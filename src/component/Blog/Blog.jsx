@@ -9,14 +9,14 @@ const dummyPosts = [
   },
   {
     id: 2,
-    title: 'Why Chipsub is the Smartest Move This Year 🔥',
-    excerpt: 'Forget paying full price — Chipsub helps you get data at discounted rates. Here’s why people are switching...',
+    title: 'Why Monetrax is the Smartest Move This Year 🔥',
+    excerpt: 'Forget paying full price — Monetrax helps you get data at discounted rates. Here’s why people are switching...',
     date: 'April 5, 2025',
   },
   {
     id: 3,
     title: 'Integrate Our API in 5 Mins',
-    excerpt: 'Dev-friendly guide to getting started with Chipsub’s API for resellers and app developers.',
+    excerpt: 'Dev-friendly guide to getting started with Monetrax’s API for resellers and app developers.',
     date: 'March 29, 2025',
   },
 ];
@@ -26,7 +26,7 @@ const Blog = () => {
     <div className="min-h-screen px-6 py-12 bg-gray-50 text-black">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 mb-4">Latest on the Blog</h1>
-        <p className="text-gray-700 mb-10">Tips, updates, and stories from the Chipsub community.</p>
+        <p className="text-gray-700 mb-10">Tips, updates, and stories from the Monetrax community.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {dummyPosts.map((post) => (

@@ -38,8 +38,8 @@ export async function POST(req) {
       payment_options: "card,banktransfer,ussd",
       customer: { email, name },
       customizations: {
-        title: "ChipSub Wallet Top-Up",
-        logo: "https://chipsub.vercel.app/favicon.ico",
+        title: "Monetrax Wallet Top-Up",
+        logo: "https://Monetrax.vercel.app/favicon.ico",
       },
     };
 

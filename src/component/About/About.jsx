@@ -7,9 +7,9 @@ const About = () => {
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Hero Section */}
         <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-blue-600 mb-4">About ChipSub</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold text-blue-600 mb-4">About Monetrax</h1>
           <p className="text-gray-600 text-lg">
-            ChipSub is a trusted digital platform helping users buy airtime, data, electricity, and more—seamlessly and securely.
+            Monetrax is a trusted digital platform helping users buy airtime, data, electricity, and more—seamlessly and securely.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ const About = () => {
 
         {/* Why Choose Us */}
         <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Why Choose ChipSub?</h2>
+          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Why Choose Monetrax?</h2>
           <ul className="space-y-2 text-gray-700 text-left max-w-md mx-auto">
             <li>✅ Instant airtime & data delivery</li>
             <li>✅ Reliable electricity token generation</li>
@@ -79,7 +79,7 @@ const About = () => {
         <div className="text-center">
           <h3 className="text-xl text-gray-800 font-medium mb-2">Want to reach us?</h3>
           <p className="text-gray-600">
-            Email us at <span className="text-blue-600 font-semibold">support@chipsub.com</span>
+            Email us at <span className="text-blue-600 font-semibold">support@Monetrax.com</span>
           </p>
         </div>
       </div>

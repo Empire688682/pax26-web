@@ -43,9 +43,6 @@ export default function PaymentSuccess() {
     }
   }, [transaction_id]);
 
-  console.log("Status:", status)
-
-
   return (
     <div className="flex items-center justify-center gap-6 flex-col">
       <div className="bg-white p-6 rounded-2xl shadow-md flex gap-4 flex-col text-center max-w-md">

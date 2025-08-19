@@ -16,7 +16,7 @@ import {
             Our Services
           </h2>
           <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
-            At #Chipsub, we provide everything you need to stay connected and save money.
+            At #Monetrax, we provide everything you need to stay connected and save money.
           </p>
   
           <div className="grid md:grid-cols-4 gap-8">
@@ -49,7 +49,7 @@ import {
             <ServiceCard
               Icon={Banknote}
               title="Send Money"
-              description="Transfer from Chipsub wallet to any Nigerian bank easily."
+              description="Transfer from Monetrax wallet to any Nigerian bank easily."
             />
             <ServiceCard
               Icon={BadgeCheck}

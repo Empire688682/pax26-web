@@ -112,7 +112,7 @@ export default function SignupPage() {
                             {authType === 'register'
                                 ? 'Create Account'
                                 : authType === 'login'
-                                    ? 'Login to Chipsub'
+                                    ? 'Login to Monetrax'
                                     : authType === 'reset password'
                                         ? 'Reset Password'
                                         : ''

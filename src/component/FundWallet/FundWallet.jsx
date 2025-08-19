@@ -94,15 +94,15 @@ const FundWallet = () => {
         <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-[rgba(0,_0,_0,_0.1)_0px_10px_20px] border border-blue-100 flex flex-col gap-6">
           <h2 className="text-3xl font-bold text-blue-700 mb-2">Fund Your Wallet</h2>
           <p className="text-gray-700 leading-relaxed text-sm">
-            Easily top-up your Chipsub wallet using Flutterwave. Your wallet allows you to buy airtime, data, electricity, and more — all in one place.
+            Easily top-up your Monetrax wallet using Flutterwave. Your wallet allows you to buy airtime, data, electricity, and more — all in one place.
           </p>
           <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 text-sm text-blue-800">
             🔐 All transactions are secured using end-to-end encryption.
           </div>
           <div className="text-sm text-gray-600 mt-4">
             Need help? Reach out to {" "}
-            <a href="mailto:support@chipsub.com" className="text-blue-600 underline font-medium">
-              support@chipsub.com
+            <a href="mailto:support@Monetrax.com" className="text-blue-600 underline font-medium">
+              support@Monetrax.com
             </a>
           </div>
         </div>

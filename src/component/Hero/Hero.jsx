@@ -12,7 +12,7 @@ export default function Hero() {
         {/* Text Content */}
         <div className="md:w-1/2">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
-            Buy Cheap Data Instantly with <span className="text-blue-600">Chipsub</span>
+            Buy Cheap Data Instantly with <span className="text-blue-600">Monetrax</span>
           </h1>
           <p className="mt-4 text-gray-600 text-lg">
             Affordable data, fast delivery, zero stress. Top up anytime, anywhere.
@@ -37,8 +37,8 @@ export default function Hero() {
         {/* Hero Image */}
         <div className="md:w-1/2 flex justify-center">
           <Image
-            src="/chipsubHero-img.png"
-            alt="Chipsub Hero"
+            src="/MonetraxHero-img.png"
+            alt="Monetrax Hero"
             width={500}
             height={400}
             className="w-full h-auto rounded-lg shadow-lg"

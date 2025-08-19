@@ -38,7 +38,7 @@ const Contact = () => {
 
           <div className="space-y-4 text-sm text-gray-700">
             <p className="flex items-center gap-2">
-              <Mail className="text-blue-500" size={18} /> usechipsub@gmail.com
+              <Mail className="text-blue-500" size={18} /> useMonetrax@gmail.com
             </p>
             <p className="flex items-center gap-2">
               <Phone className="text-green-500" size={18} /> +234 9154 3581 2845

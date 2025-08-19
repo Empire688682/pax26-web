@@ -13,7 +13,7 @@ export default function Notification() {
     {
       id: 2,
       title: "📢 New Feature Alert",
-      message: "You can now buy electricity tokens directly from your Chipsub wallet. Try it out!",
+      message: "You can now buy electricity tokens directly from your Monetrax wallet. Try it out!",
       date: "April 16, 2025",
       isRead: false,
     },

@@ -11,7 +11,7 @@ import axios from "axios";
 
 const Dashboard = () => {
   const { userData, userCommision, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
-  const referralLink = `https://chipsub.vercel.app?ref=${userData._id}`;
+  const referralLink = `https://Monetrax.vercel.app?ref=${userData._id}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink)

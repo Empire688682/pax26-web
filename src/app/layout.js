@@ -4,8 +4,8 @@ import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
 
 export const metadata = {
-  title: "ChipSub",
-  description: "This is ChipSub website",
+  title: "Monetrax",
+  description: "This is Monetrax website",
   author: "Jayempire",
 };
 

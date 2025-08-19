@@ -6,14 +6,14 @@ export default function Testimonials() {
             What Our Users Say
           </h2>
           <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
-            Real feedback from satisfied users who trust Chipsub for their daily data and utility needs.
+            Real feedback from satisfied users who trust Monetrax for their daily data and utility needs.
           </p>
   
           <div className="grid md:grid-cols-3 gap-8 text-left">
             <TestimonialCard
               name="Precious A."
               role="Student, UI"
-              quote="Chipsub is my go-to for cheap data! I don’t stress anymore and it’s super fast!"
+              quote="Monetrax is my go-to for cheap data! I don’t stress anymore and it’s super fast!"
             />
             <TestimonialCard
               name="Femi L."
@@ -23,7 +23,7 @@ export default function Testimonials() {
             <TestimonialCard
               name="Ijeoma E."
               role="Small Biz Owner"
-              quote="I even earn extra by reselling airtime with Chipsub. Highly recommend!"
+              quote="I even earn extra by reselling airtime with Monetrax. Highly recommend!"
             />
           </div>
         </div>

@@ -11,7 +11,7 @@ export default function CTA() {
             Start Saving on Data & Bills Today
           </h2>
           <p className="text-blue-100 mb-8 text-lg">
-            Join thousands of Nigerians already enjoying affordable data, airtime, and utility payments on Chipsub.
+            Join thousands of Nigerians already enjoying affordable data, airtime, and utility payments on Monetrax.
           </p>
   
           <div className="flex flex-col sm:flex-row justify-center gap-4">

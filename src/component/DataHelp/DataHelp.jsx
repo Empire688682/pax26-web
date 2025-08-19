@@ -42,7 +42,7 @@ const DataHelp = ({ data}) => {
 
       {/* Support */}
       <div className="text-sm text-gray-600">
-        Having issues? Contact support at <a href="usechipsub@gmail.com" className="text-green-800 font-medium underline">usechipsub@gmail.com</a>
+        Having issues? Contact support at <a href="useMonetrax@gmail.com" className="text-green-800 font-medium underline">useMonetrax@gmail.com</a>
       </div>
 
       {/* Optional Promo */}

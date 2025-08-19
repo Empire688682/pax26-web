@@ -6,7 +6,7 @@ const DownloadOurApp = () => {
   return (
     <div id='downloadApp' className="min-h-screen px-6 py-16 bg-white text-black flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold text-blue-600 mb-4">Get the Chipsub App</h1>
+        <h1 className="text-4xl font-bold text-blue-600 mb-4">Get the Monetrax App</h1>
         <p className="text-gray-700 mb-8 text-lg">
           Download our mobile app for the fastest way to buy data, airtime, recharge PINs and more!
         </p>
@@ -24,7 +24,7 @@ const DownloadOurApp = () => {
         </div>
 
         <Image
-          src="/chipsub-app-prev.png"
+          src="/Monetrax-app-prev.png"
           alt="App Preview"
           width={500}
           height={500}

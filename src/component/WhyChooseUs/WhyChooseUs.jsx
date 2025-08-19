@@ -11,7 +11,7 @@ import {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Why Choose Chipsub?
+            Why Choose Monetrax?
           </h2>
           <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
             We're not just another VTU platform — we offer speed, savings, and support you can trust.
