@@ -5,7 +5,7 @@ import { useGlobalContext } from "../Context";
 export default function CTA() {
   const {openModal} = useGlobalContext()
     return (
-      <section className="py-20 bg-blue-600 text-white text-center">
+      <section className="py-20 bg-[#4BB9F5] text-white text-center">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Start Saving on Data & Bills Today
