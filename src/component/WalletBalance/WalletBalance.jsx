@@ -14,7 +14,7 @@ const WalletBalance = () => {
         >
             <p className="text-gray-500 text-sm">Wallet Balance</p>
             <div className="flex items-center justify-between mt-2">
-                <p className="text-xl font-bold">₦{userWallet?.toFixed(2) || "**.**"}</p>
+                <p className="text-xl font-bold">₦{userWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>
                 <button className="bg-blue-600 cursor-pointer text-white px-3 py-1 rounded" onClick={()=>route.push("/fund-wallet")}>Fund +</button>
             </div>
         </div>

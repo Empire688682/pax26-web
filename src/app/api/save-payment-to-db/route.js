@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
 import dotenv from "dotenv";
 import { verifyToken } from "../helper/VerifyToken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
@@ -17,9 +16,9 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { amount, email, name, mobileUserId } = body;
+    const { amount, email, name, tx_ref, mobileUserId } = body;
 
-    if (!amount || !email || !name) {
+    if (!amount || !email || !name || !tx_ref) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400, headers:corsHeaders() });
     }
 
@@ -28,49 +27,20 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
     }
 
-    const tx_ref = `tx-${Date.now()}`;
-
-    const flutterwavePayload = {
-      tx_ref,
-      amount,
-      currency: "NGN",
-      redirect_url: process.env.REDIRECT_URL,
-      payment_options: "card,banktransfer,ussd",
-      customer: { email, name },
-      customizations: {
-        title: "Monetrax Wallet Top-Up",
-        logo: "https://Monetrax.vercel.app/favicon.ico",
-      },
-    };
-
-    const response = await axios.post("https://api.flutterwave.com/v3/payments", flutterwavePayload, {
-      headers: {
-        Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const checkoutLink = response.data?.data?.link;
-
     await PaymentModel.create({
       userId,
       amount,
       currency: "NGN",
       reference: tx_ref,
-      status: mobileUserId? "success" : "PENDING",
+      status: "PENDING",
       paymentMethod: "FLUTTERWAVE",
-      checkoutLink,
-      initResponse: {
-        status: response.data.status,
-        message: response.data.message
-      },
     });
 
-    return NextResponse.json({success:true, link: checkoutLink }, { status: 200, headers:corsHeaders() });
+    return NextResponse.json({success:true, message:"Payment saved"}, { status: 200, headers:corsHeaders() });
   } catch (error) {
     console.error("Flutterwave error:", error?.response?.data || error.message);
     return NextResponse.json(
-      { message: "Failed to initiate payment", error: error.message },
+      { message: "Failed to save payment", error: error.message },
       { status: 500, headers:corsHeaders() }
     );
   }

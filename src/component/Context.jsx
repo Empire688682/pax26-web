@@ -49,6 +49,9 @@ export const AppProvider = ({ children }) => {
   // Stores referral host ID, probably for referral tracking
   const [refHostId, setRefHostId] = useState(null);
 
+  //Wallet funding ID state
+  const [paymentId, setPaymentId] = useState('');
+
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
     if (userData) {
@@ -122,7 +125,6 @@ export const AppProvider = ({ children }) => {
     setLoading(true);
     try {
        const res = await axios.get("/api/real-time-data");
-      console.log("res:", res)
       if (res.data.success) {
         setTransactionHistory(res.data.data.transactions);
         setUserWallet(res.data.data.walletBalance);
@@ -223,6 +225,8 @@ export const AppProvider = ({ children }) => {
         electricityMerchants,
         userWallet,
         userCommision,
+        paymentId, 
+        setPaymentId,
         setRefHostId,
         refHostId,
         profitConfig,

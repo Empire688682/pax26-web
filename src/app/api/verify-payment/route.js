@@ -17,6 +17,7 @@ export async function OPTIONS() {
 
 export async function POST(req) {
   const { transaction_id, mobileUserId } = await req.json();
+  console.log("transaction_id:", transaction_id);
 
   if (!transaction_id) {
     return NextResponse.json({ success: false, message: 'No transaction ID provided' }, { status: 400, headers:corsHeaders() });
@@ -25,17 +26,17 @@ export async function POST(req) {
   try {
     await connectDb();
 
+     const userId = mobileUserId || await verifyToken(req);
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'User not authorized' }, { status: 401, headers:corsHeaders() });
+    }
+    
     const verifyUrl = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
     const response = await axios.get(verifyUrl, {
       headers: {
         Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
       },
     });
-
-    const userId = mobileUserId || await verifyToken(req);
-    if (!userId) {
-      return NextResponse.json({ success: false, message: 'User not authorized' }, { status: 401, headers:corsHeaders() });
-    }
 
     const { status, amount, tx_ref } = response.data.data;
 
