@@ -125,7 +125,7 @@ const Profile = () => {
         <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center text-center">
           <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-2">
             <Image
-              src={userImage? window.URL.createObjectURL(userImage) : userData.profileImage}
+              src={userImage? window.URL.createObjectURL(userImage) : userData.profileImage || "/profile-img.png"}
               alt="Profile"
               fill
               style={{ objectFit: "cover" }}
@@ -133,7 +133,7 @@ const Profile = () => {
             {
               !userImage && <label 
               htmlFor="profileImage"
-              className='absolute bottom-[-3px] left-1/2 -translate-x-1/2 cursor-pointer'
+              className='absolute bottom-[-3px] bg-gray-100 rounded-full left-1/2 -translate-x-1/2 cursor-pointer'
               >
                 <CameraIcon size={30} />
               </label>
@@ -264,7 +264,7 @@ const Profile = () => {
           {
             loading ? "Loading......." :
               <ul className="space-y-3 text-sm text-gray-700 max-h-72 overflow-y-auto">
-                {transactionHistory.map((tx, id) => (
+                {[...transactionHistory].reverse().map((tx, id) => (
                   <li key={id} className="border-b pb-2 flex justify-between">
                     <div>
                       <p className="font-medium">{tx.type}</p>

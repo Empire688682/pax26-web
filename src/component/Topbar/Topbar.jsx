@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import SignupPage from '../SignupPage/SignupPage';
 import TransactionPin from '../TransactionPin/TransactionPin';
+import { object } from 'zod';
 
 const Topbar = () => {
     const { toggleMenu, isModalOpen, openModal, userData, route, pinModal, setPinModal } = useGlobalContext();
@@ -42,9 +43,8 @@ const Topbar = () => {
                 }
                 {
                     userData && !isHomePage && !isProfile && (
-                        <div className='flex gap-2 items-center cursor-pointer' onClick={() => route.push("/profile")}>
-                            <p className='text-[13px] font-bold text-white'>{userData.name.split(' ')[0]}</p>
-                            <Image src={userData?.profileImage} alt="profile" width={30} height={50} className="rounded-full cursor-pointer" />
+                        <div className='relative overflow-hidden w-10 h-10 items-center rounded-full border-2 border-gray-500 cursor-pointer' onClick={() => route.push("/profile")}>
+                            <Image src={userData?.profileImage} alt="profile" fill style={{objectFit:"cover"}} />
                         </div>
                     )
                 }
