@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { LogOut, Camera, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
+import { LogOut, CameraIcon, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Image from 'next/image';
@@ -135,7 +135,7 @@ const Profile = () => {
               htmlFor="profileImage"
               className='absolute bottom-[-3px] left-1/2 -translate-x-1/2 cursor-pointer'
               >
-                <Camera size={30} />
+                <CameraIcon size={30} />
               </label>
             }
           </div>
