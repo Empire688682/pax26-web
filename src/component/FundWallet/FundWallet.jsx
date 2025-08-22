@@ -19,6 +19,9 @@ const FundWallet = () => {
       if(response.data.success){
         route.push("/dashboard");
       }
+      else{
+        toast.error(response.data.message || "Payment verification failed.");
+      }
     } catch (error) {
       console.log("verifyPaymentErr:", error);
     }

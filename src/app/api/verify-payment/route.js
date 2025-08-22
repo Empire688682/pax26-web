@@ -17,7 +17,6 @@ export async function OPTIONS() {
 
 export async function POST(req) {
   const { transaction_id, mobileUserId } = await req.json();
-  console.log("transaction_id:", transaction_id);
 
   if (!transaction_id) {
     return NextResponse.json({ success: false, message: 'No transaction ID provided' }, { status: 400, headers:corsHeaders() });
