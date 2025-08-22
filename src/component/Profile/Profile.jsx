@@ -10,7 +10,7 @@ import uploadImage from '../utils/uplaodImage';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
-  const { userData, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, setUserData, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
   const [userImage, setUserImage] = useState(null);
   const [processing, setProcessing] = useState(false);
 
@@ -29,13 +29,15 @@ const Profile = () => {
       if (response.data.success) {
         if(typeof window !== "undefined"){
           const savedData = localStorage.getItem("userData");
-          const parseData = savedData ? JSON.parse(savedData) : "";
-          if(!parseData){
+          
+          if(!savedData){
             toast.error("An error occured try again");
             return
           }
+          const parseData = JSON.parse(savedData);
           parseData.profileImage = profileImage;
           localStorage.setItem("userData", JSON.stringify(parseData));
+          setUserData(parseData);
         }
         toast.success("Profile image updated!");
         setUserImage(profileImage);
@@ -121,7 +123,7 @@ const Profile = () => {
       <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
         { /* Left: Profile Overview */}
         <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center text-center">
-          <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-4">
+          <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-2">
             <Image
               src={userImage? window.URL.createObjectURL(userImage) : userData.profileImage}
               alt="Profile"
@@ -143,13 +145,13 @@ const Profile = () => {
               userImage && !processing && <div>
                 <p 
                 onClick={updateUserProfileImg}
-                className="bottom-0 mx-auto w-[100px] bg-white border-1 p-2 rounded-sm text-xs cursor-pointer text-gray-900">
+                className="bottom-0 mx-auto w-[100px] bg-white border-1 p-1 rounded-sm text-xs cursor-pointer text-gray-900">
                   Save</p>
               </div>
             }
             {
               processing && <div>
-                <p className="bottom-0 mx-auto w-[100px] bg-white border-1 p-2 rounded-sm text-xs cursor-pointer text-gray-900">
+                <p className="bottom-0 mx-auto w-[100px] bg-white border-1 p-1 rounded-sm text-xs cursor-pointer text-gray-900">
                   Saving.....</p>
               </div>
             }

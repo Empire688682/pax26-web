@@ -217,6 +217,7 @@ export const AppProvider = ({ children }) => {
         route,
         logoutUser,
         pinModal,
+        setUserData,
         setPinModal,
         getUserRealTimeData,
         transactionHistory,
