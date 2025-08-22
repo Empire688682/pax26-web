@@ -1,15 +1,42 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { LogOut, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
+import { LogOut, Camera, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Image from 'next/image';
 import { useGlobalContext } from '../Context';
 import axios from "axios";
+import uploadImage from '../utils/uplaodImage';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
   const { userData, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const [userImage, setUserImage] = useState(null);
+  const [processing, setProcessing] = useState(false);
+
+  const updateUserProfileImg = async () => {
+    setProcessing(true);
+    const profileImage = await uploadImage(userImage);
+    if (!profileImage) {
+      toast.error("An error occured, try again");
+      setProcessing(false);
+      setUserImage(null);
+      return;
+    }
+    try {
+      const response = await axios.post("/api/update-profileImage", profileImage);
+      console.log("response:", response);
+      if (response.data.success) {
+        toast.success("Profile image updated!");
+      }
+    } catch (error) {
+      console.log("ImageUploadError:", error);
+      toast.error("Failed to update profile image.");
+    }
+    finally {
+      setProcessing(false);
+    }
+  }
 
   useEffect(() => {
     getUserRealTimeData();
@@ -25,7 +52,7 @@ const Profile = () => {
     email: `${userData.email}` || "",
     phone: `${userData.number}` || "",
     bvnVerified: userData.bvnVerify,
-    avatar: '/profile-img.png',
+    avatar: '/profile-img.png'
   };
 
   const [pwdForm, setPwdForm] = useState({
@@ -48,7 +75,7 @@ const Profile = () => {
       return
     }
 
-    if(newPwd.length < 8){
+    if (newPwd.length < 8) {
       toast.error("Password too short");
       return
     }
@@ -72,7 +99,7 @@ const Profile = () => {
       console.log("PwdResetError:", error);
       toast.error(error.response.data.message)
     }
-    finally{
+    finally {
       setPostLoading(false)
     }
   };
@@ -81,15 +108,40 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
-        {/* Left: Profile Overview */}
+        { /* Left: Profile Overview */}
         <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center text-center">
-          <div className="relative w-20 h-20 rounded-full overflow-hidden shadow-lg mb-4">
+          <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-4">
             <Image
-              src={user.avatar}
+              src={userImage? window.URL.createObjectURL(userImage) : user.avatar}
               alt="Profile"
               fill
               style={{ objectFit: "cover" }}
             />
+            {
+              !userImage && <label 
+              htmlFor="profileImage"
+              className='absolute bottom-[-3px] left-1/2 -translate-x-1/2 cursor-pointer'
+              >
+                <Camera size={30} />
+              </label>
+            }
+          </div>
+          <div>
+            <input type="file" hidden name="profileImage" id="profileImage" onChange={(e) => setUserImage(e.target.files[0])} />
+            {
+              userImage && !processing && <div>
+                <p 
+                onClick={updateUserProfileImg}
+                className="bottom-0 mx-auto w-[100px] bg-white border-1 p-2 rounded-sm text-xs cursor-pointer text-gray-900">
+                  Save</p>
+              </div>
+            }
+            {
+              processing && <div>
+                <p className="bottom-0 mx-auto w-[100px] bg-white border-1 p-2 rounded-sm text-xs cursor-pointer text-gray-900">
+                  Saving.....</p>
+              </div>
+            }
           </div>
           <h2 className="text-xl font-bold text-blue-700">{user.name}</h2>
           <p className="text-sm text-gray-600">{user.email}</p>
@@ -184,7 +236,7 @@ const Profile = () => {
                 className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 text-sm"
               >
                 {
-                  postLoading? "Updating....." : "Update Password"
+                  postLoading ? "Updating....." : "Update Password"
                 }
               </button>
             </form>
