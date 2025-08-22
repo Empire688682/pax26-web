@@ -24,10 +24,21 @@ const Profile = () => {
       return;
     }
     try {
-      const response = await axios.post("/api/update-profileImage", profileImage);
+      const response = await axios.post("/api/update-profileImage", {profileImage});
       console.log("response:", response);
       if (response.data.success) {
+        if(typeof window !== "undefined"){
+          const savedData = localStorage.getItem("userData");
+          const parseData = savedData ? JSON.parse(savedData) : "";
+          if(!parseData){
+            toast.error("An error occured try again");
+            return
+          }
+          parseData.profileImage = profileImage;
+          localStorage.setItem("userData", JSON.stringify(parseData));
+        }
         toast.success("Profile image updated!");
+        setUserImage(profileImage);
       }
     } catch (error) {
       console.log("ImageUploadError:", error);
@@ -35,6 +46,7 @@ const Profile = () => {
     }
     finally {
       setProcessing(false);
+      setUserImage(null);
     }
   }
 
@@ -52,7 +64,6 @@ const Profile = () => {
     email: `${userData.email}` || "",
     phone: `${userData.number}` || "",
     bvnVerified: userData.bvnVerify,
-    avatar: '/profile-img.png'
   };
 
   const [pwdForm, setPwdForm] = useState({
@@ -112,7 +123,7 @@ const Profile = () => {
         <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center text-center">
           <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-4">
             <Image
-              src={userImage? window.URL.createObjectURL(userImage) : user.avatar}
+              src={userImage? window.URL.createObjectURL(userImage) : userData.profileImage}
               alt="Profile"
               fill
               style={{ objectFit: "cover" }}

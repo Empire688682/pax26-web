@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema(
     bvnVerify: { type: Boolean, default: false },
     walletBalance: { type: Number, default: 0 },
     commissionBalance: { type: Number, default: 0 },
-    profileImage: { type: String, default: "" },
+    profileImage: { type: String, default: "/profile-img.png" },
     isAdmin: {type: Boolean, default: false},
     number: { type: String, default: "" }, 
     forgottenPasswordToken: { type: String, default: "" }, 

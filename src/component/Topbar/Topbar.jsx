@@ -44,7 +44,7 @@ const Topbar = () => {
                     userData && isHomePage && (
                         <div className='flex gap-2 items-center cursor-pointer' onClick={() => route.push("/dashboard")}>
                             <p className='text-[13px] font-bold text-white'>{userData.name}</p>
-                            <Image src="/profile-img.png" alt="profile" width={30} height={50} className="rounded-full cursor-pointer" />
+                            <Image src={userData?.profileImage} alt="profile" width={30} height={50} className="rounded-full cursor-pointer" />
                         </div>
                     )
                 }
