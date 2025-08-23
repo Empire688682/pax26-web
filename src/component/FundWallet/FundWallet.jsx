@@ -32,7 +32,7 @@ const FundWallet = () => {
 
   useEffect(()=>{
     verifyPayment();
-  },[paymentId])
+  },[paymentId]);
 
   return (
     <div className="min-h-screen px-4 py-10 bg-gradient-to-br from-blue-50 to-white">
