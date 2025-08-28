@@ -35,9 +35,9 @@ export async function POST(req) {
         const hashedPassword = await bcrypt.hash(newPwd, 10);
         user.password = hashedPassword;
         await user.save();
-        return NextResponse.json({ success: true, message: "Password changed" }, { status: 200 })
+        return NextResponse.json({ success: true, message: "Password changed" }, { status: 200, headers:corsHeaders()  })
     } catch (error) {
         console.log("Error:", error);
-        return NextResponse.json({ success: false, message: "An error occured" }, { status: 500 })
+        return NextResponse.json({ success: false, message: "An error occured" }, { status: 500, headers:corsHeaders()  })
     }
 }
