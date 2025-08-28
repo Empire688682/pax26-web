@@ -140,7 +140,13 @@ const Profile = () => {
             }
           </div>
           <div>
-            <input type="file" hidden name="profileImage" id="profileImage" onChange={(e) => setUserImage(e.target.files[0])} />
+            <input 
+            type="file" 
+            hidden 
+            name="profileImage" 
+            id="profileImage"
+            accept='image/*' 
+            onChange={(e) => setUserImage(e.target.files[0])} />
             {
               userImage && !processing && <div>
                 <p 
