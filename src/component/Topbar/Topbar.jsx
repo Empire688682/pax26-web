@@ -10,7 +10,6 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import SignupPage from '../SignupPage/SignupPage';
 import TransactionPin from '../TransactionPin/TransactionPin';
-import { object } from 'zod';
 
 const Topbar = () => {
     const { toggleMenu, isModalOpen, openModal, userData, route, pinModal, setPinModal } = useGlobalContext();
