@@ -22,7 +22,7 @@ export async function POST(req) {
     user.profileImage = profileImage;
     await user.save();
 
-    return NextResponse.json({ success:true,  message: "Profile image updated successfully" });
+    return NextResponse.json({ success:true,  message: "Profile image updated successfully" }, {status: 200, headers:corsHeaders() });
   } catch (error) {
     console.error("Error updating profile image:", error);
     return NextResponse.json({ success:false, message: "Error updating profile image" }, { status: 500, headers:corsHeaders() });
