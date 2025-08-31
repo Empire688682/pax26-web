@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { connectDb } from '../../ults/db/ConnectDb';
 import PaymentModel from '../../ults/models/PaymentModel';
 import UserModel from '../../ults/models/UserModel';
-import ReferralModel from '../../ults/models/ReferralModel'; // ✅ import this
+import ReferralModel from '../../ults/models/ReferralModel';
 import { verifyToken } from '../helper/VerifyToken';
 import TransactionModel from '@/app/ults/models/TransactionModel';
 import { corsHeaders } from '@/app/ults/corsHeaders/corsHeaders';
