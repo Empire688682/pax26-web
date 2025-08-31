@@ -29,6 +29,8 @@ export async function POST(req) {
     if (!userId) {
       return NextResponse.json({ success: false, message: 'User not authorized' }, { status: 401, headers:corsHeaders() });
     }
+
+    console.log("Resolved userId:", userId);
     
     const verifyUrl = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
     const response = await axios.get(verifyUrl, {
@@ -43,8 +45,8 @@ export async function POST(req) {
       const existingPayment = await PaymentModel.findOne({ reference: tx_ref });
 
       if (!existingPayment) {
-        return NextResponse.json({ success: false, message: 'Payment not found in DB' }, { status: 404, headers:corsHeaders() });
-      }
+      return NextResponse.json({ success: false, message: 'Payment not found in DB' }, { status: 404, headers:corsHeaders() });
+    }
 
       if (existingPayment.status === 'PAID') {
         return NextResponse.json({ success: true, message: 'Payment already verified' }, { status: 200, headers:corsHeaders() });
@@ -58,6 +60,7 @@ export async function POST(req) {
           userId,
           type: "Wallet funding",
           amount,
+          transactionId: transaction_id,
           status: "success",
           reference: existingPayment._id,
         }],
@@ -84,7 +87,7 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: 'Transaction not successful' }, { status: 400, headers:corsHeaders() });
     }
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error("❌ Verification error:", err.response?.data || err.message);
     return NextResponse.json({ success: false, message: 'Verification failed' }, { status: 500, headers:corsHeaders() });
   }
 }
