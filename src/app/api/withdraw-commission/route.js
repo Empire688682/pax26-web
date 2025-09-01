@@ -9,8 +9,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req) {
-    const {mobileUserId} = await req.json()
-    const  userId  = mobileUserId || await verifyToken(req);
+    const  userId  = await verifyToken(req);
     if (!userId) {
         return NextResponse.json({ success: false, message: "No Id provided" }, { status: 401, headers:corsHeaders() })
     }

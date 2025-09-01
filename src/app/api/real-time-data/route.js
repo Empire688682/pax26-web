@@ -12,10 +12,9 @@ export async function OPTIONS() {
 
 export async function GET(req) {
     const {searchParams} = new URL(req.url);
-    const mobileUserId = searchParams.get('mobileUserId');
     await connectDb();
     try {
-        const userId = mobileUserId || await verifyToken(req);
+        const userId = await verifyToken(req);
         if (!userId) {
             return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
         }

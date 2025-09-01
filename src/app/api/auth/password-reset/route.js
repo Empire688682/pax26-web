@@ -16,12 +16,12 @@ export async function POST(req) {
     try {
         await connectDb();
 
-        const { currentPwd, newPwd, mobileUserId } = reqBody;
+        const { currentPwd, newPwd} = reqBody;
         if (!currentPwd || !newPwd) {
             return NextResponse.json({ success: false, message: "All field required" }, { status: 400, headers:corsHeaders() })
         }
 
-        const userId = mobileUserId || await verifyToken(req);
+        const userId = await verifyToken(req);
         const user = await UserModel.findById(userId);
         if (!user) {
             return NextResponse.json({ success: false, message: "User not Authenticated" }, { status: 400, headers:corsHeaders() })

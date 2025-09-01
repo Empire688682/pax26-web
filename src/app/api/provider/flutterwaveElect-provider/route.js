@@ -19,14 +19,14 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { disco, meterNumber, meterType, amount, phone, pin, mobileUserId } = body;
+  const { disco, meterNumber, meterType, amount, phone, pin } = body;
 
   try {
     if (!disco || !meterNumber || !meterType || !amount || !phone || !pin) {
       return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400, headers:corsHeaders() });
     }
 
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     const user = await UserModel.findById(userId);
     if (!user) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });

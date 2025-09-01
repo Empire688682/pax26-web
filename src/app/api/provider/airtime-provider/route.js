@@ -22,7 +22,7 @@ export async function POST(req) {
   const session = await mongoose.startSession(); // 👈 Start a session
   session.startTransaction(); // 👈 Begin the transaction
   try {
-    const { network, amount, number, pin, mobileUserId } = reqBody.data;
+    const { network, amount, number, pin } = reqBody.data;
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -32,7 +32,7 @@ export async function POST(req) {
       );
     }
 
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     const verifyUser = await UserModel.findById(userId).session(session);
 
     if (!verifyUser) {

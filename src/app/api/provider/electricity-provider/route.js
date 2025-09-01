@@ -18,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { disco, meterNumber, meterType, amount, phone, pin, mobileUserId } = body;
+  const { disco, meterNumber, meterType, amount, phone, pin } = body;
 
   try {
     // Validate request
@@ -48,7 +48,7 @@ export async function POST(req) {
     }
 
     // Auth and funds check
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     const user = await UserModel.findById(userId);
 
     if (!user) {

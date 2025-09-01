@@ -18,9 +18,8 @@ export async function OPTIONS() {
 export async function POST(req) {
   console.log("=== MOBILE VERIFY PAYMENT REQUEST ===");
   
-  const { transaction_id, mobileUserId } = await req.json();
+  const { transaction_id } = await req.json();
   console.log("📱 Received transaction_id:", transaction_id);
-  console.log("👤 Received mobileUserId:", mobileUserId);
   console.log("⏰ Request timestamp:", new Date().toISOString());
 
   if (!transaction_id) {
@@ -30,7 +29,7 @@ export async function POST(req) {
   try {
     await connectDb();
 
-     const userId = mobileUserId || await verifyToken(req);
+     const userId = await verifyToken(req);
      console.log("User ID after token verification:", userId);
 
     if (!userId) {

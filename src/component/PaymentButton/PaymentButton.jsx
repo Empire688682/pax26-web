@@ -23,13 +23,8 @@ export default function PaymentButton({
         amount,
         name
       }
-      const response = await axios.post("https://monetrax.vercel.app/api/save-payment-to-db",
+      const response = await axios.post("/api/save-payment-to-db",
         postData,
-        {
-          headers: {
-            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODM0ZjE4ZGJmOTBmYzllNzA3MGNkNDMiLCJpYXQiOjE3NTY3MjYxOTMsImV4cCI6MTc1NjgxMjU5M30.Zfwk_qUorqxGDQBW8Ot8dD1HQbHTyn6urei83MRZSPM`
-          }
-        }
       );
       console.log("response:", response)
     } catch (error) {

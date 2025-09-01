@@ -15,13 +15,9 @@ const FundWallet = () => {
     if (!paymentId) return;
     setLoading(true);
     try {
-      const response = await axios.post('https://monetrax.vercel.app/api/verify-payment',
+      const response = await axios.post('/api/verify-payment',
         { transaction_id: paymentId },
-        {
-          headers: {
-            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODM0ZjE4ZGJmOTBmYzllNzA3MGNkNDMiLCJpYXQiOjE3NTY3MjYxOTMsImV4cCI6MTc1NjgxMjU5M30.Zfwk_qUorqxGDQBW8Ot8dD1HQbHTyn6urei83MRZSPM`
-          }
-        });
+       );
       if (response.data.success) {
         setAmount("");
         toast.success("Payment verified successfully! Your wallet has been funded.");

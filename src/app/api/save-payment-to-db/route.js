@@ -16,13 +16,13 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { amount, email, name, tx_ref, mobileUserId } = body;
+    const { amount, email, name, tx_ref } = body;
 
     if (!amount || !email || !name || !tx_ref) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400, headers:corsHeaders() });
     }
 
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     if (!userId) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
     }

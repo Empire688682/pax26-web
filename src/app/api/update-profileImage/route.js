@@ -10,8 +10,8 @@ export async function OPTIONS() {
 
 export async function POST(req) {
     await connectDb();
-  const { mobileUserId, profileImage } = await req.json();
-  const userId = await verifyToken(req) || mobileUserId;
+  const { profileImage } = await req.json();
+  const userId = await verifyToken(req);
 
   try {
     const user = await UserModel.findById(userId);

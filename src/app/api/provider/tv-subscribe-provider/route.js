@@ -18,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { provider, smartcardNumber, amount, tvPackage, phone, pin, mobileUserId } = body;
+  const { provider, smartcardNumber, amount, tvPackage, phone, pin } = body;
 
   const savedAmount = Number(amount);
   if (isNaN(savedAmount)) {
@@ -31,7 +31,7 @@ export async function POST(req) {
     }
 
 
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     const user = await UserModel.findById(userId);
     if (!user) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });

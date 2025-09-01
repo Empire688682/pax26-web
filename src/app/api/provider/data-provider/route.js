@@ -24,7 +24,7 @@ export async function POST(req) {
   session.startTransaction(); // 👈 Begin the transaction
 
   try {
-    const { network, plan, planId, number, amount, pin, mobileUserId } = reqBody;
+    const { network, plan, planId, number, amount, pin } = reqBody;
 
     if (!network || !plan || !planId || !number || !amount || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -34,7 +34,7 @@ export async function POST(req) {
       );
     }
 
-    const userId = mobileUserId || await verifyToken(req);
+    const userId = await verifyToken(req);
     const verifyUser = await UserModel.findById(userId).session(session);
 
     if (!verifyUser) {

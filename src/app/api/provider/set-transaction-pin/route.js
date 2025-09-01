@@ -10,11 +10,11 @@ export async function OPTIONS() {
 }
 
 export async function POST(req){
-    const { pin, mobileUserId } = await req.json();
+    const { pin } = await req.json();
     await connectDb();
 
     try {
-        const userId = mobileUserId || await verifyToken(req);
+        const userId = await verifyToken(req);
 
         if (!userId) {
             return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
