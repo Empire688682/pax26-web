@@ -16,7 +16,7 @@ export async function POST(req) {
   try {
     const user = await UserModel.findById(userId);
     if (!user) {
-      return NextResponse.json({ success:false, message: "User not found" }, { status: 404, headers:corsHeaders() });
+      return NextResponse.json({ success:false, message: "User not authenticated" }, { status: 404, headers:corsHeaders() });
     }
 
     user.profileImage = profileImage;

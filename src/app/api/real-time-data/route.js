@@ -11,7 +11,6 @@ export async function OPTIONS() {
 }
 
 export async function GET(req) {
-    const {searchParams} = new URL(req.url);
     await connectDb();
     try {
         const userId = await verifyToken(req);
