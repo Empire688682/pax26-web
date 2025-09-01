@@ -11,7 +11,7 @@ export async function OPTIONS() {
 export async function POST(req) {
     await connectDb();
   const { mobileUserId, profileImage } = await req.json();
-  const userId = verifyToken(req) || mobileUserId;
+  const userId = await verifyToken(req) || mobileUserId;
 
   try {
     const user = await UserModel.findById(userId);

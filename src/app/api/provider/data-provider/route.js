@@ -144,6 +144,7 @@ export async function POST(req) {
         type: "data",
         amount,
         status: "success",
+        transactionId: result.orderid,
         reference: result.orderid,
         metadata: {
           network,

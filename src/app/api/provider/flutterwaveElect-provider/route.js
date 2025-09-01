@@ -149,6 +149,7 @@ export async function POST(req) {
       type: "electricity",
       amount: saveAmount,
       status: "success",
+      transactionId: result?.orderid,
       reference: requestId,
       metadata: {
         disco,

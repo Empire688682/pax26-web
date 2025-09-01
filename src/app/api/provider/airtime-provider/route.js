@@ -106,6 +106,7 @@ export async function POST(req) {
         type: "airtime",
         amount,
         status: "success",
+        transactionId: result.orderid,
         reference: result.orderid,
         metadata: {
           network,
