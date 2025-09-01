@@ -31,6 +31,8 @@ export async function POST(req) {
     await connectDb();
 
      const userId = mobileUserId || await verifyToken(req);
+     console.log("User ID after token verification:", userId);
+
     if (!userId) {
       return NextResponse.json({ success: false, message: 'User not authorized' }, { status: 401, headers:corsHeaders() });
     }

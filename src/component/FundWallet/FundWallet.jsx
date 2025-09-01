@@ -15,7 +15,7 @@ const FundWallet = () => {
     if(!paymentId) return;
     setLoading(true);
     try {
-      const response = await axios.post('/api/verify-payment', {transaction_id:paymentId});
+      const response = await axios.post('https://monetrax.vercel.app/api/verify-payment', {transaction_id:paymentId});
       if(response.data.success){
         route.push("/dashboard");
       }
