@@ -7,32 +7,44 @@ import PaymentButton from "../PaymentButton/PaymentButton";
 import axios from "axios";
 
 const FundWallet = () => {
-  const { userData, paymentId, route } = useGlobalContext();
+  const { userData, paymentId, setPaymentId, route } = useGlobalContext();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
   const verifyPayment = async () => {
-    if(!paymentId) return;
+    if (!paymentId) return;
     setLoading(true);
     try {
-      const response = await axios.post('https://monetrax.vercel.app/api/verify-payment', {transaction_id:paymentId});
-      if(response.data.success){
-        route.push("/dashboard");
+      const response = await axios.post('https://monetrax.vercel.app/api/verify-payment',
+        { transaction_id: paymentId },
+        {
+          headers: {
+            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODM0ZjE4ZGJmOTBmYzllNzA3MGNkNDMiLCJpYXQiOjE3NTY3MjYxOTMsImV4cCI6MTc1NjgxMjU5M30.Zfwk_qUorqxGDQBW8Ot8dD1HQbHTyn6urei83MRZSPM`
+          }
+        });
+      if (response.data.success) {
+        setAmount("");
+        toast.success("Payment verified successfully! Your wallet has been funded.");
+        setTimeout(() => {
+          route.push('/dashboard');
+        }, 2000);
       }
-      else{
+      else {
         toast.error(response.data.message || "Payment verification failed.");
       }
     } catch (error) {
       console.log("verifyPaymentErr:", error);
+      toast.error("An error occurred during payment verification.");
     }
     finally {
-      setLoading(false)
+      setLoading(false);
+      setPaymentId('');
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     verifyPayment();
-  },[paymentId]);
+  }, [paymentId]);
 
   return (
     <div className="min-h-screen px-4 py-10 bg-gradient-to-br from-blue-50 to-white">
@@ -41,19 +53,19 @@ const FundWallet = () => {
         {
           loading ?
             <div className="bg-white/90 backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-4">
-                <h2 className="text-xl font-semibold text-blue-600 mb-2">Payment Verification</h2>
-                  <div className="flex justify-center items-center mt-4">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="ml-2 text-gray-600">Verifying...</span>
-                  </div>
-                {
-                  loading ?
-                    <p>Please wait while we verify your payment</p>
-                    :
-                    <p>Verification process complete</p>
-                }
-                <p className="text-gray-500 text-sm">Transaction ID: <span className='font-semibold'>{paymentId}</span></p>
+              <h2 className="text-xl font-semibold text-blue-600 mb-2">Payment Verification</h2>
+              <div className="flex justify-center items-center mt-4">
+                <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <span className="ml-2 text-gray-600">Verifying...</span>
               </div>
+              {
+                loading ?
+                  <p>Please wait while we verify your payment</p>
+                  :
+                  <p>Verification process complete</p>
+              }
+              <p className="text-gray-500 text-sm">Transaction ID: <span className='font-semibold'>{paymentId}</span></p>
+            </div>
             :
             <div
               className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6"
@@ -86,7 +98,6 @@ const FundWallet = () => {
                       amount={parseInt(amount)}
                       name={userData?.name}
                       phonenumber={userData?.number}
-                      setAmount={setAmount}
                     />
                   </span>
                 )

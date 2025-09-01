@@ -6,31 +6,37 @@ import { useGlobalContext } from "../Context";
 import axios from "axios";
 
 export default function PaymentButton({
-    email,
-    amount,
-    phonenumber,
-    name,
-    setAmount
+  email,
+  amount,
+  phonenumber,
+  name
 }) {
 
- const {setPaymentId} = useGlobalContext();
- const tx_ref =  `tx-${Date.now()}`
+  const { setPaymentId } = useGlobalContext();
+  const tx_ref = `tx-${Date.now()}`
 
- const saveTransactionToTDb = async()=>{
+  const saveTransactionToTDb = async () => {
     try {
-        const postData = {
-            tx_ref,
-            email,
-            amount,
-            name
+      const postData = {
+        tx_ref,
+        email,
+        amount,
+        name
+      }
+      const response = await axios.post("https://monetrax.vercel.app/api/save-payment-to-db",
+        postData,
+        {
+          headers: {
+            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODM0ZjE4ZGJmOTBmYzllNzA3MGNkNDMiLCJpYXQiOjE3NTY3MjYxOTMsImV4cCI6MTc1NjgxMjU5M30.Zfwk_qUorqxGDQBW8Ot8dD1HQbHTyn6urei83MRZSPM`
+          }
         }
-        const response = await axios.post("/api/save-payment-to-db", postData);
-        console.log("response:", response)
+      );
+      console.log("response:", response)
     } catch (error) {
-        console.log("SaveErr:", error)
+      console.log("SaveErr:", error)
     }
- }
- 
+  }
+
   const config = {
     public_key: process.env.NEXT_PUBLIC_FLW_PUBLIC_KEY,
     tx_ref,
@@ -55,11 +61,10 @@ export default function PaymentButton({
     callback: (response) => {
       console.log("response:", response);
       setPaymentId(response.transaction_id);
-      setAmount("");
       saveTransactionToTDb()
       closePaymentModal();
     },
-    onClose: () => {},
+    onClose: () => { },
   };
 
   return <FlutterWaveButton {...fwConfig} />;

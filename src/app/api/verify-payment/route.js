@@ -47,6 +47,7 @@ export async function POST(req) {
     });
 
     const { status, amount, tx_ref } = response.data.data;
+    console.log("Verification response data:", response.data.data);
 
     if (status === 'successful') {
       const existingPayment = await PaymentModel.findOne({ reference: tx_ref });
