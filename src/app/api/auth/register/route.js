@@ -165,7 +165,7 @@ const registerUser = async (req) => {
   } catch (error) {
     console.error("Register Error:", error);
     return NextResponse.json(
-      { success: false, message: "Something went wrong" },
+      { success: false, message: "Register Error occured" },
       { status: 500, headers:corsHeaders() }
     );
   }
