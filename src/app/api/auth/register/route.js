@@ -11,7 +11,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 dotenv.config();
 
 export async function OPTIONS() {
-  return new NextResponse(null, {status:200, headers:corsHeaders()})
+  return new NextResponse(null, { status: 200, headers: corsHeaders() })
 };
 
 
@@ -20,10 +20,10 @@ const registerUser = async (req) => {
   const reBody = await req.json();
 
   const userAgent = req.headers.get('user-agent') || "";
-  const isMobile = userAgent.includes('Expo') || 
-                    userAgent.includes('ReactNative') || 
-                    req.headers.get('x-client-type') === 'mobile' || 
-                    userAgent.includes('okhttp');
+  const isMobile = userAgent.includes('Expo') ||
+    userAgent.includes('ReactNative') ||
+    req.headers.get('x-client-type') === 'mobile' ||
+    userAgent.includes('okhttp');
 
   try {
     await connectDb();
@@ -41,58 +41,31 @@ const registerUser = async (req) => {
     if (!name || !email) {
       return NextResponse.json(
         { success: false, message: "Name and email are required" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
     if (provider === "credentials" && (!password || !number)) {
       return NextResponse.json(
         { success: false, message: "Password and number are required" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
     if (!validator.isEmail(email)) {
       return NextResponse.json(
         { success: false, message: "Invalid email format" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
-    if(provider === "credentials"){
-      const existingUser = await UserModel.findOne({ email });
-      if(existingUser){
-        return NextResponse.json(
-        { success: false, message: "Email has been taken" },
-        { status: 400, headers:corsHeaders() }
-      );
-      }
-    }
-
-    if (provider === "google") {
+    if (provider === "credentials") {
       const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
-        const { password: _, pin: __, ...userData } = existingUser.toObject();
-        const userId = existingUser._id;
-        const finalUserData = userData;
-
-        const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
-          expiresIn: "1d",
-        });
-        const res = NextResponse.json(
-          { success: true, message: "Not a new user", finalUserData },
-          { status: 200, headers:corsHeaders() }
+        return NextResponse.json(
+          { success: false, message: "Email has been taken" },
+          { status: 400, headers: corsHeaders() }
         );
-
-        res.cookies.set("UserToken", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          maxAge: 60 * 60 * 24, // 1 day
-          sameSite: "lax",
-          path: "/",
-        });
-
-        return res;
       }
     }
 
@@ -103,7 +76,7 @@ const registerUser = async (req) => {
       if (password.length < 8) {
         return NextResponse.json(
           { success: false, message: "Password must be at least 8 characters" },
-          { status: 400, headers:corsHeaders() }
+          { status: 400, headers: corsHeaders() }
         );
       }
 
@@ -133,40 +106,53 @@ const registerUser = async (req) => {
       }
     }
 
-    const { password: _, pin: __, ...userData } = newUser.toObject();
-    const userId = newUser._id;
-    const finalUserData = userData;
+    const userObj = newUser.toObject();
+    delete userObj.password;
+    delete userObj.pin;
+    delete userObj.isAdmin;
+    delete userObj.provider;
+    delete userObj.referralHost;
+    delete userObj.walletBalance;
+    delete userObj.__v;
+    delete userObj.commissionBalance;
+    delete userObj.forgottenPasswordToken;
+    const finalUserData = userObj;
 
+    const userId = newUser._id;
     const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
 
-    if(isMobile){
-       return NextResponse.json(
-      { success: true, message: "User created", finalUserData, token },
-      { status: 200, headers:corsHeaders() }
-    );
-    }else{
+    if (isMobile) {
+      return NextResponse.json(
+        { success: true, message: "User created", finalUserData, token },
+        { status: 200, headers: corsHeaders() }
+      );
+    } else {
       const res = NextResponse.json(
-      { success: true, message: "User created", finalUserData },
-      { status: 200, headers:corsHeaders() }
-    );
+        { success: true, message: "User created", finalUserData },
+        { status: 200, headers: corsHeaders() }
+      );
 
-    res.cookies.set("UserToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24, // 1 day
-      sameSite: "lax",
-      path: "/",
-    });
+      res.cookies.set("UserToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24, // 1 day
+        sameSite: "lax",
+        path: "/",
+      });
 
-    return res;
+      return res;
     }
   } catch (error) {
     console.error("Register Error:", error);
     return NextResponse.json(
-      { success: false, message: "Register Error occured" },
-      { status: 500, headers:corsHeaders() }
+      {
+        success: false,
+        message: "Register Error occurred",
+        debugError: JSON.stringify(error, Object.getOwnPropertyNames(error))
+      },
+      { status: 500, headers: corsHeaders() }
     );
   }
 };
