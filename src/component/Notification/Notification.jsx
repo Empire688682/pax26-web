@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function Notification() {
   const [notifications, setNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const apiUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:1999/api';
+  const apiUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
 
   const markAsRead = (id) => {
     setNotifications((prev) =>
@@ -38,7 +38,6 @@ export default function Notification() {
     fetchNotifications();
   }, []);
 
-  console.log('Notifications:', notifications);
 
   if (loadingNotifications) {
     return (
