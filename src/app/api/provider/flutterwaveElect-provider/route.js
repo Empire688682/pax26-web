@@ -99,7 +99,7 @@ export async function POST(req) {
     const billerCode = selectedBiller.BillerCode;
     const productCode = selectedBiller[meterType];
 
-    const requestId = crypto.randomUUID() + "-Monetrax";
+    const requestId = crypto.randomUUID() + "-Pax26";
 
     // Updated API call using the correct endpoint structure
     const flutterwaveUrl = `https://api.flutterwave.com/v3/billers/${billerCode}/items/${productCode}/payment`;

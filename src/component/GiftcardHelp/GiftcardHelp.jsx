@@ -43,8 +43,8 @@ const GiftcardHelp = ({ data }) => {
       {/* Support */}
       <div className="text-sm text-gray-600">
         Having issues? Contact support at{" "}
-        <a href="mailto:useMonetrax@gmail.com" className="text-green-800 font-medium underline">
-          useMonetrax@gmail.com
+        <a href="mailto:usePax26@gmail.com" className="text-green-800 font-medium underline">
+          usePax26@gmail.com
         </a>
       </div>
 

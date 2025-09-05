@@ -44,9 +44,9 @@ export default function PaymentButton({
       name,
     },
     customizations: {
-      title: "Monetrax Top-Up",
-      description: "Fund your Monetrax wallet",
-      logo: "https://Monetrax.vercel.app/favicon.ico",
+      title: "Pax26 Top-Up",
+      description: "Fund your Pax26 wallet",
+      logo: "https://Pax26.vercel.app/favicon.ico",
     },
   };
 

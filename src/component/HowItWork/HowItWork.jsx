@@ -8,7 +8,7 @@ export default function HowItWorks() {
           How It Works
         </h2>
         <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
-          Get started with #Monetrax in just a few taps. Fast, easy, and stress-free!
+          Get started with #Pax26 in just a few taps. Fast, easy, and stress-free!
         </p>
 
         <div className="grid md:grid-cols-3 gap-10">

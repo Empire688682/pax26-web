@@ -1,8 +1,8 @@
-# 🧾 Monetrax
+# 🧾 Pax26
 
-**Monetrax** is a fast, secure, and user-friendly utility service platform built with [Next.js](https://nextjs.org). It allows users to easily purchase **airtime**, **data bundles**, **electricity tokens**, **TV subscriptions**, and more — all in one place. Monetrax is designed for speed, mobile responsiveness, and a seamless payment experience.
+**Pax26** is a fast, secure, and user-friendly utility service platform built with [Next.js](https://nextjs.org). It allows users to easily purchase **airtime**, **data bundles**, **electricity tokens**, **TV subscriptions**, and more — all in one place. Pax26 is designed for speed, mobile responsiveness, and a seamless payment experience.
 
-![Monetrax Screenshot](public/Screenshot-chip.png)
+![Pax26 Screenshot](public/Screenshot-chip.png)
 
 ---
 
@@ -36,6 +36,6 @@
 First, clone the project and install dependencies:
 
 ```bash
-git clone https://github.com/empire688682/Monetrax.git
-cd Monetrax
+git clone https://github.com/empire688682/Pax26.git
+cd Pax26
 npm install

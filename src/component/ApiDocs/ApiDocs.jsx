@@ -4,9 +4,9 @@ const ApiDocs = () => {
   return (
     <div className="min-h-screen px-6 py-12 bg-gray-50 text-black">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">Monetrax API Documentation</h1>
+        <h1 className="text-3xl font-bold text-blue-600 mb-4">Pax26 API Documentation</h1>
         <p className="text-gray-700 mb-8">
-          Welcome to the Monetrax developer docs. Use the endpoints below to integrate airtime, data, wallet, and payment features.
+          Welcome to the Pax26 developer docs. Use the endpoints below to integrate airtime, data, wallet, and payment features.
         </p>
 
         {/* Authentication */}

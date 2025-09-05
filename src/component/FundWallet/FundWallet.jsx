@@ -107,7 +107,7 @@ const FundWallet = () => {
             Fund Your Wallet
           </h2>
           <p className="text-gray-700 leading-relaxed text-sm">
-            Easily top-up your <span className="font-semibold">Monetrax</span>{" "}
+            Easily top-up your <span className="font-semibold">Pax26</span>{" "}
             wallet using Flutterwave. Your wallet allows you to buy airtime,
             data, electricity, and much more — all in one place.
           </p>
@@ -117,10 +117,10 @@ const FundWallet = () => {
           <div className="text-sm text-gray-600 mt-4">
             Need help? Contact{" "}
             <a
-              href="mailto:support@Monetrax.com"
+              href="mailto:support@Pax26.com"
               className="text-blue-600 underline font-medium"
             >
-              support@Monetrax.com
+              support@Pax26.com
             </a>
           </div>
         </div>

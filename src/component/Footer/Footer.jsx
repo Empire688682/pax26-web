@@ -98,7 +98,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="mt-8 border-t border-white/20 pt-8">
-          <p className="text-center text-white">© 2025 Monetrax. All rights reserved.</p>
+          <p className="text-center text-white">© 2025 Pax26. All rights reserved.</p>
         </div>
       </div>
     </footer>

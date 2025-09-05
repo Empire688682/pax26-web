@@ -112,7 +112,7 @@ export default function SignupPage() {
                             {authType === 'register'
                                 ? 'Create Account'
                                 : authType === 'login'
-                                    ? 'Login to Monetrax'
+                                    ? 'Login to Pax26'
                                     : authType === 'reset password'
                                         ? 'Reset Password'
                                         : ''

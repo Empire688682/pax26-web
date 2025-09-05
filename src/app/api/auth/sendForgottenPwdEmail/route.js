@@ -65,10 +65,10 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
 
     const senderName =
       mailType === "PasswordReset"
-        ? "Monetrax Team Support"
+        ? "Pax26 Team Support"
         : mailType === "EmailSubscriber"
-          ? "Monetrax Newsletter"
-          : "Monetrax";
+          ? "Pax26 Newsletter"
+          : "Pax26";
 
 
     const mailOptions = {

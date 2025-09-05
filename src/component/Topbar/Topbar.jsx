@@ -20,7 +20,7 @@ const Topbar = () => {
     return (
         <div className="bg-gradient-to-r relative from-blue-500 to-green-400 shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-white">
-                <Image src="/Monetrax_logo.png" alt='Monetrax' width={120} height={100}/>
+                <Image src="/Pax26_log.png" alt='Pax26' width={90} height={90}/>
             </Link>
             <div className='md:block hidden'>
                 {

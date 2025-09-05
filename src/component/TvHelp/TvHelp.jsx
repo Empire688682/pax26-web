@@ -43,7 +43,7 @@ const TvHelp = ({ data }) => {
 
       {/* Support */}
       <div className="text-sm text-gray-600">
-        Need help? Contact us at <a href="mailto:support@Monetrax.com" className="text-blue-700 font-medium underline">support@Monetrax.com</a>
+        Need help? Contact us at <a href="mailto:support@Pax26.com" className="text-blue-700 font-medium underline">support@Pax26.com</a>
       </div>
 
       {/* Optional Tip */}

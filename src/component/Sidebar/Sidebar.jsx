@@ -25,7 +25,7 @@ export default function Sidebar() {
     >
       <div className='w-[50%] bg-white h-screen pl-6 pt-4'>
         <Link onClick={() => setIsOpen(false)} href="/" className="text-2xl font-bold text-blue-600">
-          <h1>Monetrax</h1>
+          <h1>Pax26</h1>
         </Link>
         <div className="flex flex-col gap-6 pt-6">
           <Link onClick={() => setIsOpen(false)} href="/" className="flex items-center gap-2 text-gray-600 hover:text-blue-600">
