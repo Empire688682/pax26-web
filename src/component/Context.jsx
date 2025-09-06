@@ -44,7 +44,8 @@ export const AppProvider = ({ children }) => {
   const [userWallet, setUserWallet] = useState(0);
 
   // User's commission balance (if applicable)
-  const [userCommision, setUserCommision] = useState(0);
+  const [userCommission, setUserCommission] = useState(0);
+  const [userCashBack, setUserCashBack] = useState(0);
 
   // Stores referral host ID, probably for referral tracking
   const [refHostId, setRefHostId] = useState(null);
@@ -128,7 +129,8 @@ export const AppProvider = ({ children }) => {
       if (res.data.success) {
         setTransactionHistory(res.data.data.transactions);
         setUserWallet(res.data.data.walletBalance);
-        setUserCommision(res.data.data.commisionBalance);
+        setUserCommission(res.data.data.commissionBalance);
+        setUserCashBack(res.data.data.cashBackBalance);
       }
     } catch (error) {
       console.log("ERROR:", error);
@@ -225,7 +227,8 @@ export const AppProvider = ({ children }) => {
         dataPlan,
         electricityMerchants,
         userWallet,
-        userCommision,
+        userCommission,
+        userCashBack,
         paymentId, 
         setPaymentId,
         setRefHostId,

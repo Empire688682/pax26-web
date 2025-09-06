@@ -19,12 +19,12 @@ export async function POST(req) {
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 401, headers:corsHeaders() })
         };
-        if (user.commisionBalance <= 99) {
+        if (user.commissionBalance <= 99) {
             return NextResponse.json({ success: false, message: "Blance most be above ₦99" }, { status: 401, headers:corsHeaders() })
         }
         await UserModel.findByIdAndUpdate(userId, {
-            $inc: { walletBalance: user.commisionBalance },
-            $set: { commisionBalance: 0 }
+            $inc: { walletBalance: user.commissionBalance },
+            $set: { commissionBalance: 0 }
         });
 
         return NextResponse.json({ success: true, message: "Withdraw successful" }, { status: 200, headers:corsHeaders() });

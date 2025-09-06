@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema(
     pin: { type: String, default: "1234"},   
     bvnVerify: { type: Boolean, default: false },
     walletBalance: { type: Number, default: 0 },
+    cashBackBalance: { type: Number, default: 0 },
     commissionBalance: { type: Number, default: 0 },
     profileImage: { type: String, default: "/profile-img.png" },
     isAdmin: {type: Boolean, default: false},

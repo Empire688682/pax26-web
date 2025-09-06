@@ -119,7 +119,7 @@ export async function POST(request) {
     response.cookies.set("UserToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      maxAge: 24 * 60 * 60,
       sameSite: "lax",
       path: "/"
     });

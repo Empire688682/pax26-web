@@ -23,8 +23,17 @@ export async function GET(req) {
         }
         const transactions = await TransactionModel.find({ userId });
         const walletBalance = user.walletBalance || 0;
-        const commisionBalance = user.commisionBalance || 0;
-        return NextResponse.json({ success: true, message: "Transaction history", data:{walletBalance, transactions, commisionBalance} }, { status: 200, headers:corsHeaders() });
+        const commissionBalance = user.commissionBalance || 0;
+        const cashBackBalance = user.cashBackBalance || 0;
+        return NextResponse.json({ 
+            success: true,
+            message: "Transaction history", data:{
+            walletBalance, 
+            transactions, 
+            commissionBalance,
+            cashBackBalance} }, 
+            { status: 200, headers:corsHeaders() }
+        );
     } catch (error) {
         console.log("ERROR:", error);
         return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers:corsHeaders() });

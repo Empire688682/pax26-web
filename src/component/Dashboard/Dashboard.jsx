@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 const Dashboard = () => {
-  const { userData, userCommision, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
+  const { userData, userCommission, userCashBack, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
   const referralLink = `https://Pax26.vercel.app?ref=${userData._id}`;
 
   const handleCopy = () => {
@@ -31,7 +31,7 @@ const Dashboard = () => {
   const firstName = fullName.split(" ")[0];
 
   const [withdrawLoading, setWithrawLoading] = useState(false);
-  const withdrawCommision = async () => {
+  const withdrawCommission = async () => {
     if (!userData._id) {
       toast.error("No Id found")
       return
@@ -75,9 +75,22 @@ const Dashboard = () => {
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
                 :
-                <p className="text-xl font-bold">₦{userCommision?.toFixed(2) || "**.**"}</p>
+                <p className="text-xl font-bold">₦{userCommission?.toFixed(2) || "**.**"}</p>
             }
-            <button onClick={withdrawCommision} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
+            <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
+          </div>
+        </div>
+
+        <div className="bg-white max-h-[100px] p-4 rounded-lg shadow-md"
+        >
+          <p className="text-gray-500 text-sm">Cash Back Balance</p>
+          <div className="flex items-center justify-between mt-2">
+            {
+              withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
+                :
+                <p className="text-xl font-bold">₦{userCashBack?.toFixed(2) || "**.**"}</p>
+            }
+            <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
           </div>
         </div>
 
