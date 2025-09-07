@@ -12,23 +12,25 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 dotenv.config();
 
 export async function OPTIONS() {
-    return new NextResponse(null, {status:200, headers:corsHeaders()});
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
 export async function POST(req) {
   await connectDb();
   const reqBody = await req.json();
 
-  const session = await mongoose.startSession(); // 👈 Start a session
-  session.startTransaction(); // 👈 Begin the transaction
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { network, amount, number, pin } = reqBody.data;
+    const { network, amount, number, pin, usedCashBack } = reqBody;
+    console.log("Request Body:", reqBody);
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "All fields are required" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -39,7 +41,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
-        { status: 401, headers:corsHeaders() }
+        { status: 401, headers: corsHeaders() }
       );
     }
 
@@ -47,15 +49,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "1234 is not allowed" },
-        { status: 400, headers:corsHeaders() }
-      );
-    }
-
-    if (verifyUser.walletBalance < amount) {
-      await session.abortTransaction(); session.endSession();
-      return NextResponse.json(
-        { success: false, message: "Insufficient balance" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -64,28 +58,54 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Incorrect PIN provided!" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
-    };
+    }
+
+    // ✅ Cashback + Wallet Deduction Logic
+    let cashbackToUse = 0;
+    let walletToUse = Number(amount);
+
+    if (usedCashBack) {
+      cashbackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
+      walletToUse = Number(amount) - cashbackToUse;
+    }
+
+    // Check wallet sufficiency
+    if (verifyUser.walletBalance < walletToUse) {
+      await session.abortTransaction(); session.endSession();
+      return NextResponse.json(
+        { success: false, message: "Insufficient wallet balance" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
+    // Deduct balances
+    if (cashbackToUse > 0) {
+      verifyUser.cashBackBalance -= cashbackToUse;
+    }
+    verifyUser.walletBalance -= walletToUse;
+    await verifyUser.save({ session });
 
     // 👉 Call external API
-    const res = await fetch(`https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&MobileNetwork=${network}&Amount=${amount}&MobileNumber=${number}`, {
-      method: "GET",
-    });
+    const res = await fetch(
+      `https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&MobileNetwork=${network}&Amount=${amount}&MobileNumber=${number}`,
+      { method: "GET" }
+    );
 
     const result = await res.json();
-    console.log("result:", result)
+    console.log("API Result:", result);
 
     if (result.status !== "ORDER_RECEIVED") {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: result.status || "Api transaction failed", details: result },
-        { status: 500, headers:corsHeaders() }
+        { status: 500, headers: corsHeaders() }
       );
-    };
+    }
 
     // ✅ Update Provider balance
-    const provider = await ProviderModel.findOneAndUpdate(
+    await ProviderModel.findOneAndUpdate(
       { name: "ClubConnect" },
       {
         lastUser: userId,
@@ -93,13 +113,10 @@ export async function POST(req) {
         note: `Debited for Airtime`,
         amount: result.walletbalance
       },
-      {new:true, upsert:true}
+      { new: true, upsert: true }
     );
 
-    // ✅ Deduct wallet and log transaction (within session)
-    verifyUser.walletBalance -= amount;
-    await verifyUser.save({ session });
-
+    // ✅ Log transaction
     const newTransaction = await TransactionModel.create(
       [{
         userId,
@@ -111,27 +128,33 @@ export async function POST(req) {
         metadata: {
           network,
           number,
+          cashbackUsed: cashbackToUse,
+          walletUsed: walletToUse,
         }
       }],
       { session }
     );
 
-    await session.commitTransaction(); // 👈 Commit if all is good
+    await session.commitTransaction();
     session.endSession();
 
     return NextResponse.json(
-      { success: true, message: "Airtime Purchase Successful", transaction: newTransaction[0] },
-      { status: 200, headers:corsHeaders() }
+      {
+        success: true,
+        message: "Airtime Purchase Successful",
+        transaction: newTransaction[0]
+      },
+      { status: 200, headers: corsHeaders() }
     );
 
   } catch (error) {
     console.log("Transaction error:", error);
-    await session.abortTransaction(); //Rollback everything on error
+    await session.abortTransaction();
     session.endSession();
 
     return NextResponse.json(
       { success: false, message: "Something went wrong", error: error.message },
-      { status: 500, headers:corsHeaders() }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

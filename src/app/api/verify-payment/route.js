@@ -16,11 +16,8 @@ export async function OPTIONS() {
 }
 
 export async function POST(req) {
-  console.log("=== MOBILE VERIFY PAYMENT REQUEST ===");
   
   const { transaction_id } = await req.json();
-  console.log("📱 Received transaction_id:", transaction_id);
-  console.log("⏰ Request timestamp:", new Date().toISOString());
 
   if (!transaction_id) {
     return NextResponse.json({ success: false, message: 'No transaction ID provided' }, { status: 400, headers:corsHeaders() });
@@ -46,17 +43,11 @@ export async function POST(req) {
     });
 
     const { status, amount, tx_ref } = response.data.data;
-    console.log("Verification response data:", response.data.data);
 
     if (status === 'successful') {
       const existingPayment = await PaymentModel.findOne({ reference: tx_ref });
-      console.log("Found existing payment:", existingPayment ? "YES" : "NO");
-      console.log("Searching for tx_ref:", tx_ref);
 
       if (!existingPayment) {
-      console.log("❌ Payment not found - checking all payments for this user...");
-      const userPayments = await PaymentModel.find({ userId: userId }).sort({ createdAt: -1 }).limit(5);
-      console.log("Recent user payments:", userPayments.map(p => ({ ref: p.reference, status: p.status })));
       return NextResponse.json({ success: false, message: 'Payment not found in DB' }, { status: 404, headers:corsHeaders() });
     }
 
@@ -67,7 +58,7 @@ export async function POST(req) {
       existingPayment.status = 'PAID';
       await existingPayment.save();
 
-      const newTransaction = await TransactionModel.create(
+       await TransactionModel.create(
         [{
           userId,
           type: "Wallet funding",

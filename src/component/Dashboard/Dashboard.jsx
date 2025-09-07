@@ -8,9 +8,11 @@ import { FaSpinner } from 'react-icons/fa';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import CashBackBalance from '../CashBackBalance/CashBackBalance';
 
 const Dashboard = () => {
-  const { userData, userCommission, userCashBack, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
+  const { userData, userCommission, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
+  const [showMore, setShowMore] = useState(false)
   const referralLink = `https://Pax26.vercel.app?ref=${userData._id}`;
 
   const handleCopy = () => {
@@ -65,13 +67,15 @@ const Dashboard = () => {
         <Bell className="text-gray-500 cursor-pointer" onClick={() => route.push("/notifications")} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+     {/* big screen */}
+      <div className='hidden md:block'>
+        <div className=" grid grid-cols-2 sm:grid-cols-3 gap-4">
         <WalletBalance />
 
-        <div className="bg-white max-h-[100px] p-4 rounded-lg shadow-md"
+        <div className="bg-white max-h-[120px] p-4 rounded-lg shadow-md"
         >
           <p className="text-gray-500 text-sm">Commission Balance</p>
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
                 :
@@ -81,18 +85,50 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white max-h-[100px] p-4 rounded-lg shadow-md"
+        <CashBackBalance />
+
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <p className="text-gray-500 text-sm mb-2">Referral Link</p>
+          <div className="flex items-center flex-wrap gap-2">
+            <input
+              value={referralLink}
+              readOnly
+              className="flex-1 border rounded px-2 py-1 text-sm"
+            />
+            <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
+              <Copy size={16} /> Copy
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      {/* small screen */}
+      <div className="md:hidden md:block flex flex-col gap-4 mb-6">
+        <WalletBalance setShowMore={setShowMore} showMore={showMore} />
+
+        {/* drop down */}
+        {
+          showMore && (
+            <div className='grid grid-cols-2 gap-2'>
+          <div className="bg-white max-h-[120px] p-4 rounded-lg shadow-md"
         >
-          <p className="text-gray-500 text-sm">Cash Back Balance</p>
-          <div className="flex items-center justify-between mt-2">
+          <p className="text-gray-500 text-sm">Commission Balance</p>
+          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
                 :
-                <p className="text-xl font-bold">₦{userCashBack?.toFixed(2) || "**.**"}</p>
+                <p className="text-xl font-bold">₦{userCommission?.toFixed(2) || "**.**"}</p>
             }
             <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
           </div>
         </div>
+
+        <CashBackBalance />
+        </div>
+          )
+        }
+        
 
         <div className="bg-white p-4 rounded-lg shadow-md">
           <p className="text-gray-500 text-sm mb-2">Referral Link</p>

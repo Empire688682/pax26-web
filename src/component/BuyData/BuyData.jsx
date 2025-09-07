@@ -7,22 +7,25 @@ import WalletBalance from "../WalletBalance/WalletBalance";
 import { useGlobalContext } from "../Context";
 import axios from "axios";
 import { applyMarkup } from "../utils/helper";
+import CashBackOption from '../ui/CashBackOption';
+import { FaTimes } from 'react-icons/fa';
 
 const BuyData = () => {
-  const { dataPlan, getUserRealTimeData, profitConfig } = useGlobalContext();
+  const { dataPlan, getUserRealTimeData, profitConfig, userCashBack } = useGlobalContext();
 
   const [form, setForm] = useState({
     network: "",
     plan: "",
-    planId:"",
+    planId: "",
     amount: "",
     number: "",
     pin: ""
   });
+  const [checked, setChecked] = useState(false)
 
   const handleChange = (e) => {
-  setForm({ ...form, [e.target.name]: e.target.value });
-};
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
 
   const [availablePlans, setAvailablePlans] = useState([]);
@@ -64,7 +67,7 @@ const BuyData = () => {
     const selected = e.target.value;
     const plan = availablePlans.find((p) => p.name === selected);
     if (plan) {
-      setForm({ ...form, plan: selected, planId:plan.code, amount: plan.sellingPrice.toString() });
+      setForm({ ...form, plan: selected, planId: plan.code, amount: plan.sellingPrice.toString() });
     }
   };
 
@@ -76,9 +79,11 @@ const BuyData = () => {
     if (!/^\d{11}$/.test(form.number)) return toast.error("Enter a valid 11-digit phone number");
     if (form.pin.length < 4) return toast.error("PIN must be 4 digits");
 
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.post("/api/provider/data-provider", form);
+      const validCashback = checked ? userCashBack : ""
+      const res = await axios.post("/api/provider/data-provider", 
+        {...form, validCashback});
 
       if (res.data.success) {
         getUserRealTimeData();
@@ -109,9 +114,16 @@ const BuyData = () => {
           <div className="flex flex-col gap-6">
             <WalletBalance />
             <div className="max-w-2xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
-              <h1 className="text-2xl font-bold text-center text-blue-700 mb-8 tracking-tight">
-                Buy your Data
-              </h1>
+              <div className='flex justify-between items-center mb-8'>
+                <h1 className="text-2xl font-bold text-center text-blue-700 tracking-tight">
+                  Buy Data
+                </h1>
+                <CashBackOption
+                  userCashBack={userCashBack}
+                  setChecked={setChecked}
+                  checked={checked}
+                />
+              </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Network */}
@@ -161,15 +173,57 @@ const BuyData = () => {
                 </div>
 
                 {/* Auto Amount (readonly) */}
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Amount</label>
                   <input
                     name="amount"
                     type="text"
                     readOnly
+                    placeholder="Amount will be auto-filled"
                     value={form.amount}
                     className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 text-gray-600"
                   />
+                  {
+                    checked && form.amount && Number(form.amount) >= 50 && (
+                      <span className='text-green-500 font-bold absolute right-6 top-10'>
+                        {
+                          Number(form.amount) < userCashBack && (
+                            0
+                          )
+                        }
+                        {
+                          Number(form.amount) > userCashBack && (
+                            Number(form.amount) - userCashBack
+                          )
+                        }
+                        {
+                          Number(form.amount) === userCashBack && (
+                            0
+                          )
+                        }
+                      </span>
+                    )
+                  }
+                  {
+                    checked && form.amount && Number(form.amount) >= 50 && (
+                      <span className='text-green-500 font-bold'>
+                        - ₦
+                        {
+                          Number(form.amount) < userCashBack ?
+                            `${form.amount}`
+                            :
+                            `${userCashBack}`
+                        }
+                      </span>
+                    )
+                  }
+                  {
+                    checked && form.amount && Number(form.amount) >= 50 && (
+                      <span className='text-red-500 font-bold absolute left-0 top-10'>
+                        <FaTimes />
+                      </span>
+                    )
+                  }
                 </div>
 
                 {/* Phone Number */}

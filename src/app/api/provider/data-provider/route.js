@@ -24,7 +24,7 @@ export async function POST(req) {
   session.startTransaction(); // 👈 Begin the transaction
 
   try {
-    const { network, plan, planId, number, amount, pin } = reqBody;
+    const { network, plan, planId, number, amount, pin, usedCashBack } = reqBody;
 
     if (!network || !plan || !planId || !number || !amount || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -51,17 +51,9 @@ export async function POST(req) {
         { success: false, message: "1234 is not allowed" },
         { status: 400, headers:corsHeaders() }
       );
-    }
+    };
 
-    if (verifyUser.walletBalance < amount) {
-      await session.abortTransaction(); session.endSession();
-      return NextResponse.json(
-        { success: false, message: "Insufficient balance" },
-        { status: 400, headers:corsHeaders() }
-      );
-    }
-
-    const isPinCorrect = await bcrypt.compare(pin, verifyUser.pin);
+      const isPinCorrect = await bcrypt.compare(pin, verifyUser.pin);
     if (!isPinCorrect) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
@@ -69,6 +61,28 @@ export async function POST(req) {
         { status: 400, headers:corsHeaders() }
       );
     };
+
+    let walletToUse = Number(amount);
+    let cashBackToUse = 0
+
+    if(usedCashBack){
+      cashBackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
+      walletToUse = cashBackToUse - Number(amount);
+    }
+
+    if (verifyUser.walletBalance < walletToUse) {
+      await session.abortTransaction(); session.endSession();
+      return NextResponse.json(
+        { success: false, message: "Insufficient balance" },
+        { status: 400, headers:corsHeaders() }
+      );
+    }
+
+
+     if(cashBackToUse > 0){
+      verifyUser.cashBackBalance -= cashBackToUse
+      await verifyUser.save();
+    }
 
     const validNetwork = {
       "MTN": "01",
@@ -135,7 +149,7 @@ export async function POST(req) {
     );
 
     // ✅ Deduct wallet and log transaction (within session)
-    verifyUser.walletBalance -= Number(amount);
+    verifyUser.walletBalance -= Number(walletToUse);
     await verifyUser.save({ session });
 
     const newTransaction = await TransactionModel.create(
