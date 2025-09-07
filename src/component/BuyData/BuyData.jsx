@@ -81,9 +81,9 @@ const BuyData = () => {
 
     setLoading(true);
     try {
-      const validCashback = checked ? userCashBack : ""
+      const usedCashBack = checked ? true : false;
       const res = await axios.post("/api/provider/data-provider", 
-        {...form, validCashback});
+        {...form, usedCashBack});
 
       if (res.data.success) {
         getUserRealTimeData();

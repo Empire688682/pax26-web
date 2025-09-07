@@ -70,6 +70,10 @@ export async function POST(req) {
       walletToUse = cashBackToUse - Number(amount);
     }
 
+    console.log(usedCashBack)
+
+    console.log({walletToUse, cashBackToUse})
+
     if (verifyUser.walletBalance < walletToUse) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
@@ -78,11 +82,12 @@ export async function POST(req) {
       );
     }
 
-
      if(cashBackToUse > 0){
       verifyUser.cashBackBalance -= cashBackToUse
-      await verifyUser.save();
     }
+    verifyUser.walletBalance -= walletToUse;
+
+    await verifyUser.save();
 
     const validNetwork = {
       "MTN": "01",
