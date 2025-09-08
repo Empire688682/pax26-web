@@ -24,7 +24,6 @@ export async function POST(req) {
 
   try {
     const { network, amount, number, pin, usedCashBack } = reqBody;
-    console.log("Request Body:", reqBody);
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();

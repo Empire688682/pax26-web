@@ -58,10 +58,10 @@ const Dashboard = () => {
   const [index, setIndex] = useState(5)
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-700 font-medium text-lg">
+        <h2 className="text-gray-700 font-medium text-lg flex text-sm items center gap-2">
           <Heart /> Welcome back, <span className="font-bold">{firstName}</span>
         </h2>
         <Bell className="text-gray-500 cursor-pointer" onClick={() => route.push("/notifications")} />
@@ -181,7 +181,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <h3 className="text-md font-medium mb-2 mt-6">Transaction History</h3>
+      <h3 className="text-md font-medium mb-2 mt-6">Recent Activities</h3>
       <div className="bg-white p-4 rounded-lg shadow-md">
         {
           loading ? "Loading...." :

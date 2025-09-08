@@ -43,7 +43,7 @@ const FundWallet = () => {
   }, [paymentId]);
 
   return (
-    <div className="min-h-screen px-4 py-10 bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen pb-10 ">
       <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 grid-cols-1 gap-10 items-center">
         {
@@ -102,7 +102,7 @@ const FundWallet = () => {
         }
 
         {/* Info Section */}
-        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6">
+        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 flex flex-col gap-6">
           <h2 className="text-3xl font-bold text-blue-700 mb-2">
             Fund Your Wallet
           </h2>

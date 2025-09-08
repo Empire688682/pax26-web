@@ -70,10 +70,6 @@ export async function POST(req) {
       walletToUse = cashBackToUse - Number(amount);
     }
 
-    console.log(usedCashBack)
-
-    console.log({walletToUse, cashBackToUse})
-
     if (verifyUser.walletBalance < walletToUse) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(

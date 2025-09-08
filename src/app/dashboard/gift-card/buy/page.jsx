@@ -4,7 +4,7 @@ import GiftCardExchange from '@/component/GiftCard/GiftCard'
 
 const Page = () => {
   return (
-    <div className='px-6 py-12'>
+    <div className='px-6 bg-gradient-to-br from-blue-50 to-white'>
     <GiftCardExchange />
     </div>
   )

@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='px-6 py-12'>
+    <div className='px-6 bg-gradient-to-br from-blue-50 to-white'>
       <Crypto />
     </div>
   )

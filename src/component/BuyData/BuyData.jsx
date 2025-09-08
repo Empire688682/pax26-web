@@ -107,7 +107,7 @@ const BuyData = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10">
+    <div className="min-h-screen pb-10">
       <ToastContainer />
       {dataPlan ? (
         <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">
