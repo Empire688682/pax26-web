@@ -24,6 +24,10 @@ export async function POST(req) {
 
   try {
     const { network, amount, number, pin, usedCashBack } = reqBody;
+    console.log("usedCashBack:", usedCashBack);
+    if(!usedCashBack){
+      console.log("usedCashBack2:", usedCashBack);
+    }
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -102,6 +106,12 @@ export async function POST(req) {
         { status: 500, headers: corsHeaders() }
       );
     }
+
+    if(!usedCashBack){
+        const apiAmount = Number(result.amount);
+        verifyUser.cashBackBalance = Number(amount) - apiAmount;
+        await verifyUser.save({ session });
+      }
 
     // ✅ Update Provider balance
     await ProviderModel.findOneAndUpdate(
