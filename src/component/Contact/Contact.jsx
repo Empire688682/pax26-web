@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { toast, ToastContainer } from 'react-toastify';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
 import SocialIcons from '../SocialIcons/SocialIcons';
 
@@ -38,7 +38,7 @@ const Contact = () => {
 
           <div className="space-y-4 text-sm text-gray-700">
             <p className="flex items-center gap-2">
-              <Mail className="text-blue-500" size={18} /> usePax26@gmail.com
+              <Mail className="text-blue-500" size={18} /> info@pax26.com
             </p>
             <p className="flex items-center gap-2">
               <Phone className="text-green-500" size={18} /> +234 9154 3581 2845

@@ -7,7 +7,11 @@ export const metadata = {
   title: "Pax26",
   description: "This is Pax26 website",
   author: "Jayempire",
+  icons :{
+    icon:"/icon.ico"
+  }
 };
+
 
 export default function RootLayout({ children }) {
   return (
