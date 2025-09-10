@@ -24,10 +24,6 @@ export async function POST(req) {
 
   try {
     const { network, amount, number, pin, usedCashBack } = reqBody;
-    console.log("usedCashBack:", usedCashBack);
-    if(!usedCashBack){
-      console.log("usedCashBack2:", usedCashBack);
-    }
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -109,7 +105,8 @@ export async function POST(req) {
 
     if(!usedCashBack){
         const apiAmount = Number(result.amount);
-        verifyUser.cashBackBalance = Number(amount) - apiAmount;
+        const userCashback = Number(amount) - apiAmount;
+        verifyUser.cashBackBalance += Math.floor(userCashback);
         await verifyUser.save({ session });
       }
 
