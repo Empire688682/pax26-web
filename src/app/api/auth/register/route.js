@@ -131,6 +131,7 @@ const registerUser = async (req) => {
     delete userObj.__v;
     delete userObj.commissionBalance;
     delete userObj.forgottenPasswordToken;
+    delete userObj.referralHostId;
     const finalUserData = userObj;
 
     const userId = newUser._id;

@@ -71,6 +71,7 @@ export async function POST(request) {
     delete userObj.walletBalance;
     delete userObj.__v;
     delete userObj.commissionBalance;
+    delete userObj.referralHostId;
     delete userObj.forgottenPasswordToken;
     // Mask email: replace characters 3 to second-to-last with *
     if (userObj.email) {
