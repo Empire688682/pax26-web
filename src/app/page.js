@@ -13,15 +13,15 @@ const Page = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
-      const refId = searchParams.get("ref");
+      const refCode = searchParams.get("ref");
 
-      if (refId) {
+      if (refCode) {
         const expireIn = Date.now() + 3 * 24 * 60 * 60 * 1000; // 3 days
         localStorage.setItem(
-          "ReferralID",
-          JSON.stringify({ refId, expireIn })
+          "ReferralCode",
+          JSON.stringify({ refCode, expireIn })
         );
-        console.log("Referral ID saved:", refId); // For debugging
+        console.log("Referral Code saved:", refCode); // For debugging
       }
     }
   }, []);

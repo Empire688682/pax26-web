@@ -48,7 +48,7 @@ export const AppProvider = ({ children }) => {
   const [userCashBack, setUserCashBack] = useState(0);
 
   // Stores referral host ID, probably for referral tracking
-  const [refHostId, setRefHostId] = useState(null);
+  const [refHostCode, setRefHostCode] = useState(null);
 
   //Wallet funding ID state
   const [paymentId, setPaymentId] = useState('');
@@ -167,15 +167,15 @@ export const AppProvider = ({ children }) => {
   // On every render, check if referral ID stored locally is still valid and load it
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedId = localStorage.getItem("ReferralID");
+      const storedId = localStorage.getItem("ReferralCode");
       const now = new Date().getTime();
       if (storedId) {
         const parsedId = JSON.parse(storedId);
         const expiresAt = Number(parsedId.expireIn);
         if (expiresAt > now) {
-          setRefHostId(parsedId.refId);
+          setRefHostCode(parsedId.refCode);
         } else {
-          localStorage.removeItem("ReferralID");
+          localStorage.removeItem("ReferralCode");
         }
       }
     }
@@ -231,8 +231,8 @@ export const AppProvider = ({ children }) => {
         userCashBack,
         paymentId, 
         setPaymentId,
-        setRefHostId,
-        refHostId,
+        setRefHostCode,
+        refHostCode,
         profitConfig,
         setProfitConfig,
       }}

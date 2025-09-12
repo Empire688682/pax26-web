@@ -34,9 +34,11 @@ const registerUser = async (req) => {
       email,
       number,
       password,
-      refCode,
+      refHostCode,
       provider = "credentials",
     } = reBody;
+
+    console.log("reBody:", reBody);
 
     // Validate required fields
     if (!name || !email) {
@@ -86,11 +88,18 @@ const registerUser = async (req) => {
     }
 
     //Generate referralCode
-    const chars = ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789;
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const nextUserNumber = await UserModel.countDocuments() + 1;
     const prefx = (name || "").toUpperCase().slice(0, 3);
     const nanoid = customAlphabet(chars, 4);
-    const referralCode = "PAX" + prefx + nanoid + nextUserNumber;
+    const referralCode = "PAX" + prefx + nanoid() + nextUserNumber;
+
+    //Get referral host id
+    let referralHostId
+    if(refHostCode){
+     const refHost = await UserModel.findOne({referralCode:refHostCode});
+     referralHostId = refHost._id;
+    }
 
     const newUser = await UserModel.create({
       name,
@@ -98,15 +107,14 @@ const registerUser = async (req) => {
       number,
       password: hashedPassword,
       pin: defaultPin,
-      referralHost: refId,
+      referralHostId,
       provider,
       referralCode
     });
 
 
     // Handle referral if provided
-    if (refCode) {
-      const refHost = await UserModel.findOne({referralCode:refCode});
+    if (refHostCode) {
       if (refHost) {
         await ReferralModel.create({
           referrer: refHost._id,
