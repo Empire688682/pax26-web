@@ -115,9 +115,9 @@ const registerUser = async (req) => {
 
     // Handle referral if provided
     if (refHostCode) {
-      if (refHost) {
+      if (referralHostId) {
         await ReferralModel.create({
-          referrer: refHost._id,
+          referrer: referralHostId,
           referredUser: newUser._id,
         });
       }

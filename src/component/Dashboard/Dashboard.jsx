@@ -13,7 +13,7 @@ import CashBackBalance from '../CashBackBalance/CashBackBalance';
 const Dashboard = () => {
   const { userData, userCommission, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false)
-  const referralLink = `https://www.pax26.com?ref=${userData.referralCode}`;
+  const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink)
