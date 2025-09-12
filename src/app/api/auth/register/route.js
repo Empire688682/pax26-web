@@ -38,8 +38,6 @@ const registerUser = async (req) => {
       provider = "credentials",
     } = reBody;
 
-    console.log("reBody:", reBody);
-
     // Validate required fields
     if (!name || !email) {
       return NextResponse.json(
@@ -96,9 +94,9 @@ const registerUser = async (req) => {
 
     //Get referral host id
     let referralHostId
-    if(refHostCode){
-     const refHost = await UserModel.findOne({referralCode:refHostCode});
-     referralHostId = refHost._id;
+    if (refHostCode) {
+      const refHost = await UserModel.findOne({ referralCode: refHostCode });
+      referralHostId = refHost._id;
     }
 
     const newUser = await UserModel.create({
@@ -107,7 +105,7 @@ const registerUser = async (req) => {
       number,
       password: hashedPassword,
       pin: defaultPin,
-      referralHostId,
+      referralHostId: referralHostId,
       provider,
       referralCode
     });

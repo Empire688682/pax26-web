@@ -51,7 +51,6 @@ export default function SignupPage() {
                 email: "",
                 number: "",
                 password: "",
-                refId: ""
             });
             setIsModalOpen(false);
             window.location.reload();

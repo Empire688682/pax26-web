@@ -17,6 +17,15 @@ export const AppProvider = ({ children }) => {
   // State to track current auth modal type: "register" or "login"
   const [authType, setAuthType] = useState('register');
 
+  useEffect(() => {
+    setData({
+      name: "",
+      email: "",
+      number: "",
+      password: "",
+    });
+  }, [authType])
+
   // Form data for auth inputs (name, email, phone number, password)
   const [data, setData] = useState({
     name: "",
@@ -125,7 +134,7 @@ export const AppProvider = ({ children }) => {
   const getUserRealTimeData = async () => {
     setLoading(true);
     try {
-       const res = await axios.get("/api/real-time-data");
+      const res = await axios.get("/api/real-time-data");
       if (res.data.success) {
         setTransactionHistory(res.data.data.transactions);
         setUserWallet(res.data.data.walletBalance);
@@ -183,11 +192,11 @@ export const AppProvider = ({ children }) => {
 
   // State to store profit configuration for pricing (type and value)
   const [profitConfig, setProfitConfig] = useState({
-    type: "percentage", 
-    value: 3.5,          
+    type: "percentage",
+    value: 3.5,
   });
 
-   const [electricityMerchants] = useState([
+  const [electricityMerchants] = useState([
     { name: "Abuja Electricity (AEDC)", serviceID: "abuja-electric" },
     { name: "Ikeja Electricity (IKEDC)", serviceID: "ikeja-electric" },
     { name: "Eko Electricity (EKEDC)", serviceID: "eko-electric" },
@@ -229,7 +238,7 @@ export const AppProvider = ({ children }) => {
         userWallet,
         userCommission,
         userCashBack,
-        paymentId, 
+        paymentId,
         setPaymentId,
         setRefHostCode,
         refHostCode,
