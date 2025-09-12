@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { customAlphabet } from "nanoid";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ const registerUser = async (req) => {
       email,
       number,
       password,
-      refId,
+      refCode,
       provider = "credentials",
     } = reBody;
 
@@ -84,6 +85,13 @@ const registerUser = async (req) => {
       defaultPin = "1234";
     }
 
+    //Generate referralCode
+    const chars = ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789;
+    const nextUserNumber = await UserModel.countDocuments() + 1;
+    const prefx = (name || "").toUpperCase().slice(0, 3);
+    const nanoid = customAlphabet(chars, 4);
+    const referralCode = "PAX" + prefx + nanoid + nextUserNumber;
+
     const newUser = await UserModel.create({
       name,
       email,
@@ -92,12 +100,13 @@ const registerUser = async (req) => {
       pin: defaultPin,
       referralHost: refId,
       provider,
+      referralCode
     });
 
 
     // Handle referral if provided
-    if (refId) {
-      const refHost = await UserModel.findById(refId);
+    if (refCode) {
+      const refHost = await UserModel.findOne({referralCode:refCode});
       if (refHost) {
         await ReferralModel.create({
           referrer: refHost._id,

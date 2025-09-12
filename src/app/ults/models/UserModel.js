@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema(
     profileImage: { type: String, default: "/profile-img.png" },
     isAdmin: {type: Boolean, default: false},
     number: { type: String, default: "" }, 
+    referralCode: { type: String, default: "", unique:true }, 
     forgottenPasswordToken: { type: String, default: "" }, 
     referralHost: { type: String , default: "" }, // Add this for referrals
     provider: { type: String, default: "credentials" },

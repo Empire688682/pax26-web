@@ -191,6 +191,9 @@ export default function SignupPage() {
                             {
                                 authType === 'register' && <p className='text-center'>Already have an account? <span onClick={() => openModal("login")} className='text-blue-600 underline cursor-pointer'>Login</span></p>
                             }
+                            {
+                                authType === 'login' && <p className='text-center'>Don't have an account? <span onClick={() => openModal("register")} className='text-blue-600 underline cursor-pointer'>Register</span></p>
+                            }
                         </form>
 
                         {
