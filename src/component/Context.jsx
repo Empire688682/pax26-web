@@ -83,16 +83,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Effect to lock body scroll when modal is open, unlock when closed
-  useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    else {
-      document.body.style.overflow = "auto";
-    }
-  }, [isModalOpen]);
-
   // On mount, check if user data is stored in localStorage and still valid
   useEffect(() => {
     if (typeof window !== "undefined") {
