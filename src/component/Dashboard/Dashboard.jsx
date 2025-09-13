@@ -55,8 +55,6 @@ const Dashboard = () => {
     };
   };
 
-  const [index, setIndex] = useState(5)
-
   return (
     <div className="min-h-screen">
       <ToastContainer />
@@ -171,13 +169,15 @@ const Dashboard = () => {
           <Tv className="text-blue-600 mb-2" size={28} />
           <p className="text-sm font-medium">TV Subscription</p>
         </div>
-        <div onClick={() => route.push("/dashboard/gift-card")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Gift className="text-blue-600 mb-2" size={28} />
           <p className="text-sm font-medium text-center">Gift Card</p>
+          <p className="text-sm font-bold text-center">Comming Soon</p>
         </div>
-        <div onClick={() => route.push("/dashboard/crypto")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <TrendingDown className="text-blue-600 mb-2" size={28} />
           <p className="text-sm font-medium text-center">Crypto</p>
+          <p className="text-sm font-bold text-center">Comming Soon</p>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ const Dashboard = () => {
               {
                 transactionHistory.length > 0 ? (
                   <>
-                    {[...transactionHistory].reverse().slice(0, index).map((transaction) => (
+                    {[...transactionHistory].reverse().slice(0, 5).map((transaction) => (
                       <div key={transaction._id} className="flex cursor-pointer justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-500">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
@@ -219,7 +219,7 @@ const Dashboard = () => {
                       transactionHistory.length > 5 &&
                       <div className="text-center mt-4">
                         <button
-                          onClick={() => setIndex(index + 3)}
+                          onClick={() => router.push("/transactions")}
                           className="text-blue-600 hover:underline font-medium text-sm"
                         >
                           See More →
