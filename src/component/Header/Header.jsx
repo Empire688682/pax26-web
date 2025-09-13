@@ -8,11 +8,10 @@ import {
 import { useGlobalContext } from '../Context';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import SignupPage from '../SignupPage/SignupPage';
 import TransactionPin from '../TransactionPin/TransactionPin';
 
 const Header = () => {
-    const { toggleMenu, isModalOpen, openModal, userData, route, pinModal, setPinModal } = useGlobalContext();
+    const { toggleMenu, openModal, userData, route, pinModal, setPinModal } = useGlobalContext();
     const pathName = usePathname();
 
     const isHomePage = pathName === '/';
@@ -50,9 +49,6 @@ const Header = () => {
                     !isHomePage && <Menu onClick={toggleMenu} size={30} className='cursor-pointer text-white' />
                 }
             </div>
-            {
-                isModalOpen && (<SignupPage />)
-            }
             {
                 pinModal && (
                     <div className='w-full h-full bg-black/70 flex items-center justify-center fixed top-0 left-0'>

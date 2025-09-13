@@ -27,13 +27,10 @@ export async function POST(req) {
     await connectDb();
 
      const userId = await verifyToken(req);
-     console.log("User ID after token verification:", userId);
 
     if (!userId) {
       return NextResponse.json({ success: false, message: 'User not authorized' }, { status: 401, headers:corsHeaders() });
     }
-
-    console.log("Resolved userId:", userId);
     
     const verifyUrl = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
     const response = await axios.get(verifyUrl, {
