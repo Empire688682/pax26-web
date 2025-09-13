@@ -172,12 +172,12 @@ const Dashboard = () => {
         <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Gift className="text-blue-600 mb-2" size={28} />
           <p className="text-sm font-medium text-center">Gift Card</p>
-          <p className="text-sm font-bold text-center">Comming Soon</p>
+          <p className="text-sm animate-pulse font-bold text-center">Comming Soon</p>
         </div>
         <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <TrendingDown className="text-blue-600 mb-2" size={28} />
           <p className="text-sm font-medium text-center">Crypto</p>
-          <p className="text-sm font-bold text-center">Comming Soon</p>
+          <p className="text-sm animate-pulse font-bold text-center">Comming Soon</p>
         </div>
       </div>
 
