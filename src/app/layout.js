@@ -2,6 +2,7 @@
 import "./globals.css";
 import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
+import { ThemeProvider } from "next-themes";
 
 export const metadata = {
   title: "Pax26",
@@ -15,9 +16,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ClientWrapper>
+        <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem = {true}
+        >
+          <ClientWrapper>
           {/* Tawk.to Live Chat Script */}
           <Script
             id="tawk-to-live-chat"
@@ -39,6 +45,7 @@ export default function RootLayout({ children }) {
           />
           {children}
         </ClientWrapper>
+        </ThemeProvider>
       </body>
     </html>
   );

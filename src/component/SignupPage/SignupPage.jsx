@@ -98,7 +98,7 @@ export default function SignupPage() {
         <div className="min-h-screen absolute w-full flex items-center justify-center text-black px-4">
         <ToastContainer />
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center px-6 z-70">
+                <div className="fixed inset-0 bg-white/60 flex items-center justify-center px-6 z-70">
                     <div className="bg-white rounded-xl shadow-lg w-full md:max-w-md max-w:[300px] p-8 relative">
                         <button
                             className="absolute top-4 right-4 text-gray-500 hover:text-red-500"

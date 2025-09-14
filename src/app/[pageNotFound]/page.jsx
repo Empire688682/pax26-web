@@ -19,7 +19,7 @@ const NotFoundPage = () => {
         </p>
         <Link
           href="/dashboard"
-          className="inline-block px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-black/90 transition-all"
+          className="inline-block px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-white/90 transition-all"
         >
           Go back home
         </Link>

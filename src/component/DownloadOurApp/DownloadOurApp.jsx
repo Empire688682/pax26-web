@@ -13,7 +13,7 @@ const DownloadOurApp = () => {
 
         <div className="flex justify-center items-center gap-4 mb-10 flex-wrap">
           {/* Android */}
-          <Link href="https://play.google.com/store" target="_blank" className="bg-black text-white rounded-xl hover:bg-gray-800">
+          <Link href="https://play.google.com/store" target="_blank" className="bg-white text-white rounded-xl hover:bg-gray-800">
           <Image src="/google-playstore.png" alt="Apple" width={170} height={24} />
           </Link>
 

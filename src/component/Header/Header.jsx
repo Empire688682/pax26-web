@@ -51,7 +51,7 @@ const Header = () => {
             </div>
             {
                 pinModal && (
-                    <div className='w-full h-full bg-black/70 flex items-center justify-center fixed top-0 left-0'>
+                    <div className='w-full h-full bg-white/70 flex items-center justify-center fixed top-0 left-0'>
                         <X size={40} className='text-white absolute top-30 right-[50px] cursor-pointer' onClick={() => setPinModal(false)} />
                         <div className=' top-30'>
                             <TransactionPin />

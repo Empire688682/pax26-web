@@ -20,7 +20,7 @@ export default function Sidebar() {
 
   return (
     <nav
-      className={`fixed flex top-0 right-0 w-full shadow-md bg-black/30 z-50 transform transition-transform duration-400 ease-in-out
+      className={`fixed flex top-0 right-0 w-full shadow-md bg-white/30 z-50 transform transition-transform duration-400 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       <div className='w-[50%] bg-white h-screen pl-6 pt-4'>
