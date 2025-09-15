@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTheme } from 'next-themes';
 
 // Create React Context for global app state
 const AppContext = React.createContext();
@@ -10,6 +11,7 @@ const AppContext = React.createContext();
 export const AppProvider = ({ children }) => {
   // State to control mobile menu toggle
   const [isOpen, setIsOpen] = useState(false);
+  const {theme} = useTheme();
 
   // State to control visibility of auth modal (register/login)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -200,11 +202,32 @@ export const AppProvider = ({ children }) => {
     { name: "Yola Electricity (YEDC)", serviceID: "yola-electric" }
   ]);
 
+  //CSS Variables
+  const [pax26, setPax26] = useState({})
+ useEffect(()=>{
+   const pax26 = {
+    bg: `${theme === 'light' ? '#ffffff' : '#01050f'}`,
+    secodaryBg: `${theme === 'light' ? '#f1f5f9' : '#131b2f'}`,
+    ctBg: `${theme === 'light' ? '#64748b' : '#01050f'}`,
+    footerBg: `${theme === 'light' ? '#64748b' : '#01050f'}`,
+    header: `${theme === 'light' ? '#f1f5f9' : '#01050f'}`,
+    card: `${theme === 'light' ? '#f1f5f9' : '#01050f'}`,
+    primary: theme === 'light' ? '#2563eb' : '#3b82f6',
+    textPrimary: theme === 'light' ? '#1e293b' : '#f1f5f9',
+    textSecondary: theme === 'light' ? '#64748b' : '#94a3b8',
+    border: theme === 'light' ? '#131b2f' : '#f1f5f9',
+    btn: theme === 'light' ? '#3b82f6' : '#2563eb',
+    btnHover: theme === 'light' ? '#2563eb' : '#3b82f6',
+  }
+  setPax26(pax26);
+ },[theme])
+
   // Provide all state and handlers via context to children components
   return (
     <AppContext.Provider
       value={{
         isOpen,
+        pax26,
         toggleMenu,
         setIsOpen,
         isModalOpen,

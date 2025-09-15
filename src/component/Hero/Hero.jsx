@@ -4,47 +4,62 @@ import Link from 'next/link';
 import { useGlobalContext } from '../Context';
 
 export default function Hero() {
-  const {openModal} = useGlobalContext("register");
+  const {openModal, pax26} = useGlobalContext("register");
   return (
-    <section className="pt-24 pb-16 bg-gradient-to-r from-blue-300 to-green-300">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
-        
-        {/* Text Content */}
-        <div className="md:w-1/2">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
-            Buy Cheap Data Instantly with <span className="text-blue-600">Pax26</span>
-          </h1>
-          <p className="mt-4 text-gray-600 text-lg">
-            Affordable data, fast delivery, zero stress. Top up anytime, anywhere.
-          </p>
+    <section
+  className="pt-24 pb-16"
+  style={{ backgroundColor: pax26.bg }}
+>
+  <div className="max-w-7xl mx-auto px-6 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+    
+    {/* Text Content */}
+    <div className="md:w-1/2">
+      <h1
+        className="text-4xl md:text-5xl font-bold leading-tight"
+        style={{ color: pax26.textPrimary }}
+      >
+        Power Your Everyday Life with{" "}
+        <span style={{ color: pax26.primary }}>Pax26</span>
+      </h1>
+      <p className="mt-4 text-lg" style={{ color: pax26.textSecondary }}>
+        Airtime, data, TV, electricity, and gift cards—instant, affordable, and stress-free.
+      </p>
 
-          <div className="mt-6 flex gap-4">
-            <div
-              onClick={()=>openModal("register")}
-              className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition"
-            >
-              Get Started
-            </div>
-            <Link
-              href="#pricing"
-              className="border border-blue-600 text-blue-600 px-6 py-3 rounded-full hover:bg-blue-50 transition"
-            >
-              See Pricing
-            </Link>
-          </div>
+      <div className="mt-6 flex gap-4">
+        <div
+          onClick={() => openModal("register")}
+          className="px-6 py-3 rounded-full transition"
+          style={{
+            backgroundColor: pax26.btn,
+            color: "#fff",
+          }}
+        >
+          Get Started
         </div>
-
-        {/* Hero Image */}
-        <div className="md:w-1/2 flex justify-center">
-          <Image
-            src="/Pax26_hero.png"
-            alt="Pax26 Hero"
-            width={500}
-            height={400}
-            className="w-full h-auto rounded-lg shadow-lg"
-          />
-        </div>
+        <Link
+          href="#pricing"
+          className="border px-6 py-3 rounded-full transition"
+          style={{
+            borderColor: pax26.btn,
+            color: pax26.btn,
+          }}
+        >
+          See Pricing
+        </Link>
       </div>
-    </section>
+    </div>
+
+    {/* Hero Image */}
+    <div className="md:w-1/2 flex justify-center">
+      <Image
+        src="/Pax26_hero.png"
+        alt="Pax26 Hero"
+        width={500}
+        height={400}
+        className="w-full h-auto rounded-lg shadow-lg"
+      />
+    </div>
+  </div>
+</section>
   );
 }

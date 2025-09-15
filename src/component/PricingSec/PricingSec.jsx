@@ -3,10 +3,14 @@
 import { useGlobalContext } from "../Context";
 
 export default function PricingSec() {
+  const { pax26 } = useGlobalContext();
     return (
-      <section id="pricing" className="py-16 bg-gray-100">
+      <section id="pricing" 
+      className="py-16 bg-gray-100"
+      style={{ backgroundColor: pax26.secodaryBg }}>
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4"
+          style={{ color: pax26.textPrimary }}>
             Affordable Pricing
           </h2>
           <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
@@ -51,13 +55,15 @@ export default function PricingSec() {
   }
   
   function PlanCard({ network, price, size, validity, color }) {
-    const {route} = useGlobalContext();
+    const {route, pax26} = useGlobalContext();
     return (
-      <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition text-left">
+      <div className="p-6 rounded-xl shadow hover:shadow-md transition text-left"
+      style={{ backgroundColor: pax26.card}}>
         <div className={`px-3 py-1 text-sm font-semibold rounded-full w-fit mb-4 ${color}`}>
           {network}
         </div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">{price}</h3>
+        <h3 className="text-2xl font-bold mb-2"
+        style={{ color: pax26.textPrimary }}>{price}</h3>
         <p className="text-gray-600">{size} Data Plan</p>
         <p className="text-gray-500 text-sm mb-4">Valid for {validity}</p>
         <button onClick={()=>route.push("/dashboard")}  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">

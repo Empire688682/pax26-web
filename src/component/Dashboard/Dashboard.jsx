@@ -72,7 +72,7 @@ const Dashboard = () => {
 
         <div className="bg-white max-h-[120px] p-4 rounded-lg shadow-md"
         >
-          <p className="text-gray-500 text-sm">Commission Balance</p>
+          <p className="text-gray-500 text-sm">Commission</p>
           <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />

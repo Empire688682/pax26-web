@@ -12,7 +12,7 @@ import WhyChooseUs from '@/component/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
 
 const Page = () => {
-  const {isModalOpen} = useGlobalContext();
+  const {isModalOpen, pax26} = useGlobalContext();
   useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);

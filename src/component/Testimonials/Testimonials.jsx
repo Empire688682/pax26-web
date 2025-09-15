@@ -1,8 +1,15 @@
+"use-client";
+
+import { useGlobalContext } from "../Context";
+
 export default function Testimonials() {
+  const {pax26} = useGlobalContext();
     return (
-      <section className="py-16 bg-white">
+      <section className="py-16"
+      style={{ backgroundColor: pax26.secodaryBg }}>
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4"
+          style={{ color: pax26.textPrimary }}>
             What Our Users Say
           </h2>
           <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
@@ -32,8 +39,12 @@ export default function Testimonials() {
   }
   
   function TestimonialCard({ name, role, quote }) {
+    const { pax26 } = useGlobalContext();
     return (
-      <div className="bg-gray-50 p-6 rounded-xl shadow hover:shadow-md transition">
+      <div 
+      className="p-6 rounded-xl shadow hover:shadow-md transition"
+      style={{ backgroundColor: pax26.card }}
+      >
         <p className="text-gray-700 text-sm italic mb-4">"{quote}"</p>
         <hr className="my-4 border-gray-200" />
         <div>

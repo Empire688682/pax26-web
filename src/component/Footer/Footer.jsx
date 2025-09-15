@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import SocialIcons from '../SocialIcons/SocialIcons';
+import { useGlobalContext } from '../Context';
 
 const Footer = () => {
+  const { pax26 } = useGlobalContext();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
@@ -26,7 +28,8 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-r from-blue-500 to-green-400 z-70">
+    <footer className="z-50"
+    style={{ backgroundColor: pax26.footerBg }}>
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}

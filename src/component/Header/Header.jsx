@@ -11,20 +11,25 @@ import { usePathname } from 'next/navigation';
 import TransactionPin from '../TransactionPin/TransactionPin';
 
 const Header = () => {
-    const { toggleMenu, openModal, userData, route, pinModal, setPinModal } = useGlobalContext();
+    const { toggleMenu, openModal, pax26, userData, route, pinModal, setPinModal } = useGlobalContext();
     const pathName = usePathname();
 
     const isHomePage = pathName === '/';
     const isProfile = pathName === '/profile';
     return (
-        <div className="bg-gradient-to-r relative from-blue-500 to-green-400 shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-white">
-                <Image src="/Pax26_log.png" alt='Pax26' width={90} height={90} />
+        <div 
+        className="relative shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between"
+        style={{ backgroundColor: pax26.header }}>
+            <Link href="/" className="text-2xl md:text-3xl font-bold text-white">
+                <h1
+                style={{ color: pax26.textPrimary }}
+                >Pax26</h1>
             </Link>
             <div className='md:block hidden'>
                 {
                     isHomePage && (
-                        <a href='#downloadApp' className='text-white'>
+                        <a href='#downloadApp' 
+                        style={{ color: pax26.textPrimary }}>
                             Download App
                         </a>
                     )
@@ -34,7 +39,11 @@ const Header = () => {
                 {
                     isHomePage && !userData && (
 
-                        <button className='cursor-pointer text-white font-semibold' onClick={() => openModal("login")}>Signup</button>
+                        <button 
+                        className='cursor-pointer font-semibold'
+                         onClick={() => openModal("login")}
+                         style={{ color: pax26.textPrimary }}
+                         >Signup</button>
 
                     )
                 }
