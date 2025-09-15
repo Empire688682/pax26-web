@@ -11,7 +11,14 @@ import axios from "axios";
 import CashBackBalance from '../CashBackBalance/CashBackBalance';
 
 const Dashboard = () => {
-  const { userData, userCommission, getUserRealTimeData, route, transactionHistory, loading } = useGlobalContext();
+  const { 
+    userData, 
+    pax26, 
+    userCommission, 
+    getUserRealTimeData, 
+    route, 
+    transactionHistory, 
+    loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false)
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 

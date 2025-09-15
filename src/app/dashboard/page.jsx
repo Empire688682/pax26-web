@@ -6,7 +6,7 @@ import { useGlobalContext } from '@/component/Context';
 import LoadingSpinner from '@/component/LoadingSpinner/LoadingSpinner';
 
 const Page = () => {
-  const { userData, route } = useGlobalContext();
+  const { userData, route, pax26 } = useGlobalContext();
   const [allData, setAllData] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -43,9 +43,17 @@ const Page = () => {
 
   return (
     <>
-      <div className='px-6 py-10 bg-gradient-to-br from-blue-50 to-white'>
-        <div className="overflow-hidden w-full mb-6 whitespace-nowrap bg-white p-2 rounded-lg shadow">
-          <div className="animate-scroll text-sm text-gray-700 inline-block">
+      <div className='px-6 py-10'
+      style={{ backgroundColor: pax26.secodaryBg }}
+      >
+        <div className="overflow-hidden w-full mb-6 whitespace-nowrap p-2 rounded-lg shadow"
+        style={{ backgroundColor: pax26.bg }}
+        >{
+          loading ? <p style={{ color: pax26.textPrimary }}>Laoding....</p>: 
+          (
+            <div 
+          className="animate-scroll text-sm text-gray-700 inline-block"
+          style={{ color: pax26.textPrimary }}>
             👥 Active Users: {allData.users} &nbsp;·&nbsp;
             📱 Airtime Purchases : {allData.airtime} &nbsp;·&nbsp;
             📶 Data Purchases: {allData.data} &nbsp;·&nbsp;
@@ -54,6 +62,8 @@ const Page = () => {
             💰 Wallet Fundings: ₦{allData.walletsTotal} &nbsp;·&nbsp;
             🎁 Commissions Paid: ₦{allData.totalReward}
           </div>
+          )
+        }
         </div>
         <Dashboard />
       </div>
