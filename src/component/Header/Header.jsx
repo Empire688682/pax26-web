@@ -55,7 +55,7 @@ const Header = () => {
                     )
                 }
                 {
-                    !isHomePage && <Menu onClick={toggleMenu} size={30} className='cursor-pointer text-white' />
+                    !isHomePage && <Menu onClick={toggleMenu} size={30} color={pax26.textPrimary} className='cursor-pointer' />
                 }
             </div>
             {

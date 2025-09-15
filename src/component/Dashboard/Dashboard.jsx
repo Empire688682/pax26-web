@@ -66,7 +66,8 @@ const Dashboard = () => {
     <div className="min-h-screen">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-700 font-medium text-lg flex text-sm items center gap-2">
+        <h2 className="font-medium text-lg flex text-sm items center gap-2"
+        style={{color:pax26.textPrimary}}>
           <Heart /> Welcome back, <span className="font-bold">{firstName}</span>
         </h2>
         <Bell className="text-gray-500 cursor-pointer" onClick={() => route.push("/notifications")} />
@@ -77,9 +78,11 @@ const Dashboard = () => {
         <div className=" grid grid-cols-2 sm:grid-cols-3 gap-4">
         <WalletBalance />
 
-        <div className="bg-white max-h-[120px] p-4 rounded-lg shadow-md"
+        <div 
+        style={{backgroundColor:pax26.bg}} className="max-h-[120px] p-4 rounded-lg shadow-md"
         >
-          <p className="text-gray-500 text-sm">Commission</p>
+          <p className="text-sm"
+          style={{color:pax26.textPrimary}}>Commission</p>
           <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
@@ -92,7 +95,8 @@ const Dashboard = () => {
 
         <CashBackBalance />
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div 
+        style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
           <p className="text-gray-500 text-sm mb-2">Referral Link</p>
           <div className="flex items-center flex-wrap gap-2">
             <input
@@ -116,14 +120,17 @@ const Dashboard = () => {
         {
           showMore && (
             <div className='grid grid-cols-2 gap-2'>
-          <div className="bg-white max-h-[120px] p-4 rounded-lg shadow-md"
+          <div 
+          style={{backgroundColor:pax26.bg}} className="max-h-[120px] p-4 rounded-lg shadow-md"
         >
-          <p className="text-gray-500 text-sm">Commission Balance</p>
+          <p className="text-sm"
+          style={{color:pax26.textPrimary}}>Commission</p>
           <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
                 :
-                <p className="text-xl font-bold">₦{userCommission?.toFixed(2) || "**.**"}</p>
+                <p className="text-xl font-bold"
+                style={{color:pax26.textPrimary}}>₦{userCommission?.toFixed(2) || "**.**"}</p>
             }
             <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
           </div>
@@ -135,13 +142,16 @@ const Dashboard = () => {
         }
         
 
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <p className="text-gray-500 text-sm mb-2">Referral Link</p>
+        <div 
+        style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
+          <p className="text-sm mb-2"
+          style={{color:pax26.textPrimary}}>Referral Link</p>
           <div className="flex items-center flex-wrap gap-2">
             <input
               value={referralLink}
               readOnly
               className="flex-1 border rounded px-2 py-1 text-sm"
+              style={{color:pax26.textPrimary}}
             />
             <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
               <Copy size={16} /> Copy
@@ -150,46 +160,70 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <h3 className="text-md font-medium mb-2">Quick Links</h3>
+      <h3 className="text-md font-medium mb-2"
+      style={{color:pax26.textPrimary}}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div onClick={() => route.push("/fund-wallet")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Wallet className="text-blue-600 mb-2" size={28} />
-          <p className="text-sm font-medium">Fund Wallet</p>
+        <div onClick={() => route.push("/fund-wallet")} 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Wallet
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+          <p className="text-sm font-medium"
+          style={{color:pax26.textPrimary}}>Fund Wallet</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-airtime")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Phone className="text-blue-600 mb-2" size={28} />
-          <p className="text-sm font-medium">Buy Airtime</p>
+        <div onClick={() => route.push("/dashboard/buy-airtime")} 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Phone
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+          <p className="text-sm font-medium"
+          style={{color:pax26.textPrimary}}>Buy Airtime</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-data")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Wifi className="text-blue-600 mb-2" size={28} />
-          <p className="text-sm font-medium">Buy Data</p>
+        <div onClick={() => route.push("/dashboard/buy-data")} 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Wifi
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+          <p className="text-sm font-medium"
+          style={{color:pax26.textPrimary}}>Buy Data</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-electricity")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Zap className="text-blue-600 mb-2" size={28} />
-          <p className="text-sm font-medium">Electricity</p>
+        <div onClick={() => route.push("/dashboard/buy-electricity")} 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Zap
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+          <p className="text-sm font-medium"
+          style={{color:pax26.textPrimary}}>Electricity</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-tv")} className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Tv className="text-blue-600 mb-2" size={28} />
-          <p className="text-sm font-medium">TV Subscription</p>
+        <div onClick={() => route.push("/dashboard/buy-tv")} 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Tv
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+          <p className="text-sm font-medium"
+          style={{color:pax26.textPrimary}}>TV Subscription</p>
         </div>
-        <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Gift className="text-blue-600 mb-2" size={28} />
+        <div 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <Gift
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
           <p className="text-sm font-medium text-center">Gift Card</p>
-          <p className="text-sm animate-pulse font-bold text-center">Comming Soon</p>
+          <p className="text-sm animate-pulse font-bold text-center"
+          style={{color:pax26.textPrimary}}>Comming Soon</p>
         </div>
-        <div className="bg-white cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <TrendingDown className="text-blue-600 mb-2" size={28} />
+        <div 
+        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+          <TrendingDown
+          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
           <p className="text-sm font-medium text-center">Crypto</p>
-          <p className="text-sm animate-pulse font-bold text-center">Comming Soon</p>
+          <p className="text-sm animate-pulse font-bold text-center"
+          style={{color:pax26.textPrimary}}>Comming Soon</p>
         </div>
       </div>
 
-      <h3 className="text-md font-medium mb-2 mt-6">Recent Activities</h3>
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <h3 className="text-md font-medium mb-2 mt-6"
+      style={{color:pax26.textPrimary}}>Recent Activities</h3>
+      <div 
+      style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
         {
           loading ? "Loading...." :
             <div className="space-y-4">
@@ -226,8 +260,9 @@ const Dashboard = () => {
                       transactionHistory.length > 5 &&
                       <div className="text-center mt-4">
                         <button
-                          onClick={() => router.push("/transactions")}
-                          className="text-blue-600 hover:underline font-medium text-sm"
+                          onClick={() => route.push("/transactions")}
+                         
+                         style={{color:pax26.textPrimary}} className="hover:underline font-medium text-sm"
                         >
                           See More →
                         </button>
@@ -235,7 +270,8 @@ const Dashboard = () => {
                     }
                   </>
                 ) :
-                  <p className="text-gray-500 text-sm">No transaction history found.</p>
+                  <p className="text-sm"
+                  style={{color:pax26.textPrimary}}>No transaction history found.</p>
               }
             </div>
         }
