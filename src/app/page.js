@@ -38,7 +38,7 @@ const Page = () => {
   }, []);
 
   return (
-    <div>
+    <div className='overflow-x-hidden'>
       {isModalOpen && (
         <motion.div
         initial={{opacity:0, y:100 }}

@@ -5,12 +5,13 @@ import ClientWrapper from "./ClientWrapper";
 import { ThemeProvider } from "next-themes";
 
 export const metadata = {
-  title: "Pax26",
-  description: "This is Pax26 website",
+  title: "Pax26 - Simplifying Digital Payments & Utility Services",
+  description:
+    "Pax26 is your all-in-one platform for airtime, data, electricity, TV subscriptions, gift cards, and more. Enjoy fast, secure, and reliable digital transactions anytime, anywhere.",
   author: "Jayempire",
-  icons :{
-    icon:"/icon.ico"
-  }
+  icons: {
+    icon: "/icon.ico",
+  },
 };
 
 
