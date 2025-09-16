@@ -10,7 +10,7 @@ import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
 
 const BuyAirtime = () => {
-  const { setPinModal, getUserRealTimeData, userCashBack } = useGlobalContext();
+  const { setPinModal, getUserRealTimeData, userCashBack, pax26 } = useGlobalContext();
   const [data, setData] = useState({
     network: "",
     amount: "",
@@ -80,14 +80,16 @@ const BuyAirtime = () => {
   }
 
   return (
-    <div className="min-h-screen py-10 overflow-x-hidden">
+    <div className="min-h-screen py-10 overflow-x-hidden px-6"
+      style={{ backgroundColor: pax26.secondaryBg }}>
       <ToastContainer />
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 
           <WalletBalance />
 
-          <div className="max-w-2xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
+          <div className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100"
+            style={{ backgroundColor: pax26.card }}>
             <div className='flex justify-between items-center mb-8'>
               <h1 className="text-2xl font-bold text-center text-blue-700 tracking-tight">
                 Buy Airtime
@@ -110,7 +112,7 @@ const BuyAirtime = () => {
                   onChange={handleChange}
                   value={data.network}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option disabled value="">-- Choose Network --</option>
                   <option value="01">MTN</option>
@@ -133,7 +135,7 @@ const BuyAirtime = () => {
                   min="50"
                   required
                   placeholder='Enter Amount / Min: 50'
-                  className="w-full pl-7 pr-12 border border-gray-300 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-7 pr-12 border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 {
                   checked && data.amount && Number(data.amount) >= 50 && (
@@ -190,7 +192,7 @@ const BuyAirtime = () => {
                   type="tel"
                   placeholder="e.g. 09154358139"
                   required
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -207,7 +209,7 @@ const BuyAirtime = () => {
                   placeholder="Enter Pin"
                   required
                   maxLength={4}
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
