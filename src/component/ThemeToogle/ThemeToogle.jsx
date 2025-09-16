@@ -13,7 +13,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="px-4 z-50 mx-auto max-w-20 fixed top-3 left-1/2 md:right-30 py-2 rounded dark:text-white"
+      className="px-4 z-50 mx-auto max-w-20 py-2 rounded dark:text-white"
     >
       {resolvedTheme === "dark" ? <SunIcon size={25} /> : <MoonIcon color="#131b2f" size={25} />}
     </button>
