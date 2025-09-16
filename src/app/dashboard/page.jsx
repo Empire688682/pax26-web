@@ -44,7 +44,7 @@ const Page = () => {
   return (
     <>
       <div className='px-6 py-10'
-      style={{ backgroundColor: pax26.secodaryBg }}
+      style={{ backgroundColor: pax26.secondaryBg }}
       >
         <div className="overflow-hidden w-full mb-6 whitespace-nowrap p-2 rounded-lg shadow"
         style={{ backgroundColor: pax26.bg }}

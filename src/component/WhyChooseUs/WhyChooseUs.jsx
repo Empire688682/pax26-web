@@ -62,7 +62,7 @@ import { useGlobalContext } from '../Context';
     return (
       <div 
       className="bg-gray-50 rounded-xl p-6 shadow-sm hover:shadow-md transition"
-      style={{ backgroundColor: pax26.secodaryBg }}>
+      style={{ backgroundColor: pax26.secondaryBg }}>
         <div className="flex items-center mb-4 text-blue-600">
           <Icon size={28} className="mr-2" />
           <h3 

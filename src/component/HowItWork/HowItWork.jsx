@@ -6,7 +6,7 @@ export default function HowItWorks() {
   return (
     <section
       className="py-16"
-      style={{ backgroundColor: pax26.secodaryBg }}
+      style={{ backgroundColor: pax26.secondaryBg }}
     >
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2

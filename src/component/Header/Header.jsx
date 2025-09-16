@@ -19,7 +19,7 @@ const Header = () => {
     const isProfile = pathName === '/profile';
     return (
         <div
-            className="shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between"
+            className={`shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center ${isProfile ? "justify-end" : "justify-between"}`}
             style={{ backgroundColor: pax26.header }}>
             {
                 isHomePage ? (

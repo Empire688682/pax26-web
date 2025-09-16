@@ -207,9 +207,10 @@ export const AppProvider = ({ children }) => {
  useEffect(()=>{
    const pax26 = {
     bg: `${theme === 'light' ? '#ffffff' : '#01050f'}`,
-    secodaryBg: `${theme === 'light' ? '#f1f5f9' : '#131b2f'}`,
+    secondaryBg: `${theme === 'light' ? '#f1f5f9' : '#131b2f'}`,
     ctBg: `${theme === 'light' ? '#64748b' : '#01050f'}`,
     footerBg: `${theme === 'light' ? '#64748b' : '#01050f'}`,
+    publicBg: `${theme === 'light' ? '#d4d9e0ff' : '#10172bff'}`,
     header: `${theme === 'light' ? '#f1f5f9' : '#01050f'}`,
     card: `${theme === 'light' ? '#f1f5f9' : '#01050f'}`,
     primary: theme === 'light' ? '#2563eb' : '#3b82f6',

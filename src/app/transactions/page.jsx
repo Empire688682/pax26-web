@@ -4,22 +4,27 @@ import { useGlobalContext } from "@/component/Context";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
-  const { transactionHistory } = useGlobalContext();
+  const { transactionHistory, pax26, getUserRealTimeData } = useGlobalContext();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Turn off loading once context data is available
-    if (transactionHistory) {
-      setLoading(false);
-    }
-  }, [transactionHistory]);
+    getUserRealTimeData().then(() => setLoading(false));
+  }, []);
+
+  console.log("Transaction History:", transactionHistory);
 
   return (
-    <div className="min-h-screen px-6 ">
-      <h3 className="text-md font-medium mb-2 mt-6">Transaction History</h3>
-      <div className="bg-white p-4 rounded-lg shadow-md">
+    <div className={`min-h-screen px-3`}
+    style={{ backgroundColor: pax26?.publicBg }}>
+      <h3 className="text-md font-medium mb-2 pt-6"
+      style={{ color: pax26?.textPrimary }}
+      >Transaction History</h3>
+      <div className="py-10 px-3 shadow-md">
         {loading ? (
-          "Loading..."
+          <p style={{ color: pax26?.textPrimary }}>
+            Loading...
+          </p>
         ) : (
           <div className="space-y-4">
             {transactionHistory.length > 0 ? (
@@ -80,7 +85,8 @@ const Page = () => {
                   ))}
               </>
             ) : (
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 text-sm py-6"
+              style={{ color: pax26?.textSecondary || "#6b7280" }}>
                 No transaction history found.
               </p>
             )}

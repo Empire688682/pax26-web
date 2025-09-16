@@ -10,7 +10,7 @@ import { SessionProvider } from "next-auth/react";
 export default function ClientWrapper({ children }) {
   return (
     <AppProvider>
-      <div className="flex items-center bg-black shadow-md justify-start w-full">
+      <div className="flex items-center shadow-md justify-start w-full">
         <Sidebar />
         <div className="w-full ovflow-hidden">
           <Header />

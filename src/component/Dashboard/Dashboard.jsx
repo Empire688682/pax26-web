@@ -225,7 +225,9 @@ const Dashboard = () => {
       <div 
       style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
         {
-          loading ? "Loading...." :
+          loading ? <p style={{color:pax26.textPrimary}}>
+            Loading....
+          </p>:
             <div className="space-y-4">
               {
                 transactionHistory.length > 0 ? (
@@ -261,7 +263,6 @@ const Dashboard = () => {
                       <div className="text-center mt-4">
                         <button
                           onClick={() => route.push("/transactions")}
-                         
                          style={{color:pax26.textPrimary}} className="hover:underline font-medium text-sm"
                         >
                           See More →

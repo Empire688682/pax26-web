@@ -6,7 +6,7 @@ export default function Testimonials() {
   const {pax26} = useGlobalContext();
     return (
       <section className="py-16"
-      style={{ backgroundColor: pax26.secodaryBg }}>
+      style={{ backgroundColor: pax26.secondaryBg }}>
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4"
           style={{ color: pax26.textPrimary }}>

@@ -1,4 +1,5 @@
 "use client";
+
 import { useGlobalContext } from '@/component/Context';
 import CTA from '@/component/CTA/CTA';
 import DownloadOurApp from '@/component/DownloadOurApp/DownloadOurApp';
@@ -10,9 +11,16 @@ import SignupPage from '@/component/SignupPage/SignupPage';
 import Testimonials from '@/component/Testimonials/Testimonials';
 import WhyChooseUs from '@/component/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const Page = () => {
-  const {isModalOpen, pax26} = useGlobalContext();
+  const { isModalOpen, pax26 } = useGlobalContext();
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
@@ -31,17 +39,104 @@ const Page = () => {
 
   return (
     <div>
-       {
-                isModalOpen && (<SignupPage />)
-            }
-      <Hero />
-      <HowItWorks />
-      <Services />
-      <WhyChooseUs />
-      <PricingSec />
-      <Testimonials />
-      <CTA />
-      <DownloadOurApp />
+      {isModalOpen && (
+        <motion.div
+        initial={{opacity:0, y:100 }}
+        animate={{opacity:1, y:0 }}
+        exit={{opacity:0, y:-50 }}
+        transition={{ duration: 1 }}
+        >
+          <SignupPage />
+        </motion.div>
+      )}
+
+      {/* Hero Section */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+        variants={fadeInUp}
+      >
+        <Hero />
+      </motion.div>
+
+      {/* How it Works */}
+      <motion.div
+        initial={{opacity:0, x:-100 }}
+        whileInView={{opacity:1, x:0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        variants={fadeInUp}
+      >
+        <HowItWorks />
+      </motion.div>
+
+      {/* Services */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        variants={fadeInUp}
+      >
+        <Services />
+      </motion.div>
+
+      {/* Why Choose Us */}
+      <motion.div
+        initial={{opacity:0, x:100 }}
+        whileInView={{opacity:1, x:0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        variants={fadeInUp}
+      >
+        <WhyChooseUs />
+      </motion.div>
+
+      {/* Pricing */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        variants={fadeInUp}
+      >
+        <PricingSec />
+      </motion.div>
+
+      {/* Testimonials */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        variants={fadeInUp}
+      >
+        <Testimonials />
+      </motion.div>
+
+      {/* CTA */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        variants={fadeInUp}
+      >
+        <CTA />
+      </motion.div>
+
+      {/* Download App */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        variants={fadeInUp}
+      >
+        <DownloadOurApp />
+      </motion.div>
     </div>
   );
 };

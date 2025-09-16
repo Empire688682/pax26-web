@@ -9,7 +9,7 @@ const DownloadOurApp = () => {
   return (
     <div id='downloadApp' 
     className="min-h-screen px-6 py-16 flex items-center justify-center"
-    style={{ backgroundColor: pax26.secodaryBg }}>
+    style={{ backgroundColor: pax26.secondaryBg }}>
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-4xl font-bold text-blue-600 mb-4">Get the Pax26 App</h1>
         <p className="text-gray-700 mb-8 text-lg">

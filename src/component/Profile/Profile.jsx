@@ -10,7 +10,7 @@ import uploadImage from '../utils/uplaodImage';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
-  const { userData, setUserData, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, setUserData, pax26, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
   const [userImage, setUserImage] = useState(null);
   const [processing, setProcessing] = useState(false);
 
@@ -79,7 +79,8 @@ const Profile = () => {
     setPwdForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  const [postLoading, setPostLoading] = useState(false)
+  const [postLoading, setPostLoading] = useState(false);
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     const { currentPwd, newPwd, repeatPwd } = pwdForm;
@@ -118,11 +119,13 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6">
+    <div className="min-h-screen py-12 px-6"
+    style={{backgroundColor:pax26.secondaryBg}}>
       <ToastContainer />
-      <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
         { /* Left: Profile Overview */}
-        <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center text-center">
+        <div className="backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center text-center"
+        style={{backgroundColor:pax26.bg}}>
           <div className="relative w-18 h-18 rounded-full overflow-hidden shadow-lg mb-2">
             <Image
               src={userImage? window.URL.createObjectURL(userImage) : userData.profileImage || "/profile-img.png"}
@@ -204,11 +207,15 @@ const Profile = () => {
         </div>
 
         {/* Middle: Settings & Change Password */}
-        <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 space-y-8">
+        <div 
+        style={{backgroundColor:pax26.bg}}
+        className="p-6 rounded-2xl shadow-xl space-y-8">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4"
+            style={{color:pax26.textPrimary}}>Settings</h3>
             <div className="flex items-center justify-between mb-4">
-              <span className="flex items-center gap-2 text-sm text-gray-700"><Bell size={18} /> Notifications</span>
+              <span className="flex items-center gap-2 text-sm"
+              style={{color:pax26.textSecondary}}><Bell size={18} /> Notifications</span>
               <input
                 type="checkbox"
                 checked={notify}
@@ -217,22 +224,26 @@ const Profile = () => {
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-sm text-gray-700"><Moon size={18} /> Dark Mode</span>
+              <span className="flex items-center gap-2 text-sm"
+              style={{color:pax26.textSecondary}}><Moon size={18} /> Dark Mode</span>
               <button className="bg-gray-100 px-2 py-1 rounded text-xs" disabled>Coming soon</button>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Change Password</h3>
+            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4"
+            style={{color:pax26.textPrimary}}>Change Password</h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
-              <p className='text-sm font-bold text-center'>If not set before enter 123456789 as Current Password </p>
+              <p className='text-sm font-bold text-center'
+              style={{color:pax26.textSecondary}}>If not set before enter 123456789 as Current Password </p>
               <input
                 onChange={handleOnchange}
                 name='currentPwd'
                 value={pwdForm.currentPwd}
                 type="password"
                 placeholder="Current Password"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
+                style={{color:pax26.textPrimary}}
               />
               <input
                 onChange={handleOnchange}
@@ -240,7 +251,8 @@ const Profile = () => {
                 name='newPwd'
                 type="password"
                 placeholder="New Password"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
+                style={{color:pax26.textPrimary}}
               />
               <input
                 onChange={handleOnchange}
@@ -248,7 +260,8 @@ const Profile = () => {
                 type="password"
                 name='repeatPwd'
                 placeholder="Repeat Password"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
+                style={{color:pax26.textPrimary}}
               />
               <button
                 type="submit"
@@ -260,33 +273,6 @@ const Profile = () => {
               </button>
             </form>
           </div>
-        </div>
-
-        {/* Right: Transaction History */}
-        <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
-            <History size={20} /> Transaction History
-          </h3>
-          {
-            loading ? "Loading......." :
-              <ul className="space-y-3 text-sm text-gray-700 max-h-72 overflow-y-auto">
-                {[...transactionHistory].reverse().map((tx, id) => (
-                  <li key={id} className="border-b pb-2 flex justify-between">
-                    <div>
-                      <p className="font-medium">{tx.type}</p>
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>{tx.amount}</span>
-                        <span>{tx.date}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className={`${tx.status === "success" ? "text-green-600" : "text-red-500"}`}>{tx.status}</p>
-                      <span>Id: {tx._id}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-          }
         </div>
       </div>
     </div>
