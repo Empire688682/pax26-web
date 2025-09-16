@@ -29,11 +29,11 @@ const DownloadOurApp = () => {
         </div>
 
         <Image
-          src="/Pax26-app-prev.png"
+          src="/playstore.png"
           alt="App Preview"
-          width={500}
-          height={500}
-          className="mx-auto rounded-xl shadow-md"
+          width={250}
+          height={250}
+          className="mx-auto rounded-4xl shadow-md"
         />
       </div>
     </div>
