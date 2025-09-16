@@ -5,8 +5,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
 import SocialIcons from '../SocialIcons/SocialIcons';
+import { useGlobalContext } from '../Context';
 
 const Contact = () => {
+  const {pax26} = useGlobalContext();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
   const handleChange = (e) => {
@@ -25,7 +27,9 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div 
+    style={{backgroundColor: pax26.secondaryBg}}
+    className="min-h-screen py-12 px-6">
       <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
         {/* Left Side */}
@@ -62,7 +66,9 @@ const Contact = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-blue-100">
+        <div 
+        style={{backgroundColor: pax26.bg}}
+        className=" backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-blue-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -72,7 +78,7 @@ const Contact = () => {
                 placeholder="John Doe"
                 value={form.name}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 place-holder-gray-600 text-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
 
@@ -84,7 +90,7 @@ const Contact = () => {
                 placeholder="you@example.com"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 place-holder-gray-600 text-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
 
@@ -96,7 +102,7 @@ const Contact = () => {
                 placeholder="Write your message here..."
                 value={form.message}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 place-holder-gray-600 text-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
 

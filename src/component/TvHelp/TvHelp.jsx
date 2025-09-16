@@ -1,8 +1,13 @@
+"use client";
 import React from 'react';
+import { useGlobalContext } from '../Context';
 
 const TvHelp = ({ data }) => {
+  const {pax26} = useGlobalContext();
   return (
-    <div className='bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100 flex flex-col justify-between gap-8'>
+    <div 
+    style={{ backgroundColor: pax26.bg }}
+    className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100 flex flex-col justify-between gap-8'>
       {/* Help Section */}
       <div>
         <h2 className="text-xl font-bold text-blue-700 mb-4">Need Help?</h2>
@@ -37,7 +42,9 @@ const TvHelp = ({ data }) => {
       </div>
 
       {/* Security Notice */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg text-sm text-gray-700">
+      <div 
+      style={{ backgroundColor: pax26.secondaryBg }}
+      className="border-l-4 border-blue-500 p-4 rounded-lg text-sm text-gray-700">
         🔒 <strong>Security Notice:</strong> Your PIN is never stored. Transactions are securely encrypted.
       </div>
 
@@ -47,7 +54,9 @@ const TvHelp = ({ data }) => {
       </div>
 
       {/* Optional Tip */}
-      <div className="bg-blue-100 text-blue-800 text-xs p-3 rounded-lg text-center">
+      <div 
+      style={{ backgroundColor: pax26.secondaryBg }}
+      className="text-blue-800 text-xs p-3 rounded-lg text-center">
         📺 Tip: Subscribing before your due date ensures uninterrupted service!
       </div>
     </div>

@@ -1,8 +1,12 @@
+"use client";
 import React from 'react'
+import { useGlobalContext } from '../Context';
 
 const AirtimeHelp = ({ data }) => {
+  const {pax26} = useGlobalContext();
   return (
-    <div className='bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-green-100 flex flex-col justify-between gap-8'>
+    <div className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-green-100 flex flex-col justify-between gap-8'
+    style={{backgroundColor:pax26.bg}}>
       {/* Help Section */}
       <div>
         <h2 className="text-xl font-bold text-green-700 mb-4">Need Help?</h2>
@@ -36,7 +40,8 @@ const AirtimeHelp = ({ data }) => {
       </div>
 
       {/* Security Notice */}
-      <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg text-sm text-gray-700">
+      <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg text-sm text-gray-700"
+      style={{backgroundColor:pax26.publicBg}}>
         🔒 <strong>Security Notice:</strong> We do not store your PIN. All transactions are encrypted for your safety.
       </div>
 
@@ -46,7 +51,9 @@ const AirtimeHelp = ({ data }) => {
       </div>
 
       {/* Optional Promo/Info */}
-      <div className="bg-green-100 text-green-800 text-xs p-3 rounded-lg text-center">
+      <div 
+      style={{backgroundColor:pax26.publicBg}}
+      className="bg-green-100 text-green-800 text-xs p-3 rounded-lg text-center">
         💡 Tip: You earn cashback when you buy airtime above ₦500!
       </div>
     </div>

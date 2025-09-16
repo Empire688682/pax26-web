@@ -1,8 +1,13 @@
+"use client";
 import React from 'react'
+import { useGlobalContext } from '../Context';
 
 const DataHelp = ({ data}) => {
+  const {pax26} = useGlobalContext();
   return (
-    <div className='bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-purple-200 flex flex-col justify-between gap-8'>
+    <div
+    style={{ backgroundColor: pax26.bg }} 
+    className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-purple-200 flex flex-col justify-between gap-8'>
       {/* Help Section */}
       <div>
         <h2 className="text-xl font-bold text-green-800 mb-4">Need Help?</h2>
@@ -36,7 +41,9 @@ const DataHelp = ({ data}) => {
       </div>
 
       {/* Security Notice */}
-      <div className="bg-purple-50 border-l-4 border-green-800 p-4 rounded-lg text-sm text-gray-700">
+      <div
+      style={{ backgroundColor: pax26.secondaryBg}} 
+      className="border-l-4 border-green-800 p-4 rounded-lg text-sm text-gray-700">
         🔒 <strong>Security Notice:</strong> For your protection, all data transactions are encrypted and processed securely.
       </div>
 
@@ -46,7 +53,9 @@ const DataHelp = ({ data}) => {
       </div>
 
       {/* Optional Promo */}
-      <div className="bg-purple-100 text-green-800 text-xs p-3 rounded-lg text-center">
+      <div 
+      style={{ backgroundColor: pax26.secondaryBg}}
+      className="text-green-800 text-xs p-3 rounded-lg text-center">
         🚀 Tip: Buy monthly plans and get bonus MBs on select networks!
       </div>
     </div>

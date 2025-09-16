@@ -49,11 +49,11 @@ export default function Sidebar() {
             <LayoutDashboard size={18} className="hidden md:block" />
             Dashboard
           </Link>
-          <Link onClick={() => setIsOpen(false)} href="/api-docs" className="flex items-center gap-2 hover:text-blue-600"
+          {/* <Link onClick={() => setIsOpen(false)} href="/api-docs" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <FileCode size={18} className="hidden md:block" />
             API Docs
-          </Link>
+          </Link> */}
           <Link onClick={() => setIsOpen(false)} href="/fund-wallet" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <Wallet size={18} className="hidden md:block" />

@@ -1,8 +1,12 @@
+"use client"
 import React from 'react'
+import { useGlobalContext } from '../Context'
 
 const ElectricityHelp = ({ data}) => {
+  const {pax26} = useGlobalContext();
   return (
-    <div className='bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-yellow-200 flex flex-col justify-between gap-8'>
+    <div className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-yellow-200 flex flex-col justify-between gap-8'
+    style={{ backgroundColor: pax26.bg }}>
       {/* Help Section */}
       <div>
         <h2 className="text-xl font-bold text-yellow-600 mb-4">Need Help?</h2>
@@ -37,7 +41,9 @@ const ElectricityHelp = ({ data}) => {
       </div>
 
       {/* Security Notice */}
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg text-sm text-gray-700">
+      <div 
+      style={{ backgroundColor: pax26.secondaryBg }}
+      className="border-l-4 border-yellow-500 p-4 rounded-lg text-sm text-gray-700">
         ⚡ <strong>Security Notice:</strong> All meter details and transactions are processed securely and encrypted end-to-end.
       </div>
 
@@ -47,7 +53,9 @@ const ElectricityHelp = ({ data}) => {
       </div>
 
       {/* Optional Promo */}
-      <div className="bg-yellow-100 text-yellow-800 text-xs p-3 rounded-lg text-center">
+      <div 
+      style={{ backgroundColor: pax26.secondaryBg }}
+      className=" text-yellow-800 text-xs p-3 rounded-lg text-center">
         💡 Tip: Tokens for prepaid meters are delivered instantly after payment.
       </div>
     </div>

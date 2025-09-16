@@ -11,7 +11,7 @@ import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
 
 const BuyData = () => {
-  const { dataPlan, getUserRealTimeData, profitConfig, userCashBack } = useGlobalContext();
+  const { dataPlan, getUserRealTimeData, profitConfig, pax26, userCashBack } = useGlobalContext();
 
   const [form, setForm] = useState({
     network: "",
@@ -107,13 +107,16 @@ const BuyData = () => {
   };
 
   return (
-    <div className="min-h-screen pb-10">
+    <div className="min-h-screen py-12 px-6"
+    style={{ backgroundColor: pax26.secondaryBg }}>
       <ToastContainer />
       {dataPlan ? (
         <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">
           <div className="flex flex-col gap-6">
             <WalletBalance />
-            <div className="max-w-2xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
+            <div 
+            style={{ backgroundColor: pax26.bg }}
+            className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
               <div className='flex justify-between items-center mb-8'>
                 <h1 className="text-2xl font-bold text-center text-blue-700 tracking-tight">
                   Buy Data
@@ -136,7 +139,7 @@ const BuyData = () => {
                     onChange={handleNetworkChange}
                     value={form.network}
                     required
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 rounded-xl text-gray-400 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     <option disabled value="">
                       -- Choose Network --
@@ -159,7 +162,7 @@ const BuyData = () => {
                     onChange={handlePlanChange}
                     value={form.plan}
                     required
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     <option disabled value="">
                       -- Choose Plan --
@@ -181,7 +184,8 @@ const BuyData = () => {
                     readOnly
                     placeholder="Amount will be auto-filled"
                     value={form.amount}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 text-gray-600"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-600"
+                    style={{ backgroundColor: pax26.publicBg, color: pax26.textPrimary }}
                   />
                   {
                     checked && form.amount && Number(form.amount) >= 50 && (
@@ -236,13 +240,13 @@ const BuyData = () => {
                     value={form.number}
                     placeholder="e.g. 08012345678"
                     required
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
 
                 {/* PIN */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Enter PIN</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-1">Enter PIN</label>
                   <input
                     name="pin"
                     type="password"
@@ -251,7 +255,7 @@ const BuyData = () => {
                     placeholder="4 digit PIN"
                     required
                     maxLength={4}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 text-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
 

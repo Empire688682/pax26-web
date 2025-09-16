@@ -9,7 +9,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from "../Context";
 
 const BuyTv = () => {
-  const {getUserRealTimeData} = useGlobalContext();
+  const {getUserRealTimeData, pax26} = useGlobalContext();
   const allTvPackagesUrl = "https://www.nellobytesystems.com/APICableTVPackagesV2.asp";
 
   const initialFormState = {
@@ -143,12 +143,15 @@ const BuyTv = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10">
+    <div className="min-h-screen px-6 py-10"
+    style={{ backgroundColor: pax26.secondaryBg}}>
       <ToastContainer />
       <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
         <div className="flex flex-col gap-6">
           <WalletBalance />
-          <div className="max-w-2xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
+          <div 
+          style={{ backgroundColor: pax26.bg}}
+          className="max-w-2xl shadow-2xl rounded-2xl p-8 border border-blue-100">
             <h1 className="text-2xl font-bold text-center text-blue-700 mb-8">
               Buy TV Subscription
             </h1>
@@ -164,7 +167,7 @@ const BuyTv = () => {
                   value={form.provider}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="">-- Select Provider --</option>
                   {Object.keys(packagesData).map((p, i) => (
@@ -181,13 +184,14 @@ const BuyTv = () => {
                   Smartcard Number
                 </label>
                 <input
-                  type="text"
+                  type="tel"
                   name="smartcardNumber"
+                  placeholder="Enter Smartcard Number"
                   value={form.smartcardNumber}
                   onChange={handleChange}
                   maxLength={12}
                   required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border place-holder-gray-500 border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
                 {verifyingSmartcardNumber && (
                   <span className="absolute right-3 top-9">
@@ -216,7 +220,7 @@ const BuyTv = () => {
                   onChange={handleChange}
                   required
                   disabled={!availablePackages.length}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="" disabled>
                     -- Select Package --
@@ -235,7 +239,7 @@ const BuyTv = () => {
                   <label className="block mb-1 text-sm font-semibold text-gray-700">
                     Amount
                   </label>
-                  <p className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700">
+                  <p className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 text-gray-700">
                     {packageAmount}
                   </p>
                 </div>
@@ -253,7 +257,7 @@ const BuyTv = () => {
                   onChange={handleChange}
                   required
                   placeholder="e.g. 08012345678"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -270,7 +274,7 @@ const BuyTv = () => {
                   required
                   maxLength={4}
                   placeholder="4-digit PIN"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 

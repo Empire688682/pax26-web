@@ -15,7 +15,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
     return (
         <div
             style={{ backgroundColor: pax26.bg }}
-            className="max-h-[120px] p-4 rounded-lg mb-6 md:mb-0 shadow-md relative"
+            className="max-h-[120px] p-4 rounded-lg border border-purple-200 mb-6 md:mb-0 relative"
         >
             <p className="text-gray-500 text-sm"
                 style={{ color: pax26.textPrimary }}>Wallet Balance</p>

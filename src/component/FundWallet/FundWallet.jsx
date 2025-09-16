@@ -7,7 +7,7 @@ import PaymentButton from "../PaymentButton/PaymentButton";
 import axios from "axios";
 
 const FundWallet = () => {
-  const { userData, paymentId, setPaymentId, route } = useGlobalContext();
+  const { userData, paymentId, setPaymentId, route, pax26 } = useGlobalContext();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -43,16 +43,19 @@ const FundWallet = () => {
   }, [paymentId]);
 
   return (
-    <div className="min-h-screen pb-10 ">
+    <div className="min-h-screen py-10 px-6 "
+    style={{backgroundColor:pax26.secondaryBg}}>
       <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 grid-cols-1 gap-10 items-center">
         {
           loading ?
-            <div className="bg-white/90 backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-4">
+            <div className="backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-4"
+            style={{backgroundColor:pax26.bg}}>
               <h2 className="text-xl font-semibold text-blue-600 mb-2">Payment Verification</h2>
               <div className="flex justify-center items-center mt-4">
                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-2 text-gray-600">Verifying...</span>
+                <span className="ml-2"
+                style={{color:pax26.textPrimary}}>Verifying...</span>
               </div>
               {
                 loading ?
@@ -64,14 +67,16 @@ const FundWallet = () => {
             </div>
             :
             <div
-              className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6"
+              className="backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6"
+              style={{backgroundColor:pax26.bg}}
             >
               <h3 className="text-xl font-semibold text-blue-600 mb-2">Top-Up Form</h3>
 
               <div>
                 <label
                   htmlFor="amount"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{color:pax26.textPrimary}}
                 >
                   Amount (₦)
                 </label>
@@ -83,6 +88,7 @@ const FundWallet = () => {
                   min="100"
                   placeholder="Minimum ₦100"
                   className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                  style={{color:pax26.textPrimary}}
                 />
               </div>
 
@@ -102,7 +108,8 @@ const FundWallet = () => {
         }
 
         {/* Info Section */}
-        <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 flex flex-col gap-6">
+        <div className="backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 flex flex-col gap-6"
+        style={{backgroundColor:pax26.bg}}>
           <h2 className="text-3xl font-bold text-blue-700 mb-2">
             Fund Your Wallet
           </h2>
@@ -111,7 +118,8 @@ const FundWallet = () => {
             wallet using Flutterwave. Your wallet allows you to buy airtime,
             data, electricity, and much more — all in one place.
           </p>
-          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 text-sm text-blue-800">
+          <div className="p-4 rounded-lg border-l-4 border-blue-500 text-sm text-blue-800"
+          style={{backgroundColor:pax26.secondaryBg}}>
             🔐 All transactions are secured using bank-grade encryption.
           </div>
           <div className="text-sm text-gray-600 mt-4">

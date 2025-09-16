@@ -8,7 +8,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from '../Context';
 
 const BuyElectricity = () => {
-  const { getUserRealTimeData } = useGlobalContext();
+  const { getUserRealTimeData, pax26 } = useGlobalContext();
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -123,14 +123,16 @@ const BuyElectricity = () => {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10">
+    <div className="min-h-screen px-6 py-10"
+    style={{ backgroundColor: pax26.secondaryBg }}>
       <ToastContainer />
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 
           <WalletBalance />
 
-          <div className="max-w-2xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
+          <div className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100"
+          style={{ backgroundColor: pax26.bg}}>
             <h1 className="text-2xl font-bold text-center text-blue-700 mb-8 tracking-tight">
               Buy Electricity
             </h1>
@@ -144,7 +146,7 @@ const BuyElectricity = () => {
                   onChange={handleChange}
                   value={formData.disco}
                   required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option disabled value="">-- Choose Provider --</option>
                   {Object.keys(electricityCompany).map((merchant, id) => (
@@ -161,7 +163,7 @@ const BuyElectricity = () => {
                   onChange={handleChange}
                   value={formData.meterType}
                   required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option disabled value="">-- Choose Meter Type --</option>
                  <option  value="Prepaid">Prepaid</option>
@@ -178,7 +180,7 @@ const BuyElectricity = () => {
                   value={formData.meterNumber}
                   onChange={handleChange}
                   placeholder="e.g. 1234567890"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                   maxLength={11}
                 />
@@ -203,7 +205,7 @@ const BuyElectricity = () => {
                   value={formData.amount}
                   onChange={handleChange}
                   placeholder="Minimum ₦100"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                 />
               </div>
@@ -217,7 +219,7 @@ const BuyElectricity = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="e.g. 08012345678"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                 />
               </div>
@@ -232,7 +234,7 @@ const BuyElectricity = () => {
                   onChange={handleChange}
                   maxLength={4}
                   placeholder="Enter your PIN"
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl text-gray-600 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                 />
               </div>
