@@ -223,11 +223,6 @@ const Profile = () => {
                 className="toggle toggle-primary"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-sm"
-              style={{color:pax26.textSecondary}}><Moon size={18} /> Dark Mode</span>
-              <button className="bg-gray-100 px-2 py-1 rounded text-xs" disabled>Coming soon</button>
-            </div>
           </div>
 
           <div>
