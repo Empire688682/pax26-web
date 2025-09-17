@@ -3,6 +3,7 @@ import "./globals.css";
 import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata = {
   title: "Pax26 - Simplifying Digital Payments & Utility Services",
