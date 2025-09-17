@@ -31,14 +31,14 @@ const Blog = () => {
     >
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 mb-4">Latest on the Blog</h1>
-        <p className="text-gray-500 mb-10">Tips, updates, and stories from the Pax26 community.</p>
+        <p className="text-gray-400 mb-10">Tips, updates, and stories from the Pax26 community.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {dummyPosts.map((post) => (
             <div key={post.id} className="p-6 rounded-xl shadow-md hover:shadow-lg transition-all"
               style={{backgroundColor: pax26.bg}}>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">{post.title}</h3>
-              <p className="text-gray-500 text-sm mb-4">{post.excerpt}</p>
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">{post.title}</h3>
+              <p className="text-gray-400 text-sm mb-4">{post.excerpt}</p>
               <p className="text-xs text-gray-400">{post.date}</p>
             </div>
           ))}

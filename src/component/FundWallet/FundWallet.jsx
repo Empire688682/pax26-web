@@ -63,7 +63,7 @@ const FundWallet = () => {
                   :
                   <p>Verification process complete</p>
               }
-              <p className="text-gray-500 text-sm">Transaction ID: <span className='font-semibold'>{paymentId}</span></p>
+              <p className="text-gray-400 text-sm">Transaction ID: <span className='font-semibold'>{paymentId}</span></p>
             </div>
             :
             <div
@@ -122,7 +122,7 @@ const FundWallet = () => {
           style={{backgroundColor:pax26.secondaryBg}}>
             🔐 All transactions are secured using bank-grade encryption.
           </div>
-          <div className="text-sm text-gray-600 mt-4">
+          <div className="text-sm text-gray-400 mt-4">
             Need help? Contact{" "}
             <a
               href="mailto:support@Pax26.com"

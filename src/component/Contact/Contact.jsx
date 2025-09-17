@@ -35,7 +35,7 @@ const Contact = () => {
         {/* Left Side */}
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-blue-600">Get in Touch</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             We're always here to help. Whether you have a question or just want to say hello,
             feel free to reach out!
           </p>

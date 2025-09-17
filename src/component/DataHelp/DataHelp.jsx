@@ -22,7 +22,7 @@ const DataHelp = ({ data}) => {
       {/* Transaction Summary */}
       <div>
         <h2 className="text-xl font-bold text-green-800 mb-4">Transaction Summary</h2>
-        <div className="text-sm text-gray-800 space-y-2">
+        <div className="text-sm text-gray-400 space-y-2">
           <p><strong>Network:</strong> {data.network ? data.network.toUpperCase() : 'Not selected'}</p>
           <p><strong>Plan:</strong> {data.plan || 'Not selected'}</p>
           <p><strong>Phone:</strong> {data.number || 'Not entered'}</p>
@@ -48,7 +48,7 @@ const DataHelp = ({ data}) => {
       </div>
 
       {/* Support */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-400">
         Having issues? Contact support at <a href="usePax26@gmail.com" className="text-green-800 font-medium underline">usePax26@gmail.com</a>
       </div>
 

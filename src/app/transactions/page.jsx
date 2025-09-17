@@ -37,7 +37,7 @@ const Page = () => {
                       className="flex cursor-pointer justify-between items-center"
                     >
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-400">
                           {new Date(transaction.createdAt)
                             .toISOString()
                             .replace("T", " ")
@@ -85,7 +85,7 @@ const Page = () => {
                   ))}
               </>
             ) : (
-              <p className="text-gray-500 text-sm py-6"
+              <p className="text-gray-400 text-sm py-6"
               style={{ color: pax26?.textSecondary || "#6b7280" }}>
                 No transaction history found.
               </p>

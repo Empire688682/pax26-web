@@ -21,7 +21,7 @@ const AirtimeHelp = ({ data }) => {
       {/* Transaction Summary */}
       <div>
         <h2 className="text-xl font-bold text-green-700 mb-4">Transaction Summary</h2>
-        <div className="text-sm text-gray-800 space-y-2">
+        <div className="text-sm text-gray-400 space-y-2">
           <p><strong>Network:</strong> {data.network ? data.network.toUpperCase() : 'Not selected'}</p>
           <p><strong>Amount:</strong> {data.amount ? `₦${data.amount}` : 'Not entered'}</p>
           <p><strong>Phone:</strong> {data.number || 'Not entered'}</p>
@@ -46,7 +46,7 @@ const AirtimeHelp = ({ data }) => {
       </div>
 
       {/* Support */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-400">
         Having issues? Contact support at <a href="mailto:usePax26@gmail.com" className="text-green-700 font-medium underline">usePax26@gmail.com</a>
       </div>
 

@@ -22,7 +22,7 @@ const TvHelp = ({ data }) => {
       {/* Transaction Summary */}
       <div>
         <h2 className="text-xl font-bold text-blue-700 mb-4">Transaction Summary</h2>
-        <div className="text-sm text-gray-800 space-y-2">
+        <div className="text-sm text-gray-400 space-y-2">
           <p><strong>Provider:</strong> {data.provider || 'Not selected'}</p>
           <p><strong>Smartcard Number:</strong> {data.smartcardNumber || 'Not entered'}</p>
           <p><strong>Package:</strong> {data.packageCode || 'Not selected'}</p>
@@ -49,7 +49,7 @@ const TvHelp = ({ data }) => {
       </div>
 
       {/* Support */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-400">
         Need help? Contact us at <a href="mailto:support@Pax26.com" className="text-blue-700 font-medium underline">support@Pax26.com</a>
       </div>
 

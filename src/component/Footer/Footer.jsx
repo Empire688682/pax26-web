@@ -1,14 +1,34 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import SocialIcons from '../SocialIcons/SocialIcons';
 import { useGlobalContext } from '../Context';
+import { ArrowUpToLine } from 'lucide-react';
 
 const Footer = () => {
   const { pax26 } = useGlobalContext();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Show back to top button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+
+    return ()=> window.removeEventListener("scroll", handleScroll);
+  }, [])
+
+  const backTop = () => {
+    window.scrollTo(0, 0);
+  }
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -29,7 +49,15 @@ const Footer = () => {
 
   return (
     <footer className="z-50"
-    style={{ backgroundColor: pax26.footerBg }}>
+      style={{ backgroundColor: pax26.footerBg }}>
+      {
+        showBackToTop &&
+        <div style={{ backgroundColor: pax26.border }}
+          onClick={backTop}
+          className='p-3 rounded-full left-3 fixed border border-white bottom-10 flex items-center'>
+          <ArrowUpToLine size={30} color={pax26.toTopColor} />
+        </div>
+      }
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -76,7 +104,7 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email"
-                className="px-4 py-2 border-white text-white border outline-none rounded-md text-gray-800 w-full"
+                className="px-4 py-2 border-white text-white border outline-none rounded-md text-gray-400 w-full"
               />
               <button
                 type="submit"
@@ -95,7 +123,8 @@ const Footer = () => {
         </div>
 
         {/* Social Media */}
-        <div className="mt-12 flex justify-center space-x-6">
+        <div className="mt-12 flex justify-center pb-4 rounded-md space-x-6"
+        style={{ backgroundColor: pax26.border }}>
           <SocialIcons />
         </div>
 

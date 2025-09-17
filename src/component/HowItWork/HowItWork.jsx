@@ -26,10 +26,10 @@ export default function HowItWorks() {
             <div className="bg-blue-100 text-blue-600 p-4 rounded-full mb-4">
               <Smartphone size={32} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2"
+            <h3 className="text-xl font-semibold text-gray-400 mb-2"
               style={{ color: pax26.textPrimary }}
             >Create an Account</h3>
-            <p className="text-gray-600"
+            <p className="text-gray-400"
               style={{ color: pax26.textSecondary }}
             >
               Sign up in seconds and get access to cheap data and airtime instantly.
@@ -41,10 +41,10 @@ export default function HowItWorks() {
             <div className="bg-blue-100 text-blue-600 p-4 rounded-full mb-4">
               <Wallet2 size={32} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2"
+            <h3 className="text-xl font-semibold text-gray-400 mb-2"
               style={{ color: pax26.textPrimary }}
             >Fund Your Wallet</h3>
-            <p className="text-gray-600"
+            <p className="text-gray-400"
               style={{ color: pax26.textSecondary }}
             >
               Add money to your wallet using bank transfer or card payments.
@@ -56,10 +56,10 @@ export default function HowItWorks() {
             <div className="bg-blue-100 text-blue-600 p-4 rounded-full mb-4">
               <Zap size={32} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2"
+            <h3 className="text-xl font-semibold text-gray-400 mb-2"
               style={{ color: pax26.textPrimary }}
             >Buy Data Instantly</h3>
-            <p className="text-gray-600"
+            <p className="text-gray-400"
               style={{ color: pax26.textSecondary }}
             >
               Choose a network, pick a plan, and boom — your data arrives in seconds.

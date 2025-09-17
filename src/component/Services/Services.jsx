@@ -22,7 +22,7 @@ import { useGlobalContext } from '../Context';
           style={{ color: pax26.textPrimary }}>
             Our Services
           </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
             At #Pax26, we provide everything you need to stay connected and save money.
           </p>
   
@@ -84,7 +84,7 @@ import { useGlobalContext } from '../Context';
         className="text-lg font-semibold mb-2"
         style={{ color: pax26.textPrimary }}
         >{title}</h3>
-        <p className="text-gray-600 text-sm">{description}</p>
+        <p className="text-gray-400 text-sm">{description}</p>
       </div>
     );
   }

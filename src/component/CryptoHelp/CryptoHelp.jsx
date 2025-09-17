@@ -17,7 +17,7 @@ const CryptoHelp = ({ data }) => {
       {/* Transaction Summary */}
       <div>
         <h2 className="text-xl font-bold text-green-800 mb-4">Transaction Summary</h2>
-        <div className="text-sm text-gray-800 space-y-2">
+        <div className="text-sm text-gray-400 space-y-2">
           <p><strong>Card Type:</strong> {data.cardType || "Not selected"}</p>
           <p><strong>Amount:</strong> {data.amount ? `₦${data.amount}` : "Not entered"}</p>
           <p><strong>Card Code:</strong> {data.pin ? "••••••••" : "Not entered"}</p>
@@ -41,7 +41,7 @@ const CryptoHelp = ({ data }) => {
       </div>
 
       {/* Support */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-400">
         Having issues? Contact support at{" "}
         <a href="mailto:usePax26@gmail.com" className="text-green-800 font-medium underline">
           usePax26@gmail.com

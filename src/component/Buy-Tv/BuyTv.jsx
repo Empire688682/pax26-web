@@ -167,7 +167,7 @@ const BuyTv = () => {
                   value={form.provider}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="">-- Select Provider --</option>
                   {Object.keys(packagesData).map((p, i) => (
@@ -191,7 +191,7 @@ const BuyTv = () => {
                   onChange={handleChange}
                   maxLength={12}
                   required
-                  className="w-full border place-holder-gray-500 border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border place-holder-gray-500 border-gray-300 text-gray-400 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
                 {verifyingSmartcardNumber && (
                   <span className="absolute right-3 top-9">
@@ -220,7 +220,7 @@ const BuyTv = () => {
                   onChange={handleChange}
                   required
                   disabled={!availablePackages.length}
-                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="" disabled>
                     -- Select Package --
@@ -239,7 +239,7 @@ const BuyTv = () => {
                   <label className="block mb-1 text-sm font-semibold text-gray-700">
                     Amount
                   </label>
-                  <p className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 text-gray-700">
+                  <p className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-2 text-gray-700">
                     {packageAmount}
                   </p>
                 </div>
@@ -257,7 +257,7 @@ const BuyTv = () => {
                   onChange={handleChange}
                   required
                   placeholder="e.g. 08012345678"
-                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
@@ -274,7 +274,7 @@ const BuyTv = () => {
                   required
                   maxLength={4}
                   placeholder="4-digit PIN"
-                  className="w-full border border-gray-300 text-gray-500 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 

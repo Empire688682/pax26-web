@@ -70,7 +70,7 @@ const Dashboard = () => {
         style={{color:pax26.textPrimary}}>
           <Heart /> Welcome back, <span className="font-bold">{firstName}</span>
         </h2>
-        <Bell className="text-gray-500 cursor-pointer" onClick={() => route.push("/notifications")} />
+        <Bell className="text-gray-400 cursor-pointer" onClick={() => route.push("/notifications")} />
       </div>
 
      {/* big screen */}
@@ -97,7 +97,7 @@ const Dashboard = () => {
 
         <div 
         style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
-          <p className="text-gray-500 text-sm mb-2">Referral Link</p>
+          <p className="text-gray-400 text-sm mb-2">Referral Link</p>
           <div className="flex items-center flex-wrap gap-2">
             <input
               value={referralLink}
@@ -235,7 +235,7 @@ const Dashboard = () => {
                     {[...transactionHistory].reverse().slice(0, 5).map((transaction) => (
                       <div key={transaction._id} className="flex cursor-pointer justify-between items-center">
                         <div>
-                          <p className="text-sm text-gray-500">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
+                          <p className="text-sm text-gray-400">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
                           <p className="font-medium">{transaction.description}</p>
                         </div>
                         <div className='flex flex-col md:flex-row md:gap-4 justify-center'>

@@ -166,8 +166,8 @@ const Profile = () => {
             }
           </div>
           <h2 className="text-xl font-bold text-blue-700">{user.name}</h2>
-          <p className="text-sm text-gray-600">{user.email}</p>
-          <p className="text-sm text-gray-600">{user.phone}</p>
+          <p className="text-sm text-gray-400">{user.email}</p>
+          <p className="text-sm text-gray-400">{user.phone}</p>
 
           <div className="mt-3">
             {user.bvnVerified ? (
@@ -211,7 +211,7 @@ const Profile = () => {
         style={{backgroundColor:pax26.bg}}
         className="p-6 rounded-2xl shadow-xl space-y-8">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4"
+            <h3 className="text-lg font-semibold text-gray-400 border-b pb-2 mb-4"
             style={{color:pax26.textPrimary}}>Settings</h3>
             <div className="flex items-center justify-between mb-4">
               <span className="flex items-center gap-2 text-sm"
@@ -231,7 +231,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4"
+            <h3 className="text-lg font-semibold text-gray-400 border-b pb-2 mb-4"
             style={{color:pax26.textPrimary}}>Change Password</h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <p className='text-sm font-bold text-center'

@@ -13,7 +13,7 @@ export default function PricingSec() {
           style={{ color: pax26.textPrimary }}>
             Affordable Pricing
           </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
             Enjoy flexible and pocket-friendly data plans for every device and need.
           </p>
   
@@ -46,7 +46,7 @@ export default function PricingSec() {
             />
           </div>
   
-          <p className="text-sm text-gray-500 mt-6">
+          <p className="text-sm text-gray-400 mt-6">
             Prices may vary slightly based on availability. More bundles available when you sign up!
           </p>
         </div>
@@ -64,8 +64,8 @@ export default function PricingSec() {
         </div>
         <h3 className="text-2xl font-bold mb-2"
         style={{ color: pax26.textPrimary }}>{price}</h3>
-        <p className="text-gray-600">{size} Data Plan</p>
-        <p className="text-gray-500 text-sm mb-4">Valid for {validity}</p>
+        <p className="text-gray-400">{size} Data Plan</p>
+        <p className="text-gray-400 text-sm mb-4">Valid for {validity}</p>
         <button onClick={()=>route.push("/dashboard")}  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
           Get Started
         </button>

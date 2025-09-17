@@ -64,7 +64,7 @@ const About = () => {
                 className="w-32 h-32 mx-auto rounded-full object-cover"
               />
               <h3 className="text-lg font-semibold">Juwon Asehinde</h3>
-              <p className="text-sm text-gray-500">Founder & CEO</p>
+              <p className="text-sm text-gray-400">Founder & CEO</p>
             </div>
             <div className="space-y-2">
               <img
@@ -73,7 +73,7 @@ const About = () => {
                 className="w-32 h-32 mx-auto rounded-full object-cover"
               />
               <h3 className="text-lg font-semibold">Jane Smith</h3>
-              <p className="text-sm text-gray-500">Co-Founder & CTO</p>
+              <p className="text-sm text-gray-400">Co-Founder & CTO</p>
             </div>
             <div className="space-y-2">
               <img
@@ -82,15 +82,15 @@ const About = () => {
                 className="w-32 h-32 mx-auto rounded-full object-cover"
               />
               <h3 className="text-lg font-semibold">Tobi Ojo</h3>
-              <p className="text-sm text-gray-500">Customer Success</p>
+              <p className="text-sm text-gray-400">Customer Success</p>
             </div>
           </div>
         </div>
 
         {/* Contact CTA */}
         <div className="text-center">
-          <h3 className="text-xl text-gray-500 font-medium mb-2">Want to reach us?</h3>
-          <p className="text-gray-500">
+          <h3 className="text-xl text-gray-400 font-medium mb-2">Want to reach us?</h3>
+          <p className="text-gray-400">
             Email us at <span className="text-blue-600 font-semibold">support@Pax26.com</span>
           </p>
         </div>

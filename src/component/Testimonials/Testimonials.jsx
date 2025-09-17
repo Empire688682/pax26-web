@@ -12,7 +12,7 @@ export default function Testimonials() {
           style={{ color: pax26.textPrimary }}>
             What Our Users Say
           </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
             Real feedback from satisfied users who trust Pax26 for their daily data and utility needs.
           </p>
   
@@ -48,8 +48,8 @@ export default function Testimonials() {
         <p className="text-gray-700 text-sm italic mb-4">"{quote}"</p>
         <hr className="my-4 border-gray-200" />
         <div>
-          <p className="text-gray-800 font-semibold">{name}</p>
-          <p className="text-gray-500 text-sm">{role}</p>
+          <p className="text-gray-400 font-semibold">{name}</p>
+          <p className="text-gray-400 text-sm">{role}</p>
         </div>
       </div>
     );

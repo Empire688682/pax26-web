@@ -21,7 +21,7 @@ const ElectricityHelp = ({ data}) => {
       {/* Transaction Summary */}
       <div>
         <h2 className="text-xl font-bold text-yellow-600 mb-4">Transaction Summary</h2>
-        <div className="text-sm text-gray-800 space-y-2">
+        <div className="text-sm text-gray-400 space-y-2">
           <p><strong>DISCO:</strong> {data.disco || 'Not selected'}</p>
           <p><strong>Meter Number:</strong> {data.meterNumber || 'Not entered'}</p>
           <p><strong>Amount:</strong> {data.amount ? `₦${data.amount}` : 'Not entered'}</p>
@@ -48,7 +48,7 @@ const ElectricityHelp = ({ data}) => {
       </div>
 
       {/* Support */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-400">
         Need help? Reach us at <a href="mailto:usePax26@gmail.com" className="text-yellow-700 font-medium underline">usePax26@gmail.com</a>
       </div>
 

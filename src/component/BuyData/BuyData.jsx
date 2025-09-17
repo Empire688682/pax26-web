@@ -184,7 +184,7 @@ const BuyData = () => {
                     readOnly
                     placeholder="Amount will be auto-filled"
                     value={form.amount}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-600"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-400"
                     style={{ backgroundColor: pax26.publicBg, color: pax26.textPrimary }}
                   />
                   {
@@ -240,13 +240,13 @@ const BuyData = () => {
                     value={form.number}
                     placeholder="e.g. 08012345678"
                     required
-                    className="w-full border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
 
                 {/* PIN */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-1">Enter PIN</label>
+                  <label className="block text-sm font-semibold text-gray-400 mb-1">Enter PIN</label>
                   <input
                     name="pin"
                     type="password"
@@ -255,7 +255,7 @@ const BuyData = () => {
                     placeholder="4 digit PIN"
                     required
                     maxLength={4}
-                    className="w-full border border-gray-300 text-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
 

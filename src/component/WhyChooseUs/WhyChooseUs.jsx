@@ -17,11 +17,11 @@ import { useGlobalContext } from '../Context';
       >
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 
-          className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
+          className="text-3xl md:text-4xl font-bold text-gray-400 mb-4"
           style={{ color: pax26.textPrimary }}>
             Why Choose Pax26?
           </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
             We're not just another VTU platform — we offer speed, savings, and support you can trust.
           </p>
   
@@ -70,7 +70,7 @@ import { useGlobalContext } from '../Context';
           style={{ color: pax26.textPrimary }}
           >{title}</h3>
         </div>
-        <p className="text-gray-600 text-sm">{description}</p>
+        <p className="text-gray-400 text-sm">{description}</p>
       </div>
     );
   }
