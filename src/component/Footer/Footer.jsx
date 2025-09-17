@@ -54,8 +54,8 @@ const Footer = () => {
         showBackToTop &&
         <div style={{ backgroundColor: pax26.border }}
           onClick={backTop}
-          className='p-3 rounded-full left-3 fixed border border-white bottom-10 flex items-center'>
-          <ArrowUpToLine size={30} color={pax26.toTopColor} />
+          className='p-3 rounded-full left-3 fixed border border-white bottom-6 flex items-center'>
+          <ArrowUpToLine size={25} color={pax26.toTopColor} />
         </div>
       }
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
