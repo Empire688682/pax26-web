@@ -10,12 +10,13 @@ import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
 export default function SignupPage() {
     const {
-        isUserAuthenticated,
         isModalOpen,
         setIsModalOpen,
         authType,
         setAuthType,
         openModal,
+        setUserData,
+        route,
         data,
         setData,
         refHostCode } = useGlobalContext();
@@ -46,13 +47,14 @@ export default function SignupPage() {
             const now = new Date().getTime();
             const userDataWithTimestamp = { ...finalUserData, timestamp: now };
             localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
+            setUserData(userDataWithTimestamp);
+            route.push("/dashboard");
             setData({
                 name: "",
                 email: "",
                 number: "",
                 password: "",
             });
-            isUserAuthenticated();
             setIsModalOpen(false);
         } catch (error) {
             console.error("Auth Error:", error);

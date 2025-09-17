@@ -147,7 +147,7 @@ export const AppProvider = ({ children }) => {
   // Clear localStorage for user data on logout
   const clearLocalStorage = () => {
     if (typeof window !== "undefined") {
-      localStorage.clear("Username"); // This only clears the "Username" key (might want to clear all userData keys?)
+      localStorage.clear("Username");
     }
   };
 

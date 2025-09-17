@@ -8,7 +8,7 @@ import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
 export default function GoogleLoginButton() {
-  const { refHostCode, setIsModalOpen, isUserAuthenticated } = useGlobalContext();
+  const { refHostCode, setIsModalOpen, route } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,7 +40,8 @@ export default function GoogleLoginButton() {
       const userDataWithTimestamp = { ...finalUserData, timestamp: now };
       localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
 
-      isUserAuthenticated();
+      setUserData(userDataWithTimestamp);
+      route.push("/dashboard");
       setIsModalOpen(false)
     } catch (err) {
       console.error("GoogleErr:", err);
