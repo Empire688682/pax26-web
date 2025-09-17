@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema(
     referralCode: { type: String, default: "", unique:true }, 
     forgottenPasswordToken: { type: String, default: "" }, 
     referralHostId: { type: String , default: "" }, // Add this for referrals
-    provider: { type: String, default: "credentials" },
+    providerId: { type: String, default: "credentials" },
   },
   {
     timestamps: true,

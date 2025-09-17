@@ -1,13 +1,12 @@
 'use client';
 
-import { FcGoogle } from 'react-icons/fc';
 import { X } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { signIn } from "next-auth/react"
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
 export default function SignupPage() {
     const {
@@ -194,24 +193,10 @@ export default function SignupPage() {
                                 authType === 'login' && <p className='text-center'>Don't have an account? <span onClick={() => openModal("register")} className='text-blue-600 underline cursor-pointer'>Register</span></p>
                             }
                         </form>
-
+                        
                         {
                             authType !== "reset password" && (
-                                <div className="mt-6 flex items-center justify-between">
-                                    <hr className="w-full border-t border-gray-500" />
-                                    <span className="mx-2 text-gray-400 text-sm">OR</span>
-                                    <hr className="w-full border-t border-gray-500" />
-                                </div>
-                            )
-                        }
-                        {
-                            authType !== "reset password" && (
-                                <button
-                                    onClick={() => signIn("google", { callbackUrl: "/auth/callback" })}
-                                    className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-500 py-2 rounded-lg hover:bg-gray-100">
-                                    <FcGoogle size={22} />
-                                    <span className="text-sm">Continue with Google</span>
-                                </button>
+                                <GoogleLoginButton />
                             )
                         }
 

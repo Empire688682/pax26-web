@@ -35,8 +35,11 @@ const registerUser = async (req) => {
       number,
       password,
       refHostCode,
-      provider = "credentials",
+      profileImage,
+      providerId = "credentials",
     } = reBody;
+
+    console.log("reBody:", name, email);
 
     // Validate required fields
     if (!name || !email) {
@@ -46,7 +49,7 @@ const registerUser = async (req) => {
       );
     }
 
-    if (provider === "credentials" && (!password || !number)) {
+    if (providerId === "credentials" && (!password || !number)) {
       return NextResponse.json(
         { success: false, message: "Password and number are required" },
         { status: 400, headers: corsHeaders() }
@@ -60,7 +63,7 @@ const registerUser = async (req) => {
       );
     }
 
-    if (provider === "credentials") {
+    if (providerId === "credentials") {
       const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
         return NextResponse.json(
@@ -73,7 +76,7 @@ const registerUser = async (req) => {
     let hashedPassword = undefined;
     let defaultPin = undefined;
 
-    if (provider === "credentials") {
+    if (providerId === "credentials") {
       if (password.length < 8) {
         return NextResponse.json(
           { success: false, message: "Password must be at least 8 characters" },
@@ -93,7 +96,7 @@ const registerUser = async (req) => {
     const referralCode = "PAX" + prefx + nanoid() + nextUserNumber;
 
     //Get referral host id
-    let referralHostId
+    let referralHostId = undefined
     if (refHostCode) {
       const refHost = await UserModel.findOne({ referralCode: refHostCode });
       referralHostId = refHost._id;
@@ -106,8 +109,9 @@ const registerUser = async (req) => {
       password: hashedPassword,
       pin: defaultPin,
       referralHostId: referralHostId,
-      provider,
-      referralCode
+      providerId,
+      referralCode,
+      profileImage
     });
 
 
@@ -125,7 +129,7 @@ const registerUser = async (req) => {
     delete userObj.password;
     delete userObj.pin;
     delete userObj.isAdmin;
-    delete userObj.provider;
+    delete userObj.providerId;
     delete userObj.referralHost;
     delete userObj.walletBalance;
     delete userObj.__v;
