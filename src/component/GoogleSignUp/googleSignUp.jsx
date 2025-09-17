@@ -6,11 +6,11 @@ import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
 import { useGlobalContext } from "../Context";
 import { useState } from "react";
-import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 
 export default function GoogleLoginButton() {
     const { refHostCode } = useGlobalContext();
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+
     const handleGoogleLogin = async () => {
         setLoading(true)
         try {
@@ -38,7 +38,7 @@ export default function GoogleLoginButton() {
             window.location.reload();
         } catch (error) {
             console.error("GoogleErr:", error);
-        }finally{
+        } finally {
             setLoading(false)
         }
     };
@@ -46,24 +46,28 @@ export default function GoogleLoginButton() {
     return (
         <div>
             {
-                loading ? 
-                <LoadingSpinner/>
-                :
-                <>
-                <div className="mt-6 flex items-center justify-between">
-                <hr className="w-full border-t border-gray-500" />
-                <span className="mx-2 text-gray-400 text-sm">OR</span>
-                <hr className="w-full border-t border-gray-500" />
-            </div>
+                loading ?
+                    <div className="flex items-center flex-col justify-center h-32">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+                        <p>🙏 Please wait...</p>
+                    </div>
 
-            <button
-                onClick={handleGoogleLogin}  // ✅ call the right function
-                className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-500 py-2 rounded-lg hover:bg-gray-100"
-            >
-                <FcGoogle size={22} />
-                <span className="text-sm">Continue with Google</span>
-            </button>
-                </>
+                    :
+                    <>
+                        <div className="mt-6 flex items-center justify-between">
+                            <hr className="w-full border-t border-gray-500" />
+                            <span className="mx-2 text-gray-400 text-sm">OR</span>
+                            <hr className="w-full border-t border-gray-500" />
+                        </div>
+
+                        <button
+                            onClick={handleGoogleLogin}  // ✅ call the right function
+                            className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-500 py-2 rounded-lg hover:bg-gray-100"
+                        >
+                            <FcGoogle size={22} />
+                            <span className="text-sm">Continue with Google</span>
+                        </button>
+                    </>
             }
         </div>
     );

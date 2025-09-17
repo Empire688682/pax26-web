@@ -195,7 +195,7 @@ export default function SignupPage() {
                         </form>
                         
                         {
-                            authType !== "reset password" && (
+                            authType === "register" && (
                                 <GoogleLoginButton />
                             )
                         }
