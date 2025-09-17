@@ -125,10 +125,10 @@ const FundWallet = () => {
           <div className="text-sm text-gray-400 mt-4">
             Need help? Contact{" "}
             <a
-              href="mailto:support@Pax26.com"
+              href="mailto:info@pax26.com"
               className="text-blue-600 underline font-medium"
             >
-              support@Pax26.com
+              info@pax26.com
             </a>
           </div>
         </div>

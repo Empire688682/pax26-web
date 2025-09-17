@@ -39,16 +39,7 @@ const Page = () => {
 
   return (
     <div className='overflow-hidden'>
-      {isModalOpen && (
-        <motion.div
-        initial={{opacity:0, y:100 }}
-        animate={{opacity:1, y:0 }}
-        exit={{opacity:0, y:-50 }}
-        transition={{ duration: 1 }}
-        >
-          <SignupPage />
-        </motion.div>
-      )}
+      <SignupPage />
 
       {/* Hero Section */}
       <motion.div

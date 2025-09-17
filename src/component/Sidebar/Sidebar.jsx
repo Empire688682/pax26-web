@@ -25,16 +25,16 @@ export default function Sidebar() {
     >
       <div className='w-[50%] h-screen pl-6 pt-4'
         style={{ backgroundColor: pax26.publicBg }}>
-        <Link onClick={() => setIsOpen(false)} href="/" className="text-2xl font-bold text-blue-600">
+        <Link onClick={() => setIsOpen(false)} href="/dashboard" className="text-2xl font-bold text-blue-600">
           <h1>Pax26</h1>
         </Link>
         <div className="flex flex-col gap-6 pt-6">
-          <Link onClick={() => setIsOpen(false)} href="/" className="flex items-center gap-2 hover:text-blue-600"
-          style={{ color: pax26.textSecondary }}>
-            <Home size={18} className="hidden md:block" />
-            Home
-          </Link>
           <Link onClick={() => setIsOpen(false)} href="/dashboard" className="flex items-center gap-2 hover:text-blue-600"
+          style={{ color: pax26.textSecondary }}>
+            <LayoutDashboard size={18} className="hidden md:block" />
+            Dashboard
+          </Link>
+          <Link onClick={() => setIsOpen(false)} href="/dashboard/buy-data" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <Wifi size={18} className="hidden md:block" />
             Buy Data
@@ -43,11 +43,6 @@ export default function Sidebar() {
           style={{ color: pax26.textSecondary }}>
             <DollarSign size={18} className="hidden md:block" />
             Profile
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/dashboard" className="flex items-center gap-2 hover:text-blue-600"
-          style={{ color: pax26.textSecondary }}>
-            <LayoutDashboard size={18} className="hidden md:block" />
-            Dashboard
           </Link>
           {/* <Link onClick={() => setIsOpen(false)} href="/api-docs" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>

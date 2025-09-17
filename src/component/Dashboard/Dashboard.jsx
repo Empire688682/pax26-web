@@ -87,7 +87,8 @@ const Dashboard = () => {
             {
               withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
                 :
-                <p className="text-xl font-bold">₦{userCommission?.toFixed(2) || "**.**"}</p>
+                <p className="text-xl font-bold"
+                style={{color:pax26.textPrimary}}>₦{userCommission?.toFixed(2) || "**.**"}</p>
             }
             <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
           </div>
@@ -97,12 +98,14 @@ const Dashboard = () => {
 
         <div 
         style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
-          <p className="text-gray-400 text-sm mb-2">Referral Link</p>
+          <p className="text-gray-400 text-sm mb-2"
+          style={{color:pax26.textPrimary}}>Referral Link</p>
           <div className="flex items-center flex-wrap gap-2">
             <input
               value={referralLink}
               readOnly
               className="flex-1 border rounded px-2 py-1 text-sm"
+              style={{color:pax26.textPrimary}}
             />
             <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
               <Copy size={16} /> Copy
@@ -206,7 +209,8 @@ const Dashboard = () => {
         style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Gift
           style={{color:pax26.textPrimary}} className="mb-2" size={28} />
-          <p className="text-sm font-medium text-center">Gift Card</p>
+          <p className="text-sm font-medium text-center"
+          style={{color:pax26.textPrimary}}>Gift Card</p>
           <p className="text-sm animate-pulse font-bold text-center"
           style={{color:pax26.textPrimary}}>Comming Soon</p>
         </div>
@@ -214,7 +218,8 @@ const Dashboard = () => {
         style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <TrendingDown
           style={{color:pax26.textPrimary}} className="mb-2" size={28} />
-          <p className="text-sm font-medium text-center">Crypto</p>
+          <p className="text-sm font-medium text-center"
+          style={{color:pax26.textPrimary}}>Crypto</p>
           <p className="text-sm animate-pulse font-bold text-center"
           style={{color:pax26.textPrimary}}>Comming Soon</p>
         </div>
