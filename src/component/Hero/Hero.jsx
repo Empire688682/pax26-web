@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useGlobalContext } from '../Context';
 
 export default function Hero() {
-  const {openModal, pax26} = useGlobalContext("register");
+  const {openModal, pax26} = useGlobalContext();
   return (
     <section
   className="pt-24 pb-16"
