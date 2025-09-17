@@ -8,67 +8,79 @@ import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
 export default function GoogleLoginButton() {
-    const { refHostCode } = useGlobalContext();
-    const [loading, setLoading] = useState(false);
+  const { refHostCode, setIsModalOpen, isUserAuthenticated } = useGlobalContext();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    const handleGoogleLogin = async () => {
-        setLoading(true)
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const resultData = result.user;
-            const data = {
-                name: resultData.displayName,
-                email: resultData.email,
-                providerId: resultData.providerId,
-                number: resultData.phoneNumber,
-                profileImage: resultData.photoURL,
-                refHostCode
-            }
-            const response = await axios.post("/api/auth/register", data);
-            const { success, message, finalUserData } = response.data;
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const resultData = result.user;
 
-            if (!success) {
-                setError(message || "Authentication failed");
-                return;
-            }
+      const data = {
+        name: resultData.displayName,
+        email: resultData.email,
+        providerId: resultData.providerData[0]?.providerId,
+        number: resultData.phoneNumber,
+        profileImage: resultData.photoURL,
+        refHostCode,
+      };
 
-            const now = new Date().getTime();
-            const userDataWithTimestamp = { ...finalUserData, timestamp: now };
-            localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
-            window.location.reload();
-        } catch (error) {
-            console.error("GoogleErr:", error);
-        } finally {
-            setLoading(false)
-        }
-    };
+      const response = await axios.post("/api/auth/register", data);
+      const { success, message, finalUserData } = response.data;
 
-    return (
-        <div>
-            {
-                loading ?
-                    <div className="flex items-center flex-col justify-center h-32">
-                        <div className="w-12 h-12 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
-                        <p>🙏 Please wait...</p>
-                    </div>
+      if (!success) {
+        setError(message || "Authentication failed");
+        return;
+      }
 
-                    :
-                    <>
-                        <div className="mt-6 flex items-center justify-between">
-                            <hr className="w-full border-t border-gray-500" />
-                            <span className="mx-2 text-gray-400 text-sm">OR</span>
-                            <hr className="w-full border-t border-gray-500" />
-                        </div>
+      const now = new Date().getTime();
+      const userDataWithTimestamp = { ...finalUserData, timestamp: now };
+      localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
 
-                        <button
-                            onClick={handleGoogleLogin}  // ✅ call the right function
-                            className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-500 py-2 rounded-lg hover:bg-gray-100"
-                        >
-                            <FcGoogle size={22} />
-                            <span className="text-sm">Continue with Google</span>
-                        </button>
-                    </>
-            }
-        </div>
-    );
+      isUserAuthenticated();
+      setIsModalOpen(false)
+    } catch (err) {
+      console.error("GoogleErr:", err);
+      setError(err.message || "Something went wrong with Google login.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {error && (
+        <p className="text-red-600 text-sm font-medium text-center mt-2">
+          ⚠️ {error}
+        </p>
+      )}
+
+      <div className="mt-6 flex items-center justify-between">
+        <hr className="w-full border-t border-gray-300" />
+        <span className="mx-2 text-gray-400 text-sm">OR</span>
+        <hr className="w-full border-t border-gray-300" />
+      </div>
+
+      <button
+        onClick={handleGoogleLogin}
+        disabled={loading}
+        className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-400 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50"
+      >
+        {loading ? (
+          <>
+            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span>Signing in...</span>
+          </>
+        ) : (
+          <>
+            <FcGoogle size={22} />
+            <span className="text-sm">Continue with Google</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
 }

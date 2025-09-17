@@ -10,6 +10,7 @@ import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
 export default function SignupPage() {
     const {
+        isUserAuthenticated,
         isModalOpen,
         setIsModalOpen,
         authType,
@@ -51,8 +52,8 @@ export default function SignupPage() {
                 number: "",
                 password: "",
             });
+            isUserAuthenticated();
             setIsModalOpen(false);
-            window.location.reload();
         } catch (error) {
             console.error("Auth Error:", error);
             setError(error?.response?.data?.message);

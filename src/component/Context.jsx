@@ -85,8 +85,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // On mount, check if user data is stored in localStorage and still valid
-  useEffect(() => {
+  const isUserAuthenticated = () =>{
     if (typeof window !== "undefined") {
       const storedData = localStorage.getItem("userData");
       if (storedData) {
@@ -103,6 +102,11 @@ export const AppProvider = ({ children }) => {
         }
       }
     }
+  }
+
+  // On mount, check if user data is stored in localStorage and still valid
+  useEffect(() => {
+    isUserAuthenticated();
   }, []);
 
   // Toggle mobile menu open/close
@@ -232,6 +236,7 @@ export const AppProvider = ({ children }) => {
         pax26,
         toggleMenu,
         setIsOpen,
+        isUserAuthenticated,
         isModalOpen,
         setIsModalOpen,
         authType,
