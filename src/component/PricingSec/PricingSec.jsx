@@ -3,7 +3,7 @@
 import { useGlobalContext } from "../Context";
 
 export default function PricingSec() {
-  const { pax26, openModal } = useGlobalContext();
+  const { pax26 } = useGlobalContext();
     return (
       <section id="pricing" 
       className="py-16 bg-gray-100"
@@ -55,7 +55,7 @@ export default function PricingSec() {
   }
   
   function PlanCard({ network, price, size, validity, color }) {
-    const {route, pax26} = useGlobalContext();
+    const { pax26, openModal } = useGlobalContext();
     return (
       <div className="p-6 rounded-xl shadow hover:shadow-md transition text-left"
       style={{ backgroundColor: pax26.card}}>
@@ -66,7 +66,7 @@ export default function PricingSec() {
         style={{ color: pax26.textPrimary }}>{price}</h3>
         <p className="text-gray-400">{size} Data Plan</p>
         <p className="text-gray-400 text-sm mb-4">Valid for {validity}</p>
-        <button onClick={()=>openModal("register")}  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+        <button onClick={() => openModal("register")}  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
           Get Started
         </button>
       </div>
