@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { usePathname } from 'next/navigation';
 
-const PasswordReset = () => {
+const PasswordReset = ({setIsPasswordSet}) => {
     const { pax26, userData, setUserData } = useGlobalContext();
     const pathName = usePathname();
     const [pwdForm, setPwdForm] = useState({
@@ -24,18 +24,18 @@ const PasswordReset = () => {
     const handlePasswordChange = async (e) => {
         e.preventDefault();
         const { currentPwd, newPwd, repeatPwd } = pwdForm;
-        
-        if(pathName === "/profile"){
+
+        if (pathName === "/profile") {
             if (!currentPwd || !newPwd || !repeatPwd) {
-            toast.error("All field required");
-            return
+                toast.error("All field required");
+                return
+            }
         }
-        }
-        else{
+        else {
             if (!newPwd || !repeatPwd) {
-            toast.error("All field required");
-            return
-        }
+                toast.error("All field required");
+                return
+            }
         }
 
         if (newPwd.length < 8) {
@@ -51,26 +51,25 @@ const PasswordReset = () => {
         try {
             const response = await axios.post("/api/auth/password-reset", pwdForm);
             if (response.data.success) {
-                if (!userData?.isPasswordSet) {
-                    if (typeof window !== "undefined") {
-                        const savedData = localStorage.getItem("userData");
+                if (typeof window !== "undefined") {
+                    const savedData = localStorage.getItem("userData");
 
-                        if (!savedData) {
-                            toast.error("An error occured try again");
-                            return
-                        }
-                        const parseData = JSON.parse(savedData);
-                        parseData.isPasswordSet = true;
-                        localStorage.setItem("userData", JSON.stringify(parseData));
-                        setUserData(parseData);
+                    if (!savedData) {
+                        toast.error("An error occured try again");
+                        return
                     }
+                    const parseData = JSON.parse(savedData);
+                    parseData.isPasswordSet = true;
+                    localStorage.setItem("userData", JSON.stringify(parseData));
+                    setUserData(parseData);
                 }
                 toast.success('Password updated!');
                 setPwdForm({
                     currentPwd: "",
                     newPwd: "",
                     repeatPwd: ""
-                })
+                });
+                setIsPasswordSet(true);
             }
         } catch (error) {
             console.log("PwdResetError:", error);

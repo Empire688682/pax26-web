@@ -75,7 +75,7 @@ const Dashboard = () => {
       {
         !isPassworSet && (
           <div className=" fixed top-0 left-0 w-full h-screen px-6 flex items-center justify-center bg-black/95 z-10 p-4 shadow-md">
-            <PasswordReset />
+            <PasswordReset setIsPasswordSet={setIsPasswordSet}/>
           </div>
         )
       }
