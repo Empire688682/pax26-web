@@ -21,47 +21,45 @@ export async function POST(request) {
   try {
     await connectDb();
 
-    const reqBody = await request.json();
-    const { email, password } = reqBody;
+    const { email, password, provider = "credentials" } = await request.json();
 
     const existUser = await UserModel.findOne({ email });
     if (!existUser) {
       return NextResponse.json(
         { success: false, message: "User not exist" },
-        {
-          status: 400,
-          headers: corsHeaders()
-        }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
-    if (existUser.provider === "google") {
-      if (existUser.password === "not set") {
+    // Provider rules
+    if (existUser.provider === "credentials") {
+      if (provider === "credentials") {
+        // Check password
+        const passwordMatch = await bcrypt.compare(password, existUser.password);
+        if (!passwordMatch) {
+          return NextResponse.json(
+            { success: false, message: "Incorrect password" },
+            { status: 400, headers: corsHeaders() }
+          );
+        }
+      } 
+      // ⚡ If they used Google login but account was credentials-based → allow
+      else if (provider === "google") {
+        // Optional: you can update their account to link google as well
+        await UserModel.updateOne({ email }, { provider: "credentials" });
+      }
+    } 
+    
+    else if (existUser.provider === "google") {
+      if (provider !== "google") {
         return NextResponse.json(
-          {
-            success: false,
-            message: "User password not set, continue with google and set up your password"
-          },
-          {
-            status: 400,
-            headers: corsHeaders()
-          }
+          { success: false, message: "Please login with Google" },
+          { status: 400, headers: corsHeaders() }
         );
       }
     }
 
-    const passwordMatch = await bcrypt.compare(password, existUser.password);
-    if (!passwordMatch) {
-      return NextResponse.json(
-        { success: false, message: "Incorrect password" },
-        {
-          status: 400,
-          headers: corsHeaders()
-        }
-      );
-    }
-
-    // Remove sensitive data from user object
+    // Prepare safe user object
     const userObj = existUser.toObject();
     delete userObj.password;
     delete userObj.pin;
@@ -73,50 +71,45 @@ export async function POST(request) {
     delete userObj.commissionBalance;
     delete userObj.referralHostId;
     delete userObj.forgottenPasswordToken;
-    // Mask email: replace characters 3 to second-to-last with *
-    if (userObj.email) {
-      const email = userObj.email;
-      const [localPart, domain] = email.split('@');
 
+    // Mask email
+    if (userObj.email) {
+      const [localPart, domain] = userObj.email.split("@");
       if (localPart.length > 2) {
-        const maskedLocal = localPart[0] + localPart[1] + '*'.repeat(localPart.length - 2);
-        userObj.email = maskedLocal + '@' + domain;
+        const maskedLocal =
+          localPart[0] + localPart[1] + "*".repeat(localPart.length - 2);
+        userObj.email = maskedLocal + "@" + domain;
       }
     }
-    // Mask phone number
+
+    // Mask phone
     if (userObj.number) {
       const phone = userObj.number;
       if (phone.length > 4) {
-        // Show first 3 and last 3 digits
-        const masked = phone.substring(0, 3) + '*'.repeat(phone.length - 6) + phone.substring(phone.length - 3);
-        userObj.number = masked;
+        userObj.number =
+          phone.substring(0, 3) +
+          "*".repeat(phone.length - 6) +
+          phone.substring(phone.length - 3);
       }
     }
-    const finalUserData = userObj;
 
-    // Generate JWT token
-    const userId = existUser._id;
+    // JWT
     const token = jwt.sign(
-      { userId },
+      { userId: existUser._id },
       process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );
 
-    // Create response with CORS headers
     const response = NextResponse.json(
       {
         success: true,
         message: "User logged in successfully",
-        finalUserData,
-        token // Include token in response for mobile app
+        finalUserData: userObj,
+        token
       },
-      {
-        status: 200,
-        headers: corsHeaders()
-      }
+      { status: 200, headers: corsHeaders() }
     );
 
-    // Set cookie (mainly for web usage)
     response.cookies.set("UserToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -126,15 +119,11 @@ export async function POST(request) {
     });
 
     return response;
-
   } catch (error) {
     console.log("Login-error:", error);
     return NextResponse.json(
       { success: false, message: "An error occurred" },
-      {
-        status: 500,
-        headers: corsHeaders()
-      }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

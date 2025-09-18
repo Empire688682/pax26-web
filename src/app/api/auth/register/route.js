@@ -36,7 +36,8 @@ const registerUser = async (req) => {
       password,
       refHostCode,
       profileImage,
-      providerId = "credentials",
+      providerId,
+      provider,
     } = reBody;
 
     console.log("reBody:", name, email);
@@ -49,7 +50,7 @@ const registerUser = async (req) => {
       );
     }
 
-    if (providerId === "credentials" && (!password || !number)) {
+    if (provider === "credentials" && (!password || !number)) {
       return NextResponse.json(
         { success: false, message: "Password and number are required" },
         { status: 400, headers: corsHeaders() }
@@ -63,7 +64,7 @@ const registerUser = async (req) => {
       );
     }
 
-    if (providerId === "credentials") {
+    if (provider === "credentials") {
       const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
         return NextResponse.json(
@@ -76,7 +77,7 @@ const registerUser = async (req) => {
     let hashedPassword = undefined;
     let defaultPin = undefined;
 
-    if (providerId === "credentials") {
+    if (provider === "credentials") {
       if (password.length < 8) {
         return NextResponse.json(
           { success: false, message: "Password must be at least 8 characters" },
@@ -109,7 +110,8 @@ const registerUser = async (req) => {
       password: hashedPassword,
       pin: defaultPin,
       referralHostId: referralHostId,
-      providerId,
+      provider,
+      providerId:providerId || null,
       referralCode,
       profileImage
     });
@@ -129,7 +131,7 @@ const registerUser = async (req) => {
     delete userObj.password;
     delete userObj.pin;
     delete userObj.isAdmin;
-    delete userObj.providerId;
+    delete userObj.provider;
     delete userObj.referralHost;
     delete userObj.walletBalance;
     delete userObj.__v;

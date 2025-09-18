@@ -80,7 +80,8 @@ export const AppProvider = ({ children }) => {
         name: "",
         email: "",
         number: "",
-        password: ""
+        password: "",
+        provider: "credentials"
       });
     }
   };

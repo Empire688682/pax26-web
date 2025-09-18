@@ -54,6 +54,7 @@ export default function SignupPage() {
                 email: "",
                 number: "",
                 password: "",
+                provider: "credentials"
             });
             setIsModalOpen(false);
         } catch (error) {
@@ -198,7 +199,7 @@ export default function SignupPage() {
                         </form>
                         
                         {
-                            authType === "register" && (
+                            authType === "register" || authType === "login" &&  (
                                 <GoogleLoginButton />
                             )
                         }

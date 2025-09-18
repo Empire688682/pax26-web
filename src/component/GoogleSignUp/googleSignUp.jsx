@@ -8,9 +8,11 @@ import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
 export default function GoogleLoginButton() {
-  const { refHostCode, setIsModalOpen, route } = useGlobalContext();
+  const { refHostCode, setIsModalOpen, route, setUserData, authType } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const apiUrl = authType === "register"? "/api/auth/register" : "/api/auth/login"
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -22,13 +24,14 @@ export default function GoogleLoginButton() {
       const data = {
         name: resultData.displayName,
         email: resultData.email,
-        providerId: resultData.providerData[0]?.providerId,
+        providerId: resultData.uid,
         number: resultData.phoneNumber,
         profileImage: resultData.photoURL,
         refHostCode,
+        provider:resultData.providerData[0]?.providerId
       };
 
-      const response = await axios.post("/api/auth/register", data);
+      const response = await axios.post(apiUrl, data);
       const { success, message, finalUserData } = response.data;
 
       if (!success) {
