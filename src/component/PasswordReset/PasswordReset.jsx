@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { usePathname } from 'next/navigation';
 
-const PasswordReset = ({setIsPasswordSet}) => {
+const PasswordReset = () => {
     const { pax26, userData, setUserData } = useGlobalContext();
     const pathName = usePathname();
     const [pwdForm, setPwdForm] = useState({
@@ -69,7 +69,6 @@ const PasswordReset = ({setIsPasswordSet}) => {
                     newPwd: "",
                     repeatPwd: ""
                 });
-                setIsPasswordSet(true);
             }
         } catch (error) {
             console.log("PwdResetError:", error);
@@ -85,8 +84,7 @@ const PasswordReset = ({setIsPasswordSet}) => {
     return (
         <div>
             <ToastContainer />
-            <h3 className="text-lg font-semibold text-gray-400 border-b pb-2 mb-4"
-                style={{ color: pax26.textPrimary }}>{title}</h3>
+            <h3 className="text-lg font-semibold text-gray-400 pb-2 mb-4">{title}</h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
                 {
                     pathName === "/profile" && (

@@ -21,7 +21,6 @@ const Dashboard = () => {
     transactionHistory,
     loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
-  const [isPassworSet, setIsPasswordSet] = useState(true);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 
   const handleCopy = () => {
@@ -33,6 +32,8 @@ const Dashboard = () => {
         console.error("Failed to copy:", err);
       });
   };
+
+  console.log("userData:", userData);
 
   useEffect(() => {
     getUserRealTimeData();
@@ -64,18 +65,12 @@ const Dashboard = () => {
     };
   };
 
-  useEffect(() => {
-    if(!userData.isPassworSet) {
-      setIsPasswordSet(false)
-    }
-  }, []);
-
   return (
     <div className="min-h-screen">
       {
-        !isPassworSet && (
+        !userData?.isPasswordSet && (
           <div className=" fixed top-0 left-0 w-full h-screen px-6 flex items-center justify-center bg-black/95 z-10 p-4 shadow-md">
-            <PasswordReset setIsPasswordSet={setIsPasswordSet}/>
+            <PasswordReset />
           </div>
         )
       }
