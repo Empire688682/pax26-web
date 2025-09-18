@@ -21,7 +21,7 @@ export async function POST(request) {
   try {
     await connectDb();
 
-    const { email, password, provider = "credentials" } = await request.json();
+    const { email, password} = await request.json();
 
     const existUser = await UserModel.findOne({ email });
     if (!existUser) {
@@ -33,7 +33,6 @@ export async function POST(request) {
 
     // Provider rules
     if (existUser.provider === "credentials") {
-      if (provider === "credentials") {
         // Check password
         const passwordMatch = await bcrypt.compare(password, existUser.password);
         if (!passwordMatch) {
@@ -42,21 +41,17 @@ export async function POST(request) {
             { status: 400, headers: corsHeaders() }
           );
         }
-      } 
-      // ⚡ If they used Google login but account was credentials-based → allow
-      else if (provider === "google.com") {
-        // Optional: you can update their account to link google as well
-        await UserModel.updateOne({ email }, { provider: "credentials" });
-      }
     } 
     
     else if (existUser.provider === "google.com") {
-      if (provider !== "google.com") {
-        return NextResponse.json(
-          { success: false, message: "Please login with Google" },
-          { status: 400, headers: corsHeaders() }
-        );
-      }
+      // Check password
+        const passwordMatch = await bcrypt.compare(password, existUser.password);
+        if (!passwordMatch) {
+          return NextResponse.json(
+            { success: false, message: "Incorrect password" },
+            { status: 400, headers: corsHeaders() }
+          );
+        }
     }
 
     // Prepare safe user object
