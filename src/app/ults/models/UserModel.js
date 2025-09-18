@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema(
     name: { type: String },
     email: { type: String, required: true, unique: true },
     password: { type: String, default:"not set"},
+    isPasswordSet: { type: Boolean, default:true},
     pin: { type: String, default: "1234"},   
     bvnVerify: { type: Boolean, default: false },
     walletBalance: { type: Number, default: 0 },

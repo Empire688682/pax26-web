@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useGlobalContext } from '../Context';
 import axios from "axios";
 import uploadImage from '../utils/uplaodImage';
+import PasswordReset from '../PasswordReset/PasswordReset';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
@@ -66,56 +67,6 @@ const Profile = () => {
     email: `${userData.email}` || "",
     phone: `${userData.number}` || "",
     bvnVerified: userData.bvnVerify,
-  };
-
-  const [pwdForm, setPwdForm] = useState({
-    currentPwd: "",
-    newPwd: "",
-    repeatPwd: "",
-  });
-
-  const handleOnchange = (e) => {
-    const { name, value } = e.target;
-    setPwdForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  const [postLoading, setPostLoading] = useState(false);
-
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    const { currentPwd, newPwd, repeatPwd } = pwdForm;
-    if (!currentPwd || !newPwd || !repeatPwd) {
-      toast.error("All field required");
-      return
-    }
-
-    if (newPwd.length < 8) {
-      toast.error("Password too short");
-      return
-    }
-
-    if (newPwd !== repeatPwd) {
-      toast.error("Password did not match");
-    };
-
-    setPostLoading(true)
-    try {
-      const response = await axios.post("/api/auth/password-reset", pwdForm);
-      if (response.data.success) {
-        toast.success('Password updated!');
-        setPwdForm({
-          currentPwd: "",
-          newPwd: "",
-          repeatPwd: ""
-        })
-      }
-    } catch (error) {
-      console.log("PwdResetError:", error);
-      toast.error(error.response.data.message)
-    }
-    finally {
-      setPostLoading(false)
-    }
   };
 
   return (
@@ -226,47 +177,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-400 border-b pb-2 mb-4"
-            style={{color:pax26.textPrimary}}>Change Password</h3>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <p className='text-sm font-bold text-center'
-              style={{color:pax26.textSecondary}}>If not set before enter 123456789 as Current Password </p>
-              <input
-                onChange={handleOnchange}
-                name='currentPwd'
-                value={pwdForm.currentPwd}
-                type="password"
-                placeholder="Current Password"
-                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                style={{color:pax26.textPrimary}}
-              />
-              <input
-                onChange={handleOnchange}
-                value={pwdForm.newPwd}
-                name='newPwd'
-                type="password"
-                placeholder="New Password"
-                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                style={{color:pax26.textPrimary}}
-              />
-              <input
-                onChange={handleOnchange}
-                value={pwdForm.repeatPwd}
-                type="password"
-                name='repeatPwd'
-                placeholder="Repeat Password"
-                className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                style={{color:pax26.textPrimary}}
-              />
-              <button
-                type="submit"
-                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 text-sm"
-              >
-                {
-                  postLoading ? "Updating....." : "Update Password"
-                }
-              </button>
-            </form>
+            <PasswordReset />
           </div>
         </div>
       </div>

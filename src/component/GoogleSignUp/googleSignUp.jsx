@@ -8,11 +8,11 @@ import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
 export default function GoogleLoginButton() {
-  const { refHostCode, setIsModalOpen, route, setUserData, authType } = useGlobalContext();
+  const { refHostCode, setIsModalOpen, route, setUserData } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const apiUrl = authType === "register"? "/api/auth/register" : "/api/auth/login"
+  const apiUrl = "/api/auth/register";
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -33,9 +33,9 @@ export default function GoogleLoginButton() {
 
       const response = await axios.post(apiUrl, data);
       const { success, message, finalUserData } = response.data;
-
+      const innerMessage = response.data.response?.data?.message;
       if (!success) {
-        setError(message || "Authentication failed");
+        setError(innerMessage || message || "Authentication failed");
         return;
       }
 
@@ -48,7 +48,8 @@ export default function GoogleLoginButton() {
       setIsModalOpen(false)
     } catch (err) {
       console.error("GoogleErr:", err);
-      setError(err.message || "Something went wrong with Google login.");
+      const innerMessage = err.response?.data?.message;
+      setError(innerMessage || err.message || "Something went wrong with Google login.");
     } finally {
       setLoading(false);
     }

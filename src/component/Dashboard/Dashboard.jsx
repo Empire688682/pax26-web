@@ -9,17 +9,19 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import CashBackBalance from '../CashBackBalance/CashBackBalance';
+import PasswordReset from '../PasswordReset/PasswordReset';
 
 const Dashboard = () => {
-  const { 
-    userData, 
-    pax26, 
-    userCommission, 
-    getUserRealTimeData, 
-    route, 
-    transactionHistory, 
+  const {
+    userData,
+    pax26,
+    userCommission,
+    getUserRealTimeData,
+    route,
+    transactionHistory,
     loading } = useGlobalContext();
-  const [showMore, setShowMore] = useState(false)
+  const [showMore, setShowMore] = useState(false);
+  const [isPassworSet, setIsPasswordSet] = useState(true);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 
   const handleCopy = () => {
@@ -62,57 +64,70 @@ const Dashboard = () => {
     };
   };
 
+  useEffect(() => {
+    if(!userData.isPassworSet) {
+      setIsPasswordSet(false)
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
+      {
+        !isPassworSet && (
+          <div className=" fixed top-0 left-0 w-full h-screen px-6 flex items-center justify-center bg-black/95 z-10 p-4 shadow-md">
+            <PasswordReset />
+          </div>
+        )
+      }
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-medium text-lg flex text-sm items center gap-2"
-        style={{color:pax26.textPrimary}}>
+          style={{ color: pax26.textPrimary }}>
           <Heart /> Welcome back, <span className="font-bold">{firstName}</span>
         </h2>
         <Bell className="text-gray-400 cursor-pointer" onClick={() => route.push("/notifications")} />
       </div>
 
-     {/* big screen */}
+      {/* big screen */}
       <div className='hidden md:block'>
         <div className=" grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <WalletBalance />
+          <WalletBalance />
 
-        <div 
-        style={{backgroundColor:pax26.bg}} className="max-h-[120px] p-4 rounded-lg shadow-md"
-        >
-          <p className="text-sm"
-          style={{color:pax26.textPrimary}}>Commission</p>
-          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-            {
-              withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
-                :
-                <p className="text-xl font-bold"
-                style={{color:pax26.textPrimary}}>₦{userCommission?.toFixed(2) || "**.**"}</p>
-            }
-            <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
+          <div
+            style={{ backgroundColor: pax26.bg }} className="max-h-[120px] p-4 rounded-lg shadow-md"
+          >
+            <p className="text-sm"
+              style={{ color: pax26.textPrimary }}>Commission</p>
+            <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+              {
+                withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
+                  :
+                  <p className="text-xl font-bold"
+                    style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
+              }
+              <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
+            </div>
+          </div>
+
+          <CashBackBalance />
+
+          <div
+            style={{ backgroundColor: pax26.bg }} className="p-4 rounded-lg shadow-md">
+            <p className="text-gray-400 text-sm mb-2"
+              style={{ color: pax26.textPrimary }}>Referral Link</p>
+            <div className="flex items-center flex-wrap gap-2">
+              <input
+                value={referralLink}
+                readOnly
+                className="flex-1 border rounded px-2 py-1 text-sm"
+                style={{ color: pax26.textPrimary }}
+              />
+              <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
+                <Copy size={16} /> Copy
+              </button>
+            </div>
           </div>
         </div>
-
-        <CashBackBalance />
-
-        <div 
-        style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
-          <p className="text-gray-400 text-sm mb-2"
-          style={{color:pax26.textPrimary}}>Referral Link</p>
-          <div className="flex items-center flex-wrap gap-2">
-            <input
-              value={referralLink}
-              readOnly
-              className="flex-1 border rounded px-2 py-1 text-sm"
-              style={{color:pax26.textPrimary}}
-            />
-            <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
-              <Copy size={16} /> Copy
-            </button>
-          </div>
-        </div>
-      </div>
       </div>
 
       {/* small screen */}
@@ -123,38 +138,38 @@ const Dashboard = () => {
         {
           showMore && (
             <div className='grid grid-cols-2 gap-2'>
-          <div 
-          style={{backgroundColor:pax26.bg}} className="max-h-[120px] p-4 rounded-lg shadow-md"
-        >
-          <p className="text-sm"
-          style={{color:pax26.textPrimary}}>Commission</p>
-          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-            {
-              withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
-                :
-                <p className="text-xl font-bold"
-                style={{color:pax26.textPrimary}}>₦{userCommission?.toFixed(2) || "**.**"}</p>
-            }
-            <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
-          </div>
-        </div>
+              <div
+                style={{ backgroundColor: pax26.bg }} className="max-h-[120px] p-4 rounded-lg shadow-md"
+              >
+                <p className="text-sm"
+                  style={{ color: pax26.textPrimary }}>Commission</p>
+                <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+                  {
+                    withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
+                      :
+                      <p className="text-xl font-bold"
+                        style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
+                  }
+                  <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
+                </div>
+              </div>
 
-        <CashBackBalance />
-        </div>
+              <CashBackBalance />
+            </div>
           )
         }
-        
 
-        <div 
-        style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
+
+        <div
+          style={{ backgroundColor: pax26.bg }} className="p-4 rounded-lg shadow-md">
           <p className="text-sm mb-2"
-          style={{color:pax26.textPrimary}}>Referral Link</p>
+            style={{ color: pax26.textPrimary }}>Referral Link</p>
           <div className="flex items-center flex-wrap gap-2">
             <input
               value={referralLink}
               readOnly
               className="flex-1 border rounded px-2 py-1 text-sm"
-              style={{color:pax26.textPrimary}}
+              style={{ color: pax26.textPrimary }}
             />
             <button onClick={handleCopy} className="ml-2 cursor-pointer bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
               <Copy size={16} /> Copy
@@ -164,75 +179,75 @@ const Dashboard = () => {
       </div>
 
       <h3 className="text-md font-medium mb-2"
-      style={{color:pax26.textPrimary}}>Quick Links</h3>
+        style={{ color: pax26.textPrimary }}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div onClick={() => route.push("/fund-wallet")} 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div onClick={() => route.push("/fund-wallet")}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Wallet
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium"
-          style={{color:pax26.textPrimary}}>Fund Wallet</p>
+            style={{ color: pax26.textPrimary }}>Fund Wallet</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-airtime")} 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div onClick={() => route.push("/dashboard/buy-airtime")}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Phone
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium"
-          style={{color:pax26.textPrimary}}>Buy Airtime</p>
+            style={{ color: pax26.textPrimary }}>Buy Airtime</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-data")} 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div onClick={() => route.push("/dashboard/buy-data")}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Wifi
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium"
-          style={{color:pax26.textPrimary}}>Buy Data</p>
+            style={{ color: pax26.textPrimary }}>Buy Data</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-electricity")} 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div onClick={() => route.push("/dashboard/buy-electricity")}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Zap
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium"
-          style={{color:pax26.textPrimary}}>Electricity</p>
+            style={{ color: pax26.textPrimary }}>Electricity</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-tv")} 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div onClick={() => route.push("/dashboard/buy-tv")}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Tv
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium"
-          style={{color:pax26.textPrimary}}>TV Subscription</p>
+            style={{ color: pax26.textPrimary }}>TV Subscription</p>
         </div>
-        <div 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Gift
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium text-center"
-          style={{color:pax26.textPrimary}}>Gift Card</p>
+            style={{ color: pax26.textPrimary }}>Gift Card</p>
           <p className="text-sm animate-pulse font-bold text-center"
-          style={{color:pax26.textPrimary}}>Comming Soon</p>
+            style={{ color: pax26.textPrimary }}>Comming Soon</p>
         </div>
-        <div 
-        style={{backgroundColor:pax26.bg}} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
+        <div
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <TrendingDown
-          style={{color:pax26.textPrimary}} className="mb-2" size={28} />
+            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
           <p className="text-sm font-medium text-center"
-          style={{color:pax26.textPrimary}}>Crypto</p>
+            style={{ color: pax26.textPrimary }}>Crypto</p>
           <p className="text-sm animate-pulse font-bold text-center"
-          style={{color:pax26.textPrimary}}>Comming Soon</p>
+            style={{ color: pax26.textPrimary }}>Comming Soon</p>
         </div>
       </div>
 
       <h3 className="text-md font-medium mb-2 mt-6"
-      style={{color:pax26.textPrimary}}>Recent Activities</h3>
-      <div 
-      style={{backgroundColor:pax26.bg}} className="p-4 rounded-lg shadow-md">
+        style={{ color: pax26.textPrimary }}>Recent Activities</h3>
+      <div
+        style={{ backgroundColor: pax26.bg }} className="p-4 rounded-lg shadow-md">
         {
-          loading ? <p style={{color:pax26.textPrimary}}>
+          loading ? <p style={{ color: pax26.textPrimary }}>
             Loading....
-          </p>:
+          </p> :
             <div className="space-y-4">
               {
                 transactionHistory.length > 0 ? (
@@ -268,7 +283,7 @@ const Dashboard = () => {
                       <div className="text-center mt-4">
                         <button
                           onClick={() => route.push("/transactions")}
-                         style={{color:pax26.textPrimary}} className="hover:underline font-medium text-sm"
+                          style={{ color: pax26.textPrimary }} className="hover:underline font-medium text-sm"
                         >
                           See More →
                         </button>
@@ -277,7 +292,7 @@ const Dashboard = () => {
                   </>
                 ) :
                   <p className="text-sm"
-                  style={{color:pax26.textPrimary}}>No transaction history found.</p>
+                    style={{ color: pax26.textPrimary }}>No transaction history found.</p>
               }
             </div>
         }

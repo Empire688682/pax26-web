@@ -40,8 +40,6 @@ const registerUser = async (req) => {
       provider,
     } = reBody;
 
-    console.log("reBody:", name, email);
-
     // Validate required fields
     if (!name || !email) {
       return NextResponse.json(
@@ -69,6 +67,15 @@ const registerUser = async (req) => {
       if (existingUser) {
         return NextResponse.json(
           { success: false, message: "Email has been taken" },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+    }
+    else if(provider === "google.com"){
+      const existingUser = await UserModel.findOne({ email });
+      if (existingUser) {
+        return NextResponse.json(
+          { success: false, message: "User already exists, please Log in" },
           { status: 400, headers: corsHeaders() }
         );
       }
@@ -111,6 +118,7 @@ const registerUser = async (req) => {
       pin: defaultPin,
       referralHostId: referralHostId,
       provider,
+      isPasswordSet: provider === "credentials"? true:false,
       providerId:providerId || null,
       referralCode,
       profileImage
@@ -138,6 +146,9 @@ const registerUser = async (req) => {
     delete userObj.commissionBalance;
     delete userObj.forgottenPasswordToken;
     delete userObj.referralHostId;
+    if(userObj.isPasswordSet){
+      delete userObj.isPasswordSet;
+    }
     const finalUserData = userObj;
 
     const userId = newUser._id;

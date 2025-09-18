@@ -71,7 +71,7 @@ export default function Sidebar() {
           </Link>
           <div onClick={logoutUser} className="flex items-center cursor-pointer gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
-            <LogOut size={18} className="hidden md:block" />
+            <LogOut size={18} />
             Logout
           </div>
         </div>
