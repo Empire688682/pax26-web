@@ -36,6 +36,7 @@ export async function POST(req) {
         
         const hashedPassword = await bcrypt.hash(newPwd, 10);
         user.password = hashedPassword;
+        user.isPasswordSet = true;
         await user.save();
         return NextResponse.json({ success: true, message: "Password changed" }, { status: 200, headers: corsHeaders() })
     } catch (error) {
