@@ -44,14 +44,14 @@ export async function POST(request) {
         }
       } 
       // ⚡ If they used Google login but account was credentials-based → allow
-      else if (provider === "google") {
+      else if (provider === "google.com") {
         // Optional: you can update their account to link google as well
         await UserModel.updateOne({ email }, { provider: "credentials" });
       }
     } 
     
-    else if (existUser.provider === "google") {
-      if (provider !== "google") {
+    else if (existUser.provider === "google.com") {
+      if (provider !== "google.com") {
         return NextResponse.json(
           { success: false, message: "Please login with Google" },
           { status: 400, headers: corsHeaders() }
