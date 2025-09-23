@@ -32,7 +32,7 @@ export const metadata = {
     siteName: "Pax26",
     images: [
       {
-        url: "/og-banner.png",
+        url: "/Pax26_single_logo.png",
         width: 1200,
         height: 630,
         alt: "Pax26 Digital Payments",
@@ -46,7 +46,7 @@ export const metadata = {
     title: "Pax26 - Simplifying Digital Payments",
     description:
       "Airtime, data, bills & gift cards in one platform. Fast, secure, and reliable.",
-    images: ["/og-banner.png"],
+    images: ["/Pax26_single_logo.png"],
   },
 };
 

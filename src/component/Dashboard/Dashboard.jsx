@@ -65,18 +65,14 @@ const Dashboard = () => {
     };
   };
 
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      if(userData && userData.isPasswordSet){
-      setIsPasswordSet(true)
-    }
-    else{
-      setIsPasswordSet(false);
-    }
-    },5000);
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setIsPasswordSet(!!userData?.isPasswordSet);
+  }, 5000);
 
-    return ()=> clearInterval(interval);
-  },[]);
+  return () => clearInterval(interval);
+}, []);
+
 
   return (
     <div className="min-h-screen">

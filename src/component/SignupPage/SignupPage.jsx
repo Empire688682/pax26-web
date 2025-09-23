@@ -48,7 +48,7 @@ export default function SignupPage() {
             const userDataWithTimestamp = { ...finalUserData, timestamp: now };
             localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
             setUserData(userDataWithTimestamp);
-            route.push("/dashboard");
+            window.location.reload();
             setData({
                 name: "",
                 email: "",
@@ -56,7 +56,6 @@ export default function SignupPage() {
                 password: "",
                 provider: "credentials"
             });
-            route.push("/dashboard");
             toast.success(message || "Authentication successful");
         } catch (error) {
             console.error("Auth Error:", error);
