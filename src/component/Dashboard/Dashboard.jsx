@@ -70,8 +70,11 @@ const Dashboard = () => {
     setIsPasswordSet(!!userData?.isPasswordSet);
   }, 5000);
 
+  console.log("isPasswordSet:", !!userData?.isPasswordSet);
+  console.log("userData:", userData);
+
   return () => clearInterval(interval);
-}, []);
+}, [userData]);
 
 
   return (
