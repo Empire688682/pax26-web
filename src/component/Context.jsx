@@ -207,8 +207,8 @@ export const AppProvider = ({ children }) => {
     { name: "Yola Electricity (YEDC)", serviceID: "yola-electric" }
   ]);
 
-  //CSS Variables
-  const [pax26, setPax26] = useState({})
+ //CSS Variables
+ const [pax26, setPax26] = useState({});
  useEffect(()=>{
    const pax26 = {
     bg: `${theme === 'light' ? '#ffffff' : '#01050f'}`,
@@ -227,7 +227,7 @@ export const AppProvider = ({ children }) => {
     btnHover: theme === 'light' ? '#2563eb' : '#e2e6eeff',
   }
   setPax26(pax26);
- },[theme])
+ },[theme]);
 
   // Provide all state and handlers via context to children components
   return (

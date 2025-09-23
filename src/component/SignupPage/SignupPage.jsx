@@ -56,7 +56,8 @@ export default function SignupPage() {
                 password: "",
                 provider: "credentials"
             });
-            setIsModalOpen(false);
+            route.push("/dashboard");
+            toast.success(message || "Authentication successful");
         } catch (error) {
             console.error("Auth Error:", error);
             setError(error?.response?.data?.message);

@@ -21,6 +21,7 @@ const Dashboard = () => {
     transactionHistory,
     loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
+  const [isPasswordSet, setIsPasswordSet] = useState(false);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 
   const handleCopy = () => {
@@ -33,8 +34,6 @@ const Dashboard = () => {
       });
   };
 
-  console.log("userData:", userData);
-
   useEffect(() => {
     getUserRealTimeData();
   }, []);
@@ -43,6 +42,7 @@ const Dashboard = () => {
   const firstName = fullName.split(" ")[0];
 
   const [withdrawLoading, setWithrawLoading] = useState(false);
+
   const withdrawCommission = async () => {
     if (!userData._id) {
       toast.error("No Id found")
@@ -65,10 +65,20 @@ const Dashboard = () => {
     };
   };
 
+  useEffect(()=>{
+    const interval = setInterval(()=>{
+      if(userData && userData.isPasswordSet){
+      setIsPasswordSet(true)
+    }
+    },5000);
+
+    return ()=> clearInterval(interval);
+  },[]);
+
   return (
     <div className="min-h-screen">
       {
-        !userData?.isPasswordSet && (
+        !isPasswordSet && (
           <div className=" fixed top-0 left-0 w-full h-screen px-6 flex items-center justify-center bg-black/95 z-10 p-4 shadow-md">
             <PasswordReset />
           </div>
