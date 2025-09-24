@@ -104,7 +104,7 @@ const Dashboard = () => {
               style={{ color: pax26.textPrimary }}>Commission</p>
             <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
               {
-                withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
+                withdrawLoading ? <FaSpinner style={{color:pax26.textPrimary}} className='text-2xl animate-spin' />
                   :
                   <p className="text-xl font-bold"
                     style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
@@ -149,7 +149,7 @@ const Dashboard = () => {
                   style={{ color: pax26.textPrimary }}>Commission</p>
                 <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
                   {
-                    withdrawLoading ? <FaSpinner className='text-2xl animate-spin' />
+                    withdrawLoading ? <FaSpinner style={{color:pax26.textPrimary}} className='text-2xl animate-spin' />
                       :
                       <p className="text-xl font-bold"
                         style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>

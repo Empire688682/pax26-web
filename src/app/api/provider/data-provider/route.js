@@ -67,7 +67,7 @@ export async function POST(req) {
 
     if(usedCashBack){
       cashBackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
-      walletToUse = cashBackToUse - Number(amount);
+      walletToUse = Number(amount) - cashBackToUse;
     }
 
     if (verifyUser.walletBalance < walletToUse) {
@@ -77,13 +77,6 @@ export async function POST(req) {
         { status: 400, headers:corsHeaders() }
       );
     }
-
-     if(cashBackToUse > 0){
-      verifyUser.cashBackBalance -= cashBackToUse
-    }
-    verifyUser.walletBalance -= walletToUse;
-
-    await verifyUser.save();
 
     const validNetwork = {
       "MTN": "01",
@@ -150,7 +143,10 @@ export async function POST(req) {
     );
 
     // ✅ Deduct wallet and log transaction (within session)
-    verifyUser.walletBalance -= Number(walletToUse);
+    if(cashBackToUse > 0){
+      verifyUser.cashBackBalance -= cashBackToUse
+    }
+    verifyUser.walletBalance -= walletToUse;
     await verifyUser.save({ session });
 
     const newTransaction = await TransactionModel.create(
