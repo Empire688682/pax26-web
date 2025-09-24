@@ -7,9 +7,40 @@ import PaymentButton from "../PaymentButton/PaymentButton";
 import axios from "axios";
 
 const FundWallet = () => {
-  const { userData, paymentId, setPaymentId, route, pax26 } = useGlobalContext();
+  const { userData, paymentId, setPaymentId, setUserData, route, pax26 } = useGlobalContext();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const generateVirtualAccount = async () => {
+    const email = userData?.email
+    try {
+      const response = await axios.post('/api/generate-virtual-account',)
+      if (response.data.success) {
+        console.log("Virtual Account Generated:", response.data);
+        const virtualAccount = response.data.virtualAccount
+        if (typeof window !== "undefined") {
+          const savedData = localStorage.getItem("userData");
+
+          if (!savedData) {
+            toast.error("An error occured try again");
+            return
+          }
+          const parseData = JSON.parse(savedData);
+          parseData.virtualAccount = virtualAccount;
+          localStorage.setItem("userData", JSON.stringify(parseData));
+          setUserData(parseData);
+        }
+      }
+    } catch (error) {
+      console.log("Generate Virtual Account Error:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (userData?.virtualAccount === "") {
+      generateVirtualAccount();
+    }
+  }, [userData]);
 
   const verifyPayment = async () => {
     if (!paymentId) return;
@@ -17,7 +48,7 @@ const FundWallet = () => {
     try {
       const response = await axios.post('/api/verify-payment',
         { transaction_id: paymentId },
-       );
+      );
       if (response.data.success) {
         setAmount("");
         toast.success("Payment verified successfully! Your wallet has been funded.");
@@ -44,18 +75,18 @@ const FundWallet = () => {
 
   return (
     <div className="min-h-screen py-10 px-6 "
-    style={{backgroundColor:pax26.secondaryBg}}>
+      style={{ backgroundColor: pax26.secondaryBg }}>
       <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 grid-cols-1 gap-10 items-center">
         {
           loading ?
             <div className="backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-4"
-            style={{backgroundColor:pax26.bg}}>
+              style={{ backgroundColor: pax26.bg }}>
               <h2 className="text-xl font-semibold text-blue-600 mb-2">Payment Verification</h2>
               <div className="flex justify-center items-center mt-4">
                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <span className="ml-2"
-                style={{color:pax26.textPrimary}}>Verifying...</span>
+                  style={{ color: pax26.textPrimary }}>Verifying...</span>
               </div>
               {
                 loading ?
@@ -68,7 +99,7 @@ const FundWallet = () => {
             :
             <div
               className="backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6"
-              style={{backgroundColor:pax26.bg}}
+              style={{ backgroundColor: pax26.bg }}
             >
               <h3 className="text-xl font-semibold text-blue-600 mb-2">Top-Up Form</h3>
 
@@ -76,7 +107,7 @@ const FundWallet = () => {
                 <label
                   htmlFor="amount"
                   className="block text-sm font-medium mb-1"
-                  style={{color:pax26.textPrimary}}
+                  style={{ color: pax26.textPrimary }}
                 >
                   Amount (₦)
                 </label>
@@ -88,7 +119,7 @@ const FundWallet = () => {
                   min="100"
                   placeholder="Minimum ₦100"
                   className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400`}
-                  style={{color:pax26.textPrimary}}
+                  style={{ color: pax26.textPrimary }}
                 />
               </div>
 
@@ -109,7 +140,7 @@ const FundWallet = () => {
 
         {/* Info Section */}
         <div className="backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 flex flex-col gap-6"
-        style={{backgroundColor:pax26.bg}}>
+          style={{ backgroundColor: pax26.bg }}>
           <h2 className="text-3xl font-bold text-blue-700 mb-2">
             Fund Your Wallet
           </h2>
@@ -119,16 +150,16 @@ const FundWallet = () => {
             data, electricity, and much more — all in one place.
           </p>
           <div className="p-4 rounded-lg border-l-4 border-blue-500 text-sm text-blue-800"
-          style={{backgroundColor:pax26.secondaryBg}}>
+            style={{ backgroundColor: pax26.secondaryBg }}>
             🔐 All transactions are secured using bank-grade encryption.
           </div>
           <div className="text-sm text-gray-400 mt-4">
             Need help? Contact{" "}
             <a
-              href="mailto:info@pax26.com"
+              href="mailto:info@pax26.com.com"
               className="text-blue-600 underline font-medium"
             >
-              info@pax26.com
+              info@pax26.com.com
             </a>
           </div>
         </div>

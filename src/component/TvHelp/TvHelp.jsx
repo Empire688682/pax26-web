@@ -50,7 +50,7 @@ const TvHelp = ({ data }) => {
 
       {/* Support */}
       <div className="text-sm text-gray-400">
-        Need help? Contact us at <a href="mailto:info@pax26.com" className="text-blue-700 font-medium underline">info@pax26.com</a>
+        Need help? Contact us at <a href="mailto:info@pax26.com.com" className="text-blue-700 font-medium underline">info@pax26.com.com</a>
       </div>
 
       {/* Optional Tip */}

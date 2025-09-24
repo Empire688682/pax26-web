@@ -91,7 +91,7 @@ const About = () => {
         <div className="text-center">
           <h3 className="text-xl text-gray-400 font-medium mb-2">Want to reach us?</h3>
           <p className="text-gray-400">
-            Email us at <span className="text-blue-600 font-semibold">info@pax26.com</span>
+            Email us at <span className="text-blue-600 font-semibold">info@pax26.com.com</span>
           </p>
         </div>
       </div>

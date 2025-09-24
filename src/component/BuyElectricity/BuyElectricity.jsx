@@ -100,7 +100,7 @@ const BuyElectricity = () => {
 
     setLoading(true)
     try {
-      const response = await axios.post("/api/provider/flutterwaveElect-provider", formData);
+      const response = await axios.post("/api/provider/electricity-provider", formData);
       console.log("Response:", response);
       if (response.data.success) {
         getUserRealTimeData()
@@ -245,7 +245,7 @@ const BuyElectricity = () => {
                 className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-semibold hover:bg-blue-700 cursor-pointer transition duration-300"
               >
                 {
-                  loading ? "Proccessing..." : "Buy Now"
+                  loading ? "Proccessing..." : verifyingMeter ? "Verifying Meter..." : "Buy Now"
                 }
               </button>
             </form>

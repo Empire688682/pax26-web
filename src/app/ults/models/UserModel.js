@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema(
     forgottenPasswordToken: { type: String, default: "" }, 
     referralHostId: { type: String , default: "" },
     provider: { type: String, default: "credentials" },
+    virtualAccount: { type: String, default: "" },
     providerId: { type: String, default: null }, 
   },
   {

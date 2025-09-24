@@ -49,7 +49,7 @@ const ElectricityHelp = ({ data}) => {
 
       {/* Support */}
       <div className="text-sm text-gray-400">
-        Need help? Reach us at <a href="mailto:usePax26@gmail.com" className="text-yellow-700 font-medium underline">usePax26@gmail.com</a>
+        Need help? Reach us at <a href="mailto:info@pax26.com" className="text-yellow-700 font-medium underline">info@pax26.com</a>
       </div>
 
       {/* Optional Promo */}
