@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://pax26.com
+
+# Sitemaps
+Sitemap: https://pax26.com/sitemap.xml
