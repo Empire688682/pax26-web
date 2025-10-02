@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import AirtimeHelp from '../AirtimeHelp/AirtimeHelp';
@@ -82,7 +82,7 @@ const BuyAirtime = () => {
   return (
     <div className="min-h-screen py-10 overflow-x-hidden px-6"
       style={{ backgroundColor: pax26.secondaryBg }}>
-      <ToastContainer />
+      
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 

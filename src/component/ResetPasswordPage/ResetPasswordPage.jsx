@@ -4,7 +4,7 @@ import styles from "./ResetPasswordPage.module.css";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useGlobalContext } from "../Context";
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ResetPasswordPage = () => {
@@ -71,7 +71,7 @@ const ResetPasswordPage = () => {
 
   return (
     <div className={styles.resetPassword }>
-      <ToastContainer />
+      
         <div className={styles.card}>
           <h2 className={styles.title}>Reset Your Password</h2>
           <p className={styles.subtitle}>

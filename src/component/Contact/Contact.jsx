@@ -1,9 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast,  } from 'react-toastify';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import 'react-toastify/dist/ReactToastify.css';
+
 import SocialIcons from '../SocialIcons/SocialIcons';
 import { useGlobalContext } from '../Context';
 
@@ -30,7 +30,7 @@ const Contact = () => {
     <div 
     style={{backgroundColor: pax26.secondaryBg}}
     className="min-h-screen py-12 px-6">
-      <ToastContainer />
+      
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
         {/* Left Side */}
         <div className="space-y-6">

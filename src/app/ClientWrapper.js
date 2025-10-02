@@ -5,7 +5,6 @@ import Sidebar from "@/component/Sidebar/Sidebar";
 import { AppProvider } from "@/component/Context";
 import Footer from "@/component/Footer/Footer";
 import Header from "@/component/Header/Header";
-import { SessionProvider } from "next-auth/react";
 
 export default function ClientWrapper({ children }) {
   return (
@@ -14,9 +13,7 @@ export default function ClientWrapper({ children }) {
         <Sidebar />
         <div className="w-full ovflow-hidden">
           <Header />
-          <SessionProvider>
-            {children}
-          </SessionProvider>
+          {children}
         </div>
       </div>
       <Footer />

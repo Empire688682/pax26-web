@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { LogOut, CameraIcon, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast} from 'react-toastify'; 
 import Image from 'next/image';
 import { useGlobalContext } from '../Context';
 import axios from "axios";
@@ -20,7 +19,7 @@ const Profile = () => {
   // add another loading state for BVN
   const [bvnLoading, setBvnLoading] = useState(false);
 
-  const verifyBvn = async (e) => {
+  const submityBvn = async (e) => {
     e.preventDefault();
 
     if (bvn.length !== 11) {
@@ -35,21 +34,30 @@ const Profile = () => {
       );
 
       if (response.data?.success) {
-        toast.success("BVN verified successfully ✅");
+        toast.success("BVN Submitted successfully ✅");
+        if (typeof window !== "undefined") {
+          const savedData = localStorage.getItem("userData");
 
-        // save BVN verified flag in user profile if needed
-        // await axios.post("/api/update-bvn", { bvn });
-
+          if (!savedData) {
+            toast.error("An error occured try again");
+            return
+          }
+          const parseData = JSON.parse(savedData);
+          parseData.bvnVerify = true;
+          parseData.virtualAccount = response.data.virtualAccount;
+          localStorage.setItem("userData", JSON.stringify(parseData));
+          setUserData(parseData);
+        }
         setUserBvn(false);
       } else {
         toast.error("Failed to verify BVN ❌");
       }
 
-      console.log("BVN Verification response:", response.data);
+      console.log("BVN Submission response:", response.data);
     } catch (error) {
-      console.log("BVN Verification Error:", error.response?.data || error.message);
-      console.log("BVN Verification Error:", error);
-      toast.error("Error verifying BVN. Try again.");
+      console.log("BVN Submission Error:", error.response?.data || error.message);
+      console.log("BVN Submission Error:", error);
+      toast.error("Error Submit BVN. Try again.");
     } finally {
       setBvnLoading(false);
     }
@@ -113,7 +121,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen py-12 px-6"
       style={{ backgroundColor: pax26.secondaryBg }}>
-      <ToastContainer />
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
         { /* Left: Profile Overview */}
         <div className="backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center text-center"
@@ -173,7 +180,7 @@ const Profile = () => {
                     <ShieldAlert size={16} /> BVN Not Verified
                   </span>
                   <button
-                    onClick={() => setUserBvn(true)}
+                    onClick={() => setUserBvn(()=>alert("Coming soon"))}
                     className="bg-yellow-400 mt-2 px-3 py-1 rounded-md text-xs text-black hover:bg-yellow-500"
                   >
                     Verify Now
@@ -185,7 +192,7 @@ const Profile = () => {
 
           {userBvn && (
             <form
-              onSubmit={verifyBvn}
+              onSubmit={submityBvn}
               style={{ backgroundColor: pax26.secondaryBg }}
               className="w-full max-w-md mx-auto shadow-md rounded-lg p-6"
             >

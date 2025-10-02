@@ -66,6 +66,7 @@ export async function POST(request) {
     delete userObj.commissionBalance;
     delete userObj.referralHostId;
     delete userObj.forgottenPasswordToken;
+    delete userObj.bvn;
 
     // Mask email
     if (userObj.email) {

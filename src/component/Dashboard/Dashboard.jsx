@@ -5,7 +5,7 @@ import { PiHandWithdraw } from "react-icons/pi";
 import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import CashBackBalance from '../CashBackBalance/CashBackBalance';
@@ -83,7 +83,7 @@ const Dashboard = () => {
           </div>
         )
       }
-      <ToastContainer />
+      
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-medium text-lg flex text-sm items center gap-2"
           style={{ color: pax26.textPrimary }}>

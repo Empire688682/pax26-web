@@ -146,6 +146,7 @@ const registerUser = async (req) => {
     delete userObj.commissionBalance;
     delete userObj.forgottenPasswordToken;
     delete userObj.referralHostId;
+    delete userObj.bvn;
     if(userObj.isPasswordSet){
       delete userObj.isPasswordSet;
     }

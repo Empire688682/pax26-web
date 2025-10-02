@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import ElectricityHelp from '../ElectricityHelp/ElectricityHelp';
 import axios from 'axios';
@@ -125,7 +125,7 @@ const BuyElectricity = () => {
   return (
     <div className="min-h-screen px-6 py-10"
     style={{ backgroundColor: pax26.secondaryBg }}>
-      <ToastContainer />
+      
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import axios from "axios";
@@ -45,7 +45,7 @@ const Crypto = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10">
-      <ToastContainer />
+      
       <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">
         <div className="flex flex-col gap-6">
           <WalletBalance />

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import WalletBalance from "../WalletBalance/WalletBalance";
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TvHelp from "../TvHelp/TvHelp";
 import axios from "axios";
@@ -145,7 +145,7 @@ const BuyTv = () => {
   return (
     <div className="min-h-screen px-6 py-10"
     style={{ backgroundColor: pax26.secondaryBg}}>
-      <ToastContainer />
+      
       <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
         <div className="flex flex-col gap-6">
           <WalletBalance />

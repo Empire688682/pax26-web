@@ -4,6 +4,8 @@ import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata = {
   title: "Pax26 - Simplifying Digital Payments & Utility Services",
@@ -98,6 +100,7 @@ export default function RootLayout({ children }) {
               }}
             />
             {children}
+            <ToastContainer />
           </ClientWrapper>
         </ThemeProvider>
         <Analytics />

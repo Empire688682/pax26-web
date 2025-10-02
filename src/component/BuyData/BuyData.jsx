@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DataHelp from "../DataHelp/DataHelp";
 import WalletBalance from "../WalletBalance/WalletBalance";
@@ -109,7 +109,7 @@ const BuyData = () => {
   return (
     <div className="min-h-screen py-12 px-6"
     style={{ backgroundColor: pax26.secondaryBg }}>
-      <ToastContainer />
+      
       {dataPlan ? (
         <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">
           <div className="flex flex-col gap-6">

@@ -2,8 +2,8 @@
 import React, { useState } from 'react'
 import { useGlobalContext } from '../Context';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast,  } from 'react-toastify';
+
 import { usePathname } from 'next/navigation';
 
 const PasswordReset = () => {
@@ -83,7 +83,7 @@ const PasswordReset = () => {
 
     return (
         <div>
-            <ToastContainer />
+            
             <h3 className="text-lg font-semibold text-gray-400 pb-2 mb-4">{title}</h3>
             <form onSubmit={handlePasswordChange} className="space-y-4">
                 {

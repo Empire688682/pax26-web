@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from "react-toastify";
+import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
@@ -99,7 +99,7 @@ export default function SignupPage() {
 
     return (
         <div className="min-h-screen absolute w-full flex items-center justify-center text-black px-4">
-        <ToastContainer />
+        
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center px-6 z-70">
                     <div className="bg-white rounded-xl shadow-lg w-full md:max-w-md max-w:[300px] p-8 relative">
