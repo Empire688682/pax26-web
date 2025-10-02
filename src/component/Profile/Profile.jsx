@@ -30,17 +30,11 @@ const Profile = () => {
 
     setBvnLoading(true);
     try {
-      const response = await axios.get(
-        `https://api.flutterwave.com/v3/kyc/bvns/${bvn}`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_FLW_SECRET_KEY}`,
-            // 👆 safer to expose prefixed env var in frontend
-          },
-        }
+      const response = await axios.post(
+        `/api/bvn`, {bvn}
       );
 
-      if (response.data?.status === "success") {
+      if (response.data?.success) {
         toast.success("BVN verified successfully ✅");
 
         // save BVN verified flag in user profile if needed
@@ -53,7 +47,8 @@ const Profile = () => {
 
       console.log("BVN Verification response:", response.data);
     } catch (error) {
-      console.error("BVN Verification Error:", error.response?.data || error.message);
+      console.log("BVN Verification Error:", error.response?.data || error.message);
+      console.log("BVN Verification Error:", error);
       toast.error("Error verifying BVN. Try again.");
     } finally {
       setBvnLoading(false);
