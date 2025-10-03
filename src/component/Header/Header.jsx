@@ -50,7 +50,7 @@ const Header = () => {
                         }
                     </>
             }
-            <div className='md:block hidden'>
+            {/* <div className='md:block hidden'>
                 {
                     isHomePage && (
                         <a href='#downloadApp'
@@ -59,7 +59,7 @@ const Header = () => {
                         </a>
                     )
                 }
-            </div>
+            </div> */}
             <div className='flex items-center gap-4'>
                 {
                     isHomePage && !userData && (
