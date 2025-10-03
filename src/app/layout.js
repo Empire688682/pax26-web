@@ -13,6 +13,7 @@ export const metadata = {
     "Pax26 is your all-in-one platform for airtime, data, electricity, TV subscriptions, gift cards, and more. Enjoy fast, secure, and reliable digital transactions anytime, anywhere.",
   keywords: [
     "buy airtime",
+    "buy airtime online in nigeria",
     "buy data",
     "electricity bills",
     "TV subscription",
