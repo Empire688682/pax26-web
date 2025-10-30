@@ -23,6 +23,7 @@ export function middleware(req) {
     "/profile",
     "/notifications",
     "/payment-success",
+    "/survey",
   ];
   const isProtected = protectedPaths.some((protectedPath)=>
    path.startsWith(protectedPath));
@@ -31,7 +32,7 @@ export function middleware(req) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  if(token && (path === "/" || path === "" || path === "/auth/callback" || path === "/reset-password")){
+  if(token && (path === "/" || path === "" || path === "/reset-password")){
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
@@ -60,7 +61,7 @@ export const config = {
     "/profile",
     "/notifications",
     "/payment-success",
-    "/auth/callback",
+    "/survey",
     "/reset-password"
   ],
 }

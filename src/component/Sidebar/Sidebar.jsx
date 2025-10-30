@@ -64,6 +64,11 @@ export default function Sidebar() {
             <Info size={18} className="hidden md:block" />
             About
           </Link>
+          <Link onClick={() => setIsOpen(false)} href="/survey" className="flex items-center gap-2 hover:text-blue-600"
+          style={{ color: pax26.textSecondary }}>
+            <Info size={18} className="hidden md:block" />
+            Your Feedback
+          </Link>
           <Link onClick={() => setIsOpen(false)} href="/blog" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <Newspaper size={18} className="hidden md:block" />
