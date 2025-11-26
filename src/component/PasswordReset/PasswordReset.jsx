@@ -94,8 +94,8 @@ const PasswordReset = () => {
                             value={pwdForm.currentPwd}
                             type="password"
                             placeholder="Current Password"
-                            className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                            style={{ color: pax26.textPrimary }}
+                            className="w-full border text-white placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
+    
                         />
                     )
                 }
@@ -105,8 +105,7 @@ const PasswordReset = () => {
                     name='newPwd'
                     type="password"
                     placeholder="New Password"
-                    className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    style={{ color: pax26.textPrimary }}
+                    className="w-full border text-white placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
                 <input
                     onChange={handleOnchange}
@@ -114,8 +113,7 @@ const PasswordReset = () => {
                     type="password"
                     name='repeatPwd'
                     placeholder="Repeat Password"
-                    className="w-full border placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    style={{ color: pax26.textPrimary }}
+                    className="w-full border text-white placeholder-gray-400 border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
                 <button
                     type="submit"

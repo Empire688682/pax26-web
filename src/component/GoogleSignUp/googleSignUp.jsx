@@ -19,6 +19,11 @@ export default function GoogleLoginButton() {
     setError("");
     try {
       const result = await signInWithPopup(auth, provider);
+      console.log("GoogleSignUp:", result);
+      if (!result.user) {
+        setError("No user data returned from Google.");
+        return;
+      }
       const resultData = result.user;
 
       const data = {
