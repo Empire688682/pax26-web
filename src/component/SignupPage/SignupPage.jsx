@@ -199,7 +199,7 @@ export default function SignupPage() {
                         </form>
                         
                         {
-                            authType === "register" &&  (
+                            (authType === "register" || authType === "login")  &&  (
                                 <GoogleLoginButton />
                             )
                         }

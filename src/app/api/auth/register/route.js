@@ -48,7 +48,7 @@ const registerUser = async (req) => {
       );
     }
 
-    if (provider === "credentials" && (!password || !number)) {
+    if (!password || !number) {
       return NextResponse.json(
         { success: false, message: "Password and number are required" },
         { status: 400, headers: corsHeaders() }
@@ -62,40 +62,23 @@ const registerUser = async (req) => {
       );
     }
 
-    if (provider === "credentials") {
-      const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
         return NextResponse.json(
           { success: false, message: "Email has been taken" },
           { status: 400, headers: corsHeaders() }
         );
       }
-    }
-    else if(provider === "google.com"){
-      const existingUser = await UserModel.findOne({ email });
-      if (existingUser) {
-        return NextResponse.json(
-          { success: false, message: "User already exists, please Log in" },
-          { status: 400, headers: corsHeaders() }
-        );
-      }
-    }
 
-    let hashedPassword = undefined;
-    let defaultPin = undefined;
-
-    if (provider === "credentials") {
-      if (password.length < 8) {
+    if (password.length < 8) {
         return NextResponse.json(
           { success: false, message: "Password must be at least 8 characters" },
           { status: 400, headers: corsHeaders() }
         );
       }
 
-      hashedPassword = await bcrypt.hash(password, 10);
-      defaultPin = "1234";
-    }
-
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const defaultPin = "1234";
     //Generate referralCode
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const nextUserNumber = await UserModel.countDocuments() + 1;
@@ -107,7 +90,7 @@ const registerUser = async (req) => {
     let referralHostId = undefined
     if (refHostCode) {
       const refHost = await UserModel.findOne({ referralCode: refHostCode });
-      referralHostId = refHost._id;
+      referralHostId = refHost?  refHost._id : undefined;
     }
 
     const newUser = await UserModel.create({
@@ -118,7 +101,7 @@ const registerUser = async (req) => {
       pin: defaultPin,
       referralHostId: referralHostId,
       provider,
-      isPasswordSet: provider === "credentials"? true:false,
+      isPasswordSet: true,
       providerId:providerId || null,
       referralCode,
       profileImage
@@ -147,9 +130,27 @@ const registerUser = async (req) => {
     delete userObj.forgottenPasswordToken;
     delete userObj.referralHostId;
     delete userObj.bvn;
-    if(userObj.isPasswordSet){
-      delete userObj.isPasswordSet;
+     // Mask email
+    if (userObj.email) {
+      const [localPart, domain] = userObj.email.split("@");
+      if (localPart.length > 2) {
+        const maskedLocal =
+          localPart[0] + localPart[1] + "*".repeat(localPart.length - 2);
+        userObj.email = maskedLocal + "@" + domain;
+      }
     }
+
+    // Mask phone
+    if (userObj.number) {
+      const phone = userObj.number;
+      if (phone.length > 4) {
+        userObj.number =
+          phone.substring(0, 3) +
+          "*".repeat(phone.length - 6) +
+          phone.substring(phone.length - 3);
+      }
+    }
+
     const finalUserData = userObj;
 
     const userId = newUser._id;

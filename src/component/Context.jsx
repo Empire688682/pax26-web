@@ -119,8 +119,8 @@ export const AppProvider = ({ children }) => {
       await axios.get("/api/auth/logout");
       toast.success("Logged out successfully");
       clearLocalStorage();
-      setIsOpen(false); // close menu on logout
-      window.location.reload(); // reload page to reset state
+      setIsOpen(false);
+      route.push("/");
     } catch (error) {
       console.log("Logout Error:", error);
       toast.error("Something went wrong logging out");

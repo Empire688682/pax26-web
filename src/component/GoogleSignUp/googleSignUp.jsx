@@ -12,14 +12,13 @@ export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const apiUrl = "/api/auth/register";
+  const apiUrl = `/api/auth/google`;
 
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError("");
     try {
       const result = await signInWithPopup(auth, provider);
-      console.log("GoogleSignUp:", result);
       if (!result.user) {
         setError("No user data returned from Google.");
         return;

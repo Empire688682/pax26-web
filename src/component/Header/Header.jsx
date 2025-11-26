@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     Menu,
@@ -14,8 +14,12 @@ import ThemeToggle from '../ThemeToogle/ThemeToogle';
 const Header = () => {
     const { toggleMenu, openModal, pax26, userData, route, pinModal, setPinModal } = useGlobalContext();
     const pathName = usePathname();
+    const [isHomePage, setIsHomePage] = useState(false);
 
-    const isHomePage = pathName === '/';
+    useEffect(() => {
+        setIsHomePage(pathName === "/");
+    }, []);
+
     const isProfile = pathName === '/profile';
     return (
         <div

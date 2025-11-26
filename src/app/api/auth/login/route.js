@@ -31,28 +31,13 @@ export async function POST(request) {
       );
     }
 
-    // Provider rules
-    if (existUser.provider === "credentials") {
-        // Check password
-        const passwordMatch = await bcrypt.compare(password, existUser.password);
+   const passwordMatch = await bcrypt.compare(password, existUser.password);
         if (!passwordMatch) {
           return NextResponse.json(
             { success: false, message: "Incorrect password" },
             { status: 400, headers: corsHeaders() }
           );
-        }
-    } 
-    
-    else if (existUser.provider === "google.com") {
-      // Check password
-        const passwordMatch = await bcrypt.compare(password, existUser.password);
-        if (!passwordMatch) {
-          return NextResponse.json(
-            { success: false, message: "Incorrect password" },
-            { status: 400, headers: corsHeaders() }
-          );
-        }
-    }
+        } 
 
     // Prepare safe user object
     const userObj = existUser.toObject();

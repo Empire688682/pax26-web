@@ -4,9 +4,9 @@ const UserSchema = new mongoose.Schema(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    password: { type: String, default:"not set"},
+    password: { type: String, default:null},
     isPasswordSet: { type: Boolean, default:true},
-    pin: { type: String, default: "1234"},   
+    pin: { type: String, default: null},   
     bvn: { type: String, default: ""},   
     bvnVerify: { type: Boolean, default: false },
     walletBalance: { type: Number, default: 0 },
