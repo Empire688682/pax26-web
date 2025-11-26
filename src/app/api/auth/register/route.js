@@ -78,7 +78,6 @@ const registerUser = async (req) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const defaultPin = "1234";
     //Generate referralCode
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const nextUserNumber = await UserModel.countDocuments() + 1;
@@ -98,7 +97,7 @@ const registerUser = async (req) => {
       email,
       number,
       password: hashedPassword,
-      pin: defaultPin,
+      pin: null,
       referralHostId: referralHostId,
       provider,
       isPasswordSet: true,

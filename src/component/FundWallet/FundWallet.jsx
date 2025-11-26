@@ -113,7 +113,7 @@ const FundWallet = () => {
                   />
                   <span
                   style={{ color: pax26.textPrimary }}
-                  >Use More Options</span>
+                  >Use Another Options</span>
                 </label>
               </div>
             </div>
@@ -140,7 +140,7 @@ const FundWallet = () => {
                   </div>
 
                   {amount && Number(amount) >= 100 && (
-                    <span className="w-full flex items-center justify-center bg-blue-600 text-white py-2 rounded-lg text-base font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+                    <span className="w-full flex items-center mt-4 justify-center bg-blue-600 text-white py-2 rounded-lg text-base font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
                       <PaymentButton
                         email={userData?.email}
                         amount={parseInt(amount)}
