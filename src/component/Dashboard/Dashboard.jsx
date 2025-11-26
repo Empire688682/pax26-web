@@ -72,6 +72,13 @@ const Dashboard = () => {
 
   return () => clearInterval(interval);
 }, [userData]);
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setIsPasswordSet(!!userData?.isPasswordSet);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [userData]);
 
 
   return (

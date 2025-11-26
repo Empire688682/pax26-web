@@ -11,7 +11,7 @@ import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
 
 const BuyData = () => {
-  const { dataPlan, getUserRealTimeData, profitConfig, pax26, userCashBack } = useGlobalContext();
+  const { dataPlan, getUserRealTimeData, userData, setPinModal, profitConfig, pax26, userCashBack } = useGlobalContext();
 
   const [form, setForm] = useState({
     network: "",
@@ -27,6 +27,15 @@ const BuyData = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+ useEffect(()=>{
+    const interval = setInterval(()=>{
+      if(userData.pin === null){
+        setPinModal(true);
+      }
+    },2000);
+
+    return () => clearInterval(interval);
+  }, [userData]);
 
   const [availablePlans, setAvailablePlans] = useState([]);
   const [loading, setLoading] = useState(false);

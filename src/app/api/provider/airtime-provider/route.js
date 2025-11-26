@@ -52,13 +52,6 @@ export async function POST(req) {
       );
     }
 
-    if(pin === null){
-      return NextResponse.json(
-        { success: false, message: ` ${verifyUser?.name} please set your pin`},
-        { status: 400, headers: corsHeaders() }
-      );
-    }
-
     const isPinCorrect = await bcrypt.compare(pin, verifyUser.pin);
     if (!isPinCorrect) {
       await session.abortTransaction(); session.endSession();

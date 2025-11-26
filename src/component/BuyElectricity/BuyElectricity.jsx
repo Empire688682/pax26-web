@@ -8,7 +8,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from '../Context';
 
 const BuyElectricity = () => {
-  const { getUserRealTimeData, pax26 } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, setPinModal } = useGlobalContext();
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -34,6 +34,16 @@ const BuyElectricity = () => {
     };
     getElectricityCompany();
   }, []);
+
+    useEffect(()=>{
+      const interval = setInterval(()=>{
+        if(userData.pin === null){
+          setPinModal(true);
+        }
+      },2000);
+  
+      return () => clearInterval(interval);
+    }, [userData]);
 
   const [formData, setFormData] = useState({
     disco: '',

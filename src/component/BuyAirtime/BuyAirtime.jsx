@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from '../WalletBalance/WalletBalance';
@@ -10,7 +10,7 @@ import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
 
 const BuyAirtime = () => {
-  const { setPinModal, getUserRealTimeData, userCashBack, pax26 } = useGlobalContext();
+  const { setPinModal, getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
   const [data, setData] = useState({
     network: "",
     amount: "",
@@ -23,6 +23,16 @@ const BuyAirtime = () => {
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
+
+  useEffect(()=>{
+    const interval = setInterval(()=>{
+      if(userData.pin === null){
+        setPinModal(true);
+      }
+    },2000);
+
+    return () => clearInterval(interval);
+  }, [userData]);
 
   const handleFormSubmission = (e) => {
     e.preventDefault();

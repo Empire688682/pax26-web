@@ -9,7 +9,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from "../Context";
 
 const BuyTv = () => {
-  const {getUserRealTimeData, pax26} = useGlobalContext();
+  const {getUserRealTimeData, pax26, userData, setPinModal} = useGlobalContext();
   const allTvPackagesUrl = "https://www.nellobytesystems.com/APICableTVPackagesV2.asp";
 
   const initialFormState = {
@@ -96,6 +96,16 @@ const BuyTv = () => {
       setVerifyingSmartcardNumber(false);
     }
   };
+
+    useEffect(()=>{
+      const interval = setInterval(()=>{
+        if(userData.pin === null){
+          setPinModal(true);
+        }
+      },2000);
+  
+      return () => clearInterval(interval);
+    }, [userData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
