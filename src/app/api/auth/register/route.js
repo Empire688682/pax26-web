@@ -119,7 +119,11 @@ const registerUser = async (req) => {
 
     const userObj = newUser.toObject();
     delete userObj.password;
-    delete userObj.pin;
+     if(userObj.pin){
+      userObj.pin = true;
+    }else{
+      userObj.pin = null;
+    }
     delete userObj.isAdmin;
     delete userObj.provider;
     delete userObj.referralHost;

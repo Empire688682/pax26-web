@@ -30,10 +30,16 @@ const TransactionPin = () => {
 
       const data = await res.json()
 
+      console.log(data);
+
       if (res.ok) {
         setMessage({ type: 'success', text: data.message })
         setTimeout(() => setPinModal(false), 1500);
-        window.location.reload();
+        const savedData = localStorage.getItem("userData");
+        const parseData = JSON.parse(savedData);
+          parseData.pin = true;
+          localStorage.setItem("userData", JSON.stringify(parseData));
+          setUserData(parseData);
       } else {
         setMessage({ type: 'error', text: data.message });
       }

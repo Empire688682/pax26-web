@@ -42,7 +42,11 @@ export async function POST(request) {
     // Prepare safe user object
     const userObj = existUser.toObject();
     delete userObj.password;
-    delete userObj.pin;
+    if(userObj.pin){
+      userObj.pin = true;
+    }else{
+      userObj.pin = null;
+    }
     delete userObj.isAdmin;
     delete userObj.provider;
     delete userObj.referralHost;
