@@ -21,7 +21,7 @@ const Dashboard = () => {
     transactionHistory,
     loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
-  const [isPasswordSet, setIsPasswordSet] = useState(false);
+  const [isPasswordSet, setIsPasswordSet] = useState(true);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
 
   const handleCopy = () => {
@@ -65,13 +65,13 @@ const Dashboard = () => {
     };
   };
 
-//   useEffect(() => {
-//   const interval = setInterval(() => {
-//     setIsPasswordSet(!!userData?.isPasswordSet);
-//   }, 5000);
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setIsPasswordSet(!!userData?.isPasswordSet);
+  }, 5000);
 
-//   return () => clearInterval(interval);
-// }, [userData]);
+  return () => clearInterval(interval);
+}, [userData]);
 
 
   return (
