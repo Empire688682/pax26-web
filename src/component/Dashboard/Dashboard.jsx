@@ -22,7 +22,7 @@ const Dashboard = () => {
     loading } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(true);
-  const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData.referralCode}`;
+  const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData?.referralCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink)

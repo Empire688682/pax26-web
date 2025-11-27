@@ -164,6 +164,7 @@ export const AppProvider = ({ children }) => {
     const fetchDataPlan = async () => {
       try {
         const res = await axios.get("/api/data-plan");
+        console.log("dataPlan:", res)
         if (res.data.success) {
           setDataPlan(res.data.data);
         }
