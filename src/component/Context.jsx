@@ -120,6 +120,10 @@ export const AppProvider = ({ children }) => {
       toast.success("Logged out successfully");
       clearLocalStorage();
       setIsOpen(false);
+      setUserData(null);
+      setTransactionHistory([]);
+      setUserWallet(0);
+      setUserCommission(0);
       route.push("/");
     } catch (error) {
       console.log("Logout Error:", error);
