@@ -75,6 +75,7 @@ const BuyTv = () => {
 
   const verifySmartcardNumber = async (smartcardNumber, provider) => {
     setVerifyingSmartcardNumber(true);
+    toast.info("Verifying smartcard number...");
     try {
       const response = await axios.post("/api/verify-uic-tv-number", {
         smartcardNumber,
@@ -124,7 +125,6 @@ const BuyTv = () => {
 
     try {
       setLoading(true);
-      toast.info("Processing...");
 
       const response = await axios.post("/api/provider/tv-subscribe-provider", {
         provider,
