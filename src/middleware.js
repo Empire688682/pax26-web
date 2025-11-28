@@ -7,7 +7,6 @@ export function middleware(req) {
   const protectedPaths = [
     "/blog",
     "/buy-data",
-    "/contact",
     "/dashboard",
     "/dashboard/buy-data",
     "/dashboard/buy-airtime",
