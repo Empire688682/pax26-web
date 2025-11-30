@@ -12,7 +12,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 dotenv.config();
 
 export async function OPTIONS() {
-    return new NextResponse(null, {status:200, headers:corsHeaders()});
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
 export async function POST(req) {
@@ -23,7 +23,7 @@ export async function POST(req) {
   try {
     // Validate request
     if (!disco || !meterNumber || !meterType || !amount || !phone || !pin) {
-      return NextResponse.json({ success: false, message: "All fields required" }, { status: 400, headers:corsHeaders() });
+      return NextResponse.json({ success: false, message: "All fields required" }, { status: 400, headers: corsHeaders() });
     }
 
     // Disco codes
@@ -52,17 +52,17 @@ export async function POST(req) {
     const user = await UserModel.findById(userId);
 
     if (!user) {
-      return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
+      return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers: corsHeaders() });
     }
 
     const isPinMatch = await bcrypt.compare(pin, user.pin);
     if (!isPinMatch) {
-      return NextResponse.json({ success: false, message: "Pin not correct" }, { status: 401, headers:corsHeaders() });
+      return NextResponse.json({ success: false, message: "Pin not correct" }, { status: 401, headers: corsHeaders() });
     }
 
     const saveAmount = Number(amount);
     if (user.walletBalance < saveAmount) {
-      return NextResponse.json({ success: false, message: "Insufficient funds" }, { status: 400, headers:corsHeaders() });
+      return NextResponse.json({ success: false, message: "Insufficient funds" }, { status: 400, headers: corsHeaders() });
     }
 
     // Generate request ID
@@ -79,9 +79,23 @@ export async function POST(req) {
 
     console.log("Response:", result);
 
-    if (result?.status !== "ORDER_RECEIVED") {
-      return NextResponse.json({ success: false, message: "We are sorry Electricity currently not available", data: result }, { status: 400, headers:corsHeaders() });
+    if (result?.status !== "ORDER_RECEIVED" && result?.status !== "INSUFFICIENT_BALANCE") {
+      return NextResponse.json({ success: false, message: "We are sorry Electricity currently not available", data: result }, { status: 400, headers: corsHeaders() });
     };
+
+    //MOCK DATA
+    const mockResponse = {
+      orderid: "789",
+      statuscode: "100",
+      status: "ORDER_RECEIVED",
+      meterno: meterNumber,
+      metertoken: "000123"
+    };
+    // For MOCK DATA testing, uncomment below and comment above fetch block
+    if (result?.status === "INSUFFICIENT_BALANCE") {
+      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: mockResponse }, { status:200, headers: corsHeaders() });
+    };
+
     // ✅ Update Provider balance
     await ProviderModel.findOneAndUpdate(
       { name: "ClubConnect" },
@@ -113,9 +127,9 @@ export async function POST(req) {
         number: meterNumber
       }
     });
-    return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers:corsHeaders() });
+    return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);
-    return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers:corsHeaders() });
+    return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers: corsHeaders() });
   }
 }

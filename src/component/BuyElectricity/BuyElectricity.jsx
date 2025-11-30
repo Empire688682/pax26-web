@@ -13,7 +13,7 @@ const BuyElectricity = () => {
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [verifyingMeter, setVerifyingMeter] = useState(false);
-  const [purchasedToken, setPurchasedToken] = useState(null);
+  const [responseData, setResponseData] = useState(null);
 
   const electricityUrl = "https://www.nellobytesystems.com/APIElectricityDiscosV1.asp"
 
@@ -113,9 +113,10 @@ const BuyElectricity = () => {
       const response = await axios.post("/api/provider/electricity-provider", formData);
       console.log("Response:", response);
       if (response.data.success) {
-        getUserRealTimeData()
+        getUserRealTimeData();
         console.log("Response:", response.data.data);
-        setPurchasedToken(response.data.data);
+        setResponseData(response.data.data);
+        toast.success(response.data.message);
       }
     } catch (error) {
       console.log("Elect-Error:", error);
