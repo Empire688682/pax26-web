@@ -146,9 +146,9 @@ export default function ElectricityReceipt({
 // Reusable Row Component
 function ReceiptRow({ title, value, highlight }) {
   return (
-    <div className="flex justify-between border-b border-gray-200 pb-1">
-      <span className="text-gray-600">{title}</span>
-      <span className={`font-semibold ${highlight ? "text-green-600" : ""}`}>
+    <div className="flex justify-between gap-15 border-b border-gray-200 pb-1">
+      <span className="text-gray-600 text-xs">{title}</span>
+      <span className={` ${highlight ? "text-green-600 text-xs" : ""}`}>
         {value}
       </span>
     </div>
