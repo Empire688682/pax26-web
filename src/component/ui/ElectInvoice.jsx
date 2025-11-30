@@ -89,7 +89,7 @@ export default function ElectricityReceipt({
         </div>
 
         {/* Content */}
-        <div className="relative z-10">
+        <div className="relative z-8">
           {/* Header */}
           <div className="flex items-center justify-between mt-2 mb-4">
             <h1 className="text-2xl font-bold text-[#00A85A]">Pax26</h1>
