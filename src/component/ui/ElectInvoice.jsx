@@ -53,7 +53,7 @@ Date: ${date}
       </div>
 
       {/* Content Above Watermark */}
-      <div className="relative z-10">
+      <div className="relative z-5">
 
         {/* Header */}
         <div className="flex items-center justify-between mt-2 mb-4">
