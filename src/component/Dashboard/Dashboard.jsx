@@ -264,7 +264,9 @@ const Dashboard = () => {
                 transactionHistory.length > 0 ? (
                   <>
                     {[...transactionHistory].reverse().slice(0, 5).map((transaction) => (
-                      <div key={transaction._id} className="flex cursor-pointer justify-between items-center">
+                      <div key={transaction._id}
+                      onClick={()=>route.push(`transactions/${transaction._id}`)}
+                       className="flex cursor-pointer justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-400">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
                           <p className="font-medium">{transaction.description}</p>

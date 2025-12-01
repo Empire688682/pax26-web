@@ -17,7 +17,7 @@ export default function Page() {
     // For now, we'll use mock data
     const fetchData = async () => {
       // Simulate fetching data
-      const electData = mockElectData.find(item => item.id === id);
+      const electData = mockElectData.find(item => item.id === parseInt(id));
       setData(electData);
       const interval = setTimeout(() => {
         setLoading(false);
@@ -35,7 +35,7 @@ if(loading){
     <div className="p-6 min-h-screen " 
      style={{backgroundColor:pax26.secondaryBg}}
   >
-      {data ? (
+      {data && !loading ? (
         <ElectricityReceipt
         amount={data.amount}
         status="Successful"

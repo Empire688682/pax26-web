@@ -4,15 +4,13 @@ import { useGlobalContext } from "@/component/Context";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
-  const { transactionHistory, pax26, getUserRealTimeData } = useGlobalContext();
+  const { transactionHistory, pax26, getUserRealTimeData, route } = useGlobalContext();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Turn off loading once context data is available
     getUserRealTimeData().then(() => setLoading(false));
   }, []);
-
-  console.log("Transaction History:", transactionHistory);
 
   return (
     <div className={`min-h-screen px-3`}
@@ -33,6 +31,7 @@ const Page = () => {
                   .reverse()
                   .map((transaction) => (
                     <div
+                      onClick={()=>route.push(`transactions/${transaction._id}`)}
                       key={transaction._id}
                       className="flex cursor-pointer justify-between items-center"
                     >
