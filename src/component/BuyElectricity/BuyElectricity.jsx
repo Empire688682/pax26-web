@@ -67,8 +67,11 @@ const BuyElectricity = () => {
           { meterNumber, disco },
         );
 
+        console.log("Verify Meter Response:", response);
+
         if (response.data.success) {
           setCustomerName(response.data.data);
+          localStorage.setItem("verifiedMeterName", response.data);
           return true
         }
         else {
@@ -90,7 +93,7 @@ const BuyElectricity = () => {
 
     const { disco, meterNumber, meterType, amount, phone, pin } = formData;
 
-    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin) {
+    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
       return toast.error("All fields are required!");
     }
 
@@ -108,7 +111,8 @@ const BuyElectricity = () => {
       return toast.error("Meter verification failed");
     };
 
-    setLoading(true)
+    setLoading(true);
+    formData.customerName = customerName;
     try {
       const response = await axios.post("/api/provider/electricity-provider", formData);
       console.log("Response:", response);

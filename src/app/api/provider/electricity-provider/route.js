@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import TransactionModel from "@/app/ults/models/TransactionModel";
 import ProviderModel from "@/app/ults/models/ProviderModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import ElectricityHistoryModel from "@/app/ults/models/ElectricityHistoryModel";
 
 dotenv.config();
 
@@ -22,7 +23,7 @@ export async function POST(req) {
 
   try {
     // Validate request
-    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin) {
+    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
       return NextResponse.json({ success: false, message: "All fields required" }, { status: 400, headers: corsHeaders() });
     }
 
@@ -89,7 +90,8 @@ export async function POST(req) {
       statuscode: "100",
       status: "ORDER_RECEIVED",
       meterno: meterNumber,
-      metertoken: "000123"
+      metertoken: "000123",
+      serviceAddress: "123, Mock Street, Lagos"
     };
     // For MOCK DATA testing, uncomment below and comment above fetch block
     if (result?.status === "INSUFFICIENT_BALANCE") {
@@ -127,6 +129,18 @@ export async function POST(req) {
         number: meterNumber
       }
     });
+
+    await ElectricityHistoryModel.create({
+          userId,
+          meterNumber,
+          disco,
+          customerName,
+          serviceAddress: mockResponse.serviceAddress,
+          meterType,
+          amount,
+          token: mockResponse.metertoken
+    });
+
     return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);

@@ -1,0 +1,122 @@
+export const mockElectData = [
+  {
+    id:1,
+    userId: "65fa1c9ee13b2f0012a4b100",
+    meterNumber: "4528391027",
+    disco: "Ikeja Electric",
+    customerName: "John Doe",
+    serviceAddress: "12 Olowu Street, Ikeja, Lagos",
+    meterType: "Prepaid",
+    amount: 5000,
+    token: "8329-4920-1934-2210",
+    date: "2025-02-20T10:12:00Z"
+  },
+  {
+    id:2,
+    userId: "65fa1c9ee13b2f0012a4b101",
+    meterNumber: "7823049812",
+    disco: "Eko Electric",
+    customerName: "Mary Johnson",
+    serviceAddress: "44 Admiralty Way, Lekki, Lagos",
+    meterType: "Postpaid",
+    amount: 13500,
+    token: "4920-5839-1120-9921",
+    date: "2025-02-18T08:40:00Z"
+  },
+  {
+    id:3,
+    userId: "65fa1c9ee13b2f0012a4b102",
+    meterNumber: "9032847501",
+    disco: "Abuja Electric",
+    customerName: "Samuel Ade",
+    serviceAddress: "Plot 20, Garki 2, Abuja",
+    meterType: "Prepaid",
+    amount: 2500,
+    token: "1283-9920-2837-7721",
+    date: "2025-02-10T14:22:00Z"
+  },
+  {
+    id:4,
+    userId: "65fa1c9ee13b2f0012a4b103",
+    meterNumber: "3348291028",
+    disco: "Port Harcourt Electric",
+    customerName: "Grace Peters",
+    serviceAddress: "8 Olu Street, Port Harcourt",
+    meterType: "Prepaid",
+    amount: 7000,
+    token: "2201-1938-2210-4432",
+    date: "2025-02-05T11:10:00Z"
+  },
+  {
+    id:5,
+    userId: "65fa1c9ee13b2f0012a4b104",
+    meterNumber: "5583927710",
+    disco: "Jos Electric",
+    customerName: "Peter Musa",
+    serviceAddress: "31 Unity Road, Jos",
+    meterType: "Postpaid",
+    amount: 9800,
+    token: "5538-2291-1844-9920",
+    date: "2025-01-30T09:00:00Z"
+  },
+  {
+    id:6,
+    userId: "65fa1c9ee13b2f0012a4b105",
+    meterNumber: "6672849102",
+    disco: "Benin Electric",
+    customerName: "Rita Ojo",
+    serviceAddress: "22 Forestry Road, Benin",
+    meterType: "Prepaid",
+    amount: 3100,
+    token: "1138-9920-5548-1200",
+    date: "2025-01-25T16:45:00Z"
+  },
+  {
+    id:7,
+    userId: "65fa1c9ee13b2f0012a4b106",
+    meterNumber: "2248931029",
+    disco: "Kano Electric",
+    customerName: "Aminu Sani",
+    serviceAddress: "5 Kabuga Avenue, Kano",
+    meterType: "Prepaid",
+    amount: 4200,
+    token: "2840-1002-4433-2211",
+    date: "2025-01-22T07:30:00Z"
+  },
+  {
+    id:8,
+    userId: "65fa1c9ee13b2f0012a4b107",
+    meterNumber: "9903845712",
+    disco: "Ikeja Electric",
+    customerName: "Victoria Nnaji",
+    serviceAddress: "9 Adebayo, Maryland, Lagos",
+    meterType: "Postpaid",
+    amount: 15000,
+    token: "9920-1182-5539-2031",
+    date: "2025-01-20T12:14:00Z"
+  },
+  {
+    id:9,
+    userId: "65fa1c9ee13b2f0012a4b108",
+    meterNumber: "7738291044",
+    disco: "Eko Electric",
+    customerName: "Emeka Okafor",
+    serviceAddress: "18 Ojuelegba Road, Surulere",
+    meterType: "Prepaid",
+    amount: 6000,
+    token: "4450-2291-1044-1199",
+    date: "2025-01-12T18:10:00Z"
+  },
+  {
+    id:10,
+    userId: "65fa1c9ee13b2f0012a4b109",
+    meterNumber: "8821039485",
+    disco: "Kano Electric",
+    customerName: "Fatima Usman",
+    serviceAddress: "12 Gwammaja Area, Kano",
+    meterType: "Prepaid",
+    amount: 5300,
+    token: "1100-9921-2399-5520",
+    date: "2025-01-05T10:50:00Z"
+  }
+];

@@ -92,13 +92,13 @@ export default function ElectricityReceipt({
         <div className="relative z-8">
           {/* Header */}
           <div className="flex items-center justify-between mt-2 mb-4">
-            <h1 className="text-2xl font-bold text-[#00A85A]">Pax26</h1>
+            <h1 className="text-2xl font-bold text-blue-700">Pax26</h1>
             <p className="text-gray-600 text-sm">Transaction Receipt</p>
           </div>
 
           {/* Amount */}
           <div className="text-center mb-6">
-            <p className="text-3xl font-semibold text-green-600">
+            <p className="text-3xl font-semibold text-blue-700">
               ₦{Number(amount).toLocaleString()}
             </p>
             <p className="text-lg font-medium text-gray-700">{status}</p>
@@ -148,7 +148,7 @@ function ReceiptRow({ title, value, highlight }) {
   return (
     <div className="flex justify-between gap-15 border-b border-gray-200 pb-1">
       <span className="text-gray-600 text-xs">{title}</span>
-      <span className={` ${highlight ? "text-green-600 text-xs" : ""}`}>
+      <span className={` ${highlight ? "text-blue-700 text-xs" : ""}`}>
         {value}
       </span>
     </div>
