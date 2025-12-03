@@ -9,6 +9,7 @@ import TransactionModel from "@/app/ults/models/TransactionModel";
 import ProviderModel from "@/app/ults/models/ProviderModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import ElectricityHistoryModel from "@/app/ults/models/ElectricityHistoryModel";
+import { nanoid } from "nanoid";
 
 dotenv.config();
 
@@ -19,7 +20,8 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { disco, meterNumber, meterType, amount, phone, pin } = body;
+  const { disco, meterNumber, meterType, amount, phone, pin, customerName } = body;
+  console.log("Electricity-REQ:", body);
 
   try {
     // Validate request
@@ -85,8 +87,9 @@ export async function POST(req) {
     };
 
     //MOCK DATA
+    const orderid = nanoid(6);
     const mockResponse = {
-      orderid: "789",
+      orderid: orderid,
       statuscode: "100",
       status: "ORDER_RECEIVED",
       meterno: meterNumber,
@@ -95,10 +98,7 @@ export async function POST(req) {
     };
     // For MOCK DATA testing, uncomment below and comment above fetch block
     if (result?.status === "INSUFFICIENT_BALANCE") {
-      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: mockResponse }, { status:200, headers: corsHeaders() });
-    };
-
-    // ✅ Update Provider balance
+      // ✅ Update Provider balance
     await ProviderModel.findOneAndUpdate(
       { name: "ClubConnect" },
       {
@@ -122,7 +122,7 @@ export async function POST(req) {
       type: "electricity",
       amount: saveAmount,
       status: "success",
-      transactionId: result.orderid,
+      transactionId: mockResponse.orderid, //result.orderid,
       reference: requestId,
       metadata: {
         network: disco,
@@ -130,7 +130,7 @@ export async function POST(req) {
       }
     });
 
-    await ElectricityHistoryModel.create({
+  await ElectricityHistoryModel.create({
           userId,
           meterNumber,
           disco,
@@ -140,8 +140,12 @@ export async function POST(req) {
           amount,
           token: mockResponse.metertoken
     });
+      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: mockResponse }, { status:200, headers: corsHeaders() });
+    };
 
-    return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
+
+
+   // return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers: corsHeaders() });

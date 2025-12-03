@@ -12,6 +12,7 @@ const BuyElectricity = () => {
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [isMeterVerified, setIsMeterVerified] = useState(false);
   const [verifyingMeter, setVerifyingMeter] = useState(false);
   const [responseData, setResponseData] = useState(null);
 
@@ -52,10 +53,14 @@ const BuyElectricity = () => {
     amount: '',
     phone: '',
     pin: '',
+    customerName: '',
   });
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+   const { name, value } = e.target
+  
+
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const verifyMeterNumber = async (meterNumber, disco) => {
@@ -70,8 +75,10 @@ const BuyElectricity = () => {
         console.log("Verify Meter Response:", response);
 
         if (response.data.success) {
-          setCustomerName(response.data.data);
-          localStorage.setItem("verifiedMeterName", response.data);
+        const name = response.data.data;
+          setCustomerName(name);
+          setFormData((prev) =>({...prev, customerName: name}));
+          localStorage.setItem("verifiedMeterName", name);
           return true
         }
         else {
@@ -88,12 +95,21 @@ const BuyElectricity = () => {
 
   };
 
+  useEffect(()=>{
+    const { disco, meterNumber } = formData;
+    if (meterNumber.length >= 7 && disco) {
+      verifyMeterNumber(meterNumber, disco).then((isVerified)=>{
+        setIsMeterVerified(isVerified);
+      });
+    }
+  },[formData.disco, formData.meterNumber]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const { disco, meterNumber, meterType, amount, phone, pin } = formData;
 
-    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
+    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin) {
       return toast.error("All fields are required!");
     }
 
@@ -105,14 +121,13 @@ const BuyElectricity = () => {
       return toast.error("Pin most be 4 digit");
     }
 
-    const isMeterVerified = await verifyMeterNumber(meterNumber, disco);
-
     if (!isMeterVerified) {
-      return toast.error("Meter verification failed");
+      return toast.error("Meter not verified");
     };
 
     setLoading(true);
-    formData.customerName = customerName;
+
+    console.log("Form Data Submitted:", formData);
     try {
       const response = await axios.post("/api/provider/electricity-provider", formData);
       console.log("Response:", response);
