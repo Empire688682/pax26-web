@@ -7,6 +7,8 @@ import { useGlobalContext } from "@/component/Context";
 export default function Page() {
   const { pax26, electReceiptData } = useGlobalContext();
 
+  console.log("Electricity Receipt Data:", electReceiptData);
+
   if (!electReceiptData) {
     return (
       <div className="flex items-center justify-center pt-32" style={{ color: pax26.textPrimary }}>

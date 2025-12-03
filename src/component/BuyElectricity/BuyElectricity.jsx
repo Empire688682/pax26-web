@@ -135,7 +135,7 @@ const BuyElectricity = () => {
         getUserRealTimeData();
         console.log("Response:", response.data.data);
         setElectReceiptData(response.data.data);
-        route.push("/electricity-receipt");
+        route.push("/dashboard/buy-electricity/electricity-receipt");
         toast.success(response.data.message);
       }
     } catch (error) {
