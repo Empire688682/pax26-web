@@ -64,6 +64,9 @@ export const AppProvider = ({ children }) => {
   //Wallet funding ID state
   const [paymentId, setPaymentId] = useState('');
 
+  //Instance electricity data on purchase receipt page
+  const [electReceiptData, setElectReceiptData] = useState(null);
+
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
     if (userData) {
@@ -233,6 +236,7 @@ export const AppProvider = ({ children }) => {
   }
   setPax26(pax26);
  },[theme]);
+ 
 
   // Provide all state and handlers via context to children components
   return (
@@ -261,6 +265,8 @@ export const AppProvider = ({ children }) => {
         loading,
         dataPlan,
         electricityMerchants,
+        electReceiptData,
+        setElectReceiptData,
         userWallet,
         userCommission,
         userCashBack,

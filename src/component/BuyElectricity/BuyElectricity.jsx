@@ -8,7 +8,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from '../Context';
 
 const BuyElectricity = () => {
-  const { getUserRealTimeData, pax26, userData, setPinModal } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, route, setPinModal, setElectReceiptData } = useGlobalContext();
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -113,7 +113,7 @@ const BuyElectricity = () => {
       return toast.error("All fields are required!");
     }
 
-    if (parseInt(amount, 10) < 100) {
+    if (+amount < 1000) {
       return toast.error("Minimum amount is ₦100");
     }
 
@@ -134,7 +134,8 @@ const BuyElectricity = () => {
       if (response.data.success) {
         getUserRealTimeData();
         console.log("Response:", response.data.data);
-        setResponseData(response.data.data);
+        setElectReceiptData(response.data.data);
+        route.push("/electricity-receipt");
         toast.success(response.data.message);
       }
     } catch (error) {
@@ -234,7 +235,7 @@ const BuyElectricity = () => {
                   name="amount"
                   value={formData.amount}
                   onChange={handleChange}
-                  placeholder="Minimum ₦100"
+                  placeholder="Minimum ₦1000"
                   className="w-full border border-gray-300 rounded-xl text-gray-400 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                 />

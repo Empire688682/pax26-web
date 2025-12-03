@@ -90,6 +90,11 @@ export async function POST(req) {
     const orderid = nanoid(6);
     const mockResponse = {
       orderid: orderid,
+      amount: amount,
+      date: new Date().toISOString(),
+      disco: disco,
+      customerName: customerName,
+      meterType: meterType,
       statuscode: "100",
       status: "ORDER_RECEIVED",
       meterno: meterNumber,
