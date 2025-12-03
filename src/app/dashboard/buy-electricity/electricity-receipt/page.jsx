@@ -1,21 +1,18 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import ElectricityReceipt from "@/component/ui/ElectInvoice";
-import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
 import { useGlobalContext } from "@/component/Context";
 
 export default function Page() {
-  const { pax26, electReceiptData } = useGlobalContext();
+  const { pax26, route, electReceiptData } = useGlobalContext();
 
   console.log("Electricity Receipt Data:", electReceiptData);
 
-  if (!electReceiptData) {
-    return (
-      <div className="flex items-center justify-center pt-32" style={{ color: pax26.textPrimary }}>
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  useEffect(() =>{
+    if (!electReceiptData) {
+      route.push("/dashboard/buy-electricity");
+    }
+  }, [electReceiptData]);
 
   return (
     <div className="p-6 min-h-screen" style={{ backgroundColor: pax26.secondaryBg }}>
