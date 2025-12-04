@@ -60,7 +60,7 @@ export default function TransactionHistoryItem({ data }) {
                         data?.type === "electricity"&& (
                             <div className="flex flex-col">
                                 <span className="text-gray-500 text-sm">Meter number</span>
-                                <span className="text-lg font-medium">{data?.metadata?.network}</span>
+                                <span className="text-lg font-medium">{data?.metadata?.number || " "}</span>
                             </div>
                         )
                     }

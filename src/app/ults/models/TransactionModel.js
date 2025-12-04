@@ -12,7 +12,9 @@ const TransactionSchema = new mongoose.Schema(
     reference: { type: String, unique: true, sparse: true },
     metadata: {
       network: { type: String },
-      number: { type: String },
+      name: { type: String },
+      address: { type: String },
+      token: { type: String },
     },
   },
   {

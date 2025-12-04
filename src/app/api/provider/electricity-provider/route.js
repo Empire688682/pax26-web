@@ -131,7 +131,10 @@ export async function POST(req) {
       reference: requestId,
       metadata: {
         network: disco,
-        number: meterNumber
+        number: meterNumber,
+        name: customerName,
+        address: mockResponse.serviceAddress,
+        token: mockResponse.metertoken,
       }
     });
 
