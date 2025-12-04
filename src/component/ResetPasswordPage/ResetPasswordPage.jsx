@@ -65,7 +65,7 @@ const ResetPasswordPage = () => {
 
   useEffect(()=>{
     if(!token){
-      route.push("/dashboard");
+      router.push("/dashboard");
     }
   }, []);
 

@@ -4,7 +4,7 @@ import { useGlobalContext } from '../Context';
 import { Handshake } from 'lucide-react';
 
 const CashBackBalance = () => {
-    const { getUserRealTimeData, route, pax26, userCashBack } = useGlobalContext();
+    const { getUserRealTimeData, router, pax26, userCashBack } = useGlobalContext();
 
     useEffect(() => {
         getUserRealTimeData();

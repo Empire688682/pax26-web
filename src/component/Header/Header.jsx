@@ -12,7 +12,7 @@ import TransactionPin from '../TransactionPin/TransactionPin';
 import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
 const Header = () => {
-    const { toggleMenu, openModal, pax26, userData, route, pinModal, setPinModal } = useGlobalContext();
+    const { toggleMenu, openModal, pax26, userData, router, pinModal, setPinModal } = useGlobalContext();
     const pathName = usePathname();
 
     const isHomePage = pathName === '/';
@@ -52,7 +52,7 @@ const Header = () => {
                     <>
                         {
                             userData && !isHomePage && !isProfile && (
-                                <div className='relative overflow-hidden w-10 h-10 items-center rounded-full border-2 border-gray-500 cursor-pointer' onClick={() => route.push("/profile")}>
+                                <div className='relative overflow-hidden w-10 h-10 items-center rounded-full border-2 border-gray-500 cursor-pointer' onClick={() => router.push("/profile")}>
                                     <Image src={userData?.profileImage} alt="profile" fill style={{ objectFit: "cover" }} />
                                 </div>
                             )

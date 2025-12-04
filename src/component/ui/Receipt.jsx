@@ -13,7 +13,6 @@ export default function Receipt({
   transactionId,
   type,
   metadata,
-  token
 }) {
   const receiptRef = useRef(null);
   const networks = {

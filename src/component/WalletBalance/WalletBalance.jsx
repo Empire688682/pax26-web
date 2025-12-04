@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ArrowBigRightDash, ArrowBigLeftDashIcon } from 'lucide-react';
 
 const WalletBalance = ({ setShowMore, showMore }) => {
-    const { getUserRealTimeData, route, pax26, userWallet } = useGlobalContext();
+    const { getUserRealTimeData, router, pax26, userWallet } = useGlobalContext();
     const pathName = usePathname();
 
     useEffect(() => {
@@ -23,7 +23,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
                 <p className="text-xl font-bold"
                     style={{ color: pax26.textPrimary }}>₦{userWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>
                 <div className='flex flex-col gap-2'>
-                    <button className="bg-blue-600 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={() => route.push("/fund-wallet")}>Fun Wallet +</button>
+                    <button className="bg-blue-600 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={() => router.push("/fund-wallet")}>Fun Wallet +</button>
                     {
                         pathName === "/dashboard" && (
                             <p className="cursor-pointer absolute left-0 bottom-[-23px] md:hidden items-center flex text-gray-400 text-xs px-3 py-1"

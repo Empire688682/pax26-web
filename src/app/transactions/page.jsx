@@ -31,7 +31,7 @@ const Page = () => {
                   .reverse()
                   .map((transaction) => (
                     <div
-                      onClick={()=>route.push(`transactions/${transaction._id}`)}
+                      onClick={()=>router.push(`transactions/${transaction._id}`)}
                       key={transaction._id}
                       className="flex cursor-pointer justify-between items-center"
                     >

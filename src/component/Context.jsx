@@ -40,7 +40,7 @@ export const AppProvider = ({ children }) => {
   const [userData, setUserData] = useState("");
 
   // Next.js router for programmatic navigation
-  const route = useRouter();
+  const router = useRouter();
 
   // Controls visibility of a PIN entry modal (e.g. for sensitive actions)
   const [pinModal, setPinModal] = useState(false);
@@ -64,14 +64,11 @@ export const AppProvider = ({ children }) => {
   //Wallet funding ID state
   const [paymentId, setPaymentId] = useState('');
 
-  //Instance electricity data on purchase receipt page
-  const [receiptData, setReceiptData] = useState(null);
-
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
     if (userData) {
       // If logged in, redirect to dashboard instead of showing modal
-      route.push("/dashboard");
+      router.push("/dashboard");
     }
     else {
       // Set auth modal type and open modal for user to login/register
@@ -127,7 +124,7 @@ export const AppProvider = ({ children }) => {
       setTransactionHistory([]);
       setUserWallet(0);
       setUserCommission(0);
-      route.push("/");
+      router.push("/");
     } catch (error) {
       console.log("Logout Error:", error);
       toast.error("Something went wrong logging out");
@@ -236,7 +233,7 @@ export const AppProvider = ({ children }) => {
   }
   setPax26(pax26);
  },[theme]);
- 
+
 
   // Provide all state and handlers via context to children components
   return (
@@ -255,7 +252,7 @@ export const AppProvider = ({ children }) => {
         userData,
         data,
         setData,
-        route,
+        router,
         logoutUser,
         pinModal,
         setUserData,
@@ -274,8 +271,6 @@ export const AppProvider = ({ children }) => {
         refHostCode,
         profitConfig,
         setProfitConfig,
-        receiptData,
-        setReceiptData,
       }}
     >
       {children}

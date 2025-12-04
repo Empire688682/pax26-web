@@ -8,7 +8,7 @@ import axios from "axios";
 import { Copy } from "lucide-react";
 
 const FundWallet = () => {
-  const { userData, paymentId, setPaymentId, route, pax26 } = useGlobalContext();
+  const { userData, paymentId, setPaymentId, router, pax26 } = useGlobalContext();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [moreOptions, setMoreOptions] = useState(true);
@@ -24,7 +24,7 @@ const FundWallet = () => {
         setAmount("");
         toast.success("Payment verified successfully! Your wallet has been funded.");
         setTimeout(() => {
-          route.push('/dashboard');
+          router.push('/dashboard');
         }, 2000);
       } else {
         toast.error(response.data.message || "Payment verification failed.");

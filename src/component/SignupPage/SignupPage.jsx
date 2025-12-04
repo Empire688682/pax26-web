@@ -16,7 +16,7 @@ export default function SignupPage() {
         setAuthType,
         openModal,
         setUserData,
-        route,
+        router,
         data,
         setData,
         refHostCode } = useGlobalContext();

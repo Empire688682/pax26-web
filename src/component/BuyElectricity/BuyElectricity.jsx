@@ -8,7 +8,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useGlobalContext } from '../Context';
 
 const BuyElectricity = () => {
-  const { getUserRealTimeData, pax26, userData, route, setPinModal, setReceiptData } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, router, setPinModal, setReceiptData } = useGlobalContext();
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -134,8 +134,8 @@ const BuyElectricity = () => {
       if (response.data.success) {
         getUserRealTimeData();
         console.log("Response:", response.data.data);
-        setReceiptData(response.data.data);
-        route.push("/transaction-receipt");
+        const transactionId = response.data.data._id;
+        router.push(`/transaction-receipt/?id=${transactionId}`);
         toast.success(response.data.message);
       }
     } catch (error) {

@@ -17,9 +17,10 @@ const Dashboard = () => {
     pax26,
     userCommission,
     getUserRealTimeData,
-    route,
+    router,
     transactionHistory,
-    loading } = useGlobalContext();
+    loading,
+     } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(true);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData?.referralCode}`;
@@ -96,7 +97,7 @@ const Dashboard = () => {
           style={{ color: pax26.textPrimary }}>
           <Heart /> Welcome back, <span className="font-bold">{firstName}</span>
         </h2>
-        <Bell className="text-gray-400 cursor-pointer" onClick={() => route.push("/notifications")} />
+        <Bell className="text-gray-400 cursor-pointer" onClick={() => router.push("/notifications")} />
       </div>
 
       {/* big screen */}
@@ -192,7 +193,7 @@ const Dashboard = () => {
       <h3 className="text-md font-medium mb-2"
         style={{ color: pax26.textPrimary }}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div onClick={() => route.push("/fund-wallet")}
+        <div onClick={() => router.push("/fund-wallet")}
           style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Wallet
             style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
@@ -200,7 +201,7 @@ const Dashboard = () => {
             style={{ color: pax26.textPrimary }}>Fund Wallet</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-airtime")}
+        <div onClick={() => router.push("/dashboard/buy-airtime")}
           style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Phone
             style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
@@ -208,7 +209,7 @@ const Dashboard = () => {
             style={{ color: pax26.textPrimary }}>Buy Airtime</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-data")}
+        <div onClick={() => router.push("/dashboard/buy-data")}
           style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Wifi
             style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
@@ -216,7 +217,7 @@ const Dashboard = () => {
             style={{ color: pax26.textPrimary }}>Buy Data</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-electricity")}
+        <div onClick={() => router.push("/dashboard/buy-electricity")}
           style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Zap
             style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
@@ -224,7 +225,7 @@ const Dashboard = () => {
             style={{ color: pax26.textPrimary }}>Electricity</p>
         </div>
 
-        <div onClick={() => route.push("/dashboard/buy-tv")}
+        <div onClick={() => router.push("/dashboard/buy-tv")}
           style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
           <Tv
             style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
@@ -265,7 +266,7 @@ const Dashboard = () => {
                   <>
                     {[...transactionHistory].reverse().slice(0, 5).map((transaction) => (
                       <div key={transaction._id}
-                      onClick={()=>route.push(`transactions/${transaction._id}`)}
+                      onClick={()=>router.push(`transaction-receipt/${transaction._id}`)}
                        className="flex cursor-pointer justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-400">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
@@ -295,7 +296,7 @@ const Dashboard = () => {
                       transactionHistory.length > 5 &&
                       <div className="text-center mt-4">
                         <button
-                          onClick={() => route.push("/transactions")}
+                          onClick={() => router.push("/transactions")}
                           style={{ color: pax26.textPrimary }} className="hover:underline font-medium text-sm"
                         >
                           See More →
