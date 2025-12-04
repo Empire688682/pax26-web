@@ -4,20 +4,24 @@ import { useRef } from "react";
 import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 
-export default function ElectricityReceipt({
+export default function Receipt({
   amount,
   status,
   date,
   provider,
-  meterNumber,
-  customerName,
-  serviceAddress,
-  meterType,
-  units,
-  transactionNo,
+  number,
+  transactionId,
+  type,
+  metadata,
   token
 }) {
   const receiptRef = useRef(null);
+  const networks = {
+    "01": "MTN",
+    "02": "GLO",
+    "03": "AIRTEL",
+    "04": "9MOBILE"
+  };
 
   // ---------------------------------------------
   // SHARE AS IMAGE
@@ -102,20 +106,37 @@ export default function ElectricityReceipt({
               ₦{Number(amount).toLocaleString()}
             </p>
             <p className="text-lg font-medium text-gray-700">{status}</p>
-            <p className="text-sm text-gray-500 mt-1">{date}</p>
+            <p className="text-sm text-gray-500 mt-1">{new Date(date).toLocaleString()}</p>
           </div>
 
           {/* Info rows */}
-          <div className="space-y-3 text-sm">
-            <ReceiptRow title="Provider" value={provider} />
-            <ReceiptRow title="Meter Number" value={meterNumber} />
-            <ReceiptRow title="Customer Name" value={customerName} />
-            <ReceiptRow title="Service Address" value={serviceAddress} />
-            <ReceiptRow title="Meter Type" value={meterType} />
-            <ReceiptRow title="Units" value={`${units} kWh`} />
-            <ReceiptRow title="Token" value={token} highlight />
-            <ReceiptRow title="Transaction No." value={transactionNo} />
-          </div>
+          {
+            // Electricity Receipt Details
+            type === "eclectricity" && (
+              <div className="space-y-3 text-sm">
+                <ReceiptRow title="Provider" value={provider} />
+                <ReceiptRow title="Meter Number" value={number} />
+                <ReceiptRow title="Customer Name" value={metadata?.customerName} />
+                <ReceiptRow title="Service Address" value={metadata?.address|| "Mock address NO.123."} />
+                <ReceiptRow title="Meter Type" value={metadata?.meterType || "Mock prepaid"} />
+                <ReceiptRow title="Units" value={`${metadata?.units || "mock 120"} kWh`} />
+                <ReceiptRow title="Token" value={metadata?.token || "mock 1234567890"} highlight />
+                <ReceiptRow title="Transaction ID." value={transactionId} />
+              </div>
+            )
+          }
+
+          {
+            // Electricity Receipt Details
+            type === "airtime" || type === "data"  && (
+              <div className="space-y-3 text-sm">
+                <ReceiptRow title="Mobile Network" value={networks[metadata?.network]} />
+                <ReceiptRow title="Recipient Number" value={metadata?.number} />
+                <ReceiptRow title="Transaction Type" value={type} />
+                <ReceiptRow title="Transaction ID" value={transactionId} />
+              </div>
+            )
+          }
 
           <p className="text-[11px] text-gray-500 text-center mt-6">
             Powered by Pax26 — Reliable Bills, Every Time.

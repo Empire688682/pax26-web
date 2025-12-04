@@ -65,7 +65,7 @@ export const AppProvider = ({ children }) => {
   const [paymentId, setPaymentId] = useState('');
 
   //Instance electricity data on purchase receipt page
-  const [electReceiptData, setElectReceiptData] = useState(null);
+  const [receiptData, setReceiptData] = useState(null);
 
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
@@ -265,8 +265,6 @@ export const AppProvider = ({ children }) => {
         loading,
         dataPlan,
         electricityMerchants,
-        electReceiptData,
-        setElectReceiptData,
         userWallet,
         userCommission,
         userCashBack,
@@ -276,6 +274,8 @@ export const AppProvider = ({ children }) => {
         refHostCode,
         profitConfig,
         setProfitConfig,
+        receiptData,
+        setReceiptData,
       }}
     >
       {children}

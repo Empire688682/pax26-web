@@ -122,7 +122,7 @@ export async function POST(req) {
       { new: true }
     );
 
-    await TransactionModel.create({
+   const transaction =  await TransactionModel.create({
       userId,
       type: "electricity",
       amount: saveAmount,
@@ -138,17 +138,17 @@ export async function POST(req) {
       }
     });
 
-  await ElectricityHistoryModel.create({
-          userId,
-          meterNumber,
-          disco,
-          customerName,
-          serviceAddress: mockResponse.serviceAddress,
-          meterType,
-          amount,
-          token: mockResponse.metertoken
-    });
-      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: mockResponse }, { status:200, headers: corsHeaders() });
+  // await ElectricityHistoryModel.create({
+  //         userId,
+  //         meterNumber,
+  //         disco,
+  //         customerName,
+  //         serviceAddress: mockResponse.serviceAddress,
+  //         meterType,
+  //         amount,
+  //         token: mockResponse.metertoken
+  //   });
+      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: transaction }, { status:200, headers: corsHeaders() });
     };
 
 

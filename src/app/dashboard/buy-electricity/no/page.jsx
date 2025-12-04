@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import ElectricityReceipt from "@/component/ui/ElectInvoice";
+import Receipt from "@/component/ui/Receipt";
 import { useParams } from "next/navigation";
 import { mockElectData } from "@/component/MockData/mockElectData";
 import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
@@ -36,7 +36,7 @@ if(loading){
      style={{backgroundColor:pax26.secondaryBg}}
   >
       {data && !loading ? (
-        <ElectricityReceipt
+        <Receipt
         amount={data.amount}
         status="Successful"
         date={data.date}
