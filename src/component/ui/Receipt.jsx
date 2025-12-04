@@ -9,11 +9,17 @@ export default function Receipt({
   status,
   date,
   provider,
-  number,
   transactionId,
   type,
   metadata,
 }) {
+  console.log("Receipt metadata:", metadata);
+  console.log("Receipt type:", type);
+  console.log("Receipt amount:", amount);
+  console.log("Receipt status:", status);
+  console.log("Receipt date:", date);
+  console.log("Receipt provider:", provider);
+  console.log("Receipt transactionId:", transactionId);
   const receiptRef = useRef(null);
   const networks = {
     "01": "MTN",
@@ -114,7 +120,7 @@ export default function Receipt({
             type === "eclectricity" && (
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Provider" value={provider} />
-                <ReceiptRow title="Meter Number" value={number} />
+                <ReceiptRow title="Meter Number" value={metadata?.number} />
                 <ReceiptRow title="Customer Name" value={metadata?.customerName} />
                 <ReceiptRow title="Service Address" value={metadata?.address|| "Mock address NO.123."} />
                 <ReceiptRow title="Meter Type" value={metadata?.meterType || "Mock prepaid"} />

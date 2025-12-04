@@ -4,7 +4,7 @@ import { useGlobalContext } from "@/component/Context";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
-  const { transactionHistory, pax26, getUserRealTimeData, route } = useGlobalContext();
+  const { transactionHistory, pax26, getUserRealTimeData, router } = useGlobalContext();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const Page = () => {
                   .reverse()
                   .map((transaction) => (
                     <div
-                      onClick={()=>router.push(`transactions/${transaction._id}`)}
+                      onClick={()=>router.push(`transaction-receipt/?id=${transaction._id}`)}
                       key={transaction._id}
                       className="flex cursor-pointer justify-between items-center"
                     >

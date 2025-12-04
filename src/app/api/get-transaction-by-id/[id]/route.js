@@ -2,8 +2,8 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { NextResponse } from "next/server";
 import dotenv from "dotenv";
-import { verifyToken } from "@/app/ults/auth/verifyToken";
 import TransactionModel from "@/app/ults/models/TransactionModel";
+import { verifyToken } from "../../helper/VerifyToken";
 
 dotenv.config();
 
@@ -13,7 +13,7 @@ export async function OPTIONS() {
 
 export async function GET(req, { params }) {
   await connectDb();
-  const { id } = params;
+  const { id } = await params;
     try {
     // Auth user
     const userId = await verifyToken(req);
