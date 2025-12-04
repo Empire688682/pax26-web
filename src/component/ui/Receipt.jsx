@@ -8,17 +8,14 @@ export default function Receipt({
   amount,
   status,
   date,
-  provider,
   transactionId,
-  type,
+  receiptType,
   metadata,
 }) {
   console.log("Receipt metadata:", metadata);
-  console.log("Receipt type:", type);
   console.log("Receipt amount:", amount);
   console.log("Receipt status:", status);
   console.log("Receipt date:", date);
-  console.log("Receipt provider:", provider);
   console.log("Receipt transactionId:", transactionId);
   const receiptRef = useRef(null);
   const networks = {
@@ -117,11 +114,12 @@ export default function Receipt({
           {/* Info rows */}
           {
             // Electricity Receipt Details
-            type === "eclectricity" && (
+            receiptType === "electricity" && (
               <div className="space-y-3 text-sm">
-                <ReceiptRow title="Provider" value={provider} />
+                <ReceiptRow title="Transaction Type" value={receiptType} />
+                <ReceiptRow title="Provider" value={metadata?.network} />
                 <ReceiptRow title="Meter Number" value={metadata?.number} />
-                <ReceiptRow title="Customer Name" value={metadata?.customerName} />
+                <ReceiptRow title="Customer Name" value={metadata?.customerName || "Mock name"} />
                 <ReceiptRow title="Service Address" value={metadata?.address|| "Mock address NO.123."} />
                 <ReceiptRow title="Meter Type" value={metadata?.meterType || "Mock prepaid"} />
                 <ReceiptRow title="Units" value={`${metadata?.units || "mock 120"} kWh`} />
@@ -133,11 +131,11 @@ export default function Receipt({
 
           {
             // Electricity Receipt Details
-            type === "airtime" || type === "data"  && (
+            (receiptType === "airtime" || receiptType === "data")  && (
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Mobile Network" value={networks[metadata?.network]} />
                 <ReceiptRow title="Recipient Number" value={metadata?.number} />
-                <ReceiptRow title="Transaction Type" value={type} />
+                <ReceiptRow title="Transaction Type" value={receiptType} />
                 <ReceiptRow title="Transaction ID" value={transactionId} />
               </div>
             )
