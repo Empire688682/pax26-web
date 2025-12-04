@@ -99,7 +99,7 @@ export const AppProvider = ({ children }) => {
 
         // If stored user data expired after 24 hours, remove it
         if (now - parsedData.timestamp > twentyFourHours) {
-          localStorage.removeItem("userData");
+          logoutUser();
         } else {
           // Otherwise, load user data into state
           setUserData(parsedData);

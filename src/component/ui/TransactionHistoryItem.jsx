@@ -31,19 +31,60 @@ export default function TransactionHistoryItem({ data }) {
                     </div>
 
                     {
-                        data?.type !== "Wallet funding" && data?.type !== "Electricity" && (
+                        data?.type !== "Wallet funding" && data?.type !== "electricity" && (
                             <div className="flex flex-col">
-                                <span className="text-gray-500 text-sm">Phone Number</span>
+                                <span className="text-gray-500 text-sm"> {data.type }Phone Number</span>
                                 <span className="text-lg font-medium">{data?.metadata?.number}</span>
                             </div>
                         )
                     }
 
                     {
-                        data?.type !== "Wallet funding" && data?.type !== "Electricity" && (
+                        data?.type !== "Wallet funding" && data?.type !== "electricity" && (
                             <div className="flex flex-col">
                                 <span className="text-gray-500 text-sm">Network</span>
                                 <span className="text-lg font-medium">{data?.metadata?.network}</span>
+                            </div>
+                        )
+                    }
+                    
+                    {
+                        data?.type === "electricity"&& (
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm">Provider</span>
+                                <span className="text-lg font-medium">{data?.metadata?.network}</span>
+                            </div>
+                        )
+                    }
+                    {
+                        data?.type === "electricity"&& (
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm">Meter number</span>
+                                <span className="text-lg font-medium">{data?.metadata?.network}</span>
+                            </div>
+                        )
+                    }
+                    {
+                        data?.type === "electricity"&& (
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm">Meter name</span>
+                                <span className="text-lg font-medium">{data?.metadata?.name || "Mock name"}</span>
+                            </div>
+                        )
+                    }
+                    {
+                        data?.type === "electricity"&& (
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm">Meter address</span>
+                                <span className="text-lg font-medium">{data?.metadata?.address || "Home mock data No. 10"}</span>
+                            </div>
+                        )
+                    }
+                    {
+                        data?.type === "electricity"&& (
+                            <div className="flex flex-col">
+                                <span className="text-gray-500 text-sm">Token</span>
+                                <span className="text-lg font-medium">{data?.token || "f0ce9d35-0163-418a-91eb-6098ad8de3aa"}</span>
                             </div>
                         )
                     }
