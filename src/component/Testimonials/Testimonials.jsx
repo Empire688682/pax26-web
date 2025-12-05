@@ -45,7 +45,8 @@ export default function Testimonials() {
       className="p-6 rounded-xl shadow hover:shadow-md transition"
       style={{ backgroundColor: pax26.card }}
       >
-        <p className="text-gray-700 text-sm italic mb-4">"{quote}"</p>
+        <p className="text-sm italic mb-4"
+        style={{color:pax26.textPrimary}}>"{quote}"</p>
         <hr className="my-4 border-gray-200" />
         <div>
           <p className="text-gray-400 font-semibold">{name}</p>

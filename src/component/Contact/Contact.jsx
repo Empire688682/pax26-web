@@ -35,19 +35,23 @@ const Contact = () => {
         {/* Left Side */}
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-blue-600">Get in Touch</h1>
-          <p className="text-gray-400">
+          <p 
+           style={{color:pax26.textPrimary}}>
             We're always here to help. Whether you have a question or just want to say hello,
             feel free to reach out!
           </p>
 
           <div className="space-y-4 text-sm text-gray-700">
-            <p className="flex items-center gap-2">
+            <p className="flex items-center gap-2"
+            style={{color:pax26.textPrimary}}>
               <Mail className="text-blue-500" size={18} /> info@pax26.com.com
             </p>
-            <p className="flex items-center gap-2">
+            <p className="flex items-center gap-2"
+            style={{color:pax26.textPrimary}}>
               <Phone className="text-green-500" size={18} /> +234 9154 3581 2845
             </p>
-            <p className="flex items-center gap-2">
+            <p className="flex items-center gap-2"
+            style={{color:pax26.textPrimary}}>
               <MapPin className="text-red-500" size={18} /> 10 Koshebinu Street Ibeshe, Lagos, Nigeria
             </p>
           </div>
@@ -71,7 +75,8 @@ const Contact = () => {
         className=" backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-blue-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label className="block text-sm font-medium mb-1"
+              style={{color:pax26.textPrimary}}>Full Name</label>
               <input
                 type="text"
                 name="name"
@@ -83,7 +88,8 @@ const Contact = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <label className="block text-sm font-medium mb-1"
+              style={{color:pax26.textPrimary}}>Email Address</label>
               <input
                 type="email"
                 name="email"
@@ -95,7 +101,8 @@ const Contact = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+              <label className="block text-sm font-medium mb-1"
+              style={{color:pax26.textPrimary}}>Message</label>
               <textarea
                 name="message"
                 rows="5"
