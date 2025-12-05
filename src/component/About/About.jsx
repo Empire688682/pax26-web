@@ -23,7 +23,7 @@ const About = () => {
           style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
           className="p-6 rounded-xl shadow">
             <h2 className="text-xl font-semibold text-blue-600 mb-2">Our Mission</h2>
-            <p className="text-gray-700">
+            <p style={{color:pax26.textPrimary}}>
               To empower Nigerians with simple, fast, and reliable digital services for everyday utility purchases.
             </p>
           </div>
@@ -31,7 +31,7 @@ const About = () => {
           style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
           className="p-6 rounded-xl shadow">
             <h2 className="text-xl font-semibold text-blue-600 mb-2">Our Vision</h2>
-            <p className="text-gray-700">
+            <p style={{color:pax26.textPrimary}}>
               To become the leading one-stop digital service provider in Africa, delivering convenience with every tap.
             </p>
           </div>
@@ -42,7 +42,8 @@ const About = () => {
         style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
         className="p-6 rounded-xl shadow text-center">
           <h2 className="text-2xl font-semibold text-blue-600 mb-4">Why Choose Pax26?</h2>
-          <ul className="space-y-2 text-gray-700 text-left max-w-md mx-auto">
+          <ul className="space-y-2 text-left max-w-md mx-auto"
+          style={{color:pax26.textPrimary}}>
             <li>✅ Instant airtime & data delivery</li>
             <li>✅ Reliable electricity token generation</li>
             <li>✅ Affordable prices with cashback commissions</li>
