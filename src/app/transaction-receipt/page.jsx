@@ -5,7 +5,6 @@ import TransactionReceiptWrapper from "@/component/Wrappers/TransactionReceiptWr
 import { Suspense } from "react";
 
 export default function Page() {
-  LoadingSpinner
   return (
     <Suspense fallback={<LoadingSpinner/>}>
       <TransactionReceiptWrapper />
