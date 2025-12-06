@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '../Context';
 import { PiHandWithdraw } from "react-icons/pi";
-import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown } from "lucide-react";
+import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
 import { toast, } from "react-toastify";
@@ -216,7 +216,13 @@ const Dashboard = () => {
         <QuickLinks title="Crypto" link="/dashboard" status="Comming Soon" icon={<TrendingDown
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Betting" link="/dashboard" status="Comming Soon" icon={<TrendingDown
+        <QuickLinks title="Gamb Pin" link="/dashboard" status="Comming Soon" icon={<Pin
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="Betting" link="/dashboard" status="Comming Soon" icon={<BetweenVerticalEndIcon
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="Weac Pin" link="/dashboard" status="Comming Soon" icon={<Pin
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
       </div>
 
