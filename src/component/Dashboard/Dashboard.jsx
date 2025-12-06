@@ -210,19 +210,19 @@ const Dashboard = () => {
         <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Gift Card" link="/dashboard" status="Comming Soon" icon={<Gift
+        <QuickLinks title="Gift Card" link="/dashboard" status="Inactive" icon={<Gift
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Crypto" link="/dashboard" status="Comming Soon" icon={<TrendingDown
+        <QuickLinks title="Crypto" link="/dashboard" status="Inactive" icon={<TrendingDown
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Gamb Pin" link="/dashboard" status="Comming Soon" icon={<Pin
+        <QuickLinks title="Gamb Pin" link="/dashboard" status="Inactive" icon={<Pin
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Betting" link="/dashboard" status="Comming Soon" icon={<BetweenVerticalEndIcon
+        <QuickLinks title="Betting" link="/dashboard" status="Inactive" icon={<BetweenVerticalEndIcon
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Weac Pin" link="/dashboard" status="Comming Soon" icon={<Pin
+        <QuickLinks title="Weac Pin" link="/dashboard" status="Inactive" icon={<Pin
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
       </div>
 

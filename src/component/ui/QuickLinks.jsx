@@ -10,8 +10,7 @@ const QuickLinks = ({link, title, icon, status}) => {
             {icon}
             <p className="text-sm font-medium"
                 style={{ color: pax26.textPrimary }}>{title}</p>
-                <p className="text-sm animate-pulse font-bold text-center"
-            style={{ color: pax26.textPrimary }}>{status}</p>
+                <p className="text-sm animate-pulse text-red-500 font-bold text-center">{status}</p>
         </div>
     )
 }
