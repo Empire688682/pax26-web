@@ -15,6 +15,7 @@ const TransactionSchema = new mongoose.Schema(
       name: { type: String },
       address: { type: String },
       token: { type: String },
+      meterNumber: { type: String },
     },
   },
   {
