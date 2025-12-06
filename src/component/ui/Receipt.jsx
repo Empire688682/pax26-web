@@ -12,7 +12,6 @@ export default function Receipt({
   receiptType,
   metadata,
 }) {
-  console.log("Receipt metadata:", metadata);
   const receiptRef = useRef(null);
   const networks = {
     "01": "MTN",
@@ -131,6 +130,15 @@ export default function Receipt({
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Mobile Network" value={networks[metadata?.network]} />
                 <ReceiptRow title="Recipient Number" value={metadata?.number} />
+                <ReceiptRow title="Transaction Type" value={receiptType} />
+                <ReceiptRow title="Transaction ID" value={transactionId} />
+              </div>
+            )
+          }
+          {
+            // Electricity Receipt Details
+            (receiptType === "Wallet funding")  && (
+              <div className="space-y-3 text-sm">
                 <ReceiptRow title="Transaction Type" value={receiptType} />
                 <ReceiptRow title="Transaction ID" value={transactionId} />
               </div>

@@ -5,11 +5,12 @@ import { PiHandWithdraw } from "react-icons/pi";
 import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
-import { toast,  } from "react-toastify";
+import { toast, } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import CashBackBalance from '../CashBackBalance/CashBackBalance';
 import PasswordReset from '../PasswordReset/PasswordReset';
+import QuickLinks from '../ui/QuickLinks';
 
 const Dashboard = () => {
   const {
@@ -20,7 +21,7 @@ const Dashboard = () => {
     router,
     transactionHistory,
     loading,
-     } = useGlobalContext();
+  } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(true);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData?.referralCode}`;
@@ -67,19 +68,19 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    setIsPasswordSet(!!userData?.isPasswordSet);
-  }, 5000);
+    const interval = setInterval(() => {
+      setIsPasswordSet(!!userData?.isPasswordSet);
+    }, 5000);
 
-  return () => clearInterval(interval);
-}, [userData]);
+    return () => clearInterval(interval);
+  }, [userData]);
   useEffect(() => {
-  const interval = setInterval(() => {
-    setIsPasswordSet(!!userData?.isPasswordSet);
-  }, 5000);
+    const interval = setInterval(() => {
+      setIsPasswordSet(!!userData?.isPasswordSet);
+    }, 5000);
 
-  return () => clearInterval(interval);
-}, [userData]);
+    return () => clearInterval(interval);
+  }, [userData]);
 
 
   return (
@@ -91,7 +92,7 @@ const Dashboard = () => {
           </div>
         )
       }
-      
+
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-medium text-lg flex text-sm items center gap-2"
           style={{ color: pax26.textPrimary }}>
@@ -112,7 +113,7 @@ const Dashboard = () => {
               style={{ color: pax26.textPrimary }}>Commission</p>
             <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
               {
-                withdrawLoading ? <FaSpinner style={{color:pax26.textPrimary}} className='text-2xl animate-spin' />
+                withdrawLoading ? <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
                   :
                   <p className="text-xl font-bold"
                     style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
@@ -157,7 +158,7 @@ const Dashboard = () => {
                   style={{ color: pax26.textPrimary }}>Commission</p>
                 <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
                   {
-                    withdrawLoading ? <FaSpinner style={{color:pax26.textPrimary}} className='text-2xl animate-spin' />
+                    withdrawLoading ? <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
                       :
                       <p className="text-xl font-bold"
                         style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
@@ -193,63 +194,30 @@ const Dashboard = () => {
       <h3 className="text-md font-medium mb-2"
         style={{ color: pax26.textPrimary }}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div onClick={() => router.push("/fund-wallet")}
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Wallet
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium"
-            style={{ color: pax26.textPrimary }}>Fund Wallet</p>
-        </div>
 
-        <div onClick={() => router.push("/dashboard/buy-airtime")}
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Phone
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium"
-            style={{ color: pax26.textPrimary }}>Buy Airtime</p>
-        </div>
+        <QuickLinks title="Fund Wallet" link="/fund-wallet" status="" icon={<Wallet
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <div onClick={() => router.push("/dashboard/buy-data")}
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Wifi
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium"
-            style={{ color: pax26.textPrimary }}>Buy Data</p>
-        </div>
+        <QuickLinks title="Buy Airtime" link="/dashboard/buy-airtime" status="" icon={<Phone
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <div onClick={() => router.push("/dashboard/buy-electricity")}
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Zap
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium"
-            style={{ color: pax26.textPrimary }}>Electricity</p>
-        </div>
+        <QuickLinks title="Buy Data" link="/dashboard/buy-data" status="" icon={<Wifi
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <div onClick={() => router.push("/dashboard/buy-tv")}
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Tv
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium"
-            style={{ color: pax26.textPrimary }}>TV Subscription</p>
-        </div>
-        <div
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <Gift
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium text-center"
-            style={{ color: pax26.textPrimary }}>Gift Card</p>
-          <p className="text-sm animate-pulse font-bold text-center"
-            style={{ color: pax26.textPrimary }}>Comming Soon</p>
-        </div>
-        <div
-          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
-          <TrendingDown
-            style={{ color: pax26.textPrimary }} className="mb-2" size={28} />
-          <p className="text-sm font-medium text-center"
-            style={{ color: pax26.textPrimary }}>Crypto</p>
-          <p className="text-sm animate-pulse font-bold text-center"
-            style={{ color: pax26.textPrimary }}>Comming Soon</p>
-        </div>
+        <QuickLinks title="Electricity" link="/dashboard/buy-electricity" status="" icon={<Zap
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="Gift Card" link="/dashboard" status="Comming Soon" icon={<Gift
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="Crypto" link="/dashboard" status="Comming Soon" icon={<TrendingDown
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        <QuickLinks title="Betting" link="/dashboard" status="Comming Soon" icon={<TrendingDown
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
       </div>
 
       <h3 className="text-md font-medium mb-2 mt-6"
@@ -266,8 +234,8 @@ const Dashboard = () => {
                   <>
                     {[...transactionHistory].reverse().slice(0, 5).map((transaction) => (
                       <div key={transaction._id}
-                      onClick={()=>router.push(`transaction-receipt/?id=${transaction._id}`)}
-                       className="flex cursor-pointer justify-between items-center">
+                        onClick={() => router.push(`transaction-receipt/?id=${transaction._id}`)}
+                        className="flex cursor-pointer justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-400">{new Date(transaction.createdAt).toISOString().replace("T", " ").split(".")[0]}</p>
                           <p className="font-medium">{transaction.description}</p>
