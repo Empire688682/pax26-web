@@ -24,6 +24,7 @@ const Dashboard = () => {
   } = useGlobalContext();
   const [showMore, setShowMore] = useState(false);
   const [isPasswordSet, setIsPasswordSet] = useState(true);
+  const [moreLinks, setMoreLinks] = useState(false);
   const referralLink = `${process.env.NEXT_PUBLIC_URL}?ref=${userData?.referralCode}`;
 
   const handleCopy = () => {
@@ -210,7 +211,13 @@ const Dashboard = () => {
         <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Gift Card" link="/dashboard" status="Inactive" icon={<Gift
+        <QuickLinks title="Betting" link="/dashboard" status="Inactive" icon={<BetweenVerticalEndIcon
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
+        {
+          moreLinks && (
+            <>
+             <QuickLinks title="Gift Card" link="/dashboard" status="Inactive" icon={<Gift
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         <QuickLinks title="Crypto" link="/dashboard" status="Inactive" icon={<TrendingDown
@@ -219,12 +226,23 @@ const Dashboard = () => {
         <QuickLinks title="Gamb Pin" link="/dashboard" status="Inactive" icon={<Pin
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Betting" link="/dashboard" status="Inactive" icon={<BetweenVerticalEndIcon
-          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
-
         <QuickLinks title="Weac Pin" link="/dashboard" status="Inactive" icon={<Pin
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+            </>
+          )
+        }
+        <div onClick={() => setMoreLinks(!moreLinks)}
+          style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-1 rounded-lg shadow-md flex items-center justify-center gap-2">
+          {moreLinks ? (
+            <PiHandWithdraw className="mb-2 text-blue-400" size={22} />
+          ) : (
+            <PiHandWithdraw className="mb-2 text-blue-400" size={22} />
+          )}
+          <p className="text-xs font-medium text-blue-400">{moreLinks ? "Show Less" : "Show More"}</p>
+          </div>
       </div>
+
+      
 
       <h3 className="text-md font-medium mb-2 mt-6"
         style={{ color: pax26.textPrimary }}>Recent Activities</h3>

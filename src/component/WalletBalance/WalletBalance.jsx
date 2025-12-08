@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useGlobalContext } from '../Context';
 import { usePathname } from 'next/navigation';
-import { ArrowBigRightDash, ArrowBigLeftDashIcon } from 'lucide-react';
+import { PiHandWithdraw } from 'lucide-react';
 
 const WalletBalance = ({ setShowMore, showMore }) => {
     const { getUserRealTimeData, router, pax26, userWallet } = useGlobalContext();
@@ -26,10 +26,10 @@ const WalletBalance = ({ setShowMore, showMore }) => {
                     <button className="bg-blue-600 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={() => router.push("/fund-wallet")}>Fun Wallet +</button>
                     {
                         pathName === "/dashboard" && (
-                            <p className="cursor-pointer absolute left-0 bottom-[-23px] md:hidden items-center flex text-gray-400 text-xs px-3 py-1"
+                            <p className="cursor-pointer absolute left-0 bottom-[-23px] md:hidden items-center flex text-blue-400 text-xs px-3 py-1"
                                 style={{ backgroundColor: pax26.bg }}
                                 onClick={() => setShowMore(!showMore)}>{showMore ? "Show Less" : "Show More"} {
-                                    showMore ? <ArrowBigLeftDashIcon /> : <ArrowBigRightDash />
+                                    <PiHandWithdraw />
                                 }</p>
                         )
                     }
