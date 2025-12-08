@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useGlobalContext } from '../Context';
 import { usePathname } from 'next/navigation';
-import { PiHandWithdraw } from 'lucide-react';
+import { PiHandWithdraw } from "react-icons/pi";
 
 const WalletBalance = ({ setShowMore, showMore }) => {
     const { getUserRealTimeData, router, pax26, userWallet } = useGlobalContext();
@@ -28,8 +28,9 @@ const WalletBalance = ({ setShowMore, showMore }) => {
                         pathName === "/dashboard" && (
                             <p className="cursor-pointer absolute left-0 bottom-[-23px] md:hidden items-center flex text-blue-400 text-xs px-3 py-1"
                                 style={{ backgroundColor: pax26.bg }}
-                                onClick={() => setShowMore(!showMore)}>{showMore ? "Show Less" : "Show More"} {
-                                    <PiHandWithdraw />
+                                onClick={() => setShowMore(!showMore)}>
+                                    <PiHandWithdraw size={20}/>
+                                    {showMore ? "Show Less" : "Show More"} {
                                 }</p>
                         )
                     }

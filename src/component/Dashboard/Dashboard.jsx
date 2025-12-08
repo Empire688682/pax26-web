@@ -211,7 +211,7 @@ const Dashboard = () => {
         <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Betting" link="/dashboard" status="Inactive" icon={<BetweenVerticalEndIcon
+        <QuickLinks title="Betting" link="/dashboard/betting" status="Inactive" icon={<BetweenVerticalEndIcon
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         {

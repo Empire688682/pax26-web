@@ -5,19 +5,36 @@ import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import AirtimeHelp from '../AirtimeHelp/AirtimeHelp';
 import axios from 'axios';
-import { useGlobalContext } from '../Context';
-import { FaTimes } from 'react-icons/fa';
 
 const BettingSub = () => {
-  const { setPinModal, getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
+  const { setPinModal, getUserRealTimeData, userData, pax26 } = useGlobalContext();
   const [data, setData] = useState({
-    network: "",
+    platform: "",
     amount: "",
-    number: "",
+    userId: "",
     pin: "",
   });
   const [loading, setLoading] = useState(false)
-  const [checked, setChecked] = useState(false)
+  const [bettingPlatform, setBettingPlatform] = useState({});
+
+  useEffect(()=>{
+    function fetchBettingPlatforms(){
+    axios.get(`${process.env.NEXT_PUBLIC_BETTING_COMPANY_URL}`)
+    .then((response)=>{
+      const platforms = response.data.data;
+        const platformMap = {};
+        platforms.forEach((platform) => {
+          platformMap[platform.code] = platform.name;
+        });
+        console.log("platformMap:", platformMap);
+        setBettingPlatform(platformMap);
+    })
+    .catch((error)=>{
+      console.log("Error fetching betting platforms:", error);
+    })
+  };
+  fetchBettingPlatforms();
+  }, []);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -37,9 +54,9 @@ const BettingSub = () => {
     e.preventDefault();
 
     // ✅ Validation
-    if (!data.network) return toast.error("Please select a network");
+    if (!data.platform) return toast.error("Please select a platform");
     if (!data.amount || parseInt(data.amount) < 50) return toast.error("Amount must be at least ₦50");
-    if (!/^\d{11}$/.test(data.number)) return toast.error("Enter a valid 11-digit phone number");
+    if (!/^\d{11}$/.test(data.userId)) return toast.error("Enter a valid 11-digit phone userId");
     if (data.pin.length < 4) return toast.error("PIN must be at least 4 digits");
     if (data.pin === "1234") {
       toast.error("1234 is not allowed");
@@ -55,15 +72,14 @@ const BettingSub = () => {
   const buyAirtime = async () => {
     setLoading(true);
     try {
-      const usedCashBack = checked ? true : false;
-      const response = await axios.post("/api/provider/airtime-provider",
-        { ...data, usedCashBack }
+      const response = await axios.post("/api/provider/betting-provider",
+        {data}
       );
       if (response.data.success) {
         getUserRealTimeData();
         toast.success(response.data.message);
         setData({
-          network: "",
+          platform: "",
           amount: "",
           number: "",
           pin: "",
@@ -101,24 +117,24 @@ const BettingSub = () => {
             style={{ backgroundColor: pax26.card }}>
             <div className='flex justify-between items-center mb-8'>
               <h1 className="text-2xl font-bold text-center text-blue-700 tracking-tight">
-                Buy Airtime
+                Betting Funding
               </h1>
             </div>
 
             <form onSubmit={handleFormSubmission} className="space-y-6">
-              {/* Network */}
+              {/* Platform */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Select Network
+                  Select Betting Platform
                 </label>
                 <select
-                  name="network"
+                  name="platform"
                   onChange={handleChange}
-                  value={data.network}
+                  value={data.platform}
                   required
                   className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
-                  <option disabled value="">-- Choose Network --</option>
+                  <option disabled value="">-- Choose platform --</option>
                   <option value="01">MTN</option>
                   <option value="02">GLO</option>
                   <option value="04">Airtel</option>
@@ -136,65 +152,24 @@ const BettingSub = () => {
                   value={data.amount}
                   type="number"
                   name="amount"
-                  min="50"
+                  min="100"
                   required
-                  placeholder='Enter Amount / Min: 50'
+                  placeholder='Enter Amount / Min: 100'
                   className="w-full pl-7 pr-12 border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
-                {
-                  checked && data.amount && Number(data.amount) >= 50 && (
-                    <span className='text-green-500 font-bold absolute right-6 top-8'>
-                      {
-                        Number(data.amount) < userCashBack && (
-                          0
-                        )
-                      }
-                      {
-                        Number(data.amount) > userCashBack && (
-                           Number(data.amount) - userCashBack 
-                        )
-                      }
-                      {
-                        Number(data.amount) === userCashBack && (
-                          0
-                        )
-                      }
-                    </span>
-                  )
-                }
-                {
-                  checked && data.amount && Number(data.amount) >= 50 && (
-                    <span className='text-green-500 font-bold'>
-                      - ₦
-                      {
-                        Number(data.amount) < userCashBack ?
-                          `${data.amount}`
-                          :
-                          `${userCashBack}`
-                      }
-                    </span>
-                  )
-                }
-                {
-                  checked && data.amount && Number(data.amount) >= 50 && (
-                    <span className='text-red-500 font-bold absolute left-2 top-9'>
-                      <FaTimes />
-                    </span>
-                  )
-                }
               </div>
 
               {/* Phone Number */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Phone Number
+                  UserId
                 </label>
                 <input
                   onChange={handleChange}
-                  value={data.number}
-                  name="number"
+                  value={data.userId}
+                  name="userId"
                   type="tel"
-                  placeholder="e.g. 09154358139"
+                  placeholder="e.g. 0154358139"
                   required
                   className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
