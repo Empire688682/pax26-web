@@ -9,7 +9,6 @@ export async function OPTIONS(){
 export async function POST(req) {
   const reqBody = await req.json();
   const {customerId, platform} = reqBody;
-  console.log("reqBody: ", reqBody)
   if(!customerId || !platform){
    return NextResponse.json({message:"!customerId or platform not found", success:false}, {status:400, headers:corsHeaders()})
   };
