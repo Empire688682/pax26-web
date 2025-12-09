@@ -14,10 +14,6 @@ export async function POST(req) {
    return NextResponse.json({message:"!customerId or platform not found", success:false}, {status:400, headers:corsHeaders()})
   };
 
-  console.log("KEYS: ", `https://www.nellobytesystems.com/APIVerifyBettingV1.asp?customerId=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&BettingCompany=${platform}&CustomerID=${customerId}` )
-
-   const response =  await axios.get(`https://www.nellobytesystems.com/APIVerifyBettingV1.asp?customerId=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&BettingCompany=NAIRABET&CustomerID=${customerId}`)
-   console.log("response: ", response?.data);
-   return;
-    return NextResponse.json({ message:"success", data:response, success:true }, {status:200, headers:corsHeaders()});
+   const response =  await axios.get(`https://www.nellobytesystems.com/APIVerifyBettingV1.asp?UserID=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&BettingCompany=${platform}&CustomerID=${customerId}`)
+    return NextResponse.json({ message:"success", data:response.data, success:true }, {status:200, headers:corsHeaders()});
 }

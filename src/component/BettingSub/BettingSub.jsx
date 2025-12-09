@@ -37,19 +37,20 @@ const BettingSub = () => {
   }, []);
 
   useEffect(() => {
-    if(!data.platform || !data.customerId){
+    const customerIdLength = Number(data.customerId.length);
+    if(!data.platform || data.customerId.length < 5 ){
       return;
     };
     async function checkUserVerification() {
       setVerifyingId(true);
       try {
         const response = await axios.post(`/api/verify-betting-user`, data );
-        if (response.data.success) {
+        if (response.data.success && response.data.data.status === 200) {
           setcustomerName(response.data.data.customer_name);
           setCustomerVerified(true);
           return;
         }
-        setcustomerName("Invalid platform or customerId");
+        setcustomerName(response.data.data.customer_name);
         setCustomerVerified(false);
 
       } catch (error) {
@@ -190,9 +191,7 @@ const BettingSub = () => {
                   </span>
                 }
                 {
-                  customerName && customerName !== "Invalid provider or meter number" ? <p className='text-xs pt-2 font-bold text-green-500'>{customerName}</p>
-                    :
-                    <p className='text-xs pt-2 font-bold text-red-500'>{customerName}</p>
+                    <p className={`text-xs pt-2 font-bold ${customerVerified ? 'text-green-500':'text-red-500'}`}>{customerName}</p>
                 }
               </div>
 
