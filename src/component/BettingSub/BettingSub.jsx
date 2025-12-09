@@ -37,7 +37,6 @@ const BettingSub = () => {
   }, []);
 
   useEffect(() => {
-    const customerIdLength = Number(data.customerId.length);
     if(!data.platform || data.customerId.length < 5 ){
       return;
     };
@@ -67,6 +66,43 @@ const BettingSub = () => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
+  async function fundBetting() {
+    if(!customerVerified) return toast.error("CustomerId not verified");
+    if(!data.platform || !data.amount || !data.customerId || !data.pin) {
+      toast.error("All fields are required");
+      return;
+    }
+    if(data.pin === "1234") {
+      toast.error("1234 is not allowed");
+    }
+    try {
+
+      const response = await axios.post("/api/provider/betting-provider", { data });
+      if (response.data.success) {
+        getUserRealTimeData();
+        toast.success(response.data.message);
+        setData({
+          platform: "",
+          amount: "",
+          number: "",
+          pin: "",
+        });
+      }
+      
+    } catch (error) {
+      console.log("Error funding betting wallet:", error);
+      toast.error(error.response.data.message);
+      if (error.response.data.message === "1234 is not allowed") {
+        setTimeout(() => {
+          setPinModal(true)
+        }, 2000)
+      }
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (userData.pin === null) {
@@ -80,11 +116,6 @@ const BettingSub = () => {
   const handleFormSubmission = (e) => {
     e.preventDefault();
 
-    // ✅ Validation
-    if (!data.platform) return toast.error("Please select a platform");
-    if (!data.amount || parseInt(data.amount) < 50) return toast.error("Amount must be at least ₦50");
-    if (!/^\d{11}$/.test(data.customerId)) return toast.error("Enter a valid 11-digit phone customerId");
-    if (data.pin.length < 4) return toast.error("PIN must be at least 4 digits");
     if (data.pin === "1234") {
       toast.error("1234 is not allowed");
       setTimeout(() => {
@@ -96,40 +127,6 @@ const BettingSub = () => {
     fundBetting();
   };
 
-  const fundBetting = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.post("/api/provider/betting-provider",
-        { data }
-      );
-      if (response.data.success) {
-        getUserRealTimeData();
-        toast.success(response.data.message);
-        setData({
-          platform: "",
-          amount: "",
-          number: "",
-          pin: "",
-        });
-      }
-    } catch (error) {
-      toast.error(error.response.data.message);
-      console.log(error.response.data.details);
-      if (error.response.data.message === "1234 is not allowed") {
-        setTimeout(() => {
-          setPinModal(true)
-        }, 2000)
-      }
-      if (error.response.data.message === "Pin not activated yet!") {
-        setTimeout(() => {
-          setPinModal(true)
-        }, 2000)
-      }
-    }
-    finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen py-10 overflow-x-hidden px-6"
