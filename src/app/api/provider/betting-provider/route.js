@@ -23,9 +23,9 @@ export async function POST(req) {
   session.startTransaction();
 
   try {
-    const { network, amount, number, pin, usedCashBack } = reqBody;
+    const { platform, customerId, amount, pin } = reqBody;
 
-    if (!network || !amount || !number || !pin) {
+    if (!platform || !amount || !pin || !customerId) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "All fields are required" },
@@ -65,11 +65,6 @@ export async function POST(req) {
     let cashbackToUse = 0;
     let walletToUse = Number(amount);
 
-    if (usedCashBack) {
-      cashbackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
-      walletToUse = Number(amount) - cashbackToUse;
-    }
-
     // Check wallet sufficiency
     if (verifyUser.walletBalance < walletToUse) {
       await session.abortTransaction(); session.endSession();
@@ -88,7 +83,7 @@ export async function POST(req) {
 
     // 👉 Call external API
     const res = await fetch(
-      `https://www.nellobytesystems.com/APIAirtimeV1.asp?UserID=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&MobileNetwork=${network}&Amount=${amount}&MobileNumber=${number}`,
+        `https://www.nellobytesystems.com/APIBettingV1.aspUserID=${process.env.CLUBKONNECT_USERID}&APIKey=${process.env.CLUBKONNECT_APIKEY}&BettingCompany=${platform}&CustomerID=${customerId}&Amount=${amount}`,
       { method: "GET" }
     );
 
@@ -126,15 +121,14 @@ export async function POST(req) {
     const newTransaction = await TransactionModel.create(
       [{
         userId,
-        type: "airtime",
+        type: "betting",
         amount,
         status: "success",
         transactionId: result.orderid,
         reference: result.orderid,
         metadata: {
-          network,
-          number,
-          cashbackUsed: cashbackToUse,
+          platform,
+          number: customerId,
           walletUsed: walletToUse,
         }
       }],
