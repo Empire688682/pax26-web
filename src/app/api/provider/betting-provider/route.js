@@ -98,20 +98,13 @@ export async function POST(req) {
       );
     }
 
-    if(!usedCashBack){
-        const apiAmount = Number(result.amount);
-        const userCashback = Number(amount) - apiAmount;
-        verifyUser.cashBackBalance += Math.floor(userCashback);
-        await verifyUser.save({ session });
-      }
-
     // ✅ Update Provider balance
     await ProviderModel.findOneAndUpdate(
       { name: "ClubConnect" },
       {
         lastUser: userId,
         lastAction: "debit",
-        note: `Debited for Airtime`,
+        note: `Debited for Betting Topup - ${customerId}`,
         amount: result.walletbalance
       },
       { new: true, upsert: true }
