@@ -7,6 +7,7 @@ import AirtimeHelp from '../AirtimeHelp/AirtimeHelp';
 import { FaSpinner } from "react-icons/fa";
 import axios from 'axios';
 import { useGlobalContext } from '../Context';
+import BettingHelp from '../BettingHelp/BettingHelp';
 
 const BettingSub = () => {
   const { setPinModal, getUserRealTimeData, userData, pax26 } = useGlobalContext();
@@ -241,7 +242,7 @@ const BettingSub = () => {
 
         </div>
 
-        <AirtimeHelp data={data} />
+        <BettingHelp data={data} customerName={customerName} />
 
       </div>
     </div>
