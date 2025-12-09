@@ -21,7 +21,6 @@ export async function POST(req) {
   await connectDb();
   const body = await req.json();
   const { disco, meterNumber, meterType, amount, phone, pin, customerName } = body;
-  console.log("Electricity-REQ:", body);
 
   try {
     // Validate request

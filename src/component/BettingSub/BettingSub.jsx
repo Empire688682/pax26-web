@@ -1,51 +1,77 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { toast,  } from "react-toastify";
+import { toast, } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import AirtimeHelp from '../AirtimeHelp/AirtimeHelp';
+import { FaSpinner } from "react-icons/fa";
 import axios from 'axios';
+import { useGlobalContext } from '../Context';
 
 const BettingSub = () => {
   const { setPinModal, getUserRealTimeData, userData, pax26 } = useGlobalContext();
   const [data, setData] = useState({
     platform: "",
     amount: "",
-    userId: "",
+    customerId: "",
     pin: "",
   });
-  const [loading, setLoading] = useState(false)
-  const [bettingPlatform, setBettingPlatform] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [bettingPlatform, setBettingPlatform] = useState([]);
+  const [customerVerified, setCustomerVerified] = useState(false);
+  const [verifyingId, setVerifyingId] = useState(false);
+  const [customerName, setcustomerName] = useState("");
 
-  useEffect(()=>{
-    function fetchBettingPlatforms(){
-    axios.get(`${process.env.NEXT_PUBLIC_BETTING_COMPANY_URL}`)
-    .then((response)=>{
-      const platforms = response.data.data;
-        const platformMap = {};
-        platforms.forEach((platform) => {
-          platformMap[platform.code] = platform.name;
-        });
-        console.log("platformMap:", platformMap);
-        setBettingPlatform(platformMap);
-    })
-    .catch((error)=>{
-      console.log("Error fetching betting platforms:", error);
-    })
-  };
-  fetchBettingPlatforms();
+  useEffect(() => {
+    function fetchBettingPlatforms() {
+      axios.get(`${process.env.NEXT_PUBLIC_BETTING_COMPANY_URL}`)
+        .then((response) => {
+          const platforms = response.data.BETTING_COMPANY;
+          setBettingPlatform(platforms);
+        })
+        .catch((error) => {
+          console.log("Error fetching betting platforms:", error);
+        })
+    };
+    fetchBettingPlatforms();
   }, []);
+
+  useEffect(() => {
+    if(!data.platform || !data.customerId){
+      return;
+    };
+    async function checkUserVerification() {
+      setVerifyingId(true);
+      try {
+        const response = await axios.post(`/api/verify-betting-user`, data );
+        if (response.data.success) {
+          setcustomerName(response.data.data.customer_name);
+          setCustomerVerified(true);
+          return;
+        }
+        setcustomerName("Invalid platform or customerId");
+        setCustomerVerified(false);
+
+      } catch (error) {
+        console.log("Error verifying customer:", error);
+      }
+      finally {
+        setVerifyingId(false);
+      }
+    };
+    checkUserVerification();
+  }, [data.customerId, data.platform]);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      if(userData.pin === null){
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userData.pin === null) {
         setPinModal(true);
       }
-    },2000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [userData]);
@@ -56,7 +82,7 @@ const BettingSub = () => {
     // ✅ Validation
     if (!data.platform) return toast.error("Please select a platform");
     if (!data.amount || parseInt(data.amount) < 50) return toast.error("Amount must be at least ₦50");
-    if (!/^\d{11}$/.test(data.userId)) return toast.error("Enter a valid 11-digit phone userId");
+    if (!/^\d{11}$/.test(data.customerId)) return toast.error("Enter a valid 11-digit phone customerId");
     if (data.pin.length < 4) return toast.error("PIN must be at least 4 digits");
     if (data.pin === "1234") {
       toast.error("1234 is not allowed");
@@ -66,14 +92,14 @@ const BettingSub = () => {
       return null
     }
 
-    buyAirtime();
+    fundBetting();
   };
 
-  const buyAirtime = async () => {
+  const fundBetting = async () => {
     setLoading(true);
     try {
       const response = await axios.post("/api/provider/betting-provider",
-        {data}
+        { data }
       );
       if (response.data.success) {
         getUserRealTimeData();
@@ -107,7 +133,7 @@ const BettingSub = () => {
   return (
     <div className="min-h-screen py-10 overflow-x-hidden px-6"
       style={{ backgroundColor: pax26.secondaryBg }}>
-      
+
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 
@@ -132,14 +158,42 @@ const BettingSub = () => {
                   onChange={handleChange}
                   value={data.platform}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border capitalize border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option disabled value="">-- Choose platform --</option>
-                  <option value="01">MTN</option>
-                  <option value="02">GLO</option>
-                  <option value="04">Airtel</option>
-                  <option value="03">9Mobile</option>
+                  {
+                    bettingPlatform?.map((platform, i) => (
+                      <option key={i} value={platform.PRODUCT_CODE}>{platform?.PRODUCT_CODE}</option>
+                    ))
+                  }
                 </select>
+              </div>
+
+              {/* CustomerId */}
+              <div className='relative'>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Customer Id
+                </label>
+                <input
+                  onChange={handleChange}
+                  value={data.customerId}
+                  name="customerId"
+                  type="tel"
+                  placeholder="e.g. 0154358139"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+
+                {
+                  verifyingId && <span className="absolute right-[10px] top-[40px]">
+                    <FaSpinner className="animate-spin text-blue-600 text-2xl" />
+                  </span>
+                }
+                {
+                  customerName && customerName !== "Invalid provider or meter number" ? <p className='text-xs pt-2 font-bold text-green-500'>{customerName}</p>
+                    :
+                    <p className='text-xs pt-2 font-bold text-red-500'>{customerName}</p>
+                }
               </div>
 
               {/* Amount */}
@@ -156,22 +210,6 @@ const BettingSub = () => {
                   required
                   placeholder='Enter Amount / Min: 100'
                   className="w-full pl-7 pr-12 border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  UserId
-                </label>
-                <input
-                  onChange={handleChange}
-                  value={data.userId}
-                  name="userId"
-                  type="tel"
-                  placeholder="e.g. 0154358139"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
 
