@@ -200,7 +200,7 @@ export default function SignupPage() {
                         
                         {
                             (authType === "register" || authType === "login")  &&  (
-                                <GoogleLoginButton />
+                                <GoogleLoginButton  loading={loading} setLoading={setLoading}/>
                             )
                         }
 

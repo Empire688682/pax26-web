@@ -7,15 +7,15 @@ import axios from "axios";
 import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
-export default function GoogleLoginButton() {
+export default function GoogleLoginButton({loading, setLoading}) {
   const { refHostCode, setIsModalOpen, router, setUserData } = useGlobalContext();
-  const [loading, setLoading] = useState(false);
+  const [HomeLoading, setHomeLoading] = useState(false);
   const [error, setError] = useState("");
 
   const apiUrl = `/api/auth/google`;
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setHomeLoading(true);
     setError("");
     try {
       const result = await signInWithPopup(auth, provider);
@@ -55,7 +55,7 @@ export default function GoogleLoginButton() {
       const innerMessage = err.response?.data?.message;
       setError(innerMessage || err.message || "Something went wrong with Google login.");
     } finally {
-      setLoading(false);
+      setHomeLoading(false);
     }
   };
 
@@ -74,11 +74,11 @@ export default function GoogleLoginButton() {
       </div>
 
       <button
-        onClick={handleGoogleLogin}
-        disabled={loading}
-        className="w-full mt-4 flex items-center justify-center gap-3 border border-gray-400 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50"
+        onClick={loading ? null : handleGoogleLogin}
+        disabled={HomeLoading}
+        className={` ${loading ? 'cursor-not-allowed opacity-50 pointer-events-none': ''} w-full mt-4 flex items-center justify-center gap-3 border border-gray-400 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 `}
       >
-        {loading ? (
+        {HomeLoading ? (
           <>
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             <span>Signing in...</span>
