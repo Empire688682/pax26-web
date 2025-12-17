@@ -124,7 +124,7 @@ export const AppProvider = ({ children }) => {
       setTransactionHistory([]);
       setUserWallet(0);
       setUserCommission(0);
-      router.push("/");
+      window.location.reload();
     } catch (error) {
       console.log("Logout Error:", error);
       toast.error("Something went wrong logging out");
