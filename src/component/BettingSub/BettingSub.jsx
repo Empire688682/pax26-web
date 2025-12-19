@@ -38,7 +38,7 @@ const BettingSub = () => {
   }, []);
 
   useEffect(() => {
-    if(!data.platform || data.customerId.length < 5 ){
+    if(!data.platform || data.customerId.length < 7 ){
       return;
     };
     async function checkUserVerification() {

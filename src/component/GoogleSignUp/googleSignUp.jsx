@@ -7,7 +7,7 @@ import axios from "axios";
 import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
-export default function GoogleLoginButton({loading, setLoading}) {
+export default function GoogleLoginButton({loading, setAwayLoading}) {
   const { refHostCode, setIsModalOpen, router, setUserData } = useGlobalContext();
   const [HomeLoading, setHomeLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,6 +16,7 @@ export default function GoogleLoginButton({loading, setLoading}) {
 
   const handleGoogleLogin = async () => {
     setHomeLoading(true);
+    setAwayLoading(true)
     setError("");
     try {
       const result = await signInWithPopup(auth, provider);

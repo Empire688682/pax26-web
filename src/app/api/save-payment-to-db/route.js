@@ -38,7 +38,7 @@ export async function POST(req) {
 
     return NextResponse.json({success:true, message:"Payment saved"}, { status: 200, headers:corsHeaders() });
   } catch (error) {
-    console.error("Flutterwave error:", error?.response?.data || error.message);
+    console.error("Saving payment error:", error?.response?.data || error.message);
     return NextResponse.json(
       { message: "Failed to save payment", error: error.message },
       { status: 500, headers:corsHeaders() }

@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { toast,  } from "react-toastify";
+import { toast, } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
@@ -21,6 +21,7 @@ export default function SignupPage() {
         setData,
         refHostCode } = useGlobalContext();
     const [loading, setLoading] = useState(false);
+    const [awayLoading, setAwayLoading] = useState(false);
     const [error, setError] = useState("")
 
     const handleOnchange = (e) => {
@@ -28,11 +29,11 @@ export default function SignupPage() {
         setData((prev) => ({ ...prev, [name]: value }));
     }
 
-    const baseUrl = authType === "login" ? "/api/auth/login" : authType === "register" ? "/api/auth/register": ""
+    const baseUrl = authType === "login" ? "/api/auth/login" : authType === "register" ? "/api/auth/register" : ""
     const userAuthHandler = async (e) => {
-        if(authType === "reset password"){
-           handlePasswordReset();
-           return;
+        if (authType === "reset password") {
+            handlePasswordReset();
+            return;
         }
         setLoading(true);
         try {
@@ -79,27 +80,27 @@ export default function SignupPage() {
 
     const handlePasswordReset = async () => {
         try {
-          setLoading(true);
-          const response = await axios.post("api/auth/forgottenPwd", { email:data.email });
-          console.log("response:", response)
-          if (response.data.success) {
+            setLoading(true);
+            const response = await axios.post("api/auth/forgottenPwd", { email: data.email });
             console.log("response:", response)
-            toast.success("Password reset link sent to: " + data.email);
-            setInterval(()=>{
-                setIsModalOpen(false);
-            },5000);
-          }
+            if (response.data.success) {
+                console.log("response:", response)
+                toast.success("Password reset link sent to: " + data.email);
+                setInterval(() => {
+                    setIsModalOpen(false);
+                }, 5000);
+            }
         } catch (error) {
-          toast.error("Error sending email to: " + data.email);
-          console.log("ERROR sending email:", error);
+            toast.error("Error sending email to: " + data.email);
+            console.log("ERROR sending email:", error);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
+    };
 
     return (
         <div className="min-h-screen absolute w-full flex items-center justify-center text-black px-4">
-        
+
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center px-6 z-70">
                     <div className="bg-white rounded-xl shadow-lg w-full md:max-w-md max-w:[300px] p-8 relative">
@@ -178,9 +179,9 @@ export default function SignupPage() {
                             )}
 
                             <button
-                                disabled={loading}
+                                disabled={loading || awayLoading}
                                 type="submit"
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+                                className="w-full disabled-opacity-60 disabled-cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
                             >
                                 {
                                     loading ? "Processing"
@@ -197,10 +198,10 @@ export default function SignupPage() {
                                 authType === 'login' && <p className='text-center'>Don't have an account? <span onClick={() => openModal("register")} className='text-blue-600 underline cursor-pointer'>Register</span></p>
                             }
                         </form>
-                        
+
                         {
-                            (authType === "register" || authType === "login")  &&  (
-                                <GoogleLoginButton  loading={loading} setLoading={setLoading}/>
+                            (authType === "register" || authType === "login") && (
+                                <GoogleLoginButton loading={loading} setAwayLoading={setAwayLoading} />
                             )
                         }
 
