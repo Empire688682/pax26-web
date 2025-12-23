@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { toast,  } from "react-toastify";
+import { toast, } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import AirtimeHelp from '../AirtimeHelp/AirtimeHelp';
@@ -27,23 +27,36 @@ const BuyAirtime = () => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      if(userData.pin === null){
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userData.pin === null) {
         setPinModal(true);
       }
-    },2000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [userData]);
 
-  useEffect(()=>{
-    if(data.number.length < 11)return;
-    const carrier = phoneCarrierDetector(data.number);
-    setPhoneCarrier(carrier);
-  },[data.number]);
+  const networks = [
+    { code: "01", name: "MTN" },
+    { code: "02", name: "GLO" },
+    { code: "04", name: "Airtel" },
+    { code: "03", name: "9Mobile" }
+  ];
 
-  console.log("carrier: ", carrier);
+
+  useEffect(() => {
+    if (data.number.length < 11) return;
+    const carrier = phoneCarrierDetector(data.number);
+    console.log("phoneCarrier: ", carrier);
+    if (!carrier) {
+      setPhoneNumberValid(false);
+      return;
+    }
+    setPhoneCarrier(carrier);
+    setPhoneNumberValid(true);
+    setData((prev) => ({ ...prev, network: carrier }));
+  }, [data.number]);
 
   const handleFormSubmission = (e) => {
     e.preventDefault();
@@ -104,7 +117,7 @@ const BuyAirtime = () => {
   return (
     <div className="min-h-screen py-10 overflow-x-hidden px-6"
       style={{ backgroundColor: pax26.secondaryBg }}>
-      
+
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>
 
@@ -136,12 +149,30 @@ const BuyAirtime = () => {
                   required
                   className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
-                  <option disabled value="">-- Choose Network --</option>
-                  <option value="01">MTN</option>
-                  <option value="02">GLO</option>
-                  <option value="04">Airtel</option>
-                  <option value="03">9Mobile</option>
+
+                  {
+                    phoneCarrier !== "99" && (<>
+
+                      <option disabled value="">-- Choose Network --</option>
+                      {
+                        networks.map((net) => (
+                          <option
+                            key={net.code}
+                            value={net.code}
+                          >
+                            {net.name}
+                          </option>
+                        ))
+                      }
+
+                    </>)
+                  }
                 </select>
+                {
+                  data.number < 10 && phoneCarrier === "99" && (
+                    <p>Invalid Number</p>
+                  )
+                }
               </div>
 
               {/* Amount */}
@@ -169,7 +200,7 @@ const BuyAirtime = () => {
                       }
                       {
                         Number(data.amount) > userCashBack && (
-                           Number(data.amount) - userCashBack 
+                          Number(data.amount) - userCashBack
                         )
                       }
                       {
