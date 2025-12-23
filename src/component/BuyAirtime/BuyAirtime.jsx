@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useGlobalContext } from '../Context';
 import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
+import { phoneCarrierDetector } from '../utils/phoneCarrierDetector';
 
 const BuyAirtime = () => {
   const { setPinModal, getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
@@ -17,8 +18,10 @@ const BuyAirtime = () => {
     number: "",
     pin: "",
   });
-  const [loading, setLoading] = useState(false)
-  const [checked, setChecked] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [phoneCarrier, setPhoneCarrier] = useState("");
+  const [phoneNumberValid, setPhoneNumberValid] = useState(false);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -34,6 +37,14 @@ const BuyAirtime = () => {
     return () => clearInterval(interval);
   }, [userData]);
 
+  useEffect(()=>{
+    if(data.number.length < 11)return;
+    const carrier = phoneCarrierDetector(data.number);
+    setPhoneCarrier(carrier);
+  },[data.number]);
+
+  console.log("carrier: ", carrier);
+
   const handleFormSubmission = (e) => {
     e.preventDefault();
 
@@ -41,6 +52,7 @@ const BuyAirtime = () => {
     if (!data.network) return toast.error("Please select a network");
     if (!data.amount || parseInt(data.amount) < 50) return toast.error("Amount must be at least ₦50");
     if (!/^\d{11}$/.test(data.number)) return toast.error("Enter a valid 11-digit phone number");
+    if (!phoneNumberValid) return toast.error("Invalid phone number prefix");
     if (data.pin.length < 4) return toast.error("PIN must be at least 4 digits");
     if (data.pin === "1234") {
       toast.error("1234 is not allowed");
