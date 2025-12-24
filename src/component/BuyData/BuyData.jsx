@@ -54,11 +54,23 @@ const BuyData = () => {
         sellingPrice: roundedPrice,
       };
     });
-
     setAvailablePlans(enhancedPlans);
   }
 
   useEffect(() => {
+      if (!form.number || form.number.length < 11) {
+    setForm(prev => ({
+      ...prev,
+      network: "",
+      plan: "",
+      planId: "",
+      amount: ""
+    }));
+
+    setAvailablePlans([]);
+    setPhoneCarrier("");
+    setPhoneNumberValid(false);
+  }
     if (form.number.length < 11) return;
     const carrier = phoneCarrierDetector(form.number);
     if (!carrier) {
@@ -116,6 +128,7 @@ const BuyData = () => {
     }
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -129,7 +142,7 @@ const BuyData = () => {
     try {
       const usedCashBack = checked ? true : false;
       const res = await axios.post("/api/provider/data-provider",
-        { ...form, usedCashBack });
+        { ...form, usedCashBack, network:networks[form.network] });
 
       if (res.data.success) {
         getUserRealTimeData();
