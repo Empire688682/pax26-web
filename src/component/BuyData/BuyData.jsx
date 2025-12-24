@@ -71,7 +71,7 @@ const BuyData = () => {
 
     updateAvailablePlan(carrier);
 
-  }, [form.number]);
+  }, [form.number, form.network]);
 
   useEffect(() => {
     const interval = setInterval(() => {
