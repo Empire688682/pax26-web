@@ -37,12 +37,12 @@ const BuyAirtime = () => {
     return () => clearInterval(interval);
   }, [userData]);
 
-  const networks = [
-    { code: "01", name: "MTN" },
-    { code: "02", name: "GLO" },
-    { code: "04", name: "Airtel" },
-    { code: "03", name: "9Mobile" }
-  ];
+  const networks = {
+    "01": "MTN",
+    "02": "Glo",
+    "04": "Airtel",
+    "03": "m_9mobile"
+  };
 
 
   useEffect(() => {
@@ -56,7 +56,7 @@ const BuyAirtime = () => {
     setPhoneCarrier(carrier);
     setPhoneNumberValid(true);
     setData((prev) => ({ ...prev, network: carrier }));
-  }, [data.number]);
+  }, [data.number, data.network]);
 
   const handleFormSubmission = (e) => {
     e.preventDefault();
@@ -137,6 +137,27 @@ const BuyAirtime = () => {
             </div>
 
             <form onSubmit={handleFormSubmission} className="space-y-6">
+                {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <input
+                  onChange={handleChange}
+                  value={data.number}
+                  name="number"
+                  type="tel"
+                  placeholder="e.g. 09154358139"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                {
+                  data.number.length > 10 && phoneCarrier === "99" && (
+                    <p class="text-red-500 text-sm pt-1">Invalid Phone Number</p>
+                  )
+                }
+              </div>
+
               {/* Network */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -155,12 +176,12 @@ const BuyAirtime = () => {
 
                       <option disabled value="">-- Choose Network --</option>
                       {
-                        networks.map((net) => (
+                        Object.entries(networks).map(([code, name] )=> (
                           <option
-                            key={net.code}
-                            value={net.code}
+                            key={code}
+                            value={code}
                           >
-                            {net.name}
+                            {name}
                           </option>
                         ))
                       }
@@ -168,11 +189,6 @@ const BuyAirtime = () => {
                     </>)
                   }
                 </select>
-                {
-                  data.number < 10 && phoneCarrier === "99" && (
-                    <p>Invalid Number</p>
-                  )
-                }
               </div>
 
               {/* Amount */}
@@ -231,22 +247,6 @@ const BuyAirtime = () => {
                     </span>
                   )
                 }
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  onChange={handleChange}
-                  value={data.number}
-                  name="number"
-                  type="tel"
-                  placeholder="e.g. 09154358139"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-2 py-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
               </div>
 
               {/* Pin */}

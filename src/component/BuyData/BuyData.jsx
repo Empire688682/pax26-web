@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { toast,  } from "react-toastify";
+import { toast, } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DataHelp from "../DataHelp/DataHelp";
 import WalletBalance from "../WalletBalance/WalletBalance";
@@ -9,6 +9,7 @@ import axios from "axios";
 import { applyMarkup } from "../utils/helper";
 import CashBackOption from '../ui/CashBackOption';
 import { FaTimes } from 'react-icons/fa';
+import { phoneCarrierDetector } from '../utils/phoneCarrierDetector';
 
 const BuyData = () => {
   const { dataPlan, getUserRealTimeData, userData, setPinModal, profitConfig, pax26, userCashBack } = useGlobalContext();
@@ -21,18 +22,61 @@ const BuyData = () => {
     number: "",
     pin: ""
   });
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState(false);
+  const [phoneCarrier, setPhoneCarrier] = useState("");
+  const [phoneNumberValid, setPhoneNumberValid] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
- useEffect(()=>{
-    const interval = setInterval(()=>{
-      if(userData.pin === null){
+   const networks = {
+    "01": "MTN",
+    "02": "Glo",
+    "04": "Airtel",
+    "03": "m_9mobile"
+  };
+
+  useEffect(() => {
+    if (form.number.length < 11) return;
+    const carrier = phoneCarrierDetector(form.number);
+    console.log("phoneCarrier: ", carrier);
+    if (!carrier) {
+      setPhoneNumberValid(false);
+      return;
+    }
+    setPhoneCarrier(carrier);
+    setPhoneNumberValid(true);
+    setForm((prev) => ({ ...prev, network: carrier }));
+
+    console.log("form.network updated to: ", carrier);
+    const network = networks[carrier];
+
+    const plans = dataPlan?.MOBILE_NETWORK?.[network]?.[0]?.PRODUCT || [];
+
+    const enhancedPlans = plans.map((item) => {
+      const basePrice = Number(item.PRODUCT_AMOUNT);
+      const priceWithMarkup = applyMarkup(basePrice, profitConfig.type, profitConfig.value);
+      const roundedPrice = roundToNearestTen(priceWithMarkup);
+
+      return {
+        name: item.PRODUCT_NAME,
+        code: item.PRODUCT_ID,
+        price: basePrice,
+        sellingPrice: roundedPrice,
+      };
+    });
+
+    setAvailablePlans(enhancedPlans);
+
+  }, [form.number]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userData.pin === null) {
         setPinModal(true);
       }
-    },2000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [userData]);
@@ -52,9 +96,16 @@ const BuyData = () => {
 
   const handleNetworkChange = (e) => {
     const selected = e.target.value;
-    setForm({ ...form, network: selected, plan: "", amount: "" });
+    const network = networks[selected];
 
-    const plans = dataPlan?.MOBILE_NETWORK?.[selected]?.[0]?.PRODUCT || [];
+    setForm({
+    ...form,
+    network: selected,
+    plan: "",
+    amount: ""
+  });
+
+    const plans = dataPlan?.MOBILE_NETWORK?.[network]?.[0]?.PRODUCT || [];
 
     const enhancedPlans = plans.map((item) => {
       const basePrice = Number(item.PRODUCT_AMOUNT);
@@ -86,13 +137,14 @@ const BuyData = () => {
     if (!form.network) return toast.error("Please select a network");
     if (!form.plan) return toast.error("Please choose a data plan");
     if (!/^\d{11}$/.test(form.number)) return toast.error("Enter a valid 11-digit phone number");
+    if (!phoneNumberValid) return toast.error("Enter a valid phone number");
     if (form.pin.length < 4) return toast.error("PIN must be 4 digits");
 
     setLoading(true);
     try {
       const usedCashBack = checked ? true : false;
-      const res = await axios.post("/api/provider/data-provider", 
-        {...form, usedCashBack});
+      const res = await axios.post("/api/provider/data-provider",
+        { ...form, usedCashBack });
 
       if (res.data.success) {
         getUserRealTimeData();
@@ -117,15 +169,15 @@ const BuyData = () => {
 
   return (
     <div className="min-h-screen py-12 px-6"
-    style={{ backgroundColor: pax26.secondaryBg }}>
-      
+      style={{ backgroundColor: pax26.secondaryBg }}>
+
       {dataPlan ? (
         <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">
           <div className="flex flex-col gap-6">
             <WalletBalance />
-            <div 
-            style={{ backgroundColor: pax26.bg }}
-            className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
+            <div
+              style={{ backgroundColor: pax26.bg }}
+              className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100">
               <div className='flex justify-between items-center mb-8'>
                 <h1 className="text-2xl font-bold text-center text-blue-700 tracking-tight">
                   Buy Data
@@ -138,6 +190,20 @@ const BuyData = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    name="number"
+                    type="tel"
+                    onChange={handleChange}
+                    value={form.number}
+                    placeholder="e.g. 08012345678"
+                    required
+                    className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+
                 {/* Network */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -153,9 +219,9 @@ const BuyData = () => {
                     <option disabled value="">
                       -- Choose Network --
                     </option>
-                    {Object.keys(dataPlan?.MOBILE_NETWORK || {}).map((net, i) => (
-                      <option value={net} key={i}>
-                        {net}
+                    {Object.entries(networks).map(([code, name]) => (
+                      <option value={code} key={code}>
+                        {name}
                       </option>
                     ))}
                   </select>
@@ -237,20 +303,6 @@ const BuyData = () => {
                       </span>
                     )
                   }
-                </div>
-
-                {/* Phone Number */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    name="number"
-                    type="tel"
-                    onChange={handleChange}
-                    value={form.number}
-                    placeholder="e.g. 08012345678"
-                    required
-                    className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
                 </div>
 
                 {/* PIN */}
