@@ -30,27 +30,15 @@ const BuyData = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-   const networks = {
+  const networks = {
     "01": "MTN",
     "02": "Glo",
     "04": "Airtel",
     "03": "m_9mobile"
   };
 
-  useEffect(() => {
-    if (form.number.length < 11) return;
-    const carrier = phoneCarrierDetector(form.number);
-    console.log("phoneCarrier: ", carrier);
-    if (!carrier) {
-      setPhoneNumberValid(false);
-      return;
-    }
-    setPhoneCarrier(carrier);
-    setPhoneNumberValid(true);
-    setForm((prev) => ({ ...prev, network: carrier }));
-
-    console.log("form.network updated to: ", carrier);
-    const network = networks[carrier];
+  function updateAvailablePlan(code) {
+    const network = networks[code];
 
     const plans = dataPlan?.MOBILE_NETWORK?.[network]?.[0]?.PRODUCT || [];
 
@@ -68,6 +56,20 @@ const BuyData = () => {
     });
 
     setAvailablePlans(enhancedPlans);
+  }
+
+  useEffect(() => {
+    if (form.number.length < 11) return;
+    const carrier = phoneCarrierDetector(form.number);
+    if (!carrier) {
+      setPhoneNumberValid(false);
+      return;
+    }
+    setPhoneCarrier(carrier);
+    setPhoneNumberValid(true);
+    setForm((prev) => ({ ...prev, network: carrier }));
+
+    updateAvailablePlan(carrier);
 
   }, [form.number]);
 
@@ -96,31 +98,14 @@ const BuyData = () => {
 
   const handleNetworkChange = (e) => {
     const selected = e.target.value;
-    const network = networks[selected];
-
     setForm({
-    ...form,
-    network: selected,
-    plan: "",
-    amount: ""
-  });
-
-    const plans = dataPlan?.MOBILE_NETWORK?.[network]?.[0]?.PRODUCT || [];
-
-    const enhancedPlans = plans.map((item) => {
-      const basePrice = Number(item.PRODUCT_AMOUNT);
-      const priceWithMarkup = applyMarkup(basePrice, profitConfig.type, profitConfig.value);
-      const roundedPrice = roundToNearestTen(priceWithMarkup);
-
-      return {
-        name: item.PRODUCT_NAME,
-        code: item.PRODUCT_ID,
-        price: basePrice,
-        sellingPrice: roundedPrice,
-      };
+      ...form,
+      network: selected,
+      plan: "",
+      amount: ""
     });
 
-    setAvailablePlans(enhancedPlans);
+    updateAvailablePlan(selected);
   };
 
   const handlePlanChange = (e) => {
@@ -202,6 +187,11 @@ const BuyData = () => {
                     required
                     className="w-full border border-gray-300 text-gray-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
+                  {
+                  form.number.length > 10 && phoneCarrier === "99" && (
+                    <p className="text-red-500 text-sm pt-1">Invalid Phone Number</p>
+                  )
+                }
                 </div>
 
                 {/* Network */}

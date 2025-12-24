@@ -153,7 +153,7 @@ const BuyAirtime = () => {
                 />
                 {
                   data.number.length > 10 && phoneCarrier === "99" && (
-                    <p class="text-red-500 text-sm pt-1">Invalid Phone Number</p>
+                    <p className="text-red-500 text-sm pt-1">Invalid Phone Number</p>
                   )
                 }
               </div>
