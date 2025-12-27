@@ -166,18 +166,20 @@ const Profile = () => {
           </div>
           <h2 className="text-xl font-bold text-blue-700">{user.name}</h2>
           <p className="text-sm text-gray-400">{user.email}</p>
-          <p className="text-sm text-gray-400">{user.phone}</p>
+          {
+            user.phone && <p className="text-sm text-gray-400">{user.phone}</p>
+          }
 
           <div className="mt-3">
             {user.bvnVerified ? (
               <span className="text-green-600 flex items-center justify-center gap-2 text-sm">
-                <ShieldCheck size={16} /> BVN Verified
+                <ShieldCheck size={16} />Email Verified
               </span>
             ) : <>
               {
                 !userBvn ? <div className="text-red-500 flex flex-col items-center gap-1 text-sm">
                   <span className="flex items-center gap-1">
-                    <ShieldAlert size={16} /> BVN Not Verified
+                    <ShieldAlert size={16} /> Email Not Verified
                   </span>
                   <button
                     onClick={() => setUserBvn(()=>alert("Coming soon"))}
