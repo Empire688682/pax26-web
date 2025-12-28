@@ -3,7 +3,6 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import nodemailer from "nodemailer";
 
 dotenv.config();
 
