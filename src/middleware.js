@@ -24,6 +24,7 @@ export function middleware(req) {
     "/notifications",
     "/payment-success",
     "/survey",
+    "/verify-user",
   ];
   const isProtected = protectedPaths.some((protectedPath)=>
    path.startsWith(protectedPath));
@@ -63,6 +64,7 @@ export const config = {
     "/notifications",
     "/payment-success",
     "/survey",
-    "/reset-password"
+    "/reset-password",
+    "/verify-user",
   ],
 }

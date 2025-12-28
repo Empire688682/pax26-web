@@ -93,6 +93,7 @@ const registerUser = async (req) => {
     }
 
     const newUser = await UserModel.create({
+      
       name,
       email,
       number,

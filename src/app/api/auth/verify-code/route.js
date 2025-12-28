@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import bcrypt from "bcrypt";
+import { verifyToken } from "../../helper/VerifyToken";
 
 dotenv.config();
 
@@ -15,13 +16,18 @@ export async function POST(req) {
     await connectDb();
     try {
         const reqBody = await req.json();
-        const { email, code } = reqBody;
+        const { code } = reqBody;
 
-        if (!email || !code) {
-            return NextResponse.json({ success: false, message: "Code and email required" }, { status: 400, headers: corsHeaders() });
+        if (!code) {
+            return NextResponse.json({ success: false, message: "Code required" }, { status: 400, headers: corsHeaders() });
         }
 
-        const user = await UserModel.findOne({ email });
+        const userId = await verifyToken(req);
+        if (!userId) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
+        }
+
+        const user = await UserModel.findById({ userId });
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 400, headers: corsHeaders() });
         }

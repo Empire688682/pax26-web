@@ -17,11 +17,11 @@ export async function OPTIONS() {
   });
 }
 
-export async function POST(request) {
+export async function POST(req) {
   try {
     await connectDb();
 
-    const { email, password} = await request.json();
+    const { email, password} = await req.json();
 
     const existUser = await UserModel.findOne({ email });
     if (!existUser) {

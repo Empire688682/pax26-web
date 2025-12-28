@@ -6,6 +6,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
 import { NextResponse } from "next/server";
 import { sendVerifyUserMessage } from "../../helper/sendVerifyUserMessage";
+import { verifyToken } from "../../helper/VerifyToken";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() })
@@ -14,9 +15,11 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   try {
-    const reqBody = await req.json();
-    const { email } = reqBody;
-    const user = await UserModel.findOne({ email });
+    const userId = await verifyToken(req);
+    if(!userId){
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
+    }
+    const user = await UserModel.findById({ userId });
 
     if (!user) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 400, headers: corsHeaders() });
@@ -48,7 +51,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: false,
-        message: "Register Error occurred",
+        message: "Verification Error occurred",
         debugError: JSON.stringify(error, Object.getOwnPropertyNames(error))
       },
       { status: 500, headers: corsHeaders() }
