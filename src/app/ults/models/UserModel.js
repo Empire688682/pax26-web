@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema(
     pin: { type: String, default: null},   
     bvn: { type: String, default: ""},   
     userVerify: { type: Boolean, default: false },
+    verifyToken: {type:String, default:""},
+    verifyTokenExpires : {type:Date},
     walletBalance: { type: Number, default: 0 },
     cashBackBalance: { type: Number, default: 0 },
     commissionBalance: { type: Number, default: 0 },

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
-import { sendPasswordResettingEmail } from "../../helper/route.js";
+import { sendPasswordResettingEmail } from "../../helper/sendVerifyUserMessage.js";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 dotenv.config();
 
