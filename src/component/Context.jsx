@@ -234,6 +234,13 @@ export const AppProvider = ({ children }) => {
   setPax26(pax26);
  },[theme]);
 
+ // User verification handler and redirect
+ useEffect(()=>{
+    if(userData && !userData.userVerify){
+      router.push('/verify-user');
+    }
+ },[userData])
+
 
   // Provide all state and handlers via context to children components
   return (

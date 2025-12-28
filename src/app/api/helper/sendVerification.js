@@ -1,7 +1,8 @@
 import { transporter } from "./transporter";
 
-export async function sendVerifyUserMessage({ receiver, code, link }) {
-  const html = `<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+export async function sendVerification({ receiver, code, link }) {
+  try {
+    const html = `<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
     <h2>Activate your PAX26 account</h2>
     <p>Welcome to <strong>PAX26</strong>.<br/>
        Use <strong>either</strong> the verification code <strong>or</strong> the button below to activate your account.</p>
@@ -28,4 +29,9 @@ Do not share this code or link with anyone.`;
       html,
       text,
     });
+    return true;
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    return false;
+  }
 }
