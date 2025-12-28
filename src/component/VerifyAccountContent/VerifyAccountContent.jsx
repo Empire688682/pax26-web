@@ -134,7 +134,7 @@ export default function VerifyAccountContent() {
           disabled={loading}
           className="w-full border border-gray-300 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
         >
-          Resend Verification Link
+          Resend Verification
         </button>
       </div>
     </div>

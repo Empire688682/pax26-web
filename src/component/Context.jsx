@@ -239,7 +239,7 @@ export const AppProvider = ({ children }) => {
     if(userData && !userData.userVerify){
       router.push('/verify-user');
     }
- },[userData])
+ },[userData]);
 
 
   // Provide all state and handlers via context to children components
