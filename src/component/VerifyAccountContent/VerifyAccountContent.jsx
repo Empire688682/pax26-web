@@ -5,12 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { useGlobalContext } from "../Context";
 
 export default function VerifyAccountContent() {
-  const { router, pax26, setIsModalOpen } = useGlobalContext();
+  const { router, pax26, userData } = useGlobalContext();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
   const urlToken = searchParams.get("token");
+
+   useEffect(() => {
+    if (userData.userVerify) {
+      router.push("/dashboard");
+    }
+  }, [userData]);
 
   useEffect(() => {
     if (urlToken) {
@@ -58,6 +64,7 @@ export default function VerifyAccountContent() {
       router.push("/dashboard");
     } catch (err) {
       setMessage("Something went wrong. Try again.");
+      console.log("err:", err);
     } finally {
       setLoading(false);
     }
