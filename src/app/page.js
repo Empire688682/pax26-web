@@ -1,6 +1,5 @@
 "use client";
 
-import { useGlobalContext } from '@/component/Context';
 import CTA from '@/component/CTA/CTA';
 import DownloadOurApp from '@/component/DownloadOurApp/DownloadOurApp';
 import Hero from '@/component/Hero/Hero';
@@ -19,7 +18,6 @@ const fadeInUp = {
 };
 
 const Page = () => {
-  const { isModalOpen, pax26 } = useGlobalContext();
 
   useEffect(() => {
     if (typeof window !== "undefined") {

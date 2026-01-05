@@ -3,7 +3,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { verifyToken } from "../../helper/VerifyToken";
 
 dotenv.config();
@@ -27,7 +27,7 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
 
-        const user = await UserModel.findById({ userId });
+        const user = await UserModel.findById(userId);
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 400, headers: corsHeaders() });
         }

@@ -5,21 +5,21 @@ import { useSearchParams } from "next/navigation";
 import { useGlobalContext } from "../Context";
 
 export default function VerifyAccountContent() {
-  const {router, pax26} = useGlobalContext();
+  const { router, pax26, setIsModalOpen } = useGlobalContext();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
   const urlToken = searchParams.get("token");
 
-   useEffect(() => {
+  useEffect(() => {
     if (urlToken) {
       setCode(urlToken);
       verifyToken(urlToken);
     }
   }, [urlToken]);
 
-  const verifyToken  = async (code) => {
+  const verifyToken = async (code) => {
 
     if (code.length !== 6) {
       setMessage("Please enter the 6-digit code.");
@@ -32,7 +32,7 @@ export default function VerifyAccountContent() {
       const res = await fetch("/api/auth/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({code}),
+        body: JSON.stringify({ code }),
       });
 
       const data = await res.json();
@@ -43,7 +43,19 @@ export default function VerifyAccountContent() {
       }
 
       // success
-      router.push("/login");
+      if (typeof window !== "undefined") {
+        const savedData = localStorage.getItem("userData");
+
+        if (!savedData) {
+          alert("An error occured try again");
+          return
+        }
+        const parseData = JSON.parse(savedData);
+        parseData.userVerify = true;
+        localStorage.setItem("userData", JSON.stringify(parseData));
+        setUserData(parseData);
+      }
+      router.push("/dashboard");
     } catch (err) {
       setMessage("Something went wrong. Try again.");
     } finally {
@@ -83,7 +95,7 @@ export default function VerifyAccountContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center"
-    style={{ backgroundColor: pax26?.secondaryBg || '#f3f4f6' }}>
+      style={{ backgroundColor: pax26?.secondaryBg || '#f3f4f6' }}>
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
         <h1 className="text-2xl font-bold text-center mb-2">
           Verify Your Account
@@ -97,10 +109,9 @@ export default function VerifyAccountContent() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            inputMode="numeric"
             maxLength={6}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => setCode(e.target.value)}
             placeholder="Enter 6-digit code"
             className="w-full text-center text-lg tracking-widest px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
           />
