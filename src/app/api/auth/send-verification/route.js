@@ -7,7 +7,6 @@ import { customAlphabet } from "nanoid";
 import { NextResponse } from "next/server";
 import { sendVerification } from "../../helper/sendVerification";
 import { verifyToken } from "../../helper/VerifyToken";
-import { PlaneTakeoff } from "lucide-react";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() })
