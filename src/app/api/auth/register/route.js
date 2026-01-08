@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
+import { sendUserVerification } from "../services/sendVerificationService";
 
 dotenv.config();
 
@@ -134,15 +135,6 @@ const registerUser = async (req) => {
     delete userObj.forgottenPasswordToken;
     delete userObj.referralHostId;
     delete userObj.bvn;
-     // Mask email
-    if (userObj.email) {
-      const [localPart, domain] = userObj.email.split("@");
-      if (localPart.length > 2) {
-        const maskedLocal =
-          localPart[0] + localPart[1] + "*".repeat(localPart.length - 2);
-        userObj.email = maskedLocal + "@" + domain;
-      }
-    }
 
     // Mask phone
     if (userObj.number) {
@@ -180,6 +172,8 @@ const registerUser = async (req) => {
         sameSite: "lax",
         path: "/",
       });
+
+     const sendUserMsg = await sendUserVerification(newUser);
 
       return res;
     }

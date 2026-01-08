@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { sendUserVerification } from "../services/sendVerificationService";
 
 dotenv.config();
 
@@ -56,17 +57,6 @@ export async function POST(req) {
     delete userObj.referralHostId;
     delete userObj.forgottenPasswordToken;
     delete userObj.bvn;
-
-    // Mask email
-    if (userObj.email) {
-      const [localPart, domain] = userObj.email.split("@");
-      if (localPart.length > 2) {
-        const maskedLocal =
-          localPart[0] + localPart[1] + "*".repeat(localPart.length - 2);
-        userObj.email = maskedLocal + "@" + domain;
-      }
-    }
-
     // Mask phone
     if (userObj.number) {
       const phone = userObj.number;
@@ -102,6 +92,10 @@ export async function POST(req) {
       sameSite: "lax",
       path: "/"
     });
+
+    if(!userObj.userVerify){
+       await sendUserVerification(userObj);
+    }
 
     return response;
   } catch (error) {
