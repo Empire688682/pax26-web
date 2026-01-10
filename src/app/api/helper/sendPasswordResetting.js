@@ -1,13 +1,4 @@
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-import { NextResponse } from "next/server";
-import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-
-dotenv.config();
-
-export async function OPTIONS() {
-    return new NextResponse(null, {status:200, headers:corsHeaders()});
-}
 
 export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailType) => {
   const messageType = {
@@ -43,6 +34,7 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
   };
 
   try {
+    console.log("Email Data: ", process.env.EMAIL_USER, process.env.EMAIL_PASS);
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: parseInt(process.env.EMAIL_PORT),
@@ -60,7 +52,8 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
     const subject = subjectMap[mailType] || "Notification";
 
     if (!htmlData) {
-      return NextResponse.json({ success: false, message: "Invalid email type." }, { status: 400, headers:corsHeaders() });
+        console.log("Invalid mail type provided.");
+        return false
     }
 
     const senderName =
@@ -79,10 +72,11 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
     };
 
     await transporter.sendMail(mailOptions);
-    return NextResponse.json({ success: true, message: "Email sent" }, { status: 200, headers:corsHeaders() });
+    console.log("Email sent");
+    return true
 
   } catch (error) {
-    console.error("ERROR Sending Email:", error);
-    return NextResponse.json({ success: false, message: "Unable to send message" }, { status: 500, headers:corsHeaders() });
+    console.log("ERROR Sending Email:", error);
+    return false
   }
 };

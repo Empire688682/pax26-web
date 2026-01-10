@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
-import { sendPasswordResettingEmail } from "../../helper/sendVerification.js";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { sendPasswordResettingEmail } from "../../helper/sendPasswordResetting";
 dotenv.config();
 
 
@@ -43,7 +43,7 @@ export async function POST(req) {
     const resetingPwdLink = `${process.env.BASE_URL}/reset-password?Emailtoken=${forgottenPasswordToken}&userId=${user._id}`;
     const sendingStatus = await sendPasswordResettingEmail(email, resetingPwdLink, "PasswordReset");
 
-    if (sendingStatus.status === 500) {
+    if (!sendingStatus) {
       return NextResponse.json(
         { success: false, message: "An error occured" },
         { status: 400, headers:corsHeaders() },
