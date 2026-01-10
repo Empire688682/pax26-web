@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useGlobalContext } from "../Context";
 
 export default function VerifyAccountContent() {
-  const { router, pax26, userData } = useGlobalContext();
+  const { router, pax26, userData,setUserData } = useGlobalContext();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -134,7 +134,8 @@ export default function VerifyAccountContent() {
 
         {/* MESSAGE */}
         {message && (
-          <p className="text-center text-sm text-red-500 mt-4">
+          <p className="text-center text-sm mt-4"
+          style={{ color: pax26?.textPrimary}}>
             {message}
           </p>
         )}

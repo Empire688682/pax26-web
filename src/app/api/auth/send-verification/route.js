@@ -1,6 +1,5 @@
 import UserModel from "@/app/ults/models/UserModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
-import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
@@ -33,7 +32,6 @@ export async function POST(req) {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const userNanoid = customAlphabet(alphabet, 6);
     const plainCode = userNanoid();
-    console.log("Verification Code:", plainCode);
     const hashCode = await bcrypt.hash(plainCode, 10);
     const expiresInMinutes = 15;
     const verifyTokenExpires = new Date(Date.now() + expiresInMinutes * 60 * 1000);
