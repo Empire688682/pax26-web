@@ -1,8 +1,8 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import EmailSubscriber from "@/app/ults/models/EmailSubscriber";
 import { NextResponse } from "next/server";
-import { sendPasswordResettingEmail } from "../auth/sendForgottenPwdEmail
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { sendPasswordResettingEmail } from "../auth/sendForgottenPwdEmail/route";
 
 export async function OPTIONS() {
     return new NextResponse(null, {status:200, headers:corsHeaders()});
