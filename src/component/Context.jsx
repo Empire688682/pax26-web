@@ -14,7 +14,7 @@ export const AppProvider = ({ children }) => {
   const {theme} = useTheme();
 
   // State to control visibility of auth modal (register/login)
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // State to track current auth modal type: "register" or "login"
   const [authType, setAuthType] = useState('register');
@@ -73,7 +73,7 @@ export const AppProvider = ({ children }) => {
     else {
       // Set auth modal type and open modal for user to login/register
       setAuthType(type);
-      setIsModalOpen(true);
+      setAuthModalOpen(true);
 
       // Reset auth form data
       setData({
@@ -164,7 +164,6 @@ export const AppProvider = ({ children }) => {
     const fetchDataPlan = async () => {
       try {
         const res = await axios.get("/api/data-plan");
-        console.log("dataPlan:", res)
         if (res.data.success) {
           setDataPlan(res.data.data);
         }
@@ -251,8 +250,8 @@ export const AppProvider = ({ children }) => {
         toggleMenu,
         setIsOpen,
         isUserAuthenticated,
-        isModalOpen,
-        setIsModalOpen,
+        authModalOpen,
+        setAuthModalOpen,
         authType,
         setAuthType,
         openModal,

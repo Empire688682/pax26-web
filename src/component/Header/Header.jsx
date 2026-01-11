@@ -17,6 +17,10 @@ const Header = () => {
 
     const isHomePage = pathName === '/';
     const isProfile = pathName === '/profile';
+    
+    if (pathName === '/reset-password') {
+        return null; // Do not render Header on Reset Password page
+    }
     return (
         <div
             className={`shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between`}

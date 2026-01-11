@@ -11,6 +11,7 @@ import Testimonials from '@/component/Testimonials/Testimonials';
 import WhyChooseUs from '@/component/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
+import { useGlobalContext } from '@/component/Context';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
@@ -18,10 +19,10 @@ const fadeInUp = {
 };
 
 const Page = () => {
-
+  const {openModal} = useGlobalContext();
   useEffect(() => {
+     const searchParams = new URLSearchParams(window.location.search);
     if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
       const refCode = searchParams.get("ref");
 
       if (refCode) {
@@ -34,6 +35,14 @@ const Page = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+     const searchParams = new URLSearchParams(window.location.search);
+    const authQuery = searchParams.get("auth");
+  if (authQuery === "login") {
+    openModal("login");
+  }
+}, []);
 
   return (
     <div className='overflow-hidden'>

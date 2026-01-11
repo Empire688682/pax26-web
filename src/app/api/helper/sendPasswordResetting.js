@@ -58,13 +58,10 @@ export const sendPasswordResettingEmail = (receiverEmail, resetingPwdLink, mailT
           email: "info@pax26.com",
         },
         to: [{ email: receiverEmail }],
-        html,
+        html:htmlData,
       };
 
-      console.log("Email payload:", JSON.stringify(email, null, 2));
-
       sendpulse.smtpSendMail(function (result) {
-        console.log("result: ", result)
         if (result && result.result === true) {
           console.log("Email sent");
           resolve(true);

@@ -10,8 +10,8 @@ import GoogleLoginButton from '../GoogleSignUp/googleSignUp';
 
 export default function SignupPage() {
     const {
-        isModalOpen,
-        setIsModalOpen,
+        authModalOpen,
+        setAuthModalOpen,
         authType,
         setAuthType,
         openModal,
@@ -87,7 +87,7 @@ export default function SignupPage() {
                 console.log("response:", response)
                 toast.success("Password reset link sent to: " + data.email);
                 setInterval(() => {
-                    setIsModalOpen(false);
+                    setAuthModalOpen(false);
                 }, 5000);
             }
         } catch (error) {
@@ -101,12 +101,12 @@ export default function SignupPage() {
     return (
         <div className="min-h-screen absolute w-full flex items-center justify-center text-black px-4">
 
-            {isModalOpen && (
+            {authModalOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center px-6 z-70">
                     <div className="bg-white rounded-xl shadow-lg w-full md:max-w-md max-w:[300px] p-8 relative">
                         <button
                             className="absolute top-4 right-4 text-gray-400 hover:text-red-500"
-                            onClick={() => setIsModalOpen(false)}
+                            onClick={() => setAuthModalOpen(false)}
                         >
                             <X size={24} />
                         </button>

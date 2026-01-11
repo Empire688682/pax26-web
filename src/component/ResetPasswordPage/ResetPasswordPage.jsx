@@ -8,7 +8,7 @@ import { toast,  } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ResetPasswordPage = () => {
-  const{setIsModalOpen, setAuthType, route} =useGlobalContext();
+  const{ router } = useGlobalContext();
   const searchParams = useSearchParams();
   const token = searchParams.get("Emailtoken");
   const [loading, setLoading] = useState(false);
@@ -31,16 +31,13 @@ const ResetPasswordPage = () => {
       token: token,
     });
 
-    console.log("response:", response);
-
     if (response.data.success) {
       toast.success("Password changed please login");
       setData({ 
         password: "", 
         confirmPassword: "" 
       });
-      setIsModalOpen(true);
-      setAuthType("login");
+      router.push("/?auth=login");
     }
   } catch (error) {
     console.log("Error resetingPwd:", error);

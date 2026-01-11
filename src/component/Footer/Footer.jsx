@@ -4,6 +4,7 @@ import axios from 'axios';
 import SocialIcons from '../SocialIcons/SocialIcons';
 import { useGlobalContext } from '../Context';
 import { ArrowUpToLine } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const Footer = () => {
   const { pax26 } = useGlobalContext();
@@ -11,6 +12,7 @@ const Footer = () => {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const pathName = usePathname();
 
   // Show back to top button on scroll
   useEffect(() => {
@@ -46,6 +48,11 @@ const Footer = () => {
       );
     }
   };
+
+   // Do not render Footer on Reset Password page
+  if (pathName === '/reset-password') {
+    return null;
+  }
 
   return (
     <footer className="z-50"
