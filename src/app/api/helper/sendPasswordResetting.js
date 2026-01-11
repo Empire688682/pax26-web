@@ -1,8 +1,9 @@
-import nodemailer from "nodemailer";
+import sendpulse from "@/app/lib/sendpulse";
 
-export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailType) => {
-  const messageType = {
-    "PasswordReset": `
+export const sendPasswordResettingEmail = async (receiverEmail, resetingPwdLink, mailType) {
+  return new Promise((resolve) => {
+    const messageType = {
+      "PasswordReset": ` 
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
         <h2>Password Reset</h2>
         <p>We received a request to reset your password. Click the button below to choose a new password:</p>
@@ -18,7 +19,7 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
         <p>Thanks,<br/>The Team</p>
       </div>
     `,
-    "EmailSubscriber": `
+      "EmailSubscriber": `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
         <h2>Welcome to Our Newsletter!</h2>
         <p>Thank you for subscribing to our newsletter. We're excited to keep you updated with our latest news, updates, and exclusive offers.</p>
@@ -26,57 +27,56 @@ export const sendPasswordResettingEmail = async (toEmail, resetingPwdLink, mailT
         <p>Thanks again,<br/>The Team</p>
       </div>
     `,
-  };
-
-  const subjectMap = {
-    "PasswordReset": "Password Reset Request",
-    "EmailSubscriber": "Thanks for Subscribing!",
-  };
-
-  try {
-    console.log("Email Data: ", process.env.EMAIL_USER, process.env.EMAIL_PASS);
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-    const htmlData = messageType[mailType];
-    const subject = subjectMap[mailType] || "Notification";
-
-    if (!htmlData) {
-        console.log("Invalid mail type provided.");
-        return false
-    }
-
-    const senderName =
-      mailType === "PasswordReset"
-        ? "Pax26 Team Support"
-        : mailType === "EmailSubscriber"
-          ? "Pax26 Newsletter"
-          : "Pax26";
-
-
-    const mailOptions = {
-      from: `"${senderName}" <${process.env.EMAIL_USER}>`,
-      to: toEmail,
-      subject,
-      html: htmlData,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log("Email sent");
-    return true
+    const subjectMap = {
+      "PasswordReset": "Password Reset Request",
+      "EmailSubscriber": "Thanks for Subscribing!",
+    };
 
-  } catch (error) {
-    console.log("ERROR Sending Email:", error);
-    return false
-  }
+    try {
+
+      const htmlData = messageType[mailType];
+      const subject = subjectMap[mailType] || "Notification";
+
+      if (!htmlData) {
+        console.log("Invalid mail type provided.");
+        resolve(false)
+      }
+
+      const senderName =
+        mailType === "PasswordReset"
+          ? "Pax26 Team Support"
+          : mailType === "EmailSubscriber"
+            ? "Pax26 Newsletter"
+            : "Pax26";
+
+      const email = {
+        subject,
+        from: {
+          name: senderName,
+          email: "info@pax26.com",
+        },
+        to: [{ email: receiverEmail }],
+        html,
+      };
+
+      console.log("Email payload:", JSON.stringify(email, null, 2));
+
+      sendpulse.smtpSendMail(function (result) {
+        console.log("result: ", result)
+        if (result && result.result === true) {
+          console.log("Email sent");
+          resolve(true);
+        }
+        else {
+          console.error("SendPulse failed:", result);
+          resolve(false);
+        }
+      }, email)
+    } catch (error) {
+      console.log("ERROR Sending Email:", error);
+      resolve(false);
+    }
+  })
 };
