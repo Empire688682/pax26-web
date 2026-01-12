@@ -137,7 +137,7 @@ export default function Hero() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {["Airtime", "Data", "TV", "Electricity"].map((item) => (
+            {["Airtime", "Data", "TV", "Electricity", "Crypto", "Betting", "Jamb", "More"].map((item) => (
               <div
                 key={item}
                 className="rounded-xl p-4 text-center text-sm font-medium shadow"
