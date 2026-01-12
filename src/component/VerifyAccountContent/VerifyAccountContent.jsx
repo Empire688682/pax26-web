@@ -13,7 +13,7 @@ export default function VerifyAccountContent() {
   const urlToken = searchParams.get("token");
 
    useEffect(() => {
-    if (userData.userVerify) {
+    if (userData?.userVerify) {
       router.push("/dashboard");
     }
   }, [userData]);
