@@ -50,7 +50,7 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Unable to send verification email" }, { status: 500, headers: corsHeaders() });
     }
 
-    return NextResponse.json({ success: true, message: "Verification sent" }, { status: 200, headers: corsHeaders() });
+    return NextResponse.json({ success: true, message: "Verification sent", data:sent }, { status: 200, headers: corsHeaders() });
 
   } catch (error) {
     console.error("Register Error:", error);

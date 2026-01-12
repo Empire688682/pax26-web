@@ -82,13 +82,16 @@ export default function VerifyAccountContent() {
 
       const data = await res.json();
 
+      console.log("data:", data);
+
       if (!res.ok) {
         setMessage(data.message || "Unable to resend link.");
         return;
-      }
+      };
 
       setMessage("Verification link sent to your email.");
     } catch (err) {
+      console.log("err:", err);
       setMessage("Something went wrong.");
     } finally {
       setLoading(false);
