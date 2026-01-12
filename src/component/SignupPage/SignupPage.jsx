@@ -16,8 +16,6 @@ export default function SignupPage() {
         setAuthType,
         openModal,
         setUserData,
-        router,
-        data,
         setData,
         refHostCode } = useGlobalContext();
     const [loading, setLoading] = useState(false);
@@ -86,9 +84,7 @@ export default function SignupPage() {
             if (response.data.success) {
                 console.log("response:", response)
                 toast.success("Password reset link sent to: " + data.email);
-                setInterval(() => {
-                    setAuthModalOpen(false);
-                }, 5000);
+                window.location.reload();
             }
         } catch (error) {
             toast.error("Error sending email to: " + data.email);
