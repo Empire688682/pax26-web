@@ -139,9 +139,9 @@ export async function POST(req) {
                 path: "/",
             });
 
-            // if(user && !user.userVerify){
-            //     await sendUserVerification(user);
-            // }
+            if(user && !user.userVerify){
+                await sendUserVerification(user);
+            }
 
             return res;
         }
