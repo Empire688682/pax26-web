@@ -167,7 +167,7 @@ const Profile = () => {
           <h2 className="text-xl font-bold text-blue-700">{user.name}</h2>
           <p className="text-sm text-gray-400">{user.email}</p>
           {
-            user.phone && <p className="text-sm text-gray-400">{user.phone}</p>
+            user.phone && user.phone !== null && <p className="text-sm text-gray-400">{user.phone}</p>
           }
 
           <div className="mt-3">
