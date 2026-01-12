@@ -17,6 +17,7 @@ export default function SignupPage() {
         openModal,
         setUserData,
         setData,
+        data,
         refHostCode } = useGlobalContext();
     const [loading, setLoading] = useState(false);
     const [awayLoading, setAwayLoading] = useState(false);
