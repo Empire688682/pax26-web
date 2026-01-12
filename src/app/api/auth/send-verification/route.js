@@ -40,7 +40,7 @@ export async function POST(req) {
     user.verifyTokenExpires = verifyTokenExpires;
     await user.save();
 
-    const link = `${process.env.BASE_URL}verify-user?token=${plainCode}`
+    const link = `${process.env.BASE_URL}/verify-user?token=${plainCode}`
     const sent = await sendVerification(
       user.email, 
       plainCode, 

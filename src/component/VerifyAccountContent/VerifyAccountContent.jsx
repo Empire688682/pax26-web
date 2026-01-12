@@ -134,8 +134,7 @@ export default function VerifyAccountContent() {
 
         {/* MESSAGE */}
         {message && (
-          <p className="text-center text-sm mt-4"
-          style={{ color: pax26?.textPrimary}}>
+          <p className="text-center text-sm mt-4 text-gray-700">
             {message}
           </p>
         )}

@@ -56,6 +56,7 @@ export default function Hero() {
         alt="Pax26 Hero"
         width={500}
         height={400}
+        priority
         className="w-full h-auto rounded-lg shadow-lg"
       />
     </div>
