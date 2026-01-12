@@ -108,7 +108,7 @@ export default function Hero() {
         className="relative w-[320px] h-[530px] rounded-[40px] p-4 backdrop-blur-xl shadow-2xl border"
         style={{
           background: `${pax26.bg}aa`,
-          borderColor: `${pax26.primary}30`,
+          borderColor: `${pax26.primary}90`,
         }}
       >
         <div
