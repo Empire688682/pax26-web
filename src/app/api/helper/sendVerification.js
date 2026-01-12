@@ -54,7 +54,7 @@ export function sendVerification(receiverEmail, code, link ) {
 
     sendpulse.smtpSendMail(function (result) {
       if (result && result.result === true) {
-        console.log("Verification email sent");
+        console.log("Verification email sent!");
         resolve(true);
       } else {
         console.error("SendPulse failed:", result);
