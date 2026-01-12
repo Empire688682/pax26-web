@@ -32,7 +32,7 @@ export function sendVerification(receiverEmail, code, link ) {
     `;
 
     const email = {
-      subject: "Verify your PAX26 account",
+      subject: "Confirm your email for PAX26",
       from: {
         name: "Pax26",
         email: "info@pax26.com",
