@@ -1,13 +1,13 @@
 import UserModel from "@/app/ults/models/UserModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import dotenv from "dotenv";
-import bcrypt from "bcryptjs";
 import validator from "validator";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
+import { sendUserVerification } from "../services/sendVerificationService";
 
 dotenv.config();
 
@@ -138,6 +138,8 @@ export async function POST(req) {
                 sameSite: "lax",
                 path: "/",
             });
+
+            await sendUserVerification(user);
 
             return res;
         }
