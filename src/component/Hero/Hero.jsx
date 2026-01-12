@@ -61,10 +61,10 @@ export default function Hero() {
       </p>
 
       {/* CTA */}
-      <div className="mt-10 flex flex-wrap gap-5">
+      <div className="mt-10 flex flex-wrap items-center md:justify-start justify-center gap-5">
         <button
           onClick={() => openModal("register")}
-          className="px-8 py-4 rounded-full text-sm font-semibold shadow-xl hover:scale-105 transition"
+          className="px-6 py-4 rounded-full text-sm font-semibold shadow-xl hover:scale-105 transition"
           style={{
             background: `linear-gradient(90deg, ${pax26.primary}, ${pax26.btn})`,
             color: "#fff",
