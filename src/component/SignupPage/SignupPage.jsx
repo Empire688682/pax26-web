@@ -181,20 +181,6 @@ export default function SignupPage() {
                                 <p onClick={() => setAuthType("reset password")} className='cursor-pointer underline text-center'>Forgot Password</p>
                             )}
 
-                            <button
-                                disabled={loading || awayLoading || (authType === "register" && !agreed)}
-                                type="submit"
-                                className="w-full disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
-                            >
-
-                                {
-                                    loading ? "Processing"
-                                        :
-                                        <p className='capitalize'>
-                                            {authType}
-                                        </p>
-                                }
-                            </button>
                             {authType === "register" && (
                                 <div className="flex items-start gap-2 text-sm text-gray-700">
                                     <input
@@ -216,6 +202,21 @@ export default function SignupPage() {
                                     </p>
                                 </div>
                             )}
+
+                            <button
+                                disabled={loading || awayLoading || (authType === "register" && !agreed)}
+                                type="submit"
+                                className="w-full disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+                            >
+
+                                {
+                                    loading ? "Processing"
+                                        :
+                                        <p className='capitalize'>
+                                            {authType}
+                                        </p>
+                                }
+                            </button>
 
                             {
                                 authType === 'register' && <p className='text-center'>Already have an account? <span onClick={() => openModal("login")} className='text-blue-600 underline cursor-pointer'>Login</span></p>
