@@ -115,7 +115,7 @@ const Profile = () => {
     name: `${userData.name}` || "",
     email: `${userData.email}` || "",
     phone: `${userData.number}` || "",
-    bvnVerified: userData.bvnVerify,
+    userVerified: userData.userVerify,
   };
 
   return (
@@ -171,7 +171,7 @@ const Profile = () => {
           }
 
           <div className="mt-3">
-            {user.bvnVerified ? (
+            {user?.userVerified ? (
               <span className="text-green-600 flex items-center justify-center gap-2 text-sm">
                 <ShieldCheck size={16} />Email Verified
               </span>
@@ -182,7 +182,7 @@ const Profile = () => {
                     <ShieldAlert size={16} /> Email Not Verified
                   </span>
                   <button
-                    onClick={() => setUserBvn(()=>alert("Coming soon"))}
+                    onClick={() => setUserBvn(()=>router.push("/verify-user"))}
                     className="bg-yellow-400 mt-2 px-3 py-1 rounded-md text-xs text-black hover:bg-yellow-500"
                   >
                     Verify Now
