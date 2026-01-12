@@ -64,7 +64,7 @@ export default function Hero() {
       <div className="mt-10 flex flex-wrap gap-5">
         <button
           onClick={() => openModal("register")}
-          className="px-8 py-4 rounded-full font-semibold shadow-xl hover:scale-105 transition"
+          className="px-8 py-4 rounded-full text-sm font-semibold shadow-xl hover:scale-105 transition"
           style={{
             background: `linear-gradient(90deg, ${pax26.primary}, ${pax26.btn})`,
             color: "#fff",
@@ -75,7 +75,7 @@ export default function Hero() {
 
         <Link
           href="#pricing"
-          className="px-8 py-4 rounded-full border font-semibold hover:scale-105 transition"
+          className="px-8 py-4 rounded-full border text-sm font-semibold hover:scale-105 transition"
           style={{
             borderColor: pax26.primary,
             color: pax26.primary,
@@ -105,14 +105,14 @@ export default function Hero() {
     {/* VISUAL SIDE */}
     <div className="relative flex justify-center">
       <div
-        className="relative w-[320px] h-[620px] rounded-[40px] p-4 backdrop-blur-xl shadow-2xl border"
+        className="relative w-[320px] h-[530px] rounded-[40px] p-4 backdrop-blur-xl shadow-2xl border"
         style={{
           background: `${pax26.bg}aa`,
           borderColor: `${pax26.primary}30`,
         }}
       >
         <div
-          className="w-full h-full rounded-[30px] p-6 flex flex-col justify-between"
+          className="w-full h-full rounded-[30px] p-4 flex flex-col justify-between"
           style={{ background: pax26.card }}
         >
           <div>
@@ -129,7 +129,7 @@ export default function Hero() {
               Balance
             </p>
             <p
-              className="text-3xl font-bold mt-1"
+              className="text-2xl font-bold mt-1"
               style={{ color: pax26.primary }}
             >
               ₦24,500.00
@@ -137,10 +137,10 @@ export default function Hero() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {["Airtime", "Data", "TV", "Electricity", "Crypto", "Betting", "Jamb", "More"].map((item) => (
+            {["Airtime", "Data", "TV", "Electricity", "Crypto", "Betting", "Jamb", "More..."].map((item) => (
               <div
                 key={item}
-                className="rounded-xl p-4 text-center text-sm font-medium shadow"
+                className="rounded-xl p-2 text-center text-xs font-medium shadow"
                 style={{
                   background: `${pax26.primary}10`,
                   color: pax26.primary,
@@ -152,7 +152,7 @@ export default function Hero() {
           </div>
 
           <div
-            className="mt-6 p-4 rounded-xl text-sm"
+            className="mt-3 p-4 rounded-xl text-sm"
             style={{
               background: `${pax26.btn}15`,
               color: pax26.btn,
