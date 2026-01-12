@@ -66,5 +66,6 @@ export const config = {
     "/survey",
     "/reset-password",
     "/verify-user",
+    "/terms"
   ],
 }

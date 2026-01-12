@@ -21,7 +21,8 @@ export default function SignupPage() {
         refHostCode } = useGlobalContext();
     const [loading, setLoading] = useState(false);
     const [awayLoading, setAwayLoading] = useState(false);
-    const [error, setError] = useState("")
+    const [error, setError] = useState("");
+    const [agreed, setAgreed] = useState(false);
 
     const handleOnchange = (e) => {
         const { name, value } = e.target;
@@ -29,7 +30,12 @@ export default function SignupPage() {
     }
 
     const baseUrl = authType === "login" ? "/api/auth/login" : authType === "register" ? "/api/auth/register" : ""
-    const userAuthHandler = async (e) => {
+    const userAuthHandler = async () => {
+        if (authType === "register" && !agreed) {
+            toast.error("You must agree to the Terms & Conditions");
+            return;
+        }
+
         if (authType === "reset password") {
             handlePasswordReset();
             return;
@@ -176,10 +182,11 @@ export default function SignupPage() {
                             )}
 
                             <button
-                                disabled={loading || awayLoading}
+                                disabled={loading || awayLoading || (authType === "register" && !agreed)}
                                 type="submit"
-                                className="w-full disabled-opacity-60 disabled-cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+                                className="w-full disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
                             >
+
                                 {
                                     loading ? "Processing"
                                         :
@@ -188,6 +195,28 @@ export default function SignupPage() {
                                         </p>
                                 }
                             </button>
+                            {authType === "register" && (
+                                <div className="flex items-start gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={agreed}
+                                        onChange={(e) => setAgreed(e.target.checked)}
+                                        className="mt-1 w-4 h-4 cursor-pointer"
+                                    />
+
+                                    <p>
+                                        I agree to the{" "}
+                                        <a
+                                            href="/terms"
+                                            target="_blank"
+                                            className="text-blue-600 underline hover:text-blue-800"
+                                        >
+                                            Terms & Conditions
+                                        </a>
+                                    </p>
+                                </div>
+                            )}
+
                             {
                                 authType === 'register' && <p className='text-center'>Already have an account? <span onClick={() => openModal("login")} className='text-blue-600 underline cursor-pointer'>Login</span></p>
                             }

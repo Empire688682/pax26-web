@@ -37,7 +37,7 @@ export default function Hero() {
       </div>
 
       <h1
-        className="text-5xl md:text-6xl font-extrabold leading-tight"
+        className="text-5xl md:text-6xl text-center md:text-left font-extrabold leading-tight"
         style={{ color: pax26.textPrimary }}
       >
         Power Your Daily

@@ -16,7 +16,11 @@ import {
 import { useGlobalContext } from '../Context';
 
 export default function Sidebar() {
-  const { isOpen, setIsOpen, logoutUser, pax26 } = useGlobalContext();
+  const { isOpen, setIsOpen, logoutUser, pax26, userData } = useGlobalContext();
+
+ if (!userData) {
+    return null; // or a loading indicator
+  }
 
   return (
     <nav
@@ -44,11 +48,11 @@ export default function Sidebar() {
             <DollarSign size={18} className="hidden md:block" />
             Profile
           </Link>
-          {/* <Link onClick={() => setIsOpen(false)} href="/api-docs" className="flex items-center gap-2 hover:text-blue-600"
+          <Link onClick={() => setIsOpen(false)} href="terms" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <FileCode size={18} className="hidden md:block" />
-            API Docs
-          </Link> */}
+            Terms & Conditions
+          </Link>
           <Link onClick={() => setIsOpen(false)} href="/fund-wallet" className="flex items-center gap-2 hover:text-blue-600"
           style={{ color: pax26.textSecondary }}>
             <Wallet size={18} className="hidden md:block" />
