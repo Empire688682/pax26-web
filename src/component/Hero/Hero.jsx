@@ -70,7 +70,7 @@ export default function Hero() {
             color: "#fff",
           }}
         >
-          Create Free Account
+          Create Account
         </button>
 
         <Link
@@ -137,7 +137,7 @@ export default function Hero() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {["Airtime", "Data", "TV", "Electricity", "Crypto", "Betting", "Jamb", "More..."].map((item) => (
+            {["Airtime", "Data", "TV", "Electricity", "GiftCard", "Betting", "Jamb", "More..."].map((item) => (
               <div
                 key={item}
                 className="rounded-xl p-2 text-center text-xs font-medium shadow"
