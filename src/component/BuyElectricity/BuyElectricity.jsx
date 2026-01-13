@@ -58,6 +58,7 @@ const BuyElectricity = () => {
 
   const handleChange = (e) => {
    const { name, value } = e.target
+   setApiCall(false);
   
 
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -95,14 +96,26 @@ const BuyElectricity = () => {
 
   };
 
-  useEffect(()=>{
-    const { disco, meterNumber } = formData;
-    if (meterNumber.length >= 7 && disco) {
-      verifyMeterNumber(meterNumber, disco).then((isVerified)=>{
-        setIsMeterVerified(isVerified);
-      });
-    }
-  },[formData.disco, formData.meterNumber]);
+  const [apiCall, setApiCall] = useState(false);
+ useEffect(() => {
+  const { disco, meterNumber } = formData;
+
+  if (!disco || meterNumber.length < 7) {
+    setIsMeterVerified(false);
+    return;
+  }
+
+  if(apiCall) return;
+  const timeout = setTimeout(() => {
+    verifyMeterNumber(meterNumber, disco).then((isVerified) => {
+      setIsMeterVerified(isVerified);
+    });
+  }, 800); // wait for user to stop typing
+
+  setApiCall(true);
+  return () => clearTimeout(timeout);
+}, [formData.disco, formData.meterNumber]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

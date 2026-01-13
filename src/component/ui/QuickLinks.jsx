@@ -5,7 +5,7 @@ import { useGlobalContext } from '../Context';
 const QuickLinks = ({link, title, icon, status}) => {
     const {router, pax26} = useGlobalContext();
     return (
-        <div onClick={() => router.push(link)}
+        <div onClick={() => {status === "Inactive" ? alert("Coming soon!") : router.push(link)}}
             style={{ backgroundColor: pax26.bg }} className="cursor-pointer p-4 rounded-lg shadow-md flex items-center justify-center flex-col">
             {icon}
             <p className="text-sm font-medium"

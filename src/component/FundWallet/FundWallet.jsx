@@ -75,7 +75,7 @@ const FundWallet = () => {
             style={{ backgroundColor: pax26.bg }}>
 
             {/* Transfer Options Section */}
-            <div className="p-4 border rounded-lg border-blue-200"
+            {/* <div className="p-4 border rounded-lg border-blue-200"
             style={{ backgroundColor: pax26.secondaryBg }}
             >
               <h3 className="text-lg font-semibold text-blue-700">Transfer Options</h3>
@@ -116,7 +116,7 @@ const FundWallet = () => {
                   >Use Another Options</span>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Top-Up Form */}
             {

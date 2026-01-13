@@ -20,8 +20,8 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { disco, meterNumber, meterType, amount, phone, pin, customerName } = body;
-
+  const { disco, meterNumber, meterType, amount, phone, pin } = body;
+  const customerName = "bug"
   try {
     // Validate request
     if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
