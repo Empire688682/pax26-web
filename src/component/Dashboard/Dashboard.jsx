@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '../Context';
 import { PiHandWithdraw } from "react-icons/pi";
-import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon } from "lucide-react";
+import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon, ArrowLeftRight  } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
 import { toast, } from "react-toastify";
@@ -195,6 +195,9 @@ const Dashboard = () => {
       <h3 className="text-md font-medium mb-2"
         style={{ color: pax26.textPrimary }}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        <QuickLinks title="Transfer" link="/dashboard/transfer" status="Inactive" icon={<ArrowLeftRight
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         <QuickLinks title="Fund Wallet" link="/fund-wallet" status="" icon={<Wallet
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
