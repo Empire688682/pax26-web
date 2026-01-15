@@ -5,14 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { useGlobalContext } from "../Context";
 
 export default function VerifyAccountContent() {
-  const { router, pax26, userData,setUserData } = useGlobalContext();
+  const { router, pax26, userData, setUserData } = useGlobalContext();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
   const urlToken = searchParams.get("token");
 
-   useEffect(() => {
+  useEffect(() => {
     if (userData?.userVerify) {
       router.push("/dashboard");
     }
@@ -112,8 +112,9 @@ export default function VerifyAccountContent() {
         </h1>
 
         <p className="text-center text-gray-600 text-sm mb-6">
-          Enter the 6-digit code sent to your email or use the verification link.
+          Please enter the 6-digit verification code sent to your email address. If you don’t see it, check your <span className="font-bold animate-pop-up">spam folder.</span>
         </p>
+
 
         {/* OTP FORM */}
         <form onSubmit={handleSubmit} className="space-y-4">
