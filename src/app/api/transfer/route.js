@@ -2,6 +2,12 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../helper/VerifyToken";
+import bcrypt from "bcryptjs";
+import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+
+export async function OPTIONS(){
+    return new NextResponse(null, {status:200, headers:corsHeaders()})
+}
 
 /**
  * Dummy Pax26 users (simulate DB)
@@ -33,14 +39,14 @@ export async function POST(req) {
     if (!senderId || !recipientAccountNumber || !amount || !pin) {
       return NextResponse.json(
         { message: "All fields are required" },
-        { status: 400 }
+        { status: 400, headers:corsHeaders() }
       );
     }
 
     if (amount <= 0) {
       return NextResponse.json(
         { message: "Invalid transfer amount" },
-        { status: 400 }
+        { status: 400, headers:corsHeaders() }
       );
     }
 
@@ -50,7 +56,7 @@ export async function POST(req) {
         
       return NextResponse.json(
         { message: "Sender not found" },
-        { status: 404 }
+        { status: 404, headers:corsHeaders() }
       );
      }
 
@@ -59,15 +65,16 @@ export async function POST(req) {
     if (!sender) {
       return NextResponse.json(
         { message: "Sender not found" },
-        { status: 404 }
+        { status: 404, headers:corsHeaders() }
       );
     }
 
     // 3️⃣ Verify PIN
-    if (sender.pin !== pin) {
+    const pinMatch = await bcrypt.compare(pin, sender.pin);
+    if (!pinMatch) {
       return NextResponse.json(
         { message: "Invalid transaction PIN" },
-        { status: 401 }
+        { status: 401, headers:corsHeaders() }
       );
     }
 
@@ -75,7 +82,7 @@ export async function POST(req) {
     if (sender.wallet < amount) {
       return NextResponse.json(
         { message: "Insufficient wallet balance" },
-        { status: 400 }
+        { status: 400, headers:corsHeaders() }
       );
     }
 
@@ -87,7 +94,7 @@ export async function POST(req) {
     if (!recipient) {
       return NextResponse.json(
         { message: "Recipient not found on Pax26" },
-        { status: 404 }
+        { status: 404, headers:corsHeaders() }
       );
     }
 
@@ -95,13 +102,15 @@ export async function POST(req) {
     if (sender.accountNumber === recipientAccountNumber) {
       return NextResponse.json(
         { message: "You cannot transfer to yourself" },
-        { status: 400 }
+        { status: 400, headers:corsHeaders() }
       );
     }
 
     // 7️⃣ Perform transfer
     sender.wallet -= amount;
     recipient.wallet += amount;
+
+    await sender.save();
 
     // 8️⃣ Success response
     return NextResponse.json(
@@ -113,13 +122,13 @@ export async function POST(req) {
           senderBalance: sender.wallet,
         },
       },
-      { status: 200 }
+      { status: 200, headers:corsHeaders() }
     );
   } catch (error) {
     console.error("Transfer Error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
-      { status: 500 }
+      { status: 500, headers:corsHeaders() }
     );
   }
 }
