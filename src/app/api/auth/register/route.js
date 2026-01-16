@@ -63,10 +63,12 @@ const registerUser = async (req) => {
       );
     }
 
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ 
+      $or:[{email}, {number}]
+     });
       if (existingUser) {
         return NextResponse.json(
-          { success: false, message: "Email has been taken" },
+          { success: false, message: "Email or Phone number has been taken" },
           { status: 400, headers: corsHeaders() }
         );
       }

@@ -58,6 +58,14 @@ export async function POST(req) {
 
         user = await UserModel.findOne({ email });
         if (!user) {
+            //check if User number is not taking
+            const userByNumber = await UserModel.findOne({number});
+            if(userByNumber){
+                 return NextResponse.json(
+                { success: false, message: "User phone number as been taken"},
+                { status: 400, headers: corsHeaders() }
+            );
+            }
             //Generate referralCode
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             const nextUserNumber = await UserModel.countDocuments() + 1;
