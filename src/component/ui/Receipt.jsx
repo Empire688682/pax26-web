@@ -108,6 +108,18 @@ export default function Receipt({
 
           {/* Info rows */}
           {
+            // Transfer Receipt Details
+            receiptType === "transfer" && (
+              <div className="space-y-3 text-sm">
+                <ReceiptRow title="Transaction Type" value={receiptType} />
+                <ReceiptRow title="Recipient Details" value={metadata?.recipientName} />
+                <ReceiptRow title="Sender Details" value={metadata?.senderName} />
+                <ReceiptRow title="Transaction ID." value={transactionId} />
+              </div>
+            )
+          }
+
+          {
             // Electricity Receipt Details
             receiptType === "electricity" && (
               <div className="space-y-3 text-sm">
@@ -131,7 +143,7 @@ export default function Receipt({
                 <ReceiptRow title="Mobile Network" value={networks[metadata?.network]} />
                 <ReceiptRow title="Recipient Number" value={metadata?.number} />
                 <ReceiptRow title="Transaction Type" value={receiptType} />
-                <ReceiptRow title="Transaction ID" value={transactionId} />
+                <ReceiptRow title="Transaction ID." value={transactionId} />
               </div>
             )
           }
@@ -140,7 +152,7 @@ export default function Receipt({
             (receiptType === "Wallet funding")  && (
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Transaction Type" value={receiptType} />
-                <ReceiptRow title="Transaction ID" value={transactionId} />
+                <ReceiptRow title="Transaction ID." value={transactionId} />
               </div>
             )
           }
@@ -175,8 +187,8 @@ export default function Receipt({
 function ReceiptRow({ title, value, highlight }) {
   return (
     <div className="flex justify-between gap-15 border-b border-gray-200 pb-1">
-      <span className="text-gray-600 text-xs">{title}</span>
-      <span className={` ${highlight ? "text-blue-700 text-xs" : ""}`}>
+      <span className="text-gray-600 text-xs capitalize">{title}</span>
+      <span className={` ${highlight ? "text-blue-700 text-xs" : " capitalize"}`}>
         {value}
       </span>
     </div>

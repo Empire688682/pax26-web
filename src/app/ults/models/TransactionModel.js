@@ -16,6 +16,10 @@ const TransactionSchema = new mongoose.Schema(
       address: { type: String },
       token: { type: String },
       meterNumber: { type: String },
+      senderName: { type: String },
+      recipientName: { type: String },
+      recipientNumber: { type: String },
+      senderNumber: { type: String },
     },
   },
   {

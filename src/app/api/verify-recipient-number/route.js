@@ -15,7 +15,7 @@ export async function POST(req) {
         const { recipientNumber } = body;
 
         const userId = await verifyToken(req);
-        const user = await UserModel.findById({userId});
+        const user = await UserModel.findById(userId);
         if(!user){
              return NextResponse.json(
                 { message: "User not authenticated" },

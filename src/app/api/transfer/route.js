@@ -15,17 +15,17 @@ export async function POST(req) {
   await connectDb();
   try {
     const body = await req.json();
-    const { recipientAccountNumber, amount, pin } = body;
+    const { accountNumber, amount, pin, recipientName } = body;
 
     // 1️⃣ Basic validation
-    if (!recipientAccountNumber || !amount || !pin) {
+    if (!accountNumber || !amount || !pin || !recipientName) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400, headers: corsHeaders() }
       );
     }
 
-    if (amount <= 0) {
+    if (amount <= 50) {
       return NextResponse.json(
         { message: "Invalid transfer amount" },
         { status: 400, headers: corsHeaders() }
@@ -52,16 +52,17 @@ export async function POST(req) {
       );
     }
 
-    // 4️⃣ Check wallet balance
-    if (sender.wallet < amount) {
+    // 4️⃣ Check walletBalance balance
+    if (sender.walletBalance < amount) {
       return NextResponse.json(
-        { message: "Insufficient wallet balance" },
+        { message: "Insufficient walletBalance balance" },
         { status: 400, headers: corsHeaders() }
       );
     }
 
     // 5️⃣ Find recipient
-    const recipient = await UserModel.findOne({ recipient: recipientAccountNumber })
+    const number = "0" + accountNumber.trim();
+    const recipient = await UserModel.findOne({ number})
 
     if (!recipient) {
       return NextResponse.json(
@@ -71,33 +72,36 @@ export async function POST(req) {
     }
 
     // 6️⃣ Prevent self-transfer
-    if (sender.accountNumber === recipientAccountNumber) {
+    if (sender.number === number) {
       return NextResponse.json(
         { message: "You cannot transfer to yourself" },
         { status: 400, headers: corsHeaders() }
       );
     }
 
-    // 7️⃣ Perform transfer
-    sender.wallet -= amount;
-    recipient.wallet += amount;
+  // 7️⃣ Perform transfer
+sender.walletBalance -= amount;
+recipient.walletBalance += amount;
 
-    await TransactionModel.create(
-      {
-        userId: sender._id,
-        type: "transfer",
-        amount,
-        status: "success",
-        transactionId: sender._id + Date.now().toLocaleString(),
-        reference: Date.now().toLocaleString() + amount,
-        metadata: {
-          platform: "Pax26",
-          number: sender?.number
-        }
-      }
-    );
+const transaction = await TransactionModel.create({
+  userId: sender._id,
+  type: "transfer",
+  amount,
+  status: "success",
+  transactionId: sender._id + Date.now().toLocaleString(),
+  reference: Date.now().toLocaleString() + amount,
+  metadata: {
+    platform: "Pax26",
+    number: sender?.number,
+    recipientName: recipientName,
+    recipientNumber: recipient.number,
+    senderName: sender.name,
+    senderNumber: sender.number,
+  }
+});
 
-    await sender.save();
+await sender.save();
+await recipient.save();
 
 
     // 8️⃣ Success response
@@ -107,7 +111,8 @@ export async function POST(req) {
         data: {
           recipientName: recipient.name,
           amount,
-          senderBalance: sender.wallet,
+          senderBalance: sender.walletBalance,
+          transactionId: transaction._id,
         },
       },
       { status: 200, headers: corsHeaders() }

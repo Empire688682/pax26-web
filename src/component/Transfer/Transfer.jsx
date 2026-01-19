@@ -11,7 +11,7 @@ import WalletBalance from "../WalletBalance/WalletBalance";
 import TransferHelp from "../TransferHelp/TransferHelp";
 
 const Transfer = () => {
-    const { pax26, userWallet, getUserRealTimeData } = useGlobalContext();
+    const { pax26, userWallet, getUserRealTimeData, router } = useGlobalContext();
 
     const [accountNumber, setAccountNumber] = useState("");
     const [recipientName, setRecipientName] = useState("");
@@ -39,16 +39,20 @@ const Transfer = () => {
     async function VerifyAccountNumber() {
         setCheckingUser(true);
         try {
-            const response = await fetch("/api/verifyAccountNumber", {
+            const response = await fetch("/api/verify-recipient-number", {
                 method: "POST",
-                body: accountNumber,
+                body: JSON.stringify({ recipientNumber: accountNumber }),
             })
-            if (response.ok) {
-                const data = await response.json();
-                console.log("data: ", data);
-                setRecipientName(data?.data?.name);
-                setUserChecked(true);
+            if (!response.ok) {
+                setRecipientName("");
+                setUserChecked(false);
+                setCheckingUser(false);
+                return;
             }
+            const data = await response.json();
+            console.log("data: ", data);
+            setRecipientName(data?.data?.name);
+            setUserChecked(true);
         } catch (error) {
             console.log("VerifyAcctNumError: ", error);
             setCheckingUser(false);
@@ -73,18 +77,29 @@ const Transfer = () => {
             const response = await fetch("/api/transfer",
                 {
                     method: "POST",
-                    body: { accountNumber, amount, pin, recipientName }
+                    body: JSON.stringify({ accountNumber, amount, pin, recipientName })
                 }
 
-            )
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert(errorData.message || "Transfer failed");
+                setLoading(false);
+                return;
+            }
 
             const data = await response.json();
             console.log("data: ", data)
-                if(data.data.status === 200){
-                setSuccess(true);
-                getUserRealTimeData()
-                setLoading(false);
-                }
+            await getUserRealTimeData();
+            setSuccess(true);
+            setLoading(false);
+            setPin("");
+            setAmount("");
+            setAccountNumber("");
+            setRecipientName("");
+            const { transactionId } = data.data;
+            router.push(`/transaction-receipt/?id=${transactionId}`);
 
         } catch (error) {
             console.log("TransferErr: ", error);
@@ -153,12 +168,13 @@ const Transfer = () => {
 
                         {/* Amount */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Amount</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Amount(Min:50)</label>
                             <input
                                 type="number"
                                 value={amount}
+                                min="50"
                                 onChange={(e) => setAmount(e.target.value)}
-                                placeholder="₦0.00"
+                                placeholder="₦50.00"
                                 className="w-full text-gray-400 border border-gray-300 focus:outline-none rounded-xl px-4 py-3"
                             />
                             {Number(amount) > userWallet && (
