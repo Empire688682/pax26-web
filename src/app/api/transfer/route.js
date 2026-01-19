@@ -56,24 +56,34 @@ export async function POST(req) {
     const debitTx = await TransactionModel.create({
       userId: sender._id,
       type: "transfer",
-      direction: "debit",
       amount,
       status: "success",
-      reference,
-      counterparty: { name: recipient.name, number: last10Recipient },
-      balanceAfter: sender.walletBalance,
+      reference:"Se_" + reference,
+      metadata: {
+        direction: "debit",
+        balanceAfter: sender.walletBalance,
+        senderName: sender.name,
+        recipientName: recipient.name,
+        recipientNumber: last10Recipient,
+        senderNumber: last10Sender,
+      },
     });
 
     // Credit transaction (recipient)
     await TransactionModel.create({
       userId: recipient._id,
       type: "transfer",
-      direction: "credit",
       amount,
       status: "success",
-      reference,
-      counterparty: { name: sender.name, number: last10Sender },
-      balanceAfter: recipient.walletBalance,
+      reference: "Re_" + reference,
+      metadata: {
+        direction: "credit",
+        balanceAfter: recipient.walletBalance,
+        senderName: sender.name,
+        recipientName: recipient.name,
+        recipientNumber: last10Recipient,
+        senderNumber: last10Sender,
+      },
     });
 
     await sender.save();
