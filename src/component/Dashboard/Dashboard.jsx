@@ -196,7 +196,7 @@ const Dashboard = () => {
         style={{ color: pax26.textPrimary }}>Quick Links</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
 
-        <QuickLinks title="Transfer" link="/dashboard/transfer" status="" icon={<ArrowLeftRight
+        <QuickLinks title="Transfer" link="/dashboard/transfer" status="Inactive" icon={<ArrowLeftRight
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         <QuickLinks title="Fund Wallet" link="/fund-wallet" status="" icon={<Wallet
