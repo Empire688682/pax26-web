@@ -58,14 +58,16 @@ export async function POST(req) {
       type: "transfer",
       amount,
       status: "success",
-      reference:"Se_" + reference,
+      reference: "Se_" + reference,
       metadata: {
-        direction: "debit",
-        balanceAfter: sender.walletBalance,
-        senderName: sender.name,
-        recipientName: recipient.name,
-        recipientNumber: last10Recipient,
-        senderNumber: last10Sender,
+        transferDetails: {
+          direction: "debit",
+          balanceAfter: sender.walletBalance,
+          senderName: sender.name,
+          recipientName: recipient.name,
+          recipientNumber: last10Recipient,
+          senderNumber: last10Sender,
+        }
       },
     });
 
@@ -77,12 +79,14 @@ export async function POST(req) {
       status: "success",
       reference: "Re_" + reference,
       metadata: {
-        direction: "credit",
-        balanceAfter: recipient.walletBalance,
-        senderName: sender.name,
-        recipientName: recipient.name,
-        recipientNumber: last10Recipient,
-        senderNumber: last10Sender,
+        transferDetails: {
+          direction: "credit",
+          balanceAfter: recipient.walletBalance,
+          senderName: sender.name,
+          recipientName: recipient.name,
+          recipientNumber: last10Recipient,
+          senderNumber: last10Sender,
+        }
       },
     });
 
