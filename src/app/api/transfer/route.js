@@ -83,6 +83,10 @@ export async function POST(req) {
 sender.walletBalance -= amount;
 recipient.walletBalance += amount;
 
+// Number converter
+    const last10SenderNumber = sender.number.slice(-10);
+    const last10RecipientNumber = recipient.number.slice(-10);
+
 const transaction = await TransactionModel.create({
   userId: sender._id,
   type: "transfer",
@@ -94,9 +98,9 @@ const transaction = await TransactionModel.create({
     platform: "Pax26",
     number: sender?.number,
     recipientName: recipientName,
-    recipientNumber: recipient.number,
+    recipientNumber: last10RecipientNumber,
     senderName: sender.name,
-    senderNumber: sender.number,
+    senderNumber: last10SenderNumber,
   }
 });
 

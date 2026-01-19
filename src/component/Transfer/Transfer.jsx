@@ -231,7 +231,7 @@ const Transfer = () => {
                         {/* Success */}
                         {success && (
                             <div className="bg-green-50 text-green-700 p-3 rounded-xl text-center text-sm">
-                                ✅ ₦{Number(amount).toLocaleString()} sent to {recipientName}
+                                ✅  sent
                             </div>
                         )}
                     </div>

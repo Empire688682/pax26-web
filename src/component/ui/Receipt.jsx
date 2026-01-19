@@ -112,8 +112,8 @@ export default function Receipt({
             receiptType === "transfer" && (
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Transaction Type" value={receiptType} />
-                <ReceiptRow title="Recipient Details" value={metadata?.recipientName} />
-                <ReceiptRow title="Sender Details" value={metadata?.senderName} />
+                <DounbleReceiptRow title="Recipient Details" value1={metadata?.recipientName} value2={metadata?.recipientNumber} />
+                <DounbleReceiptRow title="Recipient Details" value1={metadata?.senderName} value2={metadata?.senderNumber} />
                 <ReceiptRow title="Transaction ID." value={transactionId} />
               </div>
             )
@@ -193,4 +193,20 @@ function ReceiptRow({ title, value, highlight }) {
       </span>
     </div>
   );
+}
+
+function DounbleReceiptRow({ title, value1, value2 }) {
+  return (
+    <div className="flex justify-between items-center gap-15 border-b a border-gray-200 pb-1">
+      <span className="text-gray-600 text-xs capitalize">{title}</span>
+      <div className="flex flex-col items-end">
+        <span className={" capitalize text-xs font-bold"}>
+        {value1}
+      </span>
+      <span className={ " capitalize"}>
+     Pax26 | {value2}
+      </span>
+      </div>
+    </div>
+  )
 }
