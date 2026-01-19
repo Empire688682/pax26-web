@@ -31,13 +31,13 @@ const BuyTv = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await fetch(allTvPackagesUrl);
+        const res = await (allTvPackagesUrl);
         const data = await res.json();
         if (data && data.TV_ID) {
           setPackagesData(data.TV_ID);
         }
       } catch (error) {
-        console.error("Failed to fetch packages:", error);
+        console.error("Failed to  packages:", error);
       }
     };
 

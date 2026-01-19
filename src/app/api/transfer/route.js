@@ -4,68 +4,42 @@ import { NextResponse } from "next/server";
 import { verifyToken } from "../helper/VerifyToken";
 import bcrypt from "bcryptjs";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import TransactionModel from "@/app/ults/models/TransactionModel";
 
-export async function OPTIONS(){
-    return new NextResponse(null, {status:200, headers:corsHeaders()})
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders() })
 }
 
-/**
- * Dummy Pax26 users (simulate DB)
- */
-const users = [
-  {
-    id: "user_123",
-    name: "Juwon Asehinde",
-    accountNumber: "9999999999",
-    wallet: 25000,
-    pin: "1234",
-  },
-  {
-    id: "user_456",
-    name: "John Doe",
-    accountNumber: "1111111111",
-    wallet: 10000,
-    pin: "4321",
-  },
-];
 
 export async function POST(req) {
-    await connectDb();
+  await connectDb();
   try {
     const body = await req.json();
-    const { senderId, recipientAccountNumber, amount, pin } = body;
+    const { recipientAccountNumber, amount, pin } = body;
 
     // 1️⃣ Basic validation
-    if (!senderId || !recipientAccountNumber || !amount || !pin) {
+    if (!recipientAccountNumber || !amount || !pin) {
       return NextResponse.json(
         { message: "All fields are required" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
     if (amount <= 0) {
       return NextResponse.json(
         { message: "Invalid transfer amount" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
-     const userId = await verifyToken(req);
-
-     if(!sender){
-        
-      return NextResponse.json(
-        { message: "Sender not found" },
-        { status: 404, headers:corsHeaders() }
-      );
-     }
+    const userId = await verifyToken(req);
 
     // 2️⃣ Find sender
     const sender = await UserModel.findById(userId);
     if (!sender) {
       return NextResponse.json(
         { message: "Sender not found" },
-        { status: 404, headers:corsHeaders() }
+        { status: 404, headers: corsHeaders() }
       );
     }
 
@@ -74,7 +48,7 @@ export async function POST(req) {
     if (!pinMatch) {
       return NextResponse.json(
         { message: "Invalid transaction PIN" },
-        { status: 401, headers:corsHeaders() }
+        { status: 401, headers: corsHeaders() }
       );
     }
 
@@ -82,19 +56,17 @@ export async function POST(req) {
     if (sender.wallet < amount) {
       return NextResponse.json(
         { message: "Insufficient wallet balance" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
     // 5️⃣ Find recipient
-    const recipient = users.find(
-      (u) => u.accountNumber === recipientAccountNumber
-    );
+    const recipient = await UserModel.findOne({ recipient: recipientAccountNumber })
 
     if (!recipient) {
       return NextResponse.json(
         { message: "Recipient not found on Pax26" },
-        { status: 404, headers:corsHeaders() }
+        { status: 404, headers: corsHeaders() }
       );
     }
 
@@ -102,7 +74,7 @@ export async function POST(req) {
     if (sender.accountNumber === recipientAccountNumber) {
       return NextResponse.json(
         { message: "You cannot transfer to yourself" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -110,7 +82,23 @@ export async function POST(req) {
     sender.wallet -= amount;
     recipient.wallet += amount;
 
+    await TransactionModel.create(
+      {
+        userId: sender._id,
+        type: "transfer",
+        amount,
+        status: "success",
+        transactionId: sender._id + Date.now().toLocaleString(),
+        reference: Date.now().toLocaleString() + amount,
+        metadata: {
+          platform: "Pax26",
+          number: sender?.number
+        }
+      }
+    );
+
     await sender.save();
+
 
     // 8️⃣ Success response
     return NextResponse.json(
@@ -122,13 +110,13 @@ export async function POST(req) {
           senderBalance: sender.wallet,
         },
       },
-      { status: 200, headers:corsHeaders() }
+      { status: 200, headers: corsHeaders() }
     );
   } catch (error) {
     console.error("Transfer Error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
-      { status: 500, headers:corsHeaders() }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

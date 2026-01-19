@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-    ArrowLeftRight,
     Wallet,
     User,
     Lock,
@@ -12,54 +11,88 @@ import WalletBalance from "../WalletBalance/WalletBalance";
 import TransferHelp from "../TransferHelp/TransferHelp";
 
 const Transfer = () => {
-    const { pax26, userWallet } = useGlobalContext();
-
-    // Dummy Pax26 users DB
-    const pax26Users = [
-        { accountNumber: "1111111111", name: "John Doe" },
-        { accountNumber: "2222222222", name: "Amara Okafor" },
-        { accountNumber: "3333333333", name: "Tunde Adebayo" },
-    ];
+    const { pax26, userWallet, getUserRealTimeData } = useGlobalContext();
 
     const [accountNumber, setAccountNumber] = useState("");
     const [recipientName, setRecipientName] = useState("");
     const [checkingUser, setCheckingUser] = useState(false);
+    const [userChecked, setUserChecked] = useState(false)
     const [amount, setAmount] = useState("");
     const [pin, setPin] = useState("");
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    // Username lookup (dummy API simulation)
+    // API simulation
     useEffect(() => {
         if (accountNumber.length < 10) {
             setRecipientName("");
             return;
         }
 
-        setCheckingUser(true);
-
         const timer = setTimeout(() => {
-            const user = pax26Users.find(
-                (u) => u.accountNumber === accountNumber
-            );
-            setRecipientName(user ? user.name : "");
-            setCheckingUser(false);
+            VerifyAccountNumber()
         }, 800);
 
         return () => clearTimeout(timer);
     }, [accountNumber]);
 
-    const handleTransfer = () => {
+    async function VerifyAccountNumber() {
+        setCheckingUser(true);
+        try {
+            const response = await fetch("/api/verifyAccountNumber", {
+                method: "POST",
+                body: accountNumber,
+            })
+            if (response.ok) {
+                const data = await response.json();
+                console.log("data: ", data);
+                setRecipientName(data?.data?.name);
+                setUserChecked(true);
+            }
+        } catch (error) {
+            console.log("VerifyAcctNumError: ", error);
+            setCheckingUser(false);
+        }
+        finally {
+            setCheckingUser(false);
+        }
+    }
+
+    const handleTransfer = async () => {
         if (!accountNumber || !amount || !pin || !recipientName) {
             alert("Please complete all fields correctly");
             return;
+        };
+
+        if (!userChecked) {
+            alert("Please wait for account verification");
         }
 
-        setLoading(true);
-        setTimeout(() => {
+        try {
+            setLoading(true);
+            const response = await fetch("/api/transfer",
+                {
+                    method: "POST",
+                    body: { accountNumber, amount, pin, recipientName }
+                }
+
+            )
+
+            const data = await response.json();
+            console.log("data: ", data)
+                if(data.data.status === 200){
+                setSuccess(true);
+                getUserRealTimeData()
+                setLoading(false);
+                }
+
+        } catch (error) {
+            console.log("TransferErr: ", error);
             setLoading(false);
-            setSuccess(true);
-        }, 2000);
+        }
+        finally {
+            setLoading(false);
+        }
     };
 
     return (
