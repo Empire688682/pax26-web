@@ -112,8 +112,8 @@ export default function Receipt({
             receiptType === "transfer" && (
               <div className="space-y-3 text-sm">
                 <ReceiptRow title="Transaction Type" value={receiptType} />
-                <DounbleReceiptRow title="Recipient Details" value1={metadata?.tranferDetails?.recipientName} value2={metadata?.recipientNumber} />
-                <DounbleReceiptRow title="Sender Details" value1={metadata?.tranferDetails?.senderName} value2={metadata?.senderNumber} />
+                <DounbleReceiptRow title="Recipient Details" value1={metadata?.transferDetails?.recipientName} value2={metadata?.transferDetails?.recipientNumber} />
+                <DounbleReceiptRow title="Sender Details" value1={metadata?.transferDetails?.senderName} value2={metadata?.transferDetails?.senderNumber} />
                 <ReceiptRow title="Transaction ID." value={transactionId} />
               </div>
             )
