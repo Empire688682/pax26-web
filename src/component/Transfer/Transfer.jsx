@@ -90,7 +90,6 @@ const Transfer = () => {
             }
 
             const data = await response.json();
-            console.log("data: ", data)
             await getUserRealTimeData();
             setSuccess(true);
             setLoading(false);

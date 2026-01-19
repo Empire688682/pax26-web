@@ -25,9 +25,9 @@ export async function POST(req) {
       );
     }
 
-    if (amount <= 50) {
+    if (amount < 50) {
       return NextResponse.json(
-        { message: "Invalid transfer amount" },
+        { message: `Invalid transfer amount: ${amount}` },
         { status: 400, headers: corsHeaders() }
       );
     }
