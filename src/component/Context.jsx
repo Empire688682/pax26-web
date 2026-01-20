@@ -125,7 +125,6 @@ export const AppProvider = ({ children }) => {
   const logoutUser = async () => {
     try {
       await axios.get("/api/auth/logout");
-      toast.success("Logged out successfully");
       clearLocalStorage();
       setIsOpen(false);
       setUserData(null);
