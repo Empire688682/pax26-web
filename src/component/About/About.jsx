@@ -57,7 +57,7 @@ const About = () => {
         style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
         className="p-6 rounded-xl shadow text-center">
           <h2 className="text-2xl font-semibold text-blue-600 mb-4">Meet the Team</h2>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-1 gap-8">
             <div className="space-y-2">
               <img
                 src="/team-1.png"
@@ -67,7 +67,7 @@ const About = () => {
               <h3 className="text-lg font-semibold">Juwon Asehinde</h3>
               <p className="text-sm text-gray-400">Founder & CEO</p>
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <img
                 src="/team-2.png"
                 alt="CTO"
@@ -84,7 +84,7 @@ const About = () => {
               />
               <h3 className="text-lg font-semibold">Tobi Ojo</h3>
               <p className="text-sm text-gray-400">Customer Success</p>
-            </div>
+            </div> */}
           </div>
         </div>
 

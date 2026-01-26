@@ -161,7 +161,7 @@ const BuyTv = () => {
           <WalletBalance />
           <div 
           style={{ backgroundColor: pax26.bg}}
-          className="max-w-2xl shadow-2xl rounded-2xl p-8 border border-blue-100">
+          className="max-w-2xl shadow-2xl rounded-2xl p-8">
             <h1 className="text-2xl font-bold text-center text-blue-700 mb-8">
               Buy TV Subscription
             </h1>

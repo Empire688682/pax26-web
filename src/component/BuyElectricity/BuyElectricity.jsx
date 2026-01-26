@@ -175,7 +175,7 @@ const BuyElectricity = () => {
 
           <WalletBalance />
 
-          <div className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100"
+          <div className="max-w-2xl backdrop-blur-md shadow-2xl rounded-2xl p-8"
           style={{ backgroundColor: pax26.bg}}>
             <h1 className="text-2xl font-bold text-center text-blue-700 mb-8 tracking-tight">
               Buy Electricity

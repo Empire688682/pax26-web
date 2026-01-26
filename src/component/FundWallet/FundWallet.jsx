@@ -60,7 +60,7 @@ const FundWallet = () => {
 
         {/* Left: Fund Wallet Form */}
         {loading ? (
-          <div className="backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-4"
+          <div className="backdrop-blur-md p-8 text-center max-w-md rounded-2xl shadow-lg flex flex-col gap-4"
             style={{ backgroundColor: pax26.bg }}>
             <h2 className="text-xl font-semibold text-blue-600 mb-2">Payment Verification</h2>
             <div className="flex justify-center items-center mt-4">
@@ -71,7 +71,7 @@ const FundWallet = () => {
             <p className="text-gray-400 text-sm">Transaction ID: <span className='font-semibold'>{paymentId}</span></p>
           </div>
         ) : (
-          <div className="backdrop-blur-md p-8 rounded-2xl shadow-lg border border-blue-100 flex flex-col gap-6"
+          <div className="backdrop-blur-md p-8 rounded-2xl shadow-lg flex flex-col gap-6"
             style={{ backgroundColor: pax26.bg }}>
 
             {/* Transfer Options Section */}
@@ -156,10 +156,11 @@ const FundWallet = () => {
         )}
 
         {/* Info Section */}
-        <div className="backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100 flex flex-col gap-6"
+        <div className="backdrop-blur-md p-8 rounded-2xl shadow-xl flex flex-col gap-6"
           style={{ backgroundColor: pax26.bg }}>
           <h2 className="text-3xl font-bold text-blue-700 mb-2">Fund Your Wallet</h2>
-          <p className="text-gray-700 leading-relaxed text-sm">
+          <p className="leading-relaxed text-sm"
+          style={{ color: pax26.textPrimary }}>
             Easily top-up your <span className="font-semibold">Pax26</span>{" "}
             wallet using Flutterwave. Your wallet allows you to buy airtime,
             data, electricity, and much more — all in one place.
@@ -168,7 +169,8 @@ const FundWallet = () => {
             style={{ backgroundColor: pax26.secondaryBg }}>
             🔐 All transactions are secured using bank-grade encryption.
           </div>
-          <div className="text-sm text-gray-400 mt-4">
+          <div className="text-sm mt-4"
+          style={{ color: pax26.textPrimary }}>
             Need help? Contact{" "}
             <a href="mailto:info@pax26.com" className="text-blue-600 underline font-medium">
               info@pax26.com
