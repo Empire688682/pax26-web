@@ -186,9 +186,9 @@ export default function Receipt({
 // Reusable Row Component
 function ReceiptRow({ title, value, highlight }) {
   return (
-    <div className="flex justify-between border-b border-gray-200 pb-1">
+    <div className="flex justify-between gap-3 border-b border-gray-200 pb-1">
       <span className="text-gray-600 text-xs capitalize">{title}</span>
-      <span className={` ${highlight ? "text-blue-700 text-xs" : "text-xs capitalize"}`}>
+      <span className={` ${highlight ? "text-blue-700 text-xs break-all" : "text-xs capitalize break-all"}`}>
         {value}
       </span>
     </div>
@@ -197,13 +197,13 @@ function ReceiptRow({ title, value, highlight }) {
 
 function DounbleReceiptRow({ title, value1, value2 }) {
   return (
-    <div className="flex justify-between items-center border-b a border-gray-200 pb-1">
+    <div className="flex justify-between gap-3 items-center border-b a border-gray-200 pb-1">
       <span className="text-gray-600 text-xs capitalize">{title}</span>
       <div className="flex flex-col items-end">
         <span className={" capitalize text-xs font-bold"}>
         {value1}
       </span>
-      <span className={ "text-xs capitalize"}>
+      <span className={ "text-xs capitalize break-all"}>
      Pax26 | {value2}
       </span>
       </div>
