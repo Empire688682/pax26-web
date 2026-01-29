@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '../Context';
 import { PiHandWithdraw } from "react-icons/pi";
-import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon, ArrowLeftRight  } from "lucide-react";
+import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon, ArrowLeftRight } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
 import { toast, } from "react-toastify";
@@ -214,23 +214,26 @@ const Dashboard = () => {
         <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
+        <QuickLinks title="AI Auto" link="/ai" status="Inactive" icon={<ArrowLeftRight
+          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+
         <QuickLinks title="Betting" link="/dashboard/betting" status="Inactive" icon={<BetweenVerticalEndIcon
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         {
           moreLinks && (
             <>
-             <QuickLinks title="Gift Card" link="/dashboard" status="Inactive" icon={<Gift
-          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+              <QuickLinks title="Gift Card" link="/dashboard" status="Inactive" icon={<Gift
+                style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Crypto" link="/dashboard" status="Inactive" icon={<TrendingDown
-          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+              <QuickLinks title="Crypto" link="/dashboard" status="Inactive" icon={<TrendingDown
+                style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Gamb Pin" link="/dashboard" status="Inactive" icon={<Pin
-          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+              <QuickLinks title="Gamb Pin" link="/dashboard" status="Inactive" icon={<Pin
+                style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="Weac Pin" link="/dashboard" status="Inactive" icon={<Pin
-          style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
+              <QuickLinks title="Weac Pin" link="/dashboard" status="Inactive" icon={<Pin
+                style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
             </>
           )
         }
@@ -242,10 +245,10 @@ const Dashboard = () => {
             <PiHandWithdraw className="mb-2 text-blue-400" size={22} />
           )}
           <p className="text-xs font-medium text-blue-400">{moreLinks ? "Show Less" : "Show More"}</p>
-          </div>
+        </div>
       </div>
 
-      
+
 
       <h3 className="text-md font-medium mb-2 mt-6"
         style={{ color: pax26.textPrimary }}>Recent Activities</h3>
@@ -269,7 +272,7 @@ const Dashboard = () => {
                         </div>
                         <div className='flex flex-col md:flex-row md:gap-4 justify-center'>
                           <p className={`text-sm ${transaction.status === 'success' ? 'text-green-600' : transaction.status === 'pending' ? 'text-yellow-700' : 'text-red-600'}`}>
-                           {transaction.type === "transfer" && transaction?.metadata?.transferDetails?.direction === "debit"? "-" : "+"} ₦{transaction.amount}
+                            {transaction.type === "transfer" ? transaction?.metadata?.transferDetails?.direction === "debit" ? "-" : "+" : ""} ₦{transaction.amount}
                           </p>
                           <p className={`text-sm ${transaction.status === 'success' ? 'text-green-600' : transaction.status === 'pending' ? 'text-yellow-700' : 'text-red-600'}`}>
                             {transaction.type}

@@ -46,7 +46,7 @@ const Page = () => {
                       </div>
                       <div className="flex flex-col md:flex-row md:gap-4 justify-center">
                         <p className={`text-sm ${transaction.status === 'success' ? 'text-green-600' : transaction.status === 'pending' ? 'text-yellow-700' : 'text-red-600'}`}>
-                          {transaction.type === "transfer" && transaction?.metadata?.transferDetails?.direction === "debit" ? "-" : "+"} ₦{transaction.amount}
+                          {transaction.type === "transfer" ? transaction?.metadata?.transferDetails?.direction === "debit" ? "-" : "+" : ""} ₦{transaction.amount}
                         </p>
                         <p
                           className={`text-sm ${transaction.status === "success"

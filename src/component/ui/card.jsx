@@ -1,10 +1,15 @@
+"use client";
+
 // components/ui/card.jsx
 
 import React from 'react';
+import { useGlobalContext } from '../Context';
 
 export function Card({ children, className }) {
+  const {pax26} = useGlobalContext();
   return (
-    <div className={`bg-white rounded-2xl shadow-md p-4 ${className}`}>{children}</div>
+    <div className={`rounded-2xl shadow-md p-4 ${className}`}
+    style={{backgroundColor:pax26.secondaryBg}}>{children}</div>
   );
 }
 

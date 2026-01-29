@@ -234,7 +234,7 @@ export const AppProvider = ({ children }) => {
     textSecondary: theme === 'light' ? '#64748b' : '#94a3b8',
     border: theme === 'light' ? '#131b2f' : '#f1f5f9',
     toTopColor: theme === 'light' ? '#f1f5f9' : '#131b2f',
-    btn: theme === 'light' ? '#3b82f6' : '#2563eb',
+    btn: theme === 'light' ? '#3b82f6' : '#a5bef3',
     btnHover: theme === 'light' ? '#2563eb' : '#e2e6eeff',
   }
   setPax26(pax26);
