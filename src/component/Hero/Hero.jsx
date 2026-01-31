@@ -7,7 +7,7 @@ export default function Hero() {
   const { openModal, pax26 } = useGlobalContext();
   return (
     <section
-      className="relative overflow-hidden pt-32 pb-24"
+      className="relative overflow-hidden pt-32 pb-24 px-16"
       style={{ backgroundColor: pax26.bg }}
     >
       {/* Gradient glow */}
