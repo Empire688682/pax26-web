@@ -13,7 +13,7 @@ const FundWallet = () => {
   const [loading, setLoading] = useState(false);
   const [moreOptions, setMoreOptions] = useState(true);
 
-  console.log("UserAcct:", userData?.virtualAccount);
+  console.log("paymentId:", paymentId);
 
   const verifyPayment = async () => {
     if (!paymentId) return;
