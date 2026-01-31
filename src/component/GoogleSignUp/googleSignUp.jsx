@@ -57,6 +57,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
       setError(innerMessage || err.message || "Something went wrong with Google login.");
     } finally {
       setHomeLoading(false);
+      setAwayLoading(false)
     }
   };
 
