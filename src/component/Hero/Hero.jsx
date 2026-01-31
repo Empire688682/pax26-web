@@ -42,7 +42,7 @@ export default function Hero() {
       >
        One Platform.
 <br />
-<span className="bg-clip-text text-transparent">
+<span className="bg-clip-text">
   Payments, Utilities & AI
 </span>
       </h1>
@@ -81,7 +81,7 @@ now enhanced with AI-powered automation to save time and reduce stress.
       </div>
 
       {/* Trust badges */}
-      <div className="mt-10 flex items-center gap-6 text-sm">
+      <div className="mt-10 flex items-center flex-wrap gap-6 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-green-500">✔</span>
           <span style={{ color: pax26.textSecondary }}>Instant delivery</span>
@@ -89,6 +89,10 @@ now enhanced with AI-powered automation to save time and reduce stress.
         <div className="flex items-center gap-2">
           <span className="text-green-500">✔</span>
           <span style={{ color: pax26.textSecondary }}>Secure payments</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-green-500">✔</span>
+          <span style={{ color: pax26.textSecondary }}>AI-powered automation</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-green-500">✔</span>
