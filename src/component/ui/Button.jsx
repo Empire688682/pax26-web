@@ -9,20 +9,29 @@ export function Button({
   disabled = false,
   ...props
 }) {
-    const {pax26} = useGlobalContext()
+  const { pax26 } = useGlobalContext();
+  
   const baseStyles =
     "px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200";
 
   const variants = {
-    default:
-      "bg-blue-600 hover:bg-blue-700 text-white",
-    outline:
-      "border border-white/10 hover:bg-white/5",
+    default: "bg-blue-600 hover:bg-blue-700 text-white shadow-md",
+    outline: "shadow-lg hover:shadow-xl hover:bg-white/5 transition-all",
   };
+
+  // Compute dynamic styles
+  const dynamicStyles = variant === "outline" 
+    ? { 
+        color: pax26.textPrimary,
+        border: `1px solid ${pax26.textPrimary}40`,
+        boxShadow: `0 4px 12px -2px ${pax26.header}30, 0 2px 4px -1px ${pax26.header}20`
+      }
+    : undefined;
 
   return (
     <button
       disabled={disabled}
+      style={dynamicStyles}
       className={`
         ${baseStyles}
         ${variants[variant]}

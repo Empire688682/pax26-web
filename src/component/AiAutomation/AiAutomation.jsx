@@ -1,5 +1,5 @@
 "use client";
-import {Card, CardContent} from "@/component/ui/Card";
+import { CardContent, Card } from "../ui/Cards";
 import { Button } from "@/component/ui/Button";
 import { Bot, MessageCircle, Settings, BarChart3, Zap } from "lucide-react";
 import { useGlobalContext } from "../Context";
