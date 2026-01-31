@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "./Card";
+import { Card, CardHeader, CardTitle, CardContent } from "./Cards";
 import { Phone, CheckCircle, XCircle, Hash } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "./badge";
