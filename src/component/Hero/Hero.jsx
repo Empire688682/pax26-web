@@ -7,7 +7,6 @@ export default function Hero() {
   const {openModal, pax26} = useGlobalContext();
   return (
     <section
-<<<<<<< HEAD
   className="relative overflow-hidden pt-32 pb-24"
   style={{ backgroundColor: pax26.bg }}
 >
@@ -35,21 +34,6 @@ export default function Hero() {
         }}
       >
         🤖 Payments + AI Automation
-=======
-      className="relative overflow-hidden pt-32 pb-24"
-      style={{ backgroundColor: pax26.bg }}
-    >
-      {/* Gradient glow */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full blur-[120px] opacity-30"
-          style={{ background: pax26.primary }}
-        />
-        <div
-          className="absolute top-40 -right-40 w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
-          style={{ background: pax26.btn }}
-        />
->>>>>>> parent of eab6a4e (mv mn kn)
       </div>
 
       <h1
