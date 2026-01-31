@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '../Context';
 import { PiHandWithdraw } from "react-icons/pi";
-import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, TrendingDown, Pin, BetweenVerticalEndIcon, ArrowLeftRight } from "lucide-react";
+import { Wallet, Phone, Wifi, Zap, Bell, Heart, Copy, Tv, Gift, Bot, TrendingDown, Pin, BetweenVerticalEndIcon, ArrowLeftRight } from "lucide-react";
 import WalletBalance from '../WalletBalance/WalletBalance';
 import { FaSpinner } from 'react-icons/fa';
 import { toast, } from "react-toastify";
@@ -214,7 +214,7 @@ const Dashboard = () => {
         <QuickLinks title="TV Subscription" link="/dashboard/buy-tv" status="" icon={<Tv
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
-        <QuickLinks title="AI Auto" link="/ai" status="Inactive" icon={<ArrowLeftRight
+        <QuickLinks title="AI Auto" link="/ai" status="Inactive" icon={<Bot
           style={{ color: pax26.textPrimary }} className="mb-2" size={28} />} />
 
         <QuickLinks title="Betting" link="/dashboard/betting" status="Inactive" icon={<BetweenVerticalEndIcon
