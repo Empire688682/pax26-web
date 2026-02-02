@@ -1,8 +1,8 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { UserModel } from "@/app/ults/models/UserModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import { verifyToken } from "../../helper/VerifyToken";
 import { NextResponse } from "next/server";
+import { verifyToken } from "../../helper/VerifyToken";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() })
