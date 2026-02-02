@@ -70,6 +70,7 @@ export const config = {
     "/reset-password",
     "/verify-user",
     "/terms",
-    "/ai-automation"
+    "/ai-automation",
+    "/privacy"
   ],
 }
