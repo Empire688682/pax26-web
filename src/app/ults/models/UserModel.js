@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema(
     verifyToken: { type: String, default: "" },
     verifyTokenExpires: { type: Date },
     forgottenPasswordToken: { type: String, default: "" },
+    otpRequestimes: { type: Number, default: 0 },
+    phoneVerifyToken: { type: String, default: "" },
+    phoneVerifyTokenExpires: { type: Date },
+    phoneVerified: { type: Boolean, default: false },
 
     /* =====================
        FINANCIALS
