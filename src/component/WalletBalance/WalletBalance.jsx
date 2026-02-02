@@ -3,10 +3,12 @@ import React, { useEffect } from 'react';
 import { useGlobalContext } from '../Context';
 import { usePathname } from 'next/navigation';
 import { PiHandWithdraw } from "react-icons/pi";
+import { Copy } from "lucide-react";
 
 const WalletBalance = ({ setShowMore, showMore }) => {
-    const { getUserRealTimeData, router, pax26, userWallet } = useGlobalContext();
+    const { getUserRealTimeData, router, pax26, userWallet, userData } = useGlobalContext();
     const pathName = usePathname();
+    const last10Digits = userData?.number ? userData.number.slice(-10) : null;
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -15,6 +17,16 @@ const WalletBalance = ({ setShowMore, showMore }) => {
 
         return () => clearTimeout(timeout);
     }, []);
+
+    const handleCopy = () => {
+    navigator.clipboard.writeText(last10Digits)
+      .then(() => {
+        alert("Number copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy:", err);
+      });
+  };
 
     return (
         <div
@@ -27,7 +39,16 @@ const WalletBalance = ({ setShowMore, showMore }) => {
                 <p className="text-xl font-bold"
                     style={{ color: pax26.textPrimary }}>₦{userWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>
                 <div className='flex flex-col gap-2'>
-                    <button className="bg-blue-600 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={() => router.push("/fund-wallet")}>Fun Wallet +</button>
+                    <div className='grid gap-3 col-2'>
+                        <button className="bg-blue-600 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={() => router.push("/fund-wallet")}>Fun Wallet +</button>
+                        {
+                            userData?.number ? (
+                                <button title='Account number' className="bg-blue-600 flex gap-3 cursor-pointer text-sm text-white px-2 py-1 rounded" onClick={handleCopy}> Acct <Copy size={16} />{last10Digits}</button>
+                            ):(
+                                <button title='Account number' className="bg-blue-600 flex gap-3 cursor-pointer text-sm text-white px-2 py-1 rounded"> Acct <Copy size={16} />**********</button>
+                            )
+                        }
+                    </div>
                     {
                         pathName === "/dashboard" && (
                             <p className="cursor-pointer absolute left-0 bottom-[-23px] md:hidden items-center flex text-blue-400 text-xs px-3 py-1"

@@ -109,7 +109,7 @@ export const AppProvider = ({ children }) => {
  useEffect(()=>{
   if(!userData)return
     if(userData && !userData.userVerify){
-      router.push('/verify-user');
+      router.push('/verify-user?action=verify');
     }
  },[userData, router]);
 

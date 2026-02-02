@@ -34,21 +34,21 @@ export async function POST(req) {
     const plainCode = userNanoid();
     const hashCode = await bcrypt.hash(plainCode, 10);
     const expiresInMinutes = 15;
-    const verifyTokenExpires = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+    const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-    user.verifyToken = hashCode;
-    user.verifyTokenExpires = verifyTokenExpires;
-    await user.save();
+    user.emailVerification.token = hashCode;
+    user.emailVerification.expiresAt = expiresAt;
 
-    const link = `${process.env.BASE_URL}/verify-user?token=${plainCode}`
     const sent = await sendVerification(
       user.email, 
-      plainCode, 
-      link
+      plainCode
     );
     if (!sent) {
       return NextResponse.json({ success: false, message: "Unable to send verification email" }, { status: 500, headers: corsHeaders() });
     }
+
+    user.emailVerification.requestCount = (user.verifyTokenRequests || 0) + 1;
+    await user.save();
 
     return NextResponse.json({ success: true, message: "Verification sent", data:sent }, { status: 200, headers: corsHeaders() });
 

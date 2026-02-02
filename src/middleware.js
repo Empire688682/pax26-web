@@ -27,6 +27,7 @@ export function middleware(req) {
     "/survey",
     "/verify-user",
     "/ai-automation",
+    "/add-number",
   ];
   const isProtected = protectedPaths.some((protectedPath)=>
    path.startsWith(protectedPath));
@@ -71,6 +72,7 @@ export const config = {
     "/verify-user",
     "/terms",
     "/ai-automation",
-    "/privacy"
+    "/privacy",
+    "/add-number",
   ],
 }

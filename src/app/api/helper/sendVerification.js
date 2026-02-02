@@ -1,6 +1,6 @@
 import sendpulse from "@/app/lib/sendpulse";
 
-export function sendVerification(receiverEmail, code, link ) {
+export function sendVerification(receiverEmail, code ) {
   return new Promise((resolve) => {
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">

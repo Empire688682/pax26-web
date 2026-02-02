@@ -5,28 +5,19 @@ export const sendOtpViaWhatsApp = async ({ phoneNumber, otp }) => {
     const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
     const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
-    const url = `https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`;
+    const validPhoneNumber = "234" + phoneNumber.slice(-10) // Get last 10 digits;
+    console.log("Valid Phone Number:", validPhoneNumber);
+    const url = `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`;
 
     const payload = {
       messaging_product: "whatsapp",
-      to: phoneNumber, // must be in international format e.g. 2348012345678
+      to: validPhoneNumber, // must be in international format e.g. 2348012345678
       type: "template",
       template: {
-        name: "otp_verification", // 👈 your approved template name
+        name: "hello_world", // otp_verification // 👈 your approved template name
         language: {
           code: "en_US",
-        },
-        components: [
-          {
-            type: "body",
-            parameters: [
-              {
-                type: "text",
-                text: otp,
-              },
-            ],
-          },
-        ],
+        }
       },
     };
 

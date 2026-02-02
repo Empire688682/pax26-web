@@ -10,7 +10,8 @@ export default function VerifyAccountContent() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
-  const urlToken = searchParams.get("token");
+  const urlAction = searchParams.get("action");
+  const [action, setAction] = useState("");
 
   useEffect(() => {
     if (userData?.userVerify) {
@@ -19,13 +20,12 @@ export default function VerifyAccountContent() {
   }, [userData]);
 
   useEffect(() => {
-    if (urlToken) {
-      setCode(urlToken);
-      verifyToken(urlToken);
+    if (urlAction === "verify") {
+      sendVerificationLink();
     }
-  }, [urlToken]);
+  }, [urlAction]);
 
-  const verifyToken = async (code) => {
+  const verifyCode = async (code) => {
 
     if (code.length !== 6) {
       setMessage("Please enter the 6-digit code.");
@@ -34,8 +34,9 @@ export default function VerifyAccountContent() {
 
     try {
       setLoading(true);
+      setAction("verify");
       setMessage("");
-      const res = await fetch("/api/auth/verify-code", {
+      const res = await fetch("/api/auth/email-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
@@ -67,15 +68,17 @@ export default function VerifyAccountContent() {
       console.log("err:", err);
     } finally {
       setLoading(false);
+      setAction("");
     }
   };
 
   const sendVerificationLink = async () => {
     try {
       setLoading(true);
+      setAction("resend");
       setMessage("");
 
-      const res = await fetch("/api/auth/send-verification", {
+      const res = await fetch("/api/auth/send-email-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -83,6 +86,7 @@ export default function VerifyAccountContent() {
       const data = await res.json();
 
       console.log("data:", data);
+      router.replace("/verify-user");
 
       if (!res.ok) {
         setMessage(data.message || "Unable to resend link.");
@@ -95,12 +99,13 @@ export default function VerifyAccountContent() {
       setMessage("Something went wrong.");
     } finally {
       setLoading(false);
+      setAction("");
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    verifyToken(code);
+    verifyCode(code);
   };
 
   return (
@@ -132,7 +137,9 @@ export default function VerifyAccountContent() {
             disabled={loading}
             className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
           >
-            {loading ? "Verifying..." : "Verify Code"}
+            {loading && action == "verify" && "Verifying..."}
+            {loading && action == "resend" && "Sending your code..."}
+            {!loading && !action && "Verify Code"}
           </button>
         </form>
 

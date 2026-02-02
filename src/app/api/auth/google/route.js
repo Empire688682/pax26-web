@@ -122,6 +122,10 @@ export async function POST(req) {
         delete userObj.referralHostId;
         delete userObj.bvn;
         const finalUserData = userObj;
+        delete userObj.emailVerification;
+        delete userObj.phoneVerification;
+        delete userObj.paxAI;
+        delete userObj._id;
 
         const userId = user._id;
         const token = jwt.sign({ userId }, process.env.SECRET_KEY, {

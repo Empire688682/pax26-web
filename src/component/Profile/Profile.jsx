@@ -10,7 +10,7 @@ import PasswordReset from '../PasswordReset/PasswordReset';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
-  const { userData, setUserData, pax26, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, router, setUserData, pax26, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
   const [userImage, setUserImage] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [bvn, setBvn] = useState("");
@@ -182,7 +182,7 @@ const Profile = () => {
                     <ShieldAlert size={16} /> Email Not Verified
                   </span>
                   <button
-                    onClick={() => setUserBvn(()=>router.push("/verify-user"))}
+                    onClick={() => router.push("/verify-user?action=verify")}
                     className="bg-yellow-400 mt-2 px-3 py-1 rounded-md text-xs text-black hover:bg-yellow-500"
                   >
                     Verify Now

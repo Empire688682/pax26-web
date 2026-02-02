@@ -57,16 +57,10 @@ export async function POST(req) {
     delete userObj.referralHostId;
     delete userObj.forgottenPasswordToken;
     delete userObj.bvn;
-    // Mask phone
-    if (userObj.number) {
-      const phone = userObj.number;
-      if (phone.length > 4) {
-        userObj.number =
-          phone.substring(0, 3) +
-          "*".repeat(phone.length - 6) +
-          phone.substring(phone.length - 3);
-      }
-    }
+    delete userObj.emailVerification;
+    delete userObj.phoneVerification;
+    delete userObj.paxAI;
+    delete userObj._id;
 
     // JWT
     const token = jwt.sign(

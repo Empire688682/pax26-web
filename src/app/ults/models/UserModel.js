@@ -23,13 +23,21 @@ const UserSchema = new mongoose.Schema(
     ====================== */
     bvn: { type: String, default: "" },
     userVerify: { type: Boolean, default: false },
-    verifyToken: { type: String, default: "" },
-    verifyTokenExpires: { type: Date },
     forgottenPasswordToken: { type: String, default: "" },
-    otpRequestimes: { type: Number, default: 0 },
-    phoneVerifyToken: { type: String, default: "" },
-    phoneVerifyTokenExpires: { type: Date },
-    phoneVerified: { type: Boolean, default: false },
+    emailVerification: {
+      isVerified: { type: Boolean, default: false },
+      requestCount: { type: Number, default: 0 },
+      firstRequestAt: { type: Date, default: null },
+      token: { type: String },
+      expiresAt: { type: Date }
+    },
+    phoneVerification: {
+      isVerified: { type: Boolean, default: false },
+      requestCount: { type: Number, default: 0 },
+      firstRequestAt: { type: Date, default: null },
+      token: { type: String },
+      expiresAt: { type: Date }
+  },
 
     /* =====================
        FINANCIALS

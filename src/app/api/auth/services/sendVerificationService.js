@@ -19,7 +19,7 @@ export async function sendUserVerification(user) {
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
   user.verifyToken = hashedCode;
-  user.verifyTokenExpires = expiresAt;
+  user.emailVerification.token = expiresAt;
   await user.save();
 
   const link = `${process.env.BASE_URL}/verify-user?token=${plainCode}`;

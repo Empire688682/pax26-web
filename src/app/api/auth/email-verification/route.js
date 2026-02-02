@@ -36,22 +36,23 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: "User already verified" }, { status: 200, headers: corsHeaders() });
         }
 
-        const isCodeMatch = await bcrypt.compare(code, user.verifyToken);
+        const isCodeMatch = await bcrypt.compare(code, user.emailVerification.token);
         if (!isCodeMatch) {
             return NextResponse.json({ success: false, message: "Invalid code" }, { status: 400, headers: corsHeaders() });
         }
 
         // Check expiry
-        if (user.verifyTokenExpires < new Date()) {
+        if (user.emailVerification.expiresAt < new Date()) {
             return NextResponse.json({ success: false, message: "Code expired" }, { status: 400, headers: corsHeaders() });
         }
 
         user.userVerify = true;
-        user.verifyToken = ""; // optional: clear token after use
-        user.verifyTokenExpires = null; // optional: clear expiry
+        user.emailVerification.expiresAt = null; 
+        user.emailVerification.token = ""; 
+        user.emailVerification.isVerified = true; 
         await user.save();
 
-        return NextResponse.json({ success: true, message: "User activated" }, { status: 200, headers: corsHeaders() });
+        return NextResponse.json({ success: true, message: "User verified" }, { status: 200, headers: corsHeaders() });
 
     } catch (error) {
         console.log("User-verify-Error: ", error);
