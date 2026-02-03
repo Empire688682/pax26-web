@@ -85,11 +85,13 @@ const Dashboard = () => {
 
   useEffect(()=>{
     const timeOut = setTimeout(()=>{
-      setIsPasswordSet(!userData?.number);
-    }, 3000);
+      if(!userData?.number){
+        router.push("/verify-number");
+      };
+    }, 200);
 
     return () => clearTimeout(timeOut);
-  }, [userData])
+  }, [userData, router])
 
 
   return (
