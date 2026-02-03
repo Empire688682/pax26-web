@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useGlobalContext } from "../Context";
 
-const AddNumber = () => {
+const VerifyNumber = () => {
     const {pax26} = useGlobalContext();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
@@ -136,4 +136,4 @@ const AddNumber = () => {
   );
 };
 
-export default AddNumber;
+export default VerifyNumber;

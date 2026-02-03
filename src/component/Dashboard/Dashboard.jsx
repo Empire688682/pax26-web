@@ -83,6 +83,12 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [userData]);
 
+  useEffect(()=>{
+    if(!userData?.phoneVerification?.isVerified){
+      router.push("/verify-number");
+    }
+  }, [userData])
+
 
   return (
     <div className="min-h-screen">
