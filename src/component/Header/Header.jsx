@@ -9,7 +9,6 @@ import { useGlobalContext } from '../Context';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import TransactionPin from '../TransactionPin/TransactionPin';
-import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
 const Header = () => {
     const { toggleMenu, openModal, pax26, userData, router, pinModal, setPinModal } = useGlobalContext();
@@ -85,9 +84,6 @@ const Header = () => {
                         >Signup</button>
 
                     )
-                }
-                {
-                    <ThemeToggle />
                 }
                 {
                     !isHomePage && <Menu onClick={toggleMenu} size={30} color={pax26.textPrimary} className='cursor-pointer' />

@@ -12,7 +12,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="px-4 z-50 mx-auto max-w-13 py-2 rounded dark:text-white"
+      className="z-50 w-6 pr-1 rounded dark:text-white"
     >
       {resolvedTheme === "dark" ? <img src="/sun-3335.png" alt="light-mode" /> : <img src="/moon-6677.png" alt="dark-mode" />}
     </button>

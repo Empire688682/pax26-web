@@ -1,12 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { LogOut, CameraIcon, ShieldAlert, ShieldCheck, Bell, Moon, History, Pencil } from 'lucide-react';
+import { LogOut, CameraIcon, ShieldAlert, ShieldCheck, Bell, SunMoon, Pencil } from 'lucide-react';
 import { toast} from 'react-toastify'; 
 import Image from 'next/image';
 import { useGlobalContext } from '../Context';
 import axios from "axios";
 import uploadImage from '../utils/uplaodImage';
 import PasswordReset from '../PasswordReset/PasswordReset';
+import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
@@ -264,8 +265,13 @@ const Profile = () => {
                 type="checkbox"
                 checked={notify}
                 onChange={() => setNotify(!notify)}
-                className="toggle toggle-primary"
+                className="toggle toggle-primary h-5 w-8"
               />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2 text-sm"
+                style={{ color: pax26.textSecondary }}> <SunMoon/> Theme Mode</span>
+              <ThemeToggle />
             </div>
           </div>
 
