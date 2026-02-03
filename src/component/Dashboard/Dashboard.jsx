@@ -84,9 +84,11 @@ const Dashboard = () => {
   }, [userData]);
 
   useEffect(()=>{
-    if(!userData?.phoneVerification?.isVerified){
-      router.push("/verify-number");
-    }
+    const timeOut = setTimeout(()=>{
+      setIsPasswordSet(!userData?.number);
+    }, 3000);
+
+    return () => clearTimeout(timeOut);
   }, [userData])
 
 
