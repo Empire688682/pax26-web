@@ -1,3 +1,4 @@
+import { number } from "framer-motion";
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
@@ -36,7 +37,8 @@ const UserSchema = new mongoose.Schema(
       requestCount: { type: Number, default: 0 },
       firstRequestAt: { type: Date, default: null },
       token: { type: String },
-      expiresAt: { type: Date }
+      expiresAt: { type: Date },
+      incomingNumber:{ type: Date, default: null }
   },
 
     /* =====================

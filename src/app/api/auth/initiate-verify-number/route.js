@@ -43,6 +43,7 @@ export async function POST(req) {
         user.phoneVerification.token = hashedOtp;
         user.phoneVerification.requestCount = (user.requestimes || 0) + 1;
         user.phoneVerification.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        user.phoneVerification.incomingNumber = phoneNumber;
         await user.save();
 
         const sent = sendOtpViaWhatsApp({ phoneNumber, otp });
