@@ -24,7 +24,7 @@ const CashBackBalance = () => {
                 </div>
             </div>
             <button className={` text-white px-3`}
-                >{userCashBack > 0 ? "Low" : "High"}</button>
+                >{userCashBack > 0 ? "low" : "high"}</button>
         </div>
     )
 }

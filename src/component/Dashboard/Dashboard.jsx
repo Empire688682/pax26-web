@@ -219,12 +219,7 @@ const Dashboard = () => {
                         {tx.description}
                       </p>
                       <span className="text-[11px] text-blue-400 capitalize">
-                        {tx.type === "fund_wallet" && "Wallet Funding"}
-                        {tx.type === "airtime" && "Airtime Purchase"}
-                        {tx.type === "data" && "Data Purchase"}
-                        {tx.type === "transfer" && "Wallet Transfer"}
-                        {tx.type === "electricity" && "Electricity Bill"}
-                        {tx.type === "tv" && "TV Subscription"}
+                        {tx.type}
                       </span>
                     </div>
                     <div className="text-right">
