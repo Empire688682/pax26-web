@@ -90,29 +90,58 @@ const Dashboard = () => {
         {/* Commission */}
         <div
           style={{ backgroundColor: pax26.bg }}
-          className="relative overflow-hidden flex flex-col gap-4 rounded-2xl p-5 shadow-xl"
+          className="relative hidden overflow-hidden md:flex flex-col gap-4 rounded-2xl p-5 shadow-xl"
         >
           <div className="absolute -top-10 -right-10 h-32 w-32 bg-blue-500/20 blur-2xl rounded-full" />
 
           <div className="flex flex-wrap justify-between">
-             <div>
-            <p className="text-sm" style={{ color: pax26.textPrimary }}>Commission</p>
-          <p className="mt-2 text-2xl font-bold" style={{ color: pax26.textPrimary }}>
-            ₦{userCommission?.toFixed?.(2) || "0.00"}
-          </p>
-          <p className="text-xs text-gray-400 mt-1">Withdrawable earnings</p>
-          </div>
-          <div>
-            {
-            withdrawLoading && <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
-          }
-          <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 text-sm itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw</button>
-          </div>
+            <div>
+              <p className="text-sm" style={{ color: pax26.textPrimary }}>Commission</p>
+              <p className="mt-2 text-2xl font-bold" style={{ color: pax26.textPrimary }}>
+                ₦{userCommission?.toFixed?.(2) || "0.00"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Withdrawable earnings</p>
+            </div>
+            <div>
+              {
+                withdrawLoading && <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
+              }
+              <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 text-sm itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw</button>
+            </div>
           </div>
 
           <CashBackBalance />
-          
+
         </div>
+
+        {/* Show more section Mobile */}
+        {
+          showMore && <div
+            style={{ backgroundColor: pax26.bg }}
+            className="relative overflow-hidden flex flex-col gap-4 rounded-2xl p-5 shadow-xl"
+          >
+            <div className="absolute -top-10 -right-10 h-32 w-32 bg-blue-500/20 blur-2xl rounded-full" />
+
+            <div className="flex flex-wrap justify-between">
+              <div>
+                <p className="text-sm" style={{ color: pax26.textPrimary }}>Commission</p>
+                <p className="mt-2 text-2xl font-bold" style={{ color: pax26.textPrimary }}>
+                  ₦{userCommission?.toFixed?.(2) || "0.00"}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Withdrawable earnings</p>
+              </div>
+              <div>
+                {
+                  withdrawLoading && <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
+                }
+                <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 text-sm itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw</button>
+              </div>
+            </div>
+
+            <CashBackBalance />
+
+          </div>
+        }
 
         {/* Activity */}
         <div
@@ -147,8 +176,8 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <QuickLinks title="Fund Wallet" link="/fund-wallet" icon={<Wallet size={26} />} />
-          <QuickLinks title="Transfer" link="/dashboard/transfer" icon={<ArrowRight size={26} />} />
+          <QuickLinks title="Fund Wallet" link="/fund-wallet" icon={<Wallet size={26} style={{color:pax26?.textPrimary}} />} />
+          <QuickLinks title="Transfer" link="/dashboard/transfer" icon={<ArrowRight size={26} style={{color:pax26?.textPrimary}}/>} />
           <QuickLinks title="Buy Airtime" link="/dashboard/buy-airtime" />
           <QuickLinks title="Buy Data" link="/dashboard/buy-data" />
           {showMore && (
