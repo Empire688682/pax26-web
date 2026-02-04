@@ -4,25 +4,27 @@ import { useGlobalContext } from '../Context';
 import { Handshake } from 'lucide-react';
 
 const CashBackBalance = () => {
-    const { getUserRealTimeData, router, pax26, userCashBack } = useGlobalContext();
+    const { getUserRealTimeData, pax26, userCashBack } = useGlobalContext();
 
     useEffect(() => {
         getUserRealTimeData();
     }, []);
 
     return (
-        <div className="
-        max-h-[120px] p-4 rounded-lg shadow-md"
+        <div className="p-y rounded-lg flex flex-wrap justify-between shadow-md"
             style={{ backgroundColor: pax26.bg }}
         >
-            <p className="text-sm"
-                style={{ color: pax26.textPrimary }}>Cash Back</p>
-            <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-                <p className="text-xl font-bold"
-                    style={{ color: pax26.textPrimary }}>₦{userCashBack.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>
-                <button className={` ${userCashBack > 0 ? 'bg-blue-600' : 'bg-blue-200'} text-white px-3 py-1 rounded`}
-                >{userCashBack > 0 ? "Active" : "Inactive"}</button>
+            <div>
+                <p className="text-sm"
+                    style={{ color: pax26.textPrimary }}>Cash Back</p>
+                <div className="items-center mt-2 gap-2">
+                    <p className="text-xl font-bold"
+                        style={{ color: pax26.textPrimary }}>₦{userCashBack.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>
+                    <span className='text-xs text-gray-600'>Useable earnings</span>
+                </div>
             </div>
+            <button className={` text-white px-3`}
+                >{userCashBack > 0 ? "Low" : "High"}</button>
         </div>
     )
 }

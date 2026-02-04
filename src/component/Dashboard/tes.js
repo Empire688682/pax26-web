@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../Context";
-import { Bell, Heart, ArrowRight, Wallet, TrendingUp, Link2, PiHandWithdraw } from "lucide-react";
+import { Bell, Heart, ArrowRight, Wallet, TrendingUp, Link2, PiHandWithdraw} from "lucide-react";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { FaSpinner } from 'react-icons/fa';
 import CashBackBalance from "../CashBackBalance/CashBackBalance";
@@ -15,7 +15,6 @@ const Dashboard = () => {
     router,
     transactionHistory,
     loading,
-    userCommission
   } = useGlobalContext();
 
   const [showMore, setShowMore] = useState(false);
@@ -26,7 +25,7 @@ const Dashboard = () => {
     getUserRealTimeData();
   }, []);
 
-  const copyText = async (link) => {
+    const copyText = async (link) => {
     if (!userData?.number) return;
     await navigator.clipboard.writeText(link);
     alert(`Referral link copied to clipboard!`);
@@ -35,36 +34,36 @@ const Dashboard = () => {
   const firstName = userData?.name?.split(" ")[0] || "User";
 
   const withdrawCommission = async () => {
-    if (!userData?._id) {
-      alert("No Id found")
-      return
-    }
-
-    setWithrawLoading(true)
-    try {
-      const response = await axios.post("/api/withdraw-commission");
-      if (response.data.success) {
-        getUserRealTimeData();
-        alert("Commission added to wallet balance");
+      if (!userData._id) {
+        toast.error("No Id found")
+        return
       }
-    } catch (error) {
-      console.log("WithdrawError:", error);
-      alert(error.response.data.message);
-    }
-    finally {
-      setWithrawLoading(false);
-    };
-  };
-
-  useEffect(() => {
-    const timeOut = setTimeout(() => {
-      if (!userData?.number) {
-        router.push("/verify-number");
+  
+      setWithrawLoading(true)
+      try {
+        const response = await axios.post("/api/withdraw-commission");
+        if (response.data.success) {
+          getUserRealTimeData();
+          toast.success("Commission added to wallet balance");
+        }
+      } catch (error) {
+        console.log("WithdrawError:", error);
+        toast.error(error.response.data.message);
+      }
+      finally {
+        setWithrawLoading(false);
       };
-    }, 200);
+    };
 
-    return () => clearTimeout(timeOut);
-  }, [userData, router])
+    useEffect(()=>{
+        const timeOut = setTimeout(()=>{
+          if(!userData?.number){
+            router.push("/verify-number");
+          };
+        }, 200);
+    
+        return () => clearTimeout(timeOut);
+      }, [userData, router])
 
   return (
     <div className="min-h-screen space-y-6">
@@ -86,32 +85,27 @@ const Dashboard = () => {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <WalletBalance setShowMore={setShowMore} showMore={showMore} />
+        <CashBackBalance />
 
         {/* Commission */}
         <div
           style={{ backgroundColor: pax26.bg }}
-          className="relative overflow-hidden flex flex-col gap-4 rounded-2xl p-5 shadow-xl"
+          className="relative overflow-hidden flex flex-wrap gap-4 rounded-2xl p-5 shadow-xl"
         >
           <div className="absolute -top-10 -right-10 h-32 w-32 bg-blue-500/20 blur-2xl rounded-full" />
-
-          <div className="flex flex-wrap justify-between">
-             <div>
-            <p className="text-sm" style={{ color: pax26.textPrimary }}>Commission</p>
-          <p className="mt-2 text-2xl font-bold" style={{ color: pax26.textPrimary }}>
-            ₦{userCommission?.toFixed?.(2) || "0.00"}
+          <p className="text-sm" style={{ color: pax26.textPrimary }}>Commission</p>
+          <p className="mt-3 text-2xl font-bold" style={{ color: pax26.textPrimary }}>
+            ₦{userData?.commission?.toFixed?.(2) || "0.00"}
           </p>
           <p className="text-xs text-gray-400 mt-1">Withdrawable earnings</p>
-          </div>
-          <div>
-            {
-            withdrawLoading && <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
-          }
-          <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 text-sm itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw</button>
-          </div>
-          </div>
 
-          <CashBackBalance />
-          
+          {
+                             withdrawLoading ? <FaSpinner style={{ color: pax26.textPrimary }} className='text-2xl animate-spin' />
+                               :
+                               <p className="text-xl font-bold"
+                                 style={{ color: pax26.textPrimary }}>₦{userCommission?.toFixed(2) || "**.**"}</p>
+                           }
+                           <button onClick={withdrawCommission} className="bg-blue-600 flex gap-2 itmens-center cursor-pointer text-white flex-wrap px-3 py-1 rounded">Withdraw <PiHandWithdraw className='text-[20px]' /></button>
         </div>
 
         {/* Activity */}
