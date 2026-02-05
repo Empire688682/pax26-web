@@ -6,6 +6,14 @@ import { useGlobalContext } from "@/component/Context";
 export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
   const { pax26 } = useGlobalContext();
 
+  const formattedDate = aiData.lastTrained
+  ? new Date(aiData.lastTrained).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  : "No record";
+
   const saveSettings = () => {
     if(!aiData.aiName || 
       !aiData.businessName || 
@@ -18,8 +26,11 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
     }
     // Save to localStorage for now (replace with API call later)
     localStorage.setItem("aiData", JSON.stringify(aiData));
+    setAiData((prev) => ({ ...prev, lastTrained: formattedDate}));
     alert("AI settings saved!");
   }
+
+  
 
   return (
     <div
@@ -31,7 +42,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
          Ai Trained
         </p>
         <p className="text-sm" style={{ color: pax26.textSecondary }}>
-          Last updated: June 26, 2024.
+          Last updated: {aiData.lastTrained? aiData.lastTrained:"No record"}.
         </p>
       </div>
 
@@ -40,6 +51,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
           <div style={{ color: pax26.textPrimary }}>
             <label className="text-sm">Ai Name</label>
             <input
+              value={aiData.aiName}
               name="aiName"
               onChange={(e) => handleInputChange("aiName", e.target.value)}
               className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
@@ -51,6 +63,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
             <label className="text-sm">Business Name</label>
             <input
               name="businessName"
+              value={aiData.businessName}
               onChange={(e) => handleInputChange("businessName", e.target.value)}
               className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
               placeholder="Your business name"
@@ -60,8 +73,11 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
             <label className="text-sm">AI Tone</label>
             <select 
             name="tone"
-            onChange={()=>setAiData("tone", e.target.value)}
-            className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent">
+            value={aiData.tone}
+            onChange={(e)=>handleInputChange("tone", e.target.value)}
+            className="w-full mt-1 p-3 rounded-xl border-gray-400 border"
+            style={{backgroundColor:pax26.secondaryBg, color:pax26.textPrimary}}>
+              <option value="" disabled>Select tone</option>
               <option>Friendly</option>
               <option>Professional</option>
               <option>Strict</option>
@@ -70,9 +86,12 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
 
           <div style={{ color: pax26.textPrimary }}>
             <label className="text-sm">Response Length</label>
-            <select className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
+            <select className="w-full mt-1 p-3 rounded-xl border-gray-400 border"
+            style={{backgroundColor:pax26.secondaryBg, color:pax26.textPrimary}}
             name="responseLength"
-            onChange={()=>setAiData("responseLength", e.target.value)}>
+            value={aiData.responseLength}
+            onChange={(e)=>handleInputChange("responseLength", e.target.value)}>
+              <option value="" disabled>Select Length</option>
               <option>Short</option>
               <option>Balanced</option>
               <option>Detailed</option>
@@ -83,6 +102,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
             <label className="text-sm">Details</label>
             <textarea
               name="details"
+              value={aiData.details}
               onChange={(e) => handleInputChange("details", e.target.value)}
             placeholder="eg: Always greet customers by name. Use emojis for friendly tone. Avoid technical jargon..."
             className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
@@ -92,6 +112,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
           <div style={{ color: pax26.textPrimary }}>
             <label className="text-sm">Human Handoff Rule</label>
             <input
+              value={aiData.handoffRule}  
               name="handoffRule"
               onChange={(e) => handleInputChange("handoffRule", e.target.value)}
               className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"

@@ -6,11 +6,11 @@ import { Bot, Send } from "lucide-react";
 import { useGlobalContext } from "@/component/Context";
 import Image from "next/image";
 
-export default function AiPreviewTestPage() {
+export default function AiPreviewTestPage({aiData}) {
   const { pax26, userData } = useGlobalContext();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { role: "ai", text: "Hi 👋 I’m Pax26 Smart Assist. Ask me anything about your business." }
+    { role: "ai", text: `Hi 👋 I’m ${aiData?.aiName} Smart Assist. Ask me anything about your business.` }
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +33,10 @@ export default function AiPreviewTestPage() {
     }, 1200);
   };
 
+  const clearChat = () => {
+    setMessages([]);
+  }
+
   return (
     <div
       className="p-6 space-y-6 w-full md:max-w-3xl min-h-[70vh] rounded-xl mx-auto shadow-lg"
@@ -51,10 +55,10 @@ export default function AiPreviewTestPage() {
               borderRadius: "50%",
             }}
           />
-          <h1 className="text-1xl font-semibold">Pax26 Agent</h1>
+          <h1 className="text-1xl font-semibold">{aiData?.aiName} Agent</h1>
         </div>
-        <p className="text-sm cursor-pointer text-muted-foreground">
-          Refresh
+        <p onClick={clearChat} className="text-sm cursor-pointer text-muted-foreground">
+          Clear
         </p>
       </div>
 
@@ -74,7 +78,7 @@ export default function AiPreviewTestPage() {
               >
                 {msg.role === "ai" && (
                   <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
-                    <Bot size={14} /> Pax26 AI
+                    <Bot size={14} /> {aiData?.aiName} AI
                   </div>
                 )}
                 {msg.text}
