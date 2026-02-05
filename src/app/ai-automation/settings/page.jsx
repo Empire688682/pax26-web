@@ -77,7 +77,7 @@ const page = () => {
                     </button>
                     <button
                         onClick={() => changeTabs("preview")}
-                        className={`px-4 py-2 rounded-tr-xl cursor-pointer rounded-br-xl ${activeTab === "test" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+                        className={`px-4 py-2 rounded-tr-xl cursor-pointer rounded-br-xl ${activeTab === "preview" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
                     >
                         Ai Preview
                     </button>
@@ -94,6 +94,7 @@ const page = () => {
                             handleInputChange={handleInputChange}
                             setAiData={setAiData}
                             aiData={aiData}
+                            previewData={true}
                         />
                     }
                 </div>
