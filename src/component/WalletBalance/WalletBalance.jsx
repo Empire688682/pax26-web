@@ -53,7 +53,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
       {/* Balance */}
       <div className="mt-4">
         <p
-          className="text-3xl font-bold tracking-tight"
+          className="text-2xl font-bold tracking-tight"
           style={{ color: pax26.textPrimary }}
         >
           ₦{userWallet?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}
