@@ -5,7 +5,7 @@ import { useGlobalContext } from '../Context';
 const AirtimeHelp = ({ data }) => {
   const {pax26} = useGlobalContext();
   return (
-    <div className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-green-100 flex flex-col justify-between gap-8'
+    <div className='backdrop-blur-md shadow-2xl rounded-2xl p-8 flex flex-col justify-between gap-8'
     style={{backgroundColor:pax26.bg}}>
       {/* Help Section */}
       <div>

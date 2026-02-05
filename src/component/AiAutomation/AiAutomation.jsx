@@ -5,7 +5,8 @@ import { Bot, MessageCircle, Settings, BarChart3, Zap } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
 export default function AIAutomationPage() {
-    const {pax26} = useGlobalContext();
+    const {pax26, router} = useGlobalContext();
+
   return (
     <div className="p-6 space-y-6"
     style={{backgroundColor: pax26.bg}}>
@@ -87,7 +88,7 @@ export default function AIAutomationPage() {
             style={{color:pax26.textPrimary}}>AI Business Profile</h3>
             <p className="text-sm text-muted-foreground"
             style={{color:pax26.textPrimary}}>Configure how AI represents your business</p>
-            <Button variant="outline" className="w-full rounded-xl">Configure</Button>
+            <Button variant="outline" pageTo={"/profile"} className="w-full rounded-xl" >Configure</Button>
           </CardContent>
         </Card>
 
@@ -98,7 +99,7 @@ export default function AIAutomationPage() {
             style={{color:pax26.textPrimary}}>WhatsApp Automation</h3>
             <p className="text-sm text-muted-foreground"
             style={{color:pax26.textPrimary}}>Connect WhatsApp and enable auto-replies</p>
-            <Button variant="outline" className="w-full rounded-xl">Connect WhatsApp</Button>
+            <Button variant="outline" pageTo={"/whatsapp"} className="w-full rounded-xl">Connect WhatsApp</Button>
           </CardContent>
         </Card>
 
@@ -109,7 +110,7 @@ export default function AIAutomationPage() {
             style={{color:pax26.textPrimary}}>AI Settings</h3>
             <p className="text-sm text-muted-foreground"
             style={{color:pax26.textPrimary}}>Personality, tone, fallback rules</p>
-            <Button variant="outline" className="w-full rounded-xl">Manage AI</Button>
+            <Button variant="outline" pageTo={"/settings"} className="w-full rounded-xl">Manage AI</Button>
           </CardContent>
         </Card>
       </div>

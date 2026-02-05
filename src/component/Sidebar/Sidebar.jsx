@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
+import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
 export default function Sidebar() {
   const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
@@ -61,6 +62,11 @@ export default function Sidebar() {
             <Info size={18} className="hidden md:block" />
             Your Feedback
           </Link>
+          <div className="flex items-center gap-2 hover:text-blue-600 gap-5">
+            <p 
+            style={{ color: pax26.textSecondary }}>Theme</p>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
       <div onClick={() => setIsOpen(false)} className='w-[50%] h-screen'>
@@ -119,15 +125,15 @@ export default function Sidebar() {
             <Info size={18} className="hidden md:block" />
             Your Feedback
           </Link>
-          <Link onClick={() => setIsOpen(false)} href="/blog" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Newspaper size={18} className="hidden md:block" />
-            Blog
-          </Link>
           <div onClick={logoutUser} className="flex items-center cursor-pointer gap-2 hover:text-blue-600"
             style={{ color: pax26.textSecondary }}>
             <LogOut size={18} />
             Logout
+          </div>
+          <div className="flex items-center gap-2 hover:text-blue-600 gap-5">
+            <p 
+            style={{ color: pax26.textSecondary }}>Theme</p>
+            <ThemeToggle />
           </div>
         </div>
       </div>

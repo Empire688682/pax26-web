@@ -7,9 +7,14 @@ export function Button({
   className = "",
   variant = "default",
   disabled = false,
+  pageTo,
   ...props
 }) {
-  const { pax26 } = useGlobalContext();
+  const { pax26, router} = useGlobalContext();
+
+  const selectPage = (page) => {
+      router.push(`/ai-automation/${page}`);
+    };
   
   const baseStyles =
     "px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200";
@@ -38,6 +43,7 @@ export function Button({
         ${disabled ? "opacity-50 cursor-not-allowed" : ""}
         ${className}
       `}
+      onClick={pageTo ? () => selectPage(pageTo) : undefined}
       {...props}
     >
       {children}
