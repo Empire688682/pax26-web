@@ -8,6 +8,7 @@ export function Button({
   variant = "default",
   disabled = false,
   pageTo,
+  action,
   ...props
 }) {
   const { pax26, router} = useGlobalContext();
@@ -43,7 +44,7 @@ export function Button({
         ${disabled ? "opacity-50 cursor-not-allowed" : ""}
         ${className}
       `}
-      onClick={pageTo ? () => selectPage(pageTo) : undefined}
+      onClick={pageTo ? () => selectPage(pageTo) : action}
       {...props}
     >
       {children}
