@@ -21,7 +21,7 @@ export default function AIBusinessProfilePage() {
       </div>
 
       <div>
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="py-5 space-y-4">
           <div style={{color:pax26.textPrimary}}>
             <label className="text-sm">Business Name</label>
             <input

@@ -20,8 +20,8 @@ export default function WhatsAppAutomationPage() {
         </p>
       </div>
 
-      <Card className="rounded-2xl">
-        <CardContent className="p-5 space-y-4">
+      <div>
+        <CardContent className="py-5 space-y-4">
           <div className="flex items-center gap-3">
             <MessageCircle style={{color:pax26.textPrimary}}/>
             <div style={{color:pax26.textPrimary}}>
@@ -34,7 +34,7 @@ export default function WhatsAppAutomationPage() {
             Connect WhatsApp Business
           </Button>
         </CardContent>
-      </Card>
+      </div>
 
       <div>
         <CardContent className="p-5 space-y-4">
