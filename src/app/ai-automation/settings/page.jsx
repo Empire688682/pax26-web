@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 const page = () => {
     const { pax26 } = useGlobalContext();
     const [activeTab, setActiveTab] = useState("settings");
+    const [previewData, setPreviewData] = useState(false);
 
     const [aiData, setAiData] = useState({
         aiName: "",
@@ -45,6 +46,20 @@ const page = () => {
             return};
             setActiveTab(tab);
         }
+
+        useEffect(() => {
+            if (
+                aiData.aiName &&
+                aiData.businessName &&
+                aiData.details &&
+                aiData.handoffRule &&
+                aiData.responseLength &&
+                aiData.tone) {
+                setPreviewData(true);
+            } else {
+                setPreviewData(false);
+            }
+        }, [aiData]);
 
 
         return (
@@ -94,6 +109,7 @@ const page = () => {
                         handleInputChange={handleInputChange}
                         setAiData={setAiData}
                         aiData={aiData}
+                        previewData={previewData}
                     />
                 </div>
             </div>

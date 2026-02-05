@@ -6,13 +6,15 @@ import { useGlobalContext } from "@/component/Context";
 export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
   const { pax26 } = useGlobalContext();
 
-  const formattedDate = aiData.lastTrained
-  ? new Date(aiData.lastTrained).toLocaleDateString("en-US", {
+  const formattedDate = new Date().toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
-    })
-  : "No record";
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "Africa/Lagos",
+    });
 
   const saveSettings = () => {
     if(!aiData.aiName || 
@@ -25,8 +27,8 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
         return;
     }
     // Save to localStorage for now (replace with API call later)
-    localStorage.setItem("aiData", JSON.stringify(aiData));
-    setAiData((prev) => ({ ...prev, lastTrained: formattedDate}));
+    localStorage.setItem("aiData", JSON.stringify({...aiData, lastTrained: formattedDate || null}));
+    setAiData((prev) => ({ ...prev, lastTrained: formattedDate|| null}));
     alert("AI settings saved!");
   }
 

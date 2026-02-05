@@ -1,18 +1,27 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CardContent } from "@/component/ui/Cards";
 import { Button } from "@/component/ui/Button";
 import { Bot, Send } from "lucide-react";
 import { useGlobalContext } from "@/component/Context";
 import Image from "next/image";
 
-export default function AiPreviewTestPage({aiData}) {
+export default function AiPreviewTestPage({aiData, previewData}) {
   const { pax26, userData } = useGlobalContext();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
     { role: "ai", text: `Hi 👋 I’m ${aiData?.aiName} Smart Assist. Ask me anything about your business.` }
   ]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedMessages = localStorage.getItem("aiPreviewMessages");
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+    }
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -30,11 +39,26 @@ export default function AiPreviewTestPage({aiData}) {
       };
       setMessages((prev) => [...prev, aiReply]);
       setLoading(false);
+      localStorage.setItem("aiPreviewMessages", JSON.stringify([...messages, userMessage, aiReply]));
     }, 1200);
   };
 
   const clearChat = () => {
     setMessages([]);
+  };
+
+  if (!previewData) {
+    return (
+      <div className="p-6 space-y-6 w-full md:max-w-3xl min-h-[70vh] rounded-xl mx-auto shadow-lg"
+        style={{ backgroundColor: pax26.card, color: pax26.textPrimary }}>
+        <h1 className="text-2xl font-semibold" style={{ color: pax26.textPrimary }}>
+          AI Preview
+        </h1>
+        <p className="text-sm" style={{ color: pax26.textSecondary }}>
+          No preview available. Please complete all AI <span className="font-bold">Trainings</span> to see the preview and test your AI assistant's responses.
+        </p>
+      </div>
+    );
   }
 
   return (
