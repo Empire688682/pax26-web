@@ -59,7 +59,6 @@ export async function POST(req) {
     delete userObj.bvn;
     delete userObj.emailVerification;
     delete userObj.phoneVerification;
-    delete userObj.paxAI;
     delete userObj._id;
 
     // JWT

@@ -5,8 +5,6 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { sendPasswordResettingEmail } from "../../helper/sendPasswordResetting";
-dotenv.config();
-
 
 export async function OPTIONS() {
   return new NextResponse(null, {status:200, headers:corsHeaders()})

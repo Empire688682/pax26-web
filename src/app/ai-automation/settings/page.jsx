@@ -1,5 +1,5 @@
 "use client";
-import TestAIAssistantPage from '@/component/AiAutomation/AiPreviewTestPage/AiPreviewTestPage';
+import TestAIAssistantPage from '@/component/AiPreviewTestPage/AiPreviewTestPage';
 import AISettingsPage from '@/component/AiSettings/AiSettings'
 import { useGlobalContext } from '@/component/Context';
 import React, { useEffect, useState } from 'react'

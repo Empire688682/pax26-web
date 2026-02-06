@@ -124,7 +124,6 @@ export async function POST(req) {
         const finalUserData = userObj;
         delete userObj.emailVerification;
         delete userObj.phoneVerification;
-        delete userObj.paxAI;
         delete userObj._id;
 
         const userId = user._id;

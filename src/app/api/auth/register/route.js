@@ -139,7 +139,6 @@ const registerUser = async (req) => {
     delete userObj.bvn;
     delete userObj.emailVerification;
     delete userObj.phoneVerification;
-    delete userObj.paxAI;
     delete userObj._id;
 
     const finalUserData = userObj;
