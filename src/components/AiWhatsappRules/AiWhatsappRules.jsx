@@ -33,6 +33,9 @@ export default function WhatsAppAutomationRulesPage() {
           <Button className="rounded-xl w-full">
             Connect WhatsApp Business
           </Button>
+          <p className="text-xs text-gray-500">
+                You’ll be redirected to Meta to Meta number verification page.
+              </p>
         </CardContent>
       </div>
 

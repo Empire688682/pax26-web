@@ -1,15 +1,20 @@
+"use client";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Phone } from "lucide-react";
+import { useGlobalContext } from "../Context";
 
 export default function AiWhatsAppConnectionPage() {
+  const {pax26} = useGlobalContext();
   const isConnected = false; // replace with real state
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="p-6 space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
+    style={{backgroundColor:pax26.card}}
+    >
       <div className="max-w-4xl mx-auto space-y-6">
-        <div>
+        <div style={{color:pax26.textPrimary}}>
           <h1 className="text-2xl font-semibold">WhatsApp Connection</h1>
           <p className="text-gray-400 mt-1">
             Connect your business WhatsApp number to enable AI replies.
@@ -17,7 +22,7 @@ export default function AiWhatsAppConnectionPage() {
         </div>
 
         {/* Connection Status */}
-        <Card className="bg-gray-900 border-gray-800">
+        <div className="bg-gray-900 border-gray-800">
           <CardContent className="p-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {isConnected ? (
@@ -38,11 +43,11 @@ export default function AiWhatsAppConnectionPage() {
             </div>
             {isConnected && <Button variant="secondary">Disconnect</Button>}
           </CardContent>
-        </Card>
+        </div>
 
         {/* Connect WhatsApp */}
         {!isConnected && (
-          <Card className="bg-gray-900 border-gray-800">
+          <div className="bg-gray-900 border-gray-800">
             <CardContent className="p-6 space-y-4">
               <h2 className="text-lg font-medium">Connect WhatsApp Number</h2>
 
@@ -56,17 +61,17 @@ export default function AiWhatsAppConnectionPage() {
                 </div>
               </div>
 
-              <Button className="w-full rounded-xl">Connect WhatsApp</Button>
+              <Button pageTo={"/whatsapp-rules"} className="w-full rounded-xl">Connect WhatsApp</Button>
 
               <p className="text-xs text-gray-500">
-                You’ll be redirected to Meta to verify your number.
+                You’ll be redirected to Meta to whatsapp rules page.
               </p>
             </CardContent>
-          </Card>
+          </div>
         )}
 
         {/* Webhook Status */}
-        <Card className="bg-gray-900 border-gray-800">
+        <div className="bg-gray-900 border-gray-800">
           <CardContent className="p-6">
             <h2 className="text-lg font-medium mb-2">Webhook Status</h2>
             <p className="text-sm text-gray-400">
@@ -77,7 +82,7 @@ export default function AiWhatsAppConnectionPage() {
               <span className="text-sm">Webhook not verified</span>
             </div>
           </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
