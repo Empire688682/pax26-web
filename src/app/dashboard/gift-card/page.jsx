@@ -1,5 +1,5 @@
 "use client";
-import { useGlobalContext } from '@/component/Context';
+import { useGlobalContext } from '@/components/Context';
 import React from 'react'
 
 const Page = () => {

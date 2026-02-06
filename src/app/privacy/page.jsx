@@ -1,5 +1,5 @@
-import { useGlobalContext } from "@/component/Context";
-import PrivacyPage from '@/component/PrivacyPage/PrivacyPage'
+import { useGlobalContext } from "@/components/Context";
+import PrivacyPage from '@/components/PrivacyPage/PrivacyPage'
 
 export const metadata = {
     title: "Privacy Policy | Pax26",

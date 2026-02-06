@@ -1,7 +1,7 @@
 "use client";
 
-import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
-import TransactionReceiptWrapper from "@/component/Wrappers/TransactionReceiptWrapper";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
+import TransactionReceiptWrapper from "@/components/Wrappers/TransactionReceiptWrapper";
 import { Suspense } from "react";
 
 export default function Page() {

@@ -1,6 +1,6 @@
 "use client";
 import { CardContent, Card } from "../ui/Cards";
-import { Button } from "@/component/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Bot, MessageCircle, Settings, BarChart3, Zap } from "lucide-react";
 import { useGlobalContext } from "../Context";
 import React, { useState, useEffect } from "react";
@@ -199,7 +199,7 @@ export default function AIAutomationPage() {
             <Button
               disabled={!enabledAi}
               variant="outline"
-              pageTo={"/whatsapp"}
+              pageTo={"/whatsapp-rules"}
               className="w-full rounded-xl"
             >
               Connect WhatsApp

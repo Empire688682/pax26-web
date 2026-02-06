@@ -1,17 +1,17 @@
 "use client";
 
-import CTA from '@/component/CTA/CTA';
-import DownloadOurApp from '@/component/DownloadOurApp/DownloadOurApp';
-import Hero from '@/component/Hero/Hero';
-import HowItWorks from '@/component/HowItWork/HowItWork';
-import PricingSec from '@/component/PricingSec/PricingSec';
-import Services from '@/component/Services/Services';
-import SignupPage from '@/component/SignupPage/SignupPage';
-import Testimonials from '@/component/Testimonials/Testimonials';
-import WhyChooseUs from '@/component/WhyChooseUs/WhyChooseUs';
+import CTA from '@/components/CTA/CTA';
+import DownloadOurApp from '@/components/DownloadOurApp/DownloadOurApp';
+import Hero from '@/components/Hero/Hero';
+import HowItWorks from '@/components/HowItWork/HowItWork';
+import PricingSec from '@/components/PricingSec/PricingSec';
+import Services from '@/components/Services/Services';
+import SignupPage from '@/components/SignupPage/SignupPage';
+import Testimonials from '@/components/Testimonials/Testimonials';
+import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
-import { useGlobalContext } from '@/component/Context';
+import { useGlobalContext } from '@/components/Context';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },

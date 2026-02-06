@@ -1,4 +1,4 @@
-import Blog from '@/component/Blog/Blog'
+import Blog from '@/components/Blog/Blog'
 import React from 'react'
 
 const Page = () => {

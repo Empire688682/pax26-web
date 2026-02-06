@@ -1,4 +1,4 @@
-import BuyElectricity from '@/component/BuyElectricity/BuyElectricity'
+import BuyElectricity from '@/components/BuyElectricity/BuyElectricity'
 import React from 'react'
 
 const Page = () => {

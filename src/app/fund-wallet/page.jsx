@@ -1,4 +1,4 @@
-import FundWallet from '@/component/FundWallet/FundWallet'
+import FundWallet from '@/components/FundWallet/FundWallet'
 import React from 'react'
 
 const Page = () => {

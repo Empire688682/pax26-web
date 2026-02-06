@@ -1,4 +1,4 @@
-import Notification from '@/component/Notification/Notification';
+import Notification from '@/components/Notification/Notification';
 import React from 'react';
 
 const page = () => {

@@ -1,4 +1,4 @@
-import Transfer from '@/component/Transfer/Transfer'
+import Transfer from '@/components/Transfer/Transfer'
 import React from 'react'
 
 const page = () => {

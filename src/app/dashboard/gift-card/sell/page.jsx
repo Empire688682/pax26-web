@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import GiftCardExchange from '@/component/GiftCard/GiftCard'
+import GiftCardExchange from '@/components/GiftCard/GiftCard'
 
 const Page = () => {
   return (

@@ -1,6 +1,6 @@
 "use client";
-import LoadingSpinner from '@/component/LoadingSpinner/LoadingSpinner';
-import PaymentSuccess from '@/component/PaymentSuccess/PaymentSuccess'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner';
+import PaymentSuccess from '@/components/PaymentSuccess/PaymentSuccess'
 import React from 'react'
 import { Suspense } from 'react';
 

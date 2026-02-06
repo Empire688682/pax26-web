@@ -1,4 +1,4 @@
-import Crypto from '@/component/Crypto/Crypto'
+import Crypto from '@/components/Crypto/Crypto'
 import React from 'react'
 
 const page = () => {

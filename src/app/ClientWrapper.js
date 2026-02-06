@@ -1,10 +1,10 @@
 // app/ClientWrapper.js
 "use client";
 
-import Sidebar from "@/component/Sidebar/Sidebar";
-import { AppProvider } from "@/component/Context";
-import Footer from "@/component/Footer/Footer";
-import Header from "@/component/Header/Header";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import { AppProvider } from "@/components/Context";
+import Footer from "@/components/Footer/Footer";
+import Header from "@/components/Header/Header";
 
 export default function ClientWrapper({ children }) {
   return (

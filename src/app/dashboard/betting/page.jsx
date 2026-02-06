@@ -1,5 +1,5 @@
 
-import BettingSub from '@/component/BettingSub/BettingSub'
+import BettingSub from '@/components/BettingSub/BettingSub'
 import React from 'react'
 
 const page = () => {

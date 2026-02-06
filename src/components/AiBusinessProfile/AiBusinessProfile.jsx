@@ -1,7 +1,7 @@
 "use client";
-import { Card, CardContent } from "@/component/ui/Cards";
-import { Button } from "@/component/ui/Button";
-import { useGlobalContext } from "@/component/Context";
+import { Card, CardContent } from "@/components/ui/Cards";
+import { Button } from "@/components/ui/Button";
+import { useGlobalContext } from "@/components/Context";
 
 export default function AIBusinessProfilePage() {
   const { pax26 } = useGlobalContext();

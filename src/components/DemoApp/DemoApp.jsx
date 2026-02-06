@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/component/ui/Button";
-import { Card, CardContent } from "@/component/ui/Cards";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Cards";
 import { Play, Pause, ArrowRight, Cpu, Zap, Wallet, MessageCircle } from "lucide-react";
 import { useGlobalContext } from "../Context";
 

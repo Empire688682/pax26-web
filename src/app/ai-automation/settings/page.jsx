@@ -1,7 +1,7 @@
 "use client";
-import TestAIAssistantPage from '@/component/AiPreviewTestPage/AiPreviewTestPage';
-import AISettingsPage from '@/component/AiSettings/AiSettings'
-import { useGlobalContext } from '@/component/Context';
+import TestAIAssistantPage from '@/components/AiPreviewTestPage/AiPreviewTestPage';
+import AISettingsPage from '@/components/AiSettings/AiSettings'
+import { useGlobalContext } from '@/components/Context';
 import React, { useEffect, useState } from 'react'
 
 const page = () => {
@@ -14,7 +14,7 @@ const page = () => {
         businessName: "",
         tone: "",
         responseLength: "",
-        details: "",
+        instructions: "",
         handoffRule: "",
         lastTrained: null,
     });
@@ -38,7 +38,7 @@ const page = () => {
             tab === "test" &&
             !aiData.aiName ||
             !aiData.businessName ||
-            !aiData.details ||
+            !aiData.instructions ||
             !aiData.handoffRule ||
             !aiData.responseLength ||
             !aiData.tone) {
@@ -51,7 +51,7 @@ const page = () => {
             if (
                 aiData.aiName &&
                 aiData.businessName &&
-                aiData.details &&
+                aiData.instructions &&
                 aiData.handoffRule &&
                 aiData.responseLength &&
                 aiData.tone) {

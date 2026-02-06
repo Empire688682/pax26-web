@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Receipt from "@/component/ui/Receipt";
-import { useGlobalContext } from "@/component/Context";
+import Receipt from "@/components/ui/Receipt";
+import { useGlobalContext } from "@/components/Context";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 export default function TransactionReceiptWrapper() {
   const { pax26, router } = useGlobalContext();

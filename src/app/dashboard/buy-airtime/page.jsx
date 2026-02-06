@@ -1,5 +1,5 @@
 
-import BuyAirtime from '@/component/BuyAirtime/BuyAirtime'
+import BuyAirtime from '@/components/BuyAirtime/BuyAirtime'
 import React from 'react'
 
 const page = () => {

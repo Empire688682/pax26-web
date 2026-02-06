@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
-import TransactionHistoryItem from "@/component/ui/TransactionHistoryItem";
-import { useGlobalContext } from "@/component/Context";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
+import TransactionHistoryItem from "@/components/ui/TransactionHistoryItem";
+import { useGlobalContext } from "@/components/Context";
 
 export default function Page() {
   const { pax26, transactionHistory, getUserRealTimeData } = useGlobalContext();

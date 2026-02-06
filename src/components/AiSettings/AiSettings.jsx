@@ -1,7 +1,7 @@
 "use client";
-import { CardContent } from "@/component/ui/Cards";
-import { Button } from "@/component/ui/Button";
-import { useGlobalContext } from "@/component/Context";
+import { CardContent } from "@/components/ui/Cards";
+import { Button } from "@/components/ui/Button";
+import { useGlobalContext } from "@/components/Context";
 
 export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
   const { pax26 } = useGlobalContext();
@@ -19,7 +19,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
   const saveSettings = () => {
     if(!aiData.aiName || 
       !aiData.businessName || 
-      !aiData.details || 
+      !aiData.instructions || 
       !aiData.handoffRule || 
       !aiData.responseLength || 
       !aiData.tone) {
@@ -101,11 +101,11 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
           </div>
 
           <div style={{ color: pax26.textPrimary }}>
-            <label className="text-sm">Details</label>
+            <label className="text-sm">Business Instructions</label>
             <textarea
-              name="details"
-              value={aiData.details}
-              onChange={(e) => handleInputChange("details", e.target.value)}
+              name="instructions"
+              value={aiData.instructions}
+              onChange={(e) => handleInputChange("instructions", e.target.value)}
             placeholder="eg: Always greet customers by name. Use emojis for friendly tone. Avoid technical jargon..."
             className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
               id="" cols="30" rows="4"></textarea>

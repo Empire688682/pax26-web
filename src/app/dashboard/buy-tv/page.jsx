@@ -1,4 +1,4 @@
-import BuyTv from '@/component/Buy-Tv/BuyTv'
+import BuyTv from '@/components/Buy-Tv/BuyTv'
 import React from 'react';
 
 const Page = () => {

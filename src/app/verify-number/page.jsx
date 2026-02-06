@@ -1,4 +1,4 @@
-import AddNumber from '@/component/VerifyNumber/VerifyNumber'
+import AddNumber from '@/components/VerifyNumber/VerifyNumber'
 import React from 'react'
 
 const page = () => {

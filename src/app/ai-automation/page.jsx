@@ -1,4 +1,4 @@
-import AIAutomationPage from '@/component/AiAutomation/AiAutomation'
+import AIAutomationPage from '@/components/AiAutomation/AiAutomation'
 import React from 'react'
 
 const pax26 = () => {

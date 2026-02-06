@@ -1,4 +1,4 @@
-import BuyData from '@/component/BuyData/BuyData'
+import BuyData from '@/components/BuyData/BuyData'
 import React from 'react'
 
 const page = () => {

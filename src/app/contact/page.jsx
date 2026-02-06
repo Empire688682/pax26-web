@@ -1,4 +1,4 @@
-import Contact from '@/component/Contact/Contact';
+import Contact from '@/components/Contact/Contact';
 import React from 'react';
 export const metadata = {
    title: "Contact - Pax26",

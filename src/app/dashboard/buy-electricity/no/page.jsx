@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Receipt from "@/component/ui/Receipt";
+import Receipt from "@/components/ui/Receipt";
 import { useParams } from "next/navigation";
-import { mockElectData } from "@/component/MockData/mockElectData";
-import LoadingSpinner from "@/component/LoadingSpinner/LoadingSpinner";
-import { useGlobalContext } from "@/component/Context";
+import { mockElectData } from "@/components/MockData/mockElectData";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
+import { useGlobalContext } from "@/components/Context";
 
 export default function Page() {
   const {pax26} = useGlobalContext();

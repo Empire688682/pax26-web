@@ -1,9 +1,9 @@
 "use client";
-import Dashboard from '@/component/Dashboard/Dashboard'
+import Dashboard from '@/components/Dashboard/Dashboard'
 import React, { useState, useEffect } from 'react'
 import axios from "axios"
-import { useGlobalContext } from '@/component/Context';
-import LoadingSpinner from '@/component/LoadingSpinner/LoadingSpinner';
+import { useGlobalContext } from '@/components/Context';
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner';
 
 const Page = () => {
   const { userData, router, pax26 } = useGlobalContext();

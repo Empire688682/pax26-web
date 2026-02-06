@@ -1,4 +1,4 @@
-import ApiDocs from '@/component/ApiDocs/ApiDocs'
+import ApiDocs from '@/components/ApiDocs/ApiDocs'
 import React from 'react'
 export const metadata = {
   title: "API Documentation - Pax26",

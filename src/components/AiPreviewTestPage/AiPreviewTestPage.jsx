@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CardContent } from "@/component/ui/Cards";
-import { Button } from "@/component/ui/Button";
+import { CardContent } from "@/components/ui/Cards";
+import { Button } from "@/components/ui/Button";
 import { Bot, Send } from "lucide-react";
-import { useGlobalContext } from "@/component/Context";
+import { useGlobalContext } from "@/components/Context";
 import Image from "next/image";
 
 export default function AiPreviewTestPage({aiData, previewData}) {
@@ -44,6 +44,7 @@ export default function AiPreviewTestPage({aiData, previewData}) {
   };
 
   const clearChat = () => {
+    localStorage.removeItem("aiPreviewMessages");
     setMessages([]);
   };
 

@@ -1,10 +1,10 @@
 "use client";
-import { Card, CardContent } from "@/component/ui/Cards";
-import { Button } from "@/component/ui/Button";
+import { Card, CardContent } from "@/components/ui/Cards";
+import { Button } from "@/components/ui/Button";
 import { MessageCircle } from "lucide-react";
-import { useGlobalContext } from "@/component/Context";
+import { useGlobalContext } from "@/components/Context";
 
-export default function WhatsAppAutomationPage() {
+export default function WhatsAppAutomationRulesPage() {
   const { pax26 } = useGlobalContext();
 
   return (
