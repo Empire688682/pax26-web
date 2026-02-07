@@ -6,7 +6,7 @@ import { CheckCircle, AlertCircle, Phone } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
 
-export default function AiWhatsAppConnectionPage() {
+export default function AiWhatsappConnectionPage() {
   const {pax26} = useGlobalContext();
   const isConnected = false; // replace with real state
 

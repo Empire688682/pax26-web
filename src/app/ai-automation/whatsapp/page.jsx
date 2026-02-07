@@ -1,5 +1,5 @@
 "use client"
-import AiWhatsAppConnectionPage from '@/components/AiWhatsAppConnectionPage/AiWhatsAppConnectionPage'
+import AiWhatsAppConnectionPage from '@/components/AiWhatsappConnectionPage/AiWhatsappConnectionPage'
 import React from 'react';
 import { useGlobalContext } from '@/components/Context';
 
