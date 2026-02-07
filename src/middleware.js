@@ -32,6 +32,7 @@ export function middleware(req) {
     "/ai-automation/whatsapp",
     "/ai-automation",
     "/verify-number",
+    "/ai-automation/whatsapp-connect-info",
   ];
   const isProtected = protectedPaths.some((protectedPath)=>
    path.startsWith(protectedPath));
@@ -80,6 +81,7 @@ export const config = {
     "/ai-automation/profile",
     "/ai-automation/whatsapp-rules",
     "/ai-automation/whatsapp",
+    "/ai-automation/whatsapp-connect-info",
     "/privacy",
     "/verify-number",
   ],

@@ -5,7 +5,21 @@ import { MessageCircle } from "lucide-react";
 import { useGlobalContext } from "@/components/Context";
 
 export default function WhatsAppAutomationRulesPage() {
-  const { pax26 } = useGlobalContext();
+  const { pax26, isWhatsappAiConnected } = useGlobalContext();
+
+  if (!isWhatsappAiConnected) {
+  return (
+    <div className="p-6 rounded-xl">
+      <p className="text-sm text-red-500">
+        Please connect your WhatsApp number before setting automation rules.
+      </p>
+      <Button pageTo="/ai/whatsapp/connect">
+        Connect WhatsApp
+      </Button>
+    </div>
+  );
+}
+
 
   return (
      <div className="p-6 space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
@@ -34,7 +48,7 @@ export default function WhatsAppAutomationRulesPage() {
             Connect WhatsApp Business
           </Button>
           <p className="text-xs text-gray-500">
-                You’ll be redirected to Meta to Meta number verification page.
+                You’ll be redirected to Meta number verification page.
               </p>
         </CardContent>
       </div>

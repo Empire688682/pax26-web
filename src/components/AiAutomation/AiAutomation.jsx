@@ -199,7 +199,7 @@ export default function AIAutomationPage() {
             <Button
               disabled={!enabledAi}
               variant="outline"
-              pageTo={"/whatsapp-rules"}
+              pageTo={"/whatsapp"}
               className="w-full rounded-xl"
             >
               Connect WhatsApp

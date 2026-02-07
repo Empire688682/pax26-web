@@ -64,6 +64,9 @@ export const AppProvider = ({ children }) => {
   //Wallet funding ID state
   const [paymentId, setPaymentId] = useState('');
 
+  //User whatsapp Ai state
+ const [isWhatsappAiConnected, setAisWhatsappAiConnected] = useState(false)
+
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
     if (userData) {
