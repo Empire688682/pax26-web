@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Phone } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
+
 export default function AiWhatsAppConnectionPage() {
   const {pax26} = useGlobalContext();
   const isConnected = false; // replace with real state
 
   return (
-    <div className="p-6 space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
-    style={{backgroundColor:pax26.card}}
-    >
+    <div className="min-h-screen bg-gray-950 text-white p-6"
+    style={{backgroundColor:pax26.card}}>
       <div className="max-w-4xl mx-auto space-y-6">
-        <div style={{color:pax26.textPrimary}}>
+        <div  style={{color:pax26.textPrimary}}>
           <h1 className="text-2xl font-semibold">WhatsApp Connection</h1>
           <p className="text-gray-400 mt-1">
             Connect your business WhatsApp number to enable AI replies.
