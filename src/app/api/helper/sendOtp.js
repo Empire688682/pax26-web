@@ -1,23 +1,46 @@
 import axios from "axios";
 
+const normalizePhone = (phone) => {
+  const cleaned = phone.replace(/\D/g, "");
+
+  if (cleaned.startsWith("234")) return cleaned;
+  if (cleaned.startsWith("0")) return "234" + cleaned.slice(1);
+
+  return "234" + cleaned.slice(-10);
+};
+
 export const sendOtpViaWhatsApp = async ({ phoneNumber, otp }) => {
   try {
     const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
     const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
-    const validPhoneNumber = "234" + phoneNumber.slice(-10) // Get last 10 digits;
+    if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
+      throw new Error("WhatsApp API credentials missing");
+    }
+
+    const validPhoneNumber = normalizePhone(phoneNumber);
     console.log("Valid Phone Number:", validPhoneNumber);
+
     const url = `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`;
 
     const payload = {
       messaging_product: "whatsapp",
-      to: validPhoneNumber, // must be in international format e.g. 2348012345678
+      to: validPhoneNumber,
       type: "template",
       template: {
-        name: "hello_world", // otp_verification // 👈 your approved template name
-        language: {
-          code: "en_US",
-        }
+        name: "otp_verification", // 👈 YOUR APPROVED TEMPLATE
+        language: { code: "en_US" },
+        components: [
+          {
+            type: "body",
+            parameters: [
+              {
+                type: "text",
+                text: otp,
+              },
+            ],
+          },
+        ],
       },
     };
 

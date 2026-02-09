@@ -1,7 +1,11 @@
 import sendpulse from "@/app/lib/sendpulse";
 
-export function sendVerification(receiverEmail, code ) {
-  return new Promise((resolve) => {
+export function sendVerification(receiverEmail, code) {
+  return new Promise((resolve, reject) => {
+    if (!receiverEmail || !code) {
+      return reject(new Error("Missing email or verification code"));
+    }
+
     const html = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
         <h2>Confirm your email for PAX26</h2>
@@ -17,7 +21,7 @@ export function sendVerification(receiverEmail, code ) {
         <p>This code expires in <strong>15 minutes</strong>.</p>
 
         <p style="color:#d9534f; font-weight:bold;">
-        If you did not create a PAX26 account, you can ignore this email.
+          If you did not create a PAX26 account, you can ignore this email.
         </p>
 
         <p>
@@ -30,22 +34,27 @@ export function sendVerification(receiverEmail, code ) {
     const email = {
       subject: "Confirm your email for PAX26",
       from: {
-        name: "Pax26",
-        email: "info@pax26.com",
+        name: "PAX26",
+        email: "info@pax26.com", // MUST be verified in SendPulse
       },
-      to: [{ email: receiverEmail }],
+      to: [
+        {
+          email: receiverEmail,
+        },
+      ],
       html,
+      text: `Your PAX26 verification code is ${code}. It expires in 15 minutes.`,
     };
 
-    console.log("Email payload:", JSON.stringify(email, null, 2));
+    console.log("Email payload:", email);
 
-    sendpulse.smtpSendMail(function (result) {
-      if (result && result.result === true) {
-        console.log("Verification email sent!");
+    sendpulse.smtpSendMail((result) => {
+      console.log("SendPulse response:", result);
+
+      if (result?.result === true) {
         resolve(true);
       } else {
-        console.error("SendPulse failed:", result);
-        resolve(false);
+        reject(result || new Error("SendPulse failed"));
       }
     }, email);
   });

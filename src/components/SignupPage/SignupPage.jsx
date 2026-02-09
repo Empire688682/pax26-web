@@ -62,7 +62,7 @@ export default function SignupPage() {
                 password: "",
                 provider: "credentials"
             });
-            toast.success(message || "Authentication successful");
+            toast.success("Authentication successful");
         } catch (error) {
             console.error("Auth Error:", error);
             setError(error?.response?.data?.message);

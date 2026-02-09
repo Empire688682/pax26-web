@@ -20,7 +20,6 @@ export async function POST(req) {
           return NextResponse.json({ success: false, message: "Phone number is required" }, { status: 400, headers: corsHeaders() });
         }
         const userId = await verifyToken(req);
-        console.log("Verified User ID:", userId);
         if (!userId) {
           return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
