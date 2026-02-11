@@ -16,7 +16,7 @@ export default function AiWhatsappConnectInfo() {
 
   return (
     <div
-      className="p-6 space-y-8 h-full w-full md:max-w-3xl mx-auto rounded-xl shadow-lg"
+      className="space-y-8 h-full w-full md:max-w-3xl mx-auto rounded-xl shadow-lg"
       style={{ backgroundColor: pax26.card, color: pax26.textPrimary }}
     >
       {/* Header */}

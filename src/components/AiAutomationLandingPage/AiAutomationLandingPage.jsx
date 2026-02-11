@@ -9,7 +9,7 @@ import { useGlobalContext } from "../Context";
 export default function AiAutomationLandingPage() {
   const {pax26} = useGlobalContext();
   return (
-    <div className="min-h-screen px-4 py-16">
+    <div className="min-h-screen">
       {/* Hero */}
       <section className="max-w-6xl mx-auto text-center">
         <motion.h1

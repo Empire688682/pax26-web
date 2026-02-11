@@ -53,7 +53,7 @@ export default function AiAutomationHomePage() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <AiDashboardHeader 
       title={"Create automation"}

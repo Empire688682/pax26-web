@@ -7,7 +7,7 @@ export default function AIBusinessProfilePage() {
   const { pax26 } = useGlobalContext();
 
   return (
-   <div className="p-6 space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
+   <div className=" space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
     style={{backgroundColor:pax26.card}}
     >
       <div style={{color:pax26.textPrimary}}

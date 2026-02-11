@@ -36,7 +36,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
 
   return (
     <div
-      className="p-6 space-y-6 h-full w-full md:max-w-3xl rounded-xl mx-auto shadow-lg"
+      className="space-y-6 h-full w-full md:max-w-3xl rounded-xl mx-auto shadow-lg"
       style={{ backgroundColor: pax26.card, color: pax26.textPrimary }}
     >
       <div style={{ color: pax26.textPrimary }}>

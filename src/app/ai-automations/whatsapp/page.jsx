@@ -7,7 +7,7 @@ const page = () => {
     const { pax26 } = useGlobalContext();
   return (
     <div style={{ backgroundColor: pax26.secondaryBg }}>
-      <div className="p-5">
+      <div className="px-6 py-10">
         <AiWhatsAppConnectionPage />
       </div>
     </div>

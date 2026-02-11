@@ -9,7 +9,7 @@ export default function WhatsAppAutomationRulesPage() {
 
   if (!isWhatsappAiConnected) {
   return (
-    <div className="p-6 rounded-xl">
+    <div className="rounded-xl">
       <p className="text-sm text-red-500">
         Please connect your WhatsApp number before setting automation rules.
       </p>

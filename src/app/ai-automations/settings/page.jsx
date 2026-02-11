@@ -63,7 +63,7 @@ const page = () => {
 
 
         return (
-            <div style={{ backgroundColor: pax26.secondaryBg }} className='p-6'>
+            <div style={{ backgroundColor: pax26.secondaryBg }} className='px-6 py-10'>
                 <div className='mb-4'>
                     <h1 className='text-3xl font-semibold' style={{ color: pax26.textPrimary }}>AI Labrary</h1>
                     <p className='text-sm' style={{ color: pax26.textSecondary }}>Configure your AI assistant's behavior and test responses</p>

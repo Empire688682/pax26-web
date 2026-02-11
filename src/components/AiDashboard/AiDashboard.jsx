@@ -46,7 +46,7 @@ export default function AiDashboard() {
    const firstName = userData?.name?.split(" ")[0] || "User";
 
   return (
-    <div className="p-6 space-y-8">
+    <div className=" space-y-8">
        <AiDashboardHeader 
             title={firstName || "User"}
             description={"Manage your smart workflows powered by AI"}
