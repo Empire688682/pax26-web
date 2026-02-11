@@ -9,7 +9,7 @@ import {
   Settings,
   Zap,
   BarChart3,
-  CheckCircle2,
+  Plus,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 import AiDashboardHeader from "../AiDashboardHeader/AiDashboardHeader";
@@ -55,19 +55,19 @@ export default function AiAutomationHomePage() {
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
-      <AiDashboardHeader />
+      <AiDashboardHeader 
+      title={"Create automation"}
+      description={"Create and manage smart workflows powered by AI"}
+      buttonText={"My automation"}
+      buttonPath={"/dashboard"}
+      buttonIcon={''}
+      active={1}
+      executions={200}
+      totalAutomations={5}
+      />
 
       {/* Integrations Grid (Chatbase Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Business Profile */}
-        <IntegrationCard
-          icon={<Settings />}
-          title="AI Business Profile"
-          description="Define how your AI represents your business"
-          buttonText="Setup"
-          disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/profile")}
-        />
 
         {/* WhatsApp */}
         <IntegrationCard
@@ -77,6 +77,16 @@ export default function AiAutomationHomePage() {
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
           disabled={!enabledAi}
           onClick={() => router.push("/ai-automations/whatsapp")}
+        />
+
+        {/* Business Profile */}
+        <IntegrationCard
+          icon={<Settings />}
+          title="AI Business Profile"
+          description="Define how your AI represents your business"
+          buttonText="Setup"
+          disabled={!enabledAi}
+          onClick={() => router.push("/ai-automations/profile")}
         />
 
         {/* AI Settings */}

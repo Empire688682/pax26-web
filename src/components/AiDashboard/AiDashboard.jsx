@@ -10,11 +10,13 @@ import {
   Bot,
   ToggleLeft,
   ToggleRight,
+  Minus,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
+import AiDashboardHeader from "../AiDashboardHeader/AiDashboardHeader";
 
 export default function AiDashboard() {
-  const { pax26, router } = useGlobalContext();
+  const { pax26, router, userData } = useGlobalContext();
 
   // Dummy automations for now (replace with API later)
   const automations = [
@@ -41,33 +43,20 @@ export default function AiDashboard() {
     },
   ];
 
+   const firstName = userData?.name?.split(" ")[0] || "User";
+
   return (
     <div className="p-6 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1
-            className="text-2xl font-semibold"
-            style={{ color: pax26.textPrimary }}
-          >
-            Automations
-          </h1>
-          <p
-            className="text-sm"
-            style={{ color: pax26.textSecondary }}
-          >
-            Create and manage smart workflows
-          </p>
-        </div>
-
-        <Button
-          className="rounded-xl flex items-center gap-2"
-          onClick={() => router.push("/ai-automations/new")}
-        >
-          <Plus size={16} />
-          Create Automation
-        </Button>
-      </div>
+       <AiDashboardHeader 
+            title={firstName}
+            description={"Manage your smart workflows powered by AI"}
+            buttonText={"Create automation"}
+            buttonPath={"/home"}
+            buttonIcon={<Plus />}
+            active={1}
+            executions={50}
+            totalAutomations={1}
+            />
 
       {/* Automations Grid */}
       {automations.length > 0 ? (

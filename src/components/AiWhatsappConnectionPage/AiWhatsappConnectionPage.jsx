@@ -82,15 +82,16 @@ export default function AiWhatsappConnectionPage() {
                 <p className="text-sm font-medium text-white">
                   Official WhatsApp Business connection
                 </p>
-                <p className="text-xs text-gray-300">
+                <p className="text-xs text-gray-200">
                   Personal WhatsApp numbers are not supported.
                 </p>
               </div>
             </div>
 
             {/* What happens next */}
-            <div className="text-xs text-gray-400 space-y-1">
-              <p className="font-medium text-gray-300">What happens next:</p>
+            <div className="text-xs text-gray-500 space-y-1">
+              <p className="font-medium"
+              style={{color:pax26.textPrimary}}>What happens next:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>You’ll log in with Facebook</li>
                 <li>Create or select a Meta Business account</li>

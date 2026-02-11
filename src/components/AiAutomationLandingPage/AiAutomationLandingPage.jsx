@@ -25,7 +25,7 @@ export default function AiAutomationLandingPage() {
           Automate workflows, WhatsApp messaging, customer support, and business operations with Pax26 AI Automation.
         </p>
         <div className="flex justify-center gap-4">
-          <Button pageTo={"/dashboard"}>Get Started</Button>
+          <Button pageTo={"/home"}>Get Started</Button>
         </div>
       </section>
 
@@ -91,7 +91,7 @@ export default function AiAutomationLandingPage() {
              style={{color:pax26.textPrimary}}>Start Automating Today</h2>
             <p className="mb-6"
              style={{color:pax26.textPrimary}}>Build smarter systems, reduce costs, and scale faster with Pax26 AI.</p>
-            <Button pageTo={"/dashboard"}>Create Automation</Button>
+            <Button pageTo={"/home"}>Create Automation</Button>
           </CardContent>
         </Card>
       </section>
