@@ -4,22 +4,27 @@ import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
-  title: "Pax26 - Simplifying Digital Payments & Utility Services",
+  title: "Pax26 – Digital Payments & AI Automation Platform",
   description:
-    "Pax26 is your all-in-one platform for airtime, data, electricity, TV subscriptions, gift cards, and more. Enjoy fast, secure, and reliable digital transactions anytime, anywhere.",
+    "Pax26 combines fast digital payments with powerful AI automation. Buy airtime, data, pay bills, manage utilities, and automate workflows, messaging, and business operations with AI.",
   keywords: [
-    "buy airtime",
-    "buy airtime online in nigeria",
-    "buy data",
-    "electricity bills",
-    "TV subscription",
-    "gift cards",
+    "buy airtime nigeria",
+    "buy data online",
+    "electricity bill payment",
+    "tv subscription nigeria",
+    "gift cards nigeria",
     "digital payments",
-    "Nigeria",
+    "ai automation",
+    "business automation",
+    "workflow automation",
+    "whatsapp automation",
+    "ai agents",
+    "saas nigeria",
+    "pax26",
   ],
   authors: [{ name: "Jayempire" }],
   creator: "Pax26 Team",
@@ -28,9 +33,9 @@ export const metadata = {
     icon: "/icon.ico",
   },
   openGraph: {
-    title: "Pax26 - Fast & Reliable Digital Transactions",
+    title: "Pax26 – Payments, Utilities & AI Automation",
     description:
-      "Top up airtime, buy data, pay electricity & TV bills, and purchase gift cards securely on Pax26.",
+      "Pay bills, buy airtime & data, and automate your business with AI. Pax26 powers smart payments and intelligent automation in one platform.",
     url: "https://pax26.com",
     siteName: "Pax26",
     images: [
@@ -38,7 +43,7 @@ export const metadata = {
         url: "/Pax26_single_logo.png",
         width: 1200,
         height: 630,
-        alt: "Pax26 Digital Payments",
+        alt: "Pax26 Payments & AI Automation",
       },
     ],
     locale: "en_US",
@@ -46,9 +51,9 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pax26 - Simplifying Digital Payments",
+    title: "Pax26 – Payments & AI Automation",
     description:
-      "Airtime, data, bills & gift cards in one platform. Fast, secure, and reliable.",
+      "Digital payments meet AI automation. Airtime, data, bills, gift cards, and smart workflows — all on Pax26.",
     images: ["/Pax26_single_logo.png"],
   },
 };
@@ -65,21 +70,47 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Pax26",
-              url: "https://pax26.com",
-              logo: "https://pax26.com/icon.ico",
-              sameAs: [
-                "https://facebook.com/pax26",
-                "https://twitter.com/pax26",
-                "https://instagram.com/pax26",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  name: "Pax26",
+                  url: "https://pax26.com",
+                  logo: "https://pax26.com/icon.ico",
+                  sameAs: [
+                    "https://facebook.com/pax26",
+                    "https://twitter.com/pax26",
+                    "https://instagram.com/pax26",
+                  ],
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  name: "Pax26",
+                  applicationCategory: "BusinessApplication",
+                  operatingSystem: "Web",
+                  offers: {
+                    "@type": "Offer",
+                    price: "0",
+                    priceCurrency: "NGN",
+                  },
+                },
+                {
+                  "@type": "Service",
+                  name: "Pax26 AI Automation",
+                  description:
+                    "AI-powered automation services including workflow automation, WhatsApp messaging automation, AI agents, and smart business processes.",
+                  provider: {
+                    "@type": "Organization",
+                    name: "Pax26",
+                  },
+                },
               ],
             }),
           }}
         />
       </head>
+
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientWrapper>
             {/* Tawk.to Live Chat Script */}
             <Script
@@ -100,6 +131,7 @@ export default function RootLayout({ children }) {
                 `,
               }}
             />
+
             {children}
             <ToastContainer />
           </ClientWrapper>
