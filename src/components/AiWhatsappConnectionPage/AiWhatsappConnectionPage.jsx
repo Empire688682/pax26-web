@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { CardContent } from "@/components/ui/Cards";
+import { CardContent, Card } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Phone, ExternalLink } from "lucide-react";
 import { useGlobalContext } from "../Context";
@@ -24,7 +24,7 @@ export default function AiWhatsappConnectionPage() {
   return (
     <div
       className="space-y-6 h-full w-full md:max-w-3xl rounded-xl mx-auto shadow-lg"
-      style={{ backgroundColor: pax26.card, color: pax26.textPrimary }}
+      style={{ color: pax26.textPrimary }}
     >
       {/* Header */}
       <div>
@@ -35,7 +35,7 @@ export default function AiWhatsappConnectionPage() {
       </div>
 
       {/* Connection Status */}
-      <div className="rounded-xl" style={{ backgroundColor: pax26.secondaryBg }}>
+      <Card className="rounded-xl">
         <CardContent className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isWhatsappAiConnected ? (
@@ -68,11 +68,11 @@ export default function AiWhatsappConnectionPage() {
             <Button variant="secondary">Disconnect</Button>
           )}
         </CardContent>
-      </div>
+      </Card>
 
       {/* Connect WhatsApp */}
       {!isWhatsappAiConnected && (
-        <div className="rounded-xl" style={{ backgroundColor: pax26.secondaryBg }}>
+        <Card className="rounded-xl">
           <CardContent className="p-6 space-y-5">
             <h2 className="text-lg font-medium">Connect WhatsApp Business</h2>
 
@@ -116,11 +116,11 @@ export default function AiWhatsappConnectionPage() {
               How WhatsApp connection works
               </p>
           </CardContent>
-        </div>
+        </Card>
       )}
 
       {/* Webhook Status */}
-      <div className="rounded-xl" style={{ backgroundColor: pax26.secondaryBg }}>
+      <Card className="rounded-xl">
         <CardContent className="p-6">
           <h2 className="text-lg font-medium mb-1">Webhook Status</h2>
           <p className="text-sm text-gray-400">
@@ -140,7 +140,7 @@ export default function AiWhatsappConnectionPage() {
             </span>
           </div>
         </CardContent>
-      </div>
+      </Card>
     </div>
   );
 }

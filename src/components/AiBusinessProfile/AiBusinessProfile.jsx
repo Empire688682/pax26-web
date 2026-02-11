@@ -3,12 +3,11 @@ import { Card, CardContent } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { useGlobalContext } from "@/components/Context";
 
-export default function AIBusinessProfilePage() {
+export default function AiBusinessProfile() {
   const { pax26 } = useGlobalContext();
 
   return (
    <div className=" space-y-6 md:max-w-4xl min-h-[70vh] rounded-xl max-w-2xl mx-auto"
-    style={{backgroundColor:pax26.card}}
     >
       <div style={{color:pax26.textPrimary}}
       className="bg-transparent">
@@ -20,7 +19,7 @@ export default function AIBusinessProfilePage() {
         </p>
       </div>
 
-      <div>
+      <Card>
         <CardContent className="py-5 space-y-4">
           <div style={{color:pax26.textPrimary}}>
             <label className="text-sm">Business Name</label>
@@ -52,7 +51,7 @@ export default function AIBusinessProfilePage() {
             Save Business Profile
           </Button>
         </CardContent>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { CardContent } from "@/components/ui/Cards";
+import { CardContent, Card } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { useGlobalContext } from "@/components/Context";
 
@@ -39,7 +39,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
       className="space-y-6 h-full w-full md:max-w-3xl rounded-xl mx-auto shadow-lg"
       style={{ backgroundColor: pax26.card, color: pax26.textPrimary }}
     >
-      <div style={{ color: pax26.textPrimary }}>
+      <div style={{ color: pax26.textPrimary }} className="p-4">
         <p className="text-1xl text-center font-semibold flex" style={{ color: pax26.textPrimary }}>
          Ai Trained
         </p>
@@ -48,7 +48,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
         </p>
       </div>
 
-      <div>
+      <Card>
         <CardContent className="py-5 space-y-4 md:space-y-6">
           <div style={{ color: pax26.textPrimary }}>
             <label className="text-sm">Ai Name</label>
@@ -126,7 +126,7 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
             Save AI Settings
           </Button>
         </CardContent>
-      </div>
+      </Card>
     </div>
   );
 }
