@@ -32,7 +32,7 @@ const Dashboard = () => {
     alert(`Referral link copied to clipboard!`);
   };
 
- 
+  const firstName = userData?.name?.split(" ")[0] || "User";
 
   const withdrawCommission = async () => {
     if (!userData?._id) {
