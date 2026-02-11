@@ -50,7 +50,7 @@ export default function AiDashboard() {
        <AiDashboardHeader 
             title={firstName || "User"}
             description={"Manage your smart workflows powered by AI"}
-            buttonText={"Create automation"}
+            buttonText={"Create New Automation"}
             buttonPath={"/home"}
             buttonIcon={<Plus />}
             active={1}

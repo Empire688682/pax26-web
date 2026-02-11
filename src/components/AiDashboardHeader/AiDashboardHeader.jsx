@@ -42,7 +42,7 @@ export default function AiDashboardHeader({
         <div
         >
             {/* Header */}
-            <div className="max-w-7xl mx-auto flex items-center justify-between mb-10">
+            <div className="max-w-7xl mx-auto gap-2 flex flex-wrap items-center justify-between mb-10">
                 <div>
                     <h1 className="md:text-3xl text-2xl font-bold"
                         style={{ color: pax26.textPrimary }}>{title}.</h1>
@@ -52,7 +52,7 @@ export default function AiDashboardHeader({
                     </p>
                 </div>
                     <Button pageTo={buttonPath}>
-                        <p className="flex items-center gap-1">{buttonIcon} {buttonText}</p>
+                        <p className="flex items-center text-xs gap-1">{buttonIcon} {buttonText}</p>
                     </Button>
 
             </div>
@@ -61,7 +61,7 @@ export default function AiDashboardHeader({
             <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-6 mb-12"
                 style={{ color: pax26.textPrimary }}>
                 <Card>
-                        <CardContent className="p-6 flex items-center gap-4">
+                        <CardContent className="flex items-center gap-4">
                             <Workflow className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Automations</p>
@@ -70,7 +70,7 @@ export default function AiDashboardHeader({
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent className="p-6 flex items-center gap-4">
+                        <CardContent className="flex items-center gap-4">
                             <Play className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Active</p>
@@ -79,7 +79,7 @@ export default function AiDashboardHeader({
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent className="p-6 flex items-center gap-4">
+                        <CardContent className="flex items-center gap-4">
                             <Zap className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Executions</p>
