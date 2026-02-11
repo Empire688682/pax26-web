@@ -9,7 +9,7 @@ export function Card({ children, className }) {
   const {pax26} = useGlobalContext();
   return (
     <div className={`rounded-2xl shadow-md p-4 ${className}`}
-    style={{backgroundColor:pax26.secondaryBg}}>{children}</div>
+    style={{backgroundColor:pax26.bg}}>{children}</div>
   );
 }
 

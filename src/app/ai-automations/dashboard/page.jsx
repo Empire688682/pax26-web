@@ -1,6 +1,6 @@
 
 "use client"
-import AiAutomations from '@/components/AiAutomations/AiAutomations'
+import AiDashboard from '@/components/AiDashboard/AiDashboard'
 import React from 'react';
 import { useGlobalContext } from '@/components/Context';
 
@@ -9,7 +9,7 @@ const page = () => {
   return (
     <div style={{ backgroundColor: pax26.secondaryBg }}>
       <div className='p-5'>
-        <AiAutomations />
+        <AiDashboard />
       </div>
     </div>
   )

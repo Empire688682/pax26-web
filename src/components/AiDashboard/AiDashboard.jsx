@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
-export default function AiAutomations() {
+export default function AiDashboard() {
   const { pax26, router } = useGlobalContext();
 
   // Dummy automations for now (replace with API later)
@@ -42,7 +42,7 @@ export default function AiAutomations() {
   ];
 
   return (
-    <div className="p-6 space-y-8" style={{ backgroundColor: pax26.bg }}>
+    <div className="p-6 space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -62,7 +62,7 @@ export default function AiAutomations() {
 
         <Button
           className="rounded-xl flex items-center gap-2"
-          onClick={() => router.push("/ai-automation/new")}
+          onClick={() => router.push("/ai-automations/new")}
         >
           <Plus size={16} />
           Create Automation

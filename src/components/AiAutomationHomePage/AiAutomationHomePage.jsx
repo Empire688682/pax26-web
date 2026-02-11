@@ -12,12 +12,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
-import { FaSpinner } from "react-icons/fa";
+import AiDashboardHeader from "../AiDashboardHeader/AiDashboardHeader";
 
-export default function AIAutomationPage() {
+export default function AiAutomationHomePage() {
   const { pax26, router, setUserData, userData } = useGlobalContext();
   const [loading, setLoading] = useState(false);
-  const [enabledAi, setEnabledAi] = useState(false);
+  const [enabledAi, setEnabledAi] = useState(true);
 
   useEffect(() => {
     setEnabledAi(userData?.paxAI?.enabled || false);
@@ -53,59 +53,9 @@ export default function AIAutomationPage() {
   }
 
   return (
-    <div className="p-6 space-y-8" style={{ backgroundColor: pax26.bg }}>
+    <div className="p-6 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold" style={{ color: pax26.textPrimary }}>
-            Pax26 Agent
-          </h1>
-          <p className="text-sm" style={{ color: pax26.textSecondary }}>
-            Connect AI channels and deploy smart automations
-          </p>
-        </div>
-
-        <Button
-          action={handleAiEnabled}
-          className="rounded-xl flex items-center gap-2"
-        >
-          {loading ? (
-            <FaSpinner className="animate-spin" />
-          ) : enabledAi ? (
-            "Disable AI"
-          ) : (
-            "Enable AI"
-          )}
-        </Button>
-      </div>
-
-      {/* AI Status Banner */}
-      <Card className="rounded-2xl">
-        <CardContent className="p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Bot />
-            <div>
-              <p className="font-medium" style={{ color: pax26.textPrimary }}>
-                AI Status
-              </p>
-              <p
-                className={`text-sm ${
-                  enabledAi ? "text-green-500" : "text-gray-500"
-                }`}
-              >
-                {enabledAi ? "Active & running" : "Disabled"}
-              </p>
-            </div>
-          </div>
-
-          {enabledAi && (
-            <div className="flex items-center gap-2 text-green-500 text-sm">
-              <CheckCircle2 size={16} />
-              Live
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <AiDashboardHeader />
 
       {/* Integrations Grid (Chatbase Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -116,7 +66,7 @@ export default function AIAutomationPage() {
           description="Define how your AI represents your business"
           buttonText="Setup"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automation/profile")}
+          onClick={() => router.push("/ai-automations/profile")}
         />
 
         {/* WhatsApp */}
@@ -126,7 +76,7 @@ export default function AIAutomationPage() {
           description="Connect your agent to WhatsApp and reply to customers"
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automation/whatsapp")}
+          onClick={() => router.push("/ai-automations/whatsapp")}
         />
 
         {/* AI Settings */}
@@ -136,7 +86,7 @@ export default function AIAutomationPage() {
           description="Tone, personality and fallback rules"
           buttonText="Manage AI"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automation/settings")}
+          onClick={() => router.push("/ai-automations/settings")}
         />
 
         {/* Automations */}
@@ -146,7 +96,7 @@ export default function AIAutomationPage() {
           description="Create and manage smart workflows"
           buttonText="View Automations"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automation/automations")}
+          onClick={() => router.push("/ai-automations/automations")}
         />
 
         {/* Analytics */}
@@ -156,7 +106,7 @@ export default function AIAutomationPage() {
           description="Messages, performance and efficiency stats"
           buttonText="View Analytics"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automation/analytics")}
+          onClick={() => router.push("/ai-automations/analytics")}
         />
       </div>
 
