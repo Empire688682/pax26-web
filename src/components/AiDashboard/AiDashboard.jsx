@@ -48,7 +48,7 @@ export default function AiDashboard() {
   return (
     <div className="p-6 space-y-8">
        <AiDashboardHeader 
-            title={firstName}
+            title={firstName || "User"}
             description={"Manage your smart workflows powered by AI"}
             buttonText={"Create automation"}
             buttonPath={"/home"}
