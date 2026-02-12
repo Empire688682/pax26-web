@@ -50,7 +50,7 @@ const Footer = () => {
   };
 
    // Do not render Footer on Reset Password page
-  if (pathName === '/reset-password') {
+  if (pathName === '/reset-password' || "/ai-automations/pax") {
     return null;
   }
 

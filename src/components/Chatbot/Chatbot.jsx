@@ -146,15 +146,16 @@ export default function PaxChatPage() {
   /* ------------------ UI ------------------ */
   return (
     <div
-      className="h-[90vh] flex rounded-xl overflow-hidden mx-auto max-w-7xl shadow-lg"
+      className="h-[90vh] flex rounded-xl overflow-hidden
+       mx-auto max-w-7xl shadow-lg"
       style={{ backgroundColor: pax26.secondaryBg }}
     >
       {/* ============ SIDEBAR ============ */}
       <div
-        className={`transition-all duration-300 border-r border-gray-300 ${
+        className={`transition-all duration-300 ${
           sidebarOpen ? "w-64" : "w-16"
         }`}
-        style={{ backgroundColor: pax26.card }}
+        style={{ backgroundColor: pax26.bg }}
       >
         {/* Header */}
         <div className="p-4 flex items-center justify-between">
@@ -206,7 +207,8 @@ export default function PaxChatPage() {
         </div>
 
         {sidebarOpen && (
-          <div className="p-3 text-xs opacity-70 text-center">
+          <div className="p-3 text-xs opacity-70 text-center"
+          style={{color:pax26.textPrimary}}>
             Messages reset daily
           </div>
         )}
@@ -250,7 +252,8 @@ export default function PaxChatPage() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-300 flex gap-3">
+        <div className="flex gap-3 py-5"
+        style={{backgroundColor:pax26.bg}}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}

@@ -186,6 +186,8 @@ const Dashboard = () => {
               <QuickLinks title="TV" link="/dashboard/buy-tv" />
               <QuickLinks title="AI Auto" link="/ai" status="Inactive" />
               <QuickLinks title="Betting" link="/dashboard/betting" status="Inactive" />
+              <QuickLinks title="Giftcard" link="/dashboard/giftcard" status="Inactive" />
+              <QuickLinks title="Crypto" link="/dashboard/crypto" status="Inactive" />
             </>
           )}
         </div>
