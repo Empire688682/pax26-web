@@ -1,7 +1,23 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../Context";
-import { Bell, Heart, ArrowRight, Wallet, TrendingUp, Link2, PiHandWithdraw } from "lucide-react";
+import {
+  Bell,
+  Heart,
+  ArrowRight,
+  Wallet,
+  TrendingUp,
+  Link2,
+  Phone,
+  Wifi,
+  Zap,
+  Tv,
+  Bot,
+  Dice5,
+  Gift,
+  Bitcoin,
+  ArrowRightLeft
+} from "lucide-react";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { FaSpinner } from 'react-icons/fa';
 import CashBackBalance from "../CashBackBalance/CashBackBalance";
@@ -176,21 +192,75 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <QuickLinks title="Fund Wallet" link="/fund-wallet" icon={<Wallet size={26} style={{color:pax26?.textPrimary}} />} />
-          <QuickLinks title="Transfer" link="/dashboard/transfer" icon={<ArrowRight size={26} style={{color:pax26?.textPrimary}}/>} />
-          <QuickLinks title="Buy Airtime" link="/dashboard/buy-airtime" />
-          <QuickLinks title="Buy Data" link="/dashboard/buy-data" />
+          <QuickLinks
+            title="Fund Wallet"
+            link="/fund-wallet"
+            icon={<Wallet size={24} style={{ color: pax26.textPrimary }} />}
+          />
+
+          <QuickLinks
+            title="Transfer"
+            link="/dashboard/transfer"
+            icon={<ArrowRightLeft size={24} style={{ color: pax26.textPrimary }} />}
+          />
+
+          <QuickLinks
+            title="Buy Airtime"
+            link="/dashboard/buy-airtime"
+            icon={<Phone size={24} style={{ color: pax26.textPrimary }} />}
+          />
+
+          <QuickLinks
+            title="Buy Data"
+            link="/dashboard/buy-data"
+            icon={<Wifi size={24} style={{ color: pax26.textPrimary }} />}
+          />
+
           {showMore && (
             <>
-              <QuickLinks title="Electricity" link="/dashboard/buy-electricity" />
-              <QuickLinks title="TV" link="/dashboard/buy-tv" />
-              <QuickLinks title="AI Auto" link="/ai" status="Inactive" />
-              <QuickLinks title="Betting" link="/dashboard/betting" status="Inactive" />
-              <QuickLinks title="Giftcard" link="/dashboard/giftcard" status="Inactive" />
-              <QuickLinks title="Crypto" link="/dashboard/crypto" status="Inactive" />
+              <QuickLinks
+                title="Electricity"
+                link="/dashboard/buy-electricity"
+                icon={<Zap size={24} style={{ color: pax26.textPrimary }} />}
+              />
+
+              <QuickLinks
+                title="TV"
+                link="/dashboard/buy-tv"
+                icon={<Tv size={24} style={{ color: pax26.textPrimary }} />}
+              />
+
+              <QuickLinks
+                title="AI Auto"
+                link="/ai"
+                status="Inactive"
+                icon={<Bot size={24} style={{ color: pax26.textPrimary }} />}
+              />
+
+              <QuickLinks
+                title="Betting"
+                link="/dashboard/betting"
+                status="Inactive"
+                icon={<Dice5 size={24} style={{ color: pax26.textPrimary }} />}
+              />
+
+              <QuickLinks
+                title="Giftcard"
+                link="/dashboard/giftcard"
+                status="Inactive"
+                icon={<Gift size={24} style={{ color: pax26.textPrimary }} />}
+              />
+
+              <QuickLinks
+                title="Crypto"
+                link="/dashboard/crypto"
+                status="Inactive"
+                icon={<Bitcoin size={24} style={{ color: pax26.textPrimary }} />}
+              />
             </>
           )}
         </div>
+
       </div>
 
       {/* Referral Link */}
