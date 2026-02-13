@@ -1,4 +1,3 @@
-import { number } from "framer-motion";
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
@@ -38,8 +37,8 @@ const UserSchema = new mongoose.Schema(
       firstRequestAt: { type: Date, default: null },
       token: { type: String },
       expiresAt: { type: Date },
-      incomingNumber:{ type: Date, default: null }
-  },
+      incomingNumber: { type: Date, default: null }
+    },
 
     /* =====================
        FINANCIALS
@@ -59,55 +58,52 @@ const UserSchema = new mongoose.Schema(
     referralHostId: { type: String, default: "" },
 
     /* =====================
-       🔥 PAX AI CORE
+       WHATSAPP CONFIG
+    ====================== */
+    whatsappNumber: {
+      type: String,
+      default: "",
+      unique: true, // no two users can have same WhatsApp number
+      index: true   // fast lookup
+    },
+    whatsappConnected: { type: Boolean, default: false },
+    whatsappWebhookVerified: { type: Boolean, default: false },
+
+    /* =====================
+       PAX AI PLAN & USAGE
     ====================== */
     paxAI: {
       enabled: { type: Boolean, default: false },
-
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],
-        default: "free",
+        default: "free"
       },
-
       businessProfile: {
         businessName: { type: String, default: "" },
         description: { type: String, default: "" },
         tone: {
           type: String,
           enum: ["friendly", "professional", "sales", "support"],
-          default: "friendly",
+          default: "friendly"
         },
         fallbackMessage: {
           type: String,
-          default: "A human agent will get back to you shortly.",
-        },
+          default: "A human agent will get back to you shortly."
+        }
       },
-
-      /* =====================
-         WHATSAPP
-      ====================== */
-      whatsapp: {
-        connected: { type: Boolean, default: false },
-        phoneNumberId: { type: String, default: "" },
-        businessAccountId: { type: String, default: "" },
-        webhookVerified: { type: Boolean, default: false },
-      },
-
-      /* =====================
-         AI USAGE (💰 MONEY)
-      ====================== */
       usage: {
         messagesThisMonth: { type: Number, default: 0 },
         automationsTriggered: { type: Number, default: 0 },
-        lastReset: { type: Date, default: Date.now },
-      },
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+        lastReset: { type: Date, default: Date.now }
+      }
+    }
+  }, { timestamps: true });
+
+UserSchema.index({ whatsappNumber: 1 }, { unique: true });
+UserSchema.index({ number: 1 }, { unique: true });
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ referralCode: 1 }, { unique: true });
 
 const UserModel =
   mongoose.models.User || mongoose.model("User", UserSchema);
