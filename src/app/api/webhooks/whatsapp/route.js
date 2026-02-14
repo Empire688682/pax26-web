@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { connectDb } from "@/app/ults/db/ConnectDb";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { getAIResponse } from "@/components/frontEndHelpers/PaxAI";
 import { sendWhatsAppReply } from "@/components/frontEndHelpers/ReplyWhatsappMessage";
 import UserModel from "@/app/ults/models/UserModel";
+import { connectDb } from "@/app/ults/db/ConnectDb";
 
 export async function POST(req) {
   try {
