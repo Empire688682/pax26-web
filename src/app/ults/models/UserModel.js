@@ -6,11 +6,11 @@ const UserSchema = new mongoose.Schema(
        CORE USER INFO
     ====================== */
     name: { type: String },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, index:true },
     password: { type: String, default: null },
     isPasswordSet: { type: Boolean, default: true },
     pin: { type: String, default: null },
-    number: { type: String, default: "", unique: true },
+    number: { type: String, default: "", unique: true, index:true },
     profileImage: { type: String, default: "/profile-img.png" },
 
     provider: { type: String, default: "credentials" },
@@ -63,7 +63,8 @@ const UserSchema = new mongoose.Schema(
     whatsappNumber: {
       type: String,
       default: "",
-      unique: true, // no two users can have same WhatsApp number
+      unique: true,
+      index:true 
     },
     whatsappConnected: { type: Boolean, default: false },
     whatsappWebhookVerified: { type: Boolean, default: false },
@@ -98,10 +99,6 @@ const UserSchema = new mongoose.Schema(
       }
     }
   }, { timestamps: true });
-
-UserSchema.index({ whatsappNumber: 1 });
-UserSchema.index({ number: 1 });
-UserSchema.index({ email: 1 });
 
 const UserModel =
   mongoose.models.User || mongoose.model("User", UserSchema);

@@ -19,6 +19,7 @@ export async function POST(req) {
     }
 
     const phoneNumberId = value.metadata.phone_number_id;
+    const phoneNumber = value.contacts[0].wa_id;;
     const from = value.messages[0].from;
     const userText = value.messages[0].text?.body;
 
@@ -26,7 +27,8 @@ export async function POST(req) {
       return NextResponse.json({ status: "no_text" });
     }
 
-    const paxUser = await UserModel.findOne({ whatsappNumber: phoneNumberId });
+    const paxUser = await UserModel.findOne({ whatsappNumber: phoneNumber });
+    
     if (!paxUser) {
       return NextResponse.json({ status: "user_not_found" });
     }
@@ -40,6 +42,7 @@ export async function POST(req) {
       platform: "whatsapp",
       phoneNumberId,
       from,
+      to:"Pax26",
       text: userText,
       direction: "inbound",
       senderType: "user",
@@ -56,13 +59,16 @@ export async function POST(req) {
       text: replyText
     });
 
+    console.log("response: ", response);
+
     // 4️⃣ Save outbound message
     await AIMessageModel.create({
       messageId: `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       userId: paxUser._id,
       platform: "whatsapp",
-      phoneNumberId,
+      phoneNumber,
       to: from,
+      from:"Pax26",
       text: replyText,
       direction: "outbound",
       senderType: "ai",
@@ -71,8 +77,6 @@ export async function POST(req) {
         isAutoReply: true
       }
     });
-
-    console.log("✅ WhatsApp AI reply sent");
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {

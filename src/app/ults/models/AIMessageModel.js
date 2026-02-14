@@ -6,7 +6,8 @@ const MessageSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
+    index:true
   },
 
   platform: {
@@ -15,11 +16,11 @@ const MessageSchema = new mongoose.Schema({
     default: "whatsapp"
   },
 
-  phoneNumberId: String,
+  phoneNumberId: {type: String, index:true},
   providerMessageId: String,
 
   from: { type: String, required: true },
-  to: String,
+  to: { type: String, required: true },
 
   text: { type: String, required: true },
 
@@ -47,7 +48,7 @@ const MessageSchema = new mongoose.Schema({
     followUpAt: Date
   },
 
-  sessionId: String,
+  sessionId: {type: String, index:true},
 
   aiMeta: {
     model: String,
@@ -55,11 +56,6 @@ const MessageSchema = new mongoose.Schema({
     cost: Number
   }
 }, { timestamps: true });
-
-/* ✅ ADD INDEXES HERE */
-MessageSchema.index({ userId: 1, createdAt: -1 });
-MessageSchema.index({ phoneNumberId: 1 });
-MessageSchema.index({ sessionId: 1 });
 
 /* ✅ THEN EXPORT */
 export default mongoose.models.Message ||
