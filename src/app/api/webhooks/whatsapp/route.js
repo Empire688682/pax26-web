@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
-import { getAIResponse } from "@/components/frontEndHelpers/PaxAI";
-import { sendWhatsAppReply } from "@/components/frontEndHelpers/ReplyWhatsappMessage";
 import UserModel from "@/app/ults/models/UserModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
+import { nanoid } from "nanoid";
+import { getAIResponse } from "../../helper/PaxAI";
+import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
 
 export async function POST(req) {
   try {
@@ -25,15 +26,17 @@ export async function POST(req) {
       return NextResponse.json({ status: "no_text" });
     }
 
-    // 🔐 TODO: map WhatsApp number to Pax26 user
     const paxUser = await UserModel.findOne({ whatsappNumber: phoneNumberId });
+    if (!paxUser) {
+      return NextResponse.json({ status: "user_not_found" });
+    }
 
-    const inboundMessageId = `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+   const inboundMessageId = `msg_${nanoid()}`;
 
     // 1️⃣ Save inbound message
     await AIMessageModel.create({
       messageId: inboundMessageId,
-      userId:paxUser._id,
+      userId: paxUser._id,
       platform: "whatsapp",
       phoneNumberId,
       from,
@@ -56,7 +59,7 @@ export async function POST(req) {
     // 4️⃣ Save outbound message
     await AIMessageModel.create({
       messageId: `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      userId:paxUser._id,
+      userId: paxUser._id,
       platform: "whatsapp",
       phoneNumberId,
       to: from,

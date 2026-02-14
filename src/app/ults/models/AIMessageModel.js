@@ -1,4 +1,4 @@
-import { unique } from "next/dist/build/utils";
+import mongoose from "mongoose";
 
 const MessageSchema = new mongoose.Schema({
   messageId: { type: String, unique: true, required: true },
@@ -58,7 +58,7 @@ const MessageSchema = new mongoose.Schema({
 
 /* ✅ ADD INDEXES HERE */
 MessageSchema.index({ userId: 1, createdAt: -1 });
-MessageSchema.index({ phoneNumberId: 1 }, {unique:true});
+MessageSchema.index({ phoneNumberId: 1 });
 MessageSchema.index({ sessionId: 1 });
 
 /* ✅ THEN EXPORT */

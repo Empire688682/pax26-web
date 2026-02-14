@@ -64,7 +64,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
       unique: true, // no two users can have same WhatsApp number
-      index: true   // fast lookup
     },
     whatsappConnected: { type: Boolean, default: false },
     whatsappWebhookVerified: { type: Boolean, default: false },
@@ -100,10 +99,9 @@ const UserSchema = new mongoose.Schema(
     }
   }, { timestamps: true });
 
-UserSchema.index({ whatsappNumber: 1 }, { unique: true });
-UserSchema.index({ number: 1 }, { unique: true });
-UserSchema.index({ email: 1 }, { unique: true });
-UserSchema.index({ referralCode: 1 }, { unique: true });
+UserSchema.index({ whatsappNumber: 1 });
+UserSchema.index({ number: 1 });
+UserSchema.index({ email: 1 });
 
 const UserModel =
   mongoose.models.User || mongoose.model("User", UserSchema);
