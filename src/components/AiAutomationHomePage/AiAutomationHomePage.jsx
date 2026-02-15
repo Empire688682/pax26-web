@@ -64,6 +64,7 @@ export default function AiAutomationHomePage() {
       active={1}
       executions={200}
       totalAutomations={5}
+      handleAiEnabled={handleAiEnabled}
       />
 
       {/* Integrations Grid (Chatbase Style) */}

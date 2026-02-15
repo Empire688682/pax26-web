@@ -25,7 +25,7 @@ const Footer = () => {
     }
     window.addEventListener("scroll", handleScroll);
 
-    return ()=> window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [])
 
   const backTop = () => {
@@ -49,8 +49,8 @@ const Footer = () => {
     }
   };
 
-   // Do not render Footer on Reset Password page
-  if (pathName === '/reset-password' || "/ai-automations/pax") {
+  // Do not render Footer on Reset Password page
+  if (pathName === '/reset-password' || pathName === "/ai-automations/pax") {
     return null;
   }
 
@@ -131,7 +131,7 @@ const Footer = () => {
 
         {/* Social Media */}
         <div className="mt-12 flex justify-center pb-4 rounded-md space-x-6"
-        style={{ backgroundColor: pax26.border }}>
+          style={{ backgroundColor: pax26.border }}>
           <SocialIcons />
         </div>
 

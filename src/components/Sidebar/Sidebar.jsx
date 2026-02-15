@@ -62,7 +62,8 @@ export default function Sidebar() {
             <Info size={18} className="hidden md:block" />
             Your Feedback
           </Link>
-          <div className="flex items-center gap-2 hover:text-blue-600 gap-5">
+          <div className="flex items-center gap-2 hover:text-blue-600 gap-5"
+          onClick={() => setIsOpen(false)}>
             <p 
             style={{ color: pax26.textSecondary }}>Theme</p>
             <ThemeToggle />
@@ -130,14 +131,15 @@ export default function Sidebar() {
             <LogOut size={18} />
             Logout
           </div>
-          <div className="flex items-center gap-2 hover:text-blue-600 gap-5">
+          <div className="flex items-center gap-2 hover:text-blue-600 gap-5"
+          onClick={() => setIsOpen(false)}>
             <p 
             style={{ color: pax26.textSecondary }}>Theme</p>
             <ThemeToggle />
           </div>
         </div>
       </div>
-      <div onClick={() => setIsOpen(false)} className='w-[50%] h-screen'>
+      <div className='w-[50%] h-screen'>
       </div>
     </nav>
   );
