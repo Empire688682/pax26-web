@@ -42,7 +42,7 @@ export async function POST(req) {
       platform: "whatsapp",
       phoneNumberId,
       from,
-      to:"Pax26",
+      to: phoneNumberId,
       text: userText,
       direction: "inbound",
       senderType: "user",
@@ -59,8 +59,6 @@ export async function POST(req) {
       text: replyText
     });
 
-    console.log("response: ", response);
-
     // 4️⃣ Save outbound message
     await AIMessageModel.create({
       messageId: `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
@@ -68,7 +66,7 @@ export async function POST(req) {
       platform: "whatsapp",
       phoneNumber,
       to: from,
-      from:"Pax26",
+      from:phoneNumberId,
       text: replyText,
       direction: "outbound",
       senderType: "ai",
