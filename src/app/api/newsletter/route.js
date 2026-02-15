@@ -3,6 +3,7 @@ import EmailSubscriber from "@/app/ults/models/EmailSubscriber";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { sendPasswordResettingEmail } from "../helper/sendPasswordResetting";
+
 export async function OPTIONS() {
     return new NextResponse(null, {status:200, headers:corsHeaders()});
 }
