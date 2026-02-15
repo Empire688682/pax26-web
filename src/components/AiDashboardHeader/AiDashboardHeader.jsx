@@ -63,7 +63,7 @@ export default function AiDashboardHeader({
                     className="flex-shrink-0"
                 >
                     <Button pageTo={buttonPath} onClick={handleAiEnabled}>
-                        <div className="flex items-center gap-2 text-xs md:text-sm">
+                        <div className="flex items-center flex-wrap gap-2 text-xs md:text-sm">
                             {buttonIcon} {buttonText}
                         </div>
                     </Button>
@@ -71,12 +71,12 @@ export default function AiDashboardHeader({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12 h-full">
                 {/* Activate AI CTA */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="border-dashed hover:shadow-xl transition">
                         <CardContent className="flex flex-col md:flex-row items-center justify-between gap-4 p-6">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center flex-wrap gap-4">
                                 <Workflow className="h-8 w-8 text-primary" />
                                 <div>
                                     <p className="text-lg font-semibold">
@@ -94,8 +94,8 @@ export default function AiDashboardHeader({
 
                 {/* Total Automations */}
                 <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 p-6">
+                    <Card className="h-full">
+                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
                             <Workflow className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Automations</p>
@@ -107,8 +107,8 @@ export default function AiDashboardHeader({
 
                 {/* Active */}
                 <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 p-6">
+                    <Card className="h-full">
+                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
                             <Play className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Active</p>
@@ -120,8 +120,8 @@ export default function AiDashboardHeader({
 
                 {/* Executions */}
                 <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card>
-                        <CardContent className="flex items-center gap-4 p-6">
+                    <Card className="h-full">
+                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
                             <Zap className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="text-sm text-muted-foreground">Executions</p>
