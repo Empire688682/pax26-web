@@ -63,7 +63,7 @@ export default function AiDashboardHeader({
                     className="flex-shrink-0"
                 >
                     <Button pageTo={buttonPath} onClick={handleAiEnabled}>
-                        <div className="flex items-center flex-wrap gap-2 text-xs md:text-sm">
+                        <div className="flex items-center gap-2 text-xs md:text-sm">
                             {buttonIcon} {buttonText}
                         </div>
                     </Button>
@@ -71,23 +71,21 @@ export default function AiDashboardHeader({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12 h-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                 {/* Activate AI CTA */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card className="border-dashed hover:shadow-xl transition">
-                        <CardContent className="flex flex-col md:flex-row items-center justify-between gap-4 p-6">
-                            <div className="flex items-center flex-wrap gap-4">
-                                <Workflow className="h-8 w-8 text-primary" />
-                                <div>
-                                    <p className="text-lg font-semibold">
-                                        Activate AI Automation
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        Unlock WhatsApp automation, AI chatbot & lead follow-ups
-                                    </p>
-                                </div>
+                    <Card className="border-dashed hover:shadow-xl transition h-full">
+                        <CardContent className="flex flex-col items-start justify-between gap-4 p-6">
+                            <Workflow className="h-10 w-10 text-primary mb-2" />
+                            <div className="flex-1">
+                                <p className="text-lg font-semibold mb-1">
+                                    Activate AI Automation
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Unlock WhatsApp automation, AI chatbot & lead follow-ups
+                                </p>
                             </div>
-                            <Button onClick={handleAiEnabled}>Activate</Button>
+                            <Button className="mt-3 w-full" onClick={handleAiEnabled}>Activate</Button>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -95,12 +93,10 @@ export default function AiDashboardHeader({
                 {/* Total Automations */}
                 <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="h-full">
-                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
-                            <Workflow className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total Automations</p>
-                                <p className="text-2xl font-bold">{totalAutomations}</p>
-                            </div>
+                        <CardContent className="flex flex-col items-start gap-2 p-6">
+                            <Workflow className="h-8 w-8 text-primary mb-2" />
+                            <p className="text-sm text-muted-foreground">Total Automations</p>
+                            <p className="text-2xl font-bold">{totalAutomations}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -108,12 +104,10 @@ export default function AiDashboardHeader({
                 {/* Active */}
                 <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="h-full">
-                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
-                            <Play className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Active</p>
-                                <p className="text-2xl font-bold">{active}</p>
-                            </div>
+                        <CardContent className="flex flex-col items-start gap-2 p-6">
+                            <Play className="h-8 w-8 text-primary mb-2" />
+                            <p className="text-sm text-muted-foreground">Active</p>
+                            <p className="text-2xl font-bold">{active}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -121,12 +115,10 @@ export default function AiDashboardHeader({
                 {/* Executions */}
                 <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="h-full">
-                        <CardContent className="flex items-center flex-wrap gap-4 p-6">
-                            <Zap className="h-8 w-8 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Executions</p>
-                                <p className="text-2xl font-bold">{executions}</p>
-                            </div>
+                        <CardContent className="flex flex-col items-start gap-2 p-6">
+                            <Zap className="h-8 w-8 text-primary mb-2" />
+                            <p className="text-sm text-muted-foreground">Executions</p>
+                            <p className="text-2xl font-bold">{executions}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
