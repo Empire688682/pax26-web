@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -8,7 +11,7 @@ export async function getAIResponse(userText) {
     try {
         if (!userText) return "No input provided.";
 
-        if (!process.env.OPENAI_API_KEY) {
+        if (!process.env.OPENAI_API_KEY === "not set") {
             return `PaxAI is still in development mode, you said: "${userText}"`;
         }
 
