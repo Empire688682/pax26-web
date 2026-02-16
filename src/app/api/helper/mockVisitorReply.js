@@ -1,6 +1,6 @@
 // app/api/helper/mockVisitorReply.js
 export function mockVisitorReply(userText, userName) {
-  return `👋 Hi! ${userName} Thanks for reaching out to *Pax26*.
+  return `👋 Hi ${userName} Thanks for reaching out to *Pax26*.
 
 Right now, full AI chat is available only inside our app.
 
