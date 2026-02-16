@@ -17,11 +17,13 @@ const steps = [
   "FAQs",
   "Tone & Hours",
   "WhatsApp",
+  "Review",
   "Train AI",
 ];
 
 export default function AiTrainingPage() {
   const { pax26 } = useGlobalContext();
+  const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     businessName: "",
@@ -38,15 +40,23 @@ export default function AiTrainingPage() {
     },
   });
 
-  const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
+
+  const next = () => {
+    if (step === steps.length - 1) {
+      handleTrain();
+    } else {
+      setStep((s) => Math.min(s + 1, steps.length - 1))
+    }
+  };
+  
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const nextDisabled = () => {
     switch (step) {
       case 0:
-        return !form.businessName.trim() || 
-               !form.industry.trim() ||
-               !form.description.trim();
+        return !form.businessName.trim() ||
+          !form.industry.trim() ||
+          !form.description.trim();
       case 1:
         return form.services.length === 0;
       case 2:
@@ -60,17 +70,37 @@ export default function AiTrainingPage() {
     }
   };
 
+  const handleTrain = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/ai/train", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("AI training started successfully!");
+      } else {
+        alert("Failed to start AI training: " + data.message);
+      }
+    } catch (error) {
+      console.log("TrainErr: ", error);
+      alert("An error occurred while starting AI training.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="max-w-3xl mx-auto py-10"
-      style={{ color: pax26.textPrimary }}>
+    <div className="max-w-3xl mx-auto py-10" style={{ color: pax26.textPrimary }}>
       {/* Progress */}
       <p className="text-sm mb-2 text-muted-foreground">
         Step {step + 1} of {steps.length}
       </p>
 
-      <h1 className="text-2xl font-bold mb-6">
-        {steps[step]}
-      </h1>
+      <h1 className="text-2xl font-bold mb-6">{steps[step]}</h1>
 
       <motion.div
         key={step}
@@ -86,19 +116,11 @@ export default function AiTrainingPage() {
 
       {/* Navigation */}
       <div className="flex justify-between mt-6">
-        {step > 0 && (
-          <Button
-            variant="outline"
-            onClick={back}
-          >
-            Back
-          </Button>
-        )}
-        <Button onClick={next} disabled={nextDisabled()}>
-          {step === steps.length - 1 ? "Train AI" : "Save & Continue"}
+        {step > 0 && <Button variant="outline" onClick={back}>Back</Button>}
+        <Button onClick={next} disabled={nextDisabled() || loading}>
+          {step === steps.length - 1 ? `${loading ? "Processing" : "Train AI"}` : "Save & Continue"}
         </Button>
       </div>
-
     </div>
   );
 }
@@ -120,7 +142,7 @@ function renderStep(step, form, setForm) {
           />
           <Input
             label="Business URL"
-            value={form.businessUrl} // <-- corrected
+            value={form.businessUrl}
             onChange={(e) => setForm({ ...form, businessUrl: e.target.value })}
           />
           <Textarea
@@ -128,7 +150,6 @@ function renderStep(step, form, setForm) {
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
-
         </>
       );
 
@@ -138,9 +159,7 @@ function renderStep(step, form, setForm) {
           example="e.g. Web Design, SEO, Consulting"
           label="Services You Offer"
           tags={form.services}
-          onChange={(services) =>
-            setForm({ ...form, services })
-          }
+          onChange={(services) => setForm({ ...form, services })}
         />
       );
 
@@ -148,9 +167,7 @@ function renderStep(step, form, setForm) {
       return (
         <FaqBuilder
           faqs={form.faqs}
-          onChange={(faqs) =>
-            setForm({ ...form, faqs })
-          }
+          onChange={(faqs) => setForm({ ...form, faqs })}
         />
       );
 
@@ -161,41 +178,67 @@ function renderStep(step, form, setForm) {
             label="Conversation Tone"
             value={form.tone}
             options={["friendly", "professional", "salesy"]}
-            onChange={(tone) =>
-              setForm({ ...form, tone })
-            }
+            onChange={(tone) => setForm({ ...form, tone })}
           />
           <Input
             label="Working Hours"
             placeholder="Mon–Fri 9am–6pm"
             value={form.workingHours}
-            onChange={(e) =>
-              setForm({ ...form, workingHours: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, workingHours: e.target.value })}
           />
         </>
       );
 
     case 4:
       return (
-        <>
-          <Input
-            label="WhatsApp Business Number"
-            value={form.whatsappBusiness.phoneNumber}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                whatsappBusiness: {
-                  ...form.whatsappBusiness,
-                  phoneNumber: e.target.value,
-                },
-              })
-            }
-          />
-        </>
+        <Input
+          label="WhatsApp Business Number"
+          value={form.whatsappBusiness.phoneNumber}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              whatsappBusiness: {
+                ...form.whatsappBusiness,
+                phoneNumber: e.target.value,
+              },
+            })
+          }
+        />
       );
 
-    case 5:
+    case 5: // REVIEW STEP
+      return (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Review Your Details</h3>
+          <Card>
+            <CardContent>
+              <p><strong>Business Name:</strong> {form.businessName}</p>
+              <p><strong>Industry:</strong> {form.industry}</p>
+              <p><strong>Business URL:</strong> {form.businessUrl}</p>
+              <p><strong>Description:</strong> {form.description}</p>
+              <p><strong>Services:</strong> {form.services.join(", ")}</p>
+              <p>
+                <strong>FAQs:</strong>{" "}
+                {form.faqs.length > 0
+                  ? form.faqs.map((f, i) => (
+                    <div key={i}>
+                      Q: {f.question} <br /> A: {f.answer}
+                    </div>
+                  ))
+                  : "None"}
+              </p>
+              <p><strong>Tone:</strong> {form.tone}</p>
+              <p><strong>Working Hours:</strong> {form.workingHours}</p>
+              <p><strong>WhatsApp Number:</strong> {form.whatsappBusiness.phoneNumber}</p>
+            </CardContent>
+          </Card>
+          <p className="text-sm text-muted-foreground">
+            Please review your details carefully before training your AI.
+          </p>
+        </div>
+      );
+
+    case 6: // FINAL STEP: TRAIN AI
       return (
         <div className="text-center space-y-4">
           <h3 className="text-lg font-semibold capitalize">
@@ -211,4 +254,3 @@ function renderStep(step, form, setForm) {
       return null;
   }
 }
-

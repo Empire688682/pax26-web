@@ -171,7 +171,7 @@ function IntegrationCard({
    const { pax26} = useGlobalContext();
   return (
     <Card className="rounded-2xl hover:shadow-md transition">
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="py-6 space-y-4">
         <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">
           {icon}
         </div>
