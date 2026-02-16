@@ -74,7 +74,7 @@ export default function AiAutomationHomePage() {
         <IntegrationCard
           icon={<MessageCircle className="text-green-500" />}
           title="WhatsApp"
-          description="Connect your agent to WhatsApp and reply to customers"
+          description="Connect WhatsApp to automate replies, handle customer chats, and respond instantly using AI."
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
           disabled={!enabledAi}
           onClick={() => router.push("/ai-automations/whatsapp")}
@@ -83,41 +83,31 @@ export default function AiAutomationHomePage() {
         {/* Business Profile */}
         <IntegrationCard
           icon={<Settings />}
-          title="AI Business Profile"
-          description="Define how your AI represents your business"
+          title="AI Business Training"
+          description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
           buttonText="Setup"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/profile")}
+          onClick={() => router.push("/ai-automations/training")}
         />
 
-        {/* AI Settings */}
+        {/* AI chabot */}
         <IntegrationCard
           icon={<Bot />}
-          title="AI Settings"
-          description="Tone, personality and fallback rules"
-          buttonText="Manage AI"
+          title="AI Bot"
+          description="Configure your AI chatbot’s tone, personality, and fallback rules for smart, human-like responses."
+          buttonText="Open PaxAI Chatbot"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/settings")}
+          onClick={() => router.push("/ai-automations/pax")}
         />
 
         {/* Automations */}
         <IntegrationCard
           icon={<Zap className="text-orange-500" />}
-          title="Automations"
-          description="Create and manage smart workflows"
+          title="Lead Follows-up Automation"
+          description="We automatically follow up with new leads, send reminders, and re-engage inactive prospects so you never miss a conversion opportunity."
           buttonText="View Automations"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/automations")}
-        />
-
-        {/* Analytics */}
-        <IntegrationCard
-          icon={<BarChart3 className="text-blue-500" />}
-          title="Analytics"
-          description="Messages, performance and efficiency stats"
-          buttonText="View Analytics"
-          disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/analytics")}
+          onClick={() => router.push("/ai-automations/lead")}
         />
       </div>
 

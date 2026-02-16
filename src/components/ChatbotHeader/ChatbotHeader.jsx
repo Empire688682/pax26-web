@@ -12,7 +12,7 @@ const ChatbotHeader = ({ onClearChat }) => {
 
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow">
+          <div className="hidden md:flex w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow">
             <Bot size={18} />
           </div>
 
@@ -35,7 +35,9 @@ const ChatbotHeader = ({ onClearChat }) => {
           text-gray-600 hover:bg-gray-100 transition"
         >
           <Trash2 size={14} />
-          Clear chat
+          <span className="hidden md:flex">
+            Clear chat
+          </span>
         </button>
       </div>
     </header>

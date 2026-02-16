@@ -71,7 +71,8 @@ export default function AiDashboardHeader({
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12"
+                style={{ color: pax26.textPrimary }}>
                 {/* Activate AI CTA */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="border-dashed hover:shadow-xl transition h-full">
@@ -92,36 +93,57 @@ export default function AiDashboardHeader({
 
                 {/* Total Automations */}
                 <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card className="h-full">
-                        <CardContent className="flex flex-col items-start gap-2 p-6">
-                            <Workflow className="h-8 w-8 text-primary mb-2" />
-                            <p className="text-sm text-muted-foreground">Total Automations</p>
+                    <Card className="h-full hover:shadow-lg transition">
+                        <CardContent className="flex flex-col items-start gap-3 p-6">
+                            <Workflow className="h-8 w-8 text-primary mb-1" />
+
+                            <p className="text-sm font-medium">Total Automations</p>
+
                             <p className="text-2xl font-bold">{totalAutomations}</p>
+
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                Number of automation workflows you’ve created across your account.
+                            </p>
                         </CardContent>
                     </Card>
                 </motion.div>
+
 
                 {/* Active */}
                 <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card className="h-full">
-                        <CardContent className="flex flex-col items-start gap-2 p-6">
-                            <Play className="h-8 w-8 text-primary mb-2" />
-                            <p className="text-sm text-muted-foreground">Active</p>
+                    <Card className="h-full hover:shadow-lg transition">
+                        <CardContent className="flex flex-col items-start gap-3 p-6">
+                            <Play className="h-8 w-8 text-primary mb-1" />
+
+                            <p className="text-sm font-medium">Active</p>
+
                             <p className="text-2xl font-bold">{active}</p>
+
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                Automations currently running and responding to users in real time.
+                            </p>
                         </CardContent>
                     </Card>
                 </motion.div>
 
+
                 {/* Executions */}
                 <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card className="h-full">
-                        <CardContent className="flex flex-col items-start gap-2 p-6">
-                            <Zap className="h-8 w-8 text-primary mb-2" />
-                            <p className="text-sm text-muted-foreground">Executions</p>
+                    <Card className="h-full hover:shadow-lg transition">
+                        <CardContent className="flex flex-col items-start gap-3 p-6">
+                            <Zap className="h-8 w-8 text-primary mb-1" />
+
+                            <p className="text-sm font-medium">Executions</p>
+
                             <p className="text-2xl font-bold">{executions}</p>
+
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                Total number of automation actions triggered by users or events.
+                            </p>
                         </CardContent>
                     </Card>
                 </motion.div>
+
             </div>
         </div>
     );

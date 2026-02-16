@@ -1,5 +1,5 @@
 "use client"
-import AiBusinessProfile from '@/components/AiBusinessProfile/AiBusinessProfile'
+import AiBusinessTraining from '@/components/AiBusinessTraining/AiBusinessTraining'
 import React from 'react';
 import { useGlobalContext } from '@/components/Context';
 
@@ -8,7 +8,7 @@ const page = () => {
   return (
     <div style={{ backgroundColor: pax26.secondaryBg }}>
       <div className='px-6 py-10'>
-        <AiBusinessProfile />
+        <AiBusinessTraining />
       </div>
     </div>
   )
