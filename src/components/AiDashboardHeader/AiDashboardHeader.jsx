@@ -9,13 +9,13 @@ import { useGlobalContext } from "../Context";
 export default function AiDashboardHeader({
     title,
     description,
-    buttonText,
     buttonPath,
-    buttonIcon,
+    loading,
     active,
     executions,
     totalAutomations,
-    handleAiEnabled
+    handleAiEnabled,
+    enabledAi
 }) {
     const { pax26 } = useGlobalContext();
 
@@ -63,9 +63,11 @@ export default function AiDashboardHeader({
                     className="flex-shrink-0"
                 >
                     <Button pageTo={buttonPath} onClick={handleAiEnabled}>
+
                         <div className="flex items-center gap-2 text-xs md:text-sm">
-                            {buttonIcon} {buttonText}
-                        </div>
+                            {
+                                loading ? "Processing..." : enabledAi ? "Deactivate AI" : "Activate AI"
+                            } </div>
                     </Button>
                 </motion.div>
             </div>
@@ -76,18 +78,32 @@ export default function AiDashboardHeader({
                 {/* Activate AI CTA */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
                     <Card className="border-dashed hover:shadow-xl transition h-full">
-                        <CardContent className="flex flex-col items-start justify-between gap-4 p-6">
-                            <Workflow className="h-10 w-10 text-primary mb-2" />
+                        <CardContent className="flex flex-col items-start gap-4 p-6 h-full">
+                            {/* Icon */}
+                            <div className="p-3 rounded-xl bg-primary/10">
+                                <Workflow className="h-8 w-8 text-primary" />
+                            </div>
+
+                            {/* Text */}
                             <div className="flex-1">
-                                <p className="text-lg font-semibold mb-1">
-                                    Activate AI Automation
+                                <p className="text-lg font-semibold leading-tight mb-1">
+                                    Your AI Automations
                                 </p>
-                                <p className="text-xs text-muted-foreground">
-                                    Unlock WhatsApp automation, AI chatbot & lead follow-ups
+                                <p className="text-sm text-muted-foreground">
+                                    View and manage all your active AI-powered workflows in one place.
                                 </p>
                             </div>
-                            <Button className="mt-3 w-full" onClick={handleAiEnabled}>Activate</Button>
+
+                            {/* Navigation CTA */}
+                            <Button
+                             disabled={!enabledAi}
+                             pageTo={"/automations/dashboard"}
+                                className="w-full mt-auto"
+                            >
+                                View My Automations
+                            </Button>
                         </CardContent>
+
                     </Card>
                 </motion.div>
 

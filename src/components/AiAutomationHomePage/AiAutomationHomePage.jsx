@@ -82,13 +82,13 @@ export default function AiAutomationHomePage() {
       <AiDashboardHeader 
       title={"Create automation"}
       description={"Create and manage smart workflows powered by AI"}
-      buttonText={"My automation"}
-      buttonPath={"/dashboard"}
+      enabledAi={enabledAi}
       buttonIcon={''}
       active={1}
       executions={200}
       totalAutomations={5}
       handleAiEnabled={handleAiEnabled}
+      loading={loading}
       />
 
       {/* Integrations Grid (Chatbase Style) */}
@@ -203,7 +203,7 @@ function IntegrationCard({
           <p
           style={{color:pax26.textPrimary}}
           className={`text-xs ${lastUpdated ? 'flex' : 'hidden'}`}>
-          Last update: {new Date(lastUpdated).toLocaleString() || "N/A"}
+          Last Trained: {new Date(lastUpdated).toLocaleString() || "N/A"}
           </p>
         </div>
 
