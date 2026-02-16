@@ -54,6 +54,7 @@ export function TagInput({ label, tags = [], onChange, placeholder }) {
           className="flex-1 min-w-[120px] border-none outline-none text-sm"
         />
       </div>
+      <span className="text-xs text-muted-foreground">Press Enter to add</span>
     </div>
   );
 }
