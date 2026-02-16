@@ -42,14 +42,19 @@ export default function AiTrainingPage() {
 
 
   const next = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (step === steps.length - 1) {
       handleTrain();
     } else {
       setStep((s) => Math.min(s + 1, steps.length - 1))
     }
+    
   };
   
-  const back = () => setStep((s) => Math.max(s - 1, 0));
+  const back = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setStep((s) => Math.max(s - 1, 0))
+  };
 
   const nextDisabled = () => {
     switch (step) {

@@ -1,9 +1,9 @@
-import BusinessProfileModel from "@/models/BusinessProfileModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });

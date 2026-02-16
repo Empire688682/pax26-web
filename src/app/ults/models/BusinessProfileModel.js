@@ -14,7 +14,7 @@ const BusinessProfileSchema = new mongoose.Schema(
             businessId: String,
         },
 
-        bussinessUrl:{type:String, default:''},
+        businessUrl:{type:String, default:''},
 
         aiTrained: {
             type: Boolean,
@@ -85,7 +85,6 @@ const BusinessProfileSchema = new mongoose.Schema(
     }
 );
 
-BusinessProfileSchema.index({ userId: 1 }, { unique: true });
-
-export default mongoose.models.BusinessProfileModel ||
-    mongoose.model("BusinessProfile", BusinessProfileSchema);
+const BusinessProfileModel = mongoose.models.BusinessProfile ||  mongoose.model("BusinessProfile", BusinessProfileSchema);
+export default BusinessProfileModel;
+   
