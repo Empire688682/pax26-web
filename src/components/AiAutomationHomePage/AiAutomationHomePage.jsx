@@ -18,6 +18,7 @@ export default function AiAutomationHomePage() {
   const { pax26, router, setUserData, userData } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [enabledAi, setEnabledAi] = useState(true);
+  const [businessProfile, setBusinessProfile] = useState(null);
 
   useEffect(() => {
     setEnabledAi(userData?.paxAI?.enabled || false);
@@ -50,7 +51,30 @@ export default function AiAutomationHomePage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const fetchBusinessProfile = async () => {
+    try {
+      const res = await fetch("/api/ai/get-business-profile", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBusinessProfile(data.profile);
+      } else {
+        console.error("Failed to fetch business profile:", data.message);
+        alert("Failed to fetch business profile: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching business profile:", error);
+      return null;
+    }
+  };
+
+  useEffect(()=>{
+    fetchBusinessProfile();
+  },[]);
 
   return (
     <div className="space-y-8">
@@ -70,7 +94,18 @@ export default function AiAutomationHomePage() {
       {/* Integrations Grid (Chatbase Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {/* WhatsApp */}
+        {/* Business Profile */}
+        <IntegrationCard
+          lastUpdated={businessProfile?.lastUpdated}
+          icon={<Settings />}
+          title="AI Business Training"
+          description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
+          buttonText="Setup"
+          disabled={!enabledAi}
+          onClick={() => router.push("/ai-automations/training")}
+        />
+
+         {/* WhatsApp */}
         <IntegrationCard
           icon={<MessageCircle className="text-green-500" />}
           title="WhatsApp"
@@ -78,16 +113,6 @@ export default function AiAutomationHomePage() {
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
           disabled={!enabledAi}
           onClick={() => router.push("/ai-automations/whatsapp")}
-        />
-
-        {/* Business Profile */}
-        <IntegrationCard
-          icon={<Settings />}
-          title="AI Business Training"
-          description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
-          buttonText="Setup"
-          disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/training")}
         />
 
         {/* AI chabot */}
@@ -167,13 +192,19 @@ function IntegrationCard({
   buttonText,
   disabled,
   onClick,
+  lastUpdated
 }) {
    const { pax26} = useGlobalContext();
   return (
     <Card className="rounded-2xl hover:shadow-md transition">
       <CardContent className="py-6 space-y-4">
-        <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">
-          {icon}
+        <div className="flex items-center justify-between space-x-3">
+          <p className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">{icon}</p>
+          <p
+          style={{color:pax26.textPrimary}}
+          className={`text-xs ${lastUpdated ? 'flex' : 'hidden'}`}>
+          Last update: {new Date(lastUpdated).toLocaleString() || "N/A"}
+          </p>
         </div>
 
         <div>

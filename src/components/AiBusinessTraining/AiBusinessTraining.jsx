@@ -87,6 +87,21 @@ export default function AiTrainingPage() {
       const data = await res.json();
       if (data.success) {
         alert("AI training started successfully!");
+        setForm({
+          businessName: "",
+          industry: "",
+          businessUrl: "",
+          description: "",
+          services: [],
+          faqs: [],
+          tone: "professional",
+          workingHours: "",
+          whatsappBusiness: {
+            phoneNumber: "",
+            businessId: "",
+          },
+        });
+        setStep(0);
       } else {
         alert("Failed to start AI training: " + data.message);
       }
@@ -121,7 +136,7 @@ export default function AiTrainingPage() {
 
       {/* Navigation */}
       <div className="flex justify-between mt-6">
-        {step > 0 && <Button variant="outline" onClick={back}>Back</Button>}
+        {step > 0 && <Button variant="outline" disabled={loading} onClick={back}>Back</Button>}
         <Button onClick={next} disabled={nextDisabled() || loading}>
           {step === steps.length - 1 ? `${loading ? "Processing" : "Train AI"}` : "Save & Continue"}
         </Button>
