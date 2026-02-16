@@ -1,6 +1,7 @@
 import axios from "axios";
 
 export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
+    console.log("PROPS: ",  phoneNumberId, to, text);
     try {
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
@@ -11,9 +12,6 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
                 body: text,
             },
         };
-
-        // console.log("TOKEN: ", process.env.NEXT_PUBLIC_WHATSAPP_ACCESS_TOKEN);
-        // console.log("payload: ", payload);
 
         const headers = {
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_WHATSAPP_ACCESS_TOKEN}`,

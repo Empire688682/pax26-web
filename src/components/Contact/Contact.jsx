@@ -48,7 +48,7 @@ const Contact = () => {
             </p>
             <p className="flex items-center gap-2"
             style={{color:pax26.textPrimary}}>
-              <Phone className="text-green-500" size={18} /> +234 9154 3581 2845
+              <Phone className="text-green-500" size={18} /> +234 9050 9107 58
             </p>
             <p className="flex items-center gap-2"
             style={{color:pax26.textPrimary}}>

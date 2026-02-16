@@ -6,7 +6,6 @@ const MessageSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
     index:true
   },
 
@@ -32,7 +31,7 @@ const MessageSchema = new mongoose.Schema({
 
   senderType: {
     type: String,
-    enum: ["user", "ai", "admin"],
+    enum: ["user", "ai", "visitor", "admin", "system",],
     default: "user"
   },
 
