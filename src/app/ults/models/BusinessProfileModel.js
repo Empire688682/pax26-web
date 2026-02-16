@@ -87,5 +87,5 @@ const BusinessProfileSchema = new mongoose.Schema(
 
 BusinessProfileSchema.index({ userId: 1 }, { unique: true });
 
-export default mongoose.models.BusinessProfile ||
+export default mongoose.models.BusinessProfileModel ||
     mongoose.model("BusinessProfile", BusinessProfileSchema);

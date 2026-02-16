@@ -1,4 +1,4 @@
-import BusinessProfile from "@/models/BusinessProfile";
+import BusinessProfileModel from "@/models/BusinessProfileModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
@@ -35,7 +35,7 @@ export async function PUT(req) {
     const data = await req.json();
 
     // Update or create BusinessProfile
-    const profile = await BusinessProfile.findOneAndUpdate(
+    const profile = await BusinessProfileModel.findOneAndUpdate(
       { userId },
       {
         ...data,
