@@ -13,34 +13,51 @@ import {
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
+const automationsData = [
+  {
+    id: "1",
+    type: "whatsapp_auto_reply",
+    name: "WhatsApp Auto Reply",
+    description: "Instant AI replies to incoming messages",
+    enabled: true,
+    icon: <MessageCircle className="text-green-500" />,
+    trigger: "Incoming WhatsApp message",
+    action: "AI generates and sends reply"
+  },
+  {
+    id: "2",
+    type: "follow_up",
+    name: "AI Follow-Up",
+    description: "Automatically follow up with customers",
+    icon: <Zap className="text-orange-500" />,
+    trigger: "No response after 24 hours",
+    action: "AI sends follow-up message"
+  },
+  {
+    id: "3",
+    type: "business_ai_chatbox",
+    name: "Business AI Chatbox",
+    description: "AI that chats like your business",
+    icon: <Bot className="text-black-500" />,
+    trigger: "User visits website",
+    action: "AI chatbox engages visitor base on your business knowledge"
+  },
+]
+
+
 export default function AiDashboard() {
   const { pax26, router, userData } = useGlobalContext();
 
-  const [automations, setAutomations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [automations, setAutomations] = useState(automationsData);
+  const [loading, setLoading] = useState(false);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
 
-  useEffect(() => {
-    const fetchAutomations = async () => {
-      try {
-        const res = await fetch("/api/automations/all", {
-          credentials: "include",
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          setAutomations(data.automations || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch automations:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAutomations();
-  }, []);
+  const toggleAutomation = (id) => {
+    setAutomations((prev) =>
+      prev.map((auto) => auto.id === id ? { ...auto, enabled: !auto.enabled } : auto)
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -53,7 +70,7 @@ export default function AiDashboard() {
           Welcome to your dashboard
         </p>
         <p className="text-xs md:text-sm text-muted-foreground">
-          Manage your smart workflows powered by AI
+          Manage your smart workflows powered by AI, use the right button below to get started.
         </p>
       </div>
 
@@ -62,7 +79,7 @@ export default function AiDashboard() {
         <Card className="rounded-2xl">
           <CardContent className="p-10 text-center">
             <p className="text-sm text-muted-foreground"
-             style={{ color: pax26.textPrimary }}>
+              style={{ color: pax26.textPrimary }}>
               Loading automations...
             </p>
           </CardContent>
@@ -74,21 +91,24 @@ export default function AiDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {automations.map((auto) => (
             <Card
-              key={auto.automationId}
+              key={auto.id}
               className="rounded-2xl hover:shadow-md transition"
             >
               <CardContent className="p-6 space-y-4">
                 {/* Icon + Status */}
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <Zap className="text-orange-500" />
+                    {auto.icon}
                   </div>
 
-                  {auto.enabled ? (
-                    <ToggleRight className="text-green-500" />
-                  ) : (
-                    <ToggleLeft className="text-gray-400" />
-                  )}
+                  <div onClick={()=>toggleAutomation}
+                    className="cursor-pointer">
+                    {auto.enabled ? (
+                      <ToggleRight className="text-green-500 w-23 h-10" />
+                    ) : (
+                      <ToggleLeft className="text-gray-400 w-23 h-10" />
+                    )}
+                  </div>
                 </div>
 
                 {/* Name */}
@@ -142,26 +162,6 @@ export default function AiDashboard() {
             </Card>
           ))}
         </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && automations.length === 0 && (
-        <Card className="rounded-2xl border-dashed max-w-3xl mx-auto">
-          <CardContent className="p-10 text-center space-y-4 ">
-            <Zap className="mx-auto text-gray-400" size={36} />
-            <h3 className="font-semibold">No automations yet</h3>
-            <p className="text-sm text-gray-500">
-              Create your first automation to start saving time.
-            </p>
-            <Button
-              className="rounded-xl flex gap-2 mx-auto"
-              onClick={() => router.push("/ai-automations/home#Automations")}
-            >
-              <Plus size={16} />
-              Create Automation
-            </Button>
-          </CardContent>
-        </Card>
       )}
     </div>
   );

@@ -99,6 +99,7 @@ const UserSchema = new mongoose.Schema(
     ====================== */
     paxAI: {
       enabled: { type: Boolean, default: false },
+      trained: { type: Boolean, default: false },
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],
