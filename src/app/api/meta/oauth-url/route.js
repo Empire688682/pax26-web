@@ -11,7 +11,7 @@ export async function POST(req) {
   try {
     const userId = await verifyToken(req);
   if (!userId) {
-    return NextResponse.json({ success: false }, { status: 401, headers:corsHeaders() });
+    return NextResponse.json({ success: false }, { status: 401, headers:corsHeaders() })
   }
 
   const state = jwt.sign(
