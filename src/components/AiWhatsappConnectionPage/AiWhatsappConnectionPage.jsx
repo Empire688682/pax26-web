@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React,{useState} from "react";
 import { CardContent, Card } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Phone, ExternalLink } from "lucide-react";
@@ -12,14 +12,28 @@ export default function AiWhatsappConnectionPage() {
     isWhatsappAiConnected,
     whatsappNumber,
   } = useGlobalContext();
+  const [metaOauthUrl, setMetaOauthUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Meta OAuth URL builder
-  const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID;
-  const REDIRECT_URI = process.env.NEXT_PUBLIC_META_REDIRECT_URI;
-
-  const META_OAUTH_URL = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${META_APP_ID}&redirect_uri=${encodeURIComponent(
-    REDIRECT_URI
-  )}&scope=whatsapp_business_management,whatsapp_business_messaging,business_management`;
+  // ✅ Meta OAuth URL and state generation moved to backend for security
+const getMetaOauthUrl = async () => {
+  setLoading(true)
+  try {    const res = await fetch("/api/meta/oauth-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (data.success) {
+      setLoading(false)
+      window.location.href = data.url;
+    }
+  } catch (err) {
+    console.error("Failed to get Meta OAuth URL:", err);
+  }finally{
+    setLoading(false)
+  }
+};
 
   return (
     <div
@@ -101,12 +115,12 @@ export default function AiWhatsappConnectionPage() {
             </div>
 
             {/* ✅ REAL META OAUTH */}
-            <a href={META_OAUTH_URL}>
+            <div onClick={getMetaOauthUrl}>
               <Button className="w-full rounded-xl mb-2 flex items-center justify-center gap-2">
                 Continue with Meta
                 <ExternalLink size={16} />
               </Button>
-            </a>
+            </div>
 
             <p className="text-xs text-gray-500">
               Pax26 uses Meta’s official WhatsApp Cloud API.

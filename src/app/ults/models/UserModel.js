@@ -6,11 +6,11 @@ const UserSchema = new mongoose.Schema(
        CORE USER INFO
     ====================== */
     name: { type: String },
-    email: { type: String, required: true, unique: true, index:true },
+    email: { type: String, required: true, unique: true, index: true },
     password: { type: String, default: null },
     isPasswordSet: { type: Boolean, default: true },
     pin: { type: String, default: null },
-    number: { type: String, default: "", unique: true, index:true },
+    number: { type: String, default: "", unique: true, index: true },
     profileImage: { type: String, default: "/profile-img.png" },
 
     provider: { type: String, default: "credentials" },
@@ -58,16 +58,41 @@ const UserSchema = new mongoose.Schema(
     referralHostId: { type: String, default: "" },
 
     /* =====================
-       WHATSAPP CONFIG
-    ====================== */
+   WHATSAPP CONFIG
+===================== */
     whatsappNumber: {
       type: String,
       default: "",
       unique: true,
-      index:true 
+      index: true
     },
-    whatsappConnected: { type: Boolean, default: false },
-    whatsappWebhookVerified: { type: Boolean, default: false },
+    whatsappConnected: {
+      type: Boolean,
+      default: false
+    },
+
+
+    /* =====================
+       WHATSAPP (META)
+    ===================== */
+    whatsapp: {
+      connected: { type: Boolean, default: false },
+
+      accessToken: { type: String, default: "" }, // encrypted ideally
+      tokenExpiresAt: { type: Date, default: null },
+
+      wabaId: { type: String, default: "" },
+      phoneNumberId: { type: String, default: "" },
+
+      displayPhone: { type: String, default: "" },
+
+      permissions: {
+        messaging: { type: Boolean, default: false },
+        management: { type: Boolean, default: false }
+      },
+
+      connectedAt: { type: Date, default: null },
+    },
 
     /* =====================
        PAX AI PLAN & USAGE

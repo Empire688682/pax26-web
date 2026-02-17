@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card } from "@/components/ui/Cards";
 import { Bot, Zap, ToggleLeft, ToggleRight } from "lucide-react";
+import { useGlobalContext } from "@/components/Context";
+import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 export default function AutomationViewPage() {
+  const {pax26} = useGlobalContext();
   const { id } = useParams();
   const [automation, setAutomation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,8 +34,12 @@ export default function AutomationViewPage() {
     fetchAutomation();
   }, [id]);
 
-  if (loading) return <p className="text-muted">Loading automation...</p>;
-  if (!automation) return <p className="text-red-500">Automation not found</p>;
+  if (loading) return <div
+   style={{backgroundColor:pax26.secondaryBg}}
+   className="text-muted px-6 flex items-center justify-center"><p><LoadingSpinner /></p></div> ;
+  if (!automation) return <div 
+   style={{backgroundColor:pax26.secondaryBg}}
+  className="text-muted min-h-[50vh] px-6 flex items-center justify-center"><p className="text-red-500">Automation not found</p></div> ;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

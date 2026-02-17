@@ -12,6 +12,11 @@ const AutomationItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    createdBy: {
+      type: String,
+      enum: ["system", "user"],
+      default: "user"
+    },
 
     type: {
       type: String,

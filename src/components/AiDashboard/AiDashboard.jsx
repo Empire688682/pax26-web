@@ -155,7 +155,7 @@ export default function AiDashboard() {
             </p>
             <Button
               className="rounded-xl flex gap-2 mx-auto"
-              onClick={() => router.push("/ai-automations/home")}
+              onClick={() => router.push("/ai-automations/home#Automations")}
             >
               <Plus size={16} />
               Create Automation
