@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "../ui/Cards";
 import { Button } from "@/components/ui/Button";
 import {
@@ -10,59 +10,73 @@ import {
   Bot,
   ToggleLeft,
   ToggleRight,
-  Minus,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
-import AiDashboardHeader from "../AiDashboardHeader/AiDashboardHeader";
 
 export default function AiDashboard() {
   const { pax26, router, userData } = useGlobalContext();
 
-  // Dummy automations for now (replace with API later)
-  const automations = [
-    {
-      id: 1,
-      name: "Auto WhatsApp Replies",
-      trigger: "Incoming WhatsApp message",
-      action: "AI replies instantly",
-      enabled: true,
-    },
-    {
-      id: 2,
-      name: "AI Customer Support",
-      trigger: "Customer question detected",
-      action: "Escalate or respond",
-      enabled: true,
-    },
-    {
-      id: 3,
-      name: "Lead Capture Automation",
-      trigger: "New conversation",
-      action: "Save lead details",
-      enabled: false,
-    },
-  ];
+  const [automations, setAutomations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-   const firstName = userData?.name?.split(" ")[0] || "User";
+  const firstName = userData?.name?.split(" ")[0] || "User";
+
+  useEffect(() => {
+    const fetchAutomations = async () => {
+      try {
+        const res = await fetch("/api/automations/all", {
+          credentials: "include",
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setAutomations(data.automations || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch automations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAutomations();
+  }, []);
 
   return (
-    <div className=" space-y-8">
-       <AiDashboardHeader 
-            title={firstName || "User"}
-            description={"Manage your smart workflows powered by AI"}
-            buttonText={"Create New Automation"}
-            buttonPath={"/home"}
-            buttonIcon={<Plus />}
-            active={1}
-            executions={50}
-            totalAutomations={1}
-            />
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col" style={{ color: pax26.textPrimary }}>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          {firstName}.
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Welcome to your dashboard
+        </p>
+        <p className="text-xs md:text-sm text-muted-foreground">
+          Manage your smart workflows powered by AI
+        </p>
+      </div>
 
-      {/* Automations Grid */}
-      {automations.length > 0 ? (
+      {/* Loading */}
+      {loading && (
+        <Card className="rounded-2xl">
+          <CardContent className="p-10 text-center">
+            <p className="text-sm text-muted-foreground"
+             style={{ color: pax26.textPrimary }}>
+              Loading automations...
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Automations */}
+      {!loading && automations.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {automations.map((auto) => (
-            <Card key={auto.id} className="rounded-2xl hover:shadow-md transition">
+            <Card
+              key={auto.automationId}
+              className="rounded-2xl hover:shadow-md transition"
+            >
               <CardContent className="p-6 space-y-4">
                 {/* Icon + Status */}
                 <div className="flex items-center justify-between">
@@ -78,21 +92,29 @@ export default function AiDashboard() {
                 </div>
 
                 {/* Name */}
-                <div>
-                  <h3 className="font-semibold" style={{ color: pax26.textPrimary }}>
-                    {auto.name}
-                  </h3>
-                </div>
+                <h3
+                  className="font-semibold"
+                  style={{ color: pax26.textPrimary }}
+                >
+                  {auto.name}
+                </h3>
 
                 {/* Flow */}
-                <div className="text-sm space-y-2" style={{ color: pax26.textSecondary }}>
+                <div
+                  className="text-sm space-y-2"
+                  style={{ color: pax26.textSecondary }}
+                >
                   <div className="flex items-center gap-2">
                     <MessageCircle size={14} />
-                    <span><strong>Trigger:</strong> {auto.trigger}</span>
+                    <span>
+                      <strong>Trigger:</strong> {auto.trigger}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Bot size={14} />
-                    <span><strong>Action:</strong> {auto.action}</span>
+                    <span>
+                      <strong>Action:</strong> {auto.action}
+                    </span>
                   </div>
                 </div>
 
@@ -101,31 +123,40 @@ export default function AiDashboard() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push(`/automations/${auto.id}`)}
+                    onClick={() =>
+                      router.push(`/automations/${auto.automationId}`)
+                    }
                   >
                     View
                   </Button>
+
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
+                    onClick={() => router.push("/training")}
                   >
-                    Edit
+                    Improve AI
                   </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-      ) : (
-        /* Empty State */
-        <Card className="rounded-2xl border-dashed">
-          <CardContent className="p-10 text-center space-y-4">
+      )}
+
+      {/* Empty State */}
+      {!loading && automations.length === 0 && (
+        <Card className="rounded-2xl border-dashed max-w-3xl mx-auto">
+          <CardContent className="p-10 text-center space-y-4 ">
             <Zap className="mx-auto text-gray-400" size={36} />
             <h3 className="font-semibold">No automations yet</h3>
             <p className="text-sm text-gray-500">
               Create your first automation to start saving time.
             </p>
-            <Button className="rounded-xl">
+            <Button
+              className="rounded-xl flex gap-2 mx-auto"
+              onClick={() => router.push("/ai-automations/home")}
+            >
               <Plus size={16} />
               Create Automation
             </Button>

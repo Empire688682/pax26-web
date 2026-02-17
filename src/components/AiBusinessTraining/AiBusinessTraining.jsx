@@ -78,7 +78,7 @@ export default function AiTrainingPage() {
   const handleTrain = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/ai/train", {
+      const res = await fetch("/api/automations/train", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

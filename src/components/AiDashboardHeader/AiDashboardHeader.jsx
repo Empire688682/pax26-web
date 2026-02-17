@@ -56,20 +56,24 @@ export default function AiDashboardHeader({
                 </div>
 
                 {/* Right (CTA Button) */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="flex-shrink-0"
-                >
-                    <Button pageTo={buttonPath} onClick={handleAiEnabled}>
+                {
+                    buttonPath && handleAiEnabled && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex-shrink-0"
+                        >
+                            <Button pageTo={buttonPath} onClick={handleAiEnabled}>
 
-                        <div className="flex items-center gap-2 text-xs md:text-sm">
-                            {
-                                loading ? "Processing..." : enabledAi ? "Deactivate AI" : "Activate AI"
-                            } </div>
-                    </Button>
-                </motion.div>
+                                <div className="flex items-center gap-2 text-xs md:text-sm">
+                                    {
+                                        loading ? "Processing..." : enabledAi ? "Deactivate AI" : "Activate AI"
+                                    } </div>
+                            </Button>
+                        </motion.div>
+                    )
+                }
             </div>
 
             {/* Stats Cards */}
@@ -96,8 +100,8 @@ export default function AiDashboardHeader({
 
                             {/* Navigation CTA */}
                             <Button
-                             disabled={!enabledAi}
-                             pageTo={"/automations/dashboard"}
+                                disabled={!enabledAi}
+                                pageTo={"/dashboard"}
                                 className="w-full mt-auto"
                             >
                                 View My Automations

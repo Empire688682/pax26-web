@@ -27,7 +27,7 @@ export default function AiAutomationHomePage() {
   async function handleAiEnabled() {
     try {
       setLoading(true);
-      const res = await fetch("/api/ai/handle-ai-enabled", {
+      const res = await fetch("/api/automations/handle-ai-enabled", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: userData?._id }),
@@ -55,7 +55,7 @@ export default function AiAutomationHomePage() {
 
   const fetchBusinessProfile = async () => {
     try {
-      const res = await fetch("/api/ai/get-business-profile", {
+      const res = await fetch("/api/automations/get-business-profile", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
