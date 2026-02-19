@@ -15,8 +15,16 @@ export async function PATCH(req, { params }) {
     const { automationId } = params;
 
     // 🔐 Get user from token
-    const user = await verifyToken(req);
-    if (!user) {
+    const userId = await verifyToken(req);
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: "Invalid userId" },
+        { status: 401, headers: corsHeaders() }
+      );
+    };
+
+    const user = await UserModel.findById(userId);
+    if (user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401, headers: corsHeaders() }
@@ -32,7 +40,7 @@ export async function PATCH(req, { params }) {
     }
 
     const userAutomation = await UserAutomationModel.findOne({
-      userId: user.id,
+      userId: user._id,
     });
 
     if (!userAutomation) {

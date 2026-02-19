@@ -58,6 +58,21 @@ export default function AiDashboard() {
     );
   };
 
+  const toggleAutomationAPI = async (automationId) => {
+    try {
+      const res = await fetch(`/api/automations/${automationId}/toggle`, {
+        method: "PATCH",
+      });
+      const data = await res.json();
+      if (!data.success) {
+        console.error("Failed to toggle automation:", data.message);
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {  
+          console.error("Error toggling automation:", error);
+    }
+  }
+
   // Skeleton loader for cards
   const SkeletonCard = () => (
     <Card className="rounded-2xl animate-pulse">
