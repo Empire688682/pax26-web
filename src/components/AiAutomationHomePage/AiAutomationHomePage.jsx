@@ -8,11 +8,10 @@ import {
   MessageCircle,
   Settings,
   Zap,
-  BarChart3,
-  Plus,
+  Workflow 
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
-import AiDashboardHeader from "../AiDashboardHeader/AiDashboardHeader";
+import { motion } from "framer-motion";
 
 export default function AiAutomationHomePage() {
   const { pax26, router, setUserData, userData } = useGlobalContext();
@@ -72,29 +71,106 @@ export default function AiAutomationHomePage() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchBusinessProfile();
-  },[]);
+  }, []);
+
+  // Motion variants for cards
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.1, duration: 0.4, ease: "easeOut" },
+    }),
+  };
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <AiDashboardHeader 
-      title={"Create automation"}
-      description={"Create and manage smart workflows powered by AI"}
-      enabledAi={enabledAi}
-      buttonIcon={''}
-      active={1}
-      executions={200}
-      totalAutomations={5}
-      handleAiEnabled={handleAiEnabled}
-      loading={loading}
-      />
 
-      <div id="Automations"/>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+        {/* Left (Title + Desc) */}
+        <div className="flex-1">
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl md:text-4xl font-bold mb-2"
+            style={{ color: pax26.textPrimary }}
+          >
+            Create automation
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-sm md:text-base text-muted-foreground"
+            style={{ color: pax26.textPrimary }}
+          >
+            Create and manage smart workflows powered by AI
+          </motion.p>
+        </div>
+
+        {/* Right (CTA Button) */}
+        {
+          handleAiEnabled && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex-shrink-0"
+            >
+              <Button pageTo={"/"} onClick={handleAiEnabled}>
+
+                <div className="flex items-center gap-2 text-xs md:text-sm">
+                  {
+                    loading ? "Processing..." : enabledAi ? "Deactivate AI" : "Activate AI"
+                  } </div>
+              </Button>
+            </motion.div>
+          )
+        }
+      </div>
+
+
 
       {/* Integrations Grid (Chatbase Style) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {/* Activate AI CTA */}
+        <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+          <Card className="border-dashed hover:shadow-xl transition h-full">
+            <CardContent className="flex flex-col items-start gap-4 p-6 h-full">
+              {/* Icon */}
+              <div className="p-3 rounded-xl bg-primary/10">
+                <Workflow className="h-8 w-8 text-primary" 
+                style={{ color: pax26.textPrimary }}/>
+              </div>
+
+              {/* Text */}
+              <div className="flex-1">
+                <p className="text-lg font-semibold leading-tight mb-1"
+                style={{ color: pax26.textPrimary }}>
+                  Your AI Automations
+                </p>
+                <p className="text-sm text-muted-foreground"
+                style={{ color: pax26.textPrimary }}>
+                  View and manage all your active AI-powered workflows in one place.
+                </p>
+              </div>
+
+              {/* Navigation CTA */}
+              <Button
+                disabled={!enabledAi}
+                pageTo={"/dashboard"}
+                className="w-full mt-auto"
+              >
+               Create Ai Workflows
+              </Button>
+            </CardContent>
+
+          </Card>
+        </motion.div>
 
         {/* Business Profile */}
         <IntegrationCard
@@ -107,7 +183,7 @@ export default function AiAutomationHomePage() {
           onClick={() => router.push("/ai-automations/training")}
         />
 
-         {/* WhatsApp */}
+        {/* WhatsApp */}
         <IntegrationCard
           icon={<MessageCircle className="text-green-500" />}
           title="WhatsApp"
@@ -134,7 +210,7 @@ export default function AiAutomationHomePage() {
           description="We automatically follow up with new leads, send reminders, and re-engage inactive prospects so you never miss a conversion opportunity."
           buttonText="View Automations"
           disabled={!enabledAi}
-          onClick={() => router.push("/ai-automations/lead")}
+          onClick={() => router.push("/ai-automations/dashboard")}
         />
       </div>
 
@@ -196,22 +272,22 @@ function IntegrationCard({
   onClick,
   lastUpdated
 }) {
-   const { pax26} = useGlobalContext();
+  const { pax26 } = useGlobalContext();
   return (
     <Card className="rounded-2xl hover:shadow-md transition">
       <CardContent className="py-6 space-y-4">
         <div className="flex items-center justify-between space-x-3">
           <p className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">{icon}</p>
           <p
-          style={{color:pax26.textPrimary}}
-          className={`text-xs ${lastUpdated ? 'flex' : 'hidden'}`}>
-          Last Trained: {new Date(lastUpdated).toLocaleString() || "N/A"}
+            style={{ color: pax26.textPrimary }}
+            className={`text-xs ${lastUpdated ? 'flex' : 'hidden'}`}>
+            Last Trained: {new Date(lastUpdated).toLocaleString() || "N/A"}
           </p>
         </div>
 
         <div>
           <h3 className="font-semibold"
-          style={{color:pax26.textPrimary}}>{title}</h3>
+            style={{ color: pax26.textPrimary }}>{title}</h3>
           <p className="text-sm text-gray-500">{description}</p>
         </div>
 

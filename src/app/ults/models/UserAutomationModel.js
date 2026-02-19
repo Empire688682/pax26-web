@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 
 const AutomationItemSchema = new mongoose.Schema(
   {
+    // 🔗 Reference to Admin Automation (stored as ID string)
+    automationId: {
+      type: String, // comes from Admin backend
+      required: true,
+    },
+
+    // Optional shortcut for faster filtering (not source of truth)
     type: {
       type: String,
       enum: [
@@ -12,36 +19,23 @@ const AutomationItemSchema = new mongoose.Schema(
       required: true,
     },
 
-    name: {
-      type: String,
-      required: true,
-    },
-
-    description: {
-      type: String,
-      default: "",
-    },
-
+    // 👤 User toggle
     enabled: {
       type: Boolean,
       default: false,
     },
 
-    // 🔒 System controlled
-    system: {
-      type: Boolean,
-      default: true,
-      immutable: true,
+    // 📊 Runtime tracking
+    lastRunAt: {
+      type: Date,
     },
 
-    // Runtime tracking
-    lastRunAt: Date,
     runCount: {
       type: Number,
       default: 0,
     },
 
-    // Optional debug logs (future UI)
+    // 🧾 Optional logs (keep lightweight)
     logs: [
       {
         status: {
@@ -56,9 +50,8 @@ const AutomationItemSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { _id: false } // prevent subdocument auto-id
 );
-
 
 const UserAutomationSchema = new mongoose.Schema(
   {
@@ -66,28 +59,39 @@ const UserAutomationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, // 🚨 ONE RECORD PER USER
+      unique: true,
       index: true,
     },
 
-    // PaxAI config (locked for now)
+    // 🤖 PaxAI Config (user-level AI settings)
     aiConfig: {
-      model: { type: String, default: "gpt-4o-mini" },
-      temperature: { type: Number, default: 0.7 },
-      locked: { type: Boolean, default: true },
+      model: {
+        type: String,
+        default: "gpt-4o-mini",
+      },
+      temperature: {
+        type: Number,
+        default: 0.7,
+      },
+      locked: {
+        type: Boolean,
+        default: true,
+      },
     },
 
+    // 🔄 User automation toggles
     automations: {
       type: [AutomationItemSchema],
       validate: {
         validator: function (autos) {
-          const types = autos.map(a => a.type);
-          return new Set(types).size === types.length;
+          const ids = autos.map(a => a.automationId);
+          return new Set(ids).size === ids.length;
         },
-        message: "Duplicate automation types are not allowed",
+        message: "Duplicate automationId entries are not allowed",
       },
     },
 
+    // 💳 Billing plan
     billing: {
       plan: {
         type: String,
@@ -99,7 +103,8 @@ const UserAutomationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const UserAutomationModel =
+  mongoose.models.UserAutomation ||
+  mongoose.model("UserAutomation", UserAutomationSchema);
 
-const UserAutomationModel = mongoose.models.Automation ||
-  mongoose.model("Automation", UserAutomationSchema);
 export default UserAutomationModel;

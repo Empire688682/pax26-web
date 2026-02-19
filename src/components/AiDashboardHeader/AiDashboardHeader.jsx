@@ -79,37 +79,7 @@ export default function AiDashboardHeader({
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12"
                 style={{ color: pax26.textPrimary }}>
-                {/* Activate AI CTA */}
-                <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-                    <Card className="border-dashed hover:shadow-xl transition h-full">
-                        <CardContent className="flex flex-col items-start gap-4 p-6 h-full">
-                            {/* Icon */}
-                            <div className="p-3 rounded-xl bg-primary/10">
-                                <Workflow className="h-8 w-8 text-primary" />
-                            </div>
-
-                            {/* Text */}
-                            <div className="flex-1">
-                                <p className="text-lg font-semibold leading-tight mb-1">
-                                    Your AI Automations
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    View and manage all your active AI-powered workflows in one place.
-                                </p>
-                            </div>
-
-                            {/* Navigation CTA */}
-                            <Button
-                                disabled={!enabledAi}
-                                pageTo={"/dashboard"}
-                                className="w-full mt-auto"
-                            >
-                                View My Automations
-                            </Button>
-                        </CardContent>
-
-                    </Card>
-                </motion.div>
+                
 
                 {/* Total Automations */}
                 <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
