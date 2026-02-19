@@ -58,6 +58,22 @@ export default function AiDashboard() {
     );
   };
 
+  // Skeleton loader for cards
+  const SkeletonCard = () => (
+    <Card className="rounded-2xl animate-pulse">
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="w-12 h-12 rounded-xl bg-gray-200" />
+          <div className="w-10 h-6 rounded-full bg-gray-200" />
+        </div>
+        <div className="h-5 bg-gray-200 rounded w-3/4" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-5/6" />
+        <div className="h-8 bg-gray-200 rounded w-full" />
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -71,21 +87,11 @@ export default function AiDashboard() {
         </p>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <Card className="rounded-2xl">
-          <CardContent className="p-10 text-center">
-            <p className="text-sm text-muted-foreground" style={{ color: pax26.textPrimary }}>
-              Loading automations...
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Automations */}
-      {!loading && automations.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {automations.map(auto => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading 
+      ? Array.from({length:4}).map((_,i) => <SkeletonCard key={i} />)
+      : (automations.map(auto => (
             <Card key={auto.id} className="rounded-2xl hover:shadow-md transition">
               <CardContent className="p-6 space-y-4">
                 {/* Icon + Status */}
@@ -154,9 +160,9 @@ export default function AiDashboard() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          ))
       )}
+      </div>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-      <div onClick={() => setIsOpen(false)} className='w-[50%] h-screen'>
+      <div onClick={() => {setIsOpen(false); window.alert("Close menu");}} className='w-[50%] h-screen'>
       </div>
     </nav>)
   }
