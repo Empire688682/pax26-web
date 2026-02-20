@@ -23,7 +23,7 @@ export default function AiDashboard() {
     const fetchAutomations = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/automations/system/all");
+        const res = await fetch("/api/automations/all");
         const data = await res.json();
         if (data.success) {
           // Filter only active automations and map with icon
