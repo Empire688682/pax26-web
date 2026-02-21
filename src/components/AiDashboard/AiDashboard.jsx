@@ -16,6 +16,7 @@ export default function AiDashboard() {
   const { pax26, router, userData, isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained } = useGlobalContext();
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
 
@@ -54,28 +55,33 @@ export default function AiDashboard() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchBusinessProfile = async () => {
-    try {
-      const res = await fetch("/api/automations/get-business-profile", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      const profile = data?.profile || {};
-      if (data.success) {
-        console.log("profile.aiTrained: ", profile.aiTrained);
-        setAIsPaxAiBusinessTrained(profile.aiTrained || false);
+      try {
+        const res = await fetch("/api/automations/get-business-profile", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        const profile = data?.profile || {};
+        if (data.success) {
+          setAIsPaxAiBusinessTrained(profile.aiTrained || false);
+        }
+      } catch (error) {
+        console.error("Error fetching business profile:", error);
       }
-    } catch (error) {
-      console.error("Error fetching business profile:", error);
-    }
-  };
-  fetchBusinessProfile();
-  },[])
+    };
+    fetchBusinessProfile();
+  }, [])
 
   const toggleAutomationAPI = async (automationId) => {
+    if (!isPaxAiBusinessTrained) {
+      alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
+      router.push("/ai-automations/training");
+      return;
+    }
     try {
+      setToggling(true);
       const res = await fetch(`/api/automations/${automationId}/toggle`, {
         method: "PATCH",
       });
@@ -89,6 +95,8 @@ export default function AiDashboard() {
       }
     } catch (error) {
       console.error("Error toggling automation:", error);
+    } finally {
+      setToggling(false);
     }
   }
 
@@ -134,13 +142,19 @@ export default function AiDashboard() {
                     {auto.icon}
                   </div>
 
-                  <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer">
-                    {auto.enabled ? (
-                      <ToggleRight className="text-green-500 w-15 h-10" />
+                  {
+                    toggling ? (
+                      <div className="w-8 h-8 rounded-full border-4 border-blue-500 border-t-green-400 animate-spin"></div>
                     ) : (
-                      <ToggleLeft className="text-gray-400 w-15 h-10" />
-                    )}
-                  </div>
+                      <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer">
+                        {auto.enabled ? (
+                          <ToggleRight className="text-green-500 w-15 h-10" />
+                        ) : (
+                          <ToggleLeft className="text-gray-400 w-15 h-10" />
+                        )}
+                      </div>
+                    )
+                  }
                 </div>
 
                 {/* Name */}
@@ -175,10 +189,10 @@ export default function AiDashboard() {
                     </span>
                     <p>
                       {
-                        isPaxAiBusinessTrained? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
-                        : <span 
-                        className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
-                        onClick={()=>router.push("/ai-automations/training#Pax")}>Train now</span>
+                        isPaxAiBusinessTrained ? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
+                          : <span
+                            className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
+                            onClick={() => router.push("/ai-automations/training#Pax")}>Train now</span>
                       }
                     </p>
                   </div>
