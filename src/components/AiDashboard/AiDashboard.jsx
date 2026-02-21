@@ -17,45 +17,45 @@ export default function AiDashboard() {
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const isPaxAITrained = userData?.paxAI?.trained || false;
+
+  console.log("automations: ", automations);
+
   const firstName = userData?.name?.split(" ")[0] || "User";
 
   useEffect(() => {
-    const fetchAutomations = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/automations/all");
-        const data = await res.json();
-        if (data.success) {
-          // Filter only active automations and map with icon
-          const usefulAutomations = data.automations
-            .filter(a => a.active) // only active automations
-            .map(auto => ({
-              id: auto._id,
-              automationId: auto._id,
-              type: auto.type,
-              name: auto.name,
-              description: auto.description,
-              enabled: auto.enabled ?? auto.defaultEnabled,
-              trigger: auto.trigger,
-              action: auto.action,
-              meta: auto.meta || {},
-              icon: automationIcons.find(a => a.type === auto.type)?.icon || <Bot className="text-gray-500" />,
-            }));
-          setAutomations(usefulAutomations);
-        }
-      } catch (error) {
-        console.error("Error fetching automations:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAutomations();
   }, []);
 
-  const toggleAutomation = (id) => {
-    setAutomations(prev =>
-      prev.map(auto => auto.id === id ? { ...auto, enabled: !auto.enabled } : auto)
-    );
+  const fetchAutomations = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/automations/all");
+      const data = await res.json();
+      if (data.success) {
+        console.log("automationsData: ", data.automations);
+        // Filter only active automations and map with icon
+        const usefulAutomations = data.automations
+          .filter(a => a.active) // only active automations
+          .map(auto => ({
+            id: auto.automationId,
+            automationId: auto.automationId,
+            type: auto.type,
+            name: auto.name,
+            description: auto.description,
+            enabled: auto.enabled ?? auto.defaultEnabled,
+            trigger: auto.trigger,
+            action: auto.action,
+            meta: auto.meta || {},
+            icon: automationIcons.find(a => a.type === auto.type)?.icon || <Bot className="text-gray-500" />,
+          }));
+        setAutomations(usefulAutomations);
+      }
+    } catch (error) {
+      console.error("Error fetching automations:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleAutomationAPI = async (automationId) => {
@@ -64,12 +64,15 @@ export default function AiDashboard() {
         method: "PATCH",
       });
       const data = await res.json();
-      if (!data.success) {
+      if (data.success) {
+        await fetchAutomations(); // Refresh automations after toggling
+      }
+      else {
         console.error("Failed to toggle automation:", data.message);
         alert(`Error: ${data.message}`);
       }
-    } catch (error) {  
-          console.error("Error toggling automation:", error);
+    } catch (error) {
+      console.error("Error toggling automation:", error);
     }
   }
 
@@ -104,10 +107,10 @@ export default function AiDashboard() {
 
       {/* Automations */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {loading 
-      ? Array.from({length:4}).map((_,i) => <SkeletonCard key={i} />)
-      : (automations.map(auto => (
-            <Card key={auto.id} className="rounded-2xl hover:shadow-md transition">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          : (automations.map(auto => (
+            <Card key={auto.automationId} className="rounded-2xl hover:shadow-md transition">
               <CardContent className="p-6 space-y-4">
                 {/* Icon + Status */}
                 <div className="flex items-center justify-between">
@@ -115,11 +118,11 @@ export default function AiDashboard() {
                     {auto.icon}
                   </div>
 
-                  <div onClick={() => toggleAutomation(auto.id)} className="cursor-pointer">
+                  <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer">
                     {auto.enabled ? (
-                      <ToggleRight className="text-green-500 w-10 h-6" />
+                      <ToggleRight className="text-green-500 w-15 h-10" />
                     ) : (
-                      <ToggleLeft className="text-gray-400 w-10 h-6" />
+                      <ToggleLeft className="text-gray-400 w-15 h-10" />
                     )}
                   </div>
                 </div>
@@ -150,9 +153,19 @@ export default function AiDashboard() {
 
                 {/* Meta badge if requires training */}
                 {auto.meta.requiresTraining && (
-                  <span className="inline-block bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">
-                    Needs Training
-                  </span>
+                  <div className="flex flex-wrap gap-2 justify-between">
+                    <span className="inline-block bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">
+                      Needs Training
+                    </span>
+                    <p>
+                      {
+                        isPaxAITrained? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
+                        : <span 
+                        className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
+                        onClick={()=>router.push("ai-automation/training#Pax")}>Train now</span>
+                      }
+                    </p>
+                  </div>
                 )}
 
                 {/* Actions */}
@@ -168,7 +181,7 @@ export default function AiDashboard() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push("/training")}
+                    onClick={() => router.push("/ai-automation/training")}
                   >
                     Improve AI
                   </Button>
@@ -176,7 +189,7 @@ export default function AiDashboard() {
               </CardContent>
             </Card>
           ))
-      )}
+          )}
       </div>
     </div>
   );

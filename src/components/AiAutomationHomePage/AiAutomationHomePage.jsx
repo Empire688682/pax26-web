@@ -172,9 +172,10 @@ export default function AiAutomationHomePage() {
           </Card>
         </motion.div>
 
-        {/* Business Profile */}
+        {/* Ai Training */}
         <IntegrationCard
           lastUpdated={businessProfile?.lastUpdated}
+          id="Pax-training"
           icon={<Settings />}
           title="AI Business Training"
           description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
@@ -276,7 +277,8 @@ function IntegrationCard({
   return (
     <Card className="rounded-2xl hover:shadow-md transition">
       <CardContent className="py-6 space-y-4">
-        <div className="flex items-center justify-between space-x-3">
+        <div className="flex items-center justify-between space-x-3"
+        id="Pax">
           <p className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">{icon}</p>
           <p
             style={{ color: pax26.textPrimary }}

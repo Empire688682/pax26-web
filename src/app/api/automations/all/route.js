@@ -13,9 +13,7 @@ export async function OPTIONS() {
 
 
 export async function GET(req) {
-  console.log("Get: ", "get all automations")
   await connectDb();
-console.log("Get: ", "after DB")
   try {
     const userId = await verifyToken(req);
 
@@ -45,11 +43,8 @@ console.log("Get: ", "after DB")
       });
     }
 
-    console.log("userAutomation: ", userAutomation.automations)
-
     // ✅ Get admin automations
     const adminAutomations = await AdminAutomationModel.find({ active: true });
-
     // --- SYNC LOGIC ---
 
     const userAutoIds = userAutomation.automations.map(a => a.automationId);
@@ -92,7 +87,11 @@ console.log("Get: ", "after DB")
         name: admin.name,
         description: admin.description,
         enabled: userState?.enabled || false,
-        runCount: userState?.runCount || 0
+        runCount: userState?.runCount || 0,
+        active: admin.active,
+        action: admin.action,
+        trigger: admin.trigger,
+        meta: admin.meta || {},
       };
     });
 

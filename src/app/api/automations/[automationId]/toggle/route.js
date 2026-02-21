@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/connectDB";
-import UserAutomationModel from "@/models/UserAutomationModel";
-import { verifyToken } from "@/lib/verifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { connectDb } from "@/app/ults/db/ConnectDb";
+import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
+import { verifyToken } from "@/app/api/helper/VerifyToken";
+import UserModel from "@/app/ults/models/UserModel";
 
 export async function OPTIONS() {
     return new NextResponse(null, {status: 200, headers: corsHeaders()});
@@ -10,9 +11,9 @@ export async function OPTIONS() {
 
 export async function PATCH(req, { params }) {
   try {
-    await connectDB();
+    await connectDb();
 
-    const { automationId } = params;
+    const { automationId } = await params;
 
     // 🔐 Get user from token
     const userId = await verifyToken(req);
@@ -24,7 +25,7 @@ export async function PATCH(req, { params }) {
     };
 
     const user = await UserModel.findById(userId);
-    if (user) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401, headers: corsHeaders() }
@@ -74,7 +75,7 @@ export async function PATCH(req, { params }) {
       data: automation,
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500, headers: corsHeaders() }
