@@ -162,7 +162,7 @@ export default function AiDashboard() {
                         isPaxAITrained? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
                         : <span 
                         className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
-                        onClick={()=>router.push("ai-automation/training#Pax")}>Train now</span>
+                        onClick={()=>router.push("/ai-automations/training#Pax")}>Train now</span>
                       }
                     </p>
                   </div>
@@ -181,7 +181,7 @@ export default function AiDashboard() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push("/ai-automation/training")}
+                    onClick={() => router.push("/ai-automations/training")}
                   >
                     Improve AI
                   </Button>
