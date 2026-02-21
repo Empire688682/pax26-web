@@ -13,13 +13,9 @@ const automationIcons = [
 ];
 
 export default function AiDashboard() {
-  const { pax26, router, userData } = useGlobalContext();
+  const { pax26, router, userData, isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained } = useGlobalContext();
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const isPaxAITrained = userData?.paxAI?.trained || false;
-
-  console.log("automations: ", automations);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
 
@@ -57,6 +53,26 @@ export default function AiDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    const fetchBusinessProfile = async () => {
+    try {
+      const res = await fetch("/api/automations/get-business-profile", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      const profile = data?.profile || {};
+      if (data.success) {
+        console.log("profile.aiTrained: ", profile.aiTrained);
+        setAIsPaxAiBusinessTrained(profile.aiTrained || false);
+      }
+    } catch (error) {
+      console.error("Error fetching business profile:", error);
+    }
+  };
+  fetchBusinessProfile();
+  },[])
 
   const toggleAutomationAPI = async (automationId) => {
     try {
@@ -159,7 +175,7 @@ export default function AiDashboard() {
                     </span>
                     <p>
                       {
-                        isPaxAITrained? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
+                        isPaxAiBusinessTrained? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
                         : <span 
                         className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
                         onClick={()=>router.push("/ai-automations/training#Pax")}>Train now</span>

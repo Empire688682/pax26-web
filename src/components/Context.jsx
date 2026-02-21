@@ -65,7 +65,7 @@ export const AppProvider = ({ children }) => {
   const [paymentId, setPaymentId] = useState('');
 
   //User whatsapp Ai state
- const [isWhatsappAiConnected, setAisWhatsappAiConnected] = useState(false)
+ const [isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained] = useState(false)
 
   // Function to open auth modal or redirect if user already logged in
   const openModal = (type) => {
@@ -279,6 +279,8 @@ export const AppProvider = ({ children }) => {
         refHostCode,
         profitConfig,
         setProfitConfig,
+        isPaxAiBusinessTrained,
+        setAIsPaxAiBusinessTrained
       }}
     >
       {children}

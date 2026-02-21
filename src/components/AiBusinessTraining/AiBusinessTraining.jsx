@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/Cards";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -22,7 +22,11 @@ const steps = [
 ];
 
 export default function AiTrainingPage() {
-  const { pax26 } = useGlobalContext();
+  const {
+    pax26,
+    router,
+    setAIsPaxAiBusinessTrained
+  } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -40,6 +44,41 @@ export default function AiTrainingPage() {
     },
   });
 
+  const fetchBusinessProfile = async () => {
+    try {
+      const res = await fetch("/api/automations/get-business-profile", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      const profile = data?.profile || {};
+      if (data.success) {
+        setAIsPaxAiBusinessTrained(profile.aiTrained || false);
+        setForm((f) => ({
+          ...f,
+          businessName: profile.businessName || "",
+          industry: profile.industry || "",
+          businessUrl: profile.businessUrl || "",
+          description: profile.description || "",
+          services: profile.services || [],
+          faqs: profile.faqs || [],
+          tone: profile.tone || "professional",
+          workingHours: profile.workingHours || "",
+          whatsappBusiness: {
+            phoneNumber: profile.whatsappBusiness?.phoneNumber || "",
+            businessId: profile.whatsappBusiness?.businessId || "",
+          },
+        }));
+
+      }
+    } catch (error) {
+      console.error("Error fetching business profile:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBusinessProfile();
+  }, [])
 
   const next = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -48,9 +87,9 @@ export default function AiTrainingPage() {
     } else {
       setStep((s) => Math.min(s + 1, steps.length - 1))
     }
-    
+
   };
-  
+
   const back = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setStep((s) => Math.max(s - 1, 0))
@@ -86,24 +125,10 @@ export default function AiTrainingPage() {
 
       const data = await res.json();
       if (data.success) {
+        await fetchBusinessProfile(); // Refresh profile data after training
         alert("AI training started successfully!");
-        setForm({
-          businessName: "",
-          industry: "",
-          businessUrl: "",
-          description: "",
-          services: [],
-          faqs: [],
-          tone: "professional",
-          workingHours: "",
-          whatsappBusiness: {
-            phoneNumber: "",
-            businessId: "",
-          },
-        });
         setStep(0);
-      } else {
-        alert("Failed to start AI training: " + data.message);
+        router.push("/ai-automations/home");
       }
     } catch (error) {
       console.log("TrainErr: ", error);
@@ -241,9 +266,9 @@ function renderStep(step, form, setForm) {
                 <strong>FAQs:</strong>{" "}
                 {form.faqs.length > 0
                   ? form.faqs.map((f, i) => (
-                    <div key={i}>
+                    <span key={i}>
                       Q: {f.question} <br /> A: {f.answer}
-                    </div>
+                    </span>
                   ))
                   : "None"}
               </p>
