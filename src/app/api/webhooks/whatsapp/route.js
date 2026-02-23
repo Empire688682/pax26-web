@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { getAIResponse } from "../../helper/PaxAI";
 import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
+import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
 const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
 
@@ -61,6 +62,8 @@ export async function POST(req) {
         text: replyText,
       });
 
+      const responseTime = Date.now() - start;
+
       await AIMessageModel.create({
         messageId: `user_${messageId}`,
         userId: paxUser._id,
@@ -71,6 +74,17 @@ export async function POST(req) {
         direction: "outbound",
         senderType: "ai",
         status: response ? "sent" : "failed",
+      });
+
+      // 🔥 Save automation execution log
+      await AutomationExecutionModel.create({
+        userId: paxUser._id,
+        automationId: "69969159028b1378fbf27fb6",
+        channel: "whatsapp",
+        input: userText,
+        output: replyText,
+        status: response ? "success" : "failed",
+        responseTime,
       });
 
       return NextResponse.json({ status: "ok_user" });

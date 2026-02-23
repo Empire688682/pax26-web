@@ -203,7 +203,7 @@ export default function AiDashboard() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push(`/automations/${auto.automationId}`)}
+                    onClick={() => router.push(`/ai-automations/${auto.automationId}`)}
                   >
                     View
                   </Button>
