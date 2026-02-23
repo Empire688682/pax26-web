@@ -10,37 +10,30 @@ import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
-const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
+const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 2
 
 export async function POST(req) {
+  const start = Date.now(); // 🟢 define start
   try {
     await connectDb();
     const entry = await req.json();
+    console.log("Webhook entry:", JSON.stringify(entry, null, 2));
 
     const value = entry?.entry?.[0]?.changes?.[0]?.value;
-    if (!value?.messages) {
-      return NextResponse.json({ status: "ignored" });
-    }
-
-    console.log("Webhook value: ", value);
+    if (!value?.messages) return NextResponse.json({ status: "ignored" });
 
     const phoneNumberId = value.metadata.phone_number_id;
     const from = value.messages[0].from;
     const userText = value.messages[0].text?.body;
     const userName = value.contacts?.[0]?.profile?.name || "";
 
-    if (!userText) {
-      return NextResponse.json({ status: "no_text" });
-    }
+    if (!userText) return NextResponse.json({ status: "no_text" });
 
-    // 🔹 Check if registered user
     const paxUser = await UserModel.findOne({ whatsappNumber: from });
-
     const messageId = `msg_${nanoid()}`;
 
-    // 🔹 Save inbound message
     await AIMessageModel.create({
-      messageId:`system_${messageId}`,
+      messageId: `system_${messageId}`,
       platform: "whatsapp",
       from,
       to: phoneNumberId,
@@ -50,19 +43,15 @@ export async function POST(req) {
       status: "received",
     });
 
-    // =========================
-    // ✅ REGISTERED USER FLOW
-    // =========================
     if (paxUser) {
-      const replyText = await getAIResponse(userText);
-
+      const replyText = await getAIResponse(userText); // could be async-heavy
       const response = await sendWhatsAppReply({
         phoneNumberId,
         to: from,
         text: replyText,
       });
 
-      const responseTime = Date.now() - start;
+      const responseTime = Date.now() - start; // 🟢 now works
 
       await AIMessageModel.create({
         messageId: `user_${messageId}`,
@@ -76,7 +65,6 @@ export async function POST(req) {
         status: response ? "sent" : "failed",
       });
 
-      // 🔥 Save automation execution log
       await AutomationExecutionModel.create({
         userId: paxUser._id,
         automationId: "69969159028b1378fbf27fb6",
@@ -89,6 +77,7 @@ export async function POST(req) {
 
       return NextResponse.json({ status: "ok_user" });
     }
+
 
     // =========================
     // 🚶 VISITOR FLOW
