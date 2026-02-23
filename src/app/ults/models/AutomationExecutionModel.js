@@ -22,5 +22,5 @@ const AutomationExecutionSchema = new mongoose.Schema({
   }
 });
 
-const AutomationExecutionModel = mongoose.models.AutomationExecutionModel || mongoose.model("AutomationExecution", AutomationExecutionSchema);
+const AutomationExecutionModel = mongoose.models.AutomationExecution || mongoose.model("AutomationExecution", AutomationExecutionSchema);
 export default AutomationExecutionModel;

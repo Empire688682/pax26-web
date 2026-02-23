@@ -2,13 +2,11 @@ import mongoose from "mongoose";
 
 const AutomationItemSchema = new mongoose.Schema(
   {
-    // 🔗 Reference to Admin Automation (stored as ID string)
     automationId: {
-      type: String, // comes from Admin backend
+      type: String,
       required: true,
     },
 
-    // Optional shortcut for faster filtering (not source of truth)
     type: {
       type: String,
       enum: [
@@ -19,38 +17,29 @@ const AutomationItemSchema = new mongoose.Schema(
       required: true,
     },
 
-    // 👤 User toggle
     enabled: {
       type: Boolean,
       default: false,
     },
 
-    // 📊 Runtime tracking
-    lastRunAt: {
-      type: Date,
-    },
+    lastRunAt: Date,
 
     runCount: {
       type: Number,
       default: 0,
     },
 
-    // 🧾 Optional logs (keep lightweight)
-    logs: [
-      {
-        status: {
-          type: String,
-          enum: ["success", "failed"],
-        },
-        message: String,
-        executedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    successCount: {
+      type: Number,
+      default: 0,
+    },
+
+    failureCount: {
+      type: Number,
+      default: 0,
+    },
   },
-  { _id: false } // prevent subdocument auto-id
+  { _id: false }
 );
 
 const UserAutomationSchema = new mongoose.Schema(
@@ -63,7 +52,6 @@ const UserAutomationSchema = new mongoose.Schema(
       index: true,
     },
 
-    // 🤖 PaxAI Config (user-level AI settings)
     aiConfig: {
       model: {
         type: String,
@@ -79,7 +67,6 @@ const UserAutomationSchema = new mongoose.Schema(
       },
     },
 
-    // 🔄 User automation toggles
     automations: {
       type: [AutomationItemSchema],
       validate: {
@@ -91,7 +78,6 @@ const UserAutomationSchema = new mongoose.Schema(
       },
     },
 
-    // 💳 Billing plan
     billing: {
       plan: {
         type: String,
