@@ -10,7 +10,7 @@ import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
-const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 2
+const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24
 
 export async function POST(req) {
   const start = Date.now(); // 🟢 define start
@@ -24,8 +24,12 @@ export async function POST(req) {
 
     const phoneNumberId = value.metadata.phone_number_id;
     const from = value.messages[0].from;
-    const userText = value.messages[0].text?.body;
     const userName = value.contacts?.[0]?.profile?.name || "";
+    const message = value.messages?.[0];
+    if (!message || !message.text?.body) {
+      return NextResponse.json({ status: "unsupported_message" });
+    }
+    const userText = message.text.body;
 
     if (!userText) return NextResponse.json({ status: "no_text" });
 

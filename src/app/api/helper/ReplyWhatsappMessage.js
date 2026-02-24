@@ -1,7 +1,6 @@
 import axios from "axios";
 
 export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
-    console.log("PROPS: ",  phoneNumberId, to, text);
     try {
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
@@ -14,14 +13,15 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         };
 
         const headers = {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_WHATSAPP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
             "Content-Type": "application/json",
         };
 
         const response = await axios.post(url, payload, { headers });
-        // console.log("Res: ", response);
+        console.log("WhatsApp sent:", response.data);
         return response.data;
     } catch (error) {
-        console.log("SendWhatsappErr: ", error)
+        console.log("SendWhatsappErr:", error.response?.data || error.message);
+        return null;
     }
 };
