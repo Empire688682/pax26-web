@@ -18,7 +18,6 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         };
 
         const response = await axios.post(url, payload, { headers });
-        console.log("WhatsApp sent:", response.data);
         return response.data;
     } catch (error) {
         console.log("SendWhatsappErr:", error.response?.data || error.message);

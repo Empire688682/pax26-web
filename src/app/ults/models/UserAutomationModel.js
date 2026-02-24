@@ -1,45 +1,46 @@
 import mongoose from "mongoose";
 
 const AutomationItemSchema = new mongoose.Schema(
-  {
-    automationId: {
-      type: String,
-      required: true,
-    },
-
-    type: {
-      type: String,
-      enum: [
-        "whatsapp_auto_reply",
-        "follow_up",
-        "business_ai_chatbox",
-      ],
-      required: true,
-    },
-
-    enabled: {
-      type: Boolean,
-      default: false,
-    },
-
-    lastRunAt: Date,
-
-    runCount: {
-      type: Number,
-      default: 0,
-    },
-
-    successCount: {
-      type: Number,
-      default: 0,
-    },
-
-    failureCount: {
-      type: Number,
-      default: 0,
-    },
+{
+  automationId: {
+    type: String,
+    required: true,
   },
-  { _id: false }
+
+  type: {
+    type: String,
+    enum: [
+      "whatsapp_auto_reply",
+      "follow_up",
+      "business_ai_chatbox",
+    ],
+    required: true,
+  },
+
+  enabled: {
+    type: Boolean,
+    default: false,
+  },
+
+  config: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+
+  lastRunAt: Date,
+
+  runCount: {
+    type: Number,
+    default: 0,
+  },
+  stats: {
+  totalRuns: { type: Number, default: 0 },
+  successRuns: { type: Number, default: 0 },
+  failedRuns: { type: Number, default: 0 },
+  avgResponseTime: { type: Number, default: 0 }
+}
+},
+{ _id: false }
 );
 
 const UserAutomationSchema = new mongoose.Schema(

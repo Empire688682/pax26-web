@@ -105,24 +105,6 @@ const UserSchema = new mongoose.Schema(
         enum: ["free", "starter", "business", "enterprise"],
         default: "free"
       },
-      businessProfile: {
-        businessName: { type: String, default: "" },
-        description: { type: String, default: "" },
-        tone: {
-          type: String,
-          enum: ["friendly", "professional", "sales", "support"],
-          default: "friendly"
-        },
-        fallbackMessage: {
-          type: String,
-          default: "A human agent will get back to you shortly."
-        }
-      },
-      usage: {
-        messagesThisMonth: { type: Number, default: 0 },
-        automationsTriggered: { type: Number, default: 0 },
-        lastReset: { type: Date, default: Date.now }
-      }
     }
   }, { timestamps: true });
 

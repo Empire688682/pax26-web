@@ -9,12 +9,7 @@ const BusinessProfileSchema = new mongoose.Schema(
             index: true,
         },
 
-        whatsappBusiness: {
-            phoneNumber: String,
-            businessId: String,
-        },
-
-        businessUrl:{type:String, default:''},
+        businessUrl: { type: String, default: '' },
 
         aiTrained: {
             type: Boolean,
@@ -64,6 +59,13 @@ const BusinessProfileSchema = new mongoose.Schema(
             // Example: "Mon–Fri 9am–6pm"
         },
 
+        knowledgeBase: [
+            {
+                question: String,
+                answer: String
+            }
+        ],
+
         tone: {
             type: String,
             enum: ["friendly", "professional", "salesy"],
@@ -85,6 +87,6 @@ const BusinessProfileSchema = new mongoose.Schema(
     }
 );
 
-const BusinessProfileModel = mongoose.models.BusinessProfile ||  mongoose.model("BusinessProfile", BusinessProfileSchema);
+const BusinessProfileModel = mongoose.models.BusinessProfile || mongoose.model("BusinessProfile", BusinessProfileSchema);
 export default BusinessProfileModel;
-   
+

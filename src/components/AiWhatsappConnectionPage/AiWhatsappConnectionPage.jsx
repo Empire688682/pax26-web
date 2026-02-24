@@ -9,7 +9,7 @@ export default function AiWhatsappConnectionPage() {
   const {
     pax26,
     router,
-    isWhatsappAiConnected,
+    isWhatsappNumberConnected,
     whatsappNumber,
   } = useGlobalContext();
   const [metaOauthUrl, setMetaOauthUrl] = useState("");
@@ -52,7 +52,7 @@ const getMetaOauthUrl = async () => {
       <Card className="rounded-xl">
         <CardContent className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {isWhatsappAiConnected ? (
+            {isWhatsappNumberConnected ? (
               <CheckCircle className="text-green-500" />
             ) : (
               <AlertCircle className="text-yellow-500" />
@@ -60,10 +60,10 @@ const getMetaOauthUrl = async () => {
 
             <div>
               <p className="font-medium">
-                {isWhatsappAiConnected ? "Connected" : "Not Connected"}
+                {isWhatsappNumberConnected ? "Connected" : "Not Connected"}
               </p>
 
-              {isWhatsappAiConnected ? (
+              {isWhatsappNumberConnected ? (
                 <p className="text-sm text-gray-400">
                   Connected number:{" "}
                   <span className="text-green-400 font-medium">
@@ -78,14 +78,14 @@ const getMetaOauthUrl = async () => {
             </div>
           </div>
 
-          {isWhatsappAiConnected && (
+          {isWhatsappNumberConnected && (
             <Button variant="secondary">Disconnect</Button>
           )}
         </CardContent>
       </Card>
 
       {/* Connect WhatsApp */}
-      {!isWhatsappAiConnected && (
+      {!isWhatsappNumberConnected && (
         <Card className="rounded-xl">
           <CardContent className="p-6 space-y-5">
             <h2 className="text-lg font-medium">Connect WhatsApp Business</h2>
@@ -144,11 +144,11 @@ const getMetaOauthUrl = async () => {
           <div className="mt-4 flex items-center gap-2">
             <span
               className={`w-2 h-2 rounded-full ${
-                isWhatsappAiConnected ? "bg-green-500" : "bg-red-500"
+                isWhatsappNumberConnected ? "bg-green-500" : "bg-red-500"
               }`}
             />
             <span className="text-sm">
-              {isWhatsappAiConnected
+              {isWhatsappNumberConnected
                 ? "Webhook active"
                 : "Webhook not verified"}
             </span>

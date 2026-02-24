@@ -11,6 +11,7 @@ export async function POST(req) {
   try {
     const userId = await verifyToken(req);
   if (!userId) {
+    console.log("Unauthorized: No valid token provided");
     return NextResponse.json({ success: false }, { status: 401, headers:corsHeaders() })
   }
 
@@ -29,6 +30,8 @@ export async function POST(req) {
     process.env.META_REDIRECT_URI
   )}&scope=whatsapp_business_management,whatsapp_business_messaging,business_management&state=${state}`;
 
+  console.log("Generated OAuth URL:", url);
+  
   return NextResponse.json({ success: true, url, }, { status: 200, headers:corsHeaders() });
   } catch (error) {
     console.log("oauthErr: ", error);

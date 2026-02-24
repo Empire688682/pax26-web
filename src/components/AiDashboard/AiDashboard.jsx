@@ -13,7 +13,15 @@ const automationIcons = [
 ];
 
 export default function AiDashboard() {
-  const { pax26, router, userData, isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained } = useGlobalContext();
+  const {
+    pax26,
+    router,
+    userData,
+    isPaxAiBusinessTrained,
+    setAIsPaxAiBusinessTrained,
+    isWhatsappNumberConnected,
+    setIsWhatsappNumberConnected
+  } = useGlobalContext();
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
@@ -30,7 +38,6 @@ export default function AiDashboard() {
       const res = await fetch("/api/automations/all");
       const data = await res.json();
       if (data.success) {
-        console.log("automationsData: ", data.automations);
         // Filter only active automations and map with icon
         const usefulAutomations = data.automations
           .filter(a => a.active) // only active automations
@@ -66,6 +73,7 @@ export default function AiDashboard() {
         const profile = data?.profile || {};
         if (data.success) {
           setAIsPaxAiBusinessTrained(profile.aiTrained || false);
+          setIsWhatsappNumberConnected(!!profile.whatsappNumber);
         }
       } catch (error) {
         console.error("Error fetching business profile:", error);
