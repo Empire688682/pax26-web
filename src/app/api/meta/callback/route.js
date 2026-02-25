@@ -18,8 +18,7 @@ export async function GET(req) {
 
         const { searchParams } = new URL(req.url);
         const code = searchParams.get("code");
-
-        console.log("Received code:", code);
+        const state = searchParams.get("state");
 
         if (!code) {
             return NextResponse.json(
@@ -28,7 +27,6 @@ export async function GET(req) {
             );
         }
 
-        console.log("Datas: ",process.env.META_APP_SECRET, process.env.META_APP_ID, process.env.META_REDIRECT_URI);
         // 🔐 Exchange code for access token
         const tokenRes = await axios.get(
             "https://graph.facebook.com/v19.0/oauth/access_token",
@@ -42,8 +40,6 @@ export async function GET(req) {
             }
         );
 
-        console.log("Token response:", tokenRes.data);
-
         const accessToken = tokenRes.data.access_token;
 
         // 🏢 Fetch Business Managers
@@ -55,8 +51,6 @@ export async function GET(req) {
                 },
             }
         );
-
-        console.log("Business response:", bizRes.data);
 
         const business = bizRes.data?.data?.[0];
         if (!business) throw new Error("No business found");
@@ -83,8 +77,6 @@ export async function GET(req) {
                 },
             }
         );
-
-        console.log("Phone numbers response:", phoneRes.data);
 
         const phone = phoneRes.data?.data?.[0];
         if (!phone) throw new Error("No WhatsApp phone number found");
