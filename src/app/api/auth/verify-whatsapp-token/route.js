@@ -1,12 +1,10 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import { headers } from "next/headers";
 import { verifyToken } from "../../helper/VerifyToken";
 
-export async function OPTIONS(params) {
+export async function OPTIONS() {
     return new NextResponse.json(null, {status:200, headers:corsHeaders()})
 }
 

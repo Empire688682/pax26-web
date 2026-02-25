@@ -22,9 +22,7 @@ export async function sendUserVerification(user) {
   user.emailVerification.token = expiresAt;
   await user.save();
 
-  const link = `${process.env.BASE_URL}/verify-user?token=${plainCode}`;
-
-  const sent = await sendVerification(user.email, plainCode, link);
+  const sent = await sendVerification(user.email, plainCode);
 
   return { sent };
 }
