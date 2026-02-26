@@ -14,7 +14,7 @@ import { useGlobalContext } from "../Context";
 import { motion } from "framer-motion";
 
 export default function AiAutomationHomePage() {
-  const { pax26, router, setUserData, userData } = useGlobalContext();
+  const { pax26, router, fetchUser, userData } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [enabledAi, setEnabledAi] = useState(true);
   const [businessProfile, setBusinessProfile] = useState(null);
@@ -34,13 +34,7 @@ export default function AiAutomationHomePage() {
       const data = await res.json();
 
       if (data.success) {
-        const saved = localStorage.getItem("userData");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          parsed.paxAI.enabled = data.aiEnabled;
-          localStorage.setItem("userData", JSON.stringify(parsed));
-          setUserData(parsed);
-        }
+        await fetchUser()
         setEnabledAi(data.aiEnabled);
       } else {
         alert(data.message);

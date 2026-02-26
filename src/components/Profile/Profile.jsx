@@ -11,7 +11,7 @@ import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
 const Profile = () => {
   const [notify, setNotify] = useState(true);
-  const { userData, router, setUserData, pax26, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, router, fetchUser, pax26, logoutUser, setPinModal, transactionHistory, getUserRealTimeData } = useGlobalContext();
   const [userImage, setUserImage] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [bvn, setBvn] = useState("");
@@ -36,19 +36,7 @@ const Profile = () => {
 
       if (response.data?.success) {
         toast.success("BVN Submitted successfully ✅");
-        if (typeof window !== "undefined") {
-          const savedData = localStorage.getItem("userData");
-
-          if (!savedData) {
-            toast.error("An error occured try again");
-            return
-          }
-          const parseData = JSON.parse(savedData);
-          parseData.bvnVerify = true;
-          parseData.virtualAccount = response.data.virtualAccount;
-          localStorage.setItem("userData", JSON.stringify(parseData));
-          setUserData(parseData);
-        }
+        await fetchUser()
         setUserBvn(false);
       } else {
         toast.error("Failed to verify BVN ❌");
@@ -78,18 +66,7 @@ const Profile = () => {
       const response = await axios.post("/api/update-profileImage", { profileImage });
       console.log("response:", response);
       if (response.data.success) {
-        if (typeof window !== "undefined") {
-          const savedData = localStorage.getItem("userData");
-
-          if (!savedData) {
-            toast.error("An error occured try again");
-            return
-          }
-          const parseData = JSON.parse(savedData);
-          parseData.profileImage = profileImage;
-          localStorage.setItem("userData", JSON.stringify(parseData));
-          setUserData(parseData);
-        }
+        await fetchUser()
         toast.success("Profile image updated!");
         setUserImage(profileImage);
       }

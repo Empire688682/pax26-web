@@ -198,6 +198,19 @@ export const AppProvider = ({ children }) => {
 
   };
 
+  const fetchUser = async () => {
+  try {
+    const res = await axios.get("/api/user/profile");
+
+    if (res.data?.profile) {
+      setUserData(res.data.profile);
+      localStorage.setItem("userData", JSON.stringify(res.data.profile));
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
   /* ================================
      LOCAL STORAGE UTILS
@@ -403,7 +416,9 @@ export const AppProvider = ({ children }) => {
         setAIsPaxAiBusinessTrained,
 
         isWhatsappNumberConnected, 
-        setIsWhatsappNumberConnected
+        setIsWhatsappNumberConnected,
+
+        fetchUser
 
       }}
     >

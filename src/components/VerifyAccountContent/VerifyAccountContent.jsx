@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useGlobalContext } from "../Context";
 
 export default function VerifyAccountContent() {
-  const { router, pax26, userData, setUserData } = useGlobalContext();
+  const { router, pax26, userData, fetchUser } = useGlobalContext();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -50,18 +50,7 @@ export default function VerifyAccountContent() {
       }
 
       // success
-      if (typeof window !== "undefined") {
-        const savedData = localStorage.getItem("userData");
-
-        if (!savedData) {
-          alert("An error occured try again");
-          return
-        }
-        const parseData = JSON.parse(savedData);
-        parseData.userVerify = true;
-        localStorage.setItem("userData", JSON.stringify(parseData));
-        setUserData(parseData);
-      }
+      await fetchUser();
       router.push("/dashboard");
     } catch (err) {
       setMessage("Something went wrong. Try again.");

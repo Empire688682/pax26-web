@@ -60,6 +60,7 @@ export async function POST(req) {
     delete userObj.emailVerification;
     delete userObj.phoneVerification;
     delete userObj._id;
+    delete userObj.whatsapp;
 
     // JWT
     const token = jwt.sign(

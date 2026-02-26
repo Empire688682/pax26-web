@@ -7,7 +7,7 @@ import { toast,  } from 'react-toastify';
 import { usePathname } from 'next/navigation';
 
 const PasswordReset = () => {
-    const { pax26, userData, setUserData } = useGlobalContext();
+    const {fetchUser } = useGlobalContext();
     const pathName = usePathname();
     const [pwdForm, setPwdForm] = useState({
         currentPwd: "",
@@ -51,18 +51,7 @@ const PasswordReset = () => {
         try {
             const response = await axios.post("/api/auth/password-reset", pwdForm);
             if (response.data.success) {
-                if (typeof window !== "undefined") {
-                    const savedData = localStorage.getItem("userData");
-
-                    if (!savedData) {
-                        toast.error("An error occured try again");
-                        return
-                    }
-                    const parseData = JSON.parse(savedData);
-                    parseData.isPasswordSet = true;
-                    localStorage.setItem("userData", JSON.stringify(parseData));
-                    setUserData(parseData);
-                }
+                await fetchUser()
                 toast.success('Password updated!');
                 setPwdForm({
                     currentPwd: "",

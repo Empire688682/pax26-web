@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useGlobalContext } from '../Context';
 
 const TransactionPin = () => {
-  const {setPinModal, setUserData} = useGlobalContext()
+  const {setPinModal, fetchUser} = useGlobalContext()
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -34,20 +34,8 @@ const TransactionPin = () => {
 
       if (res.ok) {
         setMessage({ type: 'success', text: data.message });
-
-         if (typeof window !== "undefined") {
-                  const savedData = localStorage.getItem("userData");
-        
-                  if (!savedData) {
-                    toast.error("An error occured try again");
-                    return
-                  }
-                  const parseData = JSON.parse(savedData);
-                  parseData.pin = pin;
-                  localStorage.setItem("userData", JSON.stringify(parseData));
-                  setUserData(parseData);
-                }
-                setPinModal(false);
+        await fetchUser();
+        setPinModal(false);
       } else {
         setMessage({ type: 'error', text: data.message });
       }

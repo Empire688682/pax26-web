@@ -125,6 +125,7 @@ export async function POST(req) {
         delete userObj.emailVerification;
         delete userObj.phoneVerification;
         delete userObj._id;
+        delete userObj.whatsapp;
 
         const userId = user._id;
         const token = jwt.sign({ userId }, process.env.SECRET_KEY, {

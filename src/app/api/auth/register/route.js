@@ -140,6 +140,7 @@ const registerUser = async (req) => {
     delete userObj.emailVerification;
     delete userObj.phoneVerification;
     delete userObj._id;
+    delete userObj.whatsapp;
 
     const finalUserData = userObj;
 
