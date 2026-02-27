@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../Context";
 import { usePathname } from "next/navigation";
 import { PiHandWithdraw } from "react-icons/pi";
@@ -8,13 +8,29 @@ import { Copy, Wallet, ArrowUpRight } from "lucide-react";
 const WalletBalance = ({ setShowMore, showMore }) => {
   const { getUserRealTimeData, router, pax26, userWallet, userData } = useGlobalContext();
   const pathName = usePathname();
+  const [loading, setLoading] = useState(false)
   const last10Digits = userData?.number ? userData.number.slice(-10) : "**********";
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      getUserRealTimeData();
-    }, 5000);
-    return () => clearTimeout(timeout);
+    const fetchData = async () => {
+      setLoading(true);
+      await getUserRealTimeData();
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getUserRealTimeData();
+    };
+
+    fetchData();
+
+    const interval = setInterval(fetchData, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleCopy = async () => {
@@ -51,14 +67,28 @@ const WalletBalance = ({ setShowMore, showMore }) => {
       </div>
 
       {/* Balance */}
+      {/* Balance */}
       <div className="mt-4">
-        <p
-          className="text-2xl font-bold tracking-tight"
-          style={{ color: pax26.textPrimary }}
-        >
-          ₦{userWallet?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">Available balance</p>
+        {loading ? (
+          <div className="animate-pulse">
+            <div className="h-8 w-32 rounded-md bg-gray-600/40"></div>
+            <div className="h-3 w-24 mt-2 rounded-md bg-gray-600/30"></div>
+          </div>
+        ) : (
+          <>
+            <p
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: pax26.textPrimary }}
+            >
+              ₦
+              {userWallet?.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }) || "0.00"}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">Available balance</p>
+          </>
+        )}
       </div>
 
       {/* Account Number */}

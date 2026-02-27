@@ -8,43 +8,23 @@ import {
   MessageCircle,
   Settings,
   Zap,
-  Workflow 
+  Workflow
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 import { motion } from "framer-motion";
 
 export default function AiAutomationHomePage() {
   const { pax26, router, fetchUser, userData } = useGlobalContext();
-  const [loading, setLoading] = useState(false);
-  const [enabledAi, setEnabledAi] = useState(true);
+  const [enabledAi, setEnabledAi] = useState(false);
   const [businessProfile, setBusinessProfile] = useState(null);
+
+  useEffect(() => {
+    fetchUser();
+  }, [userData]);
 
   useEffect(() => {
     setEnabledAi(userData?.paxAI?.enabled || false);
   }, [userData]);
-
-  async function handleAiEnabled() {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/automations/handle-ai-enabled", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userData?._id }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        await fetchUser()
-        setEnabledAi(data.aiEnabled);
-      } else {
-        alert(data.message);
-      }
-    } catch (e) {
-      alert("Failed to toggle AI");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchBusinessProfile = async () => {
     try {
@@ -57,7 +37,7 @@ export default function AiAutomationHomePage() {
         setBusinessProfile(data.profile);
       } else {
         console.error("Failed to fetch business profile:", data.message);
-        alert("Failed to fetch business profile: " + data.message);
+        return null
       }
     } catch (error) {
       console.error("Error fetching business profile:", error);
@@ -104,26 +84,6 @@ export default function AiAutomationHomePage() {
             Create and manage smart workflows powered by AI
           </motion.p>
         </div>
-
-        {/* Right (CTA Button) */}
-        {
-          handleAiEnabled && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex-shrink-0"
-            >
-              <Button pageTo={"/"} onClick={handleAiEnabled}>
-
-                <div className="flex items-center gap-2 text-xs md:text-sm">
-                  {
-                    loading ? "Processing..." : enabledAi ? "Deactivate AI" : "Activate AI"
-                  } </div>
-              </Button>
-            </motion.div>
-          )
-        }
       </div>
 
 
@@ -137,29 +97,29 @@ export default function AiAutomationHomePage() {
             <CardContent className="flex flex-col items-start gap-4 p-6 h-full">
               {/* Icon */}
               <div className="p-3 rounded-xl bg-primary/10">
-                <Workflow className="h-8 w-8 text-primary" 
-                style={{ color: pax26.textPrimary }}/>
+                <Workflow className="h-8 w-8 text-primary"
+                  style={{ color: pax26.textPrimary }} />
               </div>
 
               {/* Text */}
               <div className="flex-1">
                 <p className="text-lg font-semibold leading-tight mb-1"
-                style={{ color: pax26.textPrimary }}>
+                  style={{ color: pax26.textPrimary }}>
                   Your AI Automations
                 </p>
                 <p className="text-sm text-muted-foreground"
-                style={{ color: pax26.textPrimary }}>
+                  style={{ color: pax26.textPrimary }}>
                   View and manage all your active AI-powered workflows in one place.
                 </p>
               </div>
 
               {/* Navigation CTA */}
               <Button
-                disabled={!enabledAi}
+
                 pageTo={"/dashboard"}
                 className="w-full mt-auto"
               >
-               Create Ai Workflows
+                Create Ai Workflows
               </Button>
             </CardContent>
 
@@ -174,7 +134,7 @@ export default function AiAutomationHomePage() {
           title="AI Business Training"
           description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
           buttonText="Setup"
-          disabled={!enabledAi}
+
           onClick={() => router.push("/ai-automations/training")}
         />
 
@@ -184,7 +144,7 @@ export default function AiAutomationHomePage() {
           title="WhatsApp"
           description="Connect WhatsApp to automate replies, handle customer chats, and respond instantly using AI."
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
-          disabled={!enabledAi}
+
           onClick={() => router.push("/ai-automations/whatsapp")}
         />
 
@@ -194,7 +154,7 @@ export default function AiAutomationHomePage() {
           title="AI Bot"
           description="Configure your AI chatbot’s tone, personality, and fallback rules for smart, human-like responses."
           buttonText="Open PaxAI Chatbot"
-          disabled={!enabledAi}
+
           onClick={() => router.push("/ai-automations/pax")}
         />
 
@@ -204,7 +164,7 @@ export default function AiAutomationHomePage() {
           title="Lead Follows-up Automation"
           description="We automatically follow up with new leads, send reminders, and re-engage inactive prospects so you never miss a conversion opportunity."
           buttonText="View Automations"
-          disabled={!enabledAi}
+
           onClick={() => router.push("/ai-automations/dashboard")}
         />
       </div>
@@ -272,7 +232,7 @@ function IntegrationCard({
     <Card className="rounded-2xl hover:shadow-md transition">
       <CardContent className="py-6 space-y-4">
         <div className="flex items-center justify-between space-x-3"
-        id="Pax">
+          id="Pax">
           <p className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-100">{icon}</p>
           <p
             style={{ color: pax26.textPrimary }}

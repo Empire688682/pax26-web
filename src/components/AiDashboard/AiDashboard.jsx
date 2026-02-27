@@ -130,7 +130,7 @@ export default function AiDashboard() {
       <div className="flex flex-col" style={{ color: pax26.textPrimary }}>
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{firstName}.</h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Welcome to your dashboard
+          Welcome to PaxAI dashboard
         </p>
         <p className="text-xs md:text-sm text-muted-foreground">
           Manage your smart workflows powered by AI, use the buttons below to get started.
@@ -154,7 +154,7 @@ export default function AiDashboard() {
                     toggling ? (
                       <div className="w-8 h-8 rounded-full border-4 border-blue-500 border-t-green-400 animate-spin"></div>
                     ) : (
-                      <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer">
+                      <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer animate-pulse">
                         {auto.enabled ? (
                           <ToggleRight className="text-green-500 w-15 h-10" />
                         ) : (
@@ -199,8 +199,8 @@ export default function AiDashboard() {
                       {
                         isPaxAiBusinessTrained ? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
                           : <span
-                            className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded"
-                            onClick={() => router.push("/ai-automations/training#Pax")}>Train now</span>
+                            className="inline-block cursor-pointer bg-blue-600 text-white font-bold animate-pulse text-xs px-2 py-1 rounded"
+                            onClick={() => router.push("/ai-automations/training#Pax")}>Train PaxAI</span>
                       }
                     </p>
                   </div>
