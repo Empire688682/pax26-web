@@ -139,14 +139,14 @@ export default function AiAutomationHomePage() {
         />
 
         {/* WhatsApp */}
-        <IntegrationCard
+        {/* <IntegrationCard
           icon={<MessageCircle className="text-green-500" />}
           title="WhatsApp"
           description="Connect WhatsApp to automate replies, handle customer chats, and respond instantly using AI."
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
 
           onClick={() => router.push("/ai-automations/whatsapp")}
-        />
+        /> */}
 
         {/* AI chabot */}
         <IntegrationCard
@@ -154,8 +154,13 @@ export default function AiAutomationHomePage() {
           title="AI Bot"
           description="Configure your AI chatbot’s tone, personality, and fallback rules for smart, human-like responses."
           buttonText="Open PaxAI Chatbot"
-
-          onClick={() => router.push("/ai-automations/pax")}
+          onClick={() => {
+            if (enabledAi) {
+              router.push("/ai-automations/pax");
+            } else {
+              handleAlert();
+            }
+          }}
         />
 
         {/* Automations */}

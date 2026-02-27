@@ -127,14 +127,25 @@ export default function AiDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col" style={{ color: pax26.textPrimary }}>
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{firstName}.</h1>
+      <div className="flex flex-wrap gap-3 justify-between" style={{ color: pax26.textPrimary }}>
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{firstName}.</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           Welcome to PaxAI dashboard
         </p>
         <p className="text-xs md:text-sm text-muted-foreground">
           Manage your smart workflows powered by AI, use the buttons below to get started.
         </p>
+        </div>
+
+        <div className="max-w-2xl">
+          <Button
+          className="rounded-xl w-full"
+          onClick={() => router.push(`/ai-automations/whatsapp`)}
+        >
+          Connect Bussiness Whatsapp
+        </Button>
+        </div>
       </div>
 
       {/* Automations */}
