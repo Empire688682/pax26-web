@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 ================================ */
 const AppContext = React.createContext();
 
-/* ================================
+/* ============================
    PROVIDER COMPONENT
 ================================ */
 export const AppProvider = ({ children }) => {
