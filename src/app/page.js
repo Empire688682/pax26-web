@@ -17,7 +17,6 @@ import AutomationFeatures from '@/components/AutomationFeatures/AutomationFeatur
 import HowItWorks from '@/components/HowItWorks/HowItWorks';
 import Demo from '@/components/Demo/Demo';
 import Utilities from '@/components/Utilities/Utilities';
-import HomeFooter from '@/components/HomeFooter/HomeFooter';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
