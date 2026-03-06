@@ -214,9 +214,16 @@ export default function AiDashboard() {
                 {/* Meta badge if requires training */}
                 {auto.meta.requiresTraining && (
                   <div className="flex flex-wrap gap-2 justify-between">
-                    <span className="inline-block bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">
-                      Needs Training
-                    </span>
+                    <div className="inline-block bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">
+                      <p className="font-bold">Requirement:</p>
+                      <ul className="pl-4">
+                        <li>-PaxAi must be train</li>
+                        {
+                          auto.type != "business_ai_chatbox" &&
+                          <li>-Whatsapp must be connected</li>
+                        }
+                      </ul>
+                    </div>
                     <p>
                       {
                         isPaxAiBusinessTrained ? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
