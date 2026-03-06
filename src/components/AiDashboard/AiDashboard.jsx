@@ -127,7 +127,7 @@ export default function AiDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-wrap gap-3 justify-between" style={{ color: pax26.textPrimary }}>
+      <div className="flex flex-wrap gap-4 justify-between" style={{ color: pax26.textPrimary }}>
         <div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{firstName}.</h1>
         <p className="text-sm md:text-base text-muted-foreground">
@@ -138,14 +138,25 @@ export default function AiDashboard() {
         </p>
         </div>
 
-        <div className="max-w-2xl">
+        {
+          isWhatsappNumberConnected ? 
+          <div className="max-w-2xl flex-1">
           <Button
           className="rounded-xl w-full"
           onClick={() => router.push(`/ai-automations/whatsapp`)}
         >
           Connect Bussiness Whatsapp
         </Button>
+        </div> 
+        :
+        <div className="max-w-2xl">
+          <Button
+          className="rounded-xl w-full"
+        >
+          Whatsapp Connected
+        </Button>
         </div>
+        }
       </div>
 
       {/* Automations */}
