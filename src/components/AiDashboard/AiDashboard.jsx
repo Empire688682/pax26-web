@@ -82,19 +82,20 @@ export default function AiDashboard() {
     fetchBusinessProfile();
   }, [])
 
-  const toggleAutomationAPI = async (automationId) => {
+  const toggleAutomationAPI = async (auto) => {
     if (!isPaxAiBusinessTrained) {
       alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
       router.push("/ai-automations/training");
       return;
     }
 
-    if(!userData.whatsapp.connected && auto.type != "business_ai_chatbox"){
-      alert(`${firstName} Please connect your whatsapp business to activate the automation.`)
+    if(!userData?.whatsapp?.connected && auto.type != "business_ai_chatbox"){
+      alert(`${firstName} Please connect your whatsapp business to activate ${auto.name}.`);
+      return;
     }
     try {
       setToggling(true);
-      const res = await fetch(`/api/automations/${automationId}/toggle`, {
+      const res = await fetch(`/api/automations/${auto.id}/toggle`, {
         method: "PATCH",
       });
       const data = await res.json();
@@ -180,7 +181,7 @@ export default function AiDashboard() {
                     toggling ? (
                       <div className="w-8 h-8 rounded-full border-4 border-blue-500 border-t-green-400 animate-spin"></div>
                     ) : (
-                      <div onClick={() => toggleAutomationAPI(auto.id)} className="cursor-pointer animate-pulse">
+                      <div onClick={() => toggleAutomationAPI(auto)} className="cursor-pointer animate-pulse">
                         {auto.enabled ? (
                           <ToggleRight className="text-green-500 w-15 h-10" />
                         ) : (
