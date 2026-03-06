@@ -60,12 +60,6 @@ const UserSchema = new mongoose.Schema(
     /* =====================
    WHATSAPP CONFIG
 ===================== */
-    whatsappNumber: {
-      type: String,
-      default: "",
-      unique: true,
-      index: true
-    },
     whatsappConnected: {
       type: Boolean,
       default: false
