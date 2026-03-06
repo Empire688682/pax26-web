@@ -88,6 +88,10 @@ export default function AiDashboard() {
       router.push("/ai-automations/training");
       return;
     }
+
+    if(!userData.whatsapp.connected && auto.type != "business_ai_chatbox"){
+      alert(`${firstName} Please connect your whatsapp business to activate the automation.`)
+    }
     try {
       setToggling(true);
       const res = await fetch(`/api/automations/${automationId}/toggle`, {
