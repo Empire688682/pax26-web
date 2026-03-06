@@ -3,8 +3,7 @@
 import CTA from '@/components/CTA/CTA';
 import DownloadOurApp from '@/components/DownloadOurApp/DownloadOurApp';
 import Hero from '@/components/Hero/Hero';
-import HowItWorks from '@/components/HowItWork/HowItWork';
-import PricingSec from '@/components/PricingSec/PricingSec';
+import Pricing from '@/components/Pricing/Pricing';
 import Services from '@/components/Services/Services';
 import SignupPage from '@/components/SignupPage/SignupPage';
 import Testimonials from '@/components/Testimonials/Testimonials';
@@ -12,6 +11,13 @@ import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import { useGlobalContext } from '@/components/Context';
+import Trusted from '@/components/Trusted/Trusted';
+import Problem from '@/components/Problem/Problem';
+import AutomationFeatures from '@/components/AutomationFeatures/AutomationFeatures';
+import HowItWorks from '@/components/HowItWorks/HowItWorks';
+import Demo from '@/components/Demo/Demo';
+import Utilities from '@/components/Utilities/Utilities';
+import HomeFooter from '@/components/HomeFooter/HomeFooter';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
@@ -67,10 +73,10 @@ const Page = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
         variants={fadeInUp}
       >
-        <HowItWorks />
+        <Trusted />
       </motion.div>
 
-      {/* Services */}
+      {/* Problem */}
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -78,10 +84,10 @@ const Page = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         variants={fadeInUp}
       >
-        <Services />
+        <Problem />
       </motion.div>
 
-      {/* Why Choose Us */}
+      {/* AutomationFeatures */}
       <motion.div
         initial={{opacity:0, x:100 }}
         whileInView={{opacity:1, x:0 }}
@@ -89,10 +95,10 @@ const Page = () => {
         transition={{ duration: 0.6, delay: 0.3 }}
         variants={fadeInUp}
       >
-        <WhyChooseUs />
+        <AutomationFeatures />
       </motion.div>
 
-      {/* Pricing */}
+      {/* HowItWorks */}
       <motion.div
         initial={{opacity:0, y:50}}
         whileInView={{opacity:1, y:0}}
@@ -100,7 +106,40 @@ const Page = () => {
         transition={{ duration: 0.6, delay: 0.4 }}
         variants={fadeInUp}
       >
-        <PricingSec />
+        <HowItWorks />
+      </motion.div>
+
+      {/* Demo */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        variants={fadeInUp}
+      >
+        <Demo />
+      </motion.div>
+
+      {/* Pricing */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+        variants={fadeInUp}
+      >
+        <Pricing />
+      </motion.div>
+
+      {/* Utilities */}
+      <motion.div
+        initial={{opacity:0, y:50}}
+        whileInView={{opacity:1, y:0}}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        variants={fadeInUp}
+      >
+        <Utilities />
       </motion.div>
 
       {/* Testimonials */}
@@ -108,7 +147,7 @@ const Page = () => {
         initial={{opacity:0, y:50}}
         whileInView={{opacity:1, y:0}}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
         variants={fadeInUp}
       >
         <Testimonials />
@@ -119,21 +158,10 @@ const Page = () => {
         initial={{opacity:0, y:50}}
         whileInView={{opacity:1, y:0}}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        variants={fadeInUp}
-      >
-        <CTA />
-      </motion.div>
-
-      {/* Download App */}
-      <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
-        viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.7 }}
         variants={fadeInUp}
       >
-        <DownloadOurApp />
+        <CTA />
       </motion.div>
     </div>
   );
