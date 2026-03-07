@@ -45,6 +45,11 @@ export async function PUT(req) {
       { upsert: true, new: true }
     );
 
+    user.paxAI.enabled = true;
+    user.paxAI.trained = true;
+
+    await user.save();
+
     return NextResponse.json(
       { success: true, profile },
       { status: 200, headers: corsHeaders() }
