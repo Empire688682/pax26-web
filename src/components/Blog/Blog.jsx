@@ -2,41 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useGlobalContext } from "../Context";
-
-const dummyPosts = [
-  {
-    id: 1,
-    slug: "whatsapp-auto-guide",
-    title: "Automate Your WhatsApp in Minutes 🤖",
-    excerpt:
-      "Learn how to set up WhatsApp automation for messaging, notifications, and customer follow-ups without coding.",
-    date: "March 15, 2026",
-  },
-  {
-    id: 2,
-    slug: "follow-up-leads-strategy",
-    title: "Boost Sales with Automated Lead Follow-Ups 📈",
-    excerpt:
-      "Discover how automated lead follow-ups can increase conversions and save you hours every week.",
-    date: "March 10, 2026",
-  },
-  {
-    id: 3,
-    slug: "chatbot-for-business",
-    title: "Create a Smart Chatbot for Your Business 💬",
-    excerpt:
-      "Step-by-step guide to building a chatbot that can answer FAQs, book appointments, and engage your users 24/7.",
-    date: "March 5, 2026",
-  },
-  {
-    id: 4,
-    slug: "pax26-vtu-tips",
-    title: "Save on VTU/Data Services with Pax26 💡",
-    excerpt:
-      "While AI automation is key, Pax26 still helps you save on VTU and data services — here’s how.",
-    date: "March 1, 2026",
-  },
-];
+import { posts } from "../lib/posts";
 
 const Blog = () => {
   const { pax26 } = useGlobalContext();
@@ -62,8 +28,8 @@ const Blog = () => {
 
         {/* Blog Grid */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {dummyPosts.map((post) => (
-            <Link key={post.id} href={`/blog/${post.slug}`}>
+          {posts.map((post) => (
+            <Link key={post.slug} href={`/blog/${post.slug}`}>
               <article
                 className="p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border"
                 style={{ backgroundColor: pax26.bg }}

@@ -5,7 +5,6 @@ export function middleware(req) {
   const path = req.nextUrl.pathname  
   const token = req.cookies.get("UserToken")?.value || "";
   const protectedPaths = [
-    "/blog",
     "/buy-data",
     "/dashboard",
     "/dashboard/buy-data",
