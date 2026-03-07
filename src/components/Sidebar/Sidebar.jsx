@@ -20,7 +20,8 @@ export default function Sidebar() {
   const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
 
   if (!userData) {
-    return (<nav
+    return (
+    <nav
       className={`fixed flex top-0 right-0 w-full shadow-md bg-black/50 z-50 transform transition-transform duration-400 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
@@ -61,6 +62,11 @@ export default function Sidebar() {
             style={{ color: pax26.textSecondary }}>
             <Info size={18} className="hidden md:block" />
             Your Feedback
+          </Link> 
+          <Link onClick={() => setIsOpen(false)} href="/blog" className="flex items-center gap-2 hover:text-blue-600"
+            style={{ color: pax26.textSecondary }}>
+            <Info size={18} className="hidden md:block" />
+            Blog
           </Link>
           <div className="flex items-center gap-2 hover:text-blue-600 gap-5"
           onClick={() => setIsOpen(false)}>
@@ -139,7 +145,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-      <div className='w-[50%] h-screen'>
+      <div onClick={() => {setIsOpen(false); window.alert("Close menu");}} className='w-[50%] h-screen'>
       </div>
     </nav>
   );
