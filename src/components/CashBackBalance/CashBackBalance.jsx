@@ -15,8 +15,6 @@ const CashBackBalance = () => {
             style={{ backgroundColor: pax26.bg }}
         >
             <div>
-                <p className="text-sm"
-                    style={{ color: pax26.textPrimary }}>Cash Back</p>
                 <div className="items-center mt-2 gap-2">
                     <p className="text-xl font-bold"
                         style={{ color: pax26.textPrimary }}>₦{userCashBack.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "**.**"}</p>

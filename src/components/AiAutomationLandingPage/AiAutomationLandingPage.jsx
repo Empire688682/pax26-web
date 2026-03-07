@@ -27,8 +27,8 @@ export default function AiAutomationLandingPage() {
           className="text-4xl md:text-6xl font-bold mb-6"
           style={{ color: pax26.textPrimary }}
         >
-          WhatsApp & AI Automation for
-          <span className="text-primary"> Growing Businesses</span>
+          Automate Your WhatsApp Business
+          <span className="text-primary"> With AI</span>
         </motion.h1>
 
         <motion.p
@@ -39,8 +39,8 @@ export default function AiAutomationLandingPage() {
           className="max-w-2xl mx-auto mb-8 text-lg"
           style={{ color: pax26.textPrimary }}
         >
-          Automate WhatsApp replies, customer support, and lead follow-ups —
-          so you close more sales without hiring more staff.
+          Automatically reply to customers, capture leads, and follow up with
+          prospects on WhatsApp — so your business grows even while you sleep.
         </motion.p>
 
         <motion.div
@@ -50,8 +50,32 @@ export default function AiAutomationLandingPage() {
           transition={{ delay: 0.2 }}
           className="flex justify-center"
         >
-          <Button pageTo="/home">Get Started</Button>
+          <Button pageTo="market-place">
+            Start Automation
+          </Button>
         </motion.div>
+      </section>
+
+      {/* ================= DEMO ================= */}
+      <section className="max-w-6xl mx-auto mt-24 text-center">
+        <motion.h2
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-3xl font-bold mb-6"
+          style={{ color: pax26.textPrimary }}
+        >
+          See Automation in Action
+        </motion.h2>
+
+        <div className="rounded-xl overflow-hidden shadow-lg">
+          <img
+            src="/automation-demo.png"
+            alt="Pax26 WhatsApp automation demo"
+            className="w-full"
+          />
+        </div>
       </section>
 
       {/* ================= FEATURES ================= */}
@@ -60,17 +84,17 @@ export default function AiAutomationLandingPage() {
           {
             icon: MessageCircle,
             title: "WhatsApp Automation",
-            desc: "Auto-replies, payment alerts, broadcasts, and customer support on WhatsApp."
+            desc: "Automatically reply to customer messages, send broadcasts, and manage conversations."
           },
           {
             icon: Bot,
             title: "AI Chatbot",
-            desc: "24/7 AI chatbot that answers questions and assists customers instantly."
+            desc: "A 24/7 intelligent assistant that answers customer questions instantly."
           },
           {
             icon: Workflow,
-            title: "Lead Follow-Up Automation",
-            desc: "Automatically follow up interested customers and convert chats into sales."
+            title: "Lead Follow-Up",
+            desc: "Automatically follow up interested leads and turn chats into real sales."
           }
         ].map((item, i) => (
           <motion.div
@@ -100,16 +124,64 @@ export default function AiAutomationLandingPage() {
         ))}
       </section>
 
+      {/* ================= HOW IT WORKS ================= */}
+      <section className="max-w-6xl mx-auto mt-28 text-center">
+        <motion.h2
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-3xl font-bold mb-12"
+          style={{ color: pax26.textPrimary }}
+        >
+          How Automation Works
+        </motion.h2>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              title: "Connect WhatsApp",
+              desc: "Securely link your WhatsApp account to Pax26 automation."
+            },
+            {
+              title: "Create Automation Rules",
+              desc: "Set replies, triggers, and smart follow-up workflows."
+            },
+            {
+              title: "Let AI Handle Conversations",
+              desc: "Customers receive instant replies and automated follow-ups."
+            }
+          ].map((step, i) => (
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
+                  <p>{step.desc}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* ================= USE CASES ================= */}
-      <section className="max-w-6xl mx-auto mt-28"
-      style={{ color: pax26.textPrimary }}>
+      <section
+        className="max-w-6xl mx-auto mt-28"
+        style={{ color: pax26.textPrimary }}
+      >
         <motion.h2
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           className="text-3xl font-bold text-center mb-12"
-          style={{ color: pax26.textPrimary }}
         >
           What You Can Automate
         </motion.h2>
@@ -130,12 +202,7 @@ export default function AiAutomationLandingPage() {
               transition={{ delay: i * 0.1 }}
             >
               <Card>
-                <CardContent
-                  className="p-6 font-medium"
-                  style={{ color: pax26.textPrimary }}
-                >
-                  {text}
-                </CardContent>
+                <CardContent className="p-6 font-medium">{text}</CardContent>
               </Card>
             </motion.div>
           ))}
@@ -143,34 +210,32 @@ export default function AiAutomationLandingPage() {
       </section>
 
       {/* ================= SECURITY ================= */}
-      <section className="max-w-6xl mx-auto mt-28 text-center"
-      style={{ color: pax26.textPrimary }}>
+      <section
+        className="max-w-6xl mx-auto mt-28 text-center"
+        style={{ color: pax26.textPrimary }}
+      >
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <ShieldCheck
-            className="mx-auto h-12 w-12 mb-4"
-            style={{ color: pax26.textPrimary }}
-          />
-          <h3
-            className="text-2xl font-semibold"
-            style={{ color: pax26.textPrimary }}
-          >
+          <ShieldCheck className="mx-auto h-12 w-12 mb-4" />
+          <h3 className="text-2xl font-semibold">
             Secure, Reliable & Scalable
           </h3>
           <p className="max-w-xl mx-auto mt-3">
             Your data and conversations are protected with secure infrastructure
-            and controlled automation rules you manage yourself.
+            and controlled automation rules that you manage yourself.
           </p>
         </motion.div>
       </section>
 
       {/* ================= CTA ================= */}
-      <section className="max-w-6xl mx-auto mt-28 text-center pb-24"
-      style={{ color: pax26.textPrimary }}>
+      <section
+        className="max-w-6xl mx-auto mt-28 text-center pb-24"
+        style={{ color: pax26.textPrimary }}
+      >
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -180,13 +245,15 @@ export default function AiAutomationLandingPage() {
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-10">
               <h2 className="text-3xl font-bold mb-4">
-                Automate Conversations. Close More Sales.
+                Start Automating Your WhatsApp Today
               </h2>
               <p className="mb-6">
-                Use WhatsApp and AI automation to respond faster,
-                follow up smarter, and grow without stress.
+                Respond faster, capture more leads, and grow your business
+                automatically with Pax26 AI automation.
               </p>
-              <Button pageTo="/home">Create Automation</Button>
+              <Button pageTo="market-place">
+                Create Automation
+              </Button>
             </CardContent>
           </Card>
         </motion.div>

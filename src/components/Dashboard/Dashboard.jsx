@@ -25,6 +25,7 @@ const Dashboard = () => {
     getUserRealTimeData
   } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     getUserRealTimeData();
@@ -81,8 +82,8 @@ const Dashboard = () => {
           </div>
 
           <button
-            onClick={() => router.push("/ai-automations")}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+            onClick={() => router.push("dashboard/ai-automations")}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm flex items-center text-white gap-2"
           >
             Setup
             <ArrowRight size={16} />
@@ -168,7 +169,7 @@ const Dashboard = () => {
 
           <button
             onClick={() => setShowWallet(!showWallet)}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
           >
             {showWallet ? "Hide Wallet" : "View Wallet"}
           </button>
@@ -180,7 +181,7 @@ const Dashboard = () => {
       {showWallet && (
         <div className="grid md:grid-cols-2 gap-4">
 
-          <WalletBalance />
+          <WalletBalance showMore={showMore} setShowMore={setShowMore} />
 
           <div
             style={{ backgroundColor: pax26.bg }}
@@ -212,31 +213,31 @@ const Dashboard = () => {
 
           <QuickLinks
             title="Airtime"
-            link="/dashboard/buy-airtime"
+            link="/dashboard/services/buy-airtime"
             icon={<Phone style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Data"
-            link="/dashboard/buy-data"
+            link="/dashboard/services/buy-data"
             icon={<Wifi style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Electricity"
-            link="/dashboard/buy-electricity"
+            link="/dashboard/services/buy-electricity"
             icon={<Zap style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="TV"
-            link="/dashboard/buy-tv"
+            link="/dashboard/services/buy-tv"
             icon={<Tv style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Transfer"
-            link="/dashboard/transfer"
+            link="/dashboard/services/transfer"
             icon={<ArrowRightLeft style={{color:pax26.textPrimary}} />}
           />
 
@@ -292,7 +293,13 @@ const Dashboard = () => {
                     </p>
                   </div>
 
-                  <p
+                  <div className="flex gap-2">
+                    <p
+                    className={`text-xs capitalize font-semibold text-green-500`}
+                  >
+                    {tx.type}
+                  </p>
+                    <p
                     className={`text-sm font-semibold ${tx.status === "success"
                         ? "text-green-500"
                         : "text-yellow-400"
@@ -300,6 +307,7 @@ const Dashboard = () => {
                   >
                     ₦{tx.amount}
                   </p>
+                  </div>
 
                 </div>
               ))
