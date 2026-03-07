@@ -3,98 +3,166 @@ import React from "react";
 import { useGlobalContext } from "../Context";
 
 const About = () => {
-  const {pax26} = useGlobalContext();
+  const { pax26 } = useGlobalContext();
+
   return (
-    <div className="min-h-screen text-gray-700 px-6 py-10"
-    style={{backgroundColor: pax26.secondaryBg}}>
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Hero Section */}
-        <div className="text-center"
-        style={{color: pax26.textPrimary}}>
-          <h1 className="text-4xl sm:text-5xl font-bold text-blue-600 mb-4">About Pax26</h1>
-          <p className=" text-lg">
-            Pax26 is a trusted digital platform helping users buy airtime, data, electricity, and more—seamlessly and securely.
+    <div
+      className="min-h-screen px-6 py-14"
+      style={{ backgroundColor: pax26.secondaryBg }}
+    >
+      <div className="max-w-6xl mx-auto space-y-14">
+
+        {/* Hero */}
+        <div className="text-center space-y-4">
+          <h1
+            className="text-4xl sm:text-5xl font-bold text-blue-600"
+          >
+            About Pax26
+          </h1>
+
+          <p
+            className="max-w-3xl mx-auto text-lg"
+            style={{ color: pax26.textPrimary }}
+          >
+            Pax26 is an AI automation platform designed to help businesses
+            automate customer interactions, capture leads, and streamline
+            digital operations. Alongside intelligent automation, Pax26 also
+            provides seamless digital services including airtime, data,
+            electricity payments, and more.
+          </p>
+        </div>
+
+        {/* What We Do */}
+        <div
+          style={{ backgroundColor: pax26.bg }}
+          className="p-8 rounded-xl shadow-lg"
+        >
+          <h2 className="text-2xl font-semibold text-blue-600 mb-4 text-center">
+            What Pax26 Does
+          </h2>
+
+          <p
+            className="text-center max-w-3xl mx-auto"
+            style={{ color: pax26.textPrimary }}
+          >
+            Pax26 combines artificial intelligence with digital services to
+            help individuals and businesses operate smarter. Our AI automation
+            tools allow businesses to automatically respond to customers,
+            capture leads, and manage conversations on platforms like WhatsApp,
+            while our digital services provide quick access to essential
+            utilities.
           </p>
         </div>
 
         {/* Mission & Vision */}
         <div className="grid sm:grid-cols-2 gap-10">
+
           <div
-          style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
-          className="p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-blue-600 mb-2">Our Mission</h2>
-            <p style={{color:pax26.textPrimary}}>
-              To empower Nigerians with simple, fast, and reliable digital services for everyday utility purchases.
+            style={{ backgroundColor: pax26.bg }}
+            className="p-6 rounded-xl shadow"
+          >
+            <h2 className="text-xl font-semibold text-blue-600 mb-3">
+              Our Mission
+            </h2>
+
+            <p style={{ color: pax26.textPrimary }}>
+              To empower businesses and individuals with intelligent automation
+              tools that simplify communication, improve efficiency, and make
+              digital services more accessible.
             </p>
           </div>
+
           <div
-          style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
-          className="p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-blue-600 mb-2">Our Vision</h2>
-            <p style={{color:pax26.textPrimary}}>
-              To become the leading one-stop digital service provider in Africa, delivering convenience with every tap.
+            style={{ backgroundColor: pax26.bg }}
+            className="p-6 rounded-xl shadow"
+          >
+            <h2 className="text-xl font-semibold text-blue-600 mb-3">
+              Our Vision
+            </h2>
+
+            <p style={{ color: pax26.textPrimary }}>
+              To become a leading AI automation platform helping businesses
+              across Africa and beyond automate operations, engage customers
+              smarter, and scale faster.
             </p>
           </div>
+
         </div>
 
-        {/* Why Choose Us */}
+        {/* Why Pax26 */}
         <div
-        style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
-        className="p-6 rounded-xl shadow text-center">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Why Choose Pax26?</h2>
-          <ul className="space-y-2 text-left max-w-md mx-auto"
-          style={{color:pax26.textPrimary}}>
-            <li>✅ Instant airtime & data delivery</li>
-            <li>✅ Reliable electricity token generation</li>
-            <li>✅ Affordable prices with cashback commissions</li>
-            <li>✅ Secure wallet for easy transactions</li>
-            <li>✅ Excellent user support</li>
+          style={{ backgroundColor: pax26.bg }}
+          className="p-8 rounded-xl shadow-lg"
+        >
+          <h2 className="text-2xl font-semibold text-blue-600 mb-6 text-center">
+            Why Choose Pax26?
+          </h2>
+
+          <ul
+            className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto"
+            style={{ color: pax26.textPrimary }}
+          >
+            <li>✅ AI automation for WhatsApp and business messaging</li>
+            <li>✅ Automatic lead capture and smart workflows</li>
+            <li>✅ Fast and reliable digital service payments</li>
+            <li>✅ Secure wallet for seamless transactions</li>
+            <li>✅ Affordable services with cashback opportunities</li>
+            <li>✅ Built for businesses and individuals</li>
           </ul>
         </div>
 
-        {/* Our Team */}
+        {/* Founder */}
         <div
-        style={{backgroundColor: pax26.bg, color: pax26.textPrimary}} 
-        className="p-6 rounded-xl shadow text-center">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Meet the Team</h2>
-          <div className="grid sm:grid-cols-1 md:grid-cols-1 gap-8">
-            <div className="space-y-2">
-              <img
-                src="/team-1.png"
-                alt="Founder"
-                className="w-32 h-32 mx-auto rounded-full object-cover"
-              />
-              <h3 className="text-lg font-semibold">Juwon Asehinde</h3>
-              <p className="text-sm text-gray-400">Founder & CEO</p>
-            </div>
-            {/* <div className="space-y-2">
-              <img
-                src="/team-2.png"
-                alt="CTO"
-                className="w-32 h-32 mx-auto rounded-full object-cover"
-              />
-              <h3 className="text-lg font-semibold">Jane Smith</h3>
-              <p className="text-sm text-gray-400">Co-Founder & CTO</p>
-            </div>
-            <div className="space-y-2">
-              <img
-                src="/team-3.png"
-                alt="Support"
-                className="w-32 h-32 mx-auto rounded-full object-cover"
-              />
-              <h3 className="text-lg font-semibold">Tobi Ojo</h3>
-              <p className="text-sm text-gray-400">Customer Success</p>
-            </div> */}
+          style={{ backgroundColor: pax26.bg }}
+          className="p-8 rounded-xl shadow-lg text-center"
+        >
+          <h2 className="text-2xl font-semibold text-blue-600 mb-6">
+            Founder
+          </h2>
+
+          <div className="space-y-3">
+            <img
+              src="/team-1.png"
+              alt="Juwon Asehinde - Founder of Pax26"
+              className="w-32 h-32 mx-auto rounded-full object-cover"
+            />
+
+            <h3
+              className="text-lg font-semibold"
+              style={{ color: pax26.textPrimary }}
+            >
+              Juwon Asehinde
+            </h3>
+
+            <p className="text-sm text-gray-400">
+              Founder & CEO
+            </p>
+
+            <p
+              className="max-w-xl mx-auto text-sm"
+              style={{ color: pax26.textPrimary }}
+            >
+              Juwon founded Pax26 to build a platform where AI automation and
+              digital services come together to simplify business operations and
+              everyday transactions.
+            </p>
           </div>
         </div>
 
-        {/* Contact CTA */}
-        <div className="text-center">
-          <h3 className="text-xl text-gray-400 font-medium mb-2">Want to reach us?</h3>
+        {/* Contact */}
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-medium text-gray-400">
+            Want to reach us?
+          </h3>
+
           <p className="text-gray-400">
-            Email us at <span className="text-blue-600 font-semibold">info@pax26.com.com</span>
+            Email us at{" "}
+            <span className="text-blue-600 font-semibold">
+              info@pax26.com
+            </span>
           </p>
         </div>
+
       </div>
     </div>
   );

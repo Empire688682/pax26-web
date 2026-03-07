@@ -8,52 +8,84 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
-  title: "Pax26 – Digital Payments & AI Automation Platform",
+  metadataBase: new URL("https://pax26.com"),
+
+  title: {
+    default: "Pax26 – AI Automation Platform for WhatsApp & Business Workflows",
+    template: "%s | Pax26",
+  },
+
   description:
-    "Pax26 combines fast digital payments with powerful AI automation. Buy airtime, data, pay bills, manage utilities, and automate workflows, messaging, and business operations with AI.",
+    "Pax26 is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows. It also supports airtime, data, electricity payments and digital services.",
+
   keywords: [
-    "buy airtime nigeria",
-    "buy data online",
-    "electricity bill payment",
-    "tv subscription nigeria",
-    "gift cards nigeria",
-    "digital payments",
-    "ai automation",
-    "business automation",
+    "ai automation platform",
+    "whatsapp ai automation",
+    "ai chatbot for business",
+    "business automation tools",
     "workflow automation",
-    "whatsapp automation",
     "ai agents",
-    "saas nigeria",
+    "saas automation platform",
+    "buy airtime nigeria",
+    "buy data online nigeria",
+    "pay electricity bills nigeria",
+    "tv subscription nigeria",
+    "digital payments nigeria",
     "pax26",
   ],
+
   authors: [{ name: "Jayempire" }],
   creator: "Pax26 Team",
   publisher: "Pax26",
+
+  applicationName: "Pax26",
+  category: "AI Automation Platform",
+
   icons: {
     icon: "/icon.ico",
+    shortcut: "/icon.ico",
+    apple: "/icon.ico",
   },
+
+  alternates: {
+    canonical: "https://pax26.com",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
   openGraph: {
-    title: "Pax26 – Payments, Utilities & AI Automation",
+    title: "Pax26 – AI Automation for WhatsApp & Business Workflows",
     description:
-      "Pay bills, buy airtime & data, and automate your business with AI. Pax26 powers smart payments and intelligent automation in one platform.",
+      "Automate your business with AI. Pax26 enables WhatsApp automation, lead capture, and workflow automation while supporting digital payments.",
     url: "https://pax26.com",
     siteName: "Pax26",
+    locale: "en_US",
+    type: "website",
+
     images: [
       {
         url: "/Pax26_single_logo.png",
         width: 1200,
         height: 630,
-        alt: "Pax26 Payments & AI Automation",
+        alt: "Pax26 AI Automation Platform",
       },
     ],
-    locale: "en_US",
-    type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "Pax26 – Payments & AI Automation",
+    title: "Pax26 – AI Automation Platform",
     description:
-      "Digital payments meet AI automation. Airtime, data, bills, gift cards, and smart workflows — all on Pax26.",
+      "Automate WhatsApp replies, capture leads and run workflows with AI. Pax26 also supports digital payments and utilities.",
     images: ["/Pax26_single_logo.png"],
   },
 };
@@ -62,7 +94,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* JSON-LD Structured Data */}
+
+        {/* Structured Data for SEO */}
         <Script
           id="pax26-schema"
           type="application/ld+json"
@@ -71,6 +104,7 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@graph": [
+
                 {
                   "@type": "Organization",
                   name: "Pax26",
@@ -82,37 +116,49 @@ export default function RootLayout({ children }) {
                     "https://instagram.com/pax26",
                   ],
                 },
+
                 {
                   "@type": "SoftwareApplication",
                   name: "Pax26",
+                  url: "https://pax26.com",
                   applicationCategory: "BusinessApplication",
                   operatingSystem: "Web",
+                  description:
+                    "Pax26 is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows.",
+                  creator: {
+                    "@type": "Organization",
+                    name: "Pax26",
+                  },
                   offers: {
                     "@type": "Offer",
                     price: "0",
                     priceCurrency: "NGN",
                   },
                 },
+
                 {
                   "@type": "Service",
                   name: "Pax26 AI Automation",
                   description:
-                    "AI-powered automation services including workflow automation, WhatsApp messaging automation, AI agents, and smart business processes.",
+                    "AI powered automation services including WhatsApp messaging automation, AI agents, workflow automation and lead capture.",
                   provider: {
                     "@type": "Organization",
                     name: "Pax26",
                   },
                 },
+
               ],
             }),
           }}
         />
+
       </head>
 
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientWrapper>
-            {/* Tawk.to Live Chat Script */}
+
+            {/* Live Chat */}
             <Script
               id="tawk-to-live-chat"
               strategy="afterInteractive"
@@ -134,8 +180,10 @@ export default function RootLayout({ children }) {
 
             {children}
             <ToastContainer />
+
           </ClientWrapper>
         </ThemeProvider>
+
         <Analytics />
       </body>
     </html>
