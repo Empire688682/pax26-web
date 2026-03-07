@@ -213,31 +213,31 @@ const Dashboard = () => {
           <QuickLinks
             title="Airtime"
             link="/dashboard/buy-airtime"
-            icon={<Phone />}
+            icon={<Phone style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Data"
             link="/dashboard/buy-data"
-            icon={<Wifi />}
+            icon={<Wifi style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Electricity"
             link="/dashboard/buy-electricity"
-            icon={<Zap />}
+            icon={<Zap style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="TV"
             link="/dashboard/buy-tv"
-            icon={<Tv />}
+            icon={<Tv style={{color:pax26.textPrimary}} />}
           />
 
           <QuickLinks
             title="Transfer"
             link="/dashboard/transfer"
-            icon={<ArrowRightLeft />}
+            icon={<ArrowRightLeft style={{color:pax26.textPrimary}} />}
           />
 
         </div>
