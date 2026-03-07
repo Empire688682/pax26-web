@@ -7,7 +7,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-24 bg-gray-50 text-center">
+    <section className="py-24 px-6 bg-gray-50 text-center">
       <h2 className="text-4xl font-bold">Start Automating in Minutes</h2>
 
       <div className="grid md:grid-cols-4 gap-8 mt-12 max-w-6xl mx-auto px-6">

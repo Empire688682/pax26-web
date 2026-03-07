@@ -1,6 +1,6 @@
 export default function Demo() {
   return (
-    <section className="py-24 bg-white text-center">
+    <section className="py-24 px-6 bg-white text-center">
       <h2 className="text-4xl font-bold">See Pax26 AI In Action</h2>
 
       <div className="mt-10 max-w-xl mx-auto space-y-4 text-left">
