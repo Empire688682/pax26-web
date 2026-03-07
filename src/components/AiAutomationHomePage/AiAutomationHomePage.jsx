@@ -49,6 +49,12 @@ export default function AiAutomationHomePage() {
     fetchBusinessProfile();
   }, []);
 
+  const handleAlert =()=>{
+    alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
+      router.push("/dashboard/ai-automations/training");
+      return;
+  }
+
   // Motion variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -135,7 +141,7 @@ export default function AiAutomationHomePage() {
           description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
           buttonText="Setup"
 
-          onClick={() => router.push("/ai-automations/training")}
+          onClick={() => router.push("/dashboard/ai-automations/training")}
         />
 
         {/* WhatsApp */}
@@ -156,7 +162,7 @@ export default function AiAutomationHomePage() {
           buttonText="Open PaxAI Chatbot"
           onClick={() => {
             if (enabledAi) {
-              router.push("/ai-automations/pax");
+              router.push("/dashboard/ai-automations/pax");
             } else {
               handleAlert();
             }
@@ -170,7 +176,7 @@ export default function AiAutomationHomePage() {
           description="We automatically follow up with new leads, send reminders, and re-engage inactive prospects so you never miss a conversion opportunity."
           buttonText="View Automations"
 
-          onClick={() => router.push("/ai-automations/dashboard")}
+          onClick={() => router.push("/dashboard/ai-automations/market-place")}
         />
       </div>
 

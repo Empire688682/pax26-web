@@ -12,7 +12,7 @@ const automationIcons = [
   { type: "business_ai_chatbox", icon: <Bot className="text-black-500" /> },
 ];
 
-export default function AiDashboard() {
+export default function AiMarket() {
   const {
     pax26,
     router,
@@ -85,12 +85,13 @@ export default function AiDashboard() {
   const toggleAutomationAPI = async (auto) => {
     if (!isPaxAiBusinessTrained) {
       alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
-      router.push("/ai-automations/training");
+      router.push("/dashboard/ai-automations/training");
       return;
     }
 
     if(!userData?.whatsapp?.connected && auto.type != "business_ai_chatbox"){
-      alert(`${firstName} Please connect your whatsapp business to activate ${auto.name}.`);
+      alert(`${firstName} Please connect your whatsapp business to activate ${auto.name}. Click OK to go to whatsapp page.`);
+      router.push("/dashboard/ai-automations/whatsapp");
       return;
     }
     try {
@@ -144,11 +145,11 @@ export default function AiDashboard() {
         </div>
 
         {
-          isWhatsappNumberConnected ? 
+          !isWhatsappNumberConnected ? 
           <div className="max-w-2xl flex-1">
           <Button
           className="rounded-xl w-full"
-          onClick={() => router.push(`/ai-automations/whatsapp`)}
+          onClick={() => router.push(`/dashboard/ai-automations/whatsapp`)}
         >
           Connect Bussiness Whatsapp
         </Button>
@@ -234,7 +235,7 @@ export default function AiDashboard() {
                         isPaxAiBusinessTrained ? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
                           : <span
                             className="inline-block cursor-pointer bg-blue-600 text-white font-bold animate-pulse text-xs px-2 py-1 rounded"
-                            onClick={() => router.push("/ai-automations/training#Pax")}>Train PaxAI</span>
+                            onClick={() => router.push("/dashboard/ai-automations/training#Pax")}>Train PaxAI</span>
                       }
                     </p>
                   </div>
@@ -253,7 +254,7 @@ export default function AiDashboard() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push("/ai-automations/training")}
+                    onClick={() => router.push("dashboard/ai-automations/training")}
                   >
                     Improve AI
                   </Button>

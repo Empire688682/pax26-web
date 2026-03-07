@@ -1,6 +1,6 @@
 
 "use client"
-import AiDashboard from '@/components/AiDashboard/AiDashboard'
+import AiMarket from '@/components/AiMarket/AiMarket'
 import React from 'react';
 import { useGlobalContext } from '@/components/Context';
 
@@ -9,7 +9,7 @@ const page = () => {
   return (
     <div style={{ backgroundColor: pax26.secondaryBg }}>
       <div className='px-6 py-10'>
-        <AiDashboard />
+        <AiMarket />
       </div>
     </div>
   )
