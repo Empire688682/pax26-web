@@ -29,6 +29,7 @@ export async function GET(req) {
     }else{
       userObj.pin = null;
     }
+    userObj.whatsappBusinessNo = user.whatsapp.displayPhone;
     delete userObj.isAdmin;
     delete userObj.provider;
     delete userObj.referralHost;

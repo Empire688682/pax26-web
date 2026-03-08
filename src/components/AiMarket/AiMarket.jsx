@@ -90,7 +90,7 @@ export default function AiMarket() {
       return;
     }
 
-    if(!userData?.whatsapp?.connected && auto.type != "business_ai_chatbox"){
+    if(!isWhatsappNumberConnected && auto.type != "business_ai_chatbox"){
       alert(`${firstName} Please connect your whatsapp business to activate ${auto.name}. Click OK to go to whatsapp page.`);
       router.push("/dashboard/automations/whatsapp");
       return;
@@ -160,7 +160,9 @@ export default function AiMarket() {
           <Button
           className="rounded-xl w-full"
         >
-          Whatsapp Connected
+          Connected Number: {<span className="text-green-400 font-medium">
+                    {userData?.whatsappBusinessNo}
+                  </span>}
         </Button>
         </div>
         }

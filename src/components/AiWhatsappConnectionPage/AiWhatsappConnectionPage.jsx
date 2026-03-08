@@ -1,5 +1,5 @@
 "use client";
-import React,{useState} from "react";
+import React,{useEffect, useState} from "react";
 import { CardContent, Card } from "@/components/ui/Cards";
 import { Button } from "@/components/ui/Button";
 import { CheckCircle, AlertCircle, Phone, ExternalLink } from "lucide-react";
@@ -10,14 +10,12 @@ export default function AiWhatsappConnectionPage() {
     pax26,
     router,
     isWhatsappNumberConnected,
-    whatsappNumber,
+    userData,
+    fetchUser
   } = useGlobalContext();
-  const [metaOauthUrl, setMetaOauthUrl] = useState("");
-  const [loading, setLoading] = useState(false);
 
   // ✅ Meta OAuth URL and state generation moved to backend for security
 const getMetaOauthUrl = async () => {
-  setLoading(true)
   try {    const res = await fetch("/api/meta/oauth-url", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -25,15 +23,16 @@ const getMetaOauthUrl = async () => {
     });
     const data = await res.json();
     if (data.success) {
-      setLoading(false)
       window.location.href = data.url;
     }
   } catch (err) {
     console.error("Failed to get Meta OAuth URL:", err);
-  }finally{
-    setLoading(false)
   }
 };
+
+useEffect(()=>{
+  fetchUser();
+},[])
 
   return (
     <div
@@ -67,7 +66,7 @@ const getMetaOauthUrl = async () => {
                 <p className="text-sm text-gray-400">
                   Connected number:{" "}
                   <span className="text-green-400 font-medium">
-                    {whatsappNumber || "+234 *** *** **45"}
+                    {userData?.whatsappBusinessNo}
                   </span>
                 </p>
               ) : (
