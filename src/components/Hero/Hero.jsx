@@ -34,7 +34,7 @@ export default function Hero() {
           </span>
 
           <h1
-            className="text-5xl text-center md:text-start md:text-6xl font-extrabold leading-tight"
+            className="text-5xl md:text-start md:text-6xl font-extrabold leading-tight"
             style={{ color: pax26.textPrimary }}
           >
             Turn WhatsApp Into  Your AI Sales Team
