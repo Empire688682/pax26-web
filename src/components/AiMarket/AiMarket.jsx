@@ -249,7 +249,7 @@ export default function AiMarket() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push(`/automations/${auto.automationId}`)}
+                    onClick={() => router.push(`/dashboard/automations/${auto.automationId}`)}
                   >
                     View
                   </Button>
@@ -257,7 +257,7 @@ export default function AiMarket() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push("dashboard/automations/training")}
+                    onClick={() => router.push("/dashboard/automations/training")}
                   >
                     Improve AI
                   </Button>
