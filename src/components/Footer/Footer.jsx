@@ -123,28 +123,28 @@ const Footer = () => {
             <ul className="space-y-2">
 
               <li>
-                <a href="/automations"
+                <a href="/dashboard/automations"
                   className="text-white hover:text-blue-200 transition">
                   WhatsApp Automation
                 </a>
               </li>
 
               <li>
-                <a href="/automations"
+                <a href="/dashboard/automations"
                   className="text-white hover:text-blue-200 transition">
                   AI Business Chatbot
                 </a>
               </li>
 
               <li>
-                <a href="/automations"
+                <a href="/dashboard/automations"
                   className="text-white hover:text-blue-200 transition">
                   Automated Follow-ups
                 </a>
               </li>
 
               <li>
-                <a href="/automations"
+                <a href="/dashboard/automations"
                   className="text-white hover:text-blue-200 transition">
                   Lead Qualification
                 </a>
@@ -166,7 +166,7 @@ const Footer = () => {
             <ul className="space-y-2">
 
               <li>
-                <a href="/dashboard/buy-data"
+                <a href="/dashboard/services/buy-data"
                   className="text-white hover:text-blue-200 transition">
                   Buy Data
                 </a>
