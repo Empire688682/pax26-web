@@ -2,7 +2,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import EmailSubscriber from "@/app/ults/models/EmailSubscriber";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import { sendPasswordResettingEmail } from "../helper/sendPasswordResetting";
+import { handleSendEmail } from "../helper/handleSendEmail";
 
 export async function OPTIONS() {
     return new NextResponse(null, {status:200, headers:corsHeaders()});
@@ -26,7 +26,7 @@ export async function POST(req) {
     const newSubscriber = new EmailSubscriber({ email });
     await newSubscriber.save();
 
-     const sendingStatus = await sendPasswordResettingEmail(email, "", "EmailSubscriber");
+     const sendingStatus = await handleSendEmail(email, "", "EmailSubscriber");
         if (sendingStatus.status === 500) {
           return NextResponse.json(
             { success: false, message: "An error occured" },

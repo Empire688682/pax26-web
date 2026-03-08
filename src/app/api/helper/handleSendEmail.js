@@ -1,6 +1,6 @@
 import sendpulse from "@/app/lib/sendpulse";
 
-export const sendPasswordResettingEmail = (receiverEmail, resetingPwdLink, mailType) => {
+export const handleSendEmail = (receiverEmail, resetingPwdLink, mailType) => {
   return new Promise((resolve) => {
     const messageType = {
       "PasswordReset": ` 

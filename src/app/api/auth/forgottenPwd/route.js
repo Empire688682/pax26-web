@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import { sendPasswordResettingEmail } from "../../helper/sendPasswordResetting";
+import { handleSendEmail } from "../../helper/handleSendEmail";
 
 export async function OPTIONS() {
   return new NextResponse(null, {status:200, headers:corsHeaders()})
@@ -39,7 +39,7 @@ export async function POST(req) {
     );
 
     const resetingPwdLink = `${process.env.BASE_URL}/reset-password?Emailtoken=${forgottenPasswordToken}&userId=${user._id}`;
-    const sendingStatus = await sendPasswordResettingEmail(email, resetingPwdLink, "PasswordReset");
+    const sendingStatus = await handleSendEmail(email, resetingPwdLink, "PasswordReset");
 
     if (!sendingStatus) {
       return NextResponse.json(
