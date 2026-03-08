@@ -13,6 +13,7 @@ export default function AiWhatsappConnectionPage() {
     userData,
     fetchUser
   } = useGlobalContext();
+  const [loading, setLoading] = useState();
 
   // ✅ Meta OAuth URL and state generation moved to backend for security
 const getMetaOauthUrl = async () => {
@@ -27,6 +28,30 @@ const getMetaOauthUrl = async () => {
     }
   } catch (err) {
     console.error("Failed to get Meta OAuth URL:", err);
+  }
+};
+
+const disconnectNumber = async () => {
+  try {
+    setLoading(true);
+
+    const res = await fetch("/api/automations/disconnect-whatsapp", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      await fetchUser();
+      alert("Whatsapp number disconnected");
+    }
+
+  } catch (error) {
+    console.log("Disconnect number Err:", error);
+    alert("Disconnect number error!");
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -78,7 +103,10 @@ useEffect(()=>{
           </div>
 
           {isWhatsappNumberConnected && (
-            <Button variant="secondary">Disconnect</Button>
+            <button
+             onClick={disconnectNumber}
+             className="text-sm cursor-pointer"
+             >{loading? "Disconnecting":"Disconnect"}</button>
           )}
         </CardContent>
       </Card>

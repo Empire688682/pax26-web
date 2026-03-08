@@ -202,7 +202,6 @@ export const AppProvider = ({ children }) => {
   try {
     const res = await axios.get("/api/user/profile");
     const profile = res.data?.profile;
-    console.log("profile: ", profile);
     if (profile) {
       setUserData(profile);
       setIsWhatsappNumberConnected(!!profile.whatsappConnected);

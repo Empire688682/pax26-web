@@ -156,9 +156,9 @@ export default function AiMarket() {
         </Button>
         </div> 
         :
-        <div className="max-w-2xl">
+        <div className="">
           <Button
-          className="rounded-xl w-full"
+          className="rounded-xl w-full flex items-ceter gap-3"
         >
           Connected Number: {<span className="text-green-400 font-medium">
                     {userData?.whatsappBusinessNo}
