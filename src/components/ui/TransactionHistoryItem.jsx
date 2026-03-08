@@ -6,7 +6,6 @@ import { Badge } from "./badge";
 
 export default function TransactionHistoryItem({ data }) {
     const statusColor = data.status === "success" ? "bg-green-500" : "bg-red-500";
-    console.log("TransactionHistoryItem data:", data);
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

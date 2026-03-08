@@ -277,6 +277,7 @@ const Dashboard = () => {
 
                 <div
                   key={tx._id}
+                  onClick={() => router.push(`transaction-receipt/?id=${tx._id}`)}
                   className="flex justify-between border-b border-white/5 py-3"
                 >
 
