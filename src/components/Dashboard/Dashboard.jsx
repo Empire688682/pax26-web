@@ -60,7 +60,7 @@ const Dashboard = () => {
       >
         <div className="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 blur-3xl rounded-full" />
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between flex-wrap gap-3 items-center">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Bot className="text-blue-400" />
