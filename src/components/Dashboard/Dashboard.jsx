@@ -169,7 +169,7 @@ const Dashboard = () => {
 
           <button
             onClick={() => setShowWallet(!showWallet)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs"
           >
             {showWallet ? "Hide Wallet" : "View Wallet"}
           </button>
