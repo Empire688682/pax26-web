@@ -64,7 +64,7 @@ const Footer = () => {
 
   }
 
-  if (pathName === "/reset-password" || pathName === "/ai-automations/pax") {
+  if (pathName === "/reset-password" || pathName === "/automations/pax") {
     return null
   }
 
@@ -123,28 +123,28 @@ const Footer = () => {
             <ul className="space-y-2">
 
               <li>
-                <a href="/ai-automations"
+                <a href="/automations"
                   className="text-white hover:text-blue-200 transition">
                   WhatsApp Automation
                 </a>
               </li>
 
               <li>
-                <a href="/ai-automations"
+                <a href="/automations"
                   className="text-white hover:text-blue-200 transition">
                   AI Business Chatbot
                 </a>
               </li>
 
               <li>
-                <a href="/ai-automations"
+                <a href="/automations"
                   className="text-white hover:text-blue-200 transition">
                   Automated Follow-ups
                 </a>
               </li>
 
               <li>
-                <a href="/ai-automations"
+                <a href="/automations"
                   className="text-white hover:text-blue-200 transition">
                   Lead Qualification
                 </a>

@@ -123,14 +123,14 @@ export async function GET(req) {
 
         // ✅ Redirect back to dashboard
         return NextResponse.redirect(
-            `${process.env.BASE_URL}/ai-automations?whatsapp=connected`
+            `${process.env.BASE_URL}/dashboard/automations/market-place?whatsapp=connected`
         );
 
     } catch (error) {
         console.error("Meta OAuth error:", error?.response?.data || error.message);
 
         return NextResponse.redirect(
-            `${process.env.BASE_URL}/ai-automations?whatsapp=failed`
+            `${process.env.BASE_URL}/dashboard/automations?whatsapp=failed`
         );
     }
 }

@@ -82,7 +82,7 @@ const Dashboard = () => {
           </div>
 
           <button
-            onClick={() => router.push("dashboard/ai-automations")}
+            onClick={() => router.push("dashboard/automations")}
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm flex items-center text-white gap-2"
           >
             Setup

@@ -201,9 +201,11 @@ export const AppProvider = ({ children }) => {
   const fetchUser = async () => {
   try {
     const res = await axios.get("/api/user/profile");
-
-    if (res.data?.profile) {
-      setUserData(res.data.profile);
+    const profile = res.data?.profile;
+    console.log("profile: ", profile);
+    if (profile) {
+      setUserData(profile);
+      setIsWhatsappNumberConnected(!!profile.whatsappConnected);
       localStorage.setItem("userData", JSON.stringify(res.data.profile));
     }
   } catch (error) {

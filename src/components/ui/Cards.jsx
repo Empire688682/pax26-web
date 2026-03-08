@@ -26,7 +26,9 @@ export function CardTitle({ children, className }) {
 }
 
 export function CardContent({ children, className }) {
+  const {pax26} = useGlobalContext();
   return (
-    <div className={`mt-2 ${className}`}>{children}</div>
+    <div className={`mt-2 ${className}`}
+    style={{color:pax26.textPrimary}}>{children}</div>
   );
 }

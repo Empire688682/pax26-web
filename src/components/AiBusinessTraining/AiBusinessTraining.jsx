@@ -128,7 +128,7 @@ export default function AiTrainingPage() {
         await fetchBusinessProfile(); // Refresh profile data after training
         alert("AI train successfully!");
         setStep(0);
-        router.push("/dashboard/ai-automations/home");
+        router.push("/dashboard/automations/home");
       }
     } catch (error) {
       console.log("TrainErr: ", error);

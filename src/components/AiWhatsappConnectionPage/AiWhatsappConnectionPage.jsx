@@ -126,7 +126,7 @@ const getMetaOauthUrl = async () => {
               Pax26 uses Meta’s official WhatsApp Cloud API.
             </p>
 
-            <p onClick={()=>router.push("/ai-automations/whatsapp-connect-info")} className="text-blue-400 text-sm w-25 font-bold underline cursor-pointer">
+            <p onClick={()=>router.push("/automations/whatsapp-connect-info")} className="text-blue-400 text-sm w-25 font-bold underline cursor-pointer">
               How WhatsApp connection works
               </p>
           </CardContent>

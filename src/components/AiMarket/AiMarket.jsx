@@ -20,8 +20,9 @@ export default function AiMarket() {
     isPaxAiBusinessTrained,
     setAIsPaxAiBusinessTrained,
     isWhatsappNumberConnected,
-    setIsWhatsappNumberConnected
+    fetchUser
   } = useGlobalContext();
+
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
@@ -54,6 +55,7 @@ export default function AiMarket() {
             icon: automationIcons.find(a => a.type === auto.type)?.icon || <Bot className="text-gray-500" />,
           }));
         setAutomations(usefulAutomations);
+        await fetchUser();
       }
     } catch (error) {
       console.error("Error fetching automations:", error);
@@ -73,7 +75,6 @@ export default function AiMarket() {
         const profile = data?.profile || {};
         if (data.success) {
           setAIsPaxAiBusinessTrained(profile.aiTrained || false);
-          setIsWhatsappNumberConnected(!!profile.whatsappNumber);
         }
       } catch (error) {
         console.error("Error fetching business profile:", error);
@@ -85,13 +86,13 @@ export default function AiMarket() {
   const toggleAutomationAPI = async (auto) => {
     if (!isPaxAiBusinessTrained) {
       alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
-      router.push("/dashboard/ai-automations/training");
+      router.push("/dashboard/automations/training");
       return;
     }
 
     if(!userData?.whatsapp?.connected && auto.type != "business_ai_chatbox"){
       alert(`${firstName} Please connect your whatsapp business to activate ${auto.name}. Click OK to go to whatsapp page.`);
-      router.push("/dashboard/ai-automations/whatsapp");
+      router.push("/dashboard/automations/whatsapp");
       return;
     }
     try {
@@ -149,7 +150,7 @@ export default function AiMarket() {
           <div className="max-w-2xl flex-1">
           <Button
           className="rounded-xl w-full"
-          onClick={() => router.push(`/dashboard/ai-automations/whatsapp`)}
+          onClick={() => router.push(`/dashboard/automations/whatsapp`)}
         >
           Connect Bussiness Whatsapp
         </Button>
@@ -235,7 +236,7 @@ export default function AiMarket() {
                         isPaxAiBusinessTrained ? <span className="inline-block cursor-pointer bg-blue-600 text-white font-bold text-xs px-2 py-1 rounded">PaxAI is trained</span>
                           : <span
                             className="inline-block cursor-pointer bg-blue-600 text-white font-bold animate-pulse text-xs px-2 py-1 rounded"
-                            onClick={() => router.push("/dashboard/ai-automations/training#Pax")}>Train PaxAI</span>
+                            onClick={() => router.push("/dashboard/automations/training#Pax")}>Train PaxAI</span>
                       }
                     </p>
                   </div>
@@ -246,7 +247,7 @@ export default function AiMarket() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push(`/ai-automations/${auto.automationId}`)}
+                    onClick={() => router.push(`/automations/${auto.automationId}`)}
                   >
                     View
                   </Button>
@@ -254,7 +255,7 @@ export default function AiMarket() {
                   <Button
                     variant="outline"
                     className="rounded-xl w-full"
-                    onClick={() => router.push("dashboard/ai-automations/training")}
+                    onClick={() => router.push("dashboard/automations/training")}
                   >
                     Improve AI
                   </Button>

@@ -51,7 +51,7 @@ export default function AiAutomationHomePage() {
 
   const handleAlert =()=>{
     alert("Please train PaxAI with your business information before enabling automations. Click OK to go to training page.");
-      router.push("/dashboard/ai-automations/training");
+      router.push("/dashboard/automations/training");
       return;
   }
 
@@ -141,7 +141,7 @@ export default function AiAutomationHomePage() {
           description="Set your business details, tone, services, and rules so the AI responds exactly like your brand."
           buttonText="Setup"
 
-          onClick={() => router.push("/dashboard/ai-automations/training")}
+          onClick={() => router.push("/dashboard/automations/training")}
         />
 
         {/* WhatsApp */}
@@ -151,7 +151,7 @@ export default function AiAutomationHomePage() {
           description="Connect WhatsApp to automate replies, handle customer chats, and respond instantly using AI."
           buttonText={enabledAi ? "Connect WhatsApp" : "Subscribe to enable"}
 
-          onClick={() => router.push("/ai-automations/whatsapp")}
+          onClick={() => router.push("/automations/whatsapp")}
         /> */}
 
         {/* AI chabot */}
@@ -162,7 +162,7 @@ export default function AiAutomationHomePage() {
           buttonText="Open PaxAI Chatbot"
           onClick={() => {
             if (enabledAi) {
-              router.push("/dashboard/ai-automations/pax");
+              router.push("/dashboard/automations/pax");
             } else {
               handleAlert();
             }
@@ -176,7 +176,7 @@ export default function AiAutomationHomePage() {
           description="We automatically follow up with new leads, send reminders, and re-engage inactive prospects so you never miss a conversion opportunity."
           buttonText="View Automations"
 
-          onClick={() => router.push("/dashboard/ai-automations/market-place")}
+          onClick={() => router.push("/dashboard/automations/market-place")}
         />
       </div>
 

@@ -14,7 +14,7 @@ export function Button({
   const { pax26, router} = useGlobalContext();
 
   const selectPage = (page) => {
-      router.push(`/dashboard/ai-automations/${page}`);
+      router.push(`/dashboard/automations/${page}`);
     };
   
   const baseStyles =
