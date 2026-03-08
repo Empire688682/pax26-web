@@ -52,7 +52,7 @@ const Contact = () => {
             </p>
             <p className="flex items-center gap-2"
             style={{color:pax26.textPrimary}}>
-              <MapPin className="text-red-500" size={18} /> 10 Koshebinu Street Ibeshe, Lagos, Nigeria
+              <MapPin className="text-red-500" size={18} /> Lagos, Nigeria
             </p>
           </div>
 
