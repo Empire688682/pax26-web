@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "../ui/Cards";
 import { Button } from "@/components/ui/Button";
-import { Zap, MessageCircle, Bot, ToggleLeft, ToggleRight } from "lucide-react";
+import { Zap, MessageCircle, Bot, Edit, ToggleLeft, ToggleRight } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
 const automationIcons = [
@@ -162,7 +162,7 @@ export default function AiMarket() {
         >
           Connected Number: {<span className="text-green-400 font-medium">
                     {userData?.whatsappBusinessNo}
-                  </span>}
+                  </span>} {<Edit onClick={() => router.push(`/dashboard/automations/whatsapp`)}/>}
         </Button>
         </div>
         }
