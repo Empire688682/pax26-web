@@ -81,10 +81,16 @@ export async function GET(req) {
         const phone = phoneRes.data?.data?.[0];
         if (!phone) throw new Error("No WhatsApp phone number found");
 
-        const decoded = jwt.verify(
-            state,
-            process.env.OAUTH_STATE_SECRET
-        );
+        let decoded;
+
+        try {
+            decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET);
+        } catch {
+            return NextResponse.json(
+                { success: false, message: "Invalid OAuth state" },
+                { status: 401 }
+            );
+        }
 
         const userId = decoded.userId;
 
