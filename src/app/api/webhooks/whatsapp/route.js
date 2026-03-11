@@ -10,7 +10,23 @@ import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
-const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24
+const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
+
+// ✅ META WEBHOOK VERIFICATION
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
+
+  if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+    console.log("✅ Webhook verified by Meta");
+    return new Response(challenge, { status: 200 });
+  }
+
+  return new Response("Forbidden", { status: 403 });
+}
 
 export async function POST(req) {
   const start = Date.now(); // 🟢 define start
