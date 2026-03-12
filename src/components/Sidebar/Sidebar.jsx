@@ -8,145 +8,202 @@ import {
   FileCode,
   Wallet,
   Phone,
-  Newspaper,
   LogOut,
-  Info
+  Info,
+  History,
+  Gift,
+  Settings,
+  Bell,
+  X,
+  ChevronRight,
+  Zap,
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
 import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
+const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26 }) => (
+  <Link
+    href={href || '#'}
+    onClick={onClick}
+    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group"
+    style={{ color: danger ? '#f87171' : pax26?.textSecondary }}
+    onMouseEnter={e => {
+      e.currentTarget.style.background = pax26?.secondaryBg;
+      e.currentTarget.style.color = danger ? '#f87171' : pax26?.primary;
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.background = 'transparent';
+      e.currentTarget.style.color = danger ? '#f87171' : pax26?.textSecondary;
+    }}
+  >
+    <div className="flex items-center gap-3">
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
+        style={{ background: pax26?.secondaryBg }}
+      >
+        <Icon size={15} />
+      </div>
+      <span className="text-sm font-medium">{label}</span>
+    </div>
+    <ChevronRight size={13} className="opacity-0 group-hover:opacity-40 transition-opacity" />
+  </Link>
+);
+
+const SectionLabel = ({ label, pax26 }) => (
+  <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-1 mt-2"
+    style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+    {label}
+  </p>
+);
+
+const Divider = ({ pax26 }) => (
+  <div className="my-3 mx-3" style={{ height: '1px', background: pax26?.border }} />
+);
+
 export default function Sidebar() {
   const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
 
-  if (!userData) {
-    return (
-    <nav
-      className={`fixed flex top-0 right-0 w-full shadow-md bg-black/50 z-50 transform transition-transform duration-400 ease-in-out
-      ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-    >
-      <div className='w-[50%] h-screen p-4'
-        style={{ backgroundColor: pax26.publicBg }}>
-        <div className='flex justify-between gap-3'>
-          <Link onClick={() => setIsOpen(false)} href="/" className="text-2xl font-bold text-blue-600">
-            <h1>Pax26</h1>
-          </Link>
-          <div onClick={() => {setIsOpen(false); router.push("/?auth=login")}} className="text-sm font-bold text-white">
-            <Button>
-              Sign-up
-            </Button>
-          </div>
-        </div>
-        <div className="flex flex-col gap-6 pt-6">
-          <Link onClick={() => setIsOpen(false)} href="/about" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Info size={18} className="hidden md:block" />
-            About
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="terms" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <FileCode size={18} className="hidden md:block" />
-            Terms & Conditions
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/fund-wallet" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Wallet size={18} className="hidden md:block" />
-            Fund Wallet
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/contact" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Phone size={18} className="hidden md:block" />
-            Contact
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/survey" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Info size={18} className="hidden md:block" />
-            Your Feedback
-          </Link> 
-          <Link onClick={() => setIsOpen(false)} href="/blog" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Info size={18} className="hidden md:block" />
-            Blog
-          </Link>
-          <div className="flex items-center gap-2 hover:text-blue-600 gap-5"
-          onClick={() => setIsOpen(false)}>
-            <p 
-            style={{ color: pax26.textSecondary }}>Theme</p>
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
-      <div onClick={() => setIsOpen(false)} className='w-[50%] h-screen'>
-      </div>
-    </nav>)
-  }
+  const close = () => setIsOpen(false);
 
   return (
     <nav
-      className={`fixed flex top-0 right-0 w-full shadow-md bg-black/50 z-50 transform transition-transform duration-400 ease-in-out
-      ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      className={`fixed flex top-0 right-0 w-full z-50 transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
-      <div className='w-[50%] h-screen pl-6 pt-4'
-        style={{ backgroundColor: pax26.publicBg }}>
-        <Link onClick={() => setIsOpen(false)} href="/dashboard" className="text-2xl font-bold text-blue-600">
-          <h1>Pax26</h1>
-        </Link>
-        <div className="flex flex-col gap-6 pt-6">
-          <Link onClick={() => setIsOpen(false)} href="/dashboard" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <LayoutDashboard size={18} className="hidden md:block" />
-            Dashboard
+      {/* ── Panel ─────────────────────────────────────────── */}
+      <div
+        className="w-[78%] max-w-[300px] h-screen flex flex-col overflow-hidden"
+        style={{
+          background: pax26?.card ? `${pax26.card}ee` : pax26?.bg,
+          backdropFilter: 'blur(24px)',
+          borderRight: `1px solid ${pax26?.border}`,
+          boxShadow: '8px 0 40px rgba(0,0,0,0.25)',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-4 py-4"
+          style={{ borderBottom: `1px solid ${pax26?.border}` }}
+        >
+          <Link href={userData ? '/dashboard' : '/'} onClick={close}>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center">
+                <Zap size={15} className="text-white" />
+              </div>
+              <span className="font-black text-lg" style={{ color: pax26?.textPrimary }}>
+                Pax26
+              </span>
+            </div>
           </Link>
-          <Link onClick={() => setIsOpen(false)} href="/dashboard/buy-data" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Wifi size={18} className="hidden md:block" />
-            Buy Data
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/profile" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <DollarSign size={18} className="hidden md:block" />
-            Profile
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="terms" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <FileCode size={18} className="hidden md:block" />
-            Terms & Conditions
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/fund-wallet" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Wallet size={18} className="hidden md:block" />
-            Fund Wallet
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/contact" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Phone size={18} className="hidden md:block" />
-            Contact
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/about" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Info size={18} className="hidden md:block" />
-            About
-          </Link>
-          <Link onClick={() => setIsOpen(false)} href="/survey" className="flex items-center gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <Info size={18} className="hidden md:block" />
-            Your Feedback
-          </Link>
-          <div onClick={logoutUser} className="flex items-center cursor-pointer gap-2 hover:text-blue-600"
-            style={{ color: pax26.textSecondary }}>
-            <LogOut size={18} />
-            Logout
-          </div>
-          <div className="flex items-center gap-2 hover:text-blue-600 gap-5"
-          onClick={() => setIsOpen(false)}>
-            <p 
-            style={{ color: pax26.textSecondary }}>Theme</p>
-            <ThemeToggle />
-          </div>
+
+          <button
+            onClick={close}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+            style={{ background: pax26?.secondaryBg, color: pax26?.textSecondary }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* ── Scrollable nav area ───────────────────────── */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
+
+          {!userData ? (
+            <>
+              {/* Guest menu */}
+              <SectionLabel label="Menu" pax26={pax26} />
+              <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
+              <NavItem href="/blog" icon={FileCode} label="Blog" onClick={close} pax26={pax26} />
+              <NavItem href="/contact" icon={Phone} label="Contact" onClick={close} pax26={pax26} />
+              <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
+              <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
+              <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+            </>
+          ) : (
+            <>
+              {/* Authenticated menu */}
+              <SectionLabel label="Overview" pax26={pax26} />
+              <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/ai-automation" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/automations" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
+
+              <Divider pax26={pax26} />
+              <SectionLabel label="Finance" pax26={pax26} />
+              <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
+              <NavItem href="/fund-wallet" icon={DollarSign} label="VTU Service" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/referrals" icon={Gift} label="Referrals" onClick={close} pax26={pax26} />
+
+              <Divider pax26={pax26} />
+              <SectionLabel label="Account" pax26={pax26} />
+              <NavItem href="/profile" icon={Settings} label="Profile & Settings" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
+              <NavItem href="/contact" icon={Phone} label="Contact Support" onClick={close} pax26={pax26} />
+              <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
+              <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+              <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
+
+              <Divider pax26={pax26} />
+              {/* Logout */}
+              <button
+                onClick={() => { close(); logoutUser(); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200"
+                style={{ color: '#f87171' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(248,113,113,0.1)' }}>
+                  <LogOut size={15} className="text-red-400" />
+                </div>
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* ── Footer ───────────────────────────────────── */}
+        <div
+          className="px-4 py-4 flex items-center justify-between"
+          style={{ borderTop: `1px solid ${pax26?.border}` }}
+        >
+          {/* User info (if logged in) */}
+          {userData ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: pax26?.primary + '33', color: pax26?.primary }}
+              >
+                {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold truncate" style={{ color: pax26?.textPrimary }}>
+                  {userData?.name || 'User'}
+                </p>
+                <p className="text-xs truncate" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                  {userData?.email || ''}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => { close(); router.push('/?auth=login'); }}
+              className="cursor-pointer"
+            >
+              <Button>Sign up</Button>
+            </div>
+          )}
+
+          <ThemeToggle />
         </div>
       </div>
-      <div onClick={() => {setIsOpen(false); window.alert("Close menu");}} className='w-[50%] h-screen'>
-      </div>
+
+      {/* ── Backdrop ──────────────────────────────────────── */}
+      <div
+        onClick={close}
+        className="flex-1 h-screen"
+        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }}
+      />
     </nav>
   );
 }

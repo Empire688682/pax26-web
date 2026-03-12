@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
+import TempSessionModel from "@/app/ults/models/TempSessionModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
-/**
- * GET /api/meta/callback?code=XXXX
- */
 export async function GET(req) {
     try {
         await connectDb();
@@ -21,28 +20,25 @@ export async function GET(req) {
         const state = searchParams.get("state");
 
         if (!code) {
-            return NextResponse.json(
-                { success: false, message: "Authorization code missing" },
-                { status: 400, headers: corsHeaders() }
+            return NextResponse.redirect(
+                `${process.env.BASE_URL}/dashboard/automations?whatsapp=failed&reason=missing_code`
             );
         }
 
-        // 🔐 Verify state JWT first (before any API calls)
+        // 🔐 Verify state JWT first
         let decoded;
         try {
             decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET);
         } catch {
-            return NextResponse.json(
-                { success: false, message: "Invalid or expired OAuth state" },
-                { status: 401 }
+            return NextResponse.redirect(
+                `${process.env.BASE_URL}/dashboard/automations?whatsapp=failed&reason=expired_state`
             );
         }
 
         const userId = decoded.userId;
         if (!userId) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401, headers: corsHeaders() }
+            return NextResponse.redirect(
+                `${process.env.BASE_URL}/dashboard/automations?whatsapp=failed&reason=unauthorized`
             );
         }
 
@@ -61,7 +57,7 @@ export async function GET(req) {
 
         const accessToken = tokenRes.data.access_token;
 
-        // 🏢 Fetch Business Managers
+        // 🏢 Fetch Business
         const bizRes = await axios.get(
             "https://graph.facebook.com/v19.0/me/businesses",
             { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -89,8 +85,7 @@ export async function GET(req) {
             );
 
             const phones = phoneRes.data?.data || [];
-
-            phones.forEach(p => {
+            phones.forEach((p) => {
                 allPhones.push({
                     id: p.id,
                     display: p.display_phone_number,
@@ -102,9 +97,7 @@ export async function GET(req) {
             });
         }
 
-        if (allPhones.length === 0) {
-            throw new Error("No WhatsApp phone number found in any WABA");
-        }
+        if (allPhones.length === 0) throw new Error("No phone numbers found");
 
         // ✅ Single phone — auto connect
         if (allPhones.length === 1) {
@@ -120,10 +113,7 @@ export async function GET(req) {
                         phoneNumberId: phone.id,
                         displayPhone: phone.display,
                         connectedAt: new Date(),
-                        permissions: {
-                            messaging: true,
-                            management: true,
-                        },
+                        permissions: { messaging: true, management: true },
                     },
                     whatsappConnected: true,
                     paxAI: { enabled: true },
@@ -136,24 +126,23 @@ export async function GET(req) {
             );
         }
 
-        // 📲 Multiple phones — redirect to selection page
-        const tempToken = jwt.sign(
-            {
-                userId,
-                accessToken,
-                phones: allPhones,
-            },
-            process.env.OAUTH_STATE_SECRET,
-            { expiresIn: "10m" }
-        );
+        // 📲 Multiple phones — save server-side, pass only sessionId to browser
+        const sessionId = crypto.randomUUID();
+
+        await TempSessionModel.create({
+            sessionId,
+            userId,
+            accessToken,  // ✅ never exposed to browser
+            phones: allPhones,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min TTL
+        });
 
         return NextResponse.redirect(
-            `${process.env.BASE_URL}/dashboard/automations/select-phone?token=${tempToken}`
+            `${process.env.BASE_URL}/dashboard/automations/select-phone?session=${sessionId}`
         );
 
     } catch (error) {
         console.error("Meta OAuth error:", error?.response?.data || error.message);
-
         return NextResponse.redirect(
             `${process.env.BASE_URL}/dashboard/automations?whatsapp=failed`
         );

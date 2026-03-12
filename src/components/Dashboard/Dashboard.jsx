@@ -55,7 +55,6 @@ const Dashboard = () => {
 
       {/* AI Automation Hero */}
       <div
-        style={{ backgroundColor: pax26.bg }}
         className="rounded-2xl p-6 relative overflow-hidden shadow-xl"
       >
         <div className="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 blur-3xl rounded-full" />
