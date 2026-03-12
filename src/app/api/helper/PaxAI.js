@@ -24,8 +24,11 @@ export async function getAIResponse(userText) {
       temperature: 0.7,
     });
 
-    return response.choices?.[0]?.message?.content
-      || "No response from AI.";
+    const aiRes = response.choices?.[0]?.message?.content
+
+    console.log("aiRes: ", aiRes);
+
+    return aiRes || "No response from AI.";
   } catch (error) {
     console.error("getAIResponse error:", error);
     return `PaxAI is in development mode. You said: "${userText}"`;
