@@ -27,6 +27,25 @@ export async function GET(req) {
             );
         }
 
+        // 🔐 Verify state JWT first (before any API calls)
+        let decoded;
+        try {
+            decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET);
+        } catch {
+            return NextResponse.json(
+                { success: false, message: "Invalid or expired OAuth state" },
+                { status: 401 }
+            );
+        }
+
+        const userId = decoded.userId;
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized" },
+                { status: 401, headers: corsHeaders() }
+            );
+        }
+
         // 🔐 Exchange code for access token
         const tokenRes = await axios.get(
             "https://graph.facebook.com/v19.0/oauth/access_token",
@@ -45,91 +64,91 @@ export async function GET(req) {
         // 🏢 Fetch Business Managers
         const bizRes = await axios.get(
             "https://graph.facebook.com/v19.0/me/businesses",
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            }
+            { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
         const business = bizRes.data?.data?.[0];
         if (!business) throw new Error("No business found");
 
-        // 📱 Fetch WhatsApp Business Account
+        // 📱 Fetch all WABAs
         const wabaRes = await axios.get(
             `https://graph.facebook.com/v19.0/${business.id}/owned_whatsapp_business_accounts`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            }
+            { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
-        const waba = wabaRes.data?.data?.[0];
-        if (!waba) throw new Error("No WhatsApp Business Account found");
+        const allWabas = wabaRes.data?.data;
+        if (!allWabas?.length) throw new Error("No WhatsApp Business Account found");
 
-        // ☎️ Fetch phone numbers
-        const phoneRes = await axios.get(
-            `https://graph.facebook.com/v19.0/${waba.id}/phone_numbers`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            }
-        );
+        // ☎️ Collect all phones across all WABAs
+        const allPhones = [];
 
-        const phone = phoneRes.data?.data?.[0];
-        if (!phone) throw new Error("No WhatsApp phone number found");
-
-        let decoded;
-
-        try {
-            decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET);
-        } catch {
-            return NextResponse.json(
-                { success: false, message: "Invalid OAuth state" },
-                { status: 401 }
+        for (const w of allWabas) {
+            const phoneRes = await axios.get(
+                `https://graph.facebook.com/v19.0/${w.id}/phone_numbers`,
+                { headers: { Authorization: `Bearer ${accessToken}` } }
             );
+
+            const phones = phoneRes.data?.data || [];
+
+            phones.forEach(p => {
+                allPhones.push({
+                    id: p.id,
+                    display: p.display_phone_number,
+                    name: p.verified_name,
+                    quality: p.quality_rating,
+                    wabaId: w.id,
+                    wabaName: w.name,
+                });
+            });
         }
 
-        const userId = decoded.userId;
-
-        if (!userId) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401, headers: corsHeaders() }
-            );
+        if (allPhones.length === 0) {
+            throw new Error("No WhatsApp phone number found in any WABA");
         }
 
-        await UserModel.findByIdAndUpdate(
-            userId,
-            {
-                whatsapp: {
-                    connected: true,
-                    accessToken,
-                    wabaId: waba.id,
-                    phoneNumberId: phone.id,
-                    displayPhone: phone.display_phone_number,
-                    connectedAt: new Date(),
-                    permissions: {
-                        messaging: true,
-                        management: true,
+        // ✅ Single phone — auto connect
+        if (allPhones.length === 1) {
+            const phone = allPhones[0];
+
+            await UserModel.findByIdAndUpdate(
+                userId,
+                {
+                    whatsapp: {
+                        connected: true,
+                        accessToken,
+                        wabaId: phone.wabaId,
+                        phoneNumberId: phone.id,
+                        displayPhone: phone.display,
+                        connectedAt: new Date(),
+                        permissions: {
+                            messaging: true,
+                            management: true,
+                        },
                     },
+                    whatsappConnected: true,
+                    paxAI: { enabled: true },
                 },
+                { new: true }
+            );
 
-                whatsappConnected: true, // optional backward compatibility
+            return NextResponse.redirect(
+                `${process.env.BASE_URL}/dashboard/automations/market-place?whatsapp=connected`
+            );
+        }
 
-                paxAI: {
-                    enabled: true,
-                },
+        // 📲 Multiple phones — redirect to selection page
+        const tempToken = jwt.sign(
+            {
+                userId,
+                accessToken,
+                phones: allPhones,
             },
-            { new: true }
+            process.env.OAUTH_STATE_SECRET,
+            { expiresIn: "10m" }
         );
 
-
-        // ✅ Redirect back to dashboard
         return NextResponse.redirect(
-            `${process.env.BASE_URL}/dashboard/automations/market-place?whatsapp=connected`
+            `${process.env.BASE_URL}/dashboard/automations/select-phone?token=${tempToken}`
         );
 
     } catch (error) {

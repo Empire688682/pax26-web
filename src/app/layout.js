@@ -11,12 +11,12 @@ export const metadata = {
   metadataBase: new URL("https://pax26.com"),
 
   title: {
-    default: "Pax26 – AI Automation Platform for WhatsApp & Business Workflows",
+    default: "Pax26 Technologies – AI Automation Platform for WhatsApp & Business Workflows",
     template: "%s | Pax26",
   },
 
   description:
-    "Pax26 is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows. It also supports airtime, data, electricity payments and digital services.",
+    "Pax26 Technologies is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows. It also supports airtime, data, electricity payments and digital services.",
 
   keywords: [
     "ai automation platform",
@@ -38,7 +38,7 @@ export const metadata = {
   creator: "Pax26 Team",
   publisher: "Pax26",
 
-  applicationName: "Pax26",
+  applicationName: "Pax26 Technologies",
   category: "AI Automation Platform",
 
   icons: {
@@ -63,7 +63,7 @@ export const metadata = {
   },
 
   openGraph: {
-    title: "Pax26 – AI Automation for WhatsApp & Business Workflows",
+    title: "Pax26 Technologies – AI Automation for WhatsApp & Business Workflows",
     description:
       "Automate your business with AI. Pax26 enables WhatsApp automation, lead capture, and workflow automation while supporting digital payments.",
     url: "https://pax26.com",
@@ -83,7 +83,7 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Pax26 – AI Automation Platform",
+    title: "Pax26 Pax26 Technologies – AI Automation Platform",
     description:
       "Automate WhatsApp replies, capture leads and run workflows with AI. Pax26 also supports digital payments and utilities.",
     images: ["/Pax26_single_logo.png"],
@@ -107,7 +107,7 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "Organization",
-                  name: "Pax26",
+                  name: "Pax26 Technologies",
                   url: "https://pax26.com",
                   logo: "https://pax26.com/icon.ico",
                   sameAs: [
@@ -119,7 +119,7 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "SoftwareApplication",
-                  name: "Pax26",
+                  name: "Pax26 Technologies",
                   url: "https://pax26.com",
                   applicationCategory: "BusinessApplication",
                   operatingSystem: "Web",
@@ -138,12 +138,12 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "Service",
-                  name: "Pax26 AI Automation",
+                  name: "Pax26 Technologies AI Automation",
                   description:
                     "AI powered automation services including WhatsApp messaging automation, AI agents, workflow automation and lead capture.",
                   provider: {
                     "@type": "Organization",
-                    name: "Pax26",
+                    name: "Pax26 Technologies",
                   },
                 },
 
