@@ -226,7 +226,7 @@ export default function AiAutomationLandingPage() {
               <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
                 className="flex flex-wrap gap-3 mb-6">
                 <button className="al-btn flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white"
-                  onClick={() => router.push("market-place")}
+                  onClick={() => router.push("/dashboard/automations/home")}
                   style={{ background: primary, boxShadow: `0 12px 32px ${primary}40` }}>
                   Start Free Automation <IcoArrow />
                 </button>
