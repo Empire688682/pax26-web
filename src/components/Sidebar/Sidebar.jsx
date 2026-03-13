@@ -68,12 +68,12 @@ export default function Sidebar() {
 
   return (
     <nav
-      className={`fixed h-screen flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
+      className={`fixed h-[100vh] flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       {/* ── Panel ─────────────────────────────────────────── */}
       <div
-        className="w-[78%] max-w-[300px] h-screen flex flex-col overflow-hidden"
+        className="w-[78%]  max-w-[300px] h-screen flex flex-col overflow-hidden"
         style={{
           background: pax26?.card ? `${pax26.card}ee` : pax26?.bg,
           backdropFilter: 'blur(24px)',
@@ -127,13 +127,14 @@ export default function Sidebar() {
               <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
               <NavItem href="/dashboard/automations" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
               <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/automations/training" icon={Zap} label="Train AI" onClick={close} pax26={pax26} />
 
               <Divider pax26={pax26} />
               <SectionLabel label="Finance" pax26={pax26} />
               <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
               <NavItem href="/dashboard#VTU" icon={DollarSign} label="VTU Service" onClick={close} pax26={pax26} />
               <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
-              <NavItem href="/dashboard/referrals" icon={Gift} label="Referrals" onClick={close} pax26={pax26} />
+              {/* <NavItem href="/dashboard#VTU" icon={Gift} label="Referrals" onClick={close} pax26={pax26} /> */}
 
               <Divider pax26={pax26} />
               <SectionLabel label="Account" pax26={pax26} />

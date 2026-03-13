@@ -8,7 +8,6 @@ const About = () => {
   return (
     <div
       className="min-h-screen px-6 py-14"
-      style={{ backgroundColor: pax26.secondaryBg }}
     >
       <div className="max-w-6xl mx-auto space-y-14">
 

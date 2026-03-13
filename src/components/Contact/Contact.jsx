@@ -27,8 +27,7 @@ const Contact = () => {
   };
 
   return (
-    <div 
-    style={{backgroundColor: pax26.secondaryBg}}
+    <div
     className="min-h-screen py-12 px-6">
       
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">

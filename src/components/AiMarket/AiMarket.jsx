@@ -138,7 +138,7 @@ export default function AiMarket() {
         <div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{firstName}.</h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Welcome to PaxAI dashboard
+          Welcome to Pax26 automations dashboard
         </p>
         <p className="text-xs md:text-sm text-muted-foreground">
           Manage your smart workflows powered by AI, use the buttons below to get started.
