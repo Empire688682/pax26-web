@@ -46,7 +46,6 @@ const Page = () => {
       <div className='px-6 py-10'
       >
         <div className="overflow-hidden w-full mb-6 whitespace-nowrap p-2 rounded-lg shadow"
-        style={{ backgroundColor: pax26.bg }}
         >{
           loading ? <p style={{ color: pax26.textPrimary }}>Laoding....</p>: 
           (

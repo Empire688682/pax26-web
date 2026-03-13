@@ -6,7 +6,7 @@ import AiWhatsappConnectInfo from '@/components/AiWhatsappConnectInfo/AiWhatsapp
 const page = () => {
     const { pax26 } = useGlobalContext();
   return (
-    <div style={{ backgroundColor: pax26.secondaryBg }}>
+    <div>
       <div className="px-6 py-10">
         <AiWhatsappConnectInfo />
       </div>

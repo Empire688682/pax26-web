@@ -39,7 +39,6 @@ export default function AutomationViewPage() {
   if (loading)
     return (
       <div
-        style={{ backgroundColor: pax26.secondaryBg }}
         className="text-muted px-6 flex items-center justify-center"
       >
         <LoadingSpinner />
@@ -49,7 +48,6 @@ export default function AutomationViewPage() {
   if (!automation)
     return (
       <div
-        style={{ backgroundColor: pax26.secondaryBg }}
         className="text-muted min-h-[50vh] px-6 flex items-center justify-center"
       >
         <p className="text-red-500">Automation not found</p>
@@ -58,7 +56,7 @@ export default function AutomationViewPage() {
 
   return (
     <div className="px-6"
-      style={{ color: pax26.textPrimary, backgroundColor: pax26.secondaryBg }}>
+      style={{ color: pax26.textPrimary}}>
       <div className="max-w-3xl mx-auto space-y-6 py-8">
         {/* Automation Info */}
       <h1 className="text-2xl font-bold flex items-center gap-2">
