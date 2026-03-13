@@ -68,7 +68,7 @@ export default function Sidebar() {
 
   return (
     <nav
-      className={`fixed flex top-0 right-0 w-full z-50 transform transition-transform duration-300 ease-in-out
+      className={`fixed h-screen flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       {/* ── Panel ─────────────────────────────────────────── */}

@@ -173,7 +173,7 @@ const Footer = () => {
               </li>
 
               <li>
-                <a href="/dashboard"
+                <a href="/dashboard/services/buy-airtime"
                   className="text-white hover:text-blue-200 transition">
                   Airtime Recharge
                 </a>
@@ -187,14 +187,14 @@ const Footer = () => {
               </li>
 
               <li>
-                <a href="/dashboard"
+                <a href="/dashboard/services/buy-tv"
                   className="text-white hover:text-blue-200 transition">
                   TV Subscription
                 </a>
               </li>
 
               <li>
-                <a href="/dashboard"
+                <a href="/dashboard#VTU"
                   className="text-white hover:text-blue-200 transition">
                   Gift Cards
                 </a>
