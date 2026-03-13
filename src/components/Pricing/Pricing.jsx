@@ -6,12 +6,12 @@ export default function Pricing() {
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-gray-50">
-      <h2 className="text-4xl text-center font-bold">Simple Pricing</h2>
+    <section id="pricing" className="py-24">
+      <h2 className="text-4xl text-center text-white font-bold">Simple Pricing</h2>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-12 px-6">
         {plans.map((p, i) => (
-          <div key={i} className="bg-white p-8 rounded-xl shadow text-center">
+          <div key={i} className="bg-gray-200 p-8 rounded-xl shadow text-center">
             <h3 className="text-xl font-bold">{p.name}</h3>
             <p className="text-3xl mt-4">{p.price}</p>
             <p className="text-gray-500 mt-2">{p.desc}</p>

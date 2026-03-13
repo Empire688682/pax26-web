@@ -87,7 +87,8 @@ const Page = () => {
       </motion.div>
 
       {/* AutomationFeatures */}
-      <motion.div
+      <div className='border-t-[2px] border-black/80'>
+         <motion.div
         initial={{opacity:0, x:100 }}
         whileInView={{opacity:1, x:0 }}
         viewport={{ once: true, amount: 0.2 }}
@@ -96,6 +97,7 @@ const Page = () => {
       >
         <AutomationFeatures />
       </motion.div>
+      </div>
 
       {/* HowItWorks */}
       <motion.div

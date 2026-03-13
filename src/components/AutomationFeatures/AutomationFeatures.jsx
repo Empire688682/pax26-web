@@ -19,12 +19,12 @@ export default function AutomationFeatures() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-black/30">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 px-6">
         {features.map((f, i) => (
           <div key={i} className="p-8 shadow rounded-xl">
-            <h3 className="text-xl font-bold">{f.title}</h3>
-            <p className="mt-2 text-gray-600">{f.text}</p>
+            <h3 className="text-xl text-gray-300 font-bold">{f.title}</h3>
+            <p className="mt-2 text-gray-400">{f.text}</p>
           </div>
         ))}
       </div>
