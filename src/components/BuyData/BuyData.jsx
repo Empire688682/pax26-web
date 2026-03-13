@@ -166,8 +166,7 @@ const BuyData = () => {
   };
 
   return (
-    <div className="min-h-screen py-12 px-6"
-      style={{ backgroundColor: pax26.secondaryBg }}>
+    <div className="min-h-screen py-12 px-6">
 
       {dataPlan ? (
         <div className="grid md:grid-cols-2 grid-cols-1 gap-6 justify-start">

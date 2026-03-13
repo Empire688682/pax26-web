@@ -7,7 +7,7 @@ const TvHelp = ({ data }) => {
   return (
     <div 
     style={{ backgroundColor: pax26.bg }}
-    className='backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-blue-100 flex flex-col justify-between gap-8'>
+    className='backdrop-blur-md shadow-2xl rounded-2xl p-8 flex flex-col justify-between gap-8'>
       {/* Help Section */}
       <div>
         <h2 className="text-xl font-bold text-blue-700 mb-4">Need Help?</h2>

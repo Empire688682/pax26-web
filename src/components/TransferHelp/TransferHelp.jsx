@@ -7,7 +7,7 @@ const TransferHelp = ({ data }) => {
 
   return (
     <div
-      className="backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-green-100 flex flex-col justify-between gap-8"
+      className="backdrop-blur-md shadow-2xl rounded-2xl p-8 flex flex-col justify-between gap-8"
       style={{ backgroundColor: pax26.bg }}
     >
       {/* Help Section */}

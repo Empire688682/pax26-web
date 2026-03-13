@@ -44,8 +44,6 @@ export default function TransactionReceiptWrapper() {
     fetchTransaction();
   }, [transactionId, router]);
 
-  console.log("Receipt Data:", receiptData);
-
   // -------- LOADING OR NO DATA --------
   if (loading || !receiptData) {
     return (
@@ -59,7 +57,6 @@ export default function TransactionReceiptWrapper() {
   return (
     <div
       className="p-6 min-h-screen"
-      style={{ backgroundColor: pax26.secondaryBg }}
     >
       <Receipt
         amount={receiptData.amount}

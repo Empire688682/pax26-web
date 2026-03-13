@@ -125,20 +125,20 @@ export default function Sidebar() {
               {/* Authenticated menu */}
               <SectionLabel label="Overview" pax26={pax26} />
               <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
-              <NavItem href="/dashboard/ai-automation" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
-              <NavItem href="/dashboard/automations" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/automations" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
 
               <Divider pax26={pax26} />
               <SectionLabel label="Finance" pax26={pax26} />
               <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
-              <NavItem href="/fund-wallet" icon={DollarSign} label="VTU Service" onClick={close} pax26={pax26} />
-              <NavItem href="/dashboard/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
+              <NavItem href="/dashboard#VTU" icon={DollarSign} label="VTU Service" onClick={close} pax26={pax26} />
+              <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
               <NavItem href="/dashboard/referrals" icon={Gift} label="Referrals" onClick={close} pax26={pax26} />
 
               <Divider pax26={pax26} />
               <SectionLabel label="Account" pax26={pax26} />
               <NavItem href="/profile" icon={Settings} label="Profile & Settings" onClick={close} pax26={pax26} />
-              <NavItem href="/dashboard/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
+              <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
               <NavItem href="/contact" icon={Phone} label="Contact Support" onClick={close} pax26={pax26} />
               <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
               <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />

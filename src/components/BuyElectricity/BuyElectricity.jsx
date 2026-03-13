@@ -167,8 +167,7 @@ const BuyElectricity = () => {
   })
 
   return (
-    <div className="min-h-screen px-6 py-10"
-    style={{ backgroundColor: pax26.secondaryBg }}>
+    <div className="min-h-screen px-6 py-10">
       
       <div className='grid md:grid-cols-2 grid-cols-1 gap-6 justify-start '>
         <div className='flex flex-col gap-6'>

@@ -59,8 +59,7 @@ export default function Page() {
   // 🟢 Success UI
   // ------------------------
   return (
-    <div className="p-6"
-     style={{backgroundColor:pax26.secondaryBg}}>
+    <div className="p-6">
       <TransactionHistoryItem data={data} />
     </div>
   );
