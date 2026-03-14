@@ -142,7 +142,7 @@ const TransactionPin = () => {
           {/* close button */}
           <button
             onClick={() => setPinModal(false)}
-            className="tp-btn absolute top-4 right-4 w-7 h-7 rounded-xl flex items-center justify-center z-10"
+            className="tp-btn cursor-pointer absolute top-4 right-4 w-7 h-7 rounded-xl flex items-center justify-center z-80"
             style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}`, color: pax26?.textSecondary }}>
             <X size={13} />
           </button>
