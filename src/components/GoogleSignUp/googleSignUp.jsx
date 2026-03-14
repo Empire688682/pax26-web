@@ -8,7 +8,7 @@ import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
 export default function GoogleLoginButton({loading, setAwayLoading}) {
-  const { refHostCode, setAuthModalOpen, router, setUserData } = useGlobalContext();
+  const { refHostCode, pax26, setAuthModalOpen, router, setUserData } = useGlobalContext();
   const [HomeLoading, setHomeLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -83,12 +83,13 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
         {HomeLoading ? (
           <>
             <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <span>Signing in...</span>
+            <span className="text-gray-400 text-sm">Signing in...</span>
           </>
         ) : (
           <>
             <FcGoogle size={22} />
-            <span className="text-sm">Continue with Google</span>
+            <span
+            className="text-gray-400 text-sm">Continue with Google</span>
           </>
         )}
       </button>
