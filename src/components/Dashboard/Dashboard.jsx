@@ -194,7 +194,7 @@ const Dashboard = () => {
           <div className="absolute top-0 left-0 right-0 h-0.5"
             style={{ background: `linear-gradient(to right, ${primary}, ${TEAL})` }} />
 
-          <div className="relative z-10 flex gap-3 flex-wrap items-center justify-between gap-4">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -215,7 +215,7 @@ const Dashboard = () => {
               </p>
             </div>
             <button
-              className="db-btn flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
+              className="db-btn flex mr-4 items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
               onClick={() => router.push("dashboard/automations")}
               style={{ background: primary, boxShadow: `0 8px 24px ${primary}40` }}>
               Setup <ArrowRight size={14} />
