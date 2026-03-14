@@ -11,7 +11,7 @@ const CashBackBalance = () => {
     }, []);
 
     return (
-        <div className="p-y rounded-lg flex flex-wrap justify-between shadow-md"
+        <div className="p-4 rounded-lg flex flex-wrap justify-between shadow-md"
             style={{ backgroundColor: pax26.bg }}
         >
             <div>

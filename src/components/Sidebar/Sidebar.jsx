@@ -26,11 +26,11 @@ const CSS = `
 
 /* ── VTU services config ──────────────────────────────────────── */
 const VTU_SERVICES = [
-  { href: "/dashboard/services/buy-airtime", icon: Phone,     label: "Airtime",     color: "#f97316" },
-  { href: "/dashboard/services/buy-data",    icon: Database,  label: "Data",        color: "#38bdf8" },
-  { href: "/dashboard/services/buy-tv",      icon: Tv,        label: "TV Sub",      color: "#a78bfa" },
-  { href: "/dashboard/services/buy-electricity",                      icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
-  { href: "/dashboard#VTU",                  icon: Gift,      label: "Gift Cards",  color: "#f472b6" },
+  { href: "/dashboard/services/buy-airtime", icon: Phone, label: "Airtime", color: "#f97316" },
+  { href: "/dashboard/services/buy-data", icon: Database, label: "Data", color: "#38bdf8" },
+  { href: "/dashboard/services/buy-tv", icon: Tv, label: "TV Sub", color: "#a78bfa" },
+  { href: "/dashboard/services/buy-electricity", icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
+  { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards",  color: "#f472b6" },
 ];
 
 /* ── Plain nav item ───────────────────────────────────────────── */
@@ -189,7 +189,7 @@ export default function Sidebar() {
           </div>
 
           {/* ── Scrollable nav ─────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
+          <div className="flex-1 overflow-y-auto px-3  mb-18 flex flex-col gap-0.5">
 
             {!userData ? (
               /* Guest menu */
@@ -247,8 +247,9 @@ export default function Sidebar() {
           </div>
 
           {/* ── Footer ─────────────────────────────────── */}
-          <div className="px-4 py-4 flex items-center justify-between"
-            style={{ borderTop: `1px solid ${pax26?.border}` }}>
+          <div className='fixed w-full bottom-0 left-3'>
+            <div className="px-4 py-4 flex items-center justify-between"
+            style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
             {userData ? (
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -270,6 +271,7 @@ export default function Sidebar() {
               </div>
             )}
             <ThemeToggle />
+          </div>
           </div>
         </div>
 
