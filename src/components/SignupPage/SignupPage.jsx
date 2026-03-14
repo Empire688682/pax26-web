@@ -365,7 +365,7 @@ export default function SignupPage() {
                 <div className="flex items-center gap-3 my-5">
                   <div className="flex-1 h-px" style={{ background: border }} />
                   <span className="am-mono text-[10px] uppercase tracking-widest"
-                    style={{ color: textSecondary, opacity: 0.4 }}>or continue with</span>
+                    style={{ color: "white", opacity: 0.4 }}>or continue with</span>
                   <div className="flex-1 h-px" style={{ background: border }} />
                 </div>
                 <GoogleLoginButton loading={loading} setAwayLoading={setAwayLoading} />
