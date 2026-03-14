@@ -153,7 +153,7 @@ export default function Sidebar() {
     <>
       <style>{CSS}</style>
       <nav
-        className={`fixed h-[100vh] flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
+        className={`fixed h-screen flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* ── Panel ─────────────────────────────────────── */}
@@ -247,7 +247,7 @@ export default function Sidebar() {
           </div>
 
           {/* ── Footer ─────────────────────────────────── */}
-          <div className='fixed w-full bottom-0 left-3'>
+          <div className='fixed w-full bottom-1 left-2'>
             <div className="px-4 py-4 flex items-center justify-between"
             style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
             {userData ? (
