@@ -120,7 +120,7 @@ export const AppProvider = ({ children }) => {
   const logoutUser = async () => {
     try {
       await axios.get("/api/auth/logout");
-      clearLocalStorage();
+      localStorage.clear()
       setIsOpen(false);
       setUserData(null);
       setTransactionHistory([]);
@@ -197,7 +197,7 @@ export const AppProvider = ({ children }) => {
 
   const clearLocalStorage = () => {
     if (typeof window !== "undefined") {
-      localStorage.clear("Username");
+      localStorage.clear();
     }
   };
 
