@@ -311,7 +311,7 @@ const Dashboard = () => {
 
           <div className="rounded-2xl px-3 py-1" style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
             {transactionHistory?.length ? (
-              transactionHistory.slice(0, 5).map((tx) => (
+              [...transactionHistory].reverse().slice(0, 5).map((tx) => (
                 <TxRow
                   key={tx._id}
                   tx={tx}
