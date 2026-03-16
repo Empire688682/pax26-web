@@ -137,8 +137,6 @@ export async function POST(req) {
         }
       });
 
-      console.log("transaction: ", transaction)
-
       return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: transaction }, { status: 200, headers: corsHeaders() });
     };
 
