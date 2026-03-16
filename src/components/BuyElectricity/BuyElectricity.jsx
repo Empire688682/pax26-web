@@ -344,7 +344,14 @@ const BuyElectricity = () => {
   const primary = pax26?.primary;
 
   const [formData, setFormData] = useState({
-    disco: "", meterNumber: "", meterType: "", amount: "", phone: "", pin: "", customerName: "",
+    disco: "", 
+    meterNumber: "", 
+    meterType: "", 
+    amount: "", 
+    phone: "", 
+    pin: "", 
+    customerName: "",
+    customerAddress: ""
   });
 
   /* fetch discos */
@@ -374,9 +381,9 @@ const BuyElectricity = () => {
     try {
       const res = await axios.post("/api/verify-meter-number", { meterNumber, disco });
       if (res.data.success) {
-        const name = res.data.data;
-        setCustomerName(name);
-        setFormData(p => ({ ...p, customerName: name }));
+        const {customer_name, customer_address} = res.data.data;
+        setCustomerName(customer_name);
+        setFormData(p => ({ ...p, customerName: customer_name, customerAddress: customer_address }));
         setIsMeterVerified(true);
         toast.success("Meter verified!");
       } else {

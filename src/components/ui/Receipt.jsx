@@ -256,13 +256,13 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
               {/* Electricity */}
               {receiptType === "electricity" && (<>
                 <Row label="Type"           value={receiptType}                       />
-                <Row label="Provider"       value={metadata?.network}                  />
-                <Row label="Meter Number"   value={metadata?.meterNumber}   mono       />
+                <Row label="Provider"       value={metadata?.provider}                  />
+                <Row label="Meter Number"   value={metadata?.accountNumber}   mono       />
                 <Row label="Customer"       value={metadata?.customerName}             />
                 <Row label="Address"        value={metadata?.address}                  />
                 <Row label="Meter Type"     value={metadata?.meterType}                />
                 <Row label="Units"          value={`${metadata?.units || "—"} kWh`}   />
-                <Row label="Token"          value={metadata?.token}          highlight mono />
+                <Row label="Token"          value={metadata?.tokenGenerated}          highlight mono />
                 <Row label="Transaction ID" value={transactionId}            mono       />
               </>)}
 
@@ -275,7 +275,7 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
               </>)}
 
               {/* Wallet funding */}
-              {receiptType === "Wallet funding" && (<>
+              {receiptType === "wallet-funding" && (<>
                 <Row label="Type"           value={receiptType}  />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}

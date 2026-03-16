@@ -111,7 +111,7 @@ function ServiceCard({ title, link, icon, color, pax26, router }) {
 
 /* ── Transaction row ──────────────────────────────────────────── */
 function TxRow({ tx, onClick, pax26 }) {
-  const isSuccess = tx.status === "success";
+  const isSuccess = tx.status;
   return (
     <div className="db-tx flex items-center justify-between gap-3 px-3 py-3.5 -mx-3"
       onClick={onClick}
@@ -120,20 +120,20 @@ function TxRow({ tx, onClick, pax26 }) {
         {/* type dot */}
         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: isSuccess ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)" }}>
-          <TrendingUp size={14} style={{ color: isSuccess ? "#22c55e" : "#f59e0b" }} />
+          <TrendingUp size={14} style={{ color: isSuccess === "success" ? "#22c55e" : isSuccess === "pending" ? "#f59e0b" : "#f54d0b" }} />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium truncate" style={{ color: pax26?.textPrimary }}>{tx.description}</p>
-          <p className="db-mono text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
+          <p className="db-mono text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
             {new Date(tx.createdAt).toLocaleString()}
           </p>
         </div>
       </div>
       <div className="flex flex-col items-end flex-shrink-0">
-        <p className="text-sm font-bold" style={{ color: isSuccess ? "#22c55e" : "#f59e0b" }}>
+        <p className="text-sm font-bold" style={{ color: isSuccess === "success" ? "#22c55e" : isSuccess === "pending" ? "#f59e0b" : "#f54d0b" }}>
           ₦{tx.amount}
         </p>
-        <p className="db-mono text-[10px] capitalize" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
+        <p className="db-mono text-[10px] capitalize" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
           {tx.type}
         </p>
       </div>
@@ -296,7 +296,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <p className="text-xs font-bold tracking-widest uppercase"
-                style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+                style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
                 Recent Activity
               </p>
               <div className="h-px w-10" style={{ background: pax26?.border }} />

@@ -24,6 +24,8 @@ const UtilityMetaSchema = new mongoose.Schema({
   customerName: String,
   accountNumber: String,  // meter no, smartcard no, betting ID
   tokenGenerated: String, // electricity token (if applicable)
+  address: String,
+  meterType: String,
 }, { _id: false });
 
 const SubscriptionMetaSchema = new mongoose.Schema({
@@ -47,7 +49,7 @@ const TransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      indext:true
+      index:true
     },
 
     // Strict enum — every new product type gets added here
@@ -65,7 +67,7 @@ const TransactionSchema = new mongoose.Schema(
         "platform-subscription",
       ],
       required: true,
-      indext:true
+      index:true
     },
 
     amount: { type: Number, required: true },
@@ -77,7 +79,7 @@ const TransactionSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "success", "failed", "reversed"],
       default: "pending",
-      indext:true
+      index:true
     },
 
     reference: { type: String, unique: true, sparse: true },
@@ -99,7 +101,7 @@ const TransactionSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
-);
+); 
 
 const TransactionModel =
   mongoose.models.Transaction ||

@@ -44,6 +44,8 @@ export default function TransactionReceiptWrapper() {
     fetchTransaction();
   }, [transactionId, router]);
 
+  console.log("receiptData: ", receiptData)
+
   // -------- LOADING OR NO DATA --------
   if (loading || !receiptData) {
     return (
@@ -61,10 +63,9 @@ export default function TransactionReceiptWrapper() {
       <Receipt
         amount={receiptData.amount}
         receiptType={receiptData.type}
-        metadata={receiptData.metadata}
+        metadata={receiptData?.meta?.utility}
         status={receiptData.status}
         date={receiptData.createdAt}
-        meterType={receiptData.meterType}
         units={receiptData.units || 120}
         transactionId={receiptData._id}
       />

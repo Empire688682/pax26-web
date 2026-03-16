@@ -37,12 +37,11 @@ export async function POST(req) {
         const data = await res.json();
 
         console.log("data: ", data);
-        console.log("verifyUrl: ", verifyUrl);
 
         if(data.status !== "00") {
             return NextResponse.json({ success: false, message: "An error occurred" }, { status: 500, headers:corsHeaders() });
         } else {
-            return NextResponse.json({ success: true, message: "Meter Number Verified", data:data.customer_name }, { status: 200, headers:corsHeaders() });
+            return NextResponse.json({ success: true, message: "Meter Number Verified", data:data }, { status: 200, headers:corsHeaders() });
         }
     } catch (error) {
         console.log("Verify-Error:", error);

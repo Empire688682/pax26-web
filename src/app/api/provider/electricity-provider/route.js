@@ -8,7 +8,6 @@ import bcrypt from "bcryptjs";
 import TransactionModel from "@/app/ults/models/TransactionModel";
 import ProviderModel from "@/app/ults/models/ProviderModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import ElectricityHistoryModel from "@/app/ults/models/ElectricityHistoryModel";
 import { nanoid } from "nanoid";
 
 dotenv.config();
@@ -20,11 +19,10 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { disco, meterNumber, meterType, amount, phone, pin } = body;
-  const customerName = "bug"
+  const { disco, meterNumber, meterType, customerAddress, customerName, amount, phone, pin } = body;
   try {
     // Validate request
-    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
+    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName || !customerAddress) {
       return NextResponse.json({ success: false, message: "All fields required" }, { status: 400, headers: corsHeaders() });
     }
 
@@ -103,56 +101,50 @@ export async function POST(req) {
     // For MOCK DATA testing, uncomment below and comment above fetch block
     if (result?.status === "INSUFFICIENT_BALANCE") {
       // ✅ Update Provider balance
-    await ProviderModel.findOneAndUpdate(
-      { name: "ClubConnect" },
-      {
-        lastUser: userId,
-        lastAction: "debit",
-        note: `Debited for Electricity`,
-        amount: result.walletbalance
-      },
-      { new: true, upsert: true }
-    );
+      await ProviderModel.findOneAndUpdate(
+        { name: "ClubConnect" },
+        {
+          lastUser: userId,
+          lastAction: "debit",
+          note: `Debited for Electricity`,
+          amount: result.walletbalance
+        },
+        { new: true, upsert: true }
+      );
 
-    // Deduct wallet balance
-    await UserModel.findByIdAndUpdate(
-      userId,
-      { walletBalance: user.walletBalance - saveAmount },
-      { new: true }
-    );
+      // Deduct wallet balance
+      await UserModel.findByIdAndUpdate(
+        userId,
+        { walletBalance: user.walletBalance - saveAmount },
+        { new: true }
+      );
 
-   const transaction =  await TransactionModel.create({
-      userId,
-      type: "electricity",
-      amount: saveAmount,
-      status: "success",
-      transactionId: mockResponse.orderid, //result.orderid,
-      reference: requestId,
-      metadata: {
-        network: disco,
-        meterNumber,
-        name: customerName,
-        address: mockResponse.serviceAddress,
-        token: mockResponse.metertoken,
-      }
-    });
+      const transaction = await TransactionModel.create({
+        userId,
+        type: "electricity",
+        amount: saveAmount,
+        status: "success",
+        reference: requestId,
+        meta: {
+          utility: {
+            provider: disco,
+            accountNumber:meterNumber,
+            customerName,
+            meterType,
+            address: customerAddress,
+            tokenGenerated: mockResponse.metertoken,
+          }
+        }
+      });
 
-  // await ElectricityHistoryModel.create({
-  //         userId,
-  //         meterNumber,
-  //         disco,
-  //         customerName,
-  //         serviceAddress: mockResponse.serviceAddress,
-  //         meterType,
-  //         amount,
-  //         token: mockResponse.metertoken
-  //   });
-      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: transaction }, { status:200, headers: corsHeaders() });
+      console.log("transaction: ", transaction)
+
+      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: transaction }, { status: 200, headers: corsHeaders() });
     };
 
 
 
-   // return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
+    // return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers: corsHeaders() });
