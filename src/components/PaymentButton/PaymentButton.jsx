@@ -55,8 +55,8 @@ export default function PaymentButton({
     text: "Fund Your Wallet",
     callback: (response) => {
       console.log("response:", response);
+      saveTransactionToTDb();
       setPaymentId(response.transaction_id);
-      saveTransactionToTDb()
       closePaymentModal();
     },
     onClose: () => { },

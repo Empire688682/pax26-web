@@ -3,7 +3,7 @@ import TransactionModel from "@/app/ults/models/TransactionModel";
 import { verifyToken } from "../helper/VerifyToken";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
-import PaymentModel from "@/app/ults/models/PaymentModel";
+import FundingModel from "@/app/ults/models/FundingModel";
 import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
@@ -32,7 +32,7 @@ export async function GET(req) {
 
         const totalReward = refRewardedSum[0]?.total || 0;
 
-       const successfulFunding = await PaymentModel.aggregate([
+       const successfulFunding = await FundingModel.aggregate([
         {$match: {status: "PAID"}},
         {$group: {_id: null, total:{$sum: "$amount"}}}
        ]);
