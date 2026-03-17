@@ -8,8 +8,9 @@ const UserSchema = new mongoose.Schema(
     name: { type: String },
     email: { type: String, required: true, unique: true, index: true },
     password: { type: String, default: null },
-    isPasswordSet: { type: Boolean, default: true },
-    pin: { type: String, default: null },
+    isPasswordSet: { type: Boolean, default: false },
+    transactionPin: { type: String, default: null },
+    isTransactionPinSet: { type: Boolean, default: false },
     number: { type: String, default: "", unique: true, index: true },
     profileImage: { type: String, default: "/profile-img.png" },
 

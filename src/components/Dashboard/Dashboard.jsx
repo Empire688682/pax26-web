@@ -143,19 +143,23 @@ function TxRow({ tx, onClick, pax26 }) {
 
 /* ── Main Dashboard ───────────────────────────────────────────── */
 const Dashboard = () => {
-  const { userData, pax26, router, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, pax26, router, transactionHistory, checkIsTransactionPinSet, getUserRealTimeData } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
-  const [showMore, setShowMore]     = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => { getUserRealTimeData(); }, []);
 
-  const firstName = userData?.name?.split(" ")[0] || "User";
-  const primary   = pax26?.primary || "#3B82F6";
+  useEffect(() => {
+    checkIsTransactionPinSet()
+  }, []);
 
-  const GREEN  = "#22c55e";
-  const TEAL   = "#06b6d4";
-  const AMBER  = "#f59e0b";
-  const CORAL  = "#f97316";
+  const firstName = userData?.name?.split(" ")[0] || "User";
+  const primary = pax26?.primary || "#3B82F6";
+
+  const GREEN = "#22c55e";
+  const TEAL = "#06b6d4";
+  const AMBER = "#f59e0b";
+  const CORAL = "#f97316";
   const VIOLET = "#a78bfa";
 
   return (
@@ -225,10 +229,10 @@ const Dashboard = () => {
 
         {/* ── Automation stats ────────────────────────────────── */}
         <div className="db-s3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Automations"  value="0"  color={TEAL}   delay="0s"     pax26={pax26} />
-          <StatCard label="Msgs Handled" value="0"  color={GREEN}  delay="0.05s"  pax26={pax26} />
-          <StatCard label="Leads"        value="0"  color={AMBER}  delay="0.10s"  pax26={pax26} />
-          <StatCard label="Revenue"      value="₦0" color={VIOLET} delay="0.15s"  pax26={pax26} />
+          <StatCard label="Automations" value="0" color={TEAL} delay="0s" pax26={pax26} />
+          <StatCard label="Msgs Handled" value="0" color={GREEN} delay="0.05s" pax26={pax26} />
+          <StatCard label="Leads" value="0" color={AMBER} delay="0.10s" pax26={pax26} />
+          <StatCard label="Revenue" value="₦0" color={VIOLET} delay="0.15s" pax26={pax26} />
         </div>
 
         {/* ── Wallet card ─────────────────────────────────────── */}
@@ -283,11 +287,11 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3" id="VTU">
-            <ServiceCard title="Airtime"    link="/dashboard/services/buy-airtime"    icon={<Phone size={18} />}         color={GREEN}  pax26={pax26} router={router} />
-            <ServiceCard title="Data"       link="/dashboard/services/buy-data"       icon={<Wifi size={18} />}          color={TEAL}   pax26={pax26} router={router} />
-            <ServiceCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} />}         color={AMBER}  pax26={pax26} router={router} />
-            <ServiceCard title="TV"         link="/dashboard/services/buy-tv"         icon={<Tv size={18} />}            color={VIOLET} pax26={pax26} router={router} />
-            <ServiceCard title="Transfer"   link="/dashboard/services/transfer"       icon={<ArrowRightLeft size={18} />} color={CORAL}  pax26={pax26} router={router} />
+            <ServiceCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={18} />} color={GREEN} pax26={pax26} router={router} />
+            <ServiceCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={18} />} color={TEAL} pax26={pax26} router={router} />
+            <ServiceCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} />} color={AMBER} pax26={pax26} router={router} />
+            <ServiceCard title="TV" link="/dashboard/services/buy-tv" icon={<Tv size={18} />} color={VIOLET} pax26={pax26} router={router} />
+            <ServiceCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={18} />} color={CORAL} pax26={pax26} router={router} />
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
+import mongoose from "mongoose"
 import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../helper/VerifyToken";
@@ -45,6 +46,8 @@ export async function POST(req) {
         { status: 404, headers: corsHeaders() }
       );
     }
+
+    console.log("sender.pin: ", sender.pin);
 
     const pinMatch = await bcrypt.compare(pin, sender.pin);
     if (!pinMatch) {

@@ -154,6 +154,16 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const checkIsTransactionPinSet = () =>{
+    if(!userData) return
+    if(!userData.transactionPinSet){
+      setPinModal(true)
+    }else{
+      setPinModal(false)
+    }
+    return
+  }
+
 
   /* ================================
      USER DATA FETCHING
@@ -161,6 +171,7 @@ export const AppProvider = ({ children }) => {
 
   const getUserRealTimeData = async () => {
     setLoading(true);
+    await fetchUser();
     try {
       const res = await axios.get("/api/real-time-data");
       if (res.data.success) {
@@ -186,21 +197,9 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem("userData", JSON.stringify(res.data.profile));
       }
     } catch (error) {
-      console.log(error);
+      console.log("fetchUser: ", error);
     }
   };
-
-
-  /* ================================
-     LOCAL STORAGE UTILS
-  =================================*/
-
-  const clearLocalStorage = () => {
-    if (typeof window !== "undefined") {
-      localStorage.clear();
-    }
-  };
-
 
   /* ================================
      MENU HANDLER
@@ -337,6 +336,8 @@ export const AppProvider = ({ children }) => {
         setIsWhatsappNumberConnected,
 
         fetchUser,
+        
+        checkIsTransactionPinSet
       }}
     >
       {children}

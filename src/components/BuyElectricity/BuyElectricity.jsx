@@ -331,7 +331,7 @@ function ElectricityHelpPanel({ formData, customerName, isMeterVerified, pax26 }
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyElectricity = () => {
-  const { getUserRealTimeData, pax26, userData, router, setPinModal } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, router, checkIsTransactionPinSet, setPinModal } = useGlobalContext();
 
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading]                       = useState(false);
@@ -353,6 +353,10 @@ const BuyElectricity = () => {
     customerName: "",
     customerAddress: ""
   });
+
+  useEffect(()=>{
+          checkIsTransactionPinSet();
+        },[])
 
   /* fetch discos */
   useEffect(() => {
