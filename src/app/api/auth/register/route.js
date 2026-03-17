@@ -173,7 +173,7 @@ const registerUser = async (req) => {
       return res;
     }
   } catch (error) {
-    console.error("Register Error:", error);
+    console.log("Register Error:", error);
     return NextResponse.json(
       {
         success: false,

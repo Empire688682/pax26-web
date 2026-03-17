@@ -7,7 +7,7 @@ const TransferMetaSchema = new mongoose.Schema({
   senderNumber: String,
   recipientName: String,
   recipientNumber: String,
-  bankName: String,
+  bankName: {type: String, default:"Pax26"},
   accountNumber: String,
   balanceBefore: Number,
   balanceAfter: Number,
