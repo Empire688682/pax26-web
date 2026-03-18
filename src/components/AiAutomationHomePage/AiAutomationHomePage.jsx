@@ -130,8 +130,8 @@ export default function AiAutomationHomePage() {
   const { pax26, router, fetchUser, userData } = useGlobalContext();
   const [enabledAi, setEnabledAi]             = useState(false);
   const [businessProfile, setBusinessProfile] = useState(null);
+  const [apiRun, setApiRun]                   = useState(false);
 
-  useEffect(() => { fetchUser(); }, [userData]);
   useEffect(() => { setEnabledAi(userData?.paxAI?.enabled || false); }, [userData]);
 
   const fetchBusinessProfile = async () => {
@@ -139,10 +139,18 @@ export default function AiAutomationHomePage() {
       const res  = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
       const data = await res.json();
       if (data.success) setBusinessProfile(data.profile);
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.log("fetchBusinessProfileErr: ", err); 
+    }finally{
+      setApiRun(true);
+    }
   };
 
-  useEffect(() => { fetchBusinessProfile(); }, []);
+  useEffect(() => { 
+    if(apiRun) return;
+    fetchUser();
+    fetchBusinessProfile(); 
+  }, [userData]);
 
   const handleAlert = () => {
     alert("Please train PaxAI with your business information before enabling automations.");
@@ -193,7 +201,7 @@ export default function AiAutomationHomePage() {
 
             <button
               className="aah-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-              onClick={() => router.push("/market-place")}
+              onClick={() => router.push("/dashboard/automations/market-place")}
               style={{ background: pax26?.primary, boxShadow: `0 8px 28px ${pax26?.primary}40` }}>
               <IconSpark /> New Workflow
             </button>

@@ -92,6 +92,8 @@ export async function POST(req) {
     const last10Recipient = recipient.number.slice(-10);
     const reference = `TRF-${Date.now()}-${sender._id}`;
 
+    let debitTx; 
+
     // ✅ Atomic session
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -100,7 +102,7 @@ export async function POST(req) {
       await sender.save({ session });
       await recipient.save({ session });
 
-     const debitTx = await TransactionModel.create([{
+      debitTx = await TransactionModel.create([{
         userId: sender._id,
         type: "transfer",
         amount: Number(amount),
@@ -159,7 +161,7 @@ export async function POST(req) {
         recipientName: recipient.name,
         amount: Number(amount),
         senderBalance: senderAfter,
-        transactionId: debitTx._id,
+        transactionId: debitTx[0]._id,
         reference,
       },
     }, { status: 200, headers: corsHeaders() });
