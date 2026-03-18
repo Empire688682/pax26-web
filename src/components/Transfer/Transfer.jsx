@@ -254,7 +254,7 @@ const Transfer = () => {
   const [checkingUser, setCheckingUser]   = useState(false);
   const [userChecked, setUserChecked]     = useState(false);
   const [amount, setAmount]               = useState("");
-  const [pin, setPin]                     = useState("");
+  const [transactionPin, setTransactionPin]                     = useState("");
   const [loading, setLoading]             = useState(false);
   const [showConfirm, setShowConfirm]     = useState(false);
   const [focused, setFocused]             = useState("");
@@ -288,7 +288,7 @@ const Transfer = () => {
 
   /* Step 1 — validate → open modal */
   const handleReview = () => {
-    if (!accountNumber || !amount || !pin || !recipientName)
+    if (!accountNumber || !amount || !transactionPin || !recipientName)
       return toast.error("Please complete all fields correctly.");
     if (!userChecked)
       return toast.error("Please wait for account verification.");
@@ -296,7 +296,7 @@ const Transfer = () => {
       return toast.error("Minimum transfer is ₦50.");
     if (Number(amount) > userWallet)
       return toast.error("Insufficient wallet balance.");
-    if (pin.length < 4)
+    if (transactionPin.length < 4)
       return toast.error("PIN must be 4 digits.");
     setShowConfirm(true);
   };
@@ -307,7 +307,7 @@ const Transfer = () => {
     try {
       const res = await fetch("/api/transfer", {
         method: "POST",
-        body: JSON.stringify({ accountNumber, amount, pin, recipientName }),
+        body: JSON.stringify({ accountNumber, amount, transactionPin, recipientName }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -317,7 +317,7 @@ const Transfer = () => {
       const data = await res.json();
       await getUserRealTimeData();
       setShowConfirm(false);
-      setPin(""); setAmount(""); setAccountNumber(""); setRecipientName("");
+      setTransactionPin(""); setAmount(""); setAccountNumber(""); setRecipientName("");
       const { transactionId } = data.data;
       router.push(`/transaction-receipt/?id=${transactionId}`);
     } catch {
@@ -334,7 +334,7 @@ const Transfer = () => {
 
   const amountValid  = amount && Number(amount) >= 50;
   const overBalance  = Number(amount) > userWallet;
-  const canSubmit    = recipientName && amountValid && !overBalance && pin.length === 4;
+  const canSubmit    = recipientName && amountValid && !overBalance && transactionPin.length === 4;
 
   return (
     <>
@@ -499,8 +499,8 @@ const Transfer = () => {
                       <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                         style={{ color: pax26?.textSecondary, opacity: 0.35 }} />
                       <input
-                        type="password" value={pin} maxLength={4} placeholder="4-digit PIN"
-                        onChange={e => setPin(e.target.value)}
+                        type="password" value={transactionPin} maxLength={4} placeholder="4-digit PIN"
+                        onChange={e => setTransactionPin(e.target.value)}
                         className="tr-input w-full pl-9 pr-4 py-3 rounded-xl text-sm tracking-widest"
                         style={inputStyle("pin")}
                         onFocus={() => setFocused("pin")} onBlur={() => setFocused("")}

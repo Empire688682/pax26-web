@@ -216,7 +216,7 @@ function ConfirmModal({ visible, onConfirm, onCancel, loading, data, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyTv = () => {
-  const { getUserRealTimeData, pax26, userData, setPinModal, checkIsTransactionPinSet } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, setPinModal } = useGlobalContext();
 
   const initialForm = { provider: "", smartcardNumber: "", tvPackage: "", phone: "", pin: "" };
 
@@ -233,10 +233,6 @@ const BuyTv = () => {
 
   const primary = pax26?.primary;
   const GREEN   = "#22c55e";
-
-  useEffect(()=>{
-    checkIsTransactionPinSet();
-  },[])
 
   /* fetch all packages on mount */
   useEffect(() => {

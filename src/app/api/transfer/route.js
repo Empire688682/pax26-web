@@ -15,9 +15,9 @@ export async function POST(req) {
   await connectDb();
 
   try {
-    const { accountNumber, amount, pin } = await req.json();
+    const { accountNumber, amount, transactionPin } = await req.json();
 
-    if (!accountNumber || !amount || !pin) {
+    if (!accountNumber || !amount || !transactionPin) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400, headers: corsHeaders() }
@@ -47,9 +47,7 @@ export async function POST(req) {
       );
     }
 
-    console.log("sender.pin: ", sender.pin);
-
-    const pinMatch = await bcrypt.compare(pin, sender.pin);
+    const pinMatch = await bcrypt.compare(transactionPin, sender.transactionPin);
     if (!pinMatch) {
       return NextResponse.json(
         { message: "Invalid transaction PIN" },
@@ -102,7 +100,7 @@ export async function POST(req) {
       await sender.save({ session });
       await recipient.save({ session });
 
-      await TransactionModel.create([{
+     const debitTx = await TransactionModel.create([{
         userId: sender._id,
         type: "transfer",
         amount: Number(amount),

@@ -65,11 +65,11 @@ const NETWORKS = { "01": "MTN", "02": "Glo", "03": "9Mobile", "04": "Airtel" };
 
 /* ── Receipt type config ──────────────────────────────────────── */
 const TYPE_CONFIG = {
-  airtime:          { icon: <Smartphone size={18} />, color: "#f97316", label: "Airtime"          },
-  data:             { icon: <Wifi size={18} />,        color: "#38bdf8", label: "Data"              },
-  electricity:      { icon: <Zap size={18} />,         color: "#fbbf24", label: "Electricity"       },
-  transfer:         { icon: <ArrowLeftRight size={18} />, color: "#a78bfa", label: "Transfer"        },
-  "Wallet funding": { icon: <Wallet size={18} />,      color: "#22c55e", label: "Wallet Funding"   },
+  airtime: { icon: <Smartphone size={18} />, color: "#f97316", label: "Airtime" },
+  data: { icon: <Wifi size={18} />, color: "#38bdf8", label: "Data" },
+  electricity: { icon: <Zap size={18} />, color: "#fbbf24", label: "Electricity" },
+  transfer: { icon: <ArrowLeftRight size={18} />, color: "#a78bfa", label: "Transfer" },
+  "wallet funding": { icon: <Wallet size={18} />, color: "#22c55e", label: "Wallet Funding" },
 };
 
 /* ── Row helpers ──────────────────────────────────────────────── */
@@ -108,16 +108,16 @@ function DoubleRow({ label, top, bottom }) {
 }
 
 /* ── Main component ───────────────────────────────────────────── */
-export default function Receipt({ amount, status, date, transactionId, receiptType, metadata }) {
+export default function Receipt({ amount, status, date, transactionId, receiptType, meta }) {
   const { pax26 } = useGlobalContext();
   const receiptRef = useRef(null);
-  const [sharingImg, setSharingImg]   = useState(false);
-  const [sharingPdf, setSharingPdf]   = useState(false);
-  const [imgDone, setImgDone]         = useState(false);
-  const [pdfDone, setPdfDone]         = useState(false);
+  const [sharingImg, setSharingImg] = useState(false);
+  const [sharingPdf, setSharingPdf] = useState(false);
+  const [imgDone, setImgDone] = useState(false);
+  const [pdfDone, setPdfDone] = useState(false);
 
-  const primary  = pax26?.primary || "#3b82f6";
-  const cfg      = TYPE_CONFIG[receiptType] || { icon: <Wallet size={18} />, color: primary, label: receiptType };
+  const primary = pax26?.primary || "#3b82f6";
+  const cfg = TYPE_CONFIG[receiptType] || { icon: <Wallet size={18} />, color: primary, label: receiptType };
   const isSuccess = status?.toLowerCase() === "success" || status?.toLowerCase() === "successful";
 
   /* ── Share as image ── */
@@ -125,8 +125,8 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
     setSharingImg(true);
     try {
       const dataUrl = await htmlToImage.toPng(receiptRef.current, { pixelRatio: 2 });
-      const blob    = await (await fetch(dataUrl)).blob();
-      const file    = new File([blob], "pax26-receipt.png", { type: "image/png" });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], "pax26-receipt.png", { type: "image/png" });
       if (navigator.share) {
         await navigator.share({ title: "Pax26 Receipt", files: [file] });
       } else {
@@ -142,12 +142,12 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
   const handleSharePDF = async () => {
     setSharingPdf(true);
     try {
-      const dataUrl  = await htmlToImage.toPng(receiptRef.current, { pixelRatio: 2 });
-      const pdf      = new jsPDF("p", "mm", "a4");
+      const dataUrl = await htmlToImage.toPng(receiptRef.current, { pixelRatio: 2 });
+      const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, 0);
       const pdfBlob = pdf.output("blob");
-      const file    = new File([pdfBlob], "pax26-receipt.pdf", { type: "application/pdf" });
+      const file = new File([pdfBlob], "pax26-receipt.pdf", { type: "application/pdf" });
       if (navigator.share) {
         await navigator.share({ title: "Pax26 Receipt PDF", files: [file] });
       } else {
@@ -196,9 +196,11 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
                   </div>
                   <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "18px", fontWeight: 800, color: "#111827" }}>Pax26</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "20px",
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "20px",
                   background: isSuccess ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-                  border: `1px solid ${isSuccess ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}` }}>
+                  border: `1px solid ${isSuccess ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}`
+                }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: isSuccess ? "#22c55e" : "#ef4444" }} />
                   <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: isSuccess ? "#22c55e" : "#ef4444" }}>
                     {status}
@@ -247,36 +249,36 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
 
               {/* Transfer */}
               {receiptType === "transfer" && (<>
-                <Row label="Type"           value={receiptType}                                    />
-                <DoubleRow label="Recipient" top={metadata?.transferDetails?.recipientName} bottom={metadata?.transferDetails?.recipientNumber} />
-                <DoubleRow label="Sender"    top={metadata?.transferDetails?.senderName}    bottom={metadata?.transferDetails?.senderNumber}    />
+                <Row label="Type" value={receiptType} />
+                <DoubleRow label="Recipient" top={meta?.transfer?.recipientName} bottom={meta?.transfer?.recipientNumber} />
+                <DoubleRow label="Sender" top={meta?.transfer?.senderName} bottom={meta?.transfer?.senderNumber} />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 
               {/* Electricity */}
               {receiptType === "electricity" && (<>
-                <Row label="Type"           value={receiptType}                       />
-                <Row label="Provider"       value={metadata?.provider}                  />
-                <Row label="Meter Number"   value={metadata?.accountNumber}   mono       />
-                <Row label="Customer"       value={metadata?.customerName}             />
-                <Row label="Address"        value={metadata?.address}                  />
-                <Row label="Meter Type"     value={metadata?.meterType}                />
-                <Row label="Units"          value={`${metadata?.units || "—"} kWh`}   />
-                <Row label="Token"          value={metadata?.tokenGenerated}          highlight mono />
-                <Row label="Transaction ID" value={transactionId}            mono       />
+                <Row label="Type" value={receiptType} />
+                <Row label="Provider" value={meta?.electricity?.provider} />
+                <Row label="Meter Number" value={meta?.electricity?.accountNumber} mono />
+                <Row label="Customer" value={meta?.electricity?.customerName} />
+                <Row label="Address" value={meta?.electricity?.address} />
+                <Row label="Meter Type" value={meta?.electricity?.meterType} />
+                <Row label="Units" value={`${meta?.electricity?.units || "—"} kWh`} />
+                <Row label="Token" value={meta?.electricity?.tokenGenerated} highlight mono />
+                <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 
               {/* Airtime / Data */}
               {(receiptType === "airtime" || receiptType === "data") && (<>
-                <Row label="Network"        value={NETWORKS[metadata?.network] || metadata?.network} />
-                <Row label="Recipient"      value={metadata?.number}           mono />
-                <Row label="Type"           value={receiptType}                     />
-                <Row label="Transaction ID" value={transactionId}             mono />
+                <Row label="Network" value={NETWORKS[meta?.airtime?.network] || meta?.data?.network} />
+                <Row label="Recipient" value={meta?.airtime?.number || meta?.data?.number} mono />
+                <Row label="Type" value={receiptType} />
+                <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 
               {/* Wallet funding */}
               {receiptType === "wallet-funding" && (<>
-                <Row label="Type"           value={receiptType}  />
+                <Row label="Type" value={receiptType} />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 
@@ -322,7 +324,7 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
               }}>
               {sharingPdf
                 ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent rc-spin"
-                    style={{ borderColor: `${pax26?.border}`, borderTopColor: pax26?.primary }} />
+                  style={{ borderColor: `${pax26?.border}`, borderTopColor: pax26?.primary }} />
                 : pdfDone
                   ? <><CheckCircle2 size={15} /> Saved!</>
                   : <><FileDown size={15} /> Save PDF</>

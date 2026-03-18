@@ -156,7 +156,7 @@ export const AppProvider = ({ children }) => {
 
   const checkIsTransactionPinSet = () =>{
     if(!userData) return
-    if(!userData.transactionPinSet){
+    if(userData.isTransactionPinSet === false){
       setPinModal(true)
     }else{
       setPinModal(false)
@@ -171,7 +171,6 @@ export const AppProvider = ({ children }) => {
 
   const getUserRealTimeData = async () => {
     setLoading(true);
-    await fetchUser();
     try {
       const res = await axios.get("/api/real-time-data");
       if (res.data.success) {

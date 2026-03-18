@@ -300,7 +300,7 @@ function DataHelpPanel({ form, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyData = () => {
-  const { dataPlan, getUserRealTimeData, userData, setPinModal, checkIsTransactionPinSet, profitConfig, pax26, userCashBack } = useGlobalContext();
+  const { dataPlan, getUserRealTimeData, userData, setPinModal, profitConfig, pax26, userCashBack } = useGlobalContext();
 
   const initialForm = { network: "", plan: "", planId: "", amount: "", number: "", pin: "" };
 
@@ -315,10 +315,6 @@ const BuyData = () => {
 
   const primary = pax26?.primary;
   const GREEN   = "#22c55e";
-
-   useEffect(()=>{
-        checkIsTransactionPinSet();
-      },[])
 
   /* pin guard */
   useEffect(() => {

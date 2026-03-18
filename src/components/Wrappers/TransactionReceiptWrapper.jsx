@@ -63,10 +63,9 @@ export default function TransactionReceiptWrapper() {
       <Receipt
         amount={receiptData.amount}
         receiptType={receiptData.type}
-        metadata={receiptData?.meta?.utility}
+        meta={receiptData?.meta}
         status={receiptData.status}
         date={receiptData.createdAt}
-        units={receiptData.units || 120}
         transactionId={receiptData._id}
       />
     </div>

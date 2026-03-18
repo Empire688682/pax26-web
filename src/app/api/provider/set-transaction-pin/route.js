@@ -24,7 +24,7 @@ export async function POST(req){
 
         const updatedUser = await UserModel.findByIdAndUpdate(
             userId,
-            { pin: hashedPin },
+            { transactionPin: hashedPin, isTransactionPinSet: true  },
             { new: true, runValidators: true }
         );
 

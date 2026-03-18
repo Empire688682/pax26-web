@@ -55,7 +55,7 @@ const CSS = `
 `;
 
 const WalletBalance = ({ setShowMore, showMore }) => {
-  const { getUserRealTimeData, router, pax26, userWallet, userData } = useGlobalContext();
+  const { getUserRealTimeData, router, pax26, userWallet, userData, checkIsTransactionPinSet } = useGlobalContext();
   const pathName = usePathname();
 
   const [loading, setLoading] = useState(false);
@@ -66,6 +66,9 @@ const WalletBalance = ({ setShowMore, showMore }) => {
   const GREEN   = "#22c55e";
   const accNum  = userData?.number ? userData.number.slice(-10) : "**********";
 
+  useEffect(()=>{
+    checkIsTransactionPinSet();
+  },[userData])
   /* initial fetch + 30s polling */
   useEffect(() => {
     const fetch = async () => { setLoading(true); await getUserRealTimeData(); setLoading(false); };

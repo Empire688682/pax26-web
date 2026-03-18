@@ -24,11 +24,7 @@ export async function GET(req) {
         // Prepare safe user object
     const userObj = user.toObject();
     delete userObj.password;
-    if(userObj.pin){
-      userObj.pin = true;
-    }else{
-      userObj.pin = null;
-    }
+    delete userObj.transactionPin
     userObj.whatsappBusinessNo = user.whatsapp.displayPhone;
     delete userObj.isAdmin;
     delete userObj.provider;

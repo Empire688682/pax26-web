@@ -107,11 +107,7 @@ export async function POST(req) {
 
         const userObj = user.toObject();
         delete userObj.password;
-        if (userObj.pin) {
-            userObj.pin = true;
-        } else {
-            userObj.pin = null;
-        }
+        delete userObj.transactionPin;
         delete userObj.isAdmin;
         delete userObj.provider;
         delete userObj.referralHost;

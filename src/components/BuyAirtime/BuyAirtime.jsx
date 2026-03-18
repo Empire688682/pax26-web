@@ -271,7 +271,7 @@ function AirtimeHelpPanel({ data, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyAirtime = () => {
-  const { setPinModal, getUserRealTimeData, userData, checkIsTransactionPinSet, userCashBack, pax26 } = useGlobalContext();
+  const { setPinModal, getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
 
   const initialData = { network: "", amount: "", number: "", pin: "" };
 
@@ -285,10 +285,6 @@ const BuyAirtime = () => {
 
   const primary = pax26?.primary;
   const GREEN   = "#22c55e";
-
-  useEffect(()=>{
-      checkIsTransactionPinSet();
-    },[])
 
   /* pin guard */
   useEffect(() => {
