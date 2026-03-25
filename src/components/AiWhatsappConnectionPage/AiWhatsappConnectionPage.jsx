@@ -76,13 +76,13 @@ export default function AiWhatsappConnectionPage() {
 
   useEffect(() => { fetchUser(); }, []);
 
-  const getMetaOauthUrl = async () => {
-    try {
-      const res  = await fetch("/api/meta/oauth-url", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include" });
-      const data = await res.json();
-      if (data.success) window.location.href = data.url;
-    } catch (err) { console.error("Failed to get Meta OAuth URL:", err); }
-  };
+  // const getMetaOauthUrl = async () => {
+  //   try {
+  //     const res  = await fetch("/api/meta/oauth-url", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include" });
+  //     const data = await res.json();
+  //     if (data.success) window.location.href = data.url;
+  //   } catch (err) { console.error("Failed to get Meta OAuth URL:", err); }
+  // };
 
   /* ✅ Load FB SDK */
   useEffect(() => {
@@ -116,29 +116,10 @@ export default function AiWhatsappConnectionPage() {
     }
 
     window.FB.login(
-      async function (response) {
+      function (response) {
         if (response.authResponse) {
           const code = response.authResponse.code;
-
-          try {
-            const res = await fetch("/api/meta/exchange-code", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ code }),
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-              await fetchUser();
-            } else {
-              alert("Failed to connect WhatsApp");
-            }
-          } catch (err) {
-            console.error(err);
-            alert("Connection failed");
-          }
+          handleExchangeCode(code);
         } else {
           console.log("User cancelled signup");
         }
@@ -157,6 +138,29 @@ export default function AiWhatsappConnectionPage() {
       }
     );
   };
+
+  const handleExchangeCode = async (code) => {
+  try {
+    const res = await fetch("/api/meta/exchange-code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      await fetchUser();
+    } else {
+      alert("Failed to connect WhatsApp");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Connection failed");
+  }
+};
 
   const disconnectNumber = async () => {
     try {
