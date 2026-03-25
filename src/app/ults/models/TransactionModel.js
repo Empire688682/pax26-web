@@ -72,7 +72,7 @@ const TransactionSchema = new mongoose.Schema(
 
     amount: { type: Number, required: true },
     currency: { type: String, default: "NGN" },
-    fee: { type: Number},       //platform's charge
+    fee: { type: Number, default: 0},       //platform's charge
     netAmount: { type: Number },             // amount - fee (set pre-save)
 
     status: {

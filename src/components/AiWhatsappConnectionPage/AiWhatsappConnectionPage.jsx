@@ -84,6 +84,80 @@ export default function AiWhatsappConnectionPage() {
     } catch (err) { console.error("Failed to get Meta OAuth URL:", err); }
   };
 
+  /* ✅ Load FB SDK */
+  useEffect(() => {
+    fetchUser();
+
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId: "1458243715891036", // ✅ your real app ID
+        cookie: true,
+        xfbml: true,
+        version: "v19.0",
+      });
+    };
+
+    (function (d, s, id) {
+      if (d.getElementById(id)) return;
+      const js = d.createElement(s);
+      js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      d.body.appendChild(js);
+    })(document, "script", "facebook-jssdk");
+
+  }, []);
+
+
+  /* ✅ Embedded Signup */
+  const launchWhatsAppSignup = () => {
+    if (!window.FB) {
+      alert("Facebook SDK not loaded yet");
+      return;
+    }
+
+    window.FB.login(
+      async function (response) {
+        if (response.authResponse) {
+          const code = response.authResponse.code;
+
+          try {
+            const res = await fetch("/api/meta/exchange-code", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ code }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+              await fetchUser();
+            } else {
+              alert("Failed to connect WhatsApp");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Connection failed");
+          }
+        } else {
+          console.log("User cancelled signup");
+        }
+      },
+      {
+        config_id: "2783536142024280", // 🔥 PUT YOUR CONFIG ID HERE
+        response_type: "code",
+        override_default_response_type: true,
+        extras: {
+          setup: {
+            business: {
+              name: "Pax26 Technologies",
+            },
+          },
+        },
+      }
+    );
+  };
+
   const disconnectNumber = async () => {
     try {
       setLoading(true);
@@ -244,8 +318,11 @@ export default function AiWhatsappConnectionPage() {
             <div className="space-y-3 pt-1">
               <button
                 className="wa-btn w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white"
-                onClick={getMetaOauthUrl}
-                style={{ background: "#1877F2", boxShadow: "0 10px 28px rgba(24,119,242,0.35)" }}>
+                onClick={launchWhatsAppSignup}
+                style={{
+                  background: "#1877F2",
+                  boxShadow: "0 10px 28px rgba(24,119,242,0.35)"
+                }}>
                 <IcoMeta /> Continue with Meta
                 <ExternalLink size={14} />
               </button>

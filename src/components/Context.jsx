@@ -146,6 +146,7 @@ export const AppProvider = ({ children }) => {
         const twentyFourHours = 24 * 60 * 60 * 1000;
         const now = new Date().getTime();
         if (now - parsedData.timestamp > twentyFourHours) {
+          localStorage.clear()
           logoutUser();
         } else {
           setUserData(parsedData);
