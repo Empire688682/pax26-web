@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { Mail, Phone, MapPin, Send, ArrowRight, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Send, ArrowRight, MessageCircle, Info } from "lucide-react";
 import SocialIcons from "../SocialIcons/SocialIcons";
 import { useGlobalContext } from "../Context";
 
@@ -125,6 +125,7 @@ const Contact = () => {
                   Contact Details
                 </p>
                 <div className="space-y-1">
+                  <ContactRow icon={Info}   color="#3b82f6" label="Business Name"    value="PAX26 TECHNOLOGIES"    pax26={pax26} />
                   <ContactRow icon={Mail}   color="#3b82f6" label="Email"    value="info@pax26.com"    pax26={pax26} />
                   <ContactRow icon={Phone}  color="#22c55e" label="Phone"    value="+234 905 091 0758" pax26={pax26} />
                   <ContactRow icon={MapPin} color="#ef4444" label="Location" value="Lagos, Nigeria"    pax26={pax26} />

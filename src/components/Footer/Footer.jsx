@@ -251,7 +251,7 @@ const Footer = () => {
               </div>
 
               <p className="ft-mono text-[11px] text-white/25">
-                © {year} Pax26. All rights reserved.
+                © {year} PAX26 TECHNOLOGIES. All rights reserved.
               </p>
             </div>
           </div>

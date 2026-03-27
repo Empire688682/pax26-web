@@ -53,8 +53,8 @@ function SectionLabel({ text, primary }) {
 const About = () => {
   const { pax26 } = useGlobalContext();
   const primary = pax26?.primary || "#3b82f6";
-  const GREEN   = "#22c55e";
-  const AMBER   = "#f59e0b";
+  const GREEN = "#22c55e";
+  const AMBER = "#f59e0b";
 
   return (
     <>
@@ -84,7 +84,7 @@ const About = () => {
                 style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
                 <Zap size={12} style={{ color: primary }} />
                 <span className="ab-mono text-[10px] font-bold uppercase tracking-widest" style={{ color: primary }}>
-                  About Pax26
+                  About PAX26 TECHNOLOGIES
                 </span>
               </div>
 
@@ -96,7 +96,12 @@ const About = () => {
 
               <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-                Pax26 is an AI automation platform that helps businesses automate customer interactions,
+                Pax26 is a product of PAX26 TECHNOLOGIES,
+                a registered Nigerian technology company.
+              </p>
+              <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
+                style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
+                PAX26 TECHNOLOGIES is an AI automation platform that helps businesses automate customer interactions,
                 capture leads, and streamline digital operations — alongside seamless VTU services for everyday needs.
               </p>
             </div>
@@ -112,7 +117,7 @@ const About = () => {
             </h2>
             <p className="text-sm leading-relaxed max-w-3xl"
               style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-              Pax26 combines artificial intelligence with digital utility services to help businesses
+              PAX26 TECHNOLOGIES combines artificial intelligence with digital utility services to help businesses
               operate smarter. Our AI tools automatically respond to customers, capture leads, and manage
               conversations on WhatsApp — while our digital services give instant access to airtime, data,
               electricity payments, TV subscriptions and more.
@@ -156,7 +161,7 @@ const About = () => {
             <SectionLabel text="Why Pax26" primary={primary} />
             <h2 className="text-2xl font-extrabold mb-6" style={{ color: pax26?.textPrimary }}>
               Why choose{" "}
-              <span className="ab-serif" style={{ color: primary }}>Pax26?</span>
+              <span className="ab-serif" style={{ color: primary }}>PAX26 TECHNOLOGIES?</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {WHY.map((item, i) => (

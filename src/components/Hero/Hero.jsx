@@ -48,12 +48,12 @@ const CSS = `
 
 /* ── Chat messages ──────────────────────────────────────────── */
 const MSGS = [
-  { from: "user", text: "Hi! Do you sell sneakers?",                                  t: 0    },
-  { from: "bot",  text: "Yes! \ud83d\udc5f We have:\n\n1\ufe0f\u20e3 Air Max 90\n2\ufe0f\u20e3 Adidas Ultraboost\n3\ufe0f\u20e3 Jordan 1\n\nWhich interests you?", t: 900  },
-  { from: "user", text: "Air Max 90 in size 42",                                       t: 2200 },
-  { from: "bot",  text: "Great choice! \ud83d\udd25 We have size 42 in stock.\nPrice: \u20a655,000\n\nShould I send a payment link? \ud83d\udcb3", t: 3200 },
-  { from: "user", text: "Yes please!",                                                 t: 4500 },
-  { from: "bot",  text: "Done \u2705 Payment link sent!\nYour order ships within 2hrs. Thank you!", t: 5400 },
+  { from: "user", text: "Hi! Do you sell sneakers?", t: 0 },
+  { from: "bot", text: "Yes! \ud83d\udc5f We have:\n\n1\ufe0f\u20e3 Air Max 90\n2\ufe0f\u20e3 Adidas Ultraboost\n3\ufe0f\u20e3 Jordan 1\n\nWhich interests you?", t: 900 },
+  { from: "user", text: "Air Max 90 in size 42", t: 2200 },
+  { from: "bot", text: "Great choice! \ud83d\udd25 We have size 42 in stock.\nPrice: \u20a655,000\n\nShould I send a payment link? \ud83d\udcb3", t: 3200 },
+  { from: "user", text: "Yes please!", t: 4500 },
+  { from: "bot", text: "Done \u2705 Payment link sent!\nYour order ships within 2hrs. Thank you!", t: 5400 },
 ];
 
 /* ── Live WhatsApp chat ─────────────────────────────────────── */
@@ -142,21 +142,21 @@ function ChatMockup() {
 /* ── Marquee items ──────────────────────────────────────────── */
 const TRUST = [
   "24/7 AI Replies", "·", "WhatsApp Cloud API", "·",
-  "Lead Follow-up",  "·", "Airtime & Data",     "·",
-  "Electricity Bills","·", "TV Subscriptions",  "·",
-  "No Code Setup",   "·", "Instant Activation", "·",
+  "Lead Follow-up", "·", "Airtime & Data", "·",
+  "Electricity Bills", "·", "TV Subscriptions", "·",
+  "No Code Setup", "·", "Instant Activation", "·",
 ];
 
 /* ── Main Hero ──────────────────────────────────────────────── */
 export default function Hero() {
   const { openModal, pax26 } = useGlobalContext();
   const primary = pax26?.primary || "#3b82f6";
-  const GREEN   = "#22c55e";
+  const GREEN = "#22c55e";
 
   const stats = [
-    { value: "24/7", label: "AI Availability"  },
-    { value: "5min", label: "Setup Time"        },
-    { value: "100%", label: "Auto Replies"      },
+    { value: "24/7", label: "AI Availability" },
+    { value: "5min", label: "Setup Time" },
+    { value: "100%", label: "Auto Replies" },
   ];
 
   return (
@@ -195,6 +195,18 @@ export default function Hero() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
                 style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
                 <span className="hr-blink w-2 h-2 rounded-full block" style={{ background: GREEN }} />
+                <span className="text-xs font-bold tracking-widest capitalized" style={{ color: primary }}>
+                  PAX26 TECHNOLOGIES,
+                  a registered Nigerian technology company.
+                </span>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+                style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
+                <span className="hr-blink w-2 h-2 rounded-full block" style={{ background: GREEN }} />
                 <span className="text-xs font-bold tracking-widest uppercase" style={{ color: primary }}>
                   AI WhatsApp Automation
                 </span>
@@ -203,9 +215,9 @@ export default function Hero() {
               {/* headline */}
               <div className="mb-6 space-y-1">
                 {[
-                  { text: "Turn WhatsApp",   serif: false, delay: 0.05 },
-                  { text: "Into Your AI",    serif: false, delay: 0.15 },
-                  { text: "Sales Machine.",  serif: true,  delay: 0.25 },
+                  { text: "Turn WhatsApp", serif: false, delay: 0.05 },
+                  { text: "Into Your AI", serif: false, delay: 0.15 },
+                  { text: "Sales Machine.", serif: true, delay: 0.25 },
                 ].map((l, i) => (
                   <motion.span key={i} className="block"
                     initial={{ opacity: 0, y: 32 }}
@@ -234,7 +246,7 @@ export default function Hero() {
                 className="text-base leading-relaxed mb-8 max-w-lg"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
                 Automate customer replies, send smart follow-ups, and run AI chatbots 24/7.
-                Pax26 also handles airtime, data, bills and TV subs — all in one platform.
+                PAX26 TECHNOLOGIES also handles airtime, data, bills and TV subs — all in one platform.
               </motion.p>
 
               {/* CTAs */}

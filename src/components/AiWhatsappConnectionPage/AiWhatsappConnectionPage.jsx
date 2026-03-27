@@ -125,7 +125,7 @@ export default function AiWhatsappConnectionPage() {
         }
       },
       {
-        config_id: "1429884505551753", // 🔥 PUT YOUR CONFIG ID HERE
+        config_id: "2783536142024280", // 🔥 PUT YOUR CONFIG ID HERE
         response_type: "code",
         override_default_response_type: true,
         extras: {
