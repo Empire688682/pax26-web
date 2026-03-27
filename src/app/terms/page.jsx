@@ -7,7 +7,7 @@ const SECTIONS = [
   {
     num: "01",
     title: "Introduction",
-    body: "Welcome to PAX26 TECHNOLOGIES. These Terms and Conditions ('Terms') govern your access to and use of the PAX26 TECHNOLOGIES website, mobile application, APIs, and all related services ("Services"). By creating an account or using our platform, you agree to be legally bound by these Terms. If you do not agree, you must discontinue use of PAX26 TECHNOLOGIES immediately.",
+    body: "Welcome to PAX26 TECHNOLOGIES. These Terms and Conditions ('Terms') govern your access to and use of the PAX26 TECHNOLOGIES website, mobile application, APIs, and all related services ('Services'). By creating an account or using our platform, you agree to be legally bound by these Terms. If you do not agree, you must discontinue use of PAX26 TECHNOLOGIES immediately.",
   },
   {
     num: "02",
