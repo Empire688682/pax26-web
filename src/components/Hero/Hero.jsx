@@ -195,18 +195,6 @@ export default function Hero() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
                 style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
                 <span className="hr-blink w-2 h-2 rounded-full block" style={{ background: GREEN }} />
-                <span className="text-xs font-bold tracking-widest capitalized" style={{ color: primary }}>
-                  PAX26 TECHNOLOGIES,
-                  a registered Nigerian technology company.
-                </span>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-                style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
-                <span className="hr-blink w-2 h-2 rounded-full block" style={{ background: GREEN }} />
                 <span className="text-xs font-bold tracking-widest uppercase" style={{ color: primary }}>
                   AI WhatsApp Automation
                 </span>
