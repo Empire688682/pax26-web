@@ -363,14 +363,14 @@ export default function TermsAndConditions() {
       <ScrollProgress />
 
       {/* ── Fixed header ────────────────────────────── */}
-      <header className={`tc-header ${scrolled ? "scrolled" : ""}`}>
+      <header className={`tc-header scrolled `}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div style={{
             width: "28px", height: "28px", borderRadius: "6px",
             background: "var(--ink)", display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <span style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "var(--gold)", letterSpacing: "0.05em" }}>
-              P26
+              Pax26
             </span>
           </div>
           <span style={{ fontFamily: "var(--mono)", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)" }}>
@@ -529,36 +529,6 @@ export default function TermsAndConditions() {
                 )}
               </section>
             ))}
-
-            {/* ── Footer signature ──────────────────────── */}
-            <div style={{
-              marginTop: "80px",
-              padding: "40px",
-              background: "var(--ink)",
-              borderRadius: "12px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "16px",
-              textAlign: "center",
-            }}>
-              <div style={{
-                width: "40px", height: "40px", borderRadius: "10px",
-                background: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--ink)", fontWeight: 500 }}>P26</span>
-              </div>
-              <p style={{ fontFamily: "var(--serif)", fontStyle: "italic", fontSize: "1.2rem", color: "var(--paper)", opacity: 0.9 }}>
-                PAX26 TECHNOLOGIES Technologies
-              </p>
-              <p style={{ fontFamily: "var(--mono)", fontSize: "0.62rem", color: "rgba(245,243,238,0.45)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                Empowering businesses · Nigeria · 2025
-              </p>
-              <div style={{ width: "40px", height: "1px", background: "var(--gold)", opacity: 0.4 }} />
-              <p style={{ fontFamily: "var(--mono)", fontSize: "0.6rem", color: "rgba(245,243,238,0.3)", letterSpacing: "0.08em" }}>
-                © 2025 PAX26 TECHNOLOGIES. All rights reserved.
-              </p>
-            </div>
           </main>
         </div>
       </div>
