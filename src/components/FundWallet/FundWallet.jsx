@@ -72,17 +72,13 @@ function Feature({ icon, title, desc, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const FundWallet = () => {
-  const { userData, paymentId, setPaymentId, getUserRealTimeData, checkIsTransactionPinSet, pax26 } = useGlobalContext();
+  const { userData, paymentId, setPaymentId, getUserRealTimeData, pax26 } = useGlobalContext();
   const [amount, setAmount]   = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied]   = useState(false);
 
   const primary = pax26?.primary;
   const GREEN   = "#22c55e";
-
-  useEffect(()=>{
-    checkIsTransactionPinSet()
-  },[]);
 
   const verifyPayment = async () => {
     if (!paymentId) return;

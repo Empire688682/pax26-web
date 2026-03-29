@@ -143,15 +143,11 @@ function TxRow({ tx, onClick, pax26 }) {
 
 /* ── Main Dashboard ───────────────────────────────────────────── */
 const Dashboard = () => {
-  const { userData, pax26, router, transactionHistory, checkIsTransactionPinSet, getUserRealTimeData } = useGlobalContext();
+  const { userData, pax26, router, transactionHistory, getUserRealTimeData } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
   useEffect(() => { getUserRealTimeData(); }, []);
-
-  useEffect(() => {
-    checkIsTransactionPinSet()
-  }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
   const primary = pax26?.primary || "#3B82F6";
