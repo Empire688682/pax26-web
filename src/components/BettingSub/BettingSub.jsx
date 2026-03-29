@@ -10,7 +10,7 @@ import { useGlobalContext } from '../Context';
 import BettingHelp from '../BettingHelp/BettingHelp';
 
 const BettingSub = () => {
-  const { setPinModal, getUserRealTimeData, userData, pax26 } = useGlobalContext();
+  const { getUserRealTimeData, userData, pax26 } = useGlobalContext();
   const [data, setData] = useState({
     platform: "",
     amount: "",
@@ -103,16 +103,6 @@ const BettingSub = () => {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (userData.pin === null) {
-        setPinModal(true);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [userData]);
 
   const handleFormSubmission = (e) => {
     e.preventDefault();

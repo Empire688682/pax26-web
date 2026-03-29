@@ -216,7 +216,7 @@ function ConfirmModal({ visible, onConfirm, onCancel, loading, data, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyTv = () => {
-  const { getUserRealTimeData, pax26, userData, setPinModal } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData } = useGlobalContext();
 
   const initialForm = { provider: "", smartcardNumber: "", tvPackage: "", phone: "", pin: "" };
 
@@ -260,12 +260,6 @@ const BuyTv = () => {
     const pkg = availablePackages.find(p => p.PACKAGE_ID === form.tvPackage);
     if (pkg) { setPackageAmount(pkg.PACKAGE_AMOUNT); setPackageName(pkg.PACKAGE_NAME); }
   }, [form.tvPackage, availablePackages]);
-
-  /* pin guard */
-  useEffect(() => {
-    const iv = setInterval(() => { if (userData.pin === null) setPinModal(true); }, 2000);
-    return () => clearInterval(iv);
-  }, [userData]);
 
   const handleChange = e => {
     const { name, value } = e.target;

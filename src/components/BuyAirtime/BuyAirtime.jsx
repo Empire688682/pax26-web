@@ -271,7 +271,7 @@ function AirtimeHelpPanel({ data, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyAirtime = () => {
-  const { setPinModal, getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
+  const { getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
 
   const initialData = { network: "", amount: "", number: "", pin: "" };
 
@@ -285,12 +285,6 @@ const BuyAirtime = () => {
 
   const primary = pax26?.primary;
   const GREEN   = "#22c55e";
-
-  /* pin guard */
-  useEffect(() => {
-    const iv = setInterval(() => { if (userData.pin === null) setPinModal(true); }, 2000);
-    return () => clearInterval(iv);
-  }, [userData]);
 
   /* auto-detect carrier */
   useEffect(() => {

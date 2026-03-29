@@ -331,7 +331,7 @@ function ElectricityHelpPanel({ formData, customerName, isMeterVerified, pax26 }
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyElectricity = () => {
-  const { getUserRealTimeData, pax26, userData, router, setPinModal } = useGlobalContext();
+  const { getUserRealTimeData, pax26, userData, router } = useGlobalContext();
 
   const [electricityCompany, setElectricityCompany] = useState({});
   const [loading, setLoading]                       = useState(false);
@@ -364,12 +364,6 @@ const BuyElectricity = () => {
       } catch (err) { console.error(err); }
     })();
   }, []);
-
-  /* pin guard */
-  useEffect(() => {
-    const iv = setInterval(() => { if (userData.pin === null) setPinModal(true); }, 2000);
-    return () => clearInterval(iv);
-  }, [userData]);
 
   /* manual meter verification — triggered by user button */
   const verifyMeter = async () => {
