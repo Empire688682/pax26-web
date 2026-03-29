@@ -47,6 +47,16 @@ export async function POST(req) {
       "Postpaid": "02"
     }
 
+    // Validate disco
+    if (!availableDiscos[disco]) {
+      return NextResponse.json({ success: false, message: "Invalid disco" }, { status: 400, headers: corsHeaders() });
+    }
+
+    // Validate meter type
+    if (!allmeterType[meterType]) {
+      return NextResponse.json({ success: false, message: "Invalid meter type" }, { status: 400, headers: corsHeaders() });
+    }
+
     // Auth and funds check
     const userId = await verifyToken(req);
     const user = await UserModel.findById(userId);
@@ -83,53 +93,52 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Internal Error", data: result }, { status: 400, headers: corsHeaders() });
     };
 
-    if (result?.transactionstatus !== "ORDER_RECEIVED") {
+    if (!result?.transactionstatus?.includes("ORDER_RECEIVED")) {
       return NextResponse.json({ success: false, message: "We are sorry Electricity currently not available", data: result }, { status: 400, headers: corsHeaders() });
     };
 
     // ✅ Update Provider balance
-      await ProviderModel.findOneAndUpdate(
-        { name: "ClubConnect" },
-        {
-          lastUser: userId,
-          lastAction: "debit",
-          note: `Debited for Electricity`,
-          amount: result.walletbalance
-        },
-        { new: true, upsert: true }
-      );
+    await ProviderModel.findOneAndUpdate(
+      { name: "ClubConnect" },
+      {
+        lastUser: userId,
+        lastAction: "debit",
+        note: `Debited for Electricity`,
+        amount: result.walletbalance
+      },
+      { new: true, upsert: true }
+    );
 
-      // Deduct wallet balance
-      await UserModel.findByIdAndUpdate(
-        userId,
-        { walletBalance: user.walletBalance - saveAmount },
-        { new: true }
-      );
+    // Deduct wallet balance
+    await UserModel.findByIdAndUpdate(
+      userId,
+      { walletBalance: user.walletBalance - saveAmount },
+      { new: true }
+    );
 
-      const stringToken = result?.metertoken;
-      const token = stringToken.replce(/\D/g, '');
-      const fee = saveAmount - Number(result?.amount);
+    const token = result?.metertoken?.replace(/\D/g, '') || null;
+    const fee = saveAmount - Number(result?.amount || 0);
 
-      const transaction = await TransactionModel.create({
-        userId,
-        type: "electricity",
-        amount: saveAmount,
-        status: "success",
-        reference: requestId,
-        fee,
-        meta: {
-          utility: {
-            provider: disco,
-            accountNumber:result?.meterno,
-            customerName,
-            meterType,
-            address: customerAddress,
-            tokenGenerated: token,
-          }
-        },
-      });
-      
-      return NextResponse.json({ success: true, message: "Order successful", data: transaction, result }, { status: 200, headers: corsHeaders() });
+    const transaction = await TransactionModel.create({
+      userId,
+      type: "electricity",
+      amount: saveAmount,
+      status: "success",
+      reference: requestId,
+      fee,
+      meta: {
+        utility: {
+          provider: disco,
+          accountNumber: result?.meterno,
+          customerName,
+          meterType,
+          address: customerAddress,
+          tokenGenerated: token,
+        }
+      },
+    });
+
+    return NextResponse.json({ success: true, message: "Order successful", data: transaction, result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers: corsHeaders() });
