@@ -68,7 +68,8 @@ const WalletBalance = ({ setShowMore, showMore }) => {
 
   useEffect(()=>{
     checkIsTransactionPinSet();
-  },[userData])
+  },[userData]);
+
   /* initial fetch + 30s polling */
   useEffect(() => {
     const fetch = async () => { setLoading(true); await getUserRealTimeData(); setLoading(false); };

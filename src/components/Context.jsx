@@ -156,13 +156,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const checkIsTransactionPinSet = () =>{
-    if(!userData) return
-    if(userData.isTransactionPinSet === false){
+    if(!userData.isTransactionPinSet){
       setPinModal(true)
     }else{
       setPinModal(false)
     }
-    return
   }
 
 
