@@ -53,7 +53,7 @@ export async function POST(req) {
       );
     };
 
-      const isPinCorrect = await bcrypt.compare(pin, verifyUser.pin);
+      const isPinCorrect = await bcrypt.compare(pin, verifyUser.transactionPin);
     if (!isPinCorrect) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(

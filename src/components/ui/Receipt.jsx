@@ -268,10 +268,20 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 
+              {/* Tv subscription */}
+              {receiptType === "tv-subscription" && (<>
+                <Row label="Type" value={receiptType} />
+                <Row label="Provider" value={meta?.utility?.provider} />
+                <Row label="Package" value={meta?.utility?.package} />
+                <Row label="Smartcard no" value={meta?.utility?.accountNumber} mono />
+                <Row label="Customer Name" value={meta?.utility?.customerName} />
+                <Row label="Transaction ID" value={transactionId} mono />
+              </>)}
+
               {/* Airtime / Data */}
               {(receiptType === "airtime" || receiptType === "data") && (<>
-                <Row label="Network" value={NETWORKS[meta?.airtime?.network] || meta?.data?.network} />
-                <Row label="Recipient" value={meta?.airtime?.number || meta?.data?.number} mono />
+                <Row label="Network" value={NETWORKS[meta?.airtimeData?.network]} />
+                <Row label="Recipient" value={meta?.airtimeData?.phoneNumber} mono />
                 <Row label="Type" value={receiptType} />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
@@ -279,6 +289,8 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
               {/* Wallet funding */}
               {receiptType === "wallet-funding" && (<>
                 <Row label="Type" value={receiptType} />
+                <Row label="Channel" value={meta?.wallet?.channel} />
+                <Row label="Ref" value={meta?.wallet?.providerRef} />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 

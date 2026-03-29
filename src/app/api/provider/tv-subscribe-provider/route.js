@@ -18,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
-  const { provider, smartcardNumber, amount, tvPackage, phone, pin } = body;
+  const { provider, customerName, smartcardNumber, amount, tvPackage, phone, pin } = body;
 
   const savedAmount = Number(amount);
   if (isNaN(savedAmount)) {
@@ -37,7 +37,7 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
     }
 
-    const isPinMatch = await bcrypt.compare(pin, user.pin);
+    const isPinMatch = await bcrypt.compare(pin, user.transactionPin);
     if (!isPinMatch) {
       return NextResponse.json({ success: false, message: "Pin not correct" }, { status: 401, headers:corsHeaders() });
     }
@@ -91,8 +91,10 @@ export async function POST(req) {
       reference: requestId,
       meta: {
         utility: {
-        network: provider,
+        provider,
+        customerName,
         accountNumber: smartcardNumber,
+        package: tvPackage,
       },
       },
     });

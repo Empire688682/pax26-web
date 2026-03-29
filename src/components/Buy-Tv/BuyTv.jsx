@@ -316,7 +316,7 @@ const BuyTv = () => {
     try {
       setLoading(true);
       const res = await axios.post("/api/provider/tv-subscribe-provider", {
-        provider, smartcardNumber, amount: packageAmount, tvPackage, phone, pin,
+        provider, customerName, smartcardNumber, amount: packageAmount, tvPackage, phone, pin,
       });
       if (res.data.success) {
         getUserRealTimeData();

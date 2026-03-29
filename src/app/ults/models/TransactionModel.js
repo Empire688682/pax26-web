@@ -28,6 +28,7 @@ const UtilityMetaSchema = new mongoose.Schema({
   tokenGenerated: String,  // electricity token (if applicable)
   address:        String,
   meterType:      String,  // electricity only: "prepaid" | "postpaid"
+  package:        String,  // tv-subscription only: "DStv Premium"
 }, { _id: false });
 
 // Covers: WAEC, JAMB, NECO, GCE, and any future exam board
@@ -80,7 +81,7 @@ const SubscriptionMetaSchema = new mongoose.Schema({
 // Wallet / funding meta
 const WalletMetaSchema = new mongoose.Schema({
   channel:     { type: String, enum: ["card", "bank-transfer", "ussd", "crypto"] },
-  providerRef: String,  // Paystack / Flutterwave reference
+  providerRef: {type:String, default:"Flutterwave"},  // Paystack / Flutterwave reference
   balanceBefore: Number,
   balanceAfter:  Number,
 }, { _id: false });

@@ -143,7 +143,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
               {/* fund button */}
               <button
                 onClick={() => router.push("/fund-wallet")}
-                className={` ${pathName != "/dashboard"? "hidden":"flex"} wb-fund-btn items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white`}
+                className={`flex wb-fund-btn items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white`}
                 style={{
                   background: primary,
                   boxShadow: `0 6px 18px ${primary}38`,
