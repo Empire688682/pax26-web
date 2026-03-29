@@ -89,9 +89,11 @@ export async function POST(req) {
       amount: savedAmount,
       status: "success",
       reference: requestId,
-      metadata: {
+      meta: {
+        utility: {
         network: provider,
-        number: smartcardNumber,
+        accountNumber: smartcardNumber,
+      },
       },
     });
 

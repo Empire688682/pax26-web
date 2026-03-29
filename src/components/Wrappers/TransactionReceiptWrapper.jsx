@@ -8,7 +8,7 @@ import axios from "axios";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 export default function TransactionReceiptWrapper() {
-  const { pax26, router } = useGlobalContext();
+  const { router } = useGlobalContext();
 
   const [receiptData, setReceiptData] = useState(null);
   const [loading, setLoading] = useState(true);

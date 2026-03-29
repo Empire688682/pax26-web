@@ -119,11 +119,12 @@ export async function POST(req) {
         status: "success",
         transactionId: result.orderid,
         reference: result.orderid,
-        metadata: {
-          platform,
-          number: customerId,
-          walletUsed: walletToUse,
-        }
+        meta: {
+         utility: {
+         network: platform,
+         accountNumber: customerId,
+      },
+      },
       }],
       { session }
     );

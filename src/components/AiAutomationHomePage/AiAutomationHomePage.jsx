@@ -168,7 +168,7 @@ export default function AiAutomationHomePage() {
   return (
     <>
       <style>{CSS}</style>
-      <div className="aah-root max-w-5xl mx-auto px-5 py-10 pb-20">
+      <div className="aah-root max-w-7xl mx-auto px-5 py-10 pb-20">
 
         {/* ── Header ─────────────────────────────────────────── */}
         <div className="mb-12">
@@ -254,7 +254,7 @@ export default function AiAutomationHomePage() {
             description="Browse and activate pre-built AI workflows for sales, support, and customer retention."
             tag="Marketplace" tagColor={VIOLET}
             cta="Browse Workflows"
-            onClick={() => router.push("/market-place")}
+            onClick={() => router.push("/dashboard/automations/market-place")}
             delay="0.24s" pax26={pax26}
           />
         </div>

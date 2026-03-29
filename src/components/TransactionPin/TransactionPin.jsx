@@ -103,7 +103,7 @@ const TransactionPin = () => {
 
     setLoading(true);
     try {
-      const res  = await fetch("/api/provider/set-transaction-pin", {
+      const res  = await fetch("/api/auth/set-transaction-pin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin: pinValue }),

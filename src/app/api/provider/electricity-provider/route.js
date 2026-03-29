@@ -55,7 +55,7 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers: corsHeaders() });
     }
 
-    const isPinMatch = await bcrypt.compare(pin, user.pin);
+    const isPinMatch = await bcrypt.compare(pin, user.transactionPin);
     if (!isPinMatch) {
       return NextResponse.json({ success: false, message: "Pin not correct" }, { status: 401, headers: corsHeaders() });
     }

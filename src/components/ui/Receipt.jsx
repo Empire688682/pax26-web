@@ -258,13 +258,13 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
               {/* Electricity */}
               {receiptType === "electricity" && (<>
                 <Row label="Type" value={receiptType} />
-                <Row label="Provider" value={meta?.electricity?.provider} />
-                <Row label="Meter Number" value={meta?.electricity?.accountNumber} mono />
-                <Row label="Customer" value={meta?.electricity?.customerName} />
-                <Row label="Address" value={meta?.electricity?.address} />
-                <Row label="Meter Type" value={meta?.electricity?.meterType} />
-                <Row label="Units" value={`${meta?.electricity?.units || "—"} kWh`} />
-                <Row label="Token" value={meta?.electricity?.tokenGenerated} highlight mono />
+                <Row label="Provider" value={meta?.utility?.provider} />
+                <Row label="Meter Number" value={meta?.utility?.accountNumber} mono />
+                <Row label="Customer" value={meta?.utility?.customerName} />
+                <Row label="Address" value={meta?.utility?.address} />
+                <Row label="Meter Type" value={meta?.utility?.meterType} />
+                <Row label="Units" value={`${meta?.utility?.units || "—"} kWh`} />
+                <Row label="Token" value={meta?.utility?.tokenGenerated} highlight mono />
                 <Row label="Transaction ID" value={transactionId} mono />
               </>)}
 

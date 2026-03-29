@@ -105,7 +105,7 @@ export async function POST(req) {
 
     if(!usedCashBack){
         const apiAmount = Number(result.amount);
-        const userCashback = Number(amount) - apiAmount;
+        const userCashback = Number(amount) - Number(apiAmount);
         verifyUser.cashBackBalance += Math.floor(userCashback);
         await verifyUser.save({ session });
       }
@@ -129,13 +129,13 @@ export async function POST(req) {
         type: "airtime",
         amount,
         status: "success",
-        transactionId: result.orderid,
         reference: result.orderid,
-        metadata: {
-          network,
-          number,
-          cashbackUsed: cashbackToUse,
-          walletUsed: walletToUse,
+        meta:{
+          airtimeData: {
+            network,
+            phoneNumber:number,
+            dataPlan: amount
+          }
         }
       }],
       { session }
