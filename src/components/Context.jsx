@@ -51,7 +51,7 @@ export const AppProvider = ({ children }) => {
   /* ================================
      USER STATES
   =================================*/
-  const [userData, setUserData] = useState("");
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [transactionHistory, setTransactionHistory] = useState([]);
@@ -155,13 +155,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const checkIsTransactionPinSet = () =>{
-    if(!userData.isTransactionPinSet){
-      setPinModal(true)
-    }else{
-      setPinModal(false)
-    }
-  }
+  console.log("Checking: ", userData?.isTransactionPinSet);
 
 
   /* ================================
@@ -334,8 +328,6 @@ export const AppProvider = ({ children }) => {
         setIsWhatsappNumberConnected,
 
         fetchUser,
-        
-        checkIsTransactionPinSet
       }}
     >
       {children}
