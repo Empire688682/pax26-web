@@ -60,9 +60,6 @@ const CSS = `
   .rc-perforated::after  { right: -10px; }
 `;
 
-/* ── Networks map ─────────────────────────────────────────────── */
-const NETWORKS = { "01": "MTN", "02": "Glo", "03": "9Mobile", "04": "Airtel" };
-
 /* ── Receipt type config ──────────────────────────────────────── */
 const TYPE_CONFIG = {
   airtime: { icon: <Smartphone size={18} />, color: "#f97316", label: "Airtime" },
@@ -280,7 +277,7 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
 
               {/* Airtime / Data */}
               {(receiptType === "airtime" || receiptType === "data") && (<>
-                <Row label="Network" value={NETWORKS[meta?.airtimeData?.network]} />
+                <Row label="Network" value={meta?.airtimeData?.network} />
                 <Row label="Recipient" value={meta?.airtimeData?.phoneNumber} mono />
                 <Row label="Type" value={receiptType} />
                 <Row label="Transaction ID" value={transactionId} mono />

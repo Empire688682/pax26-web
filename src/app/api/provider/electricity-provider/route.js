@@ -79,28 +79,15 @@ export async function POST(req) {
 
     console.log("Response:", result);
 
-    if (result?.status !== "ORDER_RECEIVED" && result?.status !== "INSUFFICIENT_BALANCE") {
+    if (result?.status === "INSUFFICIENT_BALANCE") {
+      return NextResponse.json({ success: false, message: "Internal Error", data: result }, { status: 400, headers: corsHeaders() });
+    };
+
+    if (result?.transactionstatus !== "ORDER_RECEIVED") {
       return NextResponse.json({ success: false, message: "We are sorry Electricity currently not available", data: result }, { status: 400, headers: corsHeaders() });
     };
 
-    //MOCK DATA
-    const orderid = nanoid(6);
-    const mockResponse = {
-      orderid: orderid,
-      amount: amount,
-      date: new Date().toISOString(),
-      disco: disco,
-      customerName: customerName,
-      meterType: meterType,
-      statuscode: "100",
-      status: "ORDER_RECEIVED",
-      meterno: meterNumber,
-      metertoken: "000123",
-      serviceAddress: "123, Mock Street, Lagos"
-    };
-    // For MOCK DATA testing, uncomment below and comment above fetch block
-    if (result?.status === "INSUFFICIENT_BALANCE") {
-      // ✅ Update Provider balance
+    // ✅ Update Provider balance
       await ProviderModel.findOneAndUpdate(
         { name: "ClubConnect" },
         {
@@ -119,30 +106,30 @@ export async function POST(req) {
         { new: true }
       );
 
+      const stringToken = result?.metertoken;
+      const token = stringToken.replce(/\D/g, '');
+      const fee = saveAmount - Number(result?.amount);
+
       const transaction = await TransactionModel.create({
         userId,
         type: "electricity",
         amount: saveAmount,
         status: "success",
         reference: requestId,
+        fee,
         meta: {
           utility: {
             provider: disco,
-            accountNumber:meterNumber,
+            accountNumber:result?.meterno,
             customerName,
             meterType,
             address: customerAddress,
-            tokenGenerated: mockResponse.metertoken,
+            tokenGenerated: token,
           }
-        }
+        },
       });
-
-      return NextResponse.json({ success: true, message: "Success & MOCK DATA!", data: transaction }, { status: 200, headers: corsHeaders() });
-    };
-
-
-
-    // return NextResponse.json({ success: true, message: "Order successful", data: result }, { status: 200, headers: corsHeaders() });
+      
+      return NextResponse.json({ success: true, message: "Order successful", data: transaction, result }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     console.error("Electricity-ERROR:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500, headers: corsHeaders() });

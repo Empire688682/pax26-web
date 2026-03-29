@@ -10,27 +10,26 @@ import { verifyToken } from "../../helper/VerifyToken";
 import ProviderModel from "@/app/ults/models/ProviderModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
-dotenv.config();
-
 export async function OPTIONS() {
-    return new NextResponse(null, {status:200, headers:corsHeaders()});
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
 export async function POST(req) {
   await connectDb();
   const reqBody = await req.json();
 
-  const session = await mongoose.startSession(); // 👈 Start a session
+  const session = await mongoose.connection.startSession();
   session.startTransaction(); // 👈 Begin the transaction
 
   try {
     const { network, plan, planId, number, amount, pin, usedCashBack } = reqBody;
 
     if (!network || !plan || !planId || !number || !amount || !pin) {
-      await session.abortTransaction(); session.endSession();
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
         { success: false, message: "All fields are required" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -38,10 +37,11 @@ export async function POST(req) {
     const verifyUser = await UserModel.findById(userId).session(session);
 
     if (!verifyUser) {
-      await session.abortTransaction(); session.endSession();
+      await session.abortTransaction();
+      session.endSession();
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
-        { status: 401, headers:corsHeaders() }
+        { status: 401, headers: corsHeaders() }
       );
     }
 
@@ -49,23 +49,23 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "1234 is not allowed" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     };
 
-      const isPinCorrect = await bcrypt.compare(pin, verifyUser.transactionPin);
+    const isPinCorrect = await bcrypt.compare(pin, verifyUser.transactionPin);
     if (!isPinCorrect) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Incorrect PIN provided!" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     };
 
     let walletToUse = Number(amount);
     let cashBackToUse = 0
 
-    if(usedCashBack){
+    if (usedCashBack) {
       cashBackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
       walletToUse = Number(amount) - cashBackToUse;
     }
@@ -74,7 +74,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Insufficient balance" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -91,7 +91,7 @@ export async function POST(req) {
 
     const availablePlan = await dataRes.json();
     if (!availablePlan) {
-      return NextResponse.json({ success: false, message: "Invalid Data plan" }, { status: 401, headers:corsHeaders() })
+      return NextResponse.json({ success: false, message: "Invalid Data plan" }, { status: 401, headers: corsHeaders() })
     }
 
     const networkPlans = availablePlan?.MOBILE_NETWORK[network]?.[0]?.PRODUCT;
@@ -99,7 +99,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "No data plans found for selected network" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     };
 
@@ -108,7 +108,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Invalid data plan ID" },
-        { status: 400, headers:corsHeaders() }
+        { status: 400, headers: corsHeaders() }
       );
     };
 
@@ -126,7 +126,7 @@ export async function POST(req) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "API Transaction Failed", details: result },
-        { status: 500, headers:corsHeaders() }
+        { status: 500, headers: corsHeaders() }
       );
     };
 
@@ -143,11 +143,13 @@ export async function POST(req) {
     );
 
     // ✅ Deduct wallet and log transaction (within session)
-    if(cashBackToUse > 0){
+    if (cashBackToUse > 0) {
       verifyUser.cashBackBalance -= cashBackToUse
     }
     verifyUser.walletBalance -= walletToUse;
     await verifyUser.save({ session });
+
+    const fee = Number(amount) - Number(result.amount);
 
     const newTransaction = await TransactionModel.create(
       [{
@@ -156,13 +158,14 @@ export async function POST(req) {
         amount,
         status: "success",
         reference: result.orderid,
+        fee,
         meta: {
-          dataPlan: {
-            network,
+          airtimeData: {
+            network: result?.mobilenetwork,
             phoneNumber: number,
             dataPlan: plan,
           },
-          }
+        }
       }],
       { session }
     );
@@ -172,7 +175,7 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: true, message: "Data Purchase Successful", transaction: newTransaction[0] },
-      { status: 200, headers:corsHeaders() }
+      { status: 200, headers: corsHeaders() }
     );
 
   } catch (error) {
@@ -182,7 +185,7 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: false, message: "Something went wrong", error: error.message },
-      { status: 500, headers:corsHeaders() }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }

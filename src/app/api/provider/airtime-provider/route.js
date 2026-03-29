@@ -19,7 +19,7 @@ export async function POST(req) {
   await connectDb();
   const reqBody = await req.json();
 
-  const session = await mongoose.startSession();
+  const session = await mongoose.connection.startSession();
   session.startTransaction();
 
   try {
@@ -37,7 +37,8 @@ export async function POST(req) {
     const verifyUser = await UserModel.findById(userId).session(session);
 
     if (!verifyUser) {
-      await session.abortTransaction(); session.endSession();
+      await session.abortTransaction(); 
+      session.endSession();
       return NextResponse.json(
         { success: false, message: "User not authenticated" },
         { status: 401, headers: corsHeaders() }
@@ -93,7 +94,6 @@ export async function POST(req) {
     );
 
     const result = await res.json();
-    console.log("API Result:", result);
 
     if (result.status !== "ORDER_RECEIVED") {
       await session.abortTransaction(); session.endSession();
@@ -132,9 +132,9 @@ export async function POST(req) {
         reference: result.orderid,
         meta:{
           airtimeData: {
-            network,
+            network: result?.mobilenetwork,
             phoneNumber:number,
-            dataPlan: amount
+            dataPlan: result?.productname
           }
         }
       }],
