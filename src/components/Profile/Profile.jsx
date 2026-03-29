@@ -447,15 +447,15 @@ const Profile = () => {
   }, []);
 
   const user = {
-    name: userData.name || "",
-    email: userData.email || "",
-    phone: userData.number || "",
-    userVerified: userData.userVerify,
+    name: userData?.name || "",
+    email: userData?.email || "",
+    phone: userData?.number || "",
+    userVerified: userData?.userVerify,
   };
 
   const previewSrc = userImage
     ? window.URL.createObjectURL(userImage)
-    : userData.profileImage || "/profile-img.png";
+    : userData?.profileImage || "/profile-img.png";
 
   return (
     <>
