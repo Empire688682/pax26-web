@@ -116,8 +116,18 @@ export async function POST(req) {
       { new: true }
     );
 
-    const token = result?.metertoken?.replace(/\D/g, '') || null;
+
     const fee = saveAmount - Number(result?.amount || 0);
+    let token = null;
+
+    const rawToken = result?.metertoken;
+
+    if (typeof rawToken === "string") {
+      const match = rawToken.match(/\d+/);
+      token = match ? match[0] : null;
+    }
+
+    console.log("Final Token:", token);
 
     const transaction = await TransactionModel.create({
       userId,

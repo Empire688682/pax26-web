@@ -155,8 +155,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  console.log("Checking: ", userData?.isTransactionPinSet);
-
 
   /* ================================
      USER DATA FETCHING
