@@ -127,8 +127,6 @@ export async function POST(req) {
       token = match ? match[0] : null;
     }
 
-    console.log("Final Token:", token);
-
     const transaction = await TransactionModel.create({
       userId,
       type: "electricity",

@@ -15,7 +15,7 @@ const TransferMetaSchema = new mongoose.Schema({
 }, { _id: false });
 
 const AirtimeDataMetaSchema = new mongoose.Schema({
-  network:     { type: String, enum: ["MTN", "AIRTEL", "GLO", "9MOBILE"] },
+  network:     { type: String, required: true }, // e.g. "MTN", "Airtel", "Glo", "9mobile"
   phoneNumber: String,
   dataPlan:    String, // e.g. "1GB - 30 days" (data only)
 }, { _id: false });

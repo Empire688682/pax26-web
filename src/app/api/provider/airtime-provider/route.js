@@ -95,6 +95,8 @@ export async function POST(req) {
 
     const result = await res.json();
 
+    console.log("Result: ", result);
+
     if (result.status !== "ORDER_RECEIVED") {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
