@@ -87,7 +87,7 @@ export async function POST(req) {
     });
     const result = await response.json();
 
-    console.log("Response:", result);
+    // console.log("Response:", result);
 
     if (result?.status === "INSUFFICIENT_BALANCE") {
       return NextResponse.json({ success: false, message: "Internal Error", data: result }, { status: 400, headers: corsHeaders() });

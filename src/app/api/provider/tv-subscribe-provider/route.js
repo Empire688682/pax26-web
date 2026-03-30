@@ -58,7 +58,7 @@ export async function POST(req) {
     });
     const result = await response.json();
 
-    console.log("Response:", result);
+    //console.log("Response:", result);
 
     if (result?.status !== "ORDER_RECEIVED") {
       return NextResponse.json({ success: false, message: "Order failed", data: result }, { status: 400, headers:corsHeaders() });
