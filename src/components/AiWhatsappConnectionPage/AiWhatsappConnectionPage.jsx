@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Phone, ExternalLink, Wifi, WifiOff, Unplug, AlertTriangle, CheckCircle2, Webhook } from "lucide-react";
+import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
-/* ── Keyframes + font only ───────────────────────────────────── */
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap');
 
@@ -45,15 +44,19 @@ const CSS = `
   .wa-step { transition: background 0.2s ease; }
 `;
 
-/* ── Icons ────────────────────────────────────────────────────── */
-const IcoArrow = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IcoMeta  = () => (
-  <svg width="18" height="18" viewBox="0 0 40 40" fill="currentColor">
-    <path d="M20 3C10.6 3 3 10.6 3 20s7.6 17 17 17 17-7.6 17-17S29.4 3 20 3zm-3.5 24.2c-2.7 0-4.9-2.2-4.9-4.9s2.2-4.9 4.9-4.9c1.3 0 2.5.5 3.4 1.3l-1.4 1.4c-.5-.5-1.2-.8-2-.8-1.7 0-3 1.3-3 3s1.3 3 3 3c1.5 0 2.5-.8 2.8-2h-2.8v-1.9h4.8c.1.3.1.6.1.9 0 2.7-1.8 4.9-4.9 4.9zm9.5-.2h-2v-5c0-1.3-.5-1.9-1.4-1.9-1 0-1.6.7-1.6 1.9v5h-2v-9.1h1.9v1c.5-.7 1.3-1.2 2.3-1.2 1.8 0 2.8 1.2 2.8 3.3v6z"/>
+const IcoArrow = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
   </svg>
 );
 
-/* ── Step item ────────────────────────────────────────────────── */
+const IcoMeta = () => (
+  <svg width="18" height="18" viewBox="0 0 40 40" fill="currentColor">
+    <path d="M20 3C10.6 3 3 10.6 3 20s7.6 17 17 17 17-7.6 17-17S29.4 3 20 3zm-3.5 24.2c-2.7 0-4.9-2.2-4.9-4.9s2.2-4.9 4.9-4.9c1.3 0 2.5.5 3.4 1.3l-1.4 1.4c-.5-.5-1.2-.8-2-.8-1.7 0-3 1.3-3 3s1.3 3 3 3c1.5 0 2.5-.8 2.8-2h-2.8v-1.9h4.8c.1.3.1.6.1.9 0 2.7-1.8 4.9-4.9 4.9zm9.5-.2h-2v-5c0-1.3-.5-1.9-1.4-1.9-1 0-1.6.7-1.6 1.9v5h-2v-9.1h1.9v1c.5-.7 1.3-1.2 2.3-1.2 1.8 0 2.8 1.2 2.8 3.3v6z" />
+  </svg>
+);
+
 function Step({ num, text, pax26 }) {
   return (
     <div className="wa-step flex items-center gap-3 py-2.5 px-1 rounded-xl">
@@ -66,36 +69,31 @@ function Step({ num, text, pax26 }) {
   );
 }
 
-/* ── Main page ────────────────────────────────────────────────── */
 export default function AiWhatsappConnectionPage() {
   const { pax26, router, isWhatsappNumberConnected, userData, fetchUser } = useGlobalContext();
   const [loading, setLoading] = useState(false);
+  const [sdkReady, setSdkReady] = useState(false);
 
   const GREEN = "#22c55e";
   const AMBER = "#f59e0b";
 
   useEffect(() => { fetchUser(); }, []);
 
-  // const getMetaOauthUrl = async () => {
-  //   try {
-  //     const res  = await fetch("/api/meta/oauth-url", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include" });
-  //     const data = await res.json();
-  //     if (data.success) window.location.href = data.url;
-  //   } catch (err) { console.error("Failed to get Meta OAuth URL:", err); }
-  // };
-
-  /* ✅ Load FB SDK */
   useEffect(() => {
-    fetchUser();
-
     window.fbAsyncInit = function () {
       window.FB.init({
-        appId: "1458243715891036", // ✅ your real app ID
+        appId: process.env.NEXT_PUBLIC_META_APP_ID,
         cookie: true,
         xfbml: true,
         version: "v19.0",
       });
+      setSdkReady(true);
     };
+
+    console.log("NEXT_PUBLIC_META_APP_ID: ",
+      process.env.NEXT_PUBLIC_META_APP_ID, "NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID: ",
+      process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
+      sdkReady);
 
     (function (d, s, id) {
       if (d.getElementById(id)) return;
@@ -104,73 +102,113 @@ export default function AiWhatsappConnectionPage() {
       js.src = "https://connect.facebook.net/en_US/sdk.js";
       d.body.appendChild(js);
     })(document, "script", "facebook-jssdk");
-
   }, []);
 
-
-  /* ✅ Embedded Signup */
-  const launchWhatsAppSignup = () => {
-    if (!window.FB) {
-      alert("Facebook SDK not loaded yet");
-      return;
-    }
-
-    window.FB.login(
-      function (response) {
-        if (response.authResponse) {
-          const code = response.authResponse.code;
-          handleExchangeCode(code);
-        } else {
-          console.log("User cancelled signup");
-        }
-      },
-      {
-        config_id: "2783536142024280", // 🔥 PUT YOUR CONFIG ID HERE
-        response_type: "code",
-        override_default_response_type: true,
-        extras: {
-          setup: {
-            business: {
-              name: "Pax26 Technologies",
-            },
-          },
-        },
-      }
-    );
-  };
-
-  const handleExchangeCode = async (code) => {
+  const handleWithToken = async (accessToken) => {
   try {
-    const res = await fetch("/api/meta/exchange-code", {
+    const res = await fetch("/api/meta/use-token", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ accessToken }),
     });
 
     const data = await res.json();
 
-    if (data.success) {
-      await fetchUser();
-    } else {
-      alert("Failed to connect WhatsApp");
+    if (!data.success) {
+      alert(data.message || "Failed to connect");
+      return;
     }
+
+    // ✅ SINGLE → go dashboard
+    if (data.type === "single") {
+      await fetchUser();
+      router.push("/dashboard/automations/market-place?whatsapp=connected");
+    }
+
+    // ✅ MULTIPLE → go select page
+    if (data.type === "multiple") {
+      router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
+    }
+
   } catch (err) {
     console.error(err);
     alert("Connection failed");
   }
 };
 
+  const launchWhatsAppSignup = () => {
+    if (!window.FB || !sdkReady) {
+      alert("Please wait, Facebook SDK is loading...");
+      return;
+    }
+
+    window.FB.login(
+  function (response) {
+    console.log("FB RESPONSE:", response);
+    if (response.authResponse) {
+      const accessToken = response.authResponse.accessToken;
+      window.FB.logout(); // Force logout to prevent session issues in future logins
+      if (!accessToken) {
+        alert("No access token returned. Check your config.");
+        return;
+      }
+
+      handleWithToken(accessToken);
+    }
+  },
+  {
+    config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
+    response_type: "token", // 🔥 CHANGE THIS
+    override_default_response_type: true,
+    extras: {
+      setup: {
+        business: {
+          name: "Pax26 Technologies",
+        },
+      },
+    },
+  }
+);
+}
+
+  const handleExchangeCode = async (code) => {
+    try {
+      const res = await fetch("/api/meta/exchange-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchUser();
+      } else {
+        alert("Failed to connect WhatsApp");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Connection failed");
+    }
+  };
+
   const disconnectNumber = async () => {
     try {
       setLoading(true);
-      const res  = await fetch("/api/automations/disconnect-whatsapp", { method: "POST", credentials: "include" });
+      const res = await fetch("/api/automations/disconnect-whatsapp", {
+        method: "POST",
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.success) { await fetchUser(); }
       else alert("Failed to disconnect.");
-    } catch { alert("Disconnect error!"); }
-    finally { setLoading(false); }
+    } catch {
+      alert("Disconnect error!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -178,7 +216,7 @@ export default function AiWhatsappConnectionPage() {
       <style>{CSS}</style>
       <div className="wa-root max-w-5xl mx-auto py-10 pb-20 space-y-5">
 
-        {/* ── Page header ──────────────────────────────────── */}
+        {/* Page header */}
         <div className="wa-slide-1 space-y-1 mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="wa-mono text-[10px] font-medium tracking-widest uppercase"
@@ -195,20 +233,15 @@ export default function AiWhatsappConnectionPage() {
           </p>
         </div>
 
-        {/* ── Connection status card ────────────────────────── */}
+        {/* Connection status card */}
         <div className="wa-card wa-slide-2 rounded-2xl overflow-hidden"
           style={{
             background: pax26?.bg,
             border: `1px solid ${isWhatsappNumberConnected ? "rgba(34,197,94,0.3)" : pax26?.border}`,
-            color: "transparent", /* overridden by hover — targets border-color */
           }}>
-
-          {/* top accent strip */}
           <div className="h-1 w-full" style={{ background: isWhatsappNumberConnected ? GREEN : pax26?.border }} />
-
           <div className="p-5 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
-              {/* icon with pulse */}
               <div className="relative">
                 {isWhatsappNumberConnected && (
                   <span className="wa-pulse-dot absolute inset-0 rounded-full pointer-events-none"
@@ -222,8 +255,6 @@ export default function AiWhatsappConnectionPage() {
                   {isWhatsappNumberConnected ? <Wifi size={22} /> : <WifiOff size={22} />}
                 </div>
               </div>
-
-              {/* status text */}
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>
@@ -250,7 +281,6 @@ export default function AiWhatsappConnectionPage() {
               </div>
             </div>
 
-            {/* disconnect button */}
             {isWhatsappNumberConnected && (
               <button
                 className="wa-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold"
@@ -270,10 +300,10 @@ export default function AiWhatsappConnectionPage() {
           </div>
         </div>
 
-        {/* ── Connect flow (shown when not connected) ───────── */}
+        {/* Connect flow */}
         {!isWhatsappNumberConnected && (
           <div className="wa-card wa-slide-3 rounded-2xl p-6 space-y-6"
-            style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, color: "transparent" }}>
+            style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
 
             <div>
               <h2 className="text-base font-bold mb-1" style={{ color: pax26?.textPrimary }}>
@@ -284,7 +314,6 @@ export default function AiWhatsappConnectionPage() {
               </p>
             </div>
 
-            {/* requirement notice */}
             <div className="flex items-start gap-3 p-4 rounded-xl"
               style={{ background: `${pax26?.primary}08`, border: `1px dashed ${pax26?.primary}35` }}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
@@ -302,7 +331,6 @@ export default function AiWhatsappConnectionPage() {
               </div>
             </div>
 
-            {/* steps */}
             <div>
               <p className="text-xs font-bold uppercase tracking-widest mb-2"
                 style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
@@ -318,23 +346,30 @@ export default function AiWhatsappConnectionPage() {
               </div>
             </div>
 
-            {/* CTA */}
+            {/* CTA buttons */}
             <div className="space-y-3 pt-1">
               <button
                 className="wa-btn w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white"
                 onClick={launchWhatsAppSignup}
+                disabled={!sdkReady}
                 style={{
                   background: "#1877F2",
-                  boxShadow: "0 10px 28px rgba(24,119,242,0.35)"
+                  boxShadow: "0 10px 28px rgba(24,119,242,0.35)",
                 }}>
-                <IcoMeta /> Continue with Meta
-                <ExternalLink size={14} />
+                {sdkReady
+                  ? <><IcoMeta /> Continue with Meta <ExternalLink size={14} /></>
+                  : "Loading SDK..."
+                }
               </button>
 
               <button
                 className="wa-btn w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-semibold"
-                onClick={() => router.push("/automations/whatsapp-connect-info")}
-                style={{ background: pax26?.secondaryBg, color: pax26?.textSecondary, border: `1px solid ${pax26?.border}` }}>
+                onClick={() => router.push("/dashboard/automations/whatsapp-connect-info")}
+                style={{
+                  background: pax26?.secondaryBg,
+                  color: pax26?.textSecondary,
+                  border: `1px solid ${pax26?.border}`,
+                }}>
                 How does WhatsApp connection work? <IcoArrow />
               </button>
 
@@ -345,15 +380,15 @@ export default function AiWhatsappConnectionPage() {
           </div>
         )}
 
-        {/* ── Webhook status card ───────────────────────────── */}
+        {/* Webhook status card */}
         <div className="wa-card wa-slide-4 rounded-2xl p-5"
-          style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, color: "transparent" }}>
+          style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
 
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: isWhatsappNumberConnected ? "rgba(34,197,94,0.1)" : `${pax26?.secondaryBg}`,
+                  background: isWhatsappNumberConnected ? "rgba(34,197,94,0.1)" : pax26?.secondaryBg,
                   color: isWhatsappNumberConnected ? GREEN : pax26?.textSecondary,
                 }}>
                 <Webhook size={18} />
@@ -380,12 +415,11 @@ export default function AiWhatsappConnectionPage() {
             </div>
           </div>
 
-          {/* extra detail row */}
           <div className="mt-4 pt-4 grid grid-cols-2 gap-3"
             style={{ borderTop: `1px solid ${pax26?.border}` }}>
             {[
-              { label: "Protocol",  value: "HTTPS / Meta Cloud API" },
-              { label: "Scope",     value: "messages, business_management" },
+              { label: "Protocol", value: "HTTPS / Meta Cloud API" },
+              { label: "Scope", value: "messages, business_management" },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-xl px-3 py-2.5"
                 style={{ background: pax26?.secondaryBg }}>
