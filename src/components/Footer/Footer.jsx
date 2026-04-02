@@ -76,12 +76,12 @@ function ColHead({ children }) {
 /* ── Main footer ──────────────────────────────────────────────── */
 const Footer = () => {
   const { pax26 } = useGlobalContext();
-  const pathName  = usePathname();
+  const pathName = usePathname();
 
-  const [email, setEmail]   = useState("");
+  const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
-  const [message, setMsg]   = useState("");
-  const [atTop, setAtTop]   = useState(false);
+  const [message, setMsg] = useState("");
+  const [atTop, setAtTop] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY > 400);
@@ -185,11 +185,27 @@ const Footer = () => {
             <div>
               <ColHead>Digital Services</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/dashboard/services/buy-data"    icon={<Database size={13} />}>Buy Data</FootLink>
+                <FootLink href="/dashboard/services/buy-data" icon={<Database size={13} />}>Buy Data</FootLink>
                 <FootLink href="/dashboard/services/buy-airtime" icon={<Phone size={13} />}>Airtime Recharge</FootLink>
-                <FootLink href="/dashboard"                      icon={<Zap size={13} />}>Electricity Bills</FootLink>
-                <FootLink href="/dashboard/services/buy-tv"      icon={<Tv size={13} />}>TV Subscription</FootLink>
-                <FootLink href="/dashboard#VTU"                  icon={<CreditCard size={13} />}>Gift Cards</FootLink>
+                <FootLink href="/dashboard" icon={<Zap size={13} />}>Electricity Bills</FootLink>
+                <FootLink href="/dashboard/services/buy-tv" icon={<Tv size={13} />}>TV Subscription</FootLink>
+                <FootLink href="/dashboard#VTU" icon={<CreditCard size={13} />}>Gift Cards</FootLink>
+              </ul>
+            </div>
+
+            {/* ── Legal & Company col ─────────────────────── */}
+            <div>
+              <ColHead>Company</ColHead>
+              <ul className="space-y-3">
+                <FootLink href="/about">About Us</FootLink>
+                <FootLink href="/blog">Blog</FootLink>
+                <FootLink href="/contact">Contact</FootLink>
+              </ul>
+
+              <ColHead className="mt-8">Legal</ColHead>
+              <ul className="space-y-3">
+                <FootLink href="/terms">Terms of Service</FootLink>
+                <FootLink href="/privacy">Privacy Policy</FootLink>
               </ul>
             </div>
 
