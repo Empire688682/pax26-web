@@ -90,11 +90,6 @@ export default function AiWhatsappConnectionPage() {
       setSdkReady(true);
     };
 
-    console.log("NEXT_PUBLIC_META_APP_ID: ",
-      process.env.NEXT_PUBLIC_META_APP_ID, "NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID: ",
-      process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
-      sdkReady);
-
     (function (d, s, id) {
       if (d.getElementById(id)) return;
       const js = d.createElement(s);
@@ -105,73 +100,71 @@ export default function AiWhatsappConnectionPage() {
   }, []);
 
   const handleWithToken = async (accessToken) => {
-  try {
-    const res = await fetch("/api/meta/use-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ accessToken }),
-    });
+    try {
+      const res = await fetch("/api/meta/use-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ accessToken }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!data.success) {
-      alert(data.message || "Failed to connect");
-      return;
+      if (!data.success) {
+        alert(data.message || "Failed to connect");
+        return;
+      }
+
+      // ✅ SINGLE → go dashboard
+      if (data.type === "single") {
+        await fetchUser();
+        router.push("/dashboard/automations/market-place?whatsapp=connected");
+      }
+
+      // ✅ MULTIPLE → go select page
+      if (data.type === "multiple") {
+        router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Connection failed");
     }
-
-    // ✅ SINGLE → go dashboard
-    if (data.type === "single") {
-      await fetchUser();
-      router.push("/dashboard/automations/market-place?whatsapp=connected");
-    }
-
-    // ✅ MULTIPLE → go select page
-    if (data.type === "multiple") {
-      router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Connection failed");
-  }
-};
+  };
 
   const launchWhatsAppSignup = () => {
     if (!window.FB || !sdkReady) {
       alert("Please wait, Facebook SDK is loading...");
       return;
     }
-
     window.FB.login(
-  function (response) {
-    console.log("FB RESPONSE:", response);
-    if (response.authResponse) {
-      const accessToken = response.authResponse.accessToken;
-      window.FB.logout(); // Force logout to prevent session issues in future logins
-      if (!accessToken) {
-        alert("No access token returned. Check your config.");
-        return;
-      }
+      function (response) {
+        console.log("FB RESPONSE:", response);
+        if (response.authResponse) {
+          const accessToken = response.authResponse.accessToken;
+          if (!accessToken) {
+            alert("No access token returned. Check your config.");
+            return;
+          }
 
-      handleWithToken(accessToken);
-    }
-  },
-  {
-    config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
-    response_type: "token", // 🔥 CHANGE THIS
-    override_default_response_type: true,
-    extras: {
-      setup: {
-        business: {
-          name: "Pax26 Technologies",
-        },
+          handleWithToken(accessToken);
+        }
       },
-    },
+      {
+        config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
+        response_type: "token", // 🔥 CHANGE THIS
+        override_default_response_type: true,
+        extras: {
+          setup: {
+            business: {
+              name: "Pax26 Technologies",
+            },
+          },
+        },
+      }
+    );
   }
-);
-}
 
   const handleExchangeCode = async (code) => {
     try {
