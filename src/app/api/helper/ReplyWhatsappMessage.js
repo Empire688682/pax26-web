@@ -7,6 +7,7 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         const payload = {
             messaging_product: "whatsapp",
             to,
+            type: "text",
             text: {
                 body: text,
             },
@@ -17,10 +18,14 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
             "Content-Type": "application/json",
         };
 
+        console.log("Sending to:", to);
+        console.log("Using phoneNumberId:", phoneNumberId);
+
         const response = await axios.post(url, payload, { headers });
         return response.data;
+
     } catch (error) {
-        console.log("SendWhatsappErr:", error.response?.data || error.message);
+        console.error("Error sending WhatsApp reply:", error.response?.data || error.message);
         return null;
     }
 };
