@@ -324,7 +324,7 @@ export default function AiWhatsappConnectionPage() {
               </div>
             </div>
 
-            <div>
+            <div id="whatsapp-connect">
               <p className="text-xs font-bold uppercase tracking-widest mb-2"
                 style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
                 What happens next
