@@ -14,6 +14,12 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         whatsappEnabled: true
     }).lean();
 
+    // ✅ Hard stop — no profile or not trained yet
+    if (!businessProfile || !businessProfile.aiTrained) {
+        console.log(`AI skipped for user ${user._id} — profile not trained yet.`);
+        return; // Silent stop, no reply sent
+    }
+
     const systemPrompt = buildSystemPrompt(businessProfile);
 
     // Fetch last N messages for context
