@@ -1,4 +1,5 @@
-// models/Session.model.js
+import mongoose from 'mongoose';
+
 const SessionSchema = new mongoose.Schema({
   sessionId: { type: String, unique: true, required: true },
   

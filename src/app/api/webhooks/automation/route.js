@@ -1,4 +1,4 @@
-import { triggerAIResponse } from "@/app/lib/ai.service";
+import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
