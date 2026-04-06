@@ -95,6 +95,10 @@ const UserSchema = new mongoose.Schema(
     paxAI: {
       enabled: { type: Boolean, default: false },
       trained: { type: Boolean, default: false },
+      systemPrompt: { type: String, default: "" }, // their custom AI personality
+      knowledgeBase: [{ type: String }],           // URLs or text chunks
+      maxMonthlyMessages: { type: Number, default: 100 },
+      messagesUsedThisMonth: { type: Number, default: 0 },
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],
