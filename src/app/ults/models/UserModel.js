@@ -59,16 +59,7 @@ const UserSchema = new mongoose.Schema(
     referralHostId: { type: String, default: "" },
 
     /* =====================
-   WHATSAPP CONFIG
-===================== */
-    whatsappConnected: {
-      type: Boolean,
-      default: false
-    },
-
-
-    /* =====================
-       WHATSAPP (META)
+   WHATSAPP CONFIG WHATSAPP (META)
     ===================== */
     whatsapp: {
       connected: { type: Boolean, default: false },
@@ -87,6 +78,24 @@ const UserSchema = new mongoose.Schema(
       },
 
       connectedAt: { type: Date, default: null },
+      contacts: {
+        whitelist: [{
+          type: String  // e.g "+2349154358139"
+        }],
+
+        blacklist: [{
+          type: String
+        }],
+        unknownContactPolicy: {
+          type: String,
+          enum: [
+            "allow",   // AI replies to everyone (default)
+            "block",   // AI ignores unknown contacts
+            "ask"      // AI asks user to whitelist/blacklist
+          ],
+          default: "allow"
+        }
+      },
     },
 
     /* =====================

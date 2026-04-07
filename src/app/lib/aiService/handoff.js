@@ -1,6 +1,6 @@
-import { sendWhatsAppReply } from "../api/helper/ReplyWhatsappMessage.js";
-import AIMessageModel from "../ults/models/AIMessageModel.js";
-import SessionModel from "../ults/models/SessionModel.js";
+import { sendWhatsAppReply } from "../../api/helper/ReplyWhatsappMessage.js";
+import AIMessageModel from "../../ults/models/AIMessageModel.js";
+import SessionModel from "../../ults/models/SessionModel.js";
 
 // ============================
 // HAND OFF TO HUMAN

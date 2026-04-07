@@ -1,4 +1,4 @@
-import SessionModel from "../ults/models/SessionModel";
+import SessionModel from "../../ults/models/SessionModel";
 
 export const getOrCreateSession = async ({ visitorPhone, userId, phoneNumberId }) => {
   const SESSION_TTL_HOURS = 24;
