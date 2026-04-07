@@ -225,21 +225,9 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
       onMouseEnter={e => e.currentTarget.style.borderColor = pax26?.primary + "33"}
       onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
     >
-      {/* Avatar */}
-      <div style={{
-        width: "36px", height: "36px", borderRadius: "10px",
-        background: avatarBg, color: avatarColor,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "12px", fontWeight: 700, flexShrink: 0,
-      }}>
-        {initials}
-      </div>
 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "14px", fontWeight: 600, color: pax26?.textPrimary, marginBottom: "1px" }}>
-          {contact.name}
-        </div>
         <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>
           {contact.phone}
         </div>

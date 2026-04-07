@@ -13,7 +13,7 @@ export async function POST(req) {
     await connectDb();
     try {
         const body = await req.json();
-        const { contactNumber, action, name } = body;
+        const { contactNumber, action } = body;
 
         if(!contactNumber.trim() || !action.trim()){
             return NextResponse.json(
