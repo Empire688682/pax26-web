@@ -1,6 +1,6 @@
 
 "use client"
-import AiMarket from '@/components/AiMarket/AiMarket'
+import AutomationMarket from '@/components/AutomationMarket/AutomationMarket'
 import React from 'react';
 import { useGlobalContext } from '@/components/Context';
 
@@ -9,7 +9,7 @@ const page = () => {
   return (
     <div>
       <div className='px-6 py-10'>
-        <AiMarket />
+        <AutomationMarket />
       </div>
     </div>
   )

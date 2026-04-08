@@ -241,7 +241,7 @@ function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTr
 }
 
 /* ── Main page ────────────────────────────────────────────────── */
-export default function AiMarket() {
+export default function AutomationMarket() {
   const {
     pax26, router, userData,
     isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained,
@@ -441,6 +441,20 @@ export default function AiMarket() {
           </p>
           <div className="h-px flex-1" style={{ background: pax26?.border }} />
         </div>
+
+        {
+          !isWhatsappNumberConnected && automations.length > 0 && (
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl"
+              style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
+              <button
+                className="am-btn flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+                onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
+                style={{ background: primary, boxShadow: `0 8px 24px ${primary}35` }}>
+                Contacts Manager <IcoArrow />
+              </button>
+            </div>
+          )
+        }
 
         {/* ── Cards grid ────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

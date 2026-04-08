@@ -184,8 +184,7 @@ const StatCard = ({ label, value, color, pax26 }) => (
 );
 
 /* ── Contact Card ────────────────────────────────────────── */
-const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
-  const initials = contact.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+const ContactCard = ({ contact, removeContact, addContact, pax26 }) => {
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
   const isPending = contact.status === "pending";
@@ -248,7 +247,7 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
         {isPending && (
           <>
             <button
-              onClick={() => onMove(contact.id, "whitelist")}
+              onClick={() => addContact(contact, "whitelist")}
               style={{
                 padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
                 border: `1px solid ${pax26?.primary}44`,
@@ -259,7 +258,7 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
               Allow
             </button>
             <button
-              onClick={() => onMove(contact.id, "blacklist")}
+              onClick={() => addContact(contact, "blacklist")}
               style={{
                 padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
                 border: "1px solid rgba(220,53,53,0.3)",
@@ -273,7 +272,7 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
         )}
         {isWhitelist && (
           <button
-            onClick={() => onMove(contact.id, "blacklist")}
+            onClick={() => addContact(contact, "blacklist")}
             style={{
               padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
               border: "1px solid rgba(220,53,53,0.25)",
@@ -286,7 +285,7 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
         )}
         {isBlacklist && (
           <button
-            onClick={() => onMove(contact.id, "whitelist")}
+            onClick={() => addContact(contact, "whitelist")}
             style={{
               padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
               border: `1px solid ${pax26?.primary}44`,
@@ -298,7 +297,7 @@ const ContactCard = ({ contact, onRemove, onMove, pax26 }) => {
           </button>
         )}
         <button
-          onClick={() => onRemove(contact.id)}
+          onClick={() => removeContact(phone)}
           style={{
             width: "28px", height: "28px", borderRadius: "8px", display: "flex",
             alignItems: "center", justifyContent: "center",
@@ -373,8 +372,8 @@ export default function WhatsappContact() {
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [addingContact, setAddingContact] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const tabs = [
@@ -397,28 +396,77 @@ export default function WhatsappContact() {
     pending: contacts.filter(c => c.status === "pending").length,
   };
 
-  const addContact = (status) => {
+  const addContact = async (phone, status) => {
+    setAddingContact(true);
     if (!phone.trim()) return;
-    setContacts(prev => [
-      ...prev,
-      { id: Date.now(), phone: phone.trim(), name: name.trim() || "Unknown", status },
-    ]);
-    setPhone("");
-    setName("");
+    try {
+    const response = await fetch("/api/contact/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone.trim(), status }),
+    });
+    if(response.ok) {
+      const newContact = await response.json();
+      setContacts(prev => [...prev, newContact]);
+      setPhone("");
+    } else {
+      console.error("Failed to add contact:", await response.text());
+    }
+    } catch (error) {
+      console.error("Failed to add contact:", error);
+    }finally{
+      setAddingContact(false);
+    }
+
   };
 
-  const removeContact = (id) => setContacts(prev => prev.filter(c => c.id !== id));
+  const removeContact = async (status) => {
+    setAddingContact(true);
+    if (!phone.trim()) return;
+    try {
+    const response = await fetch("/api/contact/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phone.trim(), status }),
+    });
+    if(response.ok) {
+      const newContact = await response.json();
+      setContacts(prev => [...prev, newContact]);
+      setPhone("");
+    } else {
+      console.error("Failed to add contact:", await response.text());
+    }
+    } catch (error) {
+      console.error("Failed to add contact:", error);
+    }finally{
+      setAddingContact(false);
+    }
 
-  const moveContact = (id, newStatus) =>
-    setContacts(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
+  };
+
 
   const handleSave = async () => {
-    setSaving(true);
-    // POST /api/whatsapp/contacts/policy
-    await new Promise(r => setTimeout(r, 1200));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    try {
+      setSaving(true);
+    const response = await fetch("/api/contact/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        policy, businessHours, keywordHandoff, contacts,
+      }),
+    });
+    if(response.ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      console.error("Failed to save contact settings:", await response.text());
+    }
+    } catch (error) {
+      console.error("Failed to save contact settings:", error);
+    }
+    finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -581,18 +629,10 @@ export default function WhatsappContact() {
               icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.05 1.19h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.11a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.1v1.82z"/></svg>}
             />
           </div>
-          <div style={{ flex: "1 1 120px" }}>
-            <ThemedInput
-              pax26={pax26}
-              placeholder="Name (optional)"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
-          </div>
           <div style={{ display: "flex", gap: "6px", alignItems: "flex-end", flexShrink: 0 }}>
             <button
-              onClick={() => addContact("whitelist")}
-              disabled={!phone.trim()}
+              onClick={() => addContact(phone, "whitelist")}
+              disabled={!phone.trim() || addingContact}
               style={{
                 display: "flex", alignItems: "center", gap: "6px",
                 padding: "10px 14px", borderRadius: "10px",
@@ -602,10 +642,15 @@ export default function WhatsappContact() {
                 opacity: phone.trim() ? 1 : 0.5, transition: "all 0.2s",
               }}
             >
-              <PlusIcon /><UserCheckIcon /> Allow
+              {
+                addingContact ? <Spinner /> : (
+                  <><PlusIcon /><UserCheckIcon /> Allow
+                  </>
+                )
+              }
             </button>
             <button
-              onClick={() => addContact("blacklist")}
+              onClick={() => addContact(phone, "blacklist")}
               disabled={!phone.trim()}
               style={{
                 display: "flex", alignItems: "center", gap: "6px",
@@ -616,7 +661,12 @@ export default function WhatsappContact() {
                 opacity: phone.trim() ? 1 : 0.5, transition: "all 0.2s",
               }}
             >
-              <PlusIcon /><UserXIcon /> Block
+              {
+                addingContact ? <Spinner /> : (
+                  <><PlusIcon /><UserXIcon /> Block
+                  </>
+                )
+              }
             </button>
           </div>
         </div>
@@ -673,12 +723,12 @@ export default function WhatsappContact() {
                 No contacts found
               </motion.div>
             ) : (
-              filtered.map(contact => (
+              filtered.map((contact, i) => (
                 <ContactCard
-                  key={contact.id}
+                  key={i}
                   contact={contact}
-                  onRemove={removeContact}
-                  onMove={moveContact}
+                  removeContact={removeContact}
+                  addContact={addContact}
                   pax26={pax26}
                 />
               ))
