@@ -43,11 +43,6 @@ const PlusIcon = () => (
     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
 );
-const TrashIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
-  </svg>
-);
 const ArrowRightIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -184,10 +179,9 @@ const StatCard = ({ label, value, color, pax26 }) => (
 );
 
 /* ── Contact Card ────────────────────────────────────────── */
-const ContactCard = ({ contact, removeContact, addContact, pax26 }) => {
+const ContactCard = ({ contact, toggleContact, pax26 }) => {
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
-  const isPending = contact.status === "pending";
 
   const avatarBg = isWhitelist
     ? `${pax26?.primary}22`
@@ -239,40 +233,14 @@ const ContactCard = ({ contact, removeContact, addContact, pax26 }) => {
         letterSpacing: "0.04em", textTransform: "uppercase",
         ...badgeStyle,
       }}>
-        {isWhitelist ? "AI on" : isBlacklist ? "AI off" : "pending"}
+        {isWhitelist ? "AI on" :"AI off" }
       </div>
 
       {/* Actions */}
       <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-        {isPending && (
-          <>
-            <button
-              onClick={() => addContact(contact, "whitelist")}
-              style={{
-                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
-                border: `1px solid ${pax26?.primary}44`,
-                background: `${pax26?.primary}12`,
-                color: pax26?.primary, cursor: "pointer",
-              }}
-            >
-              Allow
-            </button>
-            <button
-              onClick={() => addContact(contact, "blacklist")}
-              style={{
-                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
-                border: "1px solid rgba(220,53,53,0.3)",
-                background: "rgba(220,53,53,0.08)",
-                color: "#dc3535", cursor: "pointer",
-              }}
-            >
-              Block
-            </button>
-          </>
-        )}
         {isWhitelist && (
           <button
-            onClick={() => addContact(contact, "blacklist")}
+            onClick={() => toggleContact(contact?.number, "blacklist")}
             style={{
               padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
               border: "1px solid rgba(220,53,53,0.25)",
@@ -285,7 +253,7 @@ const ContactCard = ({ contact, removeContact, addContact, pax26 }) => {
         )}
         {isBlacklist && (
           <button
-            onClick={() => addContact(contact, "whitelist")}
+            onClick={() => toggleContact(contact?.number, "whitelist")}
             style={{
               padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
               border: `1px solid ${pax26?.primary}44`,
@@ -296,20 +264,6 @@ const ContactCard = ({ contact, removeContact, addContact, pax26 }) => {
             Whitelist
           </button>
         )}
-        <button
-          onClick={() => removeContact(phone)}
-          style={{
-            width: "28px", height: "28px", borderRadius: "8px", display: "flex",
-            alignItems: "center", justifyContent: "center",
-            border: `1px solid ${pax26?.border}`,
-            background: "transparent", color: pax26?.textPrimary,
-            opacity: 0.4, cursor: "pointer", transition: "all 0.15s",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.borderColor = "rgba(220,53,53,0.5)"; e.currentTarget.style.color = "#dc3535"; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = "0.4"; e.currentTarget.style.borderColor = pax26?.border; e.currentTarget.style.color = pax26?.textPrimary; }}
-        >
-          <TrashIcon />
-        </button>
       </div>
     </motion.div>
   );
@@ -359,11 +313,10 @@ export default function WhatsappContact() {
   const { pax26 } = useGlobalContext();
 
   const [contacts, setContacts] = useState([
-    { id: 1, phone: "+2349154358139", name: "Jayempire Dev",   status: "whitelist" },
-    { id: 2, phone: "+2348012345678", name: "Customer A",      status: "whitelist" },
-    { id: 3, phone: "+2348098765432", name: "Mum",             status: "blacklist" },
-    { id: 4, phone: "+2347011223344", name: "John Doe",        status: "blacklist" },
-    { id: 5, phone: "+2349012345678", name: "Unknown Visitor", status: "pending"   },
+    { id: 1, phone: "+2349154358139",  status: "whitelist" },
+    { id: 2, phone: "+2348012345678", status: "whitelist" },
+    { id: 3, phone: "+2348098765432", status: "blacklist" },
+    { id: 4, phone: "+2347011223344", status: "blacklist" },
   ]);
 
   const [policy, setPolicy] = useState("allow");
@@ -379,8 +332,7 @@ export default function WhatsappContact() {
   const tabs = [
     { key: "all",       label: "All" },
     { key: "whitelist", label: "Whitelist" },
-    { key: "blacklist", label: "Blacklist" },
-    { key: "pending",   label: "Pending" },
+    { key: "blacklist", label: "Blacklist" }
   ];
 
   const filtered = contacts.filter(c => {
@@ -393,10 +345,10 @@ export default function WhatsappContact() {
     total: contacts.length,
     whitelist: contacts.filter(c => c.status === "whitelist").length,
     blacklist: contacts.filter(c => c.status === "blacklist").length,
-    pending: contacts.filter(c => c.status === "pending").length,
   };
 
-  const addContact = async (phone, status) => {
+  const toggleContact = async (phone, status) => {
+    console.log("Adding contact:", phone, "with status:", status);
     setAddingContact(true);
     if (!phone.trim()) return;
     try {
@@ -500,7 +452,6 @@ export default function WhatsappContact() {
         <StatCard label="Total"     value={stats.total}     pax26={pax26} />
         <StatCard label="Whitelisted" value={stats.whitelist} color={pax26?.primary} pax26={pax26} />
         <StatCard label="Blocked"   value={stats.blacklist}  color="#dc3535" pax26={pax26} />
-        <StatCard label="Pending"   value={stats.pending}    color="#f59e0b" pax26={pax26} />
       </div>
 
       {/* ── Unknown contact policy ── */}
@@ -611,6 +562,7 @@ export default function WhatsappContact() {
             </p>
           </div>
         </div>
+    
 
         {/* Add contact form */}
         <div style={{
@@ -631,7 +583,7 @@ export default function WhatsappContact() {
           </div>
           <div style={{ display: "flex", gap: "6px", alignItems: "flex-end", flexShrink: 0 }}>
             <button
-              onClick={() => addContact(phone, "whitelist")}
+              onClick={() => toggleContact(phone, "whitelist")}
               disabled={!phone.trim() || addingContact}
               style={{
                 display: "flex", alignItems: "center", gap: "6px",
@@ -650,7 +602,7 @@ export default function WhatsappContact() {
               }
             </button>
             <button
-              onClick={() => addContact(phone, "blacklist")}
+              onClick={() => toggleContact(phone, "blacklist")}
               disabled={!phone.trim()}
               style={{
                 display: "flex", alignItems: "center", gap: "6px",
@@ -727,8 +679,7 @@ export default function WhatsappContact() {
                 <ContactCard
                   key={i}
                   contact={contact}
-                  removeContact={removeContact}
-                  addContact={addContact}
+                  toggleContact={toggleContact}
                   pax26={pax26}
                 />
               ))

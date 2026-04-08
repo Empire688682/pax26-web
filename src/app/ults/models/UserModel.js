@@ -79,13 +79,23 @@ const UserSchema = new mongoose.Schema(
 
       connectedAt: { type: Date, default: null },
       contacts: {
-        whitelist: [{
-          type: String  // e.g "+2349154358139"
-        }],
+        list: [
+          {
+            phone: { type: String, required: true }, // "+234..."
+            status: {
+              type: String,
+              enum: ["whitelist", "blacklist", "pending"],
+              default: "pending"
+            },
+            name: { type: String, default: "" }, // optional (for UI only)
+            tags: [{ type: String }], // e.g. ["VIP", "Supplier"]
+            notes: { type: String, default: "" }, // free-form notes about the contact
+            lastMessageAt: { type: Date, default: null }, // when they last messaged or were messaged
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now }
+          }
+        ],
 
-        blacklist: [{
-          type: String
-        }],
         unknownContactPolicy: {
           type: String,
           enum: [
@@ -95,7 +105,7 @@ const UserSchema = new mongoose.Schema(
           ],
           default: "allow"
         }
-      },
+      }
     },
 
     /* =====================

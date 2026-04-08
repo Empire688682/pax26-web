@@ -25,11 +25,7 @@ export async function GET(req) {
       );
     }
 
-    const contacts = user?.whatsapp?.contacts || {
-      whitelist: [],
-      blacklist: [],
-      unknownContactPolicy: "allow"
-    };
+    const contacts = user?.whatsapp?.contacts.list || [];
 
     return NextResponse.json(
       { success: true, data: contacts },
