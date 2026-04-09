@@ -956,7 +956,7 @@ export default function WhatsappContact() {
         marginBottom: "24px",
       }}>
         <div style={{ color: pax26?.primary, marginTop: "1px", flexShrink: 0 }}>
-          <InfoIcon />
+          <InfoIcon className="md:flex hidden"/>
         </div>
         <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: 0 }}>
           Blacklisted contacts will never receive AI replies. When a new unknown contact messages you, the policy above determines how the AI handles them. Changes take effect immediately on your next incoming message.
