@@ -298,10 +298,12 @@ const StatCard = ({ label, value, color, pax26 }) => (
     flex: 1,
     minWidth: 0,
   }}>
-    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5, marginBottom: "6px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+    <div
+    className="text-xs md:sm" 
+    style={{  color: pax26?.textPrimary, opacity: 0.5, marginBottom: "6px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "capitalize" }}>
       {label}
     </div>
-    <div style={{ fontSize: "28px", fontWeight: 900, color: color || pax26?.textPrimary, letterSpacing: "-0.02em" }}>
+    <div style={{ fontSize: "25px", fontWeight: 900, color: color || pax26?.textPrimary, letterSpacing: "-0.02em" }}>
       {value}
     </div>
   </div>
@@ -334,21 +336,21 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
       onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
     >
       {/* ── Main row ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
+      <div className="text-sm" style={{fontSize: "11px", display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
         {/* Phone */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+          <div style={{fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
             {contact.phone}
           </div>
           {/* Meta row */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             {contact.lastMessageAt && (
-              <span style={{ display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
                 <ClockIcon />{formatRelativeTime(contact.lastMessageAt)}
               </span>
             )}
             {contact.tags?.length > 0 && (
-              <span style={{ display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
                 <TagIcon />{contact.tags.slice(0, 2).join(", ")}{contact.tags.length > 2 ? ` +${contact.tags.length - 2}` : ""}
               </span>
             )}
@@ -360,7 +362,7 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
           <div style={{
             display: "flex", alignItems: "center", gap: "4px",
             padding: "3px 9px", borderRadius: "999px", flexShrink: 0,
-            fontSize: "11px", fontWeight: 700,
+            fontWeight: 700,
             background: pax26?.secondaryBg,
             border: `1px solid ${pax26?.border}`,
             color: pax26?.textPrimary, opacity: 0.7,
@@ -371,10 +373,12 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
         )}
 
         {/* Status badge */}
-        <div style={{
-          fontSize: "11px", fontWeight: 700, padding: "3px 10px",
+        <div 
+        className="md:flex hidden"
+        style={{
+          fontWeight: 700, padding: "3px 10px",
           borderRadius: "999px", flexShrink: 0,
-          letterSpacing: "0.04em", textTransform: "uppercase",
+          letterSpacing: "0.04em", textTransform: "capitalize",
           ...badgeStyle,
         }}>
           {isWhitelist ? "AI on" : "AI off"}
@@ -386,7 +390,7 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
             <button
               onClick={() => toggleContact(contact?.phone, "blacklist")}
               style={{
-                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
+                padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
                 border: "1px solid rgba(220,53,53,0.25)",
                 background: "rgba(220,53,53,0.06)",
                 color: "#dc3535", cursor: "pointer",
@@ -399,7 +403,7 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
             <button
               onClick={() => toggleContact(contact?.phone, "whitelist")}
               style={{
-                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
+                padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
                 border: `1px solid ${pax26?.primary}44`,
                 background: `${pax26?.primary}12`,
                 color: pax26?.primary, cursor: "pointer",

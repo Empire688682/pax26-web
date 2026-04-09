@@ -259,7 +259,7 @@ export default function AutomationViewPage() {
           </div>
         </div>
 
-        {/* ── Analytis ─────────────────────────────────────── */}
+        {/* ── Analytics ─────────────────────────────────────── */}
         {analytics && (
           <>
             {/* stat cards */}
