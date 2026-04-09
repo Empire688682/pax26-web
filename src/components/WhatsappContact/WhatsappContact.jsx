@@ -7,60 +7,82 @@ import { useGlobalContext } from "../Context";
 /* ── Icons ───────────────────────────────────────────────── */
 const ShieldIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 const UserCheckIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <polyline points="16 11 18 13 22 9"/>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+    <polyline points="16 11 18 13 22 9" />
   </svg>
 );
 const UserXIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <line x1="17" y1="11" x2="23" y2="17"/><line x1="23" y1="11" x2="17" y2="17"/>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+    <line x1="17" y1="11" x2="23" y2="17" /><line x1="23" y1="11" x2="17" y2="17" />
   </svg>
 );
 const UsersIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
-);
-const ClockIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
 const MessageIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 const PlusIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 const ArrowRightIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
   </svg>
 );
 const CheckIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
+    <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 const SearchIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 const InfoIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+const TagIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+    <line x1="7" y1="7" x2="7.01" y2="7" />
+  </svg>
+);
+const ClockIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+const NoteIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+);
+const ChevronDownIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+const XIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -74,6 +96,24 @@ const Spinner = () => (
     animation: "spin 0.7s linear infinite",
   }} />
 );
+
+/* ── Helpers ─────────────────────────────────────────────── */
+const formatRelativeTime = (date) => {
+  if (!date) return null;
+  const d = new Date(date);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const formatDate = (date) => {
+  if (!date) return "—";
+  return new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+};
 
 /* ── Themed primitives ───────────────────────────────────── */
 const fieldBase = (pax26) => ({
@@ -137,6 +177,95 @@ const ThemedInput = ({ label, pax26, style, icon, ...props }) => {
   );
 };
 
+const ThemedTextarea = ({ label, pax26, style, ...props }) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ marginBottom: "4px" }}>
+      {label && <FieldLabel pax26={pax26}>{label}</FieldLabel>}
+      <textarea
+        {...props}
+        style={{
+          ...fieldBase(pax26),
+          resize: "vertical",
+          minHeight: "72px",
+          borderColor: focused ? pax26?.primary : pax26?.border,
+          boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none",
+          ...style,
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      />
+    </div>
+  );
+};
+
+/* ── Tag Input ───────────────────────────────────────────── */
+const TagInput = ({ tags, onChange, pax26 }) => {
+  const [input, setInput] = useState("");
+  const [focused, setFocused] = useState(false);
+
+  const addTag = (val) => {
+    const trimmed = val.trim().replace(/,+$/, "");
+    if (trimmed && !tags.includes(trimmed)) {
+      onChange([...tags, trimmed]);
+    }
+    setInput("");
+  };
+
+  const handleKey = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === "Backspace" && !input && tags.length) {
+      onChange(tags.slice(0, -1));
+    }
+  };
+
+  const removeTag = (t) => onChange(tags.filter(x => x !== t));
+
+  return (
+    <div>
+      <FieldLabel pax26={pax26}>Tags</FieldLabel>
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center",
+        padding: "8px 10px", borderRadius: "10px",
+        background: pax26?.secondaryBg,
+        border: `1px solid ${focused ? pax26?.primary : pax26?.border}`,
+        boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none",
+        transition: "border-color 0.2s, box-shadow 0.2s",
+        minHeight: "40px",
+      }}>
+        {tags.map(t => (
+          <span key={t} style={{
+            display: "inline-flex", alignItems: "center", gap: "5px",
+            padding: "3px 8px", borderRadius: "999px", fontSize: "11px", fontWeight: 600,
+            background: `${pax26?.primary}18`, color: pax26?.primary,
+            border: `1px solid ${pax26?.primary}33`,
+          }}>
+            {t}
+            <span onClick={() => removeTag(t)} style={{ cursor: "pointer", opacity: 0.7, lineHeight: 1 }}>
+              <XIcon />
+            </span>
+          </span>
+        ))}
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          onFocus={() => setFocused(true)}
+          onBlur={() => { setFocused(false); if (input.trim()) addTag(input); }}
+          placeholder={tags.length ? "" : "Add tags (press Enter)…"}
+          style={{
+            flex: 1, minWidth: "100px", border: "none", outline: "none",
+            background: "transparent", fontSize: "13px", color: pax26?.textPrimary,
+            fontFamily: "inherit",
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
 /* ── Toggle Switch ───────────────────────────────────────── */
 const Toggle = ({ checked, onChange, pax26 }) => (
   <div
@@ -180,26 +309,13 @@ const StatCard = ({ label, value, color, pax26 }) => (
 
 /* ── Contact Card ────────────────────────────────────────── */
 const ContactCard = ({ contact, toggleContact, pax26 }) => {
+  const [expanded, setExpanded] = useState(false);
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
 
-  const avatarBg = isWhitelist
-    ? `${pax26?.primary}22`
-    : isBlacklist
-    ? "rgba(220,53,53,0.12)"
-    : "rgba(245,158,11,0.12)";
-
-  const avatarColor = isWhitelist
-    ? pax26?.primary
-    : isBlacklist
-    ? "#dc3535"
-    : "#f59e0b";
-
   const badgeStyle = isWhitelist
     ? { background: `${pax26?.primary}18`, color: pax26?.primary }
-    : isBlacklist
-    ? { background: "rgba(220,53,53,0.12)", color: "#dc3535" }
-    : { background: "rgba(245,158,11,0.12)", color: "#f59e0b" };
+    : { background: "rgba(220,53,53,0.12)", color: "#dc3535" };
 
   return (
     <motion.div
@@ -208,63 +324,196 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       style={{
-        display: "flex", alignItems: "center", gap: "12px",
-        padding: "12px 14px",
         background: pax26?.card || pax26?.bg,
         border: `1px solid ${pax26?.border}`,
         borderRadius: "12px",
+        overflow: "hidden",
         transition: "border-color 0.2s",
       }}
       onMouseEnter={e => e.currentTarget.style.borderColor = pax26?.primary + "33"}
       onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
     >
-
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>
-          {contact.phone}
+      {/* ── Main row ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
+        {/* Phone */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
+            {contact.phone}
+          </div>
+          {/* Meta row */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            {contact.lastMessageAt && (
+              <span style={{ display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>
+                <ClockIcon />{formatRelativeTime(contact.lastMessageAt)}
+              </span>
+            )}
+            {contact.tags?.length > 0 && (
+              <span style={{ display: "flex", alignItems: "center", gap: "3px", fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>
+                <TagIcon />{contact.tags.slice(0, 2).join(", ")}{contact.tags.length > 2 ? ` +${contact.tags.length - 2}` : ""}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Badge */}
-      <div style={{
-        fontSize: "11px", fontWeight: 700, padding: "3px 10px",
-        borderRadius: "999px", flexShrink: 0,
-        letterSpacing: "0.04em", textTransform: "uppercase",
-        ...badgeStyle,
-      }}>
-        {isWhitelist ? "AI on" :"AI off" }
-      </div>
+        {/* Message count badge */}
+        {contact.messageCount > 0 && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: "4px",
+            padding: "3px 9px", borderRadius: "999px", flexShrink: 0,
+            fontSize: "11px", fontWeight: 700,
+            background: pax26?.secondaryBg,
+            border: `1px solid ${pax26?.border}`,
+            color: pax26?.textPrimary, opacity: 0.7,
+          }}>
+            <MessageIcon />
+            {contact.messageCount}
+          </div>
+        )}
 
-      {/* Actions */}
-      <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-        {isWhitelist && (
+        {/* Status badge */}
+        <div style={{
+          fontSize: "11px", fontWeight: 700, padding: "3px 10px",
+          borderRadius: "999px", flexShrink: 0,
+          letterSpacing: "0.04em", textTransform: "uppercase",
+          ...badgeStyle,
+        }}>
+          {isWhitelist ? "AI on" : "AI off"}
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+          {isWhitelist && (
+            <button
+              onClick={() => toggleContact(contact?.phone, "blacklist")}
+              style={{
+                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
+                border: "1px solid rgba(220,53,53,0.25)",
+                background: "rgba(220,53,53,0.06)",
+                color: "#dc3535", cursor: "pointer",
+              }}
+            >
+              Blacklist
+            </button>
+          )}
+          {isBlacklist && (
+            <button
+              onClick={() => toggleContact(contact?.phone, "whitelist")}
+              style={{
+                padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
+                border: `1px solid ${pax26?.primary}44`,
+                background: `${pax26?.primary}12`,
+                color: pax26?.primary, cursor: "pointer",
+              }}
+            >
+              Whitelist
+            </button>
+          )}
+        </div>
+
+        {/* Expand toggle */}
+        {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
           <button
-            onClick={() => toggleContact(contact?.number, "blacklist")}
+            onClick={() => setExpanded(v => !v)}
             style={{
-              padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
-              border: "1px solid rgba(220,53,53,0.25)",
-              background: "rgba(220,53,53,0.06)",
-              color: "#dc3535", cursor: "pointer",
+              background: "none", border: "none", cursor: "pointer",
+              color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
+              display: "flex", alignItems: "center",
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s, opacity 0.2s",
             }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
           >
-            Blacklist
+            <ChevronDownIcon />
           </button>
         )}
-        {isBlacklist && (
-          <button
-            onClick={() => toggleContact(contact?.number, "whitelist")}
-            style={{
-              padding: "5px 10px", borderRadius: "8px", fontSize: "11px", fontWeight: 600,
-              border: `1px solid ${pax26?.primary}44`,
-              background: `${pax26?.primary}12`,
-              color: pax26?.primary, cursor: "pointer",
-            }}
-          >
-            Whitelist
-          </button>
-        )}
       </div>
+
+      {/* ── Expanded details ── */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div style={{
+              padding: "12px 14px 14px",
+              borderTop: `1px solid ${pax26?.border}`,
+              background: pax26?.secondaryBg,
+              display: "flex", flexDirection: "column", gap: "10px",
+            }}>
+              {/* Tags */}
+              {contact.tags?.length > 0 && (
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "6px" }}>
+                    Tags
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                    {contact.tags.map(t => (
+                      <span key={t} style={{
+                        padding: "3px 9px", borderRadius: "999px", fontSize: "11px", fontWeight: 600,
+                        background: `${pax26?.primary}18`, color: pax26?.primary,
+                        border: `1px solid ${pax26?.primary}30`,
+                      }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              {contact.notes && (
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
+                    Notes
+                  </div>
+                  <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.65, margin: 0, lineHeight: 1.6 }}>
+                    {contact.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Dates */}
+              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                {contact.createdAt && (
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                      Added
+                    </div>
+                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                      {formatDate(contact.createdAt)}
+                    </div>
+                  </div>
+                )}
+                {contact.updatedAt && (
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                      Updated
+                    </div>
+                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                      {formatDate(contact.updatedAt)}
+                    </div>
+                  </div>
+                )}
+                {contact.lastMessageAt && (
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                      Last message
+                    </div>
+                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                      {formatDate(contact.lastMessageAt)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -310,34 +559,32 @@ const PolicyPill = ({ label, description, value, current, onClick, pax26 }) => {
 
 /* ── Main Component ──────────────────────────────────────── */
 export default function WhatsappContact() {
-  const { pax26 } = useGlobalContext();
+  const { pax26, userData } = useGlobalContext();
 
-  const [contacts, setContacts] = useState([
-    { id: 1, phone: "+2349154358139",  status: "whitelist" },
-    { id: 2, phone: "+2348012345678", status: "whitelist" },
-    { id: 3, phone: "+2348098765432", status: "blacklist" },
-    { id: 4, phone: "+2347011223344", status: "blacklist" },
-  ]);
-
+  const [contacts, setContacts] = useState([]);
   const [policy, setPolicy] = useState("allow");
-  const [businessHours, setBusinessHours] = useState(true);
-  const [keywordHandoff, setKeywordHandoff] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [phone, setPhone] = useState("");
+  const [newTags, setNewTags] = useState([]);
+  const [newNotes, setNewNotes] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const tabs = [
-    { key: "all",       label: "All" },
+    { key: "all", label: "All" },
     { key: "whitelist", label: "Whitelist" },
-    { key: "blacklist", label: "Blacklist" }
+    { key: "blacklist", label: "Blacklist" },
   ];
 
   const filtered = contacts.filter(c => {
     const matchTab = activeTab === "all" || c.status === activeTab;
-    const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search);
+    const matchSearch = !search
+      || c.phone.includes(search)
+      || c.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()))
+      || c.notes?.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
 
@@ -345,78 +592,96 @@ export default function WhatsappContact() {
     total: contacts.length,
     whitelist: contacts.filter(c => c.status === "whitelist").length,
     blacklist: contacts.filter(c => c.status === "blacklist").length,
+    totalMessages: contacts.reduce((s, c) => s + (c.messageCount || 0), 0),
   };
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch("/api/whatsapp/contacts");
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, [userData]);
 
   const toggleContact = async (phone, status) => {
-    console.log("Adding contact:", phone, "with status:", status);
+    if (!phone || !status) return;
     setAddingContact(true);
-    if (!phone.trim()) return;
     try {
-    const response = await fetch("/api/contact/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone.trim(), status }),
-    });
-    if(response.ok) {
-      const newContact = await response.json();
-      setContacts(prev => [...prev, newContact]);
-      setPhone("");
-    } else {
-      console.error("Failed to add contact:", await response.text());
-    }
+      const cleanedPhone = phone.replace(/\D/g, "");
+      const last10 = cleanedPhone.slice(-10);
+      const response = await fetch("/api/whatsapp/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: last10, status }),
+      });
+      if (response.ok) {
+        setPhone("");
+        await fetchContacts();
+      } else {
+        console.error("Failed to add contact:", await response.text());
+      }
     } catch (error) {
-      console.error("Failed to add contact:", error);
-    }finally{
+      console.error("Failed to toggle contact:", error);
+    } finally {
       setAddingContact(false);
     }
-
   };
 
-  const removeContact = async (status) => {
-    setAddingContact(true);
+  const handleAddContact = async (status) => {
     if (!phone.trim()) return;
+    setAddingContact(true);
     try {
-    const response = await fetch("/api/contact/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone.trim(), status }),
-    });
-    if(response.ok) {
-      const newContact = await response.json();
-      setContacts(prev => [...prev, newContact]);
-      setPhone("");
-    } else {
-      console.error("Failed to add contact:", await response.text());
-    }
+      const cleanedPhone = phone.replace(/\D/g, "");
+      const last10 = cleanedPhone.slice(-10);
+      const response = await fetch("/api/whatsapp/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: last10,
+          status,
+          tags: newTags,
+          notes: newNotes,
+        }),
+      });
+      if (response.ok) {
+        setPhone("");
+        setNewTags([]);
+        setNewNotes("");
+        setShowAddForm(false);
+        await fetchContacts();
+      } else {
+        console.error("Failed to add contact:", await response.text());
+      }
     } catch (error) {
       console.error("Failed to add contact:", error);
-    }finally{
+    } finally {
       setAddingContact(false);
     }
-
   };
-
 
   const handleSave = async () => {
     try {
       setSaving(true);
-    const response = await fetch("/api/contact/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        policy, businessHours, keywordHandoff, contacts,
-      }),
-    });
-    if(response.ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } else {
-      console.error("Failed to save contact settings:", await response.text());
-    }
+      const response = await fetch("/api/contact/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ policy, contacts }),
+      });
+      if (response.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
     } catch (error) {
       console.error("Failed to save contact settings:", error);
-    }
-    finally {
+    } finally {
       setSaving(false);
     }
   };
@@ -449,9 +714,10 @@ export default function WhatsappContact() {
 
       {/* ── Stats ── */}
       <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-        <StatCard label="Total"     value={stats.total}     pax26={pax26} />
+        <StatCard label="Total" value={stats.total} pax26={pax26} />
         <StatCard label="Whitelisted" value={stats.whitelist} color={pax26?.primary} pax26={pax26} />
-        <StatCard label="Blocked"   value={stats.blacklist}  color="#dc3535" pax26={pax26} />
+        <StatCard label="Blocked" value={stats.blacklist} color="#dc3535" pax26={pax26} />
+        <StatCard label="Messages" value={stats.totalMessages} pax26={pax26} />
       </div>
 
       {/* ── Unknown contact policy ── */}
@@ -467,7 +733,6 @@ export default function WhatsappContact() {
           marginBottom: "16px",
         }}
       >
-        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", paddingBottom: "16px", borderBottom: `1px solid ${pax26?.border}` }}>
           <div style={{
             width: "38px", height: "38px", borderRadius: "10px", flexShrink: 0,
@@ -485,51 +750,12 @@ export default function WhatsappContact() {
             </p>
           </div>
         </div>
-
-        {/* Policy pills */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <PolicyPill
-            value="allow" current={policy} onClick={setPolicy} pax26={pax26}
-            label="Allow all"
-            description="AI replies to every new contact automatically"
-          />
-          <PolicyPill
-            value="ask" current={policy} onClick={setPolicy} pax26={pax26}
-            label="Ask first"
-            description="Send opt-in prompt before AI engages"
-          />
-          <PolicyPill
-            value="block" current={policy} onClick={setPolicy} pax26={pax26}
-            label="Block all"
-            description="AI ignores all unknown numbers silently"
-          />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <PolicyPill value="allow" current={policy} onClick={setPolicy} pax26={pax26} label="Allow all" description="AI replies to every new contact automatically" />
+          <PolicyPill value="ask" current={policy} onClick={setPolicy} pax26={pax26} label="Ask first" description="Send opt-in prompt before AI engages" />
+          <PolicyPill value="block" current={policy} onClick={setPolicy} pax26={pax26} label="Block all" description="AI ignores all unknown numbers silently" />
         </div>
-
-        {/* Toggles */}
-        {/* <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ color: pax26?.textPrimary, opacity: 0.5 }}><ClockIcon /></div>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: pax26?.textPrimary }}>Enforce business hours</div>
-                <div style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>AI goes silent outside your working hours</div>
-              </div>
-            </div>
-            <Toggle checked={businessHours} onChange={setBusinessHours} pax26={pax26} />
-          </div>
-          <div style={{ height: "0.5px", background: pax26?.border }} />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ color: pax26?.textPrimary, opacity: 0.5 }}><MessageIcon /></div>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: pax26?.textPrimary }}>Keyword handoff detection</div>
-                <div style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.45 }}>Detect "human", "agent" etc. and hand off automatically</div>
-              </div>
-            </div>
-            <Toggle checked={keywordHandoff} onChange={setKeywordHandoff} pax26={pax26} />
-          </div>
-        </div> */}
-      </motion.div> 
+      </motion.div>
 
       {/* ── Contact Manager ── */}
       <motion.div
@@ -553,7 +779,7 @@ export default function WhatsappContact() {
           }}>
             <UserCheckIcon />
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: "15px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "2px" }}>
               Contact manager
             </h2>
@@ -561,67 +787,99 @@ export default function WhatsappContact() {
               Add, remove and manage individual contact rules
             </p>
           </div>
+          <button
+            onClick={() => setShowAddForm(v => !v)}
+            style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "8px 14px", borderRadius: "10px",
+              fontSize: "12px", fontWeight: 700, cursor: "pointer",
+              border: `1px solid ${pax26?.primary}44`,
+              background: showAddForm ? `${pax26?.primary}20` : `${pax26?.primary}10`,
+              color: pax26?.primary, transition: "all 0.2s",
+            }}
+          >
+            <PlusIcon /> Add contact
+          </button>
         </div>
-    
 
-        {/* Add contact form */}
-        <div style={{
-          display: "flex", gap: "8px", marginBottom: "16px",
-          padding: "14px", borderRadius: "12px",
-          background: pax26?.secondaryBg,
-          border: `1px solid ${pax26?.border}`,
-          flexWrap: "wrap",
-        }}>
-          <div style={{ flex: "2 1 160px" }}>
-            <ThemedInput
-              pax26={pax26}
-              placeholder="+2349154358139"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.05 1.19h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.11a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.1v1.82z"/></svg>}
-            />
-          </div>
-          <div style={{ display: "flex", gap: "6px", alignItems: "flex-end", flexShrink: 0 }}>
-            <button
-              onClick={() => toggleContact(phone, "whitelist")}
-              disabled={!phone.trim() || addingContact}
-              style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                padding: "10px 14px", borderRadius: "10px",
-                fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                border: `1px solid ${pax26?.primary}44`,
-                background: `${pax26?.primary}15`, color: pax26?.primary,
-                opacity: phone.trim() ? 1 : 0.5, transition: "all 0.2s",
-              }}
+        {/* ── Add contact form (expandable) ── */}
+        <AnimatePresence>
+          {showAddForm && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              style={{ overflow: "hidden" }}
             >
-              {
-                addingContact ? <Spinner /> : (
-                  <><PlusIcon /><UserCheckIcon /> Allow
-                  </>
-                )
-              }
-            </button>
-            <button
-              onClick={() => toggleContact(phone, "blacklist")}
-              disabled={!phone.trim()}
-              style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                padding: "10px 14px", borderRadius: "10px",
-                fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                border: "1px solid rgba(220,53,53,0.3)",
-                background: "rgba(220,53,53,0.08)", color: "#dc3535",
-                opacity: phone.trim() ? 1 : 0.5, transition: "all 0.2s",
-              }}
-            >
-              {
-                addingContact ? <Spinner /> : (
-                  <><PlusIcon /><UserXIcon /> Block
-                  </>
-                )
-              }
-            </button>
-          </div>
-        </div>
+              <div style={{
+                padding: "16px",
+                marginBottom: "16px",
+                borderRadius: "12px",
+                background: pax26?.secondaryBg,
+                border: `1px solid ${pax26?.border}`,
+                display: "flex", flexDirection: "column", gap: "12px",
+              }}>
+                <ThemedInput
+                  pax26={pax26}
+                  label="Phone number"
+                  placeholder="+2349154358139"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.05 1.19h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.11a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 15.1v1.82z" /></svg>}
+                />
+                <TagInput tags={newTags} onChange={setNewTags} pax26={pax26} />
+                <ThemedTextarea
+                  pax26={pax26}
+                  label="Notes (optional)"
+                  placeholder="Add a note about this contact…"
+                  value={newNotes}
+                  onChange={e => setNewNotes(e.target.value)}
+                />
+                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => { setShowAddForm(false); setPhone(""); setNewTags([]); setNewNotes(""); }}
+                    style={{
+                      padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
+                      border: `1px solid ${pax26?.border}`, background: "transparent",
+                      color: pax26?.textPrimary, cursor: "pointer", opacity: 0.6,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleAddContact("blacklist")}
+                    disabled={!phone.trim() || addingContact}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "9px 16px", borderRadius: "10px",
+                      fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
+                      border: "1px solid rgba(220,53,53,0.3)",
+                      background: "rgba(220,53,53,0.08)", color: "#dc3535",
+                      opacity: phone.trim() ? 1 : 0.5,
+                    }}
+                  >
+                    {addingContact ? <Spinner /> : <><UserXIcon /> Block</>}
+                  </button>
+                  <button
+                    onClick={() => handleAddContact("whitelist")}
+                    disabled={!phone.trim() || addingContact}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "9px 16px", borderRadius: "10px",
+                      fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
+                      border: `1px solid ${pax26?.primary}44`,
+                      background: `${pax26?.primary}15`, color: pax26?.primary,
+                      opacity: phone.trim() ? 1 : 0.5,
+                    }}
+                  >
+                    {addingContact ? <Spinner /> : <><UserCheckIcon /> Allow</>}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Tabs + Search */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px", flexWrap: "wrap" }}>
@@ -651,7 +909,7 @@ export default function WhatsappContact() {
           <div style={{ flex: 1, minWidth: "160px" }}>
             <ThemedInput
               pax26={pax26}
-              placeholder="Search contacts..."
+              placeholder="Search phone, tags, notes…"
               value={search}
               onChange={e => setSearch(e.target.value)}
               icon={<SearchIcon />}
@@ -667,17 +925,14 @@ export default function WhatsappContact() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                style={{
-                  textAlign: "center", padding: "32px 16px",
-                  color: pax26?.textPrimary, opacity: 0.35, fontSize: "13px",
-                }}
+                style={{ textAlign: "center", padding: "32px 16px", color: pax26?.textPrimary, opacity: 0.35, fontSize: "13px" }}
               >
                 No contacts found
               </motion.div>
             ) : (
-              filtered.map((contact, i) => (
+              filtered.map((contact) => (
                 <ContactCard
-                  key={i}
+                  key={contact.phone}
                   contact={contact}
                   toggleContact={toggleContact}
                   pax26={pax26}
@@ -721,13 +976,7 @@ export default function WhatsappContact() {
             opacity: saving ? 0.8 : 1,
           }}
         >
-          {saving ? (
-            <><Spinner />Saving...</>
-          ) : saved ? (
-            <><CheckIcon />Saved</>
-          ) : (
-            <>Save policy<ArrowRightIcon /></>
-          )}
+          {saving ? <><Spinner />Saving...</> : saved ? <><CheckIcon />Saved</> : <>Save policy<ArrowRightIcon /></>}
         </button>
       </div>
     </div>

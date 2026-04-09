@@ -23,9 +23,10 @@ export async function GET(req) {
         { success: false, message: "User not authenticated" },
         { status: 401, headers: corsHeaders() }
       );
-    }
+    };
 
-    const contacts = user?.whatsapp?.contacts.list || [];
+    const contacts = user?.whatsapp?.contacts?.list ?? [];
+    console.log("User contacts:", contacts);
 
     return NextResponse.json(
       { success: true, data: contacts },

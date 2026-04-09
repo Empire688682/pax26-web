@@ -6,68 +6,106 @@ import { handleNewContact } from "@/app/lib/aiService/optIn";
 
 // The revised webhook flow
 export const handleIncomingWhatsApp = async (payload) => {
-    const message = payload.entry[0].changes[0].value.messages[0];
-    const metadata = payload.entry[0].changes[0].value.metadata;
-    const contact = payload.entry[0].changes[0].value.contacts[0];
-    const visitorPhone = message?.from;;
+    const value = payload?.entry?.[0]?.changes?.[0]?.value;
+    const message = value?.messages?.[0];
+    const metadata = value?.metadata;
+    const contact = value?.contacts?.[0];
+    const inboundText = message?.text?.body || "";
 
-    // 1. DEDUPLICATE — your logs show same message hitting 4+ times
-    const existing = await AIMessageModel.findOne({ messageId: message.id });
-    if (existing) {
-        console.log("Duplicate message received, ignoring. Message ID:", message.id);
-        return { skipped: true };
+    if (!message?.from) {
+        console.log("Invalid message.from");
+        return { ok: true };
     }
 
-    // 2. Find which user owns this phoneNumberId
+    const cleaned = message.from.replace(/\D/g, "");
+    const visitorPhone = `+${cleaned}`;
+
+    // 1. Find which user owns this phoneNumberId
     const user = await UserModel.findOne({ "whatsapp.phoneNumberId": metadata.phone_number_id });
     if (!user) {
         console.log("No user for this phoneNumberId");
-        return NextResponse.json({ ok: true }, { status: 200 });
+        return { ok: true };
     }
 
-    // 3. Get or create session
+    // 2. Get or create session
     const session = await getOrCreateSession({
         visitorPhone,
         userId: user._id,
         phoneNumberId: metadata.phone_number_id
     });
 
-    // 4. Save inbound message
-    await AIMessageModel.create({
-        messageId: message.id,
-        userId: user._id,
-        sessionId: session.sessionId,
-        platform: "whatsapp",
-        phoneNumberId: metadata.phone_number_id,
-        from: visitorPhone,
-        to: metadata.display_phone_number,
-        text: message.text.body,
-        direction: "inbound",
-        senderType: "visitor",
-        status: "received"
-    });
+    if (!session) {
+        console.log("Session creation failed");
+        return { ok: true };
+    }
 
-    // 5. Update session
+    // 3. Save inbound message
+    try {
+        await AIMessageModel.create({
+            messageId: message.id,
+            userId: user._id,
+            sessionId: session.sessionId,
+            platform: "whatsapp",
+            phoneNumberId: metadata.phone_number_id,
+            from: visitorPhone,
+            to: metadata.display_phone_number,
+            text: inboundText,
+            direction: "inbound",
+            senderType: "visitor",
+            status: "received"
+        });
+    } catch (err) {
+        if (err.code === 11000) {
+            console.log("Duplicate message prevented at DB level");
+            return { skipped: true };
+        }
+        throw err;
+    }
+
+    await UserModel.updateOne(
+        {
+            _id: user._id,
+            "whatsapp.contacts.list.phone": { $ne: visitorPhone }
+        },
+        {
+            $addToSet: {
+                "whatsapp.contacts.list": {
+                    phone: visitorPhone,
+                    status: "whitelist"
+                }
+            }
+        }
+    );
+    // 4. Update session
     await SessionModel.findByIdAndUpdate(session._id, {
         lastMessageAt: new Date(),
         $inc: { "context.messageCount": 1 },
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // reset TTL
     });
 
-    // 6. Check allow contacts to auto reply
-    const canAutoReply = isAllowedToAutoReply(visitorPhone, user?.whatsapp)
+    // 5. Check allow contacts to auto reply
+    const canAutoReply = await UserModel.exists({
+        _id: user._id,
+        "whatsapp.contacts.list": {
+            $elemMatch: {
+                phone: visitorPhone,
+                status: "whitelist"
+            }
+        }
+    });
     if (!canAutoReply) {
         console.log("Auto-reply blocked by contact policy. Session:", session.sessionId);
-        return NextResponse.json({ ok: true }, { status: 200 });
+        return { ok: true };
     }
 
-    // 7. Handle opt-in flow for new contacts
-    const handled = await handleNewContact({ session, user, visitorPhone, inboundText: message.text.body });
+    // 6. Handle opt-in flow for new contacts
+    const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
     if (handled) {
         console.log("Handled by opt-in flow. Session:", session.sessionId);
-        return NextResponse.json({ ok: true }, { status: 200 });
+        return { ok: true };
     }
 
-    // 8. Trigger AI response (next step)
-    await triggerAIResponse({ session, user, inboundText: message.text.body });
+    // 7. Trigger AI response (next step)
+    triggerAIResponse({ session, user, inboundText }).catch(err => console.log("AI error:", err));
+    return { ok: true };
 };

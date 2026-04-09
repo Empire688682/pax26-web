@@ -13,16 +13,16 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { contactNumber, status } = body;
+    const { phone, status, tags, notes } = body;
 
-    if (!contactNumber || !status) {
+    if (!phone || !status) {
       return NextResponse.json(
         { success: false, message: "Contact number and status are required" },
         { status: 400, headers: corsHeaders() }
       );
     }
 
-    const phone = contactNumber.trim();
+    const completePhone = "+234" + phone.trim();
 
     const userId = await verifyToken(req);
 
@@ -36,7 +36,7 @@ export async function POST(req) {
 
     // 🔥 1. Try updating existing contact
     const updateResult = await UserModel.updateOne(
-      { _id: userId, "whatsapp.contacts.list.phone": phone },
+      { _id: userId, "whatsapp.contacts.list.phone": completePhone },
       {
         $set: {
           "whatsapp.contacts.list.$.status": status,
@@ -46,14 +46,16 @@ export async function POST(req) {
     );
 
     // 🔥 2. If contact does NOT exist → create it
-    if (updateResult.matchedCount === 0) {
+    if (updateResult.modifiedCount  === 0) {
       await UserModel.updateOne(
         { _id: userId },
         {
           $push: {
             "whatsapp.contacts.list": {
-              phone,
+              phone:completePhone,
               status,
+              tags: tags || [],
+              notes: notes || "",
               createdAt: new Date(),
               updatedAt: new Date()
             }

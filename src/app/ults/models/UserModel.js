@@ -79,32 +79,34 @@ const UserSchema = new mongoose.Schema(
 
       connectedAt: { type: Date, default: null },
       contacts: {
-        list: [
-          {
-            phone: { type: String, required: true }, // "+234..."
-            status: {
-              type: String,
-              enum: ["whitelist", "blacklist", "pending"],
-              default: "pending"
-            },
-            name: { type: String, default: "" }, // optional (for UI only)
-            tags: [{ type: String }], // e.g. ["VIP", "Supplier"]
-            notes: { type: String, default: "" }, // free-form notes about the contact
-            lastMessageAt: { type: Date, default: null }, // when they last messaged or were messaged
-            createdAt: { type: Date, default: Date.now },
-            updatedAt: { type: Date, default: Date.now }
-          }
-        ],
+        type: {
+          list: {
+            type: [
+              {
+                phone: { type: String, required: true },
+                status: {
+                  type: String,
+                  enum: ["whitelist", "blacklist"],
+                  default: "whitelist"
+                },
+                tags: [{ type: String }],
+                notes: { type: String, default: "" },
+                lastMessageAt: { type: Date, default: null },
+                messageCount: { type: Number, default: 0 },
+                createdAt: { type: Date, default: Date.now },
+                updatedAt: { type: Date, default: Date.now }
+              }
+            ],
+            default: [] // ✅ THIS is key
+          },
 
-        unknownContactPolicy: {
-          type: String,
-          enum: [
-            "allow",   // AI replies to everyone (default)
-            "block",   // AI ignores unknown contacts
-            "ask"      // AI asks user to whitelist/blacklist
-          ],
-          default: "allow"
-        }
+          unknownContactPolicy: {
+            type: String,
+            enum: ["allow", "block", "ask"],
+            default: "allow"
+          }
+        },
+        default: {} // ✅ THIS ensures contacts always exists
       }
     },
 
