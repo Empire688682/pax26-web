@@ -293,8 +293,8 @@ const Toggle = ({ checked, onChange, pax26 }) => (
 const StatCard = ({ label, value, color, pax26 }) => (
   <div style={{
     background: pax26?.secondaryBg,
-    borderRadius: "12px",
-    padding: "16px",
+    borderRadius: "8px",
+    padding: "8px",
     flex: 1,
     minWidth: 0,
   }}>
@@ -717,7 +717,7 @@ export default function WhatsappContact() {
       </div>
 
       {/* ── Stats ── */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+      <div style={{ display: "flex", gap: "5px", marginBottom: "24px" }}>
         <StatCard label="Total" value={stats.total} pax26={pax26} />
         <StatCard label="Whitelisted" value={stats.whitelist} color={pax26?.primary} pax26={pax26} />
         <StatCard label="Blocked" value={stats.blacklist} color="#dc3535" pax26={pax26} />
