@@ -781,7 +781,7 @@ export default function WhatsappContact() {
             display: "flex", alignItems: "center", justifyContent: "center",
             background: `${pax26?.primary}18`, color: pax26?.textPrimary,
           }}>
-            <UserCheckIcon />
+            <UserCheckIcon className="md:flex hidden" />
           </div>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: "15px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "2px" }}>
