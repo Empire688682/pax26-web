@@ -26,7 +26,6 @@ export async function GET(req) {
     };
 
     const contacts = user?.whatsapp?.contacts?.list ?? [];
-    console.log("User contacts:", contacts);
 
     return NextResponse.json(
       { success: true, data: contacts },

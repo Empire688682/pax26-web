@@ -1,7 +1,7 @@
 import UserModel from "@/app/ults/models/UserModel.js";
-import { sendWhatsAppReply } from "./whatsapp.service.js";
 import SessionModel from "@/app/ults/models/SessionModel.js";
 import AIMessageModel from "@/app/ults/models/AIMessageModel.js";
+import { sendWhatsAppReply } from "@/app/api/helper/ReplyWhatsappMessage";
 
 export const handleNewContact = async ({ session, user, visitorPhone, inboundText }) => {
 

@@ -1,8 +1,8 @@
-import { triggerAIResponse } from "@/app/lib/ai.service";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { handleNewContact } from "@/app/lib/aiService/optIn";
+import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 
 // The revised webhook flow
 export const handleIncomingWhatsApp = async (payload) => {
