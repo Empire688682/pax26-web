@@ -5,6 +5,7 @@ import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
 import { handleNewContact } from "@/app/lib/aiService/optIn";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
+import nanoid from "nanoid";
 
 // ─────────────────────────────────────────────────────────────
 // MOCK DATA — covers every function in the A→Z flow
@@ -22,11 +23,11 @@ const MOCK_PAYLOAD = {
         },
         contacts: [{ profile: { name: "Test Visitor" }, wa_id: "2348012345678" }],
         messages: [{
-          id: `mock_msg_${Date.now()}`,
+          id: `mock_msg_${Date.now()}` + nanoid(5),
           from: "2348012345678",
           timestamp: Math.floor(Date.now() / 1000).toString(),
           type: "text",
-          text: { body: "where is your store and your website?" },
+          text: { body: "Good afternoon dear" },
         }],
       },
     }],
@@ -106,6 +107,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     });
     console.log("✅ Step 4 — Inbound message saved");
   } catch (err) {
+    console.log("❌ Error saving message:", err);
     if (err.code === 11000) {
       console.log("⚠️  Duplicate message — skipping");
       return { skipped: true };
@@ -114,11 +116,43 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 5: Add contact if new ────────────────────────────
-  await UserModel.updateOne(
-    { _id: user._id, "whatsapp.contacts.list.phone": { $ne: visitorPhone } },
-    { $addToSet: { "whatsapp.contacts.list": { phone: visitorPhone, status: "whitelist" } } }
+  const updateResult = await UserModel.updateOne(
+    {
+      _id: user._id,
+      "whatsapp.contacts.list.phone": visitorPhone
+    },
+    {
+      $inc: {
+        "whatsapp.contacts.list.$.messageCount": 1,
+        "whatsapp.contacts.list.$.inboundCount": 1
+      },
+      $set: {
+        "whatsapp.contacts.list.$.lastMessageAt": new Date()
+      }
+    }
   );
-  console.log("✅ Step 5 — Contact list updated");
+  console.log("✅ Step 5 — Existing contact updated");
+
+  if (updateResult.matchedCount === 0) {
+    await UserModel.updateOne(
+      { _id: user._id },
+      {
+        $push: {
+          "whatsapp.contacts.list": {
+            phone: visitorPhone,
+            status: "whitelist",
+            messageCount: 1,
+            outboundCount: 0,
+            inboundCount: 1,
+            lastMessageAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        }
+      }
+    );
+    console.log("✅ Step 5.1 — New contact added if not exists");
+  }
 
   // ── Step 6: Update session TTL + message count ────────────
   await SessionModel.findByIdAndUpdate(session._id, {
@@ -143,11 +177,11 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("✅ Step 7 — Auto-reply allowed");
 
   // ── Step 8: Opt-in flow ───────────────────────────────────
-  const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
-  if (handled) {
-    console.log("✅ Step 8 — Handled by opt-in flow");
-    return { ok: true };
-  }
+  // const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
+  // if (handled) {
+  //   console.log("✅ Step 8 — Handled by opt-in flow");
+  //   return { ok: true };
+  // }
   console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
 
   // ── Step 9: Trigger AI response ───────────────────────────

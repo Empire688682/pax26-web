@@ -37,6 +37,7 @@ export const handleNewContact = async ({ session, user, visitorPhone, inboundTex
       await UserModel.findByIdAndUpdate(user._id, {
         $addToSet: { "whatsapp.contacts.whitelist": visitorPhone }
       });
+      
       await SessionModel.findByIdAndUpdate(session._id, {
         status: "active",
         "context.lastIntent": null

@@ -3,6 +3,7 @@ import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt";
 import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
 import { callGroqAI } from "./grok";
+import UserModel from "@/app/ults/models/UserModel";
 
 export const triggerAIResponse = async ({ session, user, inboundText }) => {
     // Check if handed off to human — skip AI
@@ -80,6 +81,42 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         status: "sent",
         automation: { isAutoReply: true }
     });
+
+    const updateResult = await UserModel.updateOne(
+        {
+            _id: user._id,
+            "whatsapp.contacts.list.phone": session?.visitorPhone
+        },
+        {
+            $inc: {
+                "whatsapp.contacts.list.$.messageCount": 1,
+                "whatsapp.contacts.list.$.outboundCount": 1
+            },
+            $set: {
+                "whatsapp.contacts.list.$.lastMessageAt": new Date()
+            }
+        }
+    );
+
+    if (updateResult.matchedCount === 0) {
+        await UserModel.updateOne(
+            { _id: user._id },
+            {
+                $push: {
+                    "whatsapp.contacts.list": {
+                        phone: session?.visitorPhone,
+                        status: "whitelist",
+                        messageCount: 1,
+                        outboundCount: 1,
+                        inboundCount: 0,
+                        lastMessageAt: new Date(),
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }
+                }
+            }
+        );
+    }
 
     // Send via WhatsApp
     await sendWhatsAppReply({

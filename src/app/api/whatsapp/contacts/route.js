@@ -4,7 +4,6 @@ import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { fetchUrl } from "@/app/lib/fetchUrl";
-import { callGroqAI } from "@/app/lib/aiService/grok";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -15,14 +14,6 @@ export async function GET(req) {
     await connectDb();
 
     const userId = await verifyToken(req);
-    const urlContent = await fetchUrl("pax26.com/about");
-    const callAI = await callGroqAI({
-      systemPrompt: "You are a helpful assistant that summarizes website content. Be concise and friendly, also tell me the founder",
-      messages: [
-        { role: "user", content: `Summarize the key information from this website: ${urlContent}` }
-      ]
-    });
-    console.log("Fetched callAI:", callAI);
 
     const user = await UserModel.findById(userId)
       .select("whatsapp.contacts")

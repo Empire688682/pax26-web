@@ -96,7 +96,8 @@ const UserSchema = new mongoose.Schema(
                 inboundCount: { type: Number, default: 0 },
                 outboundCount: { type: Number, default: 0 },
                 createdAt: { type: Date, default: Date.now },
-                updatedAt: { type: Date, default: Date.now }
+                updatedAt: { type: Date, default: Date.now },
+                _id: false
               }
             ],
             _id: false,
