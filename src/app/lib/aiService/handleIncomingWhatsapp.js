@@ -5,7 +5,7 @@ import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
 import { handleNewContact } from "@/app/lib/aiService/optIn";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
-import nanoid from "nanoid";
+import {nanoid} from "nanoid";
 
 // ─────────────────────────────────────────────────────────────
 // MOCK DATA — covers every function in the A→Z flow
