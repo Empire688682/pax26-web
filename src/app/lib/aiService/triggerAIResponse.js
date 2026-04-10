@@ -49,7 +49,7 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
 
     // ✅ Guard against null AI response
     if (!aiResponse) {
-        console.error("AI returned null, skipping reply for session:", session.sessionId);
+        console.log("AI returned null, skipping reply for session:", session.sessionId);
         await AIMessageModel.findOneAndUpdate(
             { sessionId: session.sessionId, direction: "inbound", status: "received" },
             { status: "failed" }

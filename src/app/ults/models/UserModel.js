@@ -93,10 +93,13 @@ const UserSchema = new mongoose.Schema(
                 notes: { type: String, default: "" },
                 lastMessageAt: { type: Date, default: null },
                 messageCount: { type: Number, default: 0 },
+                inboundCount: { type: Number, default: 0 },
+                outboundCount: { type: Number, default: 0 },
                 createdAt: { type: Date, default: Date.now },
                 updatedAt: { type: Date, default: Date.now }
               }
             ],
+            _id: false,
             default: [] // ✅ THIS is key
           },
 
@@ -104,7 +107,8 @@ const UserSchema = new mongoose.Schema(
             type: String,
             enum: ["allow", "block", "ask"],
             default: "allow"
-          }
+          },
+          _id: false // prevent automatic _id generation for contacts subdocuments
         },
         default: {} // ✅ THIS ensures contacts always exists
       }
