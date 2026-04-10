@@ -17,7 +17,7 @@ export const handleIncomingWhatsApp = async (payload) => {
         return { ok: true };
     }
 
-    const cleaned = message.from.replace(/\D/g, "");
+    const cleaned = message?.from.replace(/\D/g, "");
     const visitorPhone = `+${cleaned}`;
 
     // 1. Find which user owns this phoneNumberId

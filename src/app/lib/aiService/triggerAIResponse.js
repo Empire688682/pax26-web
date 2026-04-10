@@ -20,30 +20,35 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         return; // Silent stop, no reply sent
     }
 
-    const systemPrompt = buildSystemPrompt(businessProfile);
+    const businessUrl = businessProfile?.businessUrl || null;
+
+    const systemPrompt = await buildSystemPrompt(businessProfile, businessUrl);
+    if (!systemPrompt) {
+        console.error("Failed to build system prompt for user:", user._id);
+        return;
+    }
 
     // Fetch last N messages for context
     const history = await AIMessageModel.find({ sessionId: session.sessionId })
         .sort({ createdAt: -1 })
-        .limit(10)
+        .limit(1)
         .lean();
 
-    const messages = history.reverse().map(m => ({
-        role: m.senderType === "visitor" ? "user" : "assistant",
-        content: m.text
-    }));
+    const messages = [];
+
+    // const messages = history.reverse().map(m => ({
+    //     role: m.senderType === "visitor" ? "user" : "assistant",
+    //     content: m.text
+    // }));
 
     // Add current message
     messages.push({ role: "user", content: inboundText });
 
-    // Call AI (Claude, GPT, etc.)
-    const aiReply = await callGroqAI({
-        systemPrompt,
-        messages
-    });
+    // Call AI
+    const aiResponse = await callGroqAI({ systemPrompt, messages });
 
     // ✅ Guard against null AI response
-    if (!aiReply) {
+    if (!aiResponse) {
         console.error("AI returned null, skipping reply for session:", session.sessionId);
         await AIMessageModel.findOneAndUpdate(
             { sessionId: session.sessionId, direction: "inbound", status: "received" },
@@ -51,6 +56,10 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         );
         return;
     }
+
+    // Extract plain text from response object
+    const aiReply = aiResponse?.text || aiResponse;
+    console.log("AI reply for session :", aiReply);
 
     // Save outbound message
     await AIMessageModel.create({
@@ -61,10 +70,10 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         phoneNumberId: user.whatsapp.phoneNumberId,
         from: user.whatsapp.displayPhone,
         to: session.visitorPhone,
-        text: aiReply,
+        text: aiReply,                    // ← plain string ✓
         aiMeta: {
-            model: aiReply?.model,
-            tokensUsed: aiReply?.tokensUsed,
+            model: aiResponse?.model,     // ← changed from aiReply?.model
+            tokensUsed: aiResponse?.tokensUsed, // ← changed from aiReply?.tokensUsed
         },
         direction: "outbound",
         senderType: "ai",
