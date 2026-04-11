@@ -4,7 +4,7 @@
    IMPORTS
 ================================ */
 import React, { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -24,6 +24,7 @@ export const AppProvider = ({ children }) => {
      NAVIGATION & THEME
   =================================*/
   const router = useRouter();
+  const pathname = usePathname();
   const { theme } = useTheme();
 
 
@@ -210,11 +211,30 @@ export const AppProvider = ({ children }) => {
     isUserAuthenticated();
   }, []);
 
-  useEffect(() => {
+  const verifyUserRedirect = async() => {
     if (!userData) return;
-    if (userData && !userData.userVerify) {
-      router.push("/verify-user?action=verify");
+    if (userData && !userData.userVerify && pathname !== "/verify-user") {
+    try {
+      const res  = await fetch("/api/auth/send-email-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Verification email sent! Please check your inbox.");
+        router.push("/verify-user");
+      } else {
+        toast.error(data.message || "Failed to send verification email");
+      }
+    } catch {
+      console.log("Error sending verification email", error);
+      toast.error("Error sending verification email");
     }
+    }
+  }
+
+  useEffect(() => {
+    verifyUserRedirect();
   }, [userData, router]);
 
   useEffect(() => {

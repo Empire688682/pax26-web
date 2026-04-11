@@ -4,6 +4,7 @@ import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt";
 import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
 import { callGroqAI } from "./grok";
 import UserModel from "@/app/ults/models/UserModel";
+import SessionModel from "@/app/ults/models/SessionModel";
 
 export const triggerAIResponse = async ({ session, user, inboundText }) => {
     // Check if handed off to human — skip AI

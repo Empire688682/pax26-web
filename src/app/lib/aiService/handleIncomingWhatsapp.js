@@ -24,10 +24,10 @@ const MOCK_PAYLOAD = {
         contacts: [{ profile: { name: "Test Visitor" }, wa_id: "2348012345678" }],
         messages: [{
           id: `mock_msg_${Date.now()}` + nanoid(5),
-          from: "2348012345678",
+          from: "2348012345690",
           timestamp: Math.floor(Date.now() / 1000).toString(),
           type: "text",
-          text: { body: "Good afternoon dear" },
+          text: { body: "Afternoon dear" },
         }],
       },
     }],
@@ -56,7 +56,7 @@ export const handleIncomingWhatsApp = async (payload) => {
   const cleaned = message.from.replace(/\D/g, "");
   const visitorPhone = `+${cleaned}`;
   const phoneNumberId = metadata?.phone_number_id || "";
-  const displayPhone = metadata?.display_phone_number || "2348000000000";
+  const displayPhone = metadata?.display_phone_number || "";
 
   console.log("📩 phoneNumberId:", phoneNumberId);
   console.log("📩 Incoming from:", visitorPhone, "| Text:", inboundText);

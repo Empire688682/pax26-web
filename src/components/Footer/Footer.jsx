@@ -105,7 +105,10 @@ const Footer = () => {
     }
   };
 
-  if (pathName === "/reset-password" || pathName === "/automations/pax") return null;
+  if (pathName === "/reset-password" ||
+      pathName === "/automations/pax" ||
+      pathName === "/verify-user"
+    ) return null;
 
   const year = new Date().getFullYear();
 
