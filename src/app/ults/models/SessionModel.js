@@ -39,7 +39,10 @@ const SessionSchema = new mongoose.Schema({
         // rolling AI memory — last N messages summary
         summary: { type: String, default: "" },
         lastIntent: { type: String },
-        messageCount: { type: Number, default: 0 }
+        messageCount: { type: Number, default: 0 },
+        inboundCount: { type: Number, default: 0 },
+        outboundCount: { type: Number, default: 0 },
+        totalTokens: { type: Number, default: 0 } // for AI cost tracking
     },
 
     lastMessageAt: { type: Date, default: Date.now },

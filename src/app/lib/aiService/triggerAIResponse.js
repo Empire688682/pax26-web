@@ -116,7 +116,17 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
                 }
             }
         );
-    }
+    };
+
+    await SessionModel.findByIdAndUpdate(session._id, {
+        lastMessageAt: new Date(),
+        $inc: { "context.messageCount": 1, 
+                "context.outboundCount": 1, 
+                "context.totalTokens": aiResponse?.tokensUsed || 0 
+            },
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+      console.log("✅ Session updated");
 
     // Send via WhatsApp
     await sendWhatsAppReply({
