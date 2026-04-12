@@ -114,44 +114,50 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
     throw err;
   }
+  
+  // ── Step 5: Add contact if new — auto-tag as lead ────────
+  const contactExists = await UserModel.exists({
+    _id: user._id,
+    "whatsapp.contacts.list.phone": visitorPhone,
+  });
 
-  // ── Step 5: Add contact if new ────────────────────────────
-  const updateResult = await UserModel.updateOne(
-    {
-      _id: user._id,
-      "whatsapp.contacts.list.phone": visitorPhone
-    },
-    {
-      $inc: {
-        "whatsapp.contacts.list.$.messageCount": 1,
-        "whatsapp.contacts.list.$.inboundCount": 1
-      },
-      $set: {
-        "whatsapp.contacts.list.$.lastMessageAt": new Date()
-      }
-    }
-  );
-  console.log("✅ Step 5 — Existing contact updated");
-
-  if (updateResult.matchedCount === 0) {
+  if (!contactExists) {
+    // Brand new contact — add with leadStage "new"
     await UserModel.updateOne(
       { _id: user._id },
       {
-        $push: {
+        $addToSet: {
           "whatsapp.contacts.list": {
             phone: visitorPhone,
             status: "whitelist",
+            leadStage: "new",        // ← auto-tagged as new lead
+            leadSource: "whatsapp",  // ← source tracked
             messageCount: 1,
-            outboundCount: 0,
             inboundCount: 1,
             lastMessageAt: new Date(),
             createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        }
+            updatedAt: new Date(),
+          },
+        },
       }
     );
-    console.log("✅ Step 5.1 — New contact added if not exists");
+    console.log("✅ Step 5 — New lead added:", visitorPhone);
+  } else {
+    // Existing contact — update message stats only
+    await UserModel.updateOne(
+      { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+      {
+        $set: {
+          "whatsapp.contacts.list.$.lastMessageAt": new Date(),
+          "whatsapp.contacts.list.$.updatedAt": new Date(),
+        },
+        $inc: {
+          "whatsapp.contacts.list.$.messageCount": 1,
+          "whatsapp.contacts.list.$.inboundCount": 1,
+        },
+      }
+    );
+    console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
   }
 
   // ── Step 6: Update session TTL + message count ────────────

@@ -96,6 +96,14 @@ const UserSchema = new mongoose.Schema(
                 inboundCount: { type: Number, default: 0 },
                 outboundCount: { type: Number, default: 0 },
                 createdAt: { type: Date, default: Date.now },
+                leadStage: {
+                  type: String,
+                  enum: ["new", "contacted", "qualified", "converted", "lost"],
+                  default: "new"
+                },
+                leadSource: { type: String, default: "whatsapp" }, // whatsapp, website, referral
+                followUpAt: { type: Date, default: null },  // scheduled follow-up date
+                assignedTo: { type: String, default: null }, // which sales rep
                 updatedAt: { type: Date, default: Date.now },
                 _id: false
               }
