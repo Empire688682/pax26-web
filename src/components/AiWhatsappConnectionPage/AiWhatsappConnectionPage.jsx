@@ -164,27 +164,6 @@ export default function AiWhatsappConnectionPage() {
         },
       }
     );
-  }
-
-  const handleExchangeCode = async (code) => {
-    try {
-      const res = await fetch("/api/meta/exchange-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        await fetchUser();
-      } else {
-        alert("Failed to connect WhatsApp");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Connection failed");
-    }
   };
 
   const disconnectNumber = async () => {

@@ -184,7 +184,8 @@ export const AppProvider = ({ children }) => {
       const profile = res.data?.profile;
       if (profile) {
         setUserData(profile);
-        setIsWhatsappNumberConnected(!!profile.whatsappConnected);
+        
+        setIsWhatsappNumberConnected(!!profile?.whatsapp?.connected);
         localStorage.setItem("userData", JSON.stringify(res.data.profile));
       }
     } catch (error) {

@@ -38,7 +38,9 @@ export async function GET(req) {
     delete userObj.emailVerification;
     delete userObj.phoneVerification;
     delete userObj._id;
-    delete userObj.whatsapp;
+    delete userObj.whatsapp.accessToken;
+    delete userObj.whatsapp.wabaId;
+    delete userObj.whatsapp.phoneNumberId;
 
     return NextResponse.json({success:true, profile:userObj}, {status:200, headers:corsHeaders()})
 
