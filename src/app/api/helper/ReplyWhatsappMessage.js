@@ -22,6 +22,7 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         console.log("Using phoneNumberId:", phoneNumberId);
 
         const response = await axios.post(url, payload, { headers });
+        
         return response.data;
 
     } catch (error) {
