@@ -13,8 +13,10 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, acc
             },
         };
 
+        console.log("Token: ", process.env.WHATSAPP_ACCESS_TOKEN)
+
         const headers = {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
             "Content-Type": "application/json",
         };
 

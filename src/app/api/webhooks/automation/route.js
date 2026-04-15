@@ -2,13 +2,6 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
-import UserModel from "@/app/ults/models/UserModel";
-import WhatsAppVisitorsModel from "@/app/ults/models/WhatsAppVisitorsModel";
-import { nanoid } from "nanoid";
-import { getAIResponse } from "../../helper/PaxAI";
-import { sendWhatsAppAutomationReply } from "../../helper/WhatsAppAutomationReply";
-import { mockVisitorReply } from "../../helper/mockVisitorReply";
-import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 import { handleIncomingWhatsApp } from "@/app/lib/aiService/handleIncomingWhatsapp";
 
 const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
@@ -34,14 +27,10 @@ export async function POST(req) {
     try {
         await connectDb();
         const entry = await req.json();
-        console.log("Webhook entry:", JSON.stringify(entry, null, 2));
 
         const value = entry?.entry?.[0]?.changes?.[0]?.value;
         if (!value?.messages) return NextResponse.json({ status: "ignored" });
 
-        const phoneNumberId = value.metadata.phone_number_id;
-        const from = value.messages[0].from;
-        const userName = value.contacts?.[0]?.profile?.name || "";
         const message = value.messages?.[0];
         if (!message || !message.text?.body) {
             return NextResponse.json({ status: "unsupported_message" });

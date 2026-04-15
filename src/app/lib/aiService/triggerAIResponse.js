@@ -20,10 +20,6 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             { new: true }
         );
 
-        console.log("🔒 Attempting to lock session for AI processing:", lockedSession);
-        console.log("🔒 session:", session);
-        console.log("🔒 session._id:", session._id);
-
         if (!lockedSession) {
             console.log("AI already processing (atomic lock), skipping...");
             return;
@@ -70,7 +66,6 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         }));
 
         const trimmedMessages = historyMessages.slice(-6);
-        console.log("trimmedMessages: ", trimmedMessages);
 
         const messages = [
             ...trimmedMessages,
@@ -113,6 +108,10 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
 
         if (!response?.messageId) {
             console.warn("⚠️ No messageId from WhatsApp — possible tracking issue");
+        }
+
+        if (response?.error?.code === 190) {
+            console.error("🔐 Token expired — reconnect WhatsApp required");
         }
 
         const status = response?.success ? "sent" : "failed";
