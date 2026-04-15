@@ -59,6 +59,15 @@ const BusinessProfileSchema = new mongoose.Schema(
             // Example: "Mon–Fri 9am–6pm"
         },
 
+        style: {
+            type: String,
+        },
+
+        language: {
+            type: String,
+            default: "en",
+        },
+
         knowledgeBase: [
             {
                 question: String,
@@ -69,7 +78,7 @@ const BusinessProfileSchema = new mongoose.Schema(
         tone: {
             type: String,
             enum: ["friendly", "professional", "salesy"],
-            default: "professional",
+            default: "friendly",
         },
 
         whatsappEnabled: {

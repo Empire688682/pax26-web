@@ -15,6 +15,11 @@ const SessionSchema = new mongoose.Schema({
         default: "active"
     },
 
+    isProcessing: { 
+        type: Boolean, 
+        default: false 
+    },
+
     handoff: {
         isHandedOff: { type: Boolean, default: false },
         handedOffAt: { type: Date },

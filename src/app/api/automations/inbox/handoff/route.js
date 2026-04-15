@@ -5,7 +5,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SessionModel from "@/app/ults/models/SessionModel";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import UserModel from "@/app/ults/models/UserModel";
-import { sendWhatsAppReply } from "@/app/api/helper/ReplyWhatsappMessage";
+import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -83,7 +83,7 @@ export async function POST(req) {
       }
 
       // Send via WhatsApp
-      await sendWhatsAppReply({
+      await sendWhatsAppAutomationReply({
         phoneNumberId: user.whatsapp.phoneNumberId,
         to: phone,
         text: message.trim(),

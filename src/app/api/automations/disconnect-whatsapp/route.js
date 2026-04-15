@@ -46,8 +46,6 @@ export async function POST(req) {
                         management: false,
                     },
                 },
-
-                whatsappConnected: false, // optional backward compatibility
             },
             { new: true }
         );

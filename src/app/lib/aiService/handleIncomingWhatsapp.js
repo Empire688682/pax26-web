@@ -6,43 +6,34 @@ import { handleNewContact } from "@/app/lib/aiService/optIn";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
 import {nanoid} from "nanoid";
+import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
-// ─────────────────────────────────────────────────────────────
-// MOCK DATA — covers every function in the A→Z flow
-// ─────────────────────────────────────────────────────────────
-const IS_MOCK = process.env.MOCK_WEBHOOK === "true";
-
-const MOCK_PAYLOAD = {
-  entry: [{
-    changes: [{
-      value: {
-        messaging_product: "whatsapp",
-        metadata: {
-          display_phone_number: "2348000000000",
-          phone_number_id: "69b879d4b4ac84e594143b05",
-        },
-        contacts: [{ profile: { name: "Test Visitor" }, wa_id: "2348012345678" }],
-        messages: [{
-          id: `mock_msg_${Date.now()}` + nanoid(5),
-          from: "2348012345690",
-          timestamp: Math.floor(Date.now() / 1000).toString(),
-          type: "text",
-          text: { body: "Afternoon dear" },
-        }],
-      },
-    }],
-  }],
-};
+// const MOCK_PAYLOAD = {
+//   entry: [{
+//     changes: [{
+//       value: {
+//         messaging_product: "whatsapp",
+//         metadata: {
+//           display_phone_number: "2349050910758",
+//           phone_number_id: "1038801912645044",
+//         },
+//         contacts: [{ profile: { name: "Test Visitor" }, wa_id: "2348012345678" }],
+//         messages: [{
+//           id: `mock_msg_${Date.now()}` + nanoid(5),
+//           from: "2348012345690",
+//           timestamp: Math.floor(Date.now() / 1000).toString(),
+//           type: "text",
+//           text: { body: "Afternoon dear" },
+//         }],
+//       },
+//     }],
+//   }],
+// };
 
 // ─────────────────────────────────────────────────────────────
 // Main webhook handler
 // ─────────────────────────────────────────────────────────────
 export const handleIncomingWhatsApp = async (payload) => {
-  if (IS_MOCK) {
-    console.log("⚠️  [MOCK MODE] Using mock WhatsApp payload");
-    payload = MOCK_PAYLOAD;
-  }
-
   const value = payload?.entry?.[0]?.changes?.[0]?.value;
   const message = value?.messages?.[0];
   const metadata = value?.metadata;
@@ -64,8 +55,8 @@ export const handleIncomingWhatsApp = async (payload) => {
   // ── Step 1: Find user ──────────────────────────────────────
   let user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
 
-  if (!user && IS_MOCK) {
-    console.log("⚠️  [MOCK] No user for phoneNumberId — falling back to first user in DB");
+  if (!user) {
+    console.log("⚠️  No user with phoneNumberId found, trying displayPhone:", displayPhone);
     return { ok: true };
   }
 
@@ -186,13 +177,13 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
   console.log("✅ Step 7 — Auto-reply allowed");
 
-  // ── Step 8: Opt-in flow ───────────────────────────────────
-  // const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
-  // if (handled) {
-  //   console.log("✅ Step 8 — Handled by opt-in flow");
-  //   return { ok: true };
-  // }
-  console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
+// //── Step 8: Opt-in flow ───────────────────────────────────
+//   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
+//   if (handled) {
+//     console.log("✅ Step 8 — Handled by opt-in flow");
+//     return { ok: true };
+//   }
+//   console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
 
   // ── Step 9: Trigger AI response ───────────────────────────
   console.log("🤖 Step 9 — Triggering AI response...");

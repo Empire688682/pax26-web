@@ -1,4 +1,4 @@
-import { sendWhatsAppReply } from "../../api/helper/ReplyWhatsappMessage.js";
+import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply.js";
 import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import SessionModel from "../../ults/models/SessionModel.js";
 
@@ -34,7 +34,7 @@ export const handOffToHuman = async ({
       ? "You've been connected to a live agent. Please hold on."
       : "A team member has joined the conversation.";
 
-    await sendWhatsAppReply({
+    await sendWhatsAppAutomationReply({
       phoneNumberId: session.phoneNumberId,
       to: session.visitorPhone,
       text: notifyText
@@ -83,7 +83,7 @@ export const handBackToAI = async ({
   if (notify) {
     const notifyText = "You're now back with our AI assistant. How can I help?";
 
-    await sendWhatsAppReply({
+    await sendWhatsAppAutomationReply({
       phoneNumberId: session.phoneNumberId,
       to: session.visitorPhone,
       text: notifyText

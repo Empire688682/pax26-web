@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
+export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, accessToken }) => {
     try {
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
@@ -14,7 +14,7 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         };
 
         const headers = {
-            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
         };
 
@@ -22,11 +22,21 @@ export const sendWhatsAppReply = async ({ phoneNumberId, to, text }) => {
         console.log("Using phoneNumberId:", phoneNumberId);
 
         const response = await axios.post(url, payload, { headers });
-        
-        return response.data;
+
+        const messageId = response.data?.messages?.[0]?.id;
+
+        return {
+            success: true,
+            messageId,
+            raw: response.data
+        };
 
     } catch (error) {
         console.error("Error sending WhatsApp reply:", error.response?.data || error.message);
-        return null;
+
+        return {
+            success: false,
+            error: error.response?.data || error.message
+        };
     }
 };

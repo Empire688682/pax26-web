@@ -205,6 +205,12 @@ export default function AiAutomationHomePage() {
               style={{ background: pax26?.primary, boxShadow: `0 8px 28px ${pax26?.primary}40` }}>
               <IconSpark /> New Workflow
             </button>
+            <button
+              className="aah-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+              onClick={() => router.push("/dashboard/automations/whatsapp#connect")}
+              style={{ background: pax26?.primary, boxShadow: `0 8px 28px ${pax26?.primary}40` }}>
+              Connect Your Whatsapp
+            </button>
           </div>
         </div>
 

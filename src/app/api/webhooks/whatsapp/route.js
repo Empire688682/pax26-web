@@ -6,7 +6,7 @@ import UserModel from "@/app/ults/models/UserModel";
 import WhatsAppVisitorsModel from "@/app/ults/models/WhatsAppVisitorsModel";
 import { nanoid } from "nanoid";
 import { getAIResponse } from "../../helper/PaxAI";
-import { sendWhatsAppReply } from "../../helper/ReplyWhatsappMessage";
+import { sendWhatsAppAutomationReply } from "../../helper/WhatsAppAutomationReply";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
 
@@ -65,7 +65,7 @@ export async function POST(req) {
 
     if (paxUser) {
       const replyText = await getAIResponse(userText); // could be async-heavy
-      const response = await sendWhatsAppReply({
+      const response = await sendWhatsAppAutomationReply({
         phoneNumberId,
         to: from,
         text: replyText,
@@ -134,7 +134,7 @@ export async function POST(req) {
     // 🔹 Send mock reply
     const replyText = mockVisitorReply(userText, userName);
 
-    const response = await sendWhatsAppReply({
+    const response = await sendWhatsAppAutomationReply({
       phoneNumberId,
       to: from,
       text: replyText,

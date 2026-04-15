@@ -274,7 +274,9 @@ export default function AiWhatsappConnectionPage() {
 
         {/* Connect flow */}
         {!isWhatsappNumberConnected && (
-          <div className="wa-card wa-slide-3 rounded-2xl p-6 space-y-6"
+          <div
+            id="connect"
+            className="wa-card wa-slide-3 rounded-2xl p-6 space-y-6"
             style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
 
             <div>

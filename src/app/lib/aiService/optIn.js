@@ -1,7 +1,7 @@
 import UserModel from "@/app/ults/models/UserModel.js";
 import SessionModel from "@/app/ults/models/SessionModel.js";
 import AIMessageModel from "@/app/ults/models/AIMessageModel.js";
-import { sendWhatsAppReply } from "@/app/api/helper/ReplyWhatsappMessage";
+import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 
 export const handleNewContact = async ({ session, user, visitorPhone, inboundText }) => {
 
@@ -13,7 +13,7 @@ export const handleNewContact = async ({ session, user, visitorPhone, inboundTex
 
   if (messageCount === 1) { // first message just saved
     // Send opt-in prompt
-    await sendWhatsAppReply({
+    await sendWhatsAppAutomationReply({
       phoneNumberId: user.whatsapp.phoneNumberId,
       to: visitorPhone,
       text: `Hi! 👋 You've reached ${user.whatsapp.displayPhone}. Are you contacting us for business enquiries?\n\nReply:\n1️⃣ *Yes* — to chat with our assistant\n2️⃣ *No* — to stop automated replies`
@@ -49,7 +49,7 @@ export const handleNewContact = async ({ session, user, visitorPhone, inboundTex
       await UserModel.findByIdAndUpdate(user._id, {
         $addToSet: { "whatsapp.contacts.blacklist": visitorPhone }
       });
-      await sendWhatsAppReply({
+      await sendWhatsAppAutomationReply({
         phoneNumberId: user.whatsapp.phoneNumberId,
         to: visitorPhone,
         text: "Got it! You won't receive automated replies from us. 👍"
