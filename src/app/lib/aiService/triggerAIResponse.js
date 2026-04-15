@@ -20,13 +20,39 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             { new: true }
         );
 
+        console.log("Locked session for AI processing:", lockedSession ? lockedSession.sessionId : "none");
+
         if (!lockedSession) {
             console.log("AI already processing (atomic lock), skipping...");
             return;
         }
 
-        if (session.context.inboundCount > 20) {
-            console.log("Rate limit hit");
+        const LIMIT = 30;
+        const WARNING_THRESHOLD = 29;
+
+        if (
+            session.context.inboundCount === WARNING_THRESHOLD &&
+            !session.limitWarningSent
+        ) {
+            await sendWhatsAppAutomationReply({
+                phoneNumberId: user?.whatsapp?.phoneNumberId,
+                to: session?.visitorPhone,
+                text: "⚠️ We’re wrapping up this session soon. Let me know anything else you’d like help with 😊",
+            });
+
+            await SessionModel.findByIdAndUpdate(session._id, {
+                limitWarningSent: true
+            });
+        }
+
+        if (session.context.inboundCount >= LIMIT) {
+            await sendWhatsAppAutomationReply({
+                phoneNumberId: user?.whatsapp?.phoneNumberId,
+                to: session?.visitorPhone,
+                text: "🙏 This session has reached its limit. Please try again later or wait a bit — I’ll be here to help 😊",
+            });
+
+            console.log("🚫 Limit reached — blocking AI");
             return;
         }
 
@@ -102,8 +128,7 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         const response = await sendWhatsAppAutomationReply({
             phoneNumberId: user?.whatsapp?.phoneNumberId,
             to: session?.visitorPhone,
-            text: aiReply,
-            accessToken: user?.whatsapp?.accessToken
+            text: aiReply
         });
 
         if (!response?.messageId) {
