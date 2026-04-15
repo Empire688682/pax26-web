@@ -15,7 +15,7 @@ const SessionSchema = new mongoose.Schema({
         default: "active"
     },
 
-    isProcessing: { 
+    isProcessingAI: { 
         type: Boolean, 
         default: false 
     },
