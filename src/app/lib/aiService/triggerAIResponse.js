@@ -20,8 +20,6 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             { new: true }
         );
 
-        console.log("Locked session for AI processing:", lockedSession ? lockedSession.sessionId : "none");
-
         if (!lockedSession) {
             console.log("AI already processing (atomic lock), skipping...");
             return;
