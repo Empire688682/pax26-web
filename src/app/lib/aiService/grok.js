@@ -5,27 +5,22 @@ const groq = new Groq({
 });
 
 export const callGroqAI = async ({ systemPrompt, messages }) => {
-  try {
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 1024,
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages,
-      ],
-    });
+  const response = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    max_tokens: 1024,
+    messages: [
+      { role: "system", content: systemPrompt },
+      ...messages,
+    ],
+  });
 
-    const text = response?.choices?.[0]?.message?.content;
+  const text = response?.choices?.[0]?.message?.content;
+  if (!text) return null;
 
-    if (!text) return null;
-
-    return {
-      text,
-      tokensUsed: response?.usage?.total_tokens || 0,
-      model: response?.model,
-    };
-  } catch (error) {
-    console.error("Groq AI call failed:", error);
-    return null;
-  }
+  return {
+    text,
+    tokensUsed: response?.usage?.total_tokens || 0,
+    model: response?.model,
+  };
 };
+// No try/catch — let errors bubble up to triggerAIResponse.js

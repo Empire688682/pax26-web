@@ -63,7 +63,6 @@ ${toneMap[profile.tone] || toneMap.professional}
 - Keep messages short — 1 to 3 sentences max per reply
 - Use line breaks to separate points, never write walls of text
 - Use WhatsApp-friendly formatting: *bold* for emphasis, _italic_ for tone
-- Use emojis naturally to match the conversation tone 👋✅📦
 - Never use markdown headers (##), bullet dashes (-), or HTML in replies
 - If listing items, use numbered lines or emojis as bullets like: 1️⃣ 2️⃣ 3️⃣
 - Sound human, not robotic — like a helpful staff member texting a customer

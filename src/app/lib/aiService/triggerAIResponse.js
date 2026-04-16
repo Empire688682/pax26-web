@@ -3,6 +3,8 @@ import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
 import BusinessProfileModel from "../../ults/models/BusinessProfileModel.js";
 import { callGroqAI } from "./grok.js";
+import { callGeminiAI } from "./gemini.js";
+import { callMistralAI } from "./mistral.js";
 import UserModel from "../../ults/models/UserModel.js";
 import SessionModel from "../../ults/models/SessionModel.js";
 
@@ -95,9 +97,52 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             { role: "user", content: inboundText }
         ];
 
-        // Call AI
+        //Call Ai's
+        const callAI = async () => {
+            // Try Groq first
+            try {
+                const result = await callGroqAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Groq responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Groq rate limit — trying Gemini...");
+                } else throw err;
+            }
+
+            // Try Gemini second
+            try {
+                const result = await callGeminiAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Gemini responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Gemini rate limit — trying Mistral...");
+                } else throw err;
+            }
+
+            // Try Mistral third
+            try {
+                const result = await callMistralAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Mistral responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Mistral rate limit — all providers exhausted");
+                } else throw err;
+            }
+
+            return null; // all providers failed
+        };
+
         const aiResponse = await Promise.race([
-            callGroqAI({ systemPrompt, messages }),
+            callAI(),
             new Promise((_, reject) =>
                 setTimeout(() => reject(new Error("AI timeout")), 10000)
             )
