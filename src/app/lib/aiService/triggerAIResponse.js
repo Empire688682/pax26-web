@@ -117,7 +117,6 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         const fallback = "Sorry, I’m having trouble right now. Please try again later.";
 
         const aiReply = aiResponse?.text || fallback;
-        console.log("AI reply for session :", aiReply);
 
         await new Promise(res => setTimeout(res, 1500));
 

@@ -32,6 +32,9 @@ export async function POST(req) {
         }
 
         const message = value.messages?.[0];
+
+        // console.log("Incoming whatsapp message: ", message);
+
         if (!message || !message.text?.body) {
             return NextResponse.json({ status: "unsupported_message" });
         }

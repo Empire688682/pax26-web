@@ -100,7 +100,7 @@ const PhoneCard = ({ phone, selected, onSelect, pax26 }) => {
 const SelectPhone = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { pax26 } = useGlobalContext()
+    const { pax26 } = useGlobalContext();
 
     const [phones, setPhones] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
