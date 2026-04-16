@@ -5,7 +5,6 @@ import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import UserModel from "@/app/ults/models/UserModel";
 import WhatsAppVisitorsModel from "@/app/ults/models/WhatsAppVisitorsModel";
 import { nanoid } from "nanoid";
-import { getAIResponse } from "../../helper/PaxAI";
 import { sendWhatsAppAutomationReply } from "../../helper/WhatsAppAutomationReply";
 import { mockVisitorReply } from "../../helper/mockVisitorReply";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
