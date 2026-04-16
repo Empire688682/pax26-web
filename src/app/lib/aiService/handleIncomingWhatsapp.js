@@ -1,12 +1,10 @@
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
-import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
-import { handleNewContact } from "@/app/lib/aiService/optIn";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
-import {nanoid} from "nanoid";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
+import { whatsappQueue } from "../queue/whatsappQueue";
 
 // const MOCK_PAYLOAD = {
 //   entry: [{
@@ -56,11 +54,6 @@ export const handleIncomingWhatsApp = async (payload) => {
   let user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
 
   if (!user) {
-    console.log("⚠️  No user with phoneNumberId found, trying displayPhone:", displayPhone);
-    return { ok: true };
-  }
-
-  if (!user) {
     console.log("❌ No user found for phoneNumberId:", phoneNumberId);
     return { ok: true };
   }
@@ -75,7 +68,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     phoneNumberId,
   });
 
-  if (!session) {
+  if (!session || !user) {
     console.log("❌ Session creation failed");
     return { ok: true };
   }
@@ -105,7 +98,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
     throw err;
   }
-  
+
   // ── Step 5: Add contact if new — auto-tag as lead ────────
   const contactExists = await UserModel.exists({
     _id: user._id,
@@ -154,7 +147,7 @@ export const handleIncomingWhatsApp = async (payload) => {
   // ── Step 6: Update session TTL + message count ────────────
   await SessionModel.findByIdAndUpdate(session._id, {
     lastMessageAt: new Date(),
-    $inc: { 
+    $inc: {
       "context.messageCount": 1,
       "context.inboundCount": 1,
       "context.totalTokens": 0 // no tokens for visitor messages
@@ -177,19 +170,39 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
   console.log("✅ Step 7 — Auto-reply allowed");
 
-// //── Step 8: Opt-in flow ───────────────────────────────────
-//   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
-//   if (handled) {
-//     console.log("✅ Step 8 — Handled by opt-in flow");
-//     return { ok: true };
-//   }
-//   console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
+  // //── Step 8: Opt-in flow ───────────────────────────────────
+  //   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
+  //   if (handled) {
+  //     console.log("✅ Step 8 — Handled by opt-in flow");
+  //     return { ok: true };
+  //   }
+  //   console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
 
   // ── Step 9: Trigger AI response ───────────────────────────
   console.log("🤖 Step 9 — Triggering AI response...");
-  triggerAIResponse({ session, user, inboundText }).catch(err =>
-    console.log("❌ AI error:", err)
+  // await triggerAIResponse({ session, user, inboundText });
+  await whatsappQueue.add(
+    "whatsapp-ai",
+    {
+      sessionId: session.sessionId,
+      userId: user._id.toString(),
+      inboundText,
+    },
+    {
+      attempts: 3,
+      backoff: {
+        type: "exponential",
+        delay: 2000,
+      },
+      removeOnComplete: true,
+      removeOnFail: false,
+    }
   );
-
-  return { ok: true };
+  
+  return {
+  ok: true,
+  session,
+  user,
+  inboundText
+};
 };

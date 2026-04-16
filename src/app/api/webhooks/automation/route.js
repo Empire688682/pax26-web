@@ -1,10 +1,9 @@
 // app/api/webhooks/whatsapp/route.js
+
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { handleIncomingWhatsApp } from "@/app/lib/aiService/handleIncomingWhatsapp";
-
-const TWENTY_FOUR_HOURS = 1000 * 60 * 60 * 24;
 
 // ✅ META WEBHOOK VERIFICATION
 export async function GET(req) {
@@ -23,33 +22,40 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-    const start = Date.now(); // 🟢 define start
     try {
         await connectDb();
         const entry = await req.json();
 
         const value = entry?.entry?.[0]?.changes?.[0]?.value;
-        if (!value?.messages) return NextResponse.json({ status: "ignored" });
+        if (!value?.messages) {
+            return NextResponse.json({ status: "ignored" });
+        }
 
         const message = value.messages?.[0];
         if (!message || !message.text?.body) {
             return NextResponse.json({ status: "unsupported_message" });
         }
-        const userText = message.text.body;
-
-        if (!userText) return NextResponse.json({ status: "no_text" });
-
-        const exists = await AIMessageModel.findOne({ messageId: message.id });
-        if (exists) return;
 
         if (message.type !== "text") {
             console.log("Unsupported type:", message.type);
-            return;
+            return NextResponse.json({ status: "ignored_type" });
         }
 
-        await handleIncomingWhatsApp(entry);
+        // ✅ Prevent duplicates
+        const exists = await AIMessageModel.findOne({ messageId: message.id });
+        if (exists) {
+            return NextResponse.json({ status: "duplicate" });
+        }
 
-        return NextResponse.json({ message: "ok_visitor" }, { status: 200 });
+        // ✅ Process inbound (this should return session + user)
+        const result = await handleIncomingWhatsApp(entry);
+
+        if (!result?.session || !result?.user) {
+            return NextResponse.json({ status: "no_session" });
+        }
+
+        return NextResponse.json({ ok: true });
+
     } catch (error) {
         console.error("❌ Webhook error:", error);
         return NextResponse.json(

@@ -1,4 +1,4 @@
-import { fetchUrl } from "../fetchUrl";
+import { fetchUrl } from "../fetchUrl.js";
 
 export const buildSystemPrompt = async (profile, businessUrl) => {
   if (!profile) {

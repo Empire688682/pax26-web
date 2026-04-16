@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, accessToken }) => {
+export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) => {
     try {
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
@@ -12,8 +12,6 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, acc
                 body: text,
             },
         };
-
-        console.log("Token: ", process.env.WHATSAPP_ACCESS_TOKEN)
 
         const headers = {
             Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,

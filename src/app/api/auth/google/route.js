@@ -79,12 +79,14 @@ export async function POST(req) {
                 const refHost = await UserModel.findOne({ referralCode: refHostCode });
                 referralHostId = refHost ? refHost._id : undefined;
             }
+            const authTimestamp = Date.now()
             user = await UserModel.create({
                 name,
                 email,
                 number,
                 password: null,
                 pin: null,
+                authTimestamp,
                 referralHostId: referralHostId,
                 provider,
                 isPasswordSet: false,

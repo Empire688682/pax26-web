@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema(
     isTransactionPinSet: { type: Boolean, default: false },
     number: { type: String, default: "", unique: true, index: true },
     profileImage: { type: String, default: "/profile-img.png" },
+    authTimestamp: { type: Date, default: Date.now },
 
     provider: { type: String, default: "credentials" },
     providerId: { type: String, default: null },

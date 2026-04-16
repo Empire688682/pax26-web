@@ -40,14 +40,16 @@ export async function POST(req) {
           );
         } 
 
-    // Prepare safe user object
+    // Prepare safe user object and timestamp for user maxage
     const userObj = existUser.toObject();
     delete userObj.password;
+    delete userObj.transactionPin;
     if(userObj.pin){
       userObj.pin = true;
     }else{
       userObj.pin = null;
     }
+    userObj.authTimestamp = Date.now();
     delete userObj.isAdmin;
     delete userObj.provider;
     delete userObj.referralHost;

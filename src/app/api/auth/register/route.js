@@ -95,17 +95,19 @@ const registerUser = async (req) => {
       referralHostId = refHost?  refHost._id : undefined;
     }
 
-    const newUser = await UserModel.create({
-      
+    const authTimestamp = Date.now()
+
+    const newUser = await UserModel.create({ 
       name,
       email,
       number,
       password: hashedPassword,
       pin: null,
+      authTimestamp,
       referralHostId: referralHostId,
       provider,
       isPasswordSet: true,
-      providerId:providerId || null,
+      providerId: providerId || null,
       referralCode,
       profileImage
     });

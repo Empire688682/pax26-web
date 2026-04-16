@@ -1,8 +1,8 @@
-// lib/callAI.js
-
 import Groq from "groq-sdk";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export const callGroqAI = async ({ systemPrompt, messages }) => {
   try {
@@ -11,16 +11,19 @@ export const callGroqAI = async ({ systemPrompt, messages }) => {
       max_tokens: 1024,
       messages: [
         { role: "system", content: systemPrompt },
-        ...messages
-      ]
+        ...messages,
+      ],
     });
 
-    return {
-      text: response.choices[0].message.content,
-      tokensUsed: response.usage.total_tokens,
-      model: response.model
-    };
+    const text = response?.choices?.[0]?.message?.content;
 
+    if (!text) return null;
+
+    return {
+      text,
+      tokensUsed: response?.usage?.total_tokens || 0,
+      model: response?.model,
+    };
   } catch (error) {
     console.error("Groq AI call failed:", error);
     return null;

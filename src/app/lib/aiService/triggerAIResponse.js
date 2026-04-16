@@ -1,10 +1,10 @@
-import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
-import AIMessageModel from "@/app/ults/models/AIMessageModel";
-import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt";
-import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
-import { callGroqAI } from "./grok";
-import UserModel from "@/app/ults/models/UserModel";
-import SessionModel from "@/app/ults/models/SessionModel";
+import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply.js";
+import AIMessageModel from "../../ults/models/AIMessageModel.js";
+import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
+import BusinessProfileModel from "../../ults/models/BusinessProfileModel.js";
+import { callGroqAI } from "./grok.js";
+import UserModel from "../../ults/models/UserModel.js";
+import SessionModel from "../../ults/models/SessionModel.js";
 
 export const triggerAIResponse = async ({ session, user, inboundText }) => {
     try {
@@ -30,22 +30,21 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         const LIMIT = 30;
         const WARNING_THRESHOLD = 29;
 
-        if (
-            session.context.inboundCount === WARNING_THRESHOLD &&
-            !session.limitWarningSent
-        ) {
+        if (session.context.inboundCount === WARNING_THRESHOLD && !session.limitWarningSent) {
             await sendWhatsAppAutomationReply({
-                phoneNumberId: user?.whatsapp?.phoneNumberId,
-                to: session?.visitorPhone,
-                text: "⚠️ We’re wrapping up this session soon. Let me know anything else you’d like help with 😊",
+                phoneNumberId: user.whatsapp.phoneNumberId,
+                to: session.visitorPhone,
+                text: "⚠️ You're about to reach the conversation limit. Send your final message 😊"
             });
 
             await SessionModel.findByIdAndUpdate(session._id, {
                 limitWarningSent: true
             });
+
+            return; // stop AI for this turn
         }
 
-        if (session.context.inboundCount >= LIMIT) {
+        if (session?.context?.inboundCount >= LIMIT) {
             await sendWhatsAppAutomationReply({
                 phoneNumberId: user?.whatsapp?.phoneNumberId,
                 to: session?.visitorPhone,
