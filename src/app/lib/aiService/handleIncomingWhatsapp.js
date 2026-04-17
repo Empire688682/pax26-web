@@ -180,29 +180,29 @@ export const handleIncomingWhatsApp = async (payload) => {
 
   // ── Step 9: Trigger AI response ───────────────────────────
   console.log("🤖 Step 9 — Triggering AI response...");
-  // await triggerAIResponse({ session, user, inboundText });
-  await whatsappQueue.add(
-    "whatsapp-ai",
-    {
-      sessionId: session.sessionId,
-      userId: user._id.toString(),
-      inboundText,
-    },
-    {
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 2000,
-      },
-      removeOnComplete: true,
-      removeOnFail: false,
-    }
-  );
+  triggerAIResponse({ session, user, inboundText });
+//   await whatsappQueue.add(
+//     "whatsapp-ai",
+//     {
+//       sessionId: session.sessionId,
+//       userId: user._id.toString(),
+//       inboundText,
+//     },
+//     {
+//       attempts: 3,
+//       backoff: {
+//         type: "exponential",
+//         delay: 2000,
+//       },
+//       removeOnComplete: true,
+//       removeOnFail: false,
+//     }
+//   );
   
-  return {
-  ok: true,
-  session,
-  user,
-  inboundText
-};
+//   return {
+//   ok: true,
+//   session,
+//   user,
+//   inboundText
+// };
 };

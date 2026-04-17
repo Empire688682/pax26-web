@@ -51,11 +51,7 @@ export async function POST(req) {
         }
 
         // ✅ Process inbound (this should return session + user)
-        const result = await handleIncomingWhatsApp(entry);
-
-        if (!result?.session || !result?.user) {
-            return NextResponse.json({ status: "no_session" });
-        }
+        handleIncomingWhatsApp(entry);
 
         return NextResponse.json({ ok: true });
 
