@@ -145,15 +145,18 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 6: Update session TTL + message count ────────────
-  await SessionModel.findByIdAndUpdate(session._id, {
-    lastMessageAt: new Date(),
+  await SessionModel.updateOne(
+  { _id: session._id },
+  {
     $inc: {
       "context.messageCount": 1,
       "context.inboundCount": 1,
-      "context.totalTokens": 0 // no tokens for visitor messages
     },
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-  });
+    $set: {
+      lastMessageAt: new Date(),
+    }
+  }
+);
   console.log("✅ Step 6 — Session updated");
 
   // ── Step 7: Check auto-reply permission ───────────────────

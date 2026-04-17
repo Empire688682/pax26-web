@@ -44,12 +44,6 @@ export async function POST(req) {
             return NextResponse.json({ status: "ignored_type" });
         }
 
-        // ✅ Prevent duplicates
-        const exists = await AIMessageModel.findOne({ messageId: message.id });
-        if (exists) {
-            return NextResponse.json({ status: "duplicate" });
-        }
-
         // ✅ Process inbound (this should return session + user)
         handleIncomingWhatsApp(entry);
 
