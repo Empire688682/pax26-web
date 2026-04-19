@@ -160,5 +160,5 @@ export const handleIncomingWhatsApp = async (payload) => {
 
   // ── Step 9: Trigger AI response ───────────────────────────
   console.log("🤖 Step 9 — Triggering AI response...");
-  triggerAIResponse({ session, user, inboundText });
+  await triggerAIResponse({ session, user, inboundText });
 };

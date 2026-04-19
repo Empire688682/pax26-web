@@ -45,7 +45,7 @@ export async function POST(req) {
         }
 
         // ✅ Process inbound (this should return session + user)
-        handleIncomingWhatsApp(entry);
+        await handleIncomingWhatsApp(entry);
 
         return NextResponse.json({ ok: true });
 
