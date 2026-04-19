@@ -4,29 +4,6 @@ import UserModel from "@/app/ults/models/UserModel";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
 import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
-import { whatsappQueue } from "../queue/whatsappQueue";
-
-// const MOCK_PAYLOAD = {
-//   entry: [{
-//     changes: [{
-//       value: {
-//         messaging_product: "whatsapp",
-//         metadata: {
-//           display_phone_number: "2349050910758",
-//           phone_number_id: "1038801912645044",
-//         },
-//         contacts: [{ profile: { name: "Test Visitor" }, wa_id: "2348012345678" }],
-//         messages: [{
-//           id: `mock_msg_${Date.now()}` + nanoid(5),
-//           from: "2348012345690",
-//           timestamp: Math.floor(Date.now() / 1000).toString(),
-//           type: "text",
-//           text: { body: "Afternoon dear" },
-//         }],
-//       },
-//     }],
-//   }],
-// };
 
 // ─────────────────────────────────────────────────────────────
 // Main webhook handler
@@ -184,28 +161,4 @@ export const handleIncomingWhatsApp = async (payload) => {
   // ── Step 9: Trigger AI response ───────────────────────────
   console.log("🤖 Step 9 — Triggering AI response...");
   triggerAIResponse({ session, user, inboundText });
-//   await whatsappQueue.add(
-//     "whatsapp-ai",
-//     {
-//       sessionId: session.sessionId,
-//       userId: user._id.toString(),
-//       inboundText,
-//     },
-//     {
-//       attempts: 3,
-//       backoff: {
-//         type: "exponential",
-//         delay: 2000,
-//       },
-//       removeOnComplete: true,
-//       removeOnFail: false,
-//     }
-//   );
-  
-//   return {
-//   ok: true,
-//   session,
-//   user,
-//   inboundText
-// };
 };

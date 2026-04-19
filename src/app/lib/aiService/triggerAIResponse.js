@@ -8,74 +8,29 @@ import { callMistralAI } from "./mistral.js";
 import UserModel from "../../ults/models/UserModel.js";
 import SessionModel from "../../ults/models/SessionModel.js";
 
-import { redis } from "../../ults/redis/redis.js";
-import crypto from "crypto";
-
-/* =========================
-   REDIS LOCK HELPERS
-========================= */
-
-const LOCK_TTL = 15; // seconds
-
-async function acquireLock(sessionId) {
-    const token = crypto.randomUUID();
-    const key = `lock:session:${sessionId}`;
-
-    const result = await redis.set(key, token, "NX", "EX", LOCK_TTL);
-
-    if (!result) return null;
-
-    return { key, token };
-}
-
-async function releaseLock(key, token) {
-    const script = `
-        if redis.call("GET", KEYS[1]) == ARGV[1] then
-            return redis.call("DEL", KEYS[1])
-        else
-            return 0
-        end
-    `;
-
-    await redis.eval(script, 1, key, token);
-}
-
-/* =========================
-   MAIN FUNCTION
-========================= */
-
 export const triggerAIResponse = async ({ session, user, inboundText }) => {
-    let lock = null;
-
     try {
-        /* =========================
-           1. REDIS GLOBAL LOCK
-        ========================= */
-        lock = await acquireLock(session.sessionId);
-
-        if (!lock) {
-            console.log("⚠️ AI already processing (Redis lock active)");
+        // Check if handed off to human — skip AI
+        if (session.handoff.isHandedOff) {
+            console.log("Session is handed off to human, skipping AI response for session:", session.sessionId);
             return;
         }
 
-        /* =========================
-           2. HANDOFF CHECK
-        ========================= */
-        if (session.handoff?.isHandedOff) {
-            console.log("Session handed off to human");
+        const lockedSession = await SessionModel.findOneAndUpdate(
+            { _id: session._id, isProcessingAI: false },
+            { isProcessingAI: true },
+            { new: true }
+        );
+
+        if (!lockedSession) {
+            console.log("AI already processing (atomic lock), skipping...");
             return;
         }
 
-        /* =========================
-           3. MESSAGE LIMIT CHECK
-        ========================= */
         const LIMIT = 30;
         const WARNING_THRESHOLD = 29;
 
-        if (
-            session.context.inboundCount === WARNING_THRESHOLD &&
-            !session.limitWarningSent
-        ) {
+        if (session.context.inboundCount === WARNING_THRESHOLD && !session.limitWarningSent) {
             await sendWhatsAppAutomationReply({
                 phoneNumberId: user.whatsapp.phoneNumberId,
                 to: session.visitorPhone,
@@ -86,45 +41,46 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
                 limitWarningSent: true
             });
 
-            return;
+            return; // stop AI for this turn
         }
 
-        if (session.context.inboundCount >= LIMIT) {
+        if (session?.context?.inboundCount >= LIMIT) {
             await sendWhatsAppAutomationReply({
-                phoneNumberId: user.whatsapp.phoneNumberId,
-                to: session.visitorPhone,
-                text: "🙏 Session limit reached. Please try again later."
+                phoneNumberId: user?.whatsapp?.phoneNumberId,
+                to: session?.visitorPhone,
+                text: "🙏 This session has reached its limit. Please try again later or wait a bit — I’ll be here to help 😊",
             });
 
+            console.log("🚫 Limit reached — blocking AI");
             return;
         }
 
-        /* =========================
-           4. BUSINESS PROFILE CHECK
-        ========================= */
+        await SessionModel.findByIdAndUpdate(session._id, {
+            isProcessingAI: true
+        });
+
+        // ✅ Fetch business profile for this user
         const businessProfile = await BusinessProfileModel.findOne({
             userId: user._id,
             whatsappEnabled: true
         }).lean();
 
+        // ✅ Hard stop — no profile or not trained yet
         if (!businessProfile || !businessProfile.aiTrained) {
-            console.log("AI skipped — business not trained");
+            console.log(`AI skipped for user ${user._id} — profile not trained yet.`);
+            return; // Silent stop, no reply sent
+        }
+
+        const businessUrl = businessProfile?.businessUrl || null;
+
+        const systemPrompt = await buildSystemPrompt(businessProfile, businessUrl);
+        if (!systemPrompt) {
+            console.error("Failed to build system prompt for user:", user._id);
             return;
         }
 
-        const systemPrompt = await buildSystemPrompt(
-            businessProfile,
-            businessProfile?.businessUrl || null
-        );
-
-        if (!systemPrompt) return;
-
-        /* =========================
-           5. CHAT HISTORY
-        ========================= */
-        const history = await AIMessageModel.find({
-            sessionId: session.sessionId
-        })
+        // Fetch last N messages for context
+        const history = await AIMessageModel.find({ sessionId: session.sessionId })
             .sort({ createdAt: -1 })
             .limit(10)
             .lean();
@@ -134,37 +90,55 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             content: m.text
         }));
 
+        const trimmedMessages = historyMessages.slice(-6);
+
         const messages = [
-            ...historyMessages.slice(-6),
+            ...trimmedMessages,
             { role: "user", content: inboundText }
         ];
 
-        /* =========================
-           6. AI FALLBACK CHAIN
-        ========================= */
+        //Call Ai's
         const callAI = async () => {
+            // Try Groq first
             try {
-                const r = await callGroqAI({ systemPrompt, messages });
-                if (r) return r;
-            } catch (e) {
-                if (e?.status !== 429) throw e;
+                const result = await callGroqAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Groq responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Groq rate limit — trying Gemini...");
+                } else throw err;
             }
 
+            // Try Gemini second
             try {
-                const r = await callGeminiAI({ systemPrompt, messages });
-                if (r) return r;
-            } catch (e) {
-                if (e?.status !== 429) throw e;
+                const result = await callGeminiAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Gemini responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Gemini rate limit — trying Mistral...");
+                } else throw err;
             }
 
+            // Try Mistral third
             try {
-                const r = await callMistralAI({ systemPrompt, messages });
-                if (r) return r;
-            } catch (e) {
-                if (e?.status !== 429) throw e;
+                const result = await callMistralAI({ systemPrompt, messages });
+                if (result) {
+                    console.log("✅ Mistral responded");
+                    return result;
+                }
+            } catch (err) {
+                if (err?.status === 429) {
+                    console.warn("⚠️ Mistral rate limit — all providers exhausted");
+                } else throw err;
             }
 
-            return null;
+            return null; // all providers failed
         };
 
         const aiResponse = await Promise.race([
@@ -174,29 +148,41 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             )
         ]);
 
+        // ✅ Guard against null AI response
         if (!aiResponse) {
-            console.log("AI returned null");
+            console.log("AI returned null, skipping reply for session:", session.sessionId);
+            await AIMessageModel.findOneAndUpdate(
+                { sessionId: session.sessionId, direction: "inbound", status: "received" },
+                { status: "failed" }
+            );
             return;
         }
 
-        const aiReply =
-            aiResponse?.text ||
-            "Sorry, I’m having trouble right now. Please try again later.";
+        // Extract plain text from response object
+        const fallback = "Sorry, I’m having trouble right now. Please try again later.";
 
-        /* =========================
-           7. SEND WHATSAPP RESPONSE
-        ========================= */
+        const aiReply = aiResponse?.text || fallback;
+
         await new Promise(res => setTimeout(res, 1500));
 
+        // Send via WhatsApp
         const response = await sendWhatsAppAutomationReply({
-            phoneNumberId: user.whatsapp.phoneNumberId,
-            to: session.visitorPhone,
+            phoneNumberId: user?.whatsapp?.phoneNumberId,
+            to: session?.visitorPhone,
             text: aiReply
         });
 
-        /* =========================
-           8. SAVE AI MESSAGE
-        ========================= */
+        if (!response?.messageId) {
+            console.warn("⚠️ No messageId from WhatsApp — possible tracking issue");
+        }
+
+        if (response?.error?.code === 190) {
+            console.error("🔐 Token expired — reconnect WhatsApp required");
+        }
+
+        const status = response?.success ? "sent" : "failed";
+
+        // Save outbound message
         await AIMessageModel.create({
             messageId: response?.messageId || `ai_${Date.now()}`,
             userId: user._id,
@@ -205,24 +191,21 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             phoneNumberId: user.whatsapp.phoneNumberId,
             from: user.whatsapp.displayPhone,
             to: session.visitorPhone,
-            text: aiReply,
+            text: aiReply,                    // ← plain string ✓
             aiMeta: {
-                model: aiResponse?.model,
-                tokensUsed: aiResponse?.tokensUsed
+                model: aiResponse?.model,     // ← changed from aiReply?.model
+                tokensUsed: aiResponse?.tokensUsed, // ← changed from aiReply?.tokensUsed
             },
             direction: "outbound",
             senderType: "ai",
-            status: response?.success ? "sent" : "failed",
+            status,
             automation: { isAutoReply: true }
         });
 
-        /* =========================
-           9. UPDATE USER CONTACT STATS
-        ========================= */
         const updateResult = await UserModel.updateOne(
             {
                 _id: user._id,
-                "whatsapp.contacts.list.phone": session.visitorPhone
+                "whatsapp.contacts.list.phone": session?.visitorPhone
             },
             {
                 $inc: {
@@ -241,7 +224,7 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
                 {
                     $push: {
                         "whatsapp.contacts.list": {
-                            phone: session.visitorPhone,
+                            phone: session?.visitorPhone,
                             status: "whitelist",
                             messageCount: 1,
                             outboundCount: 1,
@@ -253,36 +236,24 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
                     }
                 }
             );
-        }
+        };
 
-        /* =========================
-           10. UPDATE SESSION
-        ========================= */
-        await SessionModel.updateOne(
-            { _id: session._id },
-            {
-                $inc: {
-                    "context.messageCount": 1,
-                    "context.outboundCount": 1,
-                    "context.totalTokens": aiResponse?.tokensUsed || 0
-                },
-                $set: {
-                    lastMessageAt: new Date(),
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-                }
-            }
-        );
-
-        console.log("✅ AI response completed");
-
+        await SessionModel.findByIdAndUpdate(session._id, {
+            lastMessageAt: new Date(),
+            $inc: {
+                "context.messageCount": 1,
+                "context.outboundCount": 1,
+                "context.totalTokens": aiResponse?.tokensUsed || 0
+            },
+            isProcessingAI: false,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
+        console.log("✅ Session updated");
     } catch (error) {
         console.error("Error in triggerAIResponse:", error);
     } finally {
-        /* =========================
-           SAFE LOCK RELEASE
-        ========================= */
-        if (lock) {
-            await releaseLock(lock.key, lock.token);
-        }
+        await SessionModel.findByIdAndUpdate(session._id, {
+            isProcessingAI: false
+        });
     }
 };
