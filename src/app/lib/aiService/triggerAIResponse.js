@@ -29,7 +29,30 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
 
         const LIMIT = 30;
         const WARNING_THRESHOLD = 29;
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
+        // ✅ Auto-restore: if 24 hours passed since limit was reached, reset the session
+        if (session.limitReachedAt) {
+            const timeSinceLimitReached = Date.now() - new Date(session.limitReachedAt).getTime();
+            if (timeSinceLimitReached >= TWENTY_FOUR_HOURS) {
+                await SessionModel.findByIdAndUpdate(session._id, {
+                    limitWarningSent: false,
+                    limitReachedSent: false,
+                    limitReachedAt: null,
+                    "context.inboundCount": 0,
+                    "context.outboundCount": 0,
+                    "context.messageCount": 0,
+                });
+                // Refresh session data after reset
+                session.context.inboundCount = 0;
+                session.limitReachedSent = false;
+                session.limitWarningSent = false;
+                session.limitReachedAt = null;
+                console.log("♻️ Session auto-restored after 24 hours for:", session.sessionId);
+            }
+        }
+
+        // ⚠️ Warning at threshold
         if (session.context.inboundCount === WARNING_THRESHOLD && !session.limitWarningSent) {
             await sendWhatsAppAutomationReply({
                 phoneNumberId: user.whatsapp.phoneNumberId,
@@ -44,14 +67,22 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             return; // stop AI for this turn
         }
 
+        // 🚫 Limit reached — send message ONCE, then silently block
         if (session?.context?.inboundCount >= LIMIT) {
-            await sendWhatsAppAutomationReply({
-                phoneNumberId: user?.whatsapp?.phoneNumberId,
-                to: session?.visitorPhone,
-                text: "🙏 This session has reached its limit. Please try again later or wait a bit — I’ll be here to help 😊",
-            });
+            if (!session.limitReachedSent) {
+                await sendWhatsAppAutomationReply({
+                    phoneNumberId: user?.whatsapp?.phoneNumberId,
+                    to: session?.visitorPhone,
+                    text: "🙏 This session has reached its limit. Please try again in 24 hours — I'll be here to help 😊",
+                });
 
-            console.log("🚫 Limit reached — blocking AI");
+                await SessionModel.findByIdAndUpdate(session._id, {
+                    limitReachedSent: true,
+                    limitReachedAt: new Date(),
+                });
+            }
+
+            console.log("🚫 Limit reached — blocking AI for session:", session.sessionId);
             return;
         }
 

@@ -15,14 +15,24 @@ const SessionSchema = new mongoose.Schema({
         default: "active"
     },
 
-    isProcessingAI: { 
-        type: Boolean, 
-        default: false 
+    isProcessingAI: {
+        type: Boolean,
+        default: false
     },
 
-    limitWarningSent: { 
-        type: Boolean, 
-        default: false 
+    limitWarningSent: {
+        type: Boolean,
+        default: false
+    },
+
+    limitReachedSent: {
+        type: Boolean,
+        default: false
+    },
+
+    limitReachedAt: {
+        type: Date,
+        default: null
     },
 
     handoff: {
