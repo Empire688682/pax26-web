@@ -189,7 +189,7 @@ export default function Sidebar() {
           </div>
 
           {/* ── Scrollable nav ─────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-3  mb-18 flex flex-col gap-0.5">
+          <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-0.5">
 
             {!userData ? (
               /* Guest menu */
@@ -247,9 +247,8 @@ export default function Sidebar() {
             )}
           </div>
 
-          {/* ── Footer ─────────────────────────────────── */}
-          <div className='fixed w-full bottom-1 left-2'>
-            <div className="px-4 py-4 flex items-center justify-between"
+          {/* ── Footer — pinned at bottom of sidebar ──── */}
+          <div className="shrink-0 px-4 py-4 flex items-center justify-between"
             style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
             {userData ? (
               <div className="flex items-center gap-2 min-w-0">
@@ -272,7 +271,6 @@ export default function Sidebar() {
               </div>
             )}
             <ThemeToggle />
-          </div>
           </div>
         </div>
 
