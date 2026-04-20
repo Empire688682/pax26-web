@@ -130,7 +130,7 @@ export default function SignupPage() {
       const { success, message, finalUserData } = res.data;
       if (!success) { setError(message || "Authentication failed"); return; }
       const now = new Date().getTime();
-      const userDataWithTimestamp = { ...finalUserData, timestamp: now };
+      const userDataWithTimestamp = { ...finalUserData, authTimestamp: now };
       localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
       setUserData(userDataWithTimestamp);
       window.location.reload();

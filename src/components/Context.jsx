@@ -3,7 +3,7 @@
 /* ================================
    IMPORTS
 ================================ */
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import axios from "axios";
@@ -146,8 +146,10 @@ export const AppProvider = ({ children }) => {
         const parsedData = JSON.parse(storedData);
         const twentyFourHours = 24 * 60 * 60 * 1000;
         const now = new Date().getTime();
-        if (now - parsedData.authTimestamp > twentyFourHours) {
-          localStorage.clear()
+        // Support both 'authTimestamp' and legacy 'timestamp' key
+        const loginTime = parsedData.authTimestamp || parsedData.timestamp;
+        if (!loginTime || now - loginTime > twentyFourHours) {
+          localStorage.clear();
           logoutUser();
         } else {
           setUserData(parsedData);
@@ -183,9 +185,20 @@ export const AppProvider = ({ children }) => {
       const res = await axios.get("/api/user/profile");
       const profile = res.data?.profile;
       if (profile) {
-        setUserData(profile);
+        // Preserve the existing auth timestamp when refreshing profile data
+        const existingData = localStorage.getItem("userData");
+        let existingTimestamp = null;
+        if (existingData) {
+          const parsed = JSON.parse(existingData);
+          existingTimestamp = parsed.authTimestamp || parsed.timestamp;
+        }
+        const updatedProfile = {
+          ...profile,
+          authTimestamp: existingTimestamp || new Date().getTime(),
+        };
+        setUserData(updatedProfile);
         setIsWhatsappNumberConnected(!!profile?.whatsapp?.connected);
-        localStorage.setItem("userData", JSON.stringify(res.data.profile));
+        localStorage.setItem("userData", JSON.stringify(updatedProfile));
       }
     } catch (error) {
       console.log("fetchUser: ", error);
@@ -209,6 +222,27 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     isUserAuthenticated();
+
+    // Re-check session expiry every 60 seconds so users with
+    // long-open tabs get forcefully logged out after 24 hours
+    const intervalId = setInterval(() => {
+      if (typeof window !== "undefined") {
+        const storedData = localStorage.getItem("userData");
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          const twentyFourHours = 24 * 60 * 60 * 1000;
+          const now = new Date().getTime();
+          const loginTime = parsedData.authTimestamp || parsedData.timestamp;
+          if (!loginTime || now - loginTime > twentyFourHours) {
+            clearInterval(intervalId);
+            localStorage.clear();
+            logoutUser();
+          }
+        }
+      }
+    }, 60 * 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const verifyUserRedirect = async() => {

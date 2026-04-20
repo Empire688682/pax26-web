@@ -45,7 +45,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
       }
 
       const now = new Date().getTime();
-      const userDataWithTimestamp = { ...finalUserData, timestamp: now };
+      const userDataWithTimestamp = { ...finalUserData, authTimestamp: now };
       localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
 
       setUserData(userDataWithTimestamp);
