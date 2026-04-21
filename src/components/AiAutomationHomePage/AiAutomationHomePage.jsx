@@ -39,13 +39,13 @@ const CSS = `
 `;
 
 /* ─── Icons ───────────────────────────────────────────────────── */
-const IconBot      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>;
-const IconSettings = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-const IconZap      = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-const IconWorkflow = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h3a3 3 0 0 1 3 3v6"/><path d="M9 18h6"/></svg>;
-const IconArrow    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IconCrown    = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>;
-const IconSpark    = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>;
+const IconBot = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2" /><circle cx="12" cy="5" r="2" /><path d="M12 7v4" /><line x1="8" y1="16" x2="8.01" y2="16" /><line x1="16" y1="16" x2="16.01" y2="16" /></svg>;
+const IconSettings = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>;
+const IconZap = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>;
+const IconWorkflow = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="15" width="6" height="6" rx="1" /><path d="M9 6h3a3 3 0 0 1 3 3v6" /><path d="M9 18h6" /></svg>;
+const IconArrow = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
+const IconCrown = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" /></svg>;
+const IconSpark = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>;
 
 /* ─── Stat card ───────────────────────────────────────────────── */
 function StatCard({ label, value, accent, delay, pax26 }) {
@@ -128,28 +128,28 @@ function SectionLabel({ text, pax26 }) {
 /* ─── Main Page ───────────────────────────────────────────────── */
 export default function AiAutomationHomePage() {
   const { pax26, router, fetchUser, userData } = useGlobalContext();
-  const [enabledAi, setEnabledAi]             = useState(false);
+  const [enabledAi, setEnabledAi] = useState(false);
   const [businessProfile, setBusinessProfile] = useState(null);
-  const [apiRun, setApiRun]                   = useState(false);
+  const [apiRun, setApiRun] = useState(false);
 
   useEffect(() => { setEnabledAi(userData?.paxAI?.enabled || false); }, [userData]);
 
   const fetchBusinessProfile = async () => {
     try {
-      const res  = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
+      const res = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
       const data = await res.json();
       if (data.success) setBusinessProfile(data.profile);
-    } catch (err) { 
-      console.log("fetchBusinessProfileErr: ", err); 
-    }finally{
+    } catch (err) {
+      console.log("fetchBusinessProfileErr: ", err);
+    } finally {
       setApiRun(true);
     }
   };
 
-  useEffect(() => { 
-    if(apiRun) return;
+  useEffect(() => {
+    if (apiRun) return;
     fetchUser();
-    fetchBusinessProfile(); 
+    fetchBusinessProfile();
   }, [userData]);
 
   const handleAlert = () => {
@@ -157,11 +157,11 @@ export default function AiAutomationHomePage() {
     router.push("/dashboard/automations/training");
   };
 
-  const GOLD   = "#C9A84C";
-  const TEAL   = "#38BDF8";
+  const GOLD = "#C9A84C";
+  const TEAL = "#38BDF8";
   const VIOLET = "#A78BFA";
-  const CORAL  = "#FB923C";
-  const GREEN  = "#4CAF7D";
+  const CORAL = "#FB923C";
+  const GREEN = "#4CAF7D";
 
   const isTrained = !!businessProfile?.lastUpdated;
 
@@ -216,10 +216,10 @@ export default function AiAutomationHomePage() {
 
         {/* ── Stats row ──────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-          <StatCard label="Status"      value={enabledAi ? "Live" : "Idle"}    accent={enabledAi ? GREEN : pax26?.textSecondary} delay="0s"    pax26={pax26} />
-          <StatCard label="Training"    value={isTrained ? "Done" : "Pending"} accent={isTrained ? GOLD  : pax26?.textSecondary} delay="0.07s" pax26={pax26} />
-          <StatCard label="Automations" value="3"                               accent={TEAL}                                     delay="0.14s" pax26={pax26} />
-          <StatCard label="AI Plan"     value="Business"                        accent={VIOLET}                                   delay="0.21s" pax26={pax26} />
+          <StatCard label="Status" value={enabledAi ? "Live" : "Idle"} accent={enabledAi ? GREEN : pax26?.textSecondary} delay="0s" pax26={pax26} />
+          <StatCard label="Training" value={isTrained ? "Done" : "Pending"} accent={isTrained ? GOLD : pax26?.textSecondary} delay="0.07s" pax26={pax26} />
+          <StatCard label="Automations" value="3" accent={TEAL} delay="0.14s" pax26={pax26} />
+          <StatCard label="AI Plan" value="Business" accent={VIOLET} delay="0.21s" pax26={pax26} />
         </div>
 
         {/* ── Integration cards ──────────────────────────────── */}
@@ -227,7 +227,7 @@ export default function AiAutomationHomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           <IntCard
-            icon={<IconSettings />} iconColor={GOLD}   iconBg={`${GOLD}18`}
+            icon={<IconSettings />} iconColor={GOLD} iconBg={`${GOLD}18`}
             title="AI Business Training"
             description="Teach the AI your brand voice, services, tone, and FAQs for perfectly on-brand responses."
             tag={isTrained ? "Trained ✓" : "Setup needed"} tagColor={isTrained ? GREEN : CORAL}
@@ -236,7 +236,7 @@ export default function AiAutomationHomePage() {
             onClick={() => router.push("/dashboard/automations/training")}
             delay="0s" pax26={pax26}
           />
-          <IntCard
+          {/* <IntCard
             icon={<IconBot />}      iconColor={TEAL}   iconBg={`${TEAL}18`}
             title="AI Chatbot"
             description="Configure personality, fallback rules, and response behaviour for human-like conversations."
@@ -244,9 +244,9 @@ export default function AiAutomationHomePage() {
             cta="Configure Bot"
             onClick={() => enabledAi ? router.push("/dashboard/automations/pax") : handleAlert()}
             delay="0.08s" pax26={pax26}
-          />
+          /> */}
           <IntCard
-            icon={<IconZap />}      iconColor={CORAL}  iconBg={`${CORAL}18`}
+            icon={<IconZap />} iconColor={CORAL} iconBg={`${CORAL}18`}
             title="Lead Follow-up"
             description="Auto-follow up with new leads, send timed reminders, and re-engage cold prospects automatically."
             tag="Automation" tagColor={CORAL}
@@ -273,8 +273,8 @@ export default function AiAutomationHomePage() {
               style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
               {[
                 { label: "Auto WhatsApp Replies", color: GREEN },
-                { label: "AI Customer Support",   color: TEAL  },
-                { label: "Lead Capture",           color: CORAL },
+                { label: "AI Customer Support", color: TEAL },
+                { label: "Lead Capture", color: CORAL },
               ].map(({ label, color }) => (
                 <div key={label}
                   className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl"

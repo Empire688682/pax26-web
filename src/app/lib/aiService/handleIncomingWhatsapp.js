@@ -131,6 +131,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     },
     $set: {
       lastMessageAt: new Date(),
+      "followUp.sent": false,  // ← reset so a new silence window can trigger another follow-up
     }
   }
 );

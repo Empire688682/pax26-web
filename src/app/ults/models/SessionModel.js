@@ -66,7 +66,14 @@ const SessionSchema = new mongoose.Schema({
     },
 
     lastMessageAt: { type: Date, default: Date.now },
-    expiresAt: { type: Date } // TTL — auto-close after X hours of inactivity
+    expiresAt: { type: Date }, // TTL — auto-close after X hours of inactivity
+
+    // ── Lead follow-up tracking ────────────────────────────────
+    followUp: {
+        sent: { type: Boolean, default: false },       // true once a follow-up is dispatched for this silence window
+        sentAt: { type: Date, default: null },         // timestamp of the dispatched follow-up
+        totalSent: { type: Number, default: 0 },       // lifetime follow-up counter for this session
+    }
 
 }, { timestamps: true });
 
