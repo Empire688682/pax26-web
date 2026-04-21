@@ -123,18 +123,18 @@ export const handleIncomingWhatsApp = async (payload) => {
 
   // ── Step 6: Update session TTL + message count ────────────
   await SessionModel.updateOne(
-  { _id: session._id },
-  {
-    $inc: {
-      "context.messageCount": 1,
-      "context.inboundCount": 1,
-    },
-    $set: {
-      lastMessageAt: new Date(),
-      "followUp.sent": false,  // ← reset so a new silence window can trigger another follow-up
+    { _id: session._id },
+    {
+      $inc: {
+        "context.messageCount": 1,
+        "context.inboundCount": 1,
+      },
+      $set: {
+        lastMessageAt: new Date(),
+        "followUp.sent": false,  // ← reset so a new silence window can trigger another follow-up
+      }
     }
-  }
-);
+  );
   console.log("✅ Step 6 — Session updated");
 
   // ── Step 7: Check auto-reply permission ───────────────────
@@ -149,7 +149,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     console.log("🚫 Step 7 — Auto-reply blocked by contact policy");
     return { ok: true };
   }
-  console.log("✅ Step 7 — Auto-reply allowed");
+  console.log("✅ Step 7 — Auto-reply allowed now");
 
   // //── Step 8: Opt-in flow ───────────────────────────────────
   //   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
