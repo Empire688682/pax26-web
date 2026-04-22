@@ -44,8 +44,10 @@ export async function POST(req) {
             return NextResponse.json({ status: "ignored_type" });
         }
 
-        // ✅ Process inbound (this should return session + user)
-        await handleIncomingWhatsApp(entry);
+        // ✅ Ack Meta immediately — process AI in background to avoid 5s timeout / retries
+        handleIncomingWhatsApp(entry).catch((err) =>
+            console.error("❌ Background handler error:", err)
+        );
 
         return NextResponse.json({ ok: true });
 

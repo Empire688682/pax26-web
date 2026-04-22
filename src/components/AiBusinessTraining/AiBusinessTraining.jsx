@@ -5,6 +5,7 @@ import { TagInput } from "@/components/ui/TagInput";
 import { FaqBuilder } from "@/components/ui/FaqBuilder";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalContext } from "../Context";
+import { NIGERIAN_BUSINESS_TEMPLATES } from "./nigerianBusinessTemplates";
 
 /* ── Icons ───────────────────────────────────────────────── */
 const BrainIcon = () => (
@@ -64,8 +65,18 @@ const ChevronLeft = () => (
   </svg>
 );
 
+/* ── Sparkle icon for template step ─────────────────────── */
+const SparkleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>
+    <path d="M19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75z"/>
+    <path d="M5 18l.5 1.5L7 20l-1.5.5L5 22l-.5-1.5L3 20l1.5-.5z"/>
+  </svg>
+);
+
 /* ── Step config ─────────────────────────────────────────── */
 const STEPS = [
+  { label: "Template",       icon: SparkleIcon,       desc: "Start from a Nigerian business template" },
   { label: "Business Info",  icon: BuildingIcon,      desc: "Tell us about your business" },
   { label: "Services",       icon: PackageIcon,       desc: "What do you offer?" },
   { label: "FAQs",           icon: HelpCircleIcon,    desc: "Common customer questions" },
@@ -253,11 +264,12 @@ export default function AiTrainingPage() {
 
   const nextDisabled = () => {
     switch (step) {
-      case 0: return !form.businessName.trim() || !form.industry.trim() || !form.description.trim();
-      case 1: return form.services.length === 0;
-      case 2: return form.faqs.length === 0;
-      case 3: return !form.tone || !form.workingHours.trim();
-      case 4: return !form.whatsappBusiness.phoneNumber.trim();
+      case 0: return false; // template step — always can skip
+      case 1: return !form.businessName.trim() || !form.industry.trim() || !form.description.trim();
+      case 2: return form.services.length === 0;
+      case 3: return form.faqs.length === 0;
+      case 4: return !form.tone || !form.workingHours.trim();
+      case 5: return !form.whatsappBusiness.phoneNumber.trim();
       default: return false;
     }
   };
@@ -410,7 +422,19 @@ export default function AiTrainingPage() {
               border: `1px solid ${pax26?.border}`,
             }}
           >
-            {renderStep(step, form, setForm, pax26)}
+            {renderStep(step, form, setForm, pax26, (tpl) => {
+              setForm(f => ({
+                ...f,
+                industry:    tpl.industry,
+                description: tpl.description,
+                services:    tpl.services,
+                faqs:        tpl.faqs,
+                tone:        tpl.tone,
+                workingHours: tpl.workingHours,
+              }));
+              setDirection(1);
+              setStep(1); // jump straight to Business Info so user adds their name
+            })}
           </div>
         </motion.div>
       </AnimatePresence>
@@ -461,10 +485,70 @@ export default function AiTrainingPage() {
 }
 
 /* ── Step renderer ───────────────────────────────────────── */
-function renderStep(step, form, setForm, pax26) {
+function renderStep(step, form, setForm, pax26, onApplyTemplate) {
   switch (step) {
 
+    // ── Step 0: Template picker ───────────────────────────
     case 0:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.65, lineHeight: 1.6, marginBottom: "4px" }}>
+            Pick a template to instantly pre-fill your business info, services, and FAQs — then customise as needed.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "10px" }}>
+            {NIGERIAN_BUSINESS_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                onClick={() => onApplyTemplate(tpl)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "6px",
+                  padding: "14px 12px",
+                  borderRadius: "14px",
+                  border: `1.5px solid ${pax26?.border}`,
+                  background: pax26?.secondaryBg,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  transition: "all 0.18s",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = pax26?.primary;
+                  e.currentTarget.style.background = `${pax26?.primary}12`;
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = `0 6px 20px ${pax26?.primary}22`;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = pax26?.border;
+                  e.currentTarget.style.background = pax26?.secondaryBg;
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <span style={{ fontSize: "22px" }}>{tpl.emoji}</span>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: pax26?.textPrimary, lineHeight: 1.3 }}>
+                  {tpl.label}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "4px 0" }}>
+            <div style={{ flex: 1, height: "1px", background: pax26?.border }} />
+            <span style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.4, whiteSpace: "nowrap" }}>or start from scratch</span>
+            <div style={{ flex: 1, height: "1px", background: pax26?.border }} />
+          </div>
+
+          <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5, textAlign: "center" }}>
+            Use "Save &amp; Continue" below to skip the template and fill everything manually.
+          </p>
+        </div>
+      );
+
+    // ── Step 1: Business Info ─────────────────────────────
+    case 1:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <ThemedInput
@@ -499,7 +583,7 @@ function renderStep(step, form, setForm, pax26) {
         </div>
       );
 
-    case 1:
+    case 2:
       return (
         <TagInput
           example="e.g. Web Design, SEO, Consulting"
@@ -510,7 +594,7 @@ function renderStep(step, form, setForm, pax26) {
         />
       );
 
-    case 2:
+    case 3:
       return (
         <FaqBuilder
           faqs={form.faqs}
@@ -519,7 +603,7 @@ function renderStep(step, form, setForm, pax26) {
         />
       );
 
-    case 3:
+    case 4:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <ThemedSelect
@@ -539,7 +623,7 @@ function renderStep(step, form, setForm, pax26) {
         </div>
       );
 
-    case 4:
+    case 5:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {/* Info banner */}
@@ -573,7 +657,7 @@ function renderStep(step, form, setForm, pax26) {
         </div>
       );
 
-    case 5:
+    case 6:
       return (
         <div>
           <p style={{ fontSize: "14px", fontWeight: 600, color: pax26?.textPrimary, marginBottom: "16px" }}>
@@ -594,7 +678,7 @@ function renderStep(step, form, setForm, pax26) {
         </div>
       );
 
-    case 6:
+    case 7:
       return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "24px 0", gap: "20px" }}>
           {/* Animated ring */}

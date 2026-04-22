@@ -1,22 +1,52 @@
 import { fetchUrl } from "../fetchUrl.js";
+import BusinessProfileModel from "../../../app/ults/models/BusinessProfileModel.js";
+
+const URL_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Returns cached URL content from the DB.
+ * If cache is missing or stale (>24h), fetches fresh content, saves it, and returns it.
+ */
+async function getUrlContent(profile) {
+  if (!profile.businessUrl) return "";
+
+  const cacheAge = profile.urlCachedAt
+    ? Date.now() - new Date(profile.urlCachedAt).getTime()
+    : Infinity;
+
+  // ✅ Cache is fresh — use it instantly (no network call)
+  if (profile.urlCache && cacheAge < URL_CACHE_TTL_MS) {
+    return profile.urlCache;
+  }
+
+  // 🔄 Cache is stale or missing — fetch once and save back to DB
+  try {
+    const freshContent = await fetchUrl(profile.businessUrl);
+    if (freshContent) {
+      // Save in background — don't await, don't block the response
+      BusinessProfileModel.findByIdAndUpdate(profile._id, {
+        urlCache: freshContent,
+        urlCachedAt: new Date(),
+      }).catch((err) => console.warn("⚠️ Failed to save urlCache:", err.message));
+
+      return freshContent;
+    }
+  } catch (err) {
+    console.warn("⚠️ URL fetch failed, using stale cache if available:", err.message);
+    // Fall back to stale cache rather than breaking the response
+    if (profile.urlCache) return profile.urlCache;
+  }
+
+  return "";
+}
 
 export const buildSystemPrompt = async (profile, businessUrl) => {
   if (!profile) {
     return "You are a helpful business assistant on WhatsApp. Be concise and friendly.";
   }
 
-  // ── Fetch URL knowledge ──────────────────────────────────
-  let urlContent = "";
-  if (businessUrl) {
-    try {
-      urlContent = await fetchUrl(businessUrl);
-      if (!urlContent) {
-        console.log("⚠️ URL fetched but returned empty content:", businessUrl);
-      }
-    } catch (error) {
-      console.log("⚠️ Failed to fetch URL content:", businessUrl, error.message);
-    }
-  }
+  // ── URL content (cached — fast path) ─────────────────────────
+  const urlContent = await getUrlContent(profile);
 
   const toneMap = {
     friendly: "You are warm, casual, and approachable.",
@@ -43,7 +73,6 @@ ${profile.knowledgeBase.map((k) => `Q: ${k.question}\nA: ${k.answer}`).join("\n\
 ${profile.services.map((s) => `- ${s}`).join("\n")}`
     : "";
 
-  // ── URL knowledge block (only injected if content was fetched) ──
   const urlSection = urlContent
     ? `
 ## Live Knowledge Source (${urlContent.length >= 12000 ? "truncated" : "full"} content from ${businessUrl}):
@@ -62,17 +91,13 @@ ${toneMap[profile.tone] || toneMap.professional}
 ## WhatsApp Communication Style:
 - Keep messages short — 1 to 3 sentences max per reply
 - Use line breaks to separate points, never write walls of text
-- Use WhatsApp-friendly formatting: *bold* for emphasis, _italic_ for tone
 - Never use markdown headers (##), bullet dashes (-), or HTML in replies
-- If listing items, use numbered lines or emojis as bullets like: 1️⃣ 2️⃣ 3️⃣
 - Sound human, not robotic — like a helpful staff member texting a customer
-- Never mention it to a customer that your are AI, present youself as agent
-- Never use emojis, make all professional
+- Never reveal that you are an AI — present yourself as an agent
+- Keep all replies professional, no emojis
 
 ## About the Business:
 ${profile.description || ""}
-
-{what the business offers, its unique selling points, and any other relevant info that can help you answer questions accurately.}
 
 ## Website:
 ${businessUrl || "Not provided"}
@@ -90,9 +115,9 @@ ${urlSection}
 
 ## Important Rules:
 - Only answer questions related to this business
-- If you don't know something, say "Let me check that for you and get back to you shortly 🙏, and continue to engage user with services available and more"
+- If you don't know something, say "Let me check that for you and get back to you shortly"
 - Never make up services, prices, or information not provided above
-- If asked something outside your knowledge, say "I'll connect you with our team for that 👨‍💼"
+- If asked something outside your knowledge, say "I'll connect you with our team for that"
 - If a Live Knowledge Source is provided above, use it to answer questions accurately
 `.trim();
-};
+};

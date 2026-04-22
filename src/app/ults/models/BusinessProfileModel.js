@@ -11,6 +11,10 @@ const BusinessProfileSchema = new mongoose.Schema(
 
         businessUrl: { type: String, default: '' },
 
+        // Cached website content — populated at training time, not per-message
+        urlCache: { type: String, default: '' },
+        urlCachedAt: { type: Date, default: null },
+
         aiTrained: {
             type: Boolean,
             default: false,

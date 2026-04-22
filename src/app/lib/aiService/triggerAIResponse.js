@@ -86,15 +86,17 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             return;
         }
 
-        await SessionModel.findByIdAndUpdate(session._id, {
-            isProcessingAI: true
-        });
-
-        // ✅ Fetch business profile for this user
-        const businessProfile = await BusinessProfileModel.findOne({
-            userId: user._id,
-            whatsappEnabled: true
-        }).lean();
+        // ✅ Fetch business profile + message history in parallel — they're independent
+        const [businessProfile, rawHistory] = await Promise.all([
+            BusinessProfileModel.findOne({
+                userId: user._id,
+                whatsappEnabled: true
+            }).lean(),
+            AIMessageModel.find({ sessionId: session.sessionId })
+                .sort({ createdAt: -1 })
+                .limit(10)
+                .lean(),
+        ]);
 
         // ✅ Hard stop — no profile or not trained yet
         if (!businessProfile || !businessProfile.aiTrained) {
@@ -111,10 +113,7 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
         }
 
         // Fetch last N messages for context
-        const history = await AIMessageModel.find({ sessionId: session.sessionId })
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .lean();
+        const history = rawHistory; // already fetched above in parallel
 
         const historyMessages = history.reverse().map(m => ({
             role: m.senderType === "visitor" ? "user" : "assistant",
@@ -194,8 +193,6 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
 
         const aiReply = aiResponse?.text || fallback;
 
-        await new Promise(res => setTimeout(res, 1500));
-
         // Send via WhatsApp
         const response = await sendWhatsAppAutomationReply({
             phoneNumberId: user?.whatsapp?.phoneNumberId,
@@ -233,7 +230,8 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             automation: { isAutoReply: true }
         });
 
-        const updateResult = await UserModel.updateOne(
+        // ✅ Parallelize all post-send DB writes — none block each other
+        const contactUpdate = UserModel.updateOne(
             {
                 _id: user._id,
                 "whatsapp.contacts.list.phone": session?.visitorPhone
@@ -249,6 +247,20 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
             }
         );
 
+        const sessionUpdate = SessionModel.findByIdAndUpdate(session._id, {
+            lastMessageAt: new Date(),
+            $inc: {
+                "context.messageCount": 1,
+                "context.outboundCount": 1,
+                "context.totalTokens": aiResponse?.tokensUsed || 0
+            },
+            isProcessingAI: false,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
+
+        const [updateResult] = await Promise.all([contactUpdate, sessionUpdate]);
+
+        // Fallback: add contact if it didn't exist yet
         if (updateResult.matchedCount === 0) {
             await UserModel.updateOne(
                 { _id: user._id },
@@ -267,18 +279,8 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
                     }
                 }
             );
-        };
+        }
 
-        await SessionModel.findByIdAndUpdate(session._id, {
-            lastMessageAt: new Date(),
-            $inc: {
-                "context.messageCount": 1,
-                "context.outboundCount": 1,
-                "context.totalTokens": aiResponse?.tokensUsed || 0
-            },
-            isProcessingAI: false,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        });
         console.log("✅ Session updated");
     } catch (error) {
         console.error("Error in triggerAIResponse:", error);

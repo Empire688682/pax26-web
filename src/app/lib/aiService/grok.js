@@ -7,7 +7,7 @@ const groq = new Groq({
 export const callGroqAI = async ({ systemPrompt, messages }) => {
   const response = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    max_tokens: 1024,
+    max_tokens: 300, // WhatsApp replies are 1–3 sentences — no need for 1024
     messages: [
       { role: "system", content: systemPrompt },
       ...messages,

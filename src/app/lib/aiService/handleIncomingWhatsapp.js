@@ -76,53 +76,49 @@ export const handleIncomingWhatsApp = async (payload) => {
     throw err;
   }
 
-  // ── Step 5: Add contact if new — auto-tag as lead ────────
-  const contactExists = await UserModel.exists({
-    _id: user._id,
-    "whatsapp.contacts.list.phone": visitorPhone,
+  // ── Steps 5 & 6 (parallel): Update contact + session simultaneously ───
+  // Step 5: Single upsert-style update — try existing contact first, push if new
+  const contactUpdatePromise = UserModel.updateOne(
+    { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+    {
+      $set: {
+        "whatsapp.contacts.list.$.lastMessageAt": new Date(),
+        "whatsapp.contacts.list.$.updatedAt": new Date(),
+      },
+      $inc: {
+        "whatsapp.contacts.list.$.messageCount": 1,
+        "whatsapp.contacts.list.$.inboundCount": 1,
+      },
+    }
+  ).then(async (result) => {
+    if (result.matchedCount === 0) {
+      // Brand new contact — push with lead metadata
+      await UserModel.updateOne(
+        { _id: user._id },
+        {
+          $addToSet: {
+            "whatsapp.contacts.list": {
+              phone: visitorPhone,
+              status: "whitelist",
+              leadStage: "new",
+              leadSource: "whatsapp",
+              messageCount: 1,
+              inboundCount: 1,
+              lastMessageAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          },
+        }
+      );
+      console.log("✅ Step 5 — New lead added:", visitorPhone);
+    } else {
+      console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
+    }
   });
 
-  if (!contactExists) {
-    // Brand new contact — add with leadStage "new"
-    await UserModel.updateOne(
-      { _id: user._id },
-      {
-        $addToSet: {
-          "whatsapp.contacts.list": {
-            phone: visitorPhone,
-            status: "whitelist",
-            leadStage: "new",        // ← auto-tagged as new lead
-            leadSource: "whatsapp",  // ← source tracked
-            messageCount: 1,
-            inboundCount: 1,
-            lastMessageAt: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        },
-      }
-    );
-    console.log("✅ Step 5 — New lead added:", visitorPhone);
-  } else {
-    // Existing contact — update message stats only
-    await UserModel.updateOne(
-      { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
-      {
-        $set: {
-          "whatsapp.contacts.list.$.lastMessageAt": new Date(),
-          "whatsapp.contacts.list.$.updatedAt": new Date(),
-        },
-        $inc: {
-          "whatsapp.contacts.list.$.messageCount": 1,
-          "whatsapp.contacts.list.$.inboundCount": 1,
-        },
-      }
-    );
-    console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
-  }
-
-  // ── Step 6: Update session TTL + message count ────────────
-  await SessionModel.updateOne(
+  // Step 6: Session TTL + message count
+  const sessionUpdatePromise = SessionModel.updateOne(
     { _id: session._id },
     {
       $inc: {
@@ -131,25 +127,25 @@ export const handleIncomingWhatsApp = async (payload) => {
       },
       $set: {
         lastMessageAt: new Date(),
-        "followUp.sent": false,  // ← reset so a new silence window can trigger another follow-up
-      }
+        "followUp.sent": false,
+      },
     }
   );
-  console.log("✅ Step 6 — Session updated");
 
-  // ── Step 7: Check auto-reply permission ───────────────────
-  const canAutoReply = await UserModel.exists({
-    _id: user._id,
-    "whatsapp.contacts.list": {
-      $elemMatch: { phone: visitorPhone, status: "whitelist" },
-    },
-  });
+  await Promise.all([contactUpdatePromise, sessionUpdatePromise]);
+  console.log("✅ Steps 5 & 6 — Contact + Session updated in parallel");
 
-  if (!canAutoReply) {
+  // ── Step 7: Check auto-reply permission — in-memory, no extra DB call ──
+  // user.whatsapp.contacts.list was already loaded in Step 1
+  const contactIsWhitelisted = user.whatsapp?.contacts?.list?.some(
+    (c) => c.phone === visitorPhone && c.status === "whitelist"
+  );
+
+  if (!contactIsWhitelisted) {
     console.log("🚫 Step 7 — Auto-reply blocked by contact policy");
     return { ok: true };
   }
-  console.log("✅ Step 7 — Auto-reply allowed now")
+  console.log("✅ Step 7 — Auto-reply allowed (in-memory check)");
 
   // //── Step 8: Opt-in flow ───────────────────────────────────
   //   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
