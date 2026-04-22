@@ -45,9 +45,9 @@ export async function POST(req) {
         }
 
         // ✅ Ack Meta immediately — process AI in background to avoid 5s timeout / retries
-        handleIncomingWhatsApp(entry).catch((err) =>
-            console.error("❌ Background handler error:", err)
-        );
+        console.log("handleIncomingWhatsApp");
+        await handleIncomingWhatsApp(entry)
+
 
         return NextResponse.json({ ok: true });
 
