@@ -1,6 +1,8 @@
 // src/app/api/cron/lead-followup/route.js
 //
-// Called every hour by Vercel Cron (or any external scheduler).
+// Called every hour by Upstash QStash (POST request with signature).
+// Also accepts a manual GET request with a Bearer CRON_SECRET for testing.
+//
 // Finds conversations that:
 //   • belong to a user with "follow_up" automation enabled
 //   • had the last message > 24 hours ago
@@ -9,6 +11,7 @@
 // Then sends an AI-generated follow-up WhatsApp message.
 
 import { NextResponse } from "next/server";
+import { Receiver } from "@upstash/qstash";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
@@ -22,12 +25,31 @@ import { callMistralAI } from "@/app/lib/aiService/mistral";
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; // ms
 
-// ── Security check ─────────────────────────────────────────────
-function isAuthorized(req) {
+// ── QStash signature verifier ──────────────────────────────────
+const receiver = new Receiver({
+  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
+  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || "",
+});
+
+// ── Auth: QStash signature OR manual Bearer token ──────────────
+async function isAuthorized(req, rawBody) {
+  // 1. Try QStash signature verification (production path)
+  const signature = req.headers.get("upstash-signature");
+  if (signature && process.env.QSTASH_CURRENT_SIGNING_KEY) {
+    try {
+      const isValid = await receiver.verify({ signature, body: rawBody });
+      if (isValid) return true;
+    } catch {
+      // Signature invalid — fall through to Bearer check
+    }
+  }
+
+  // 2. Fallback: manual Bearer token (for testing via curl / Postman)
   const authHeader = req.headers.get("authorization") || "";
   const secret = process.env.CRON_SECRET;
-  if (!secret) return false; // env var must be set
-  return authHeader === `Bearer ${secret}`;
+  if (secret && authHeader === `Bearer ${secret}`) return true;
+
+  return false;
 }
 
 // ── Build a warm AI follow-up message ─────────────────────────
@@ -38,7 +60,7 @@ async function buildFollowUpMessage(businessProfile, lastAiMessage) {
   const systemPrompt = `You are a ${tone} follow-up assistant for "${businessName}". 
 Your job is to send a short, warm follow-up WhatsApp message to a potential customer who hasn't replied in over 24 hours.
 Keep it brief (1–2 sentences), human, and non-pushy. Don't repeat the previous message verbatim. 
-End with an open question or a gentle nudge. Use plain text — no markdown.`;
+End with an open question or a gentle nudge. Use plain text — no markdown, no bold, no bolding, no asterisks, no carets, no hash, no underscore, no tildes, no emojis.`;
 
   const messages = [
     {
@@ -74,11 +96,8 @@ Write a short follow-up message to re-engage them since they haven't replied.`,
   return `Hey! 👋 Just checking in — we'd love to help if you have any questions. Feel free to reply anytime 😊`;
 }
 
-// ── Main handler ───────────────────────────────────────────────
-export async function GET(req) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-  }
+// ── Shared follow-up runner ────────────────────────────────────
+async function runFollowUp() {
 
   await connectDb();
 
@@ -215,4 +234,23 @@ export async function GET(req) {
       { status: 500 }
     );
   }
+}
+
+// ── POST — called by Upstash QStash (with signature) ──────────
+export async function POST(req) {
+  const rawBody = await req.text();
+  const authorized = await isAuthorized(req, rawBody);
+  if (!authorized) {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+  return runFollowUp();
+}
+
+// ── GET — manual trigger for testing (curl / Postman) ─────────
+export async function GET(req) {
+  const authorized = await isAuthorized(req, "");
+  if (!authorized) {
+    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  }
+  return runFollowUp();
 }

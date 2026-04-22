@@ -149,7 +149,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     console.log("🚫 Step 7 — Auto-reply blocked by contact policy");
     return { ok: true };
   }
-  console.log("✅ Step 7 — Auto-reply allowed now");
+  console.log("✅ Step 7 — Auto-reply allowed now")
 
   // //── Step 8: Opt-in flow ───────────────────────────────────
   //   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
