@@ -199,26 +199,45 @@ const Spinner = ({ color = "white" }) => (
    CLOUDINARY UPLOAD HOOK
 ══════════════════════════════════════════════════════════ */
 function useCloudinaryUpload() {
-  const upload = async (file, { folder = "pax26/seller-logos", tags = [] } = {}) => {
+  const upload = async (file, { folder, tags = [], onProgress } = {}) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", folder);
     if (tags.length) formData.append("tags", tags.join(","));
 
-    const res = await fetch("/api/upload/cloudinary", {
-      method: "POST",
-      body: formData,
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("POST", "/api/upload/cloudinary");
+
+      xhr.upload.onprogress = (e) => {
+        if (onProgress && e.lengthComputable) {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          onProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(JSON.parse(xhr.response));
+        } else {
+          reject("Upload failed");
+        }
+      };
+
+      xhr.onerror = reject;
+
+      xhr.send(formData);
     });
-    if (!res.ok) throw new Error("Upload failed");
-    return res.json(); // { url, publicId, ... }
   };
+
   return { upload };
 }
 
 /* ══════════════════════════════════════════════════════════
    LOGO UPLOADER COMPONENT
 ══════════════════════════════════════════════════════════ */
-function LogoUploader({ value, onChange, pax26 }) {
+function LogoUploader({ value, onChange, pax26, sellerId }) {
   const { upload } = useCloudinaryUpload();
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -232,7 +251,7 @@ function LogoUploader({ value, onChange, pax26 }) {
     setError("");
     setUploading(true);
     try {
-      const result = await upload(file, { folder: "pax26/seller-logos", tags: ["logo"] });
+      const result = await upload(file, { folder: `pax26/${sellerId}/logos`, tags: ["logo"] });
       onChange({ url: result.url, publicId: result.publicId });
     } catch (e) {
       setError("Upload failed. Please try again.");
@@ -299,7 +318,7 @@ function LogoUploader({ value, onChange, pax26 }) {
 /* ══════════════════════════════════════════════════════════
    PRODUCT MEDIA UPLOADER (for product images in step 2)
 ══════════════════════════════════════════════════════════ */
-function ProductMediaUploader({ images, onChange, pax26 }) {
+function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
   const { upload } = useCloudinaryUpload();
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -309,7 +328,7 @@ function ProductMediaUploader({ images, onChange, pax26 }) {
     if (!arr.length) return;
     setUploading(true);
     try {
-      const results = await Promise.all(arr.map(f => upload(f, { folder: "pax26/products", tags: ["product"] })));
+      const results = await Promise.all(arr.map(f => upload(f, { folder: `pax26/${sellerId}/products`, tags: ["product"] })));
       onChange([...images, ...results.map(r => ({ url: r.url, publicId: r.publicId }))]);
     } catch {
       // silent
@@ -390,7 +409,12 @@ function ProductBuilder({ products, onChange, pax26 }) {
           <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes, Bags, Electronics" />
           <ThemedTextarea label="Description" pax26={p} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="Describe the product…" rows={2} />
           <TagInput label="Search Tags" example="e.g. black, nike, size-42" tags={draft.tags} onChange={tags => setDraft(d => ({ ...d, tags }))} pax26={p} />
-          <ProductMediaUploader images={draft.images || []} onChange={imgs => setDraft(d => ({ ...d, images: imgs }))} pax26={p} />
+          <ProductMediaUploader
+            images={draft.images || []}
+            onChange={imgs => setDraft(d => ({ ...d, images: imgs }))}
+            pax26={p}
+            sellerId={sellerId}
+          />
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "9px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer" }}>Cancel</button>
             <button onClick={save} disabled={!draft.name.trim() || !String(draft.price).trim()} style={{ flex: 2, padding: "9px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: "pointer", opacity: !draft.name.trim() || !String(draft.price).trim() ? 0.5 : 1 }}>Save Product</button>
@@ -513,10 +537,17 @@ export default function AiTrainingPage() {
 
   /* ✅ Safe effect (no hook order issues) */
   useEffect(() => {
-    if (step === 2) {
-      fetchProfile();
-    }
-  }, [step, fetchProfile]);
+    if (step !== 2) return;
+    fetchProfile();
+  }, [step]);
+
+  const deleteImage = async (publicId) => {
+    await fetch("/api/upload/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicId }),
+    });
+  };
 
   const nextDisabled = () => {
     switch (step) {
@@ -627,7 +658,12 @@ export default function AiTrainingPage() {
 
             {/* Card body */}
             <div style={{ borderRadius: "0 0 16px 16px", padding: "20px", backgroundColor: pax26?.card || pax26?.bg, border: `1px solid ${pax26?.border}`, borderTop: "none" }}>
-              {renderStep(step, form, setForm, pax26)}
+              <StepRenderer
+                step={step}
+                form={form}
+                setForm={setForm}
+                pax26={pax26}
+              />
             </div>
           </motion.div>
         </AnimatePresence>
@@ -652,7 +688,7 @@ export default function AiTrainingPage() {
 /* ══════════════════════════════════════════════════════════
    STEP RENDERER
 ══════════════════════════════════════════════════════════ */
-function renderStep(step, form, setForm, pax26) {
+function StepRenderer(step, form, setForm, pax26) {
   const p = pax26;
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -662,7 +698,12 @@ function renderStep(step, form, setForm, pax26) {
     case 0:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <LogoUploader value={form.logo} onChange={logo => set("logo", logo)} pax26={p} />
+          <LogoUploader
+            value={form.logo}
+            onChange={logo => set("logo", logo)}
+            pax26={p}
+            sellerId={sellerId}
+          />
           <ThemedInput label="Store / Business Name *" pax26={p} value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="e.g. Kemi's Boutique" />
           <ThemedSelect label="Currency" pax26={p} value={form.currency}
             options={[{ value: "NGN", label: "NGN — Nigerian Naira (₦)" }, { value: "USD", label: "USD — US Dollar ($)" }, { value: "GBP", label: "GBP — British Pound (£)" }]}
