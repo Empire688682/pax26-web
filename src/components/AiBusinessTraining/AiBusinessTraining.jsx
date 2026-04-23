@@ -657,7 +657,17 @@ export default function AiTrainingPage() {
             </div>
 
             {/* Card body */}
-            <div style={{ borderRadius: "0 0 16px 16px", padding: "20px", backgroundColor: pax26?.card || pax26?.bg, border: `1px solid ${pax26?.border}`, borderTop: "none" }}>
+            <div style={{
+              borderRadius: "0 0 16px 16px",
+              padding: "20px",
+              backgroundColor: pax26?.card || pax26?.bg,
+
+              borderLeft: `1px solid ${pax26?.border}`,
+              borderRight: `1px solid ${pax26?.border}`,
+              borderBottom: `1px solid ${pax26?.border}`,
+
+              borderTop: "0"
+            }}>
               <StepRenderer
                 step={step}
                 form={form}
