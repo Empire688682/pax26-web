@@ -4,10 +4,10 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import UserModel from "@/app/ults/models/UserModel";
-import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
+import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
 
 export async function OPTIONS() {
-    return new NextResponse(null, {status: 200, headers: corsHeaders()});
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
 export async function PATCH(req, { params }) {
@@ -33,15 +33,15 @@ export async function PATCH(req, { params }) {
       );
     };
 
-    const userBussinessProfile = await BusinessProfileModel.findOne({ userId: user._id });
+    const userBussinessProfile = await GeneralBusinessProfileModel.findOne({ userId: user._id });
 
-    if(!userBussinessProfile){
+    if (!userBussinessProfile) {
       return NextResponse.json(
         { success: false, message: "Business profile not found. Please create a business profile by train PaxAI to use automations." },
         { status: 404, headers: corsHeaders() }
       );
     }
-    
+
     if (!userBussinessProfile.aiTrained) {
       return NextResponse.json(
         { success: false, message: "PaxAI not trained. Please train PaxAI to use automations." },
@@ -78,9 +78,8 @@ export async function PATCH(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: `Automation ${
-        automation.enabled ? "enabled" : "disabled"
-      } successfully`,
+      message: `Automation ${automation.enabled ? "enabled" : "disabled"
+        } successfully`,
       data: automation,
     });
   } catch (error) {

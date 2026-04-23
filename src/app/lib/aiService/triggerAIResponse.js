@@ -1,7 +1,7 @@
 import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply.js";
 import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
-import BusinessProfileModel from "../../ults/models/BusinessProfileModel.js";
+import GeneralBusinessProfileModel from "../../ults/models/GeneralBusinessProfileModel.js";
 import { callGroqAI } from "./grok.js";
 import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
@@ -88,7 +88,7 @@ export const triggerAIResponse = async ({ session, user, inboundText }) => {
 
         // ✅ Fetch business profile + message history in parallel — they're independent
         const [businessProfile, rawHistory] = await Promise.all([
-            BusinessProfileModel.findOne({
+            GeneralBusinessProfileModel.findOne({
                 userId: user._id,
                 whatsappEnabled: true
             }).lean(),

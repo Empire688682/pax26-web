@@ -94,12 +94,27 @@ const BusinessProfileSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        //payment details
+        paymentDetails: [
+            {
+                label: { type: String, default: '' },        // e.g. "GTBank", "Opay"
+                bankName: { type: String, default: '' },
+                accountNumber: {
+                    type: String,
+                    default: '',
+                    maxlength: 10,
+                    match: [/^\d{10}$/, 'Account number must be 10 digits']
+                },
+                accountName: { type: String, default: '' },
+                active: { type: Boolean, default: false }
+            }
+        ]
     },
     {
         timestamps: true, // adds createdAt & updatedAt automatically
     }
 );
 
-const BusinessProfileModel = mongoose.models.BusinessProfile || mongoose.model("BusinessProfile", BusinessProfileSchema);
-export default BusinessProfileModel;
+const GeneralBusinessProfileModel = mongoose.models.BusinessProfile || mongoose.model("BusinessProfile", BusinessProfileSchema);
+export default GeneralBusinessProfileModel;
 

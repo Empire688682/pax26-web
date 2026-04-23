@@ -228,8 +228,8 @@ export default function AiAutomationHomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           <IntCard
             icon={<IconSettings />} iconColor={GOLD} iconBg={`${GOLD}18`}
-            title="AI Business Training"
-            description="Teach the AI your brand voice, services, tone, and FAQs for perfectly on-brand responses."
+            title="Brand Communication Setup"
+            description="Define how your business speaks—voice, tone, services, and FAQs—for consistent customer interactions."
             tag={isTrained ? "Trained ✓" : "Setup needed"} tagColor={isTrained ? GREEN : CORAL}
             cta="Open Training"
             lastUpdated={businessProfile?.lastUpdated}

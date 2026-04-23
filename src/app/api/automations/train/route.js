@@ -3,7 +3,7 @@ import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
+import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -35,7 +35,7 @@ export async function PUT(req) {
     const data = await req.json();
 
     // Update or create BusinessProfile
-    const profile = await BusinessProfileModel.findOneAndUpdate(
+    const profile = await GeneralBusinessProfileModel.findOneAndUpdate(
       { userId },
       {
         ...data,

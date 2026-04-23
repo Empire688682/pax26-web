@@ -1,5 +1,5 @@
 import { fetchUrl } from "../fetchUrl.js";
-import BusinessProfileModel from "../../../app/ults/models/BusinessProfileModel.js";
+import GeneralBusinessProfileModel from "../../../app/ults/models/GeneralBusinessProfileModel.js";
 
 const URL_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -24,7 +24,7 @@ async function getUrlContent(profile) {
     const freshContent = await fetchUrl(profile.businessUrl);
     if (freshContent) {
       // Save in background — don't await, don't block the response
-      BusinessProfileModel.findByIdAndUpdate(profile._id, {
+      GeneralBusinessProfileModel.findByIdAndUpdate(profile._id, {
         urlCache: freshContent,
         urlCachedAt: new Date(),
       }).catch((err) => console.warn("⚠️ Failed to save urlCache:", err.message));
@@ -120,4 +120,4 @@ ${urlSection}
 - If asked something outside your knowledge, say "I'll connect you with our team for that"
 - If a Live Knowledge Source is provided above, use it to answer questions accurately
 `.trim();
-};
+};

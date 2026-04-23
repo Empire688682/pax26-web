@@ -1,11 +1,11 @@
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { connectDb } from "@/app/ults/db/ConnectDb";
-import BusinessProfileModel from "@/app/ults/models/BusinessProfileModel";
+import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
 import { verifyToken } from "../../helper/VerifyToken";
 import { NextResponse } from "next/server";
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200, headers: corsHeaders() });
+    return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
 export async function GET(req) {
@@ -18,7 +18,7 @@ export async function GET(req) {
                 { status: 401, headers: corsHeaders() }
             );
         }
-        const profile = await BusinessProfileModel.findOne({ userId });
+        const profile = await GeneralBusinessProfileModel.findOne({ userId });
         if (!profile) {
             return new NextResponse(
                 JSON.stringify({ success: false, message: "Profile not found" }),
