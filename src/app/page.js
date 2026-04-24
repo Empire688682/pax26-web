@@ -42,12 +42,12 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-     const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(window.location.search);
     const authQuery = searchParams.get("auth");
-  if (authQuery === "login") {
-    openModal("login");
-  }
-}, []);
+    if (authQuery === "login") {
+      openModal("login");
+    }
+  }, [openModal]);
 
   return (
     <div className='overflow-hidden'>

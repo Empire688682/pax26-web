@@ -6,7 +6,7 @@ import {
   Wifi, DollarSign, LayoutDashboard, FileCode, Wallet,
   Phone, LogOut, Info, History, Settings, Bell, X,
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
-  ChevronDown,
+  ChevronDown, Home, Shield,
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -197,22 +197,23 @@ export default function Sidebar() {
               /* Guest menu */
               <>
                 <SectionLabel label="Menu" pax26={pax26} />
+                <NavItem href="/" icon={Home} label="Home" onClick={close} pax26={pax26} />
                 <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
                 <NavItem href="/blog" icon={FileCode} label="Blog" onClick={close} pax26={pax26} />
                 <NavItem href="/contact" icon={Phone} label="Contact" onClick={close} pax26={pax26} />
-                <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
                 <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
-                <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/terms" icon={Shield} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/privacy" icon={Shield} label="Privacy Policy" onClick={close} pax26={pax26} />
               </>
             ) : (
               /* Authenticated menu */
               <>
                 <SectionLabel label="Overview" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations" icon={Wifi} label="Agent Automation" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect Whatsapp" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train AI" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train Agent" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
                 <SectionLabel label="Finance" pax26={pax26} />
@@ -228,7 +229,8 @@ export default function Sidebar() {
                 <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
                 <NavItem href="/contact" icon={Phone} label="Contact Support" onClick={close} pax26={pax26} />
                 <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
-                <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/terms" icon={Shield} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/privacy" icon={Shield} label="Privacy Policy" onClick={close} pax26={pax26} />
                 <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
