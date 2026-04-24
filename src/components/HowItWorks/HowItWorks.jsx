@@ -46,7 +46,7 @@ const STEPS = [
     icon: Brain,
     color: "#38bdf8",
     num: "02",
-    title: "Train Your AI",
+    title: "Train Your Agent",
     text: "Feed the AI your business info, products, FAQs and tone. It learns your brand instantly.",
     badge: "One-time setup",
   },
@@ -70,7 +70,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   const { pax26 } = useGlobalContext();
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
@@ -206,9 +206,9 @@ export default function HowItWorks() {
             transition={{ duration: 0.5, delay: 0.8 }}
             className="mt-10 flex flex-wrap items-center justify-center gap-3">
             {[
-              { text: "No code required",          color: "#22c55e" },
-              { text: "Live in under 5 minutes",   color: primary   },
-              { text: "Cancel anytime",             color: "#f59e0b" },
+              { text: "No code required", color: "#22c55e" },
+              { text: "Live in under 5 minutes", color: primary },
+              { text: "Cancel anytime", color: "#f59e0b" },
             ].map(({ text, color }) => (
               <div key={text} className="flex items-center gap-2 px-4 py-2 rounded-xl"
                 style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>

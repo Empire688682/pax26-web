@@ -154,7 +154,7 @@ export default function AiAutomationHomePage() {
 
   const handleAlert = () => {
     alert("Please train PaxAI with your business information before enabling automations.");
-    router.push("/dashboard/automations/training");
+    router.push("/dashboard/automations/ai-business-dashboard");
   };
 
   const GOLD = "#C9A84C";
@@ -233,7 +233,7 @@ export default function AiAutomationHomePage() {
             tag={isTrained ? "Trained ✓" : "Setup needed"} tagColor={isTrained ? GREEN : CORAL}
             cta="Open Training"
             lastUpdated={businessProfile?.lastUpdated}
-            onClick={() => router.push("/dashboard/automations/training")}
+            onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
             delay="0s" pax26={pax26}
           />
           {/* <IntCard

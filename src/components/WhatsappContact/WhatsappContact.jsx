@@ -299,8 +299,8 @@ const StatCard = ({ label, value, color, pax26 }) => (
     minWidth: 0,
   }}>
     <div
-    className="text-xs md:sm" 
-    style={{  color: pax26?.textPrimary, opacity: 0.5, marginBottom: "6px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "capitalize" }}>
+      className="text-xs md:sm"
+      style={{ color: pax26?.textPrimary, opacity: 0.5, marginBottom: "6px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "capitalize" }}>
       {label}
     </div>
     <div style={{ fontSize: "25px", fontWeight: 900, color: color || pax26?.textPrimary, letterSpacing: "-0.02em" }}>
@@ -336,10 +336,10 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
       onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
     >
       {/* ── Main row ── */}
-      <div className="text-sm" style={{fontSize: "11px", display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
+      <div className="text-sm" style={{ fontSize: "11px", display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
         {/* Phone */}
         <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          <div style={{fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
+          <div style={{ fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
             {contact.phone}
           </div>
           {/* Meta row */}
@@ -373,14 +373,14 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
         )}
 
         {/* Status badge */}
-        <div 
-        className="md:flex hidden"
-        style={{
-          fontWeight: 700, padding: "3px 10px",
-          borderRadius: "999px", flexShrink: 0,
-          letterSpacing: "0.04em", textTransform: "capitalize",
-          ...badgeStyle,
-        }}>
+        <div
+          className="md:flex hidden"
+          style={{
+            fontWeight: 700, padding: "3px 10px",
+            borderRadius: "999px", flexShrink: 0,
+            letterSpacing: "0.04em", textTransform: "capitalize",
+            ...badgeStyle,
+          }}>
           {isWhitelist ? "AI on" : "AI off"}
         </div>
 
@@ -709,10 +709,10 @@ export default function WhatsappContact() {
           </p>
         </div>
         <h1 style={{ fontSize: "26px", fontWeight: 900, letterSpacing: "-0.02em", color: pax26?.textPrimary, marginBottom: "4px" }}>
-          Manage AI contacts
+          Manage Your Agent Contacts
         </h1>
         <p style={{ fontSize: "14px", color: pax26?.textPrimary, opacity: 0.5, lineHeight: 1.5 }}>
-          Control who your AI responds to — whitelist customers, block personal contacts.
+          Control who your Agent responds to — whitelist customers, block personal contacts.
         </p>
       </div>
 
@@ -956,7 +956,7 @@ export default function WhatsappContact() {
         marginBottom: "24px",
       }}>
         <div style={{ color: pax26?.primary, marginTop: "1px", flexShrink: 0 }}>
-          <InfoIcon className="md:flex hidden"/>
+          <InfoIcon className="md:flex hidden" />
         </div>
         <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: 0 }}>
           Blacklisted contacts will never receive AI replies. When a new unknown contact messages you, the policy above determines how the AI handles them. Changes take effect immediately on your next incoming message.

@@ -14,9 +14,25 @@ const SellerProfileSchema = new mongoose.Schema({
         trim: true,
     },
 
-    whatsappNumber: {
+    businessDescription: {
+        type: String,
+        trim: true,
+        required: true,
+    },
+
+    businessUrl: { type: String, default: '' },
+    urlCache: { type: String, default: '' },
+    urlCachedAt: { type: Date, default: null },
+
+    industry: {
         type: String,
         required: true,
+        trim: true,
+    },
+
+    whatsappNumber: {
+        type: String,
+        // Handled in backend from UserModel
     },
 
     whatsappVerified: {
@@ -36,6 +52,25 @@ const SellerProfileSchema = new mongoose.Schema({
         default: true,
     },
 
+    faqs: [
+        {
+            question: {
+                type: String,
+                required: true,
+            },
+            answer: {
+                type: String,
+                required: true,
+            },
+        },
+    ],
+
+    workingHours: {
+        type: String,
+        trim: true,
+        // Example: "Mon–Fri 9am–6pm"
+    },
+
     followUpEnabled: {
         type: Boolean,
         default: true,
@@ -51,21 +86,31 @@ const SellerProfileSchema = new mongoose.Schema({
         default: "NGN",
     },
 
-    // Payment details (reuse idea from your old model)
+    //payment details
     paymentDetails: [
         {
-            label: String,
-            bankName: String,
-            accountNumber: String,
-            accountName: String,
-            active: { type: Boolean, default: true }
+            label: { type: String, default: '' },        // e.g. "GTBank", "Opay"
+            bankName: { type: String, default: '' },
+            accountNumber: {
+                type: String,
+                default: '',
+                maxlength: 10,
+                match: [/^\d{10}$/, 'Account number must be 10 digits']
+            },
+            accountName: { type: String, default: '' },
+            active: { type: Boolean, default: false }
         }
     ],
 
     isActive: {
         type: Boolean,
         default: true,
-    }
+    },
+
+    lastUpdated: {
+        type: Date,
+        default: Date.now,
+    },
 
 }, { timestamps: true });
 

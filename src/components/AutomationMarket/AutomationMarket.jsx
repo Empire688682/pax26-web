@@ -57,14 +57,14 @@ const CSS = `
 `;
 
 /* ── Icons ────────────────────────────────────────────────────── */
-const IcoArrow   = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IcoBrain   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.96-3 2.5 2.5 0 0 1-1.32-4.24 3 3 0 0 1 .34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.96-3 2.5 2.5 0 0 0 1.32-4.24 3 3 0 0 0-.34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2"/></svg>;
-const IcoCheck   = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
+const IcoArrow = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
+const IcoBrain = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.96-3 2.5 2.5 0 0 1-1.32-4.24 3 3 0 0 1 .34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2" /><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.96-3 2.5 2.5 0 0 0 1.32-4.24 3 3 0 0 0-.34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2" /></svg>;
+const IcoCheck = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
 
 const TYPE_CONFIG = {
-  whatsapp_auto_reply:  { icon: <MessageCircle size={20} />, color: "#22c55e", label: "WhatsApp" },
-  follow_up:            { icon: <Zap size={20} />,           color: "#f97316", label: "Follow-up" },
-  business_ai_chatbox:  { icon: <Bot size={20} />,           color: "#38bdf8", label: "AI Bot"    },
+  whatsapp_auto_reply: { icon: <MessageCircle size={20} />, color: "#22c55e", label: "WhatsApp" },
+  follow_up: { icon: <Zap size={20} />, color: "#f97316", label: "Follow-up" },
+  business_ai_chatbox: { icon: <Bot size={20} />, color: "#38bdf8", label: "AI Bot" },
 };
 
 /* ── Toggle switch component ──────────────────────────────────── */
@@ -135,7 +135,7 @@ function SkeletonCard({ pax26 }) {
 
 /* ── Automation card ──────────────────────────────────────────── */
 function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTrained, pax26 }) {
-  const cfg   = TYPE_CONFIG[auto.type] || { icon: <Bot size={20} />, color: pax26?.primary, label: "Automation" };
+  const cfg = TYPE_CONFIG[auto.type] || { icon: <Bot size={20} />, color: pax26?.primary, label: "Automation" };
   const GREEN = "#22c55e";
 
   return (
@@ -249,19 +249,19 @@ export default function AutomationMarket() {
   } = useGlobalContext();
 
   const [automations, setAutomations] = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [toggling, setToggling]       = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
-  const GREEN     = "#22c55e";
-  const primary   = pax26?.primary;
+  const GREEN = "#22c55e";
+  const primary = pax26?.primary;
 
   useEffect(() => { fetchAutomations(); }, []);
 
   const fetchAutomations = async () => {
     setLoading(true);
     try {
-      const res  = await fetch("/api/automations/all");
+      const res = await fetch("/api/automations/all");
       const data = await res.json();
       if (data.success) {
         setAutomations(
@@ -283,17 +283,17 @@ export default function AutomationMarket() {
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
+        const res = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
         const data = await res.json();
         if (data.success) setAIsPaxAiBusinessTrained(data.profile?.aiTrained || false);
-      } catch {}
+      } catch { }
     })();
   }, []);
 
   const toggleAutomationAPI = async (auto) => {
     if (!isPaxAiBusinessTrained) {
       alert("Please train PaxAI with your business information before enabling automations.");
-      router.push("/dashboard/automations/training");
+      router.push("/dashboard/automations/ai-business-dashboard");
       return;
     }
     if (!isWhatsappNumberConnected && auto.type !== "business_ai_chatbox") {
@@ -303,7 +303,7 @@ export default function AutomationMarket() {
     }
     try {
       setToggling(true);
-      const res  = await fetch(`/api/automations/${auto.id}/toggle`, { method: "PATCH" });
+      const res = await fetch(`/api/automations/${auto.id}/toggle`, { method: "PATCH" });
       const data = await res.json();
       if (data.success) await fetchAutomations();
       else alert(`Error: ${data.message}`);
@@ -336,7 +336,7 @@ export default function AutomationMarket() {
                 Hey, {firstName} 👋
               </h1>
               <p className="text-sm" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                Manage your smart AI workflows — toggle, configure, and improve from here.
+                Manage your smart Agent workflows — toggle, configure, and improve from here.
               </p>
             </div>
 
@@ -403,7 +403,7 @@ export default function AutomationMarket() {
             </div>
           )}
 
-          {/* AI training status bar */}
+          {/* Agent Training Status bar */}
           <div className="flex items-center justify-between gap-3 px-5 py-3.5 rounded-xl"
             style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
             <div className="flex items-center gap-2.5">
@@ -413,16 +413,16 @@ export default function AutomationMarket() {
               </div>
               <div>
                 <p className="text-xs font-semibold" style={{ color: pax26?.textPrimary }}>
-                  AI Training Status
+                  Agent Training Status
                 </p>
                 <p className="am-mono text-[10px]" style={{ color: isPaxAiBusinessTrained ? GREEN : "#ca8a04" }}>
-                  {isPaxAiBusinessTrained ? "✓ Business AI is trained and ready" : "⚠ Not trained — automations won't respond correctly"}
+                  {isPaxAiBusinessTrained ? "✓ Business Agent is trained and ready" : "⚠ Not trained — automations won't respond correctly"}
                 </p>
               </div>
             </div>
             <button
               className="am-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold flex-shrink-0"
-              onClick={() => router.push("/dashboard/automations/training")}
+              onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
               style={{
                 background: isPaxAiBusinessTrained ? pax26?.secondaryBg : `${primary}15`,
                 color: isPaxAiBusinessTrained ? pax26?.textSecondary : primary,
@@ -433,6 +433,21 @@ export default function AutomationMarket() {
           </div>
         </div>
 
+        {
+          isWhatsappNumberConnected && automations.length > 0 && (
+            <div className="flex items-center flex-wrap lg:flex-nowrap justify-between gap-2 px-3.5 py-2 rounded-xl"
+              style={{ background: pax26?.bg }}>
+              <p className="text-xs md:text-sm" style={{ color: pax26?.textSecondary }}>Control who your Agent responds to — whitelist customers, block personal contacts.</p>
+              <button
+                className="am-btn flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white"
+                onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
+                style={{ background: primary, boxShadow: `0 8px 24px ${primary}35` }}>
+                Contacts Manager <IcoArrow />
+              </button>
+            </div>
+          )
+        }
+
         {/* ── Section label ─────────────────────────────────── */}
         <div className="flex items-center gap-3">
           <p className="am-mono text-[10px] font-medium tracking-widest uppercase whitespace-nowrap"
@@ -441,20 +456,6 @@ export default function AutomationMarket() {
           </p>
           <div className="h-px flex-1" style={{ background: pax26?.border }} />
         </div>
-
-        {
-          !isWhatsappNumberConnected && automations.length > 0 && (
-            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl"
-              style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-              <button
-                className="am-btn flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
-                onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
-                style={{ background: primary, boxShadow: `0 8px 24px ${primary}35` }}>
-                Contacts Manager <IcoArrow />
-              </button>
-            </div>
-          )
-        }
 
         {/* ── Cards grid ────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -475,7 +476,7 @@ export default function AutomationMarket() {
                     toggling={toggling}
                     onToggle={toggleAutomationAPI}
                     onView={() => router.push(`/dashboard/automations/${auto.automationId}`)}
-                    onTrain={() => router.push("/dashboard/automations/training")}
+                    onTrain={() => router.push("/dashboard/automations/ai-business-dashboard")}
                     isPaxAiBusinessTrained={isPaxAiBusinessTrained}
                     pax26={pax26}
                   />

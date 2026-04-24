@@ -1,9 +1,10 @@
+import cloudinary from "@/app/lib/cloudinary";
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary"; // we'll create this next
 
 export async function POST(req) {
     try {
         const formData = await req.formData();
+        console.log("Received upload request with formData:", formData);
         const file = formData.get("file");
         const folder = formData.get("folder") || "pax26";
         const tags = formData.get("tags");

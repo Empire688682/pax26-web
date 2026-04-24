@@ -228,7 +228,6 @@ const Dashboard = () => {
           <StatCard label="Automations" value="0" color={TEAL} delay="0s" pax26={pax26} />
           <StatCard label="Msgs Handled" value="0" color={GREEN} delay="0.05s" pax26={pax26} />
           <StatCard label="Leads" value="0" color={AMBER} delay="0.10s" pax26={pax26} />
-          <StatCard label="Revenue" value="₦0" color={VIOLET} delay="0.15s" pax26={pax26} />
         </div>
 
         {/* ── Wallet card ─────────────────────────────────────── */}

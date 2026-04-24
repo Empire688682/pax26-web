@@ -8,13 +8,11 @@ import { useGlobalContext } from "../Context";
 /* ══════════════════════════════════════════════════════════
    ICONS
 ══════════════════════════════════════════════════════════ */
-const Icon = ({ d, size = 18, ...rest }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...rest}>
-    {Array.isArray(d) ? d.map((p, i) => <path key={i} d={p} />) : <path d={d} />}
+const BotIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 8V4H8" /><path d="M8 8H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-4" /><path d="M12 8h4" /><path d="M9 17v1" /><path d="M15 17v1" />
   </svg>
 );
-
-const BotIcon = () => <Icon size={20} d={["M12 8V4H8", "M8 8H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-4", "M12 8h4", "M9 17v1", "M15 17v1"]} />;
 const StoreIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 9l1-6h16l1 6" /><path d="M3 9a2 2 0 0 0 2 2 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 2-2" /><path d="M5 11v9h14V11" /><path d="M9 21v-6h6v6" />
@@ -64,12 +62,12 @@ const CheckIcon = () => (
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
-const ChevronRight = () => (
+const ChevronRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
   </svg>
 );
-const ChevronLeft = () => (
+const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6" />
   </svg>
@@ -106,13 +104,13 @@ const XIcon = () => (
    STEPS CONFIG
 ══════════════════════════════════════════════════════════ */
 const STEPS = [
-  { label: "Store Info", icon: StoreIcon, desc: "Your shop identity & logo" },
-  { label: "Products", icon: PackageIcon, desc: "What you sell" },
-  { label: "Payment", icon: CreditCardIcon, desc: "How customers pay you" },
-  { label: "AI Behaviour", icon: SlidersIcon, desc: "Tone, hours & auto-reply" },
-  { label: "WhatsApp", icon: MessageCircleIcon, desc: "Connect your number" },
-  { label: "Review", icon: ClipboardIcon, desc: "Confirm your details" },
-  { label: "Train AI", icon: RocketIcon, desc: "Launch your sales agent" },
+  { label: "Store Info",   icon: StoreIcon,        desc: "Your shop identity & logo" },
+  { label: "Products",     icon: PackageIcon,       desc: "What you sell" },
+  { label: "Payment",      icon: CreditCardIcon,    desc: "How customers pay you" },
+  { label: "AI Behaviour", icon: SlidersIcon,       desc: "Tone, hours & auto-reply" },
+  { label: "WhatsApp",     icon: MessageCircleIcon, desc: "Connect your number" },
+  { label: "Review",       icon: ClipboardIcon,     desc: "Confirm your details" },
+  { label: "Train AI",     icon: RocketIcon,        desc: "Launch your sales agent" },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -143,7 +141,12 @@ const ThemedInput = ({ label, pax26, style, ...props }) => {
   return (
     <div style={{ marginBottom: "4px" }}>
       {label && <FieldLabel pax26={pax26}>{label}</FieldLabel>}
-      <input {...props} style={{ ...fieldBase(pax26), borderColor: focused ? pax26?.primary : pax26?.border, boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none", ...style }} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+      <input
+        {...props}
+        style={{ ...fieldBase(pax26), borderColor: focused ? pax26?.primary : pax26?.border, boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none", ...style }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      />
     </div>
   );
 };
@@ -153,7 +156,13 @@ const ThemedTextarea = ({ label, pax26, rows = 3, style, ...props }) => {
   return (
     <div style={{ marginBottom: "4px" }}>
       {label && <FieldLabel pax26={pax26}>{label}</FieldLabel>}
-      <textarea {...props} rows={rows} style={{ ...fieldBase(pax26), resize: "vertical", borderColor: focused ? pax26?.primary : pax26?.border, boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none", ...style }} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+      <textarea
+        {...props}
+        rows={rows}
+        style={{ ...fieldBase(pax26), resize: "vertical", borderColor: focused ? pax26?.primary : pax26?.border, boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none", ...style }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      />
     </div>
   );
 };
@@ -163,9 +172,28 @@ const ThemedSelect = ({ label, pax26, options = [], value, onChange, style }) =>
   return (
     <div style={{ marginBottom: "4px" }}>
       {label && <FieldLabel pax26={pax26}>{label}</FieldLabel>}
-      <select value={value} onChange={e => onChange(e.target.value)} style={{ ...fieldBase(pax26), cursor: "pointer", appearance: "none", backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' strokeWidth='2.5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center", paddingRight: "36px", borderColor: focused ? pax26?.primary : pax26?.border, boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none", ...style }} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          ...fieldBase(pax26),
+          cursor: "pointer",
+          appearance: "none",
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' strokeWidth='2.5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right 12px center",
+          paddingRight: "36px",
+          borderColor: focused ? pax26?.primary : pax26?.border,
+          boxShadow: focused ? `0 0 0 3px ${pax26?.primary}18` : "none",
+          ...style,
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+      >
         {options.map(opt => (
-          <option key={opt.value} value={opt.value} style={{ backgroundColor: pax26?.secondaryBg, color: pax26?.textPrimary }}>{opt.label}</option>
+          <option key={opt.value} value={opt.value} style={{ backgroundColor: pax26?.secondaryBg, color: pax26?.textPrimary }}>
+            {opt.label}
+          </option>
         ))}
       </select>
     </div>
@@ -178,7 +206,10 @@ const Toggle = ({ value, onChange, pax26, label, hint }) => (
       <p style={{ fontSize: "13px", fontWeight: 600, color: pax26?.textPrimary, margin: 0 }}>{label}</p>
       {hint && <p style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.5, margin: "2px 0 0" }}>{hint}</p>}
     </div>
-    <button onClick={() => onChange(!value)} style={{ width: "44px", height: "24px", borderRadius: "999px", border: "none", cursor: "pointer", background: value ? pax26?.primary : pax26?.border, transition: "background 0.2s", position: "relative", flexShrink: 0 }}>
+    <button
+      onClick={() => onChange(!value)}
+      style={{ width: "44px", height: "24px", borderRadius: "999px", border: "none", cursor: "pointer", background: value ? pax26?.primary : pax26?.border, transition: "background 0.2s", position: "relative", flexShrink: 0 }}
+    >
       <span style={{ position: "absolute", top: "3px", left: value ? "23px" : "3px", width: "18px", height: "18px", borderRadius: "50%", background: "#fff", transition: "left 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }} />
     </button>
   </div>
@@ -195,47 +226,53 @@ const Spinner = ({ color = "white" }) => (
   <div style={{ width: "16px", height: "16px", border: `2px solid ${color}30`, borderTopColor: color, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
 );
 
+const InfoBanner = ({ text, pax26 }) => (
+  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "11px 13px", borderRadius: "10px", background: `${pax26?.primary}0e`, border: `1px solid ${pax26?.primary}22` }}>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={pax26?.textPrimary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1, opacity: 0.7 }}>
+      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    {/* Use a span + dangerouslySetInnerHTML only for the text portion */}
+    <p style={{ fontSize: "12px", color: pax26?.textPrimary, lineHeight: 1.6, margin: 0, opacity: 0.75 }}
+      dangerouslySetInnerHTML={{ __html: text }}
+    />
+  </div>
+);
+
 /* ══════════════════════════════════════════════════════════
    CLOUDINARY UPLOAD HOOK
 ══════════════════════════════════════════════════════════ */
 function useCloudinaryUpload() {
-  const upload = async (file, { folder, tags = [], onProgress } = {}) => {
+  const upload = useCallback(async (file, { folder, tags = [], onProgress } = {}) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("folder", folder);
+    if (folder) formData.append("folder", folder);
     if (tags.length) formData.append("tags", tags.join(","));
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-
       xhr.open("POST", "/api/upload/cloudinary");
 
       xhr.upload.onprogress = (e) => {
         if (onProgress && e.lengthComputable) {
-          const percent = Math.round((e.loaded * 100) / e.total);
-          onProgress(percent);
+          onProgress(Math.round((e.loaded * 100) / e.total));
         }
       };
 
       xhr.onload = () => {
-        if (xhr.status === 200) {
-          resolve(JSON.parse(xhr.response));
-        } else {
-          reject("Upload failed");
-        }
+        if (xhr.status === 200) resolve(JSON.parse(xhr.response));
+        else reject(new Error("Upload failed"));
       };
 
-      xhr.onerror = reject;
-
+      xhr.onerror = () => reject(new Error("Network error"));
       xhr.send(formData);
     });
-  };
+  }, []);
 
   return { upload };
 }
 
 /* ══════════════════════════════════════════════════════════
-   LOGO UPLOADER COMPONENT
+   LOGO UPLOADER
 ══════════════════════════════════════════════════════════ */
 function LogoUploader({ value, onChange, pax26, sellerId }) {
   const { upload } = useCloudinaryUpload();
@@ -251,9 +288,10 @@ function LogoUploader({ value, onChange, pax26, sellerId }) {
     setError("");
     setUploading(true);
     try {
-      const result = await upload(file, { folder: `pax26/${sellerId}/logos`, tags: ["logo"] });
+      const folder = sellerId ? `pax26/${sellerId}/logos` : "pax26/logos";
+      const result = await upload(file, { folder, tags: ["logo"] });
       onChange({ url: result.url, publicId: result.publicId });
-    } catch (e) {
+    } catch {
       setError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
@@ -276,11 +314,11 @@ function LogoUploader({ value, onChange, pax26, sellerId }) {
         onDrop={handleDrop}
         style={{
           width: "100%", minHeight: "140px", borderRadius: "14px",
-          border: `2px dashed ${dragOver ? pax26?.primary : value ? pax26?.primary + "55" : pax26?.border}`,
-          background: dragOver ? `${pax26?.primary}08` : value ? `${pax26?.primary}06` : pax26?.secondaryBg,
+          border: `2px dashed ${dragOver ? pax26?.primary : value?.url ? pax26?.primary + "55" : pax26?.border}`,
+          background: dragOver ? `${pax26?.primary}08` : value?.url ? `${pax26?.primary}06` : pax26?.secondaryBg,
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          gap: "10px", cursor: uploading ? "wait" : "pointer", transition: "all 0.2s", overflow: "hidden",
-          position: "relative",
+          gap: "10px", cursor: uploading ? "wait" : "pointer", transition: "all 0.2s",
+          overflow: "hidden", position: "relative",
         }}
       >
         {uploading ? (
@@ -316,7 +354,7 @@ function LogoUploader({ value, onChange, pax26, sellerId }) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PRODUCT MEDIA UPLOADER (for product images in step 2)
+   PRODUCT MEDIA UPLOADER
 ══════════════════════════════════════════════════════════ */
 function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
   const { upload } = useCloudinaryUpload();
@@ -328,10 +366,11 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
     if (!arr.length) return;
     setUploading(true);
     try {
-      const results = await Promise.all(arr.map(f => upload(f, { folder: `pax26/${sellerId}/products`, tags: ["product"] })));
+      const folder = sellerId ? `pax26/${sellerId}/products` : "pax26/products";
+      const results = await Promise.all(arr.map(f => upload(f, { folder, tags: ["product"] })));
       onChange([...images, ...results.map(r => ({ url: r.url, publicId: r.publicId }))]);
     } catch {
-      // silent
+      // silent — individual failures won't crash the form
     } finally {
       setUploading(false);
     }
@@ -344,13 +383,20 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
         {images.map((img, i) => (
           <div key={img.publicId || i} style={{ position: "relative", width: "80px", height: "80px", borderRadius: "10px", overflow: "hidden", border: `1px solid ${pax26?.border}` }}>
             <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            <button onClick={() => onChange(images.filter((_, j) => j !== i))} style={{ position: "absolute", top: "3px", right: "3px", width: "20px", height: "20px", borderRadius: "50%", background: "#ff4444cc", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+            <button
+              onClick={() => onChange(images.filter((_, j) => j !== i))}
+              style={{ position: "absolute", top: "3px", right: "3px", width: "20px", height: "20px", borderRadius: "50%", background: "#ff4444cc", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
+            >
               <XIcon />
             </button>
           </div>
         ))}
         {images.length < 6 && (
-          <button onClick={() => inputRef.current?.click()} disabled={uploading} style={{ width: "80px", height: "80px", borderRadius: "10px", border: `2px dashed ${pax26?.border}`, background: pax26?.secondaryBg, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", color: pax26?.textPrimary, opacity: uploading ? 0.5 : 0.7, transition: "opacity 0.2s" }}>
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            style={{ width: "80px", height: "80px", borderRadius: "10px", border: `2px dashed ${pax26?.border}`, background: pax26?.secondaryBg, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", color: pax26?.textPrimary, opacity: uploading ? 0.5 : 0.7, transition: "opacity 0.2s" }}
+          >
             {uploading ? <Spinner color={pax26?.primary} /> : <><UploadIcon /><span style={{ fontSize: "10px" }}>Add</span></>}
           </button>
         )}
@@ -361,14 +407,14 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PRODUCT BUILDER (Step 2)
+   PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
-function ProductBuilder({ products, onChange, pax26 }) {
-  const empty = () => ({ name: "", price: "", description: "", category: "", tags: [], stock: "", images: [] });
-  const [editing, setEditing] = useState(null); // index or "new"
-  const [draft, setDraft] = useState(empty());
+function ProductBuilder({ products, onChange, pax26, sellerId }) {
+  const emptyProduct = () => ({ name: "", price: "", description: "", category: "", tags: [], stock: "", images: [] });
+  const [editing, setEditing] = useState(null); // number | "new" | null
+  const [draft, setDraft] = useState(emptyProduct());
 
-  const startNew = () => { setDraft(empty()); setEditing("new"); };
+  const startNew = () => { setDraft(emptyProduct()); setEditing("new"); };
   const startEdit = (i) => { setDraft({ ...products[i] }); setEditing(i); };
 
   const save = () => {
@@ -380,18 +426,22 @@ function ProductBuilder({ products, onChange, pax26 }) {
   };
 
   const remove = (i) => onChange(products.filter((_, j) => j !== i));
-
   const p = pax26;
+  const canSave = draft.name.trim() && String(draft.price).trim();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {products.map((prod, i) => (
         <div key={i} style={{ display: "flex", gap: "10px", alignItems: "center", padding: "10px 14px", borderRadius: "12px", border: `1px solid ${p?.border}`, background: p?.secondaryBg }}>
-          {prod.images?.[0] && <img src={prod.images[0].url} alt="" style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />}
-          {!prod.images?.[0] && <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: `${p?.primary}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: p?.textPrimary, opacity: 0.4 }}><PackageIcon /></div>}
+          {prod.images?.[0]?.url
+            ? <img src={prod.images[0].url} alt="" style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+            : <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: `${p?.primary}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: p?.textPrimary, opacity: 0.4 }}><PackageIcon /></div>
+          }
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{prod.name}</p>
-            <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.55 }}>₦{Number(prod.price).toLocaleString()}{prod.stock ? ` · ${prod.stock} in stock` : ""}</p>
+            <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.55 }}>
+              ₦{Number(prod.price).toLocaleString()}{prod.stock ? ` · ${prod.stock} in stock` : ""}
+            </p>
           </div>
           <button onClick={() => startEdit(i)} style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "11px", fontWeight: 600, cursor: "pointer" }}>Edit</button>
           <button onClick={() => remove(i)} style={{ padding: "6px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><TrashIcon /></button>
@@ -417,11 +467,16 @@ function ProductBuilder({ products, onChange, pax26 }) {
           />
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "9px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer" }}>Cancel</button>
-            <button onClick={save} disabled={!draft.name.trim() || !String(draft.price).trim()} style={{ flex: 2, padding: "9px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: "pointer", opacity: !draft.name.trim() || !String(draft.price).trim() ? 0.5 : 1 }}>Save Product</button>
+            <button onClick={save} disabled={!canSave} style={{ flex: 2, padding: "9px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : 0.5 }}>Save Product</button>
           </div>
         </div>
       ) : (
-        <button onClick={startNew} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.7, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}>
+        <button
+          onClick={startNew}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.7, transition: "opacity 0.2s" }}
+          onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+          onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
+        >
           <PlusIcon /> Add Product
         </button>
       )}
@@ -430,22 +485,25 @@ function ProductBuilder({ products, onChange, pax26 }) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PAYMENT DETAILS BUILDER (Step 3)
+   PAYMENT BUILDER
 ══════════════════════════════════════════════════════════ */
 function PaymentBuilder({ payments, onChange, pax26 }) {
-  const empty = () => ({ label: "", bankName: "", accountNumber: "", accountName: "", active: true });
+  const emptyPayment = () => ({ label: "", bankName: "", accountNumber: "", accountName: "", active: true });
   const [editing, setEditing] = useState(null);
-  const [draft, setDraft] = useState(empty());
+  const [draft, setDraft] = useState(emptyPayment());
   const p = pax26;
 
-  const startNew = () => { setDraft(empty()); setEditing("new"); };
+  const startNew = () => { setDraft(emptyPayment()); setEditing("new"); };
   const startEdit = (i) => { setDraft({ ...payments[i] }); setEditing(i); };
+
   const save = () => {
     if (!draft.bankName.trim() || !draft.accountNumber.trim()) return;
     if (editing === "new") onChange([...payments, draft]);
     else onChange(payments.map((x, i) => i === editing ? draft : x));
     setEditing(null);
   };
+
+  const canSave = draft.bankName.trim() && draft.accountNumber.trim();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -469,16 +527,213 @@ function PaymentBuilder({ payments, onChange, pax26 }) {
           <ThemedInput label="Account Name" pax26={p} value={draft.accountName} onChange={e => setDraft(d => ({ ...d, accountName: e.target.value }))} placeholder="Your business name" />
           <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
             <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "9px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer" }}>Cancel</button>
-            <button onClick={save} disabled={!draft.bankName.trim() || !draft.accountNumber.trim()} style={{ flex: 2, padding: "9px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: "pointer", opacity: !draft.bankName.trim() || !draft.accountNumber.trim() ? 0.5 : 1 }}>Save</button>
+            <button onClick={save} disabled={!canSave} style={{ flex: 2, padding: "9px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: canSave ? "pointer" : "not-allowed", opacity: canSave ? 1 : 0.5 }}>Save</button>
           </div>
         </div>
       ) : (
-        <button onClick={startNew} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}>
+        <button
+          onClick={startNew}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.7 }}
+          onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+          onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
+        >
           <PlusIcon /> Add Payment Account
         </button>
       )}
     </div>
   );
+}
+
+/* ══════════════════════════════════════════════════════════
+   STEP RENDERER — proper React component (receives props object)
+══════════════════════════════════════════════════════════ */
+function StepRenderer({ step, form, setForm, pax26, sellerId }) {
+  const p = pax26;
+  const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  switch (step) {
+
+    /* ── 0: Store Info ── */
+    case 0:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <LogoUploader
+            value={form.logo}
+            onChange={logo => set("logo", logo)}
+            pax26={p}
+            sellerId={sellerId}
+          />
+          <ThemedInput
+            label="Store / Business Name *"
+            pax26={p}
+            value={form.businessName}
+            onChange={e => set("businessName", e.target.value)}
+            placeholder="e.g. Kemi's Boutique"
+          />
+          <ThemedSelect
+            label="Currency"
+            pax26={p}
+            value={form.currency}
+            options={[
+              { value: "NGN", label: "NGN — Nigerian Naira (₦)" },
+              { value: "USD", label: "USD — US Dollar ($)" },
+              { value: "GBP", label: "GBP — British Pound (£)" },
+            ]}
+            onChange={v => set("currency", v)}
+          />
+        </div>
+      );
+
+    /* ── 1: Products ── */
+    case 1:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: "0 0 4px" }}>
+            Add your products with prices, descriptions, and images. Your AI will use these to answer customer questions and take orders.
+          </p>
+          <ProductBuilder
+            products={form.products}
+            onChange={v => set("products", v)}
+            pax26={p}
+            sellerId={sellerId}
+          />
+        </div>
+      );
+
+    /* ── 2: Payment ── */
+    case 2:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <InfoBanner text="Your AI will automatically share these payment details when customers are ready to pay." pax26={p} />
+          <PaymentBuilder
+            payments={form.paymentDetails}
+            onChange={v => set("paymentDetails", v)}
+            pax26={p}
+          />
+        </div>
+      );
+
+    /* ── 3: AI Behaviour ── */
+    case 3:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <ThemedSelect
+            label="Conversation Tone"
+            pax26={p}
+            value={form.tone}
+            options={[
+              { value: "salesy",       label: "Salesy — persuasive & conversion-focused" },
+              { value: "friendly",     label: "Friendly — warm & conversational" },
+              { value: "professional", label: "Professional — formal & structured" },
+            ]}
+            onChange={v => set("tone", v)}
+          />
+          <ThemedInput
+            label="Working Hours"
+            pax26={p}
+            value={form.workingHours}
+            onChange={e => set("workingHours", e.target.value)}
+            placeholder="e.g. Mon–Sat 8am–8pm"
+          />
+          <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
+          <Toggle label="Follow-Up Messages" hint="AI follows up on unresponded leads" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
+          {form.followUpEnabled && (
+            <ThemedSelect
+              label="Follow-Up Delay"
+              pax26={p}
+              value={String(form.followUpDelayMinutes)}
+              options={[
+                { value: "15",   label: "15 minutes" },
+                { value: "30",   label: "30 minutes" },
+                { value: "60",   label: "1 hour" },
+                { value: "120",  label: "2 hours" },
+                { value: "1440", label: "24 hours" },
+              ]}
+              onChange={v => set("followUpDelayMinutes", parseInt(v))}
+            />
+          )}
+        </div>
+      );
+
+    /* ── 4: WhatsApp ── */
+    case 4:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <InfoBanner text="Use international format e.g. <strong>+2348012345678</strong>. This is the number your customers will message." pax26={p} />
+          <ThemedInput
+            label="WhatsApp Business Number *"
+            pax26={p}
+            value={form.whatsappNumber}
+            onChange={e => set("whatsappNumber", e.target.value)}
+            placeholder="+2348012345678"
+          />
+        </div>
+      );
+
+    /* ── 5: Review ── */
+    case 5:
+      return (
+        <div>
+          {form.logo?.url && (
+            <div style={{ marginBottom: "16px" }}>
+              <img src={form.logo.url} alt="Store logo" style={{ height: "60px", borderRadius: "10px", objectFit: "contain" }} />
+            </div>
+          )}
+          <ReviewRow label="Store"      value={form.businessName} pax26={p} />
+          <ReviewRow label="Currency"   value={form.currency} pax26={p} />
+          <ReviewRow label="Products"   value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
+          <ReviewRow label="Payment"    value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
+          <ReviewRow label="Tone"       value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
+          <ReviewRow label="Hours"      value={form.workingHours} pax26={p} />
+          <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
+          <ReviewRow label="Follow-Up"  value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
+          <ReviewRow label="WhatsApp"   value={form.whatsappNumber} pax26={p} />
+          <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
+            Everything look right? Hit "Launch Agent" to train your AI sales assistant.
+          </p>
+        </div>
+      );
+
+    /* ── 6: Launch ── */
+    case 6:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "28px 0 16px", gap: "20px" }}>
+          <div style={{ position: "relative", width: "80px", height: "80px" }}>
+            <div className="animate-ping" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: p?.primary, opacity: 0.15 }} />
+            <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: `${p?.primary}18`, border: `2px solid ${p?.primary}33`, color: p?.textPrimary }}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h3 style={{ fontSize: "19px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 8px" }}>
+              Ready to launch{form.businessName ? ` ${form.businessName}'s` : " your"} Sales Agent
+            </h3>
+            <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, maxWidth: "320px", lineHeight: 1.65, margin: "0 auto" }}>
+              Your AI will know your products, prices, payment details, and selling style — ready to handle customer inquiries and close sales automatically.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
+            {[
+              `${form.products.length} products`,
+              `${form.paymentDetails.length} payment accounts`,
+              form.tone,
+              form.workingHours || "hours not set",
+              form.followUpEnabled ? `follow-up ${form.followUpDelayMinutes}min` : "no follow-up",
+            ].map((pill, i) => (
+              <span key={i} style={{ fontSize: "11px", fontWeight: 700, padding: "5px 13px", borderRadius: "999px", background: `${p?.primary}14`, color: p?.textPrimary }}>{pill}</span>
+            ))}
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -491,9 +746,10 @@ export default function AiTrainingPage() {
   const [direction, setDirection] = useState(1);
 
   const [form, setForm] = useState({
+    sellerId: "",           // populated from the fetched profile _id
     businessName: "",
     whatsappNumber: "",
-    logo: null,
+    logo: null,             // { url, publicId }
     tone: "salesy",
     autoReplyEnabled: true,
     followUpEnabled: true,
@@ -504,54 +760,43 @@ export default function AiTrainingPage() {
     products: [],
   });
 
-  /* ✅ Stable fetch function */
+  /* fetch existing seller profile on mount */
   const fetchProfile = useCallback(async () => {
     try {
       const res = await fetch("/api/seller/profile");
       const data = await res.json();
-
       if (data.success && data.profile) {
         const p = data.profile;
-
         setAIsPaxAiBusinessTrained?.(p.aiTrained || false);
-
-        setForm((f) => ({
+        setForm(f => ({
           ...f,
-          businessName: p.businessName || "",
-          whatsappNumber: p.whatsappNumber || "",
-          logo: p.logo || null,
-          tone: p.tone || "salesy",
-          autoReplyEnabled: p.autoReplyEnabled ?? true,
-          followUpEnabled: p.followUpEnabled ?? true,
+          sellerId:             p._id || "",
+          businessName:         p.businessName || "",
+          whatsappNumber:       p.whatsappNumber || "",
+          logo:                 p.logo || null,
+          tone:                 p.tone || "salesy",
+          autoReplyEnabled:     p.autoReplyEnabled ?? true,
+          followUpEnabled:      p.followUpEnabled ?? true,
           followUpDelayMinutes: p.followUpDelayMinutes || 30,
-          currency: p.currency || "NGN",
-          workingHours: p.workingHours || "",
-          paymentDetails: p.paymentDetails || [],
-          products: p.products || [],
+          currency:             p.currency || "NGN",
+          workingHours:         p.workingHours || "",
+          paymentDetails:       p.paymentDetails || [],
+          products:             p.products || [],
         }));
       }
     } catch (e) {
-      console.error(e);
+      console.error("fetchProfile error:", e);
     }
   }, [setAIsPaxAiBusinessTrained]);
 
-  /* ✅ Safe effect (no hook order issues) */
   useEffect(() => {
-    if (step !== 2) return;
     fetchProfile();
-  }, [step]);
+  }, [fetchProfile]);
 
-  const deleteImage = async (publicId) => {
-    await fetch("/api/upload/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ publicId }),
-    });
-  };
-
+  /* per-step validation */
   const nextDisabled = () => {
     switch (step) {
-      case 0: return !form.businessName.trim(); // store info
+      case 0: return !form.businessName.trim();
       case 1: return form.products.length === 0;
       case 2: return form.paymentDetails.length === 0;
       case 3: return !form.tone || !form.workingHours.trim();
@@ -590,7 +835,7 @@ export default function AiTrainingPage() {
         router.push("/dashboard/automations/home");
       }
     } catch (e) {
-      console.error(e);
+      console.error("handleTrain error:", e);
     } finally {
       setLoading(false);
     }
@@ -598,10 +843,13 @@ export default function AiTrainingPage() {
 
   const StepIcon = STEPS[step].icon;
   const progress = (step / (STEPS.length - 1)) * 100;
+  const isLastStep = step === STEPS.length - 1;
+  const disabled = nextDisabled() || loading;
 
   return (
     <>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
       <div style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "640px", margin: "0 auto", paddingLeft: "16px", paddingRight: "16px" }}>
 
         {/* ── Page header ── */}
@@ -616,7 +864,7 @@ export default function AiTrainingPage() {
           <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>Set up your store, products & payment so your AI can sell for you 24/7</p>
         </div>
 
-        {/* ── Progress ── */}
+        {/* ── Progress bar ── */}
         <div style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
             <span style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>Step {step + 1} of {STEPS.length}</span>
@@ -634,9 +882,22 @@ export default function AiTrainingPage() {
             const done = i < step;
             const active = i === step;
             return (
-              <button key={i} onClick={() => { if (i < step) { go(-1); setStep(i); } }} disabled={i > step} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: 700, flexShrink: 0, border: "none", cursor: i > step ? "not-allowed" : "pointer", transition: "all 0.2s", background: active ? pax26?.primary : done ? `${pax26?.primary}18` : pax26?.secondaryBg, color: active ? "#fff" : pax26?.textPrimary, opacity: !active && !done ? 0.4 : 1 }}>
+              <button
+                key={i}
+                onClick={() => { if (i < step) { go(-1); setStep(i); } }}
+                disabled={i > step}
+                title={s.label}
+                style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  padding: "6px 12px", borderRadius: "999px",
+                  fontSize: "11px", fontWeight: 700, flexShrink: 0, border: "none",
+                  cursor: i > step ? "not-allowed" : "pointer", transition: "all 0.2s",
+                  background: active ? pax26?.primary : done ? `${pax26?.primary}18` : pax26?.secondaryBg,
+                  color: active ? "#fff" : pax26?.textPrimary,
+                  opacity: !active && !done ? 0.4 : 1,
+                }}
+              >
                 {done ? <CheckIcon /> : <SIcon />}
-                <span style={{ display: "none" }} className="sm-inline">{s.label}</span>
               </button>
             );
           })}
@@ -644,7 +905,14 @@ export default function AiTrainingPage() {
 
         {/* ── Step card ── */}
         <AnimatePresence mode="wait" custom={direction}>
-          <motion.div key={step} custom={direction} initial={{ opacity: 0, x: direction * 28 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: direction * -28 }} transition={{ duration: 0.22, ease: "easeInOut" }}>
+          <motion.div
+            key={step}
+            custom={direction}
+            initial={{ opacity: 0, x: direction * 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -28 }}
+            transition={{ duration: 0.22, ease: "easeInOut" }}
+          >
             {/* Card header */}
             <div style={{ borderRadius: "16px 16px 0 0", padding: "18px 20px", display: "flex", alignItems: "center", gap: "14px", background: `${pax26?.primary}0e`, borderBottom: `1px solid ${pax26?.primary}1a` }}>
               <div style={{ width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", background: pax26?.primary, color: "#fff", flexShrink: 0 }}>
@@ -661,18 +929,18 @@ export default function AiTrainingPage() {
               borderRadius: "0 0 16px 16px",
               padding: "20px",
               backgroundColor: pax26?.card || pax26?.bg,
-
-              borderLeft: `1px solid ${pax26?.border}`,
-              borderRight: `1px solid ${pax26?.border}`,
+              borderLeft:   `1px solid ${pax26?.border}`,
+              borderRight:  `1px solid ${pax26?.border}`,
               borderBottom: `1px solid ${pax26?.border}`,
-
-              borderTop: "0"
+              borderTop: "none",
             }}>
+              {/* ✅ Fixed: called as JSX element so React passes a single props object */}
               <StepRenderer
                 step={step}
                 form={form}
                 setForm={setForm}
                 pax26={pax26}
+                sellerId={form.sellerId}
               />
             </div>
           </motion.div>
@@ -681,161 +949,43 @@ export default function AiTrainingPage() {
         {/* ── Navigation ── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", gap: "12px" }}>
           {step > 0 ? (
-            <button onClick={back} disabled={loading} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "11px 20px", borderRadius: "12px", fontSize: "13px", fontWeight: 600, cursor: "pointer", background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}`, transition: "border-color 0.2s" }} onMouseEnter={e => e.currentTarget.style.borderColor = pax26?.primary + "44"} onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}>
-              <ChevronLeft /> Back
+            <button
+              onClick={back}
+              disabled={loading}
+              style={{ display: "flex", alignItems: "center", gap: "6px", padding: "11px 20px", borderRadius: "12px", fontSize: "13px", fontWeight: 600, cursor: "pointer", background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}`, transition: "border-color 0.2s" }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = pax26?.primary + "44"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
+            >
+              <ChevronLeftIcon /> Back
             </button>
           ) : <div />}
 
-          <button onClick={next} disabled={nextDisabled() || loading} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 24px", borderRadius: "12px", fontSize: "13px", fontWeight: 800, cursor: nextDisabled() || loading ? "not-allowed" : "pointer", marginLeft: "auto", background: nextDisabled() || loading ? pax26?.secondaryBg : pax26?.primary, color: nextDisabled() || loading ? pax26?.textPrimary : "#fff", border: `1px solid ${nextDisabled() || loading ? pax26?.border : "transparent"}`, opacity: nextDisabled() ? 0.5 : 1, boxShadow: !nextDisabled() && !loading ? `0 6px 20px ${pax26?.primary}35` : "none", transition: "all 0.2s" }}>
-            {loading ? (<><Spinner />Processing…</>) : step === STEPS.length - 1 ? (<><RocketIcon />Launch Agent</>) : (<>Save & Continue<ChevronRight /></>)}
+          <button
+            onClick={next}
+            disabled={disabled}
+            style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "11px 24px", borderRadius: "12px",
+              fontSize: "13px", fontWeight: 800, marginLeft: "auto",
+              cursor: disabled ? "not-allowed" : "pointer",
+              background: disabled ? pax26?.secondaryBg : pax26?.primary,
+              color: disabled ? pax26?.textPrimary : "#fff",
+              border: `1px solid ${disabled ? pax26?.border : "transparent"}`,
+              opacity: nextDisabled() ? 0.5 : 1,
+              boxShadow: !disabled ? `0 6px 20px ${pax26?.primary}35` : "none",
+              transition: "all 0.2s",
+            }}
+          >
+            {loading
+              ? <><Spinner />Processing…</>
+              : isLastStep
+                ? <><RocketIcon />Launch Agent</>
+                : <>Save & Continue<ChevronRightIcon /></>
+            }
           </button>
         </div>
+
       </div>
     </>
   );
-}
-
-/* ══════════════════════════════════════════════════════════
-   STEP RENDERER
-══════════════════════════════════════════════════════════ */
-function StepRenderer(step, form, setForm, pax26) {
-  const p = pax26;
-  const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
-
-  switch (step) {
-
-    /* ── Step 0: Store Info ── */
-    case 0:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <LogoUploader
-            value={form.logo}
-            onChange={logo => set("logo", logo)}
-            pax26={p}
-            sellerId={sellerId}
-          />
-          <ThemedInput label="Store / Business Name *" pax26={p} value={form.businessName} onChange={e => set("businessName", e.target.value)} placeholder="e.g. Kemi's Boutique" />
-          <ThemedSelect label="Currency" pax26={p} value={form.currency}
-            options={[{ value: "NGN", label: "NGN — Nigerian Naira (₦)" }, { value: "USD", label: "USD — US Dollar ($)" }, { value: "GBP", label: "GBP — British Pound (£)" }]}
-            onChange={v => set("currency", v)} />
-        </div>
-      );
-
-    /* ── Step 1: Products ── */
-    case 1:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: "0 0 4px" }}>
-            Add your products with prices, descriptions, and images. Your AI will use these to answer customer questions and take orders.
-          </p>
-          <ProductBuilder products={form.products} onChange={v => set("products", v)} pax26={p} />
-        </div>
-      );
-
-    /* ── Step 2: Payment Details ── */
-    case 2:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "11px 13px", borderRadius: "10px", background: `${p?.primary}0e`, border: `1px solid ${p?.primary}22`, marginBottom: "4px" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={p?.textPrimary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1, opacity: 0.7 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            <p style={{ fontSize: "12px", color: p?.textPrimary, lineHeight: 1.6, margin: 0, opacity: 0.75 }}>
-              Your AI will automatically share these payment details when customers are ready to pay.
-            </p>
-          </div>
-          <PaymentBuilder payments={form.paymentDetails} onChange={v => set("paymentDetails", v)} pax26={p} />
-        </div>
-      );
-
-    /* ── Step 3: AI Behaviour ── */
-    case 3:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <ThemedSelect label="Conversation Tone" pax26={p} value={form.tone}
-            options={[{ value: "salesy", label: "Salesy — persuasive & conversion-focused" }, { value: "friendly", label: "Friendly — warm & conversational" }, { value: "professional", label: "Professional — formal & structured" }]}
-            onChange={v => set("tone", v)} />
-          <ThemedInput label="Working Hours" pax26={p} value={form.workingHours} onChange={e => set("workingHours", e.target.value)} placeholder="e.g. Mon–Sat 8am–8pm" />
-          <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
-          <Toggle label="Follow-Up Messages" hint="AI follows up on unresponded leads" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
-          {form.followUpEnabled && (
-            <ThemedSelect label="Follow-Up Delay" pax26={p} value={String(form.followUpDelayMinutes)}
-              options={[{ value: "15", label: "15 minutes" }, { value: "30", label: "30 minutes" }, { value: "60", label: "1 hour" }, { value: "120", label: "2 hours" }, { value: "1440", label: "24 hours" }]}
-              onChange={v => set("followUpDelayMinutes", parseInt(v))} />
-          )}
-        </div>
-      );
-
-    /* ── Step 4: WhatsApp ── */
-    case 4:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "11px 13px", borderRadius: "10px", background: `${p?.primary}0e`, border: `1px solid ${p?.primary}22` }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={p?.textPrimary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1, opacity: 0.7 }}><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            <p style={{ fontSize: "12px", color: p?.textPrimary, lineHeight: 1.6, margin: 0, opacity: 0.75 }}>
-              Use international format e.g. <strong>+2348012345678</strong>. This is the number your customers will message.
-            </p>
-          </div>
-          <ThemedInput label="WhatsApp Business Number *" pax26={p} value={form.whatsappNumber} onChange={e => set("whatsappNumber", e.target.value)} placeholder="+2348012345678" />
-        </div>
-      );
-
-    /* ── Step 5: Review ── */
-    case 5:
-      return (
-        <div>
-          {form.logo?.url && (
-            <div style={{ marginBottom: "16px" }}>
-              <img src={form.logo.url} alt="Store logo" style={{ height: "60px", borderRadius: "10px", objectFit: "contain" }} />
-            </div>
-          )}
-          <ReviewRow label="Store" value={form.businessName} pax26={p} />
-          <ReviewRow label="Currency" value={form.currency} pax26={p} />
-          <ReviewRow label="Products" value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
-          <ReviewRow label="Payment" value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
-          <ReviewRow label="Tone" value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
-          <ReviewRow label="Hours" value={form.workingHours} pax26={p} />
-          <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
-          <ReviewRow label="Follow-Up" value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
-          <ReviewRow label="WhatsApp" value={form.whatsappNumber} pax26={p} />
-          <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
-            Everything look right? Hit "Launch Agent" to train your AI sales assistant.
-          </p>
-        </div>
-      );
-
-    /* ── Step 6: Train / Launch ── */
-    case 6:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "28px 0 16px", gap: "20px" }}>
-          <div style={{ position: "relative", width: "80px", height: "80px" }}>
-            <div className="animate-ping" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: p?.primary, opacity: 0.15 }} />
-            <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: `${p?.primary}18`, border: `2px solid ${p?.primary}33`, color: p?.textPrimary }}>
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-              </svg>
-            </div>
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: "19px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 8px" }}>
-              Ready to launch{form.businessName ? ` ${form.businessName}'s` : " your"} Sales Agent
-            </h3>
-            <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, maxWidth: "320px", lineHeight: 1.65, margin: "0 auto" }}>
-              Your AI will know your products, prices, payment details, and selling style — ready to handle customer inquiries and close sales automatically.
-            </p>
-          </div>
-
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
-            {[`${form.products.length} products`, `${form.paymentDetails.length} payment accounts`, form.tone, form.workingHours || "hours not set", form.followUpEnabled ? `follow-up ${form.followUpDelayMinutes}min` : "no follow-up"].map((pill, i) => (
-              <span key={i} style={{ fontSize: "11px", fontWeight: 700, padding: "5px 13px", borderRadius: "999px", background: `${p?.primary}14`, color: p?.textPrimary }}>{pill}</span>
-            ))}
-          </div>
-        </div>
-      );
-
-    default:
-      return null;
-  }
 }

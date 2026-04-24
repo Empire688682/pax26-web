@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
- 
+
 // This function can be marked `async` if using `await` inside
 export function middleware(req) {
-  const path = req.nextUrl.pathname  
+  const path = req.nextUrl.pathname
   const token = req.cookies.get("UserToken")?.value || "";
   const protectedPaths = [
     "/dashboard",
@@ -29,6 +29,7 @@ export function middleware(req) {
     "/dashboard/automations/whatsapp-connect-info",
     "/dashboard/automations/whatsapp-contacts",
     "/dashboard/automations/whatsapp-inbox",
+    "/dashboard/automations/ai-business-dashboard",
     "/transaction-receipt",
     "/fund-wallet",
     "/api-docs",
@@ -39,21 +40,21 @@ export function middleware(req) {
     "/verify-user",
     "/verify-number",
   ];
-  const isProtected = protectedPaths.some((protectedPath)=>
-   path.startsWith(protectedPath));
+  const isProtected = protectedPaths.some((protectedPath) =>
+    path.startsWith(protectedPath));
 
-  if(!token && isProtected){
+  if (!token && isProtected) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  if(token && (path === "/" || path === "" || path === "/reset-password")){
+  if (token && (path === "/" || path === "" || path === "/reset-password")) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   return NextResponse.next();
-  
+
 }
- 
+
 export const config = {
   matcher: [
     "/",
@@ -84,6 +85,7 @@ export const config = {
     "/dashboard/automations/whatsapp-contacts",
     "/dashboard/automations/whatsapp-inbox",
     "/dashboard/automations/whatsapp-connect-info",
+    "/dashboard/automations/ai-business-dashboard",
     "/fund-wallet",
     "/api-docs",
     "/profile",

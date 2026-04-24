@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const SellerMediaSchema = new mongoose.Schema({
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -204,7 +204,7 @@ export default function Hero() {
               <div className="mb-6 space-y-1">
                 {[
                   { text: "Turn WhatsApp", serif: false, delay: 0.05 },
-                  { text: "Into Your AI", serif: false, delay: 0.15 },
+                  { text: "Into Your Agent", serif: false, delay: 0.15 },
                   { text: "Sales Machine.", serif: true, delay: 0.25 },
                 ].map((l, i) => (
                   <motion.span key={i} className="block"
@@ -233,8 +233,11 @@ export default function Hero() {
                 transition={{ delay: 0.45 }}
                 className="text-base leading-relaxed mb-8 max-w-lg"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-                Automate customer replies, send smart follow-ups, and run AI chatbots 24/7.
-                PAX26 TECHNOLOGIES also handles airtime, data, bills and TV subs — all in one platform.
+                Pax26 Technologies helps sellers respond faster and never miss a sale. When customers message you on WhatsApp, our smart agent handles the conversation, engages them, and guides them to payment.
+
+                No more delayed replies or lost customers.
+
+                We also offer airtime, data, bill payments, and TV subscriptions — all in one platform.
               </motion.p>
 
               {/* CTAs */}

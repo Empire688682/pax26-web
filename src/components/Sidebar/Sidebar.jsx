@@ -30,7 +30,7 @@ const VTU_SERVICES = [
   { href: "/dashboard/services/buy-data", icon: Database, label: "Data", color: "#38bdf8" },
   { href: "/dashboard/services/buy-tv", icon: Tv, label: "TV Sub", color: "#a78bfa" },
   { href: "/dashboard/services/buy-electricity", icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
-  { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards",  color: "#f472b6" },
+  { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards", color: "#f472b6" },
 ];
 
 /* ── Plain nav item ───────────────────────────────────────────── */
@@ -71,8 +71,10 @@ const VtuNavItem = ({ pax26, onClose }) => {
       <button
         onClick={() => setOpen(o => !o)}
         className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200"
-        style={{ color: open ? primary : pax26?.textSecondary,
-                 background: open ? `${primary}08` : 'transparent' }}
+        style={{
+          color: open ? primary : pax26?.textSecondary,
+          background: open ? `${primary}08` : 'transparent'
+        }}
         onMouseEnter={e => {
           if (!open) { e.currentTarget.style.background = pax26?.secondaryBg; e.currentTarget.style.color = primary; }
         }}
@@ -195,39 +197,39 @@ export default function Sidebar() {
               /* Guest menu */
               <>
                 <SectionLabel label="Menu" pax26={pax26} />
-                <NavItem href="/about"       icon={Info}     label="About"             onClick={close} pax26={pax26} />
-                <NavItem href="/blog"        icon={FileCode} label="Blog"              onClick={close} pax26={pax26} />
-                <NavItem href="/contact"     icon={Phone}    label="Contact"           onClick={close} pax26={pax26} />
-                <NavItem href="/fund-wallet" icon={Wallet}   label="Fund Wallet"       onClick={close} pax26={pax26} />
-                <NavItem href="/survey"      icon={Info}     label="Your Feedback"     onClick={close} pax26={pax26} />
-                <NavItem href="/terms"       icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
+                <NavItem href="/blog" icon={FileCode} label="Blog" onClick={close} pax26={pax26} />
+                <NavItem href="/contact" icon={Phone} label="Contact" onClick={close} pax26={pax26} />
+                <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
+                <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
+                <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
               </>
             ) : (
               /* Authenticated menu */
               <>
                 <SectionLabel label="Overview" pax26={pax26} />
-                <NavItem href="/dashboard"                          icon={LayoutDashboard} label="Dashboard"       onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations"              icon={Wifi}            label="AI Automation"   onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp#connect"              icon={Wifi}            label="Connect Whatsapp"   onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Zap}             label="Automations"     onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/training"     icon={Zap}             label="Train AI"        onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations" icon={Wifi} label="AI Automation" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect Whatsapp" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train AI" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
                 <SectionLabel label="Finance" pax26={pax26} />
-                <NavItem href="/fund-wallet"  icon={Wallet}  label="Fund Wallet"   onClick={close} pax26={pax26} />
-                <NavItem href="/transactions" icon={History} label="Transactions"  onClick={close} pax26={pax26} />
+                <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
+                <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
 
                 {/* VTU with submenu */}
                 <VtuNavItem pax26={pax26} onClose={close} />
 
                 <Divider pax26={pax26} />
                 <SectionLabel label="Account" pax26={pax26} />
-                <NavItem href="/profile"       icon={Settings} label="Profile & Settings" onClick={close} pax26={pax26} />
-                <NavItem href="/notifications" icon={Bell}     label="Notifications"      onClick={close} pax26={pax26} />
-                <NavItem href="/contact"       icon={Phone}    label="Contact Support"    onClick={close} pax26={pax26} />
-                <NavItem href="/about"         icon={Info}     label="About"              onClick={close} pax26={pax26} />
-                <NavItem href="/terms"         icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
-                <NavItem href="/survey"        icon={Info}     label="Your Feedback"      onClick={close} pax26={pax26} />
+                <NavItem href="/profile" icon={Settings} label="Profile & Settings" onClick={close} pax26={pax26} />
+                <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
+                <NavItem href="/contact" icon={Phone} label="Contact Support" onClick={close} pax26={pax26} />
+                <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
+                <NavItem href="/terms" icon={FileCode} label="Terms & Conditions" onClick={close} pax26={pax26} />
+                <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
                 <button

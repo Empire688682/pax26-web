@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const SellerProductSchema = new mongoose.Schema({
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -39,7 +41,14 @@ const SellerProductSchema = new mongoose.Schema({
     isAvailable: {
         type: Boolean,
         default: true,
-    }
+    },
+
+    images: [
+        {
+            url: { type: String, required: true },
+            publicId: { type: String, required: true },
+        }
+    ]
 
 }, { timestamps: true });
 

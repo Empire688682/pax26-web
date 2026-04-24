@@ -34,13 +34,13 @@ const CSS = `
 `;
 
 /* ─── Icons ───────────────────────────────────────────────────── */
-const IcoMsg    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
-const IcoBot    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="16" y1="16" x2="16.01" y2="16"/></svg>;
-const IcoZap    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-const IcoCal    = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-const IcoShield = () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>;
-const IcoArrow  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
-const IcoCheck  = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
+const IcoMsg = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>;
+const IcoBot = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2" /><circle cx="12" cy="5" r="2" /><path d="M12 7v4" /><line x1="8" y1="16" x2="8.01" y2="16" /><line x1="16" y1="16" x2="16.01" y2="16" /></svg>;
+const IcoZap = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>;
+const IcoCal = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>;
+const IcoShield = () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></svg>;
+const IcoArrow = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
+const IcoCheck = () => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>;
 
 /* ─── Scroll reveal ───────────────────────────────────────────── */
 function Reveal({ children, delay = 0 }) {
@@ -68,12 +68,12 @@ function Label({ text, primary }) {
 
 /* ─── Live WhatsApp chat mockup ───────────────────────────────── */
 const MSGS = [
-  { from: "user", text: "Hi! Do you have the red sneakers in size 42?",              t: 0    },
-  { from: "bot",  text: "Hey! 👋 Yes, in stock! Want me to reserve a pair?",         t: 900  },
-  { from: "user", text: "Yes please! How much?",                                      t: 1800 },
-  { from: "bot",  text: "₦18,500. I can send a payment link right now 🔗",           t: 2700 },
-  { from: "user", text: "Perfect!",                                                   t: 3400 },
-  { from: "bot",  text: "Done ✅ Order ready in 2 hrs. Thanks for shopping with us!", t: 4300 },
+  { from: "user", text: "Hi! Do you have the red sneakers in size 42?", t: 0 },
+  { from: "bot", text: "Hey! 👋 Yes, in stock! Want me to reserve a pair?", t: 900 },
+  { from: "user", text: "Yes please! How much?", t: 1800 },
+  { from: "bot", text: "₦18,500. I can send a payment link right now 🔗", t: 2700 },
+  { from: "user", text: "Perfect!", t: 3400 },
+  { from: "bot", text: "Done ✅ Order ready in 2 hrs. Thanks for shopping with us!", t: 4300 },
 ];
 
 function ChatMockup({ pax26 }) {
@@ -82,7 +82,7 @@ function ChatMockup({ pax26 }) {
 
   useEffect(() => {
     const timers = MSGS.map((m, i) => setTimeout(() => setVisible(i + 1), m.t + 500));
-    const reset  = setTimeout(() => setVisible(0), 8600);
+    const reset = setTimeout(() => setVisible(0), 8600);
     return () => { timers.forEach(clearTimeout); clearTimeout(reset); };
   }, [visible]);
 
@@ -124,8 +124,10 @@ function ChatMockup({ pax26 }) {
           <div className="flex gap-1 pl-1 items-center">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-1.5 h-1.5 rounded-full"
-                style={{ background: pax26?.textSecondary, opacity: 0.35,
-                  animation: `al-bubble 0.6s ease ${i * 0.15}s infinite alternate` }} />
+                style={{
+                  background: pax26?.textSecondary, opacity: 0.35,
+                  animation: `al-bubble 0.6s ease ${i * 0.15}s infinite alternate`
+                }} />
             ))}
           </div>
         )}
@@ -141,27 +143,27 @@ export default function AiAutomationLandingPage() {
 
   const GREEN = "#22C55E";
   const AMBER = "#F59E0B";
-  const TEAL  = "#06B6D4";
-  const ROSE  = "#F43F5E";
+  const TEAL = "#06B6D4";
+  const ROSE = "#F43F5E";
 
   const features = [
     { icon: <IcoMsg />, color: GREEN, title: "WhatsApp Auto-Replies", desc: "Instantly respond to every customer, 24/7. Never miss a lead — even at 3am." },
-    { icon: <IcoBot />, color: TEAL,  title: "AI Chatbot Brain",      desc: "Your AI learns your tone, services and FAQs, then replies exactly like your brand." },
-    { icon: <IcoZap />, color: AMBER, title: "Lead Follow-up",        desc: "Auto-follow warm leads, send reminders, and re-engage cold prospects hands-free." },
-    { icon: <IcoCal />, color: ROSE,  title: "Appointment Reminders", desc: "Send booking confirmations, reminders and post-visit messages automatically." },
+    { icon: <IcoBot />, color: TEAL, title: "AI Chatbot Brain", desc: "Your AI learns your tone, services and FAQs, then replies exactly like your brand." },
+    { icon: <IcoZap />, color: AMBER, title: "Lead Follow-up", desc: "Auto-follow warm leads, send reminders, and re-engage cold prospects hands-free." },
+    { icon: <IcoCal />, color: ROSE, title: "Appointment Reminders", desc: "Send booking confirmations, reminders and post-visit messages automatically." },
   ];
 
   const steps = [
-    { n: "01", title: "Train Your AI",       desc: "Feed the bot your business info, tone, and FAQs in under 5 minutes." },
-    { n: "02", title: "Set Your Rules",      desc: "Define triggers — new message, keyword, payment — and what happens next." },
-    { n: "03", title: "Go Live",             desc: "Activate and watch your AI handle conversations and follow-ups around the clock." },
+    { n: "01", title: "Train Your Agent", desc: "Feed the bot your business info, tone, and FAQs in under 5 minutes." },
+    { n: "02", title: "Set Your Rules", desc: "Define triggers — new message, keyword, payment — and what happens next." },
+    { n: "03", title: "Go Live", desc: "Activate and watch your AI handle conversations and follow-ups around the clock." },
   ];
 
   const usecases = [
-    { icon: <IcoMsg />, color: GREEN, text: "WhatsApp Customer Support & Auto-Replies"    },
-    { icon: <IcoZap />, color: AMBER, text: "Lead Capture & Intelligent Follow-Ups"       },
-    { icon: <IcoBot />, color: TEAL,  text: "Order, Payment & Subscription Notifications" },
-    { icon: <IcoCal />, color: ROSE,  text: "Appointment Booking & Reminder Automation"   },
+    { icon: <IcoMsg />, color: GREEN, text: "WhatsApp Customer Support & Auto-Replies" },
+    { icon: <IcoZap />, color: AMBER, text: "Lead Capture & Intelligent Follow-Ups" },
+    { icon: <IcoBot />, color: TEAL, text: "Order, Payment & Subscription Notifications" },
+    { icon: <IcoCal />, color: ROSE, text: "Appointment Booking & Reminder Automation" },
   ];
 
   const marquee = ["WhatsApp AI", "·", "Lead Follow-up", "·", "24/7 Replies", "·", "Smart Automation", "·", "Business Growth", "·", "Zero Missed Leads", "·"];
@@ -195,9 +197,9 @@ export default function AiAutomationLandingPage() {
               {/* headline — 3-line stagger */}
               <div className="mb-6 space-y-1">
                 {[
-                  { text: "Your Business,",  serif: false },
-                  { text: "Always On.",      serif: false },
-                  { text: "Always Closing.", serif: true  },
+                  { text: "Your Business,", serif: false },
+                  { text: "Always On.", serif: false },
+                  { text: "Always Closing.", serif: true },
                 ].map((l, i) => (
                   <motion.span key={i} className="block"
                     initial={{ opacity: 0, y: 28 }}
@@ -231,9 +233,9 @@ export default function AiAutomationLandingPage() {
                   Start Free Automation <IcoArrow />
                 </button>
                 <button className="al-btn flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-semibold"
-                  onClick={() => router.push("/dashboard/automations/training")}
+                  onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
                   style={{ background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }}>
-                  Train Your AI
+                  Train Your Agent
                 </button>
               </motion.div>
 
@@ -435,9 +437,9 @@ export default function AiAutomationLandingPage() {
                   Create Automation <IcoArrow />
                 </button>
                 <button className="al-btn flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-semibold"
-                  onClick={() => router.push("/dashboard/automations/training")}
+                  onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
                   style={{ background: pax26?.bg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }}>
-                  Train Your AI First
+                  Train Your Agent First
                 </button>
               </div>
             </div>
