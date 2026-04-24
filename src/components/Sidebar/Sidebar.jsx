@@ -212,7 +212,7 @@ export default function Sidebar() {
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Wifi} label="Agent Automation" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect Whatsapp" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations Home" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train Agent" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
