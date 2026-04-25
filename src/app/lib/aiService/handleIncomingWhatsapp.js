@@ -3,7 +3,29 @@ import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
-import AutomationExecutionModel from "@/app/ults/models/AutomationExecutionModel";
+import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch";
+import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext";
+import SellerProfile from "@/app/ults/models/SellerProfile";
+import SellerProduct from "@/app/ults/models/SellerProduct";
+
+// ─────────────────────────────────────────────────────────────
+// Fetch actual WhatsApp media download URL from Meta API
+// WhatsApp gives you an image ID — this resolves it to a URL
+// ─────────────────────────────────────────────────────────────
+async function resolveWhatsAppMediaUrl(imageId) {
+  const res = await fetch(`https://graph.facebook.com/v19.0/${imageId}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Meta media resolve failed: ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  return data.url; // actual downloadable URL (short-lived, use immediately)
+}
 
 // ─────────────────────────────────────────────────────────────
 // Main webhook handler
@@ -12,20 +34,32 @@ export const handleIncomingWhatsApp = async (payload) => {
   const value = payload?.entry?.[0]?.changes?.[0]?.value;
   const message = value?.messages?.[0];
   const metadata = value?.metadata;
-  const inboundText = message?.text?.body || "Good morning";
 
   if (!message?.from) {
     console.log("❌ Invalid message.from");
     return { ok: true };
   }
 
+  // ── Normalise phone numbers ────────────────────────────────
   const cleaned = message.from.replace(/\D/g, "");
   const visitorPhone = `+${cleaned}`;
   const phoneNumberId = metadata?.phone_number_id || "";
   const displayPhone = metadata?.display_phone_number || "";
 
+  // ── Detect message type ────────────────────────────────────
+  const messageType = message.type; // "text" | "image" | "audio" | "document" | ...
+  const isTextMessage = messageType === "text";
+  const isImageMessage = messageType === "image";
+
+  // For text: use the body. For image: use caption if provided, else a placeholder.
+  // This is what gets saved to AIMessageModel — the AI sees context separately.
+  const inboundText =
+    message?.text?.body ||
+    message?.image?.caption ||
+    (isImageMessage ? "[Customer sent an image]" : "Good morning");
+
   console.log("📩 phoneNumberId:", phoneNumberId);
-  console.log("📩 Incoming from:", visitorPhone, "| Text:", inboundText);
+  console.log("📩 Type:", messageType, "| From:", visitorPhone, "| Text:", inboundText);
 
   // ── Step 1: Find user ──────────────────────────────────────
   let user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
@@ -36,7 +70,9 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
   console.log("✅ Step 1 — User found:", user._id);
 
-  // ── Step 2: Ensure business profile exists (mock only) ────
+  // ── Step 2: Load seller profile (for image search context) ─
+  // Only needed for image messages but cheap to load early
+  const sellerProfile = await SellerProfile.findOne({ userId: user._id }).lean();
 
   // ── Step 3: Get or create session ─────────────────────────
   const session = await getOrCreateSession({
@@ -65,6 +101,12 @@ export const handleIncomingWhatsApp = async (payload) => {
       direction: "inbound",
       senderType: "visitor",
       status: "received",
+      // Store image metadata if present — useful for audit and future reference
+      ...(isImageMessage && {
+        mediaType: "image",
+        mediaId: message.image?.id,
+        mediaCaption: message.image?.caption || "",
+      }),
     });
     console.log("✅ Step 4 — Inbound message saved");
   } catch (err) {
@@ -76,8 +118,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     throw err;
   }
 
-  // ── Steps 5 & 6 (parallel): Update contact + session simultaneously ───
-  // Step 5: Single upsert-style update — try existing contact first, push if new
+  // ── Steps 5 & 6 (parallel): Update contact + session ──────
   const contactUpdatePromise = UserModel.updateOne(
     { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
     {
@@ -92,7 +133,6 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
   ).then(async (result) => {
     if (result.matchedCount === 0) {
-      // Brand new contact — push with lead metadata
       await UserModel.updateOne(
         { _id: user._id },
         {
@@ -117,7 +157,6 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
   });
 
-  // Step 6: Session TTL + message count
   const sessionUpdatePromise = SessionModel.updateOne(
     { _id: session._id },
     {
@@ -135,8 +174,7 @@ export const handleIncomingWhatsApp = async (payload) => {
   await Promise.all([contactUpdatePromise, sessionUpdatePromise]);
   console.log("✅ Steps 5 & 6 — Contact + Session updated in parallel");
 
-  // ── Step 7: Check auto-reply permission — in-memory, no extra DB call ──
-  // user.whatsapp.contacts.list was already loaded in Step 1
+  // ── Step 7: Check auto-reply permission ───────────────────
   const contactIsWhitelisted = user.whatsapp?.contacts?.list?.some(
     (c) => c.phone === visitorPhone && c.status === "whitelist"
   );
@@ -145,17 +183,74 @@ export const handleIncomingWhatsApp = async (payload) => {
     console.log("🚫 Step 7 — Auto-reply blocked by contact policy");
     return { ok: true };
   }
-  console.log("✅ Step 7 — Auto-reply allowed (in-memory check)");
+  console.log("✅ Step 7 — Auto-reply allowed");
 
-  // //── Step 8: Opt-in flow ───────────────────────────────────
-  //   const handled = await handleNewContact({ session, user, visitorPhone, inboundText });
-  //   if (handled) {
-  //     console.log("✅ Step 8 — Handled by opt-in flow");
-  //     return { ok: true };
-  //   }
-  //   console.log("✅ Step 8 — Opt-in passed, proceeding to AI");
+  // ── Step 8: Handle image vs text separately ───────────────
+  if (isImageMessage) {
+    console.log("🖼️  Step 8 — Image message detected, running visual search...");
 
-  // ── Step 9: Trigger AI response ───────────────────────────
+    // If the seller has no profile set up, fall back to a polite reply
+    if (!sellerProfile) {
+      console.log("⚠️  No seller profile found — skipping image search");
+      await triggerAIResponse({
+        session,
+        user,
+        inboundText: buildImageNoMatchContext(),
+      });
+      return { ok: true };
+    }
+
+    try {
+      // Resolve the Meta image ID → actual download URL
+      const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
+
+      // Run the full image search pipeline:
+      // download → upload to Cloudinary → visual similarity search → map to products
+      const { matches, hasMatches, customerImageUrl } = await handleCustomerImage({
+        sellerId: sellerProfile._id,
+        mediaUrl,
+        customerPhone: visitorPhone,
+      });
+
+      console.log(
+        hasMatches
+          ? `✅ Step 8 — Image search found ${matches.length} match(es)`
+          : "⚠️  Step 8 — No visual matches found"
+      );
+
+      // Build a grounded context block for the AI:
+      // Contains only real product data — AI cannot hallucinate matches
+      const imageContext = hasMatches
+        ? buildImageMatchContext(matches, customerImageUrl, sellerProfile.currency)
+        : buildImageNoMatchContext();
+
+      // Trigger AI with the image context injected as the user message
+      await triggerAIResponse({
+        session,
+        user,
+        inboundText: imageContext,
+        // Pass products so the system prompt is fully hydrated
+        // triggerAIResponse should forward this to buildSystemPrompt
+        imageSearchContext: true,
+      });
+
+    } catch (err) {
+      console.error("❌ Step 8 — Image processing error:", err.message);
+      // Fail gracefully — tell the AI search failed, let it ask the customer to describe
+      await triggerAIResponse({
+        session,
+        user,
+        inboundText: buildImageNoMatchContext(),
+        imageSearchContext: true,
+      });
+    }
+
+    return { ok: true };
+  }
+
+  // ── Step 9: Standard text — trigger AI response ───────────
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText });
+
+  return { ok: true };
 };
