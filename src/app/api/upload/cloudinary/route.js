@@ -24,6 +24,7 @@ export async function POST(req) {
                     folder,
                     tags: tags ? tags.split(",") : [],
                     resource_type: "image",
+                    visual_search: true,
                 },
                 (err, result) => {
                     if (err) reject(err);
