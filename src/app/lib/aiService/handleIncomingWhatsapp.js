@@ -3,10 +3,9 @@ import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
-import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch";
-import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext";
-import SellerProfile from "@/app/ults/models/SellerProfile";
-import SellerProduct from "@/app/ults/models/SellerProduct";
+import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js";
+import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -72,7 +71,7 @@ export const handleIncomingWhatsApp = async (payload) => {
 
   // ── Step 2: Load seller profile (for image search context) ─
   // Only needed for image messages but cheap to load early
-  const sellerProfile = await SellerProfile.findOne({ userId: user._id }).lean();
+  const sellerProfile = await SellerProfileModel.findOne({ userId: user._id }).lean();
 
   // ── Step 3: Get or create session ─────────────────────────
   const session = await getOrCreateSession({
