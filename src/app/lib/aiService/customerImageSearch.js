@@ -16,8 +16,8 @@
  */
 
 import cloudinary from "cloudinary";
-import SellerMediaModel from "../ults/models/SellerMediaModel.js";
-import SellerProductModel from "../ults/models/SellerProductModel.js";
+import SellerMediaModel from "../../ults/models/SellerMediaModel.js";
+import SellerProductModel from "../../ults/models/SellerProductModel.js";
 
 // ── Cloudinary config ────────────────────────────────────────
 // Make sure your env has: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET

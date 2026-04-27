@@ -3,8 +3,8 @@ import { sendWhatsAppImageReply } from "../../api/helper/WhatsAppImageReply.js";
 import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
 import GeneralBusinessProfileModel from "../../ults/models/GeneralBusinessProfileModel.js";
-import SellerProfile from "../../ults/models/SellerProfile.js";
-import SellerProduct from "../../ults/models/SellerProduct.js";
+import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
+import SellerProductModel from "../../ults/models/SellerProductModel.js";
 import { callGroqAI } from "./grok.js";
 import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
@@ -38,14 +38,14 @@ function extractImageTags(text) {
 // ─────────────────────────────────────────────────────────────
 async function loadProfileAndProducts(userId) {
     // Check for seller profile first — seller takes priority
-    const sellerProfile = await SellerProfile.findOne({
+    const sellerProfile = await SellerProfileModel.findOne({
         userId,
         isActive: true,
     }).lean();
 
     if (sellerProfile) {
         // Load available products in parallel with nothing else needed
-        const products = await SellerProduct.find({
+        const products = await SellerProductModel.find({
             sellerId: sellerProfile._id,
             isAvailable: true,
         }).lean();
