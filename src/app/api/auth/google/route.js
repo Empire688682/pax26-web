@@ -59,12 +59,16 @@ export async function POST(req) {
         user = await UserModel.findOne({ email });
         if (!user) {
             //check if User number is not taking
-            const userByNumber = await UserModel.findOne({number});
-            if(userByNumber){
-                 return NextResponse.json(
-                { success: false, message: "User phone number as been taken"},
-                { status: 400, headers: corsHeaders() }
-            );
+            if (number != null & number != undefined & number != "") {
+                //check if User number is not taking
+                const userByNumber = await UserModel.findOne({ number });
+                console.log("userByNumber: ", userByNumber)
+                if (userByNumber) {
+                    return NextResponse.json(
+                        { success: false, message: "User phone number as been taken" },
+                        { status: 400, headers: corsHeaders() }
+                    );
+                }
             }
             //Generate referralCode
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -83,7 +87,7 @@ export async function POST(req) {
             user = await UserModel.create({
                 name,
                 email,
-                number,
+                number: number ? number : undefined,
                 password: null,
                 pin: null,
                 authTimestamp,
@@ -92,7 +96,9 @@ export async function POST(req) {
                 isPasswordSet: false,
                 providerId: providerId || null,
                 referralCode,
-                profileImage
+                profileImage,
+                userVerify: true,
+                emailVerification: { isVerified: true }
             });
         }
 
@@ -149,8 +155,9 @@ export async function POST(req) {
                 path: "/",
             });
 
-            if(user && !user.userVerify){
-                await sendUserVerification(user);
+            if (user && !user.userVerify) {
+                // Since authenticated via Google, mark them as verified instead of sending an email
+                await UserModel.updateOne({ _id: user._id }, { $set: { userVerify: true, "emailVerification.isVerified": true } });
             }
 
             return res;

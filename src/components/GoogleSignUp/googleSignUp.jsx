@@ -7,7 +7,7 @@ import axios from "axios";
 import { useGlobalContext } from "../Context";
 import { useState } from "react";
 
-export default function GoogleLoginButton({loading, setAwayLoading}) {
+export default function GoogleLoginButton({ loading, setAwayLoading }) {
   const { refHostCode, pax26, setAuthModalOpen, router, setUserData } = useGlobalContext();
   const [HomeLoading, setHomeLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,6 +25,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
         return;
       }
       const resultData = result.user;
+      console.log("resultData: ", resultData);
 
       const data = {
         name: resultData.displayName,
@@ -33,7 +34,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
         number: resultData.phoneNumber,
         profileImage: resultData.photoURL,
         refHostCode,
-        provider:resultData.providerData[0]?.providerId
+        provider: resultData.providerData[0]?.providerId
       };
 
       const response = await axios.post(apiUrl, data);
@@ -78,7 +79,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
       <button
         onClick={loading ? null : handleGoogleLogin}
         disabled={HomeLoading}
-        className={` ${loading ? 'cursor-not-allowed opacity-50 pointer-events-none': ''} w-full mt-4 flex items-center justify-center gap-3 border border-gray-400 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 `}
+        className={` ${loading ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''} w-full mt-4 flex items-center justify-center gap-3 border border-gray-400 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-50 `}
       >
         {HomeLoading ? (
           <>
@@ -89,7 +90,7 @@ export default function GoogleLoginButton({loading, setAwayLoading}) {
           <>
             <FcGoogle size={22} />
             <span
-            className="text-gray-400 text-sm">Continue with Google</span>
+              className="text-gray-400 text-sm">Continue with Google</span>
           </>
         )}
       </button>
