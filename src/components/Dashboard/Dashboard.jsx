@@ -143,11 +143,14 @@ function TxRow({ tx, onClick, pax26 }) {
 
 /* ── Main Dashboard ───────────────────────────────────────────── */
 const Dashboard = () => {
-  const { userData, pax26, router, transactionHistory, getUserRealTimeData } = useGlobalContext();
+  const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  useEffect(() => { getUserRealTimeData(); }, []);
+  useEffect(() => {
+    getUserRealTimeData();
+    fetchUser();
+  }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
   const primary = pax26?.primary || "#3B82F6";
@@ -225,9 +228,9 @@ const Dashboard = () => {
 
         {/* ── Automation stats ────────────────────────────────── */}
         <div className="db-s3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Automations" value="0" color={TEAL} delay="0s" pax26={pax26} />
-          <StatCard label="Msgs Handled" value="0" color={GREEN} delay="0.05s" pax26={pax26} />
-          <StatCard label="Leads" value="0" color={AMBER} delay="0.10s" pax26={pax26} />
+          <StatCard label="Automations" value={userData?.workflows || 0} color={TEAL} delay="0s" pax26={pax26} />
+          <StatCard label="Msgs Handled" value={userData?.messagesHandled || 0} color={GREEN} delay="0.05s" pax26={pax26} />
+          {/* <StatCard label="Leads" value="0" color={AMBER} delay="0.10s" pax26={pax26} /> */}
         </div>
 
         {/* ── Wallet card ─────────────────────────────────────── */}

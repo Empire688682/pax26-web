@@ -3,49 +3,57 @@ import { verifyToken } from "../../helper/VerifyToken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import AIMessageModel from "@/app/ults/models/AIMessageModel";
+import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 
 export async function POST() {
-    return new NextResponse(null, ({status:200, headers:corsHeaders()}))
+    return new NextResponse(null, ({ status: 200, headers: corsHeaders() }))
 }
 
 export async function GET(req) {
     await connectDb();
     try {
         const userId = await verifyToken(req);
-        if(!userId){
-            return NextResponse.json({success:false, message:"No Id found"}, {status:404, headers:corsHeaders()})
+        if (!userId) {
+            return NextResponse.json({ success: false, message: "No Id found" }, { status: 404, headers: corsHeaders() })
         }
 
         const user = await UserModel.findById(userId);
-        if(!user){
-            return NextResponse.json({success:false, message:"Not authorized"}, {status:404, headers:corsHeaders()})
+        if (!user) {
+            return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
 
-        // Prepare safe user object
-    const userObj = user.toObject();
-    delete userObj.password;
-    delete userObj.transactionPin
-    userObj.whatsappBusinessNo = user.whatsapp.displayPhone;
-    delete userObj.isAdmin;
-    delete userObj.provider;
-    delete userObj.referralHost;
-    delete userObj.walletBalance;
-    delete userObj.__v;
-    delete userObj.commissionBalance;
-    delete userObj.referralHostId;
-    delete userObj.forgottenPasswordToken;
-    delete userObj.bvn;
-    delete userObj.emailVerification;
-    delete userObj.phoneVerification;
-    delete userObj._id;
-    delete userObj.whatsapp.accessToken;
-    delete userObj.whatsapp.wabaId;
-    delete userObj.whatsapp.phoneNumberId;
+        const messagesHandled = await AIMessageModel.countDocuments({ userId, status: { $in: ["sent", "processing", "delivered"] } });
+        const doc = await UserAutomationModel.findOne({ userId });
+        const workflows = doc.automations.filter(auto => auto.enabled).length ?? 0;
 
-    return NextResponse.json({success:true, profile:userObj}, {status:200, headers:corsHeaders()})
+        // Prepare safe user object
+        const userObj = user.toObject();
+        userObj.messagesHandled = messagesHandled;
+        userObj.workflows = workflows;
+        delete userObj.password;
+        delete userObj.transactionPin
+        userObj.whatsappBusinessNo = user.whatsapp.displayPhone;
+        delete userObj.isAdmin;
+        delete userObj.provider;
+        delete userObj.referralHost;
+        delete userObj.walletBalance;
+        delete userObj.__v;
+        delete userObj.commissionBalance;
+        delete userObj.referralHostId;
+        delete userObj.forgottenPasswordToken;
+        delete userObj.bvn;
+        delete userObj.emailVerification;
+        delete userObj.phoneVerification;
+        delete userObj._id;
+        delete userObj.whatsapp.accessToken;
+        delete userObj.whatsapp.wabaId;
+        delete userObj.whatsapp.phoneNumberId;
+
+        return NextResponse.json({ success: true, profile: userObj }, { status: 200, headers: corsHeaders() })
 
     } catch (error) {
         console.log("FtechingUserErr: ", error.message);
-        return NextResponse.json({success:false, message:"An error occured"}, {status:500, headers:corsHeaders()})
+        return NextResponse.json({ success: false, message: "An error occured" }, { status: 500, headers: corsHeaders() })
     }
 }
