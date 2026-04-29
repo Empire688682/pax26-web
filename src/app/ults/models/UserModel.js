@@ -139,6 +139,7 @@ const UserSchema = new mongoose.Schema(
         enum: ["free", "starter", "business", "enterprise"],
         default: "free"
       },
+      lastUpdated: { type: Date, default: Date.now },
     }
   }, { timestamps: true });
 

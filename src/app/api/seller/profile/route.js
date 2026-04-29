@@ -114,10 +114,7 @@ export async function POST(req) {
             );
         }
 
-        const user = await UserModel.findById(userId)
-            .select("whatsapp.displayPhone")
-            .lean();
-
+        const user = await UserModel.findById(userId);
         const whatsappNumber = user?.whatsapp?.displayPhone;
         if (!whatsappNumber) {
             return NextResponse.json(
@@ -146,78 +143,67 @@ export async function POST(req) {
                 .map((p) => p._id.toString());
 
             // Delete products removed by the seller.
-            if (incomingIds.length > 0) {
-                // Only query if there are surviving IDs; otherwise delete all.
-                await SellerProductModel.deleteMany({
-                    sellerId,
-                    _id: { $nin: incomingIds },
-                });
-            } else {
-                await SellerProductModel.deleteMany({ sellerId });
+            await SellerProductModel.deleteMany({
+                sellerId,
+                ...(incomingIds.length > 0 && { _id: { $nin: incomingIds } }),
+            });
+
+            // Split into updates and inserts so we can track new _ids.
+            const existingProducts = products.filter((p) => p._id);
+            const newProducts = products.filter((p) => !p._id);
+
+            const buildProductData = (prod) => ({
+                sellerId,
+                name: prod.name,
+                price: prod.price,
+                description: prod.description,
+                category: prod.category,
+                tags: prod.tags,
+                stock: prod.stock,
+                images: prod.images ?? [],
+                isAvailable: prod.isAvailable ?? true,
+            });
+
+            // Bulk update existing products.
+            if (existingProducts.length > 0) {
+                const updateOps = existingProducts.map((prod) => ({
+                    updateOne: {
+                        filter: { _id: prod._id },
+                        update: { $set: buildProductData(prod) },
+                        upsert: true,
+                    },
+                }));
+                await SellerProductModel.bulkWrite(updateOps, { ordered: false });
             }
 
-            // Upsert all products in ONE bulkWrite instead of a serial loop.
-            const productBulkOps = products.map((prod) => {
-                const productData = {
-                    sellerId,
-                    name: prod.name,
-                    price: prod.price,
-                    description: prod.description,
-                    category: prod.category,
-                    tags: prod.tags,
-                    stock: prod.stock,
-                    images: prod.images ?? [],
-                    isAvailable: prod.isAvailable ?? true,
-                };
+            // Insert new products and capture returned _ids.
+            let insertedProducts = [];
+            if (newProducts.length > 0) {
+                const docsToInsert = newProducts.map(buildProductData);
+                insertedProducts = await SellerProductModel.insertMany(docsToInsert, {
+                    ordered: false,
+                });
+            }
 
-                if (prod._id) {
-                    return {
-                        updateOne: {
-                            filter: { _id: prod._id },
-                            update: { $set: productData },
-                            upsert: true,
-                        },
-                    };
-                }
-                return { insertOne: { document: productData } };
-            });
+            // Wipe old media for this seller's products.
+            const allSavedIds = [
+                ...incomingIds,
+                ...insertedProducts.map((p) => p._id.toString()),
+            ];
 
-            await SellerProductModel.bulkWrite(productBulkOps, { ordered: false });
-
-            // Sync media: fetch saved products once, then replace media in bulk.
-            const savedProducts = await SellerProductModel.find({
-                sellerId,
-            })
-                .select("_id")
-                .lean();
-
-            // Build a name→_id map so we can match incoming products to saved _ids.
-            // (bulkWrite insertOne doesn't return inserted ids directly.)
-            const savedProductIds = savedProducts.map((p) => p._id);
-
-            // Wipe all old media for this seller's products in one shot.
             await SellerMediaModel.deleteMany({
-                productId: { $in: savedProductIds },
+                productId: { $in: allSavedIds },
             });
 
-            // Build new media docs for every product that carries images.
-            // We correlate by _id for updates, and by position for inserts.
+            // Build media docs — existing products matched by _id, new ones by index.
             const mediaDocs = [];
-            for (const prod of products) {
+
+            for (const prod of existingProducts) {
                 if (!Array.isArray(prod.images) || prod.images.length === 0) continue;
-
-                // For existing products the _id is known; for new ones we match by
-                // name+sellerId since bulkWrite insertOne doesn't return the new _id.
-                const matchedProduct = prod._id
-                    ? savedProducts.find((s) => s._id.toString() === prod._id.toString())
-                    : savedProducts.find((s) => !prod._id); // fallback — see note below
-
-                if (!matchedProduct) continue;
-
                 prod.images.forEach((img, index) => {
                     mediaDocs.push({
                         sellerId,
-                        productId: matchedProduct._id,
+                        productId: prod._id,
                         url: img.url,
                         publicId: img.publicId,
                         type: "image",
@@ -226,8 +212,23 @@ export async function POST(req) {
                 });
             }
 
+            newProducts.forEach((prod, i) => {
+                if (!Array.isArray(prod.images) || prod.images.length === 0) return;
+                const savedDoc = insertedProducts[i];
+                if (!savedDoc) return;
+                prod.images.forEach((img, index) => {
+                    mediaDocs.push({
+                        sellerId,
+                        productId: savedDoc._id,
+                        url: img.url,
+                        publicId: img.publicId,
+                        type: "image",
+                        isPrimary: index === 0,
+                    });
+                });
+            });
+
             if (mediaDocs.length > 0) {
-                // Single bulk insert instead of nested Promise.all + individual creates.
                 await SellerMediaModel.insertMany(mediaDocs, { ordered: false });
             }
         } else if (Array.isArray(products) && products.length === 0) {
@@ -235,18 +236,19 @@ export async function POST(req) {
             await SellerProductModel.deleteMany({ sellerId });
         }
 
-        // 3. Return final state — one query per collection, no N+1.
-        const finalProducts = await SellerProductModel.find({
-            sellerId,
-        }).lean();
+        // 3. Update paxAI training status.
+        if (user.paxAI) {
+            user.paxAI.lastUpdated = Date.now();
+            user.paxAI.trained = true;
+            await user.save();
+        }
 
+        // 4. Return final state.
+        const finalProducts = await SellerProductModel.find({ sellerId }).lean();
         const enrichedFinal = await attachMediaToProducts(finalProducts);
 
         return NextResponse.json(
-            {
-                success: true,
-                profile: { ...profile, products: enrichedFinal },
-            },
+            { success: true, profile: { ...profile, products: enrichedFinal } },
             { status: 200, headers: corsHeaders() }
         );
     } catch (error) {

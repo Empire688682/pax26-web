@@ -128,11 +128,8 @@ function SectionLabel({ text, pax26 }) {
 /* ─── Main Page ───────────────────────────────────────────────── */
 export default function AiAutomationHomePage() {
   const { pax26, router, fetchUser, userData } = useGlobalContext();
-  const [enabledAi, setEnabledAi] = useState(false);
   const [businessProfile, setBusinessProfile] = useState(null);
   const [apiRun, setApiRun] = useState(false);
-
-  useEffect(() => { setEnabledAi(userData?.paxAI?.enabled || false); }, [userData]);
 
   const fetchBusinessProfile = async () => {
     try {
@@ -163,8 +160,6 @@ export default function AiAutomationHomePage() {
   const CORAL = "#FB923C";
   const GREEN = "#4CAF7D";
 
-  const isTrained = !!businessProfile?.lastUpdated;
-
   return (
     <>
       <style>{CSS}</style>
@@ -177,10 +172,10 @@ export default function AiAutomationHomePage() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
               style={{ background: `${pax26?.primary}15`, border: `1px solid ${pax26?.primary}30` }}>
               <span className="aah-dot w-2 h-2 rounded-full block"
-                style={{ background: enabledAi ? GREEN : pax26?.primary }} />
+                style={{ background: userData?.paxAI?.enabled ? GREEN : pax26?.primary }} />
               <span className="text-xs font-bold tracking-widest uppercase"
                 style={{ color: pax26?.primary }}>
-                {enabledAi ? "AI Active" : "AI Automation Hub"}
+                {userData?.paxAI?.enabled ? "AI Active" : "AI Automation Hub"}
               </span>
             </div>
           </div>
@@ -203,7 +198,7 @@ export default function AiAutomationHomePage() {
               className="aah-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
               onClick={() => router.push("/dashboard/automations/market-place")}
               style={{ background: pax26?.primary, boxShadow: `0 8px 28px ${pax26?.primary}40` }}>
-              <IconSpark /> Automation Library
+              <IconSpark /> Automations Library
             </button>
             {
               !userData?.whatsapp.connected &&
@@ -219,10 +214,10 @@ export default function AiAutomationHomePage() {
 
         {/* ── Stats row ──────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-          <StatCard label="Status" value={enabledAi ? "Live" : "Idle"} accent={enabledAi ? GREEN : pax26?.textSecondary} delay="0s" pax26={pax26} />
-          <StatCard label="Training" value={isTrained ? "Done" : "Pending"} accent={isTrained ? GOLD : pax26?.textSecondary} delay="0.07s" pax26={pax26} />
-          <StatCard label="Automations" value="3" accent={TEAL} delay="0.14s" pax26={pax26} />
-          <StatCard label="AI Plan" value="Business" accent={VIOLET} delay="0.21s" pax26={pax26} />
+          <StatCard label="Status" value={userData?.paxAI?.enabled ? "Live" : "Idle"} accent={userData?.paxAI?.enabled ? GREEN : pax26?.textSecondary} delay="0s" pax26={pax26} />
+          <StatCard label="Training" value={userData?.paxAI?.enabled ? "Done" : "Pending"} accent={userData?.paxAI?.enabled ? GOLD : pax26?.textSecondary} delay="0.07s" pax26={pax26} />
+          <StatCard label="Automations" value={userData?.workflows || 0} accent={TEAL} delay="0.14s" pax26={pax26} />
+          <StatCard label="AI Plan" value={userData?.paxAI?.plan?.toUpperCase()} accent={VIOLET} delay="0.21s" pax26={pax26} />
         </div>
 
         {/* ── Integration cards ──────────────────────────────── */}
@@ -233,7 +228,7 @@ export default function AiAutomationHomePage() {
             icon={<IconSettings />} iconColor={GOLD} iconBg={`${GOLD}18`}
             title="Brand Communication Setup"
             description="Define how your business speaks—voice, tone, services, and FAQs—for consistent customer interactions."
-            tag={isTrained ? "Trained ✓" : "Setup needed"} tagColor={isTrained ? GREEN : CORAL}
+            tag={userData?.paxAI?.enabled ? "Trained ✓" : "Setup needed"} tagColor={userData?.paxAI?.enabled ? GREEN : CORAL}
             cta="Open Training"
             lastUpdated={businessProfile?.lastUpdated}
             onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
@@ -243,9 +238,9 @@ export default function AiAutomationHomePage() {
             icon={<IconBot />}      iconColor={TEAL}   iconBg={`${TEAL}18`}
             title="AI Chatbot"
             description="Configure personality, fallback rules, and response behaviour for human-like conversations."
-            tag={enabledAi ? "Active" : "Inactive"} tagColor={enabledAi ? GREEN : pax26?.textSecondary}
+            tag={userData?.paxAI?.enabled ? "Active" : "Inactive"} tagColor={userData?.paxAI?.enabled ? GREEN : pax26?.textSecondary}
             cta="Configure Bot"
-            onClick={() => enabledAi ? router.push("/dashboard/automations/pax") : handleAlert()}
+            onClick={() => userData?.paxAI?.enabled ? router.push("/dashboard/automations/pax") : handleAlert()}
             delay="0.08s" pax26={pax26}
           /> */}
           <IntCard
@@ -269,7 +264,7 @@ export default function AiAutomationHomePage() {
         </div>
 
         {/* ── Active automations (when AI enabled) ───────────── */}
-        {enabledAi && (
+        {userData?.paxAI?.enabled && (
           <>
             <SectionLabel text="Running Now" pax26={pax26} />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-5 rounded-2xl mb-10"
