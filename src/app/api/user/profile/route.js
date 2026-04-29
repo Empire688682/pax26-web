@@ -31,6 +31,7 @@ export async function GET(req) {
         const userObj = user.toObject();
         userObj.messagesHandled = messagesHandled;
         userObj.workflows = workflows;
+        userObj.contacts = user.whatsapp?.contacts?.list?.length || 0;
         delete userObj.password;
         delete userObj.transactionPin
         userObj.whatsappBusinessNo = user.whatsapp.displayPhone;

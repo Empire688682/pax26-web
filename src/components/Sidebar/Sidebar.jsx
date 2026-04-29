@@ -6,7 +6,7 @@ import {
   Wifi, DollarSign, LayoutDashboard, FileCode, Wallet,
   Phone, LogOut, Info, History, Settings, Bell, X,
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
-  ChevronDown, Home, Shield,
+  ChevronDown, Home, Shield, Users,
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -214,6 +214,7 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect Whatsapp" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations Home" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train Agent" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contacts" onClick={close} pax26={pax26} />
 
                 <Divider pax26={pax26} />
                 <SectionLabel label="Finance" pax26={pax26} />

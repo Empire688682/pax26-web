@@ -218,7 +218,7 @@ const Dashboard = () => {
               </p>
             </div>
             <button
-              className="db-btn flex mr-4 items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
+              className="db-btn flex mr-4 items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
               onClick={() => router.push("dashboard/automations")}
               style={{ background: primary, boxShadow: `0 8px 24px ${primary}40` }}>
               Setup <ArrowRight size={14} />
@@ -230,7 +230,7 @@ const Dashboard = () => {
         <div className="db-s3 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard label="Automations" value={userData?.workflows || 0} color={TEAL} delay="0s" pax26={pax26} />
           <StatCard label="Msgs Handled" value={userData?.messagesHandled || 0} color={GREEN} delay="0.05s" pax26={pax26} />
-          {/* <StatCard label="Leads" value="0" color={AMBER} delay="0.10s" pax26={pax26} /> */}
+          <StatCard label="Contacts" value={userData?.contacts || 0} color={AMBER} delay="0.10s" pax26={pax26} />
         </div>
 
         {/* ── Wallet card ─────────────────────────────────────── */}
