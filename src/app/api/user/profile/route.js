@@ -23,7 +23,7 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
 
-        const messagesHandled = await AIMessageModel.countDocuments({ userId, status: { $in: ["sent", "processing", "delivered"] } });
+        const messagesHandled = await AIMessageModel.countDocuments({ userId, status: { $in: ["received", "processing", "sent",] } });
         const doc = await UserAutomationModel.findOne({ userId });
         const workflows = doc.automations.filter(auto => auto.enabled).length ?? 0;
 
