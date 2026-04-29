@@ -244,17 +244,21 @@ function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTr
 export default function AutomationMarket() {
   const {
     pax26, router, userData,
-    isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained,
     isWhatsappNumberConnected, fetchUser,
   } = useGlobalContext();
 
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained] = useState(false)
 
   const firstName = userData?.name?.split(" ")[0] || "User";
   const GREEN = "#22c55e";
   const primary = pax26?.primary;
+
+  useEffect(() => { 
+    setAIsPaxAiBusinessTrained(userData?.paxAI?.trained); 
+  }, [userData]);
 
   useEffect(() => { fetchAutomations(); }, []);
 

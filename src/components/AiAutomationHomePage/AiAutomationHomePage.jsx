@@ -234,15 +234,6 @@ export default function AiAutomationHomePage() {
             onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
             delay="0s" pax26={pax26}
           />
-          {/* <IntCard
-            icon={<IconBot />}      iconColor={TEAL}   iconBg={`${TEAL}18`}
-            title="AI Chatbot"
-            description="Configure personality, fallback rules, and response behaviour for human-like conversations."
-            tag={userData?.paxAI?.enabled ? "Active" : "Inactive"} tagColor={userData?.paxAI?.enabled ? GREEN : pax26?.textSecondary}
-            cta="Configure Bot"
-            onClick={() => userData?.paxAI?.enabled ? router.push("/dashboard/automations/pax") : handleAlert()}
-            delay="0.08s" pax26={pax26}
-          /> */}
           <IntCard
             icon={<IconZap />} iconColor={CORAL} iconBg={`${CORAL}18`}
             title="Lead Follow-up"

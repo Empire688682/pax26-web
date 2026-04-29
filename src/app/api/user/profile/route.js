@@ -3,7 +3,6 @@ import { verifyToken } from "../../helper/VerifyToken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 
 export async function POST() {
@@ -23,7 +22,8 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
 
-        const messagesHandled = await AIMessageModel.countDocuments({ userId, status: { $in: ["received", "processing", "sent",] } });
+        const userMessageList = user.whatsapp?.contacts?.list;
+        const messagesHandled = userMessageList.reduce((total, contact) => total + contact?.messageCount, 0);
         const doc = await UserAutomationModel.findOne({ userId });
         const workflows = doc.automations.filter(auto => auto.enabled).length ?? 0;
 

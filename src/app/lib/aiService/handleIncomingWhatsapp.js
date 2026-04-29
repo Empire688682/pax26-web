@@ -73,6 +73,20 @@ export const handleIncomingWhatsApp = async (payload) => {
   // Only needed for image messages but cheap to load early
   const sellerProfile = await SellerProfileModel.findOne({ userId: user._id }).lean();
 
+  // ── Step 2.5: Check auto-reply permission ───────────────────
+  const existingContact = user.whatsapp?.contacts?.list?.find(
+    (c) => c.phone === visitorPhone
+  );
+
+  // New contacts (not in the initially loaded user) are created with 'whitelist' status later
+  const contactIsWhitelisted = existingContact ? existingContact.status === "whitelist" : true;
+
+  if (!contactIsWhitelisted) {
+    console.log("🚫 Auto-reply blocked by contact policy. Ignoring message and preventing db save.");
+    return { ok: true };
+  }
+  console.log("✅ Step 2.5 — Auto-reply allowed");
+
   // ── Step 3: Get or create session ─────────────────────────
   const session = await getOrCreateSession({
     visitorPhone,
@@ -173,16 +187,6 @@ export const handleIncomingWhatsApp = async (payload) => {
   await Promise.all([contactUpdatePromise, sessionUpdatePromise]);
   console.log("✅ Steps 5 & 6 — Contact + Session updated in parallel");
 
-  // ── Step 7: Check auto-reply permission ───────────────────
-  const contactIsWhitelisted = user.whatsapp?.contacts?.list?.some(
-    (c) => c.phone === visitorPhone && c.status === "whitelist"
-  );
-
-  if (!contactIsWhitelisted) {
-    console.log("🚫 Step 7 — Auto-reply blocked by contact policy");
-    return { ok: true };
-  }
-  console.log("✅ Step 7 — Auto-reply allowed");
 
   // ── Step 8: Handle image vs text separately ───────────────
   if (isImageMessage) {
