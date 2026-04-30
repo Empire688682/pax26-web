@@ -65,7 +65,7 @@ export const AppProvider = ({ children }) => {
 
   const [refHostCode, setRefHostCode] = useState(null);
 
-  const [isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained] = useState(false);
+  const [isWhatsappNumberConnected, setIsWhatsappNumberConnected] = useState(false);
 
   /* ================================
      DATA STATES
