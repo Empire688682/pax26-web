@@ -22,6 +22,12 @@ const CSS = `
     animation: sb-submenu 0.25s cubic-bezier(0.22,1,0.36,1) both;
     overflow: hidden;
   }
+
+  /* Use dynamic viewport height so mobile browser chrome doesn't
+     push the pinned footer off-screen */
+  .sb-nav  { height: 100vh; height: 100dvh; }
+  .sb-panel { height: 100vh; height: 100dvh; }
+  .sb-backdrop { height: 100vh; height: 100dvh; }
 `;
 
 /* ── VTU services config ──────────────────────────────────────── */
@@ -155,12 +161,12 @@ export default function Sidebar() {
     <>
       <style>{CSS}</style>
       <nav
-        className={`fixed h-screen flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
+        className={`sb-nav fixed flex top-0 right-0 w-full z-80 transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* ── Panel ─────────────────────────────────────── */}
         <div
-          className="w-[78%] max-w-[300px] h-screen flex flex-col overflow-hidden"
+          className="sb-panel w-[78%] max-w-[300px] flex flex-col overflow-hidden"
           style={{
             background: pax26?.card ? `${pax26.card}ee` : pax26?.bg,
             backdropFilter: 'blur(24px)',
@@ -287,7 +293,7 @@ export default function Sidebar() {
         {/* ── Backdrop ──────────────────────────────────── */}
         <div
           onClick={close}
-          className="flex-1 h-screen"
+          className="sb-backdrop flex-1"
           style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }}
         />
       </nav>
