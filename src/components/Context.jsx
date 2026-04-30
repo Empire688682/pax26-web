@@ -66,8 +66,6 @@ export const AppProvider = ({ children }) => {
   const [refHostCode, setRefHostCode] = useState(null);
 
   const [isPaxAiBusinessTrained, setAIsPaxAiBusinessTrained] = useState(false);
-  const [isWhatsappNumberConnected, setIsWhatsappNumberConnected] = useState(false);
-
 
   /* ================================
      DATA STATES
@@ -245,25 +243,25 @@ export const AppProvider = ({ children }) => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const verifyUserRedirect = async() => {
+  const verifyUserRedirect = async () => {
     if (!userData) return;
     if (userData && !userData.userVerify && pathname !== "/verify-user") {
-    try {
-      const res  = await fetch("/api/auth/send-email-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (data.success) {
-        toast.success("Verification email sent! Please check your inbox.");
-        router.push("/verify-user");
-      } else {
-        toast.error(data.message || "Failed to send verification email");
+      try {
+        const res = await fetch("/api/auth/send-email-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast.success("Verification email sent! Please check your inbox.");
+          router.push("/verify-user");
+        } else {
+          toast.error(data.message || "Failed to send verification email");
+        }
+      } catch {
+        console.log("Error sending verification email", error);
+        toast.error("Error sending verification email");
       }
-    } catch {
-      console.log("Error sending verification email", error);
-      toast.error("Error sending verification email");
-    }
     }
   }
 
@@ -372,9 +370,6 @@ export const AppProvider = ({ children }) => {
 
         profitConfig,
         setProfitConfig,
-
-        isPaxAiBusinessTrained,
-        setAIsPaxAiBusinessTrained,
 
         isWhatsappNumberConnected,
         setIsWhatsappNumberConnected,

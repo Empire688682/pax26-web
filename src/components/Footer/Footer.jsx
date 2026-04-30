@@ -52,11 +52,12 @@ const CSS = `
 `;
 
 /* ── Nav link ─────────────────────────────────────────────────── */
-function FootLink({ href, icon, children }) {
+function FootLink({ href, icon, children, textColor, textColorHover }) {
   return (
     <li>
       <a href={href}
-        className="ft-link text-sm text-white/55 hover:text-white/90">
+        className="ft-link text-sm"
+        style={{ color: textColor }}>
         {icon && <span className="opacity-50 flex-shrink-0">{icon}</span>}
         {children}
       </a>
@@ -65,9 +66,10 @@ function FootLink({ href, icon, children }) {
 }
 
 /* ── Section heading ──────────────────────────────────────────── */
-function ColHead({ children }) {
+function ColHead({ children, textColor }) {
   return (
-    <h3 className="ft-mono text-xs font-medium uppercase tracking-widest text-white/40 mb-5">
+    <h3 className="ft-mono text-xs font-medium uppercase tracking-widest mb-5"
+      style={{ color: textColor }}>
       {children}
     </h3>
   );
@@ -77,6 +79,15 @@ function ColHead({ children }) {
 const Footer = () => {
   const { pax26 } = useGlobalContext();
   const pathName = usePathname();
+
+  // Derive semi-transparent variants from the theme
+  const linkColor      = pax26.textSecondary;
+  const headingColor   = pax26.textSecondary;
+  const mutedColor     = pax26.textSecondary;
+  const chipBg         = pax26.border;
+  const dividerColor   = pax26.border;
+  const inputBg        = pax26.secondaryBg;
+  const inputBorder    = pax26.border;
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
@@ -121,19 +132,19 @@ const Footer = () => {
         <button
           onClick={backTop}
           className="ft-back-top ft-bounce-in fixed bottom-6 left-4 z-50 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-          style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.12)" }}
+          style={{ background: pax26.secondaryBg, border: `1px solid ${pax26.border}` }}
           aria-label="Back to top"
         >
-          <ArrowUp size={16} className="text-white/70" />
+          <ArrowUp size={16} style={{ color: pax26.textSecondary }} />
         </button>
       )}
 
-      <footer className="ft-root relative bg-[#0a0f1a] text-white/60 overflow-hidden">
+      <footer className="ft-root relative overflow-hidden" style={{ backgroundColor: pax26.header }}>
 
         {/* ── Subtle grid texture ────────────────────────── */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
           style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
+            backgroundImage: `linear-gradient(${pax26.textPrimary} 1px, transparent 1px), linear-gradient(90deg, ${pax26.textPrimary} 1px, transparent 1px)`,
             backgroundSize: "48px 48px",
           }} />
 
@@ -153,10 +164,10 @@ const Footer = () => {
                 <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
                   <Bot size={16} className="text-blue-400" />
                 </div>
-                <span className="text-white font-extrabold text-lg tracking-tight">Pax26</span>
+                <span className="font-extrabold text-lg tracking-tight" style={{ color: pax26.textPrimary }}>Pax26</span>
               </div>
 
-              <p className="text-sm text-white/50 leading-relaxed mb-5">
+              <p className="text-sm leading-relaxed mb-5" style={{ color: mutedColor }}>
                 AI-powered WhatsApp automation and digital services for Nigerian businesses.
                 Smart follow-ups, chatbots, and instant VTU — all in one place.
               </p>
@@ -165,8 +176,8 @@ const Footer = () => {
               <div className="flex flex-wrap gap-2">
                 {["AI Automation", "Digital Services", "WhatsApp API"].map(t => (
                   <span key={t}
-                    className="ft-mono text-[10px] font-medium px-2.5 py-1 rounded-lg text-white/40"
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    className="ft-mono text-[10px] font-medium px-2.5 py-1 rounded-lg"
+                    style={{ background: inputBg, border: `1px solid ${pax26.border}`, color: mutedColor }}>
                     {t}
                   </span>
                 ))}
@@ -175,47 +186,47 @@ const Footer = () => {
 
             {/* ── AI Automation col ─────────────────────── */}
             <div>
-              <ColHead>AI Automation</ColHead>
+              <ColHead textColor={headingColor}>AI Automation</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/dashboard/automations" icon={<Wifi size={13} />}>WhatsApp Automation</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Bot size={13} />}>AI Business Chatbot</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />}>Automated Follow-ups</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />}>Lead Qualification</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Wifi size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Bot size={13} />} textColor={linkColor}>AI Business Chatbot</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Automated Follow-ups</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Lead Qualification</FootLink>
               </ul>
             </div>
 
             {/* ── Digital Services col ──────────────────── */}
             <div>
-              <ColHead>Digital Services</ColHead>
+              <ColHead textColor={headingColor}>Digital Services</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/dashboard/services/buy-data" icon={<Database size={13} />}>Buy Data</FootLink>
-                <FootLink href="/dashboard/services/buy-airtime" icon={<Phone size={13} />}>Airtime Recharge</FootLink>
-                <FootLink href="/dashboard" icon={<Zap size={13} />}>Electricity Bills</FootLink>
-                <FootLink href="/dashboard/services/buy-tv" icon={<Tv size={13} />}>TV Subscription</FootLink>
-                <FootLink href="/dashboard#VTU" icon={<CreditCard size={13} />}>Gift Cards</FootLink>
+                <FootLink href="/dashboard/services/buy-data" icon={<Database size={13} />} textColor={linkColor}>Buy Data</FootLink>
+                <FootLink href="/dashboard/services/buy-airtime" icon={<Phone size={13} />} textColor={linkColor}>Airtime Recharge</FootLink>
+                <FootLink href="/dashboard" icon={<Zap size={13} />} textColor={linkColor}>Electricity Bills</FootLink>
+                <FootLink href="/dashboard/services/buy-tv" icon={<Tv size={13} />} textColor={linkColor}>TV Subscription</FootLink>
+                <FootLink href="/dashboard#VTU" icon={<CreditCard size={13} />} textColor={linkColor}>Gift Cards</FootLink>
               </ul>
             </div>
 
             {/* ── Legal & Company col ─────────────────────── */}
             <div>
-              <ColHead>Company</ColHead>
+              <ColHead textColor={headingColor}>Company</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/about">About Us</FootLink>
-                <FootLink href="/blog">Blog</FootLink>
-                <FootLink href="/contact">Contact</FootLink>
+                <FootLink href="/about" textColor={linkColor}>About Us</FootLink>
+                <FootLink href="/blog" textColor={linkColor}>Blog</FootLink>
+                <FootLink href="/contact" textColor={linkColor}>Contact</FootLink>
               </ul>
 
-              <ColHead className="mt-8">Legal</ColHead>
+              <ColHead textColor={headingColor}>Legal</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/terms">Terms of Service</FootLink>
-                <FootLink href="/privacy">Privacy Policy</FootLink>
+                <FootLink href="/terms" textColor={linkColor}>Terms of Service</FootLink>
+                <FootLink href="/privacy" textColor={linkColor}>Privacy Policy</FootLink>
               </ul>
             </div>
 
             {/* ── Newsletter col ────────────────────────── */}
             <div>
-              <ColHead>Stay Updated</ColHead>
-              <p className="text-sm text-white/45 leading-relaxed mb-5">
+              <ColHead textColor={headingColor}>Stay Updated</ColHead>
+              <p className="text-sm leading-relaxed mb-5" style={{ color: mutedColor }}>
                 New AI tools, product features and exclusive offers — straight to your inbox.
               </p>
 
@@ -226,8 +237,8 @@ const Footer = () => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="ft-input w-full px-4 py-2.5 rounded-xl text-sm text-white/80 placeholder-white/25 bg-white/5"
-                  style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+                  className="ft-input w-full px-4 py-2.5 rounded-xl text-sm"
+                  style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: pax26.textPrimary }}
                 />
                 <button
                   type="submit"
@@ -252,7 +263,7 @@ const Footer = () => {
 
           {/* ── Divider ───────────────────────────────────── */}
           <div className="h-px w-full mb-8"
-            style={{ background: "rgba(255,255,255,0.06)" }} />
+            style={{ background: dividerColor }} />
 
           {/* ── Bottom row: social + copyright ────────────── */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -269,7 +280,7 @@ const Footer = () => {
                 <span className="ft-mono text-[10px] text-green-400">All systems operational</span>
               </div>
 
-              <p className="ft-mono text-[11px] text-white/25">
+              <p className="ft-mono text-[11px]" style={{ color: mutedColor }}>
                 © {year} PAX26 TECHNOLOGIES. All rights reserved.
               </p>
             </div>

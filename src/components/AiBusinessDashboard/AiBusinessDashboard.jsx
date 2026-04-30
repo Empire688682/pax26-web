@@ -509,7 +509,7 @@ const DashboardTab = ({ label, active, onClick, icon: Icon, pax26 }) => (
    MAIN PAGE
    ══════════════════════════════════════════════════════════ */
 export default function AiBusinessDashboard() {
-  const { pax26, router, setAIsPaxAiBusinessTrained } = useGlobalContext();
+  const { pax26, router } = useGlobalContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("products");
@@ -541,7 +541,6 @@ export default function AiBusinessDashboard() {
       const data = await res.json();
       if (data.success && data.profile) {
         const profile = data.profile;
-        setAIsPaxAiBusinessTrained?.(profile.aiTrained || false);
         setForm(f => ({
           ...f,
           sellerId: profile._id || "",

@@ -256,8 +256,8 @@ export default function AutomationMarket() {
   const GREEN = "#22c55e";
   const primary = pax26?.primary;
 
-  useEffect(() => { 
-    setAIsPaxAiBusinessTrained(userData?.paxAI?.trained); 
+  useEffect(() => {
+    setAIsPaxAiBusinessTrained(userData?.paxAI?.trained);
   }, [userData]);
 
   useEffect(() => { fetchAutomations(); }, []);

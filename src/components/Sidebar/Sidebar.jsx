@@ -204,6 +204,7 @@ export default function Sidebar() {
                 <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
                 <NavItem href="/terms" icon={Shield} label="Terms & Conditions" onClick={close} pax26={pax26} />
                 <NavItem href="/privacy" icon={Shield} label="Privacy Policy" onClick={close} pax26={pax26} />
+                <div className="h-4 shrink-0" />
               </>
             ) : (
               /* Authenticated menu */
@@ -248,34 +249,37 @@ export default function Sidebar() {
                   </div>
                   <span className="text-sm font-medium">Logout</span>
                 </button>
+
+                {/* Bottom padding so last item clears the pinned footer */}
+                <div className="h-4 shrink-0" />
               </>
             )}
+          </div>
 
-            {/* ── Footer — pinned at bottom of sidebar ──── */}
-            <div className="shrink-0 px-4 py-4 flex items-center justify-between"
-              style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
-              {userData ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    style={{ background: pax26?.primary + '33', color: pax26?.primary }}>
-                    {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold truncate" style={{ color: pax26?.textPrimary }}>
-                      {userData?.name || 'User'}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                      {userData?.email || ''}
-                    </p>
-                  </div>
+          {/* ── Footer — pinned at bottom of sidebar ──── */}
+          <div className="shrink-0 px-4 py-4 flex items-center justify-between"
+            style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
+            {userData ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={{ background: pax26?.primary + '33', color: pax26?.primary }}>
+                  {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
-              ) : (
-                <div onClick={() => { close(); router.push('/?auth=login'); }} className="cursor-pointer">
-                  <Button>Sign up</Button>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold truncate" style={{ color: pax26?.textPrimary }}>
+                    {userData?.name || 'User'}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                    {userData?.email || ''}
+                  </p>
                 </div>
-              )}
-              <ThemeToggle />
-            </div>
+              </div>
+            ) : (
+              <div onClick={() => { close(); router.push('/?auth=login'); }} className="cursor-pointer">
+                <Button>Sign up</Button>
+              </div>
+            )}
+            <ThemeToggle />
           </div>
 
         </div>
