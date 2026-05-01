@@ -221,13 +221,11 @@ const BlogPostClient = ({ post, related }) => {
 
       {/* ── Body + Sidebar layout ── */}
       <div
+        className="blog-layout-grid"
         style={{
           maxWidth: 1060,
           margin: "0 auto",
           padding: "48px clamp(20px,4vw,40px)",
-          display: "grid",
-          gridTemplateColumns: "1fr 280px",
-          gap: 48,
           alignItems: "start",
         }}
       >
@@ -514,6 +512,18 @@ const BlogPostClient = ({ post, related }) => {
         .blog-post-content a {
           color: ${pax26.primary};
           text-decoration: underline;
+        }
+
+        .blog-layout-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 48px;
+        }
+
+        @media (min-width: 960px) {
+          .blog-layout-grid {
+            grid-template-columns: 1fr 280px;
+          }
         }
       `}</style>
     </div>

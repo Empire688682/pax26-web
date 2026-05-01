@@ -362,10 +362,7 @@ const Blog = () => {
             style={{
               fontSize: "clamp(32px, 5vw, 52px)",
               fontWeight: 900,
-              background: `linear-gradient(135deg, ${pax26.textPrimary} 0%, ${pax26.primary} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: pax26.textPrimary,
               lineHeight: 1.15,
               marginBottom: 16,
               maxWidth: 640,
