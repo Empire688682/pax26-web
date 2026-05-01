@@ -4,6 +4,8 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+
 
 export async function POST() {
     return new NextResponse(null, ({ status: 200, headers: corsHeaders() }))
@@ -22,6 +24,8 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
 
+        const userSellerProfile = await SellerProfileModel.findOne({ userId });
+
         const userMessageList = user.whatsapp?.contacts?.list;
         const messagesHandled = userMessageList.reduce((total, contact) => total + contact?.messageCount, 0);
         const doc = await UserAutomationModel.findOne({ userId });
@@ -29,6 +33,7 @@ export async function GET(req) {
 
         // Prepare safe user object
         const userObj = user.toObject();
+        userObj.businessProfile = userSellerProfile || {};
         userObj.messagesHandled = messagesHandled;
         userObj.workflows = workflows;
         userObj.contacts = user.whatsapp?.contacts?.list?.length || 0;

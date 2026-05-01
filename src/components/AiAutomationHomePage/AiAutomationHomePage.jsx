@@ -310,7 +310,7 @@ export default function AiAutomationHomePage() {
             description="Define how your business speaks—voice, tone, services, and FAQs—for consistent customer interactions."
             tag={userData?.paxAI?.enabled ? "Trained ✓" : "Setup needed"} tagColor={userData?.paxAI?.enabled ? GREEN : CORAL}
             cta="Open Training"
-            lastUpdated={businessProfile?.lastUpdated}
+            lastUpdated={userData?.businessProfile?.lastUpdated}
             onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
             delay="0s" pax26={pax26}
           />
