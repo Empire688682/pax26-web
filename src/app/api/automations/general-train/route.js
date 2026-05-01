@@ -47,6 +47,11 @@ export async function PUT(req) {
 
     user.paxAI.enabled = true;
     user.paxAI.trained = true;
+    user.paxAI.lastUpdated = new Date();
+    // Set planStartedAt only the first time AI is activated (free plan start)
+    if (!user.paxAI.planStartedAt) {
+      user.paxAI.planStartedAt = new Date();
+    }
 
     await user.save();
 

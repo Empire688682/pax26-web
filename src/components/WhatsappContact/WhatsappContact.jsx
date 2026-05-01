@@ -309,11 +309,24 @@ const StatCard = ({ label, value, color, pax26 }) => (
   </div>
 );
 
+/* ── Card Spinner (dark border variant) ─────────────────── */
+const CardSpinner = ({ color }) => (
+  <div style={{
+    width: "13px", height: "13px",
+    border: `2px solid ${color}33`,
+    borderTopColor: color,
+    borderRadius: "50%",
+    animation: "spin 0.7s linear infinite",
+    flexShrink: 0,
+  }} />
+);
+
 /* ── Contact Card ────────────────────────────────────────── */
-const ContactCard = ({ contact, toggleContact, pax26 }) => {
+const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
   const [expanded, setExpanded] = useState(false);
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
+  const isLoading   = loadingPhone === contact.phone;
 
   const badgeStyle = isWhitelist
     ? { background: `${pax26?.primary}18`, color: pax26?.primary }
@@ -389,27 +402,39 @@ const ContactCard = ({ contact, toggleContact, pax26 }) => {
           {isWhitelist && (
             <button
               onClick={() => toggleContact(contact?.phone, "blacklist")}
+              disabled={isLoading}
               style={{
+                display: "flex", alignItems: "center", gap: "5px",
                 padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
                 border: "1px solid rgba(220,53,53,0.25)",
                 background: "rgba(220,53,53,0.06)",
-                color: "#dc3535", cursor: "pointer",
+                color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
+                opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
               }}
             >
-              Blacklist
+              {isLoading
+                ? <><CardSpinner color="#dc3535" /><span>Saving…</span></>
+                : "Blacklist"
+              }
             </button>
           )}
           {isBlacklist && (
             <button
               onClick={() => toggleContact(contact?.phone, "whitelist")}
+              disabled={isLoading}
               style={{
+                display: "flex", alignItems: "center", gap: "5px",
                 padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
                 border: `1px solid ${pax26?.primary}44`,
                 background: `${pax26?.primary}12`,
-                color: pax26?.primary, cursor: "pointer",
+                color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
+                opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
               }}
             >
-              Whitelist
+              {isLoading
+                ? <><CardSpinner color={pax26?.primary} /><span>Saving…</span></>
+                : "Whitelist"
+              }
             </button>
           )}
         </div>
@@ -575,6 +600,7 @@ export default function WhatsappContact() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
+  const [loadingPhone, setLoadingPhone] = useState(null);
   const [saved, setSaved] = useState(false);
 
   const tabs = [
@@ -617,7 +643,7 @@ export default function WhatsappContact() {
 
   const toggleContact = async (phone, status) => {
     if (!phone || !status) return;
-    setAddingContact(true);
+    setLoadingPhone(phone);
     try {
       const cleanedPhone = phone.replace(/\D/g, "");
       const last10 = cleanedPhone.slice(-10);
@@ -627,15 +653,14 @@ export default function WhatsappContact() {
         body: JSON.stringify({ phone: last10, status }),
       });
       if (response.ok) {
-        setPhone("");
         await fetchContacts();
       } else {
-        console.error("Failed to add contact:", await response.text());
+        console.error("Failed to toggle contact:", await response.text());
       }
     } catch (error) {
       console.error("Failed to toggle contact:", error);
     } finally {
-      setAddingContact(false);
+      setLoadingPhone(null);
     }
   };
 
@@ -939,6 +964,7 @@ export default function WhatsappContact() {
                   key={contact.phone}
                   contact={contact}
                   toggleContact={toggleContact}
+                  loadingPhone={loadingPhone}
                   pax26={pax26}
                 />
               ))

@@ -187,6 +187,35 @@ export const handleIncomingWhatsApp = async (payload) => {
   await Promise.all([contactUpdatePromise, sessionUpdatePromise]);
   console.log("✅ Steps 5 & 6 — Contact + Session updated in parallel");
 
+  // ── Step 7: Monthly usage reset + quota check ─────────────
+  const now          = new Date();
+  const planStarted  = user.paxAI?.planStartedAt ? new Date(user.paxAI.planStartedAt) : now;
+  const daysSinceStart = (now - planStarted) / (1000 * 60 * 60 * 24);
+  const maxMessages  = user.paxAI?.maxMonthlyMessages ?? 100;
+  let   usedMessages = user.paxAI?.messagesUsedThisMonth ?? 0;
+
+  // Reset monthly counter if 30 days have passed since the plan period started
+  if (daysSinceStart >= 30) {
+    await UserModel.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          "paxAI.messagesUsedThisMonth": 0,
+          "paxAI.planStartedAt": now,
+        },
+      }
+    );
+    usedMessages = 0;
+    console.log("🔄 Step 7 — Monthly message counter reset for user:", user._id);
+  }
+
+  // Block AI reply if monthly quota is exhausted
+  if (usedMessages >= maxMessages) {
+    console.log(`🚫 Step 7 — Monthly quota exhausted (${usedMessages}/${maxMessages}). Skipping AI reply.`);
+    return { ok: true };
+  }
+  console.log(`✅ Step 7 — Usage OK: ${usedMessages}/${maxMessages}`);
+
 
   // ── Step 8: Handle image vs text separately ───────────────
   if (isImageMessage) {
@@ -200,6 +229,7 @@ export const handleIncomingWhatsApp = async (payload) => {
         user,
         inboundText: buildImageNoMatchContext(),
       });
+      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
       return { ok: true };
     }
 
@@ -236,6 +266,8 @@ export const handleIncomingWhatsApp = async (payload) => {
         // triggerAIResponse should forward this to buildSystemPrompt
         imageSearchContext: true,
       });
+      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+      console.log("📊 Step 8 — messagesUsedThisMonth incremented");
 
     } catch (err) {
       console.error("❌ Step 8 — Image processing error:", err.message);
@@ -246,6 +278,7 @@ export const handleIncomingWhatsApp = async (payload) => {
         inboundText: buildImageNoMatchContext(),
         imageSearchContext: true,
       });
+      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
     }
 
     return { ok: true };
@@ -254,6 +287,8 @@ export const handleIncomingWhatsApp = async (payload) => {
   // ── Step 9: Standard text — trigger AI response ───────────
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText });
+  await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+  console.log("📊 Step 9 — messagesUsedThisMonth incremented");
 
   return { ok: true };
 };

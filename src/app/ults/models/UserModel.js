@@ -132,13 +132,14 @@ const UserSchema = new mongoose.Schema(
       trained: { type: Boolean, default: false },
       systemPrompt: { type: String, default: "" }, // their custom AI personality
       knowledgeBase: [{ type: String }],           // URLs or text chunks
-      maxMonthlyMessages: { type: Number, default: 100 },
+      maxMonthlyMessages: { type: Number, default: 50 },
       messagesUsedThisMonth: { type: Number, default: 0 },
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],
         default: "free"
       },
+      planStartedAt: { type: Date, default: Date.now }, // when the current plan period began (signup / upgrade / monthly reset)
       lastUpdated: { type: Date, default: Date.now },
     }
   }, { timestamps: true });

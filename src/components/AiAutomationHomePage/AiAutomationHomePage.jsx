@@ -128,25 +128,11 @@ function SectionLabel({ text, pax26 }) {
 /* ─── Main Page ───────────────────────────────────────────────── */
 export default function AiAutomationHomePage() {
   const { pax26, router, fetchUser, userData } = useGlobalContext();
-  const [businessProfile, setBusinessProfile] = useState(null);
   const [apiRun, setApiRun] = useState(false);
-
-  const fetchBusinessProfile = async () => {
-    try {
-      const res = await fetch("/api/automations/get-business-profile", { method: "GET", headers: { "Content-Type": "application/json" } });
-      const data = await res.json();
-      if (data.success) setBusinessProfile(data.profile);
-    } catch (err) {
-      console.log("fetchBusinessProfileErr: ", err);
-    } finally {
-      setApiRun(true);
-    }
-  };
 
   useEffect(() => {
     if (apiRun) return;
     fetchUser();
-    fetchBusinessProfile();
   }, [userData]);
 
   const handleAlert = () => {
@@ -211,6 +197,100 @@ export default function AiAutomationHomePage() {
             }
           </div>
         </div>
+
+        {/* ── Plan banner ─────────────────────────────────────── */}
+        {(() => {
+          const plan = userData?.paxAI?.plan || "free";
+          const isActive = userData?.paxAI?.enabled ?? false;
+          const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
+          const quota = userData?.paxAI?.maxMonthlyMessages ?? 50;
+          const lastUpd = userData?.paxAI?.planStartedAt;
+          const usagePct = Math.min((used / (quota || 1)) * 100, 100);
+
+          const PLAN_META = {
+            free: { label: "Free Plan", price: "₦0 / month", color: pax26?.textSecondary },
+            starter: { label: "Starter Plan", price: "₦5,000 / month", color: TEAL },
+            business: { label: "Business Plan", price: "₦25,000 / month", color: GOLD },
+            enterprise: { label: "Enterprise Plan", price: "Custom pricing", color: VIOLET },
+          };
+          const meta = PLAN_META[plan] || PLAN_META.free;
+          const accentColor = meta.color;
+          const canUpgrade = plan === "free" || plan === "starter";
+
+          return (
+            <div className="aah-slide rounded-2xl overflow-hidden mb-10"
+              style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, animationDelay: "0.1s" }}>
+
+              {/* Colored top strip */}
+              <div style={{ height: "3px", background: `linear-gradient(90deg, ${accentColor}, ${accentColor}44, transparent)` }} />
+
+              <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5">
+
+                {/* Left — plan info */}
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${accentColor}18`, color: accentColor }}>
+                    <IconCrown />
+                  </div>
+                  <div>
+                    {/* Plan name + active badge */}
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>
+                        {meta.label}
+                      </p>
+                      <span
+                        className="inline-flex items-center text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full"
+                        style={
+                          isActive
+                            ? { background: `${GREEN}15`, color: GREEN, border: `1px solid ${GREEN}30` }
+                            : { background: `${CORAL}12`, color: CORAL, border: `1px solid ${CORAL}30` }
+                        }>
+                        {isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+
+                    {/* Price + renewal */}
+                    <p className="text-xs mb-2" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                      {meta.price}
+                      {plan !== "free" && plan !== "enterprise" && " · Renews automatically"}
+                      {lastUpd && (
+                        <span className="ml-2 opacity-50">
+                          · Updated {new Date(lastUpd).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                        </span>
+                      )}
+                    </p>
+
+                    {/* Usage bar */}
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ width: "120px", background: pax26?.border }}>
+                        <div
+                          style={{
+                            height: "100%", borderRadius: "999px",
+                            width: `${usagePct}%`,
+                            background: usagePct >= 90 ? CORAL : usagePct >= 60 ? GOLD : accentColor,
+                            transition: "width 0.5s ease",
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-semibold" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
+                        {used.toLocaleString()} / {quota.toLocaleString()} msgs
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right — CTA */}
+                <button
+                  className="aah-btn inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                  onClick={() => router.push(isActive ? "/dashboard/billing" : "/dashboard/automations/ai-business-dashboard")}
+                  style={{ background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30` }}>
+                  <IconCrown />
+                  {!isActive ? "Activate AI" : canUpgrade ? "Upgrade Plan" : "Manage Plan"}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── Stats row ──────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
@@ -277,36 +357,6 @@ export default function AiAutomationHomePage() {
           </>
         )}
 
-        {/* ── Plan banner ─────────────────────────────────────── */}
-        <div className="aah-slide flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-5"
-          style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, animationDelay: "0.3s" }}>
-
-          <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: `${GOLD}18`, color: GOLD }}>
-              <IconCrown />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>Business Plan</p>
-                <span className="inline-flex items-center text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full"
-                  style={{ background: `${GOLD}15`, color: GOLD, border: `1px solid ${GOLD}30` }}>
-                  Active
-                </span>
-              </div>
-              <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                ₦25,000 / month · Renews automatically
-              </p>
-            </div>
-          </div>
-
-          <button
-            className="aah-btn inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-            onClick={() => router.push("/dashboard/billing")}
-            style={{ background: `${GOLD}15`, color: GOLD, border: `1px solid ${GOLD}30` }}>
-            <IconCrown /> Upgrade Plan
-          </button>
-        </div>
 
       </div>
     </>
