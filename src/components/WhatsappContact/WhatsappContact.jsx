@@ -349,113 +349,141 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
       onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
     >
       {/* ── Main row ── */}
-      <div className="text-sm" style={{ fontSize: "11px", display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px" }}>
-        {/* Phone */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          <div style={{ fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px" }}>
-            {contact.phone}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-[12px] p-[12px_14px] text-[11px]">
+        {/* Phone & Meta Section */}
+        <div className="flex items-start justify-between sm:w-auto" style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
+            <div className="truncate" style={{ fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px", fontSize: "13px" }}>
+              {contact.phone}
+            </div>
+            {/* Meta row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              {contact.lastMessageAt && (
+                <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
+                  <ClockIcon />{formatRelativeTime(contact.lastMessageAt)}
+                </span>
+              )}
+              {contact.tags?.length > 0 && (
+                <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
+                  <TagIcon />{contact.tags.slice(0, 2).join(", ")}{contact.tags.length > 2 ? ` +${contact.tags.length - 2}` : ""}
+                </span>
+              )}
+            </div>
           </div>
-          {/* Meta row */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            {contact.lastMessageAt && (
-              <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
-                <ClockIcon />{formatRelativeTime(contact.lastMessageAt)}
-              </span>
+          
+          {/* Mobile Expand Toggle */}
+          <div className="flex sm:hidden items-center gap-[6px] mt-[2px]">
+            {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
+              <button
+                onClick={() => setExpanded(v => !v)}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
+                  display: "flex", alignItems: "center",
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s, opacity: 0.2s",
+                }}
+              >
+                <ChevronDownIcon />
+              </button>
             )}
-            {contact.tags?.length > 0 && (
-              <span style={{ display: "flex", alignItems: "center", gap: "3px", color: pax26?.textPrimary, opacity: 0.45 }}>
-                <TagIcon />{contact.tags.slice(0, 2).join(", ")}{contact.tags.length > 2 ? ` +${contact.tags.length - 2}` : ""}
-              </span>
+          </div>
+        </div>
+
+        {/* Badges & Actions Section */}
+        <div className="flex items-center justify-between sm:justify-end gap-[8px] sm:gap-[12px] w-full sm:w-auto">
+          <div className="flex items-center gap-[6px]">
+            {/* Message count badge */}
+            {contact.messageCount > 0 && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: "4px",
+                padding: "3px 9px", borderRadius: "999px", flexShrink: 0,
+                fontWeight: 700,
+                background: pax26?.secondaryBg,
+                border: `1px solid ${pax26?.border}`,
+                color: pax26?.textPrimary, opacity: 0.7,
+              }}>
+                <MessageIcon />
+                {contact.messageCount}
+              </div>
+            )}
+
+            {/* Status badge */}
+            <div
+              className="hidden md:flex"
+              style={{
+                fontWeight: 700, padding: "3px 10px",
+                borderRadius: "999px", flexShrink: 0,
+                letterSpacing: "0.04em", textTransform: "capitalize",
+                ...badgeStyle,
+              }}>
+              {isWhitelist ? "AI on" : "AI off"}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-[6px]">
+            {/* Actions */}
+            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+              {isWhitelist && (
+                <button
+                  onClick={() => toggleContact(contact?.phone, "blacklist")}
+                  disabled={isLoading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                    border: "1px solid rgba(220,53,53,0.25)",
+                    background: "rgba(220,53,53,0.06)",
+                    color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                  }}
+                >
+                  {isLoading
+                    ? <><CardSpinner color="#dc3535" /><span>Saving…</span></>
+                    : "Blacklist"
+                  }
+                </button>
+              )}
+              {isBlacklist && (
+                <button
+                  onClick={() => toggleContact(contact?.phone, "whitelist")}
+                  disabled={isLoading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                    border: `1px solid ${pax26?.primary}44`,
+                    background: `${pax26?.primary}12`,
+                    color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                  }}
+                >
+                  {isLoading
+                    ? <><CardSpinner color={pax26?.primary} /><span>Saving…</span></>
+                    : "Whitelist"
+                  }
+                </button>
+              )}
+            </div>
+
+            {/* Desktop Expand toggle */}
+            {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
+              <button
+                className="hidden sm:flex"
+                onClick={() => setExpanded(v => !v)}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
+                  alignItems: "center",
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s, opacity: 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
+                onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
+              >
+                <ChevronDownIcon />
+              </button>
             )}
           </div>
         </div>
-
-        {/* Message count badge */}
-        {contact.messageCount > 0 && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: "4px",
-            padding: "3px 9px", borderRadius: "999px", flexShrink: 0,
-            fontWeight: 700,
-            background: pax26?.secondaryBg,
-            border: `1px solid ${pax26?.border}`,
-            color: pax26?.textPrimary, opacity: 0.7,
-          }}>
-            <MessageIcon />
-            {contact.messageCount}
-          </div>
-        )}
-
-        {/* Status badge */}
-        <div
-          className="md:flex hidden"
-          style={{
-            fontWeight: 700, padding: "3px 10px",
-            borderRadius: "999px", flexShrink: 0,
-            letterSpacing: "0.04em", textTransform: "capitalize",
-            ...badgeStyle,
-          }}>
-          {isWhitelist ? "AI on" : "AI off"}
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-          {isWhitelist && (
-            <button
-              onClick={() => toggleContact(contact?.phone, "blacklist")}
-              disabled={isLoading}
-              style={{
-                display: "flex", alignItems: "center", gap: "5px",
-                padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
-                border: "1px solid rgba(220,53,53,0.25)",
-                background: "rgba(220,53,53,0.06)",
-                color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
-                opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
-              }}
-            >
-              {isLoading
-                ? <><CardSpinner color="#dc3535" /><span>Saving…</span></>
-                : "Blacklist"
-              }
-            </button>
-          )}
-          {isBlacklist && (
-            <button
-              onClick={() => toggleContact(contact?.phone, "whitelist")}
-              disabled={isLoading}
-              style={{
-                display: "flex", alignItems: "center", gap: "5px",
-                padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
-                border: `1px solid ${pax26?.primary}44`,
-                background: `${pax26?.primary}12`,
-                color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
-                opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
-              }}
-            >
-              {isLoading
-                ? <><CardSpinner color={pax26?.primary} /><span>Saving…</span></>
-                : "Whitelist"
-              }
-            </button>
-          )}
-        </div>
-
-        {/* Expand toggle */}
-        {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
-          <button
-            onClick={() => setExpanded(v => !v)}
-            style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
-              display: "flex", alignItems: "center",
-              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s, opacity 0.2s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
-          >
-            <ChevronDownIcon />
-          </button>
-        )}
       </div>
 
       {/* ── Expanded details ── */}
@@ -716,7 +744,7 @@ export default function WhatsappContact() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "720px", margin: "0 auto" }}>
+    <div className="px-4 md:px-0" style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "720px", margin: "0 auto" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* ── Page header ── */}
@@ -742,7 +770,7 @@ export default function WhatsappContact() {
       </div>
 
       {/* ── Stats ── */}
-      <div style={{ display: "flex", gap: "5px", marginBottom: "24px" }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-[5px] mb-[24px]">
         <StatCard label="Total" value={stats.total} pax26={pax26} />
         <StatCard label="Whitelisted" value={stats.whitelist} color={pax26?.primary} pax26={pax26} />
         <StatCard label="Blocked" value={stats.blacklist} color="#dc3535" pax26={pax26} />
@@ -779,7 +807,7 @@ export default function WhatsappContact() {
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="flex flex-col md:flex-row gap-[10px]">
           <PolicyPill value="allow" current={policy} onClick={setPolicy} pax26={pax26} label="Allow all" description="AI replies to every new contact automatically" />
           <PolicyPill value="ask" current={policy} onClick={setPolicy} pax26={pax26} label="Ask first" description="Send opt-in prompt before AI engages" />
           <PolicyPill value="block" current={policy} onClick={setPolicy} pax26={pax26} label="Block all" description="AI ignores all unknown numbers silently" />
@@ -800,23 +828,26 @@ export default function WhatsappContact() {
         }}
       >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", paddingBottom: "16px", borderBottom: `1px solid ${pax26?.border}` }}>
-          <div style={{
-            width: "38px", height: "38px", borderRadius: "10px", flexShrink: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: `${pax26?.primary}18`, color: pax26?.textPrimary,
-          }}>
-            <UserCheckIcon className="md:flex hidden" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: "15px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "2px" }}>
-              Contact manager
-            </h2>
-            <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>
-              Add, remove and manage individual contact rules
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-[12px] mb-[16px] pb-[16px]" style={{ borderBottom: `1px solid ${pax26?.border}` }}>
+          <div className="flex items-center gap-[12px] flex-1">
+            <div className="hidden sm:flex" style={{
+              width: "38px", height: "38px", borderRadius: "10px", flexShrink: 0,
+              alignItems: "center", justifyContent: "center",
+              background: `${pax26?.primary}18`, color: pax26?.textPrimary,
+            }}>
+              <UserCheckIcon />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ fontSize: "15px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "2px" }}>
+                Contact manager
+              </h2>
+              <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>
+                Add, remove and manage individual contact rules
+              </p>
+            </div>
           </div>
           <button
+            className="w-full sm:w-auto justify-center sm:justify-start"
             onClick={() => setShowAddForm(v => !v)}
             style={{
               display: "flex", alignItems: "center", gap: "6px",
@@ -865,8 +896,9 @@ export default function WhatsappContact() {
                   value={newNotes}
                   onChange={e => setNewNotes(e.target.value)}
                 />
-                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <div className="flex flex-col-reverse sm:flex-row gap-[8px] sm:justify-end">
                   <button
+                    className="w-full sm:w-auto"
                     onClick={() => { setShowAddForm(false); setPhone(""); setNewTags([]); setNewNotes(""); }}
                     style={{
                       padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
@@ -876,34 +908,38 @@ export default function WhatsappContact() {
                   >
                     Cancel
                   </button>
-                  <button
-                    onClick={() => handleAddContact("blacklist")}
-                    disabled={!phone.trim() || addingContact}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "6px",
-                      padding: "9px 16px", borderRadius: "10px",
-                      fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                      border: "1px solid rgba(220,53,53,0.3)",
-                      background: "rgba(220,53,53,0.08)", color: "#dc3535",
-                      opacity: phone.trim() ? 1 : 0.5,
-                    }}
-                  >
-                    {addingContact ? <Spinner /> : <><UserXIcon /> Block</>}
-                  </button>
-                  <button
-                    onClick={() => handleAddContact("whitelist")}
-                    disabled={!phone.trim() || addingContact}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "6px",
-                      padding: "9px 16px", borderRadius: "10px",
-                      fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                      border: `1px solid ${pax26?.primary}44`,
-                      background: `${pax26?.primary}15`, color: pax26?.primary,
-                      opacity: phone.trim() ? 1 : 0.5,
-                    }}
-                  >
-                    {addingContact ? <Spinner /> : <><UserCheckIcon /> Allow</>}
-                  </button>
+                  <div className="flex gap-[8px] w-full sm:w-auto">
+                    <button
+                      className="flex-1 sm:flex-none justify-center"
+                      onClick={() => handleAddContact("blacklist")}
+                      disabled={!phone.trim() || addingContact}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "6px",
+                        padding: "9px 16px", borderRadius: "10px",
+                        fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
+                        border: "1px solid rgba(220,53,53,0.3)",
+                        background: "rgba(220,53,53,0.08)", color: "#dc3535",
+                        opacity: phone.trim() ? 1 : 0.5,
+                      }}
+                    >
+                      {addingContact ? <Spinner /> : <><UserXIcon /> Block</>}
+                    </button>
+                    <button
+                      className="flex-1 sm:flex-none justify-center"
+                      onClick={() => handleAddContact("whitelist")}
+                      disabled={!phone.trim() || addingContact}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "6px",
+                        padding: "9px 16px", borderRadius: "10px",
+                        fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
+                        border: `1px solid ${pax26?.primary}44`,
+                        background: `${pax26?.primary}15`, color: pax26?.primary,
+                        opacity: phone.trim() ? 1 : 0.5,
+                      }}
+                    >
+                      {addingContact ? <Spinner /> : <><UserCheckIcon /> Allow</>}
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -990,8 +1026,9 @@ export default function WhatsappContact() {
       </div>
 
       {/* ── Save Button ── */}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <div className="flex sm:justify-end mt-[24px]">
         <button
+          className="w-full sm:w-auto justify-center"
           onClick={handleSave}
           disabled={saving || saved}
           style={{
