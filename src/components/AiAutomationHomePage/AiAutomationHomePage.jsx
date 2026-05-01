@@ -149,7 +149,7 @@ export default function AiAutomationHomePage() {
   return (
     <>
       <style>{CSS}</style>
-      <div className="aah-root max-w-7xl mx-auto px-5 py-10 pb-20">
+      <div className="aah-root max-w-7xl mx-auto py-10 pb-20">
 
         {/* ── Header ─────────────────────────────────────────── */}
         <div className="mb-12">
