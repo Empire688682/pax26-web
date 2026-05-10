@@ -1,333 +1,364 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import { Bot, Phone, Wifi, Zap, Tv, ArrowRightLeft, Bell, ArrowRight, Eye, EyeOff, TrendingUp } from "lucide-react";
+import {
+  Bot, Phone, Wifi, Zap, Tv, ArrowRightLeft,
+  Bell, ArrowRight, Eye, EyeOff, TrendingUp,
+  MessageSquare, Users, Layers, ChevronRight, Crown, Sparkles,
+} from "lucide-react";
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import CashBackBalance from "../CashBackBalance/CashBackBalance";
 
-/* ── Keyframes + font only ───────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+.db { font-family:'Inter',sans-serif; }
 
-  .db-root { font-family: 'Syne', sans-serif; }
-  .db-mono { font-family: 'DM Mono', monospace; }
+@keyframes db-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes db-exp{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
-  @keyframes db-slide {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes db-fade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes db-pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50%     { opacity: 0.4; transform: scale(0.75); }
-  }
-  @keyframes db-orb {
-    0%,100% { transform: translateY(0) scale(1); }
-    50%     { transform: translateY(-10px) scale(1.04); }
-  }
-  @keyframes db-shimmer {
-    0%   { background-position: -400px 0; }
-    100% { background-position:  400px 0; }
-  }
-  @keyframes db-count {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+.db-s1{animation:db-in .45s cubic-bezier(.16,1,.3,1) both}
+.db-s2{animation:db-in .45s cubic-bezier(.16,1,.3,1) .06s both}
+.db-s3{animation:db-in .45s cubic-bezier(.16,1,.3,1) .12s both}
+.db-s4{animation:db-in .45s cubic-bezier(.16,1,.3,1) .18s both}
+.db-s5{animation:db-in .45s cubic-bezier(.16,1,.3,1) .24s both}
+.db-s6{animation:db-in .45s cubic-bezier(.16,1,.3,1) .30s both}
+.db-exp{animation:db-exp .28s cubic-bezier(.16,1,.3,1) both}
 
-  .db-s1 { animation: db-slide 0.4s ease both; }
-  .db-s2 { animation: db-slide 0.4s ease 0.06s both; }
-  .db-s3 { animation: db-slide 0.4s ease 0.12s both; }
-  .db-s4 { animation: db-slide 0.4s ease 0.18s both; }
-  .db-s5 { animation: db-slide 0.4s ease 0.24s both; }
-  .db-s6 { animation: db-slide 0.4s ease 0.30s both; }
+.db-card{border-radius:16px;transition:box-shadow .2s ease}
+.db-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.1)}
 
-  .db-fade   { animation: db-fade  0.3s ease both; }
-  .db-pulse  { animation: db-pulse 2s ease-in-out infinite; }
-  .db-orb    { animation: db-orb   6s ease-in-out infinite; }
-  .db-count  { animation: db-count 0.4s ease both; }
+.db-svc{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:18px 8px;border:none;background:none;
+  border-radius:14px;cursor:pointer;width:100%;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.db-svc:hover{transform:translateY(-3px)}
 
-  .db-shimmer {
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
-    background-size: 400px 100%;
-    animation: db-shimmer 1.4s ease-in-out infinite;
-  }
+.db-tx{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:12px 16px;border-radius:10px;cursor:pointer;
+  transition:background .15s ease;
+}
+.db-tx:hover{background:rgba(0,0,0,.03)}
 
-  /* cards */
-  .db-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-  .db-card:hover { transform: translateY(-2px); }
+.db-btn{transition:opacity .15s ease,transform .15s ease;cursor:pointer}
+.db-btn:hover{opacity:.85;transform:translateY(-1px)}
 
-  /* quick link */
-  .db-ql { transition: transform 0.18s ease, background 0.18s ease; }
-  .db-ql:hover { transform: translateY(-3px); }
-
-  /* buttons */
-  .db-btn { transition: opacity 0.15s ease, transform 0.15s ease; }
-  .db-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-
-  /* tx row */
-  .db-tx { transition: background 0.15s ease; cursor: pointer; }
-  .db-tx:hover { border-radius: 12px; }
-
-  /* wallet toggle */
-  .db-wallet-expand { animation: db-slide 0.35s ease both; }
+/* ── Grid layout ── */
+.db-grid{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+}
+.db-bottom{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+}
+@media(max-width:900px){
+  .db-grid,.db-bottom{grid-template-columns:1fr}
+}
 `;
 
-/* ── Stat mini card ───────────────────────────────────────────── */
-function StatCard({ label, value, color, delay, pax26 }) {
+function SvcCard({ title, link, icon, color, pax26, router }) {
   return (
-    <div className="db-card rounded-2xl p-4 space-y-2"
-      style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, animationDelay: delay, animation: "db-slide 0.4s ease both" }}>
-      <p className="text-xs font-semibold uppercase tracking-widest"
-        style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
-        {label}
-      </p>
-      <p className="db-count text-2xl font-bold leading-none"
-        style={{ color: color || pax26?.textPrimary }}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-/* ── Quick link card ──────────────────────────────────────────── */
-function ServiceCard({ title, link, icon, color, pax26, router }) {
-  return (
-    <button
-      onClick={() => router.push(link)}
-      className="db-ql flex flex-col items-center justify-center gap-2.5 rounded-2xl py-5 px-3 w-full"
+    <button className="db-svc" onClick={() => router.push(link)}
       style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center"
-        style={{ background: `${color}14`, color }}>
+      <div style={{ width:42,height:42,borderRadius:12,display:"flex",alignItems:"center",
+        justifyContent:"center",background:`${color}14`,color }}>
         {icon}
       </div>
-      <span className="text-xs font-semibold" style={{ color: pax26?.textPrimary }}>{title}</span>
+      <span style={{ fontSize:11,fontWeight:600,color:pax26?.textPrimary }}>{title}</span>
     </button>
   );
 }
 
-/* ── Transaction row ──────────────────────────────────────────── */
-function TxRow({ tx, onClick, pax26 }) {
-  const isSuccess = tx.status;
+function TxRow({ tx, onClick, pax26, primary }) {
+  const s = tx.status;
+  const col = s==="success"?"#22c55e":s==="pending"?"#f59e0b":"#ef4444";
   return (
-    <div className="db-tx flex items-center justify-between gap-3 px-3 py-3.5 -mx-3"
-      onClick={onClick}
-      style={{ borderBottom: `1px solid ${pax26?.border}` }}>
-      <div className="flex items-center gap-3 min-w-0">
-        {/* type dot */}
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: isSuccess ? "rgba(34,197,94,0.1)" : "rgba(245,158,11,0.1)" }}>
-          <TrendingUp size={14} style={{ color: isSuccess === "success" ? "#22c55e" : isSuccess === "pending" ? "#f59e0b" : "#f54d0b" }} />
+    <div className="db-tx" onClick={onClick}>
+      <div style={{ display:"flex",alignItems:"center",gap:12,minWidth:0 }}>
+        <div style={{ width:36,height:36,borderRadius:10,flexShrink:0,display:"flex",
+          alignItems:"center",justifyContent:"center",background:`${col}12`,color:col }}>
+          <TrendingUp size={14}/>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: pax26?.textPrimary }}>{tx.description}</p>
-          <p className="db-mono text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+        <div style={{ minWidth:0 }}>
+          <p style={{ fontSize:13,fontWeight:600,color:pax26?.textPrimary,margin:"0 0 2px",
+            overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{tx.description}</p>
+          <p style={{ fontSize:10,color:pax26?.textSecondary,opacity:.5,margin:0,fontFamily:"monospace" }}>
             {new Date(tx.createdAt).toLocaleString()}
           </p>
         </div>
       </div>
-      <div className="flex flex-col items-end flex-shrink-0">
-        <p className="text-sm font-bold" style={{ color: isSuccess === "success" ? "#22c55e" : isSuccess === "pending" ? "#f59e0b" : "#f54d0b" }}>
-          ₦{tx.amount}
-        </p>
-        <p className="db-mono text-[10px] capitalize" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-          {tx.type}
-        </p>
+      <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",flexShrink:0 }}>
+        <p style={{ fontSize:13,fontWeight:700,color:col,margin:"0 0 2px" }}>₦{tx.amount?.toLocaleString()}</p>
+        <p style={{ fontSize:10,color:pax26?.textSecondary,opacity:.5,margin:0,textTransform:"capitalize",fontFamily:"monospace" }}>{tx.type}</p>
       </div>
     </div>
   );
 }
 
-/* ── Main Dashboard ───────────────────────────────────────────── */
-const Dashboard = () => {
-  const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser } = useGlobalContext();
-  const [showWallet, setShowWallet] = useState(false);
-  const [showMore, setShowMore] = useState(false);
+export default function Dashboard() {
+  const { userData,pax26,router,transactionHistory,getUserRealTimeData,fetchUser } = useGlobalContext();
+  const [showWallet,setShowWallet] = useState(false);
+  const [showMore,setShowMore] = useState(false);
 
-  useEffect(() => {
-    getUserRealTimeData();
-    fetchUser();
-  }, []);
+  useEffect(()=>{ getUserRealTimeData(); fetchUser(); },[]);
 
-  const firstName = userData?.name?.split(" ")[0] || "User";
-  const primary = pax26?.primary || "#3B82F6";
+  const firstName = userData?.name?.split(" ")[0]||"User";
+  const P  = pax26?.primary||"#3b82f6";
+  const G  = "#22c55e";
+  const T  = "#06b6d4";
+  const Am = "#f59e0b";
+  const Co = "#f97316";
+  const Vi = "#a78bfa";
 
-  const GREEN = "#22c55e";
-  const TEAL = "#06b6d4";
-  const AMBER = "#f59e0b";
-  const CORAL = "#f97316";
-  const VIOLET = "#a78bfa";
+  const plan    = userData?.paxAI?.plan||"free";
+  const isAiOn  = !!userData?.paxAI?.enabled;
+  const used    = userData?.paxAI?.messagesUsedThisMonth??0;
+  const quota   = userData?.paxAI?.maxMonthlyMessages??50;
+  const pct     = Math.min((used/(quota||1))*100,100);
+  const planCol = {free:pax26?.textSecondary,starter:T,business:Am,enterprise:Vi}[plan]??pax26?.textSecondary;
 
   return (
     <>
       <style>{CSS}</style>
-      <div className="db-root max-w-7xl mx-auto py-6 pb-24 space-y-5">
+      <div className="db" style={{ maxWidth:1200,margin:"0 auto",padding:"32px 24px 80px",display:"flex",flexDirection:"column",gap:20 }}>
 
-        {/* ── Top bar ────────────────────────────────────────── */}
-        <div className="db-s1 flex items-center justify-between">
+        {/* HEADER */}
+        <div className="db-s1" style={{ display:"flex",alignItems:"center",justifyContent:"space-between" }}>
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest mb-0.5"
-              style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
-              Welcome back
-            </p>
-            <h2 className="text-2xl font-extrabold leading-tight" style={{ color: pax26?.textPrimary }}>
-              {firstName} 👋
-            </h2>
+            <p style={{ fontSize:11,fontWeight:600,letterSpacing:2,textTransform:"uppercase",
+              color:pax26?.textSecondary,opacity:.4,margin:"0 0 4px" }}>Welcome back</p>
+            <h1 style={{ fontSize:26,fontWeight:900,color:pax26?.textPrimary,margin:0 }}>{firstName} 👋</h1>
           </div>
-          <button
-            className="db-btn w-10 h-10 rounded-xl flex items-center justify-center"
-            onClick={() => router.push("/notifications")}
-            style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-            <Bell size={18} style={{ color: pax26?.textSecondary }} />
+          <button className="db-btn" onClick={()=>router.push("/notifications")}
+            style={{ width:42,height:42,borderRadius:12,border:`1px solid ${pax26?.border}`,
+              background:pax26?.bg,display:"flex",alignItems:"center",justifyContent:"center" }}>
+            <Bell size={18} color={pax26?.textSecondary}/>
           </button>
         </div>
 
-        {/* ── AI Automation hero card ─────────────────────────── */}
-        <div className="db-card db-s2 relative rounded-2xl p-6 overflow-hidden"
-          style={{ background: pax26?.bg, border: `1px solid ${primary}25` }}>
-          {/* orbs */}
-          <div className="db-orb absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-            style={{ background: `${primary}18`, filter: "blur(50px)" }} />
-          <div className="db-orb absolute -bottom-8 left-6 w-28 h-28 rounded-full pointer-events-none"
-            style={{ background: `${TEAL}0D`, filter: "blur(40px)", animationDelay: "-3s" }} />
-          {/* top strip */}
-          <div className="absolute top-0 left-0 right-0 h-0.5"
-            style={{ background: `linear-gradient(to right, ${primary}, ${TEAL})` }} />
+        {/* MAIN GRID: Hero | Right Sidebar */}
+        <div className="db-grid db-s2">
 
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: `${primary}18`, color: primary }}>
-                  <Bot size={15} />
+          {/* LEFT — AI Hero */}
+          <div onClick={()=>router.push("dashboard/automations")}
+            style={{
+              borderRadius:20,overflow:"hidden",cursor:"pointer",
+              background:"linear-gradient(150deg,#08101e 0%,#0c1525 50%,#070e1b 100%)",
+              border:`1px solid rgba(59,130,246,.2)`,
+              boxShadow:`0 16px 48px rgba(59,130,246,.1)`,
+              position:"relative",
+            }}>
+
+            {/* subtle radial glow — no animation */}
+            <div style={{ position:"absolute",top:-100,right:-80,width:320,height:320,
+              borderRadius:"50%",background:`${P}14`,filter:"blur(80px)",pointerEvents:"none" }}/>
+            <div style={{ position:"absolute",bottom:-80,left:-40,width:240,height:240,
+              borderRadius:"50%",background:`${T}0e`,filter:"blur(60px)",pointerEvents:"none" }}/>
+
+            {/* top accent */}
+            <div style={{ height:2,background:`linear-gradient(90deg,transparent,${P} 25%,${T} 75%,transparent)` }}/>
+
+            <div style={{ position:"relative",zIndex:2,padding:"36px 36px 32px" }}>
+
+              {/* eyebrow */}
+              <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:24 }}>
+                <div style={{ display:"flex",alignItems:"center",gap:7,padding:"5px 13px",
+                  borderRadius:999,background:`rgba(255,255,255,.06)`,border:"1px solid rgba(255,255,255,.1)" }}>
+                  <Bot size={12} color={P}/>
+                  <span style={{ fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:P }}>
+                    PaxAI Automation
+                  </span>
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest"
-                  style={{ color: primary }}>
-                  AI Automation
-                </span>
-                <span className="db-pulse w-1.5 h-1.5 rounded-full block" style={{ background: GREEN }} />
+                <div style={{ display:"flex",alignItems:"center",gap:6,padding:"5px 13px",
+                  borderRadius:999,background:`${G}12`,border:`1px solid ${G}25` }}>
+                  <div style={{ width:6,height:6,borderRadius:"50%",background:G }}/>
+                  <span style={{ fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:G }}>
+                    {isAiOn?"AI Active":"Ready to Launch"}
+                  </span>
+                </div>
               </div>
-              <h2 className="text-lg font-extrabold leading-snug mb-1.5" style={{ color: pax26?.textPrimary }}>
-                Automate your WhatsApp business
+
+              {/* headline */}
+              <h2 style={{ fontSize:36,fontWeight:900,lineHeight:1.1,color:"#fff",margin:"0 0 12px",maxWidth:460 }}>
+                Your Business,{" "}
+                <span style={{ color:P }}>On Autopilot.</span>
               </h2>
-              <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                Auto-reply, capture leads, and respond to customers 24/7 — hands-free.
+              <p style={{ fontSize:14,lineHeight:1.75,color:"rgba(255,255,255,.45)",margin:"0 0 32px",maxWidth:400 }}>
+                Auto-reply WhatsApp messages, capture leads and serve customers 24/7 — completely hands-free with PaxAI.
               </p>
-            </div>
-            <button
-              className="db-btn flex mr-4 items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0"
-              onClick={() => router.push("dashboard/automations")}
-              style={{ background: primary, boxShadow: `0 8px 24px ${primary}40` }}>
-              Setup <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
 
-        {/* ── Automation stats ────────────────────────────────── */}
-        <div className="db-s3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Automations" value={userData?.workflows || 0} color={TEAL} delay="0s" pax26={pax26} />
-          <StatCard label="Msgs Handled" value={userData?.messagesHandled || 0} color={GREEN} delay="0.05s" pax26={pax26} />
-          <StatCard label="Contacts" value={userData?.contacts || 0} color={AMBER} delay="0.10s" pax26={pax26} />
-        </div>
+              {/* 3 stats */}
+              <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:32 }}>
+                {[
+                  { label:"Automations",  val:userData?.workflows||0,       icon:<Layers size={14}/>,       color:P },
+                  { label:"Msgs Handled", val:userData?.messagesHandled||0, icon:<MessageSquare size={14}/>, color:T },
+                  { label:"Contacts",     val:userData?.contacts||0,         icon:<Users size={14}/>,         color:G },
+                ].map(c=>(
+                  <div key={c.label} style={{ borderRadius:14,padding:"16px 18px",
+                    background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)" }}>
+                    <div style={{ display:"flex",alignItems:"center",gap:7,marginBottom:10,color:c.color }}>
+                      {c.icon}
+                      <span style={{ fontSize:10,fontWeight:600,textTransform:"uppercase",letterSpacing:1,
+                        color:"rgba(255,255,255,.35)" }}>{c.label}</span>
+                    </div>
+                    <p style={{ fontSize:28,fontWeight:900,color:c.color,margin:0,lineHeight:1 }}>{c.val}</p>
+                  </div>
+                ))}
+              </div>
 
-        {/* ── Wallet card ─────────────────────────────────────── */}
-        <div className="db-card db-s4 rounded-2xl p-5"
-          style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-0.5"
-                style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
-                Wallet
-              </p>
-              <p className="text-sm font-medium" style={{ color: pax26?.textPrimary }}>
-                Manage balance & cashback
-              </p>
-            </div>
-            <button
-              className="db-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold"
-              onClick={() => setShowWallet(!showWallet)}
-              style={{
-                background: showWallet ? `${primary}15` : pax26?.secondaryBg,
-                color: showWallet ? primary : pax26?.textSecondary,
-                border: `1px solid ${showWallet ? primary + "30" : pax26?.border}`,
-              }}>
-              {showWallet ? <EyeOff size={13} /> : <Eye size={13} />}
-              {showWallet ? "Hide" : "View"}
-            </button>
-          </div>
-
-          {showWallet && (
-            <div className="db-wallet-expand grid md:grid-cols-2 gap-4 mt-5 pt-5"
-              style={{ borderTop: `1px solid ${pax26?.border}` }}>
-              <WalletBalance showMore={showMore} setShowMore={setShowMore} />
-              <div className="rounded-xl p-4" style={{ background: pax26?.secondaryBg }}>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
-                  Cashback Balance
-                </p>
-                <CashBackBalance />
+              {/* CTAs */}
+              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                <button className="db-btn" style={{ display:"flex",alignItems:"center",gap:8,
+                  padding:"12px 24px",borderRadius:12,border:"none",
+                  background:P,color:"#fff",fontWeight:700,fontSize:14,
+                  boxShadow:`0 8px 24px ${P}45` }}>
+                  <Sparkles size={15}/> Open Automations <ArrowRight size={15}/>
+                </button>
+                <button className="db-btn" style={{ display:"flex",alignItems:"center",gap:8,
+                  padding:"12px 20px",borderRadius:12,cursor:"pointer",
+                  background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",
+                  color:"rgba(255,255,255,.6)",fontWeight:600,fontSize:14 }}>
+                  View Analytics
+                </button>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* ── Services ────────────────────────────────────────── */}
-        <div className="db-s5">
-          <div className="flex items-center gap-3 mb-4">
-            <p className="text-xs font-bold tracking-widest uppercase"
-              style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
-              Services
-            </p>
-            <div className="h-px flex-1" style={{ background: pax26?.border }} />
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3" id="VTU">
-            <ServiceCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={18} />} color={GREEN} pax26={pax26} router={router} />
-            <ServiceCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={18} />} color={TEAL} pax26={pax26} router={router} />
-            <ServiceCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} />} color={AMBER} pax26={pax26} router={router} />
-            <ServiceCard title="TV" link="/dashboard/services/buy-tv" icon={<Tv size={18} />} color={VIOLET} pax26={pax26} router={router} />
-            <ServiceCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={18} />} color={CORAL} pax26={pax26} router={router} />
-          </div>
-        </div>
+          {/* RIGHT SIDEBAR — Plan + Wallet */}
+          <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
 
-        {/* ── Recent transactions ──────────────────────────────── */}
-        <div className="db-s6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <p className="text-xs font-bold tracking-widest uppercase"
-                style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                Recent Activity
-              </p>
-              <div className="h-px w-10" style={{ background: pax26?.border }} />
+            {/* Plan card */}
+            <div className="db-card" style={{ background:pax26?.bg,border:`1px solid ${pax26?.border}`,overflow:"hidden" }}>
+              <div style={{ height:2,background:`linear-gradient(90deg,${planCol},${planCol}44,transparent)` }}/>
+              <div style={{ padding:"18px 20px" }}>
+                <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16 }}>
+                  <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+                    <div style={{ width:36,height:36,borderRadius:10,display:"flex",
+                      alignItems:"center",justifyContent:"center",
+                      background:`${planCol}14`,color:planCol }}>
+                      <Crown size={16}/>
+                    </div>
+                    <div>
+                      <p style={{ fontSize:11,fontWeight:600,letterSpacing:1.6,textTransform:"uppercase",
+                        color:pax26?.textSecondary,opacity:.4,margin:"0 0 2px" }}>AI Plan</p>
+                      <p style={{ fontSize:14,fontWeight:700,color:pax26?.textPrimary,margin:0,textTransform:"capitalize" }}>
+                        {plan}
+                      </p>
+                    </div>
+                  </div>
+                  <span style={{ fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",
+                    padding:"3px 10px",borderRadius:999,
+                    background:isAiOn?`${G}14`:"rgba(239,68,68,.1)",
+                    color:isAiOn?G:"#ef4444",
+                    border:`1px solid ${isAiOn?G+"28":"rgba(239,68,68,.22)"}` }}>
+                    {isAiOn?"Active":"Inactive"}
+                  </span>
+                </div>
+                <div style={{ marginBottom:8 }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",marginBottom:6 }}>
+                    <span style={{ fontSize:11,color:pax26?.textSecondary,opacity:.5 }}>Messages used</span>
+                    <span style={{ fontSize:11,fontWeight:600,color:pax26?.textSecondary }}>
+                      {used.toLocaleString()} / {quota.toLocaleString()}
+                    </span>
+                  </div>
+                  <div style={{ height:5,borderRadius:999,background:pax26?.border,overflow:"hidden" }}>
+                    <div style={{ height:"100%",borderRadius:999,width:`${pct}%`,
+                      background:pct>=90?"#ef4444":pct>=60?Am:planCol,transition:"width .6s ease" }}/>
+                  </div>
+                </div>
+                <button className="db-btn"
+                  onClick={()=>router.push(isAiOn?"/dashboard/billing":"/dashboard/automations/ai-business-dashboard")}
+                  style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,
+                    width:"100%",padding:"9px 0",marginTop:14,borderRadius:10,fontSize:12,fontWeight:700,
+                    background:`${planCol}10`,color:planCol,border:`1px solid ${planCol}25` }}>
+                  <Crown size={12}/> {isAiOn?"Manage Plan":"Activate AI"}
+                </button>
+              </div>
             </div>
-            <button
-              className="db-btn flex items-center gap-1 text-xs font-semibold"
-              onClick={() => router.push("/transactions")}
-              style={{ color: primary }}>
-              View all <ArrowRight size={12} />
+
+            {/* Wallet card */}
+            <div className="db-card" style={{ background:pax26?.bg,border:`1px solid ${pax26?.border}` }}>
+              <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px" }}>
+                <div>
+                  <p style={{ fontSize:11,fontWeight:600,letterSpacing:1.6,textTransform:"uppercase",
+                    color:pax26?.textSecondary,opacity:.4,margin:"0 0 3px" }}>Wallet</p>
+                  <p style={{ fontSize:14,fontWeight:700,color:pax26?.textPrimary,margin:0 }}>Balance &amp; Cashback</p>
+                </div>
+                <button className="db-btn" onClick={()=>setShowWallet(!showWallet)}
+                  style={{ display:"flex",alignItems:"center",gap:6,padding:"8px 14px",
+                    borderRadius:10,fontSize:12,fontWeight:700,cursor:"pointer",
+                    background:showWallet?`${P}10`:pax26?.secondaryBg,
+                    color:showWallet?P:pax26?.textSecondary,
+                    border:`1px solid ${showWallet?P+"25":pax26?.border}` }}>
+                  {showWallet?<EyeOff size={13}/>:<Eye size={13}/>}
+                  {showWallet?"Hide":"View"}
+                </button>
+              </div>
+              {showWallet&&(
+                <div className="db-exp" style={{ padding:"0 20px 20px",borderTop:`1px solid ${pax26?.border}`,paddingTop:16 }}>
+                  <WalletBalance showMore={showMore} setShowMore={setShowMore}/>
+                  <div style={{ borderRadius:12,padding:"14px",background:pax26?.secondaryBg,marginTop:12 }}>
+                    <p style={{ fontSize:10,fontWeight:600,letterSpacing:1.6,textTransform:"uppercase",
+                      color:pax26?.textSecondary,opacity:.4,margin:"0 0 8px" }}>Cashback</p>
+                    <CashBackBalance/>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* VTU Services */}
+            <div className="db-card" style={{ background:pax26?.bg,border:`1px solid ${pax26?.border}`,padding:"18px 20px" }}>
+              <p style={{ fontSize:11,fontWeight:600,letterSpacing:1.6,textTransform:"uppercase",
+                color:pax26?.textSecondary,opacity:.4,margin:"0 0 14px" }}>Services</p>
+              <div style={{ display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8 }} id="VTU">
+                <SvcCard title="Airtime"     link="/dashboard/services/buy-airtime"     icon={<Phone size={18}/>}          color={G}  pax26={pax26} router={router}/>
+                <SvcCard title="Data"        link="/dashboard/services/buy-data"        icon={<Wifi size={18}/>}           color={T}  pax26={pax26} router={router}/>
+                <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18}/>}            color={Am} pax26={pax26} router={router}/>
+                <SvcCard title="TV"          link="/dashboard/services/buy-tv"          icon={<Tv size={18}/>}             color={Vi} pax26={pax26} router={router}/>
+                <SvcCard title="Transfer"    link="/dashboard/services/transfer"        icon={<ArrowRightLeft size={18}/>} color={Co} pax26={pax26} router={router}/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RECENT TRANSACTIONS — full width */}
+        <div className="db-s6">
+          <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:10 }}>
+              <div style={{ width:3,height:18,borderRadius:99,background:P }}/>
+              <h2 style={{ fontSize:15,fontWeight:700,color:pax26?.textPrimary,margin:0 }}>Recent Activity</h2>
+            </div>
+            <button className="db-btn" onClick={()=>router.push("/transactions")}
+              style={{ display:"flex",alignItems:"center",gap:5,padding:"7px 14px",
+                borderRadius:9,fontSize:12,fontWeight:600,cursor:"pointer",
+                color:P,background:`${P}0d`,border:`1px solid ${P}1e` }}>
+              View all <ChevronRight size={13}/>
             </button>
           </div>
-
-          <div className="rounded-2xl px-3 py-1" style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-            {transactionHistory?.length ? (
-              [...transactionHistory].reverse().slice(0, 5).map((tx) => (
-                <TxRow
-                  key={tx._id}
-                  tx={tx}
-                  onClick={() => router.push(`transaction-receipt/?id=${tx._id}`)}
-                  pax26={pax26}
-                />
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  style={{ background: pax26?.secondaryBg }}>
-                  <ArrowRightLeft size={20} style={{ color: pax26?.textSecondary, opacity: 0.3 }} />
+          <div className="db-card" style={{ background:pax26?.bg,border:`1px solid ${pax26?.border}`,overflow:"hidden" }}>
+            {transactionHistory?.length?(
+              <div style={{ padding:8 }}>
+                {[...transactionHistory].reverse().slice(0,5).map(tx=>(
+                  <TxRow key={tx._id} tx={tx} primary={P}
+                    onClick={()=>router.push(`transaction-receipt/?id=${tx._id}`)}
+                    pax26={pax26}/>
+                ))}
+              </div>
+            ):(
+              <div style={{ display:"flex",flexDirection:"column",alignItems:"center",
+                justifyContent:"center",padding:"60px 0",gap:10 }}>
+                <div style={{ width:48,height:48,borderRadius:14,display:"flex",
+                  alignItems:"center",justifyContent:"center",background:pax26?.secondaryBg }}>
+                  <ArrowRightLeft size={20} color={pax26?.textSecondary} style={{ opacity:.25 }}/>
                 </div>
-                <p className="text-sm" style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+                <p style={{ fontSize:13,fontWeight:500,color:pax26?.textSecondary,opacity:.35,margin:0 }}>
                   No recent activity
                 </p>
               </div>
@@ -338,6 +369,4 @@ const Dashboard = () => {
       </div>
     </>
   );
-};
-
-export default Dashboard;
+}

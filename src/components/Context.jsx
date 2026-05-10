@@ -304,29 +304,11 @@ export const AppProvider = ({ children }) => {
      THEME / CSS VARIABLES
   =================================*/
 
-  /**
-   * Read the theme synchronously on first render so pax26 tokens are
-   * correct immediately — no flash of the wrong theme on refresh.
-   *
-   * Priority:
-   *   1. User's explicit choice stored by next-themes ("theme" key)
-   *   2. System preference (prefers-color-scheme)
-   *   3. Dark as final SSR fallback
-   */
-  const [pax26, setPax26] = useState(() => {
-    if (typeof window === "undefined") return buildPax26Theme("dark"); // SSR
+  // Initialize with a safe default so SSR doesn't mismatch
+  const [pax26, setPax26] = useState(() => buildPax26Theme("dark"));
 
-    const stored = localStorage.getItem("theme"); // next-themes key
-    if (stored === "light" || stored === "dark") return buildPax26Theme(stored);
-
-    // No explicit choice → respect the OS preference
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    return buildPax26Theme(prefersDark ? "dark" : "light");
-  });
-
-  // Keep in sync when the user toggles the theme at runtime
   useEffect(() => {
-    if (!theme) return;
+    if (!theme) return; // wait for next-themes to resolve
     setPax26(buildPax26Theme(theme));
   }, [theme]);
 

@@ -97,7 +97,7 @@ function ChatDemo() {
           <Bot size={15} color="#fff" />
         </div>
         <div>
-          <p className="text-[13px] font-bold text-white leading-none">Pax26 AI Sales Bot</p>
+          <p className="text-[13px] font-bold text-white leading-none">Pax26 Sales Agent</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="hr-pulse w-1.5 h-1.5 rounded-full bg-green-300 block" />
             <span className="text-[10px] text-white/70">online · instant replies</span>
@@ -171,7 +171,7 @@ function Badge({ children, className = "", bg, border }) {
 
 /* ─── Marquee items ───────────────────────────────────────────────────── */
 const TICKER = [
-  "WhatsApp AI Agent", "·", "Airtime & Data", "·", "Electricity Bills", "·",
+  "WhatsApp Agent", "·", "Airtime & Data", "·", "Electricity Bills", "·",
   "TV Subscriptions", "·", "No-Code Setup", "·", "24/7 Auto-Replies", "·",
   "Lead Follow-Up", "·", "Instant Activation", "·",
 ];
@@ -187,13 +187,13 @@ export default function Hero() {
   const bdr = pax26?.border;
 
   const chips = [
-    { icon: Bot, label: "AI WhatsApp Bot", color: WA, border: `${WA}40` },
+    { icon: Bot, label: "WhatsApp Sales Agent", color: WA, border: `${WA}40` },
     { icon: CreditCard, label: "Bill Payments", color: p, border: `${p}40` },
     { icon: Smartphone, label: "Airtime & Data", color: "#a855f7", border: "#a855f740" },
   ];
 
   const stats = [
-    { value: "24/7", label: "WhatsApp AI" },
+    { value: "24/7", label: "Always Online" },
     { value: "5 min", label: "Setup Time" },
     { value: "100%", label: "Auto-Reply" },
   ];
@@ -238,7 +238,7 @@ export default function Hero() {
                 style={{ background: `${WA}14`, border: `1px solid ${WA}35` }}>
                 <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
                 <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: WA }}>
-                  WhatsApp AI Automation
+                  WhatsApp Automation
                 </span>
               </motion.div>
 
@@ -259,7 +259,7 @@ export default function Hero() {
                 className="text-[13.5px] sm:text-[15px] leading-relaxed"
                 style={{ color: ts, opacity: .78 }}>
                 Pax26 Technologies — a registered Nigerian tech company — turns your WhatsApp into a{" "}
-                <strong style={{ color: tp }}>24/7 AI sales agent</strong> that chats, converts, and closes deals while you sleep.{" "}
+                <strong style={{ color: tp }}>24/7 sales agent</strong> that chats, converts, and closes deals while you sleep.{" "}
                 Plus instant airtime, data, bills & TV subscriptions in one platform.
               </motion.p>
 
@@ -331,7 +331,7 @@ export default function Hero() {
                     style={{ background: `${WA}20` }}>
                     <Zap size={10} style={{ color: WA }} />
                   </div>
-                  <span className="text-[11px] font-bold" style={{ color: tp }}>AI responding…</span>
+                  <span className="text-[11px] font-bold" style={{ color: tp }}>Agent responding…</span>
                 </motion.div>
 
                 <ChatDemo />

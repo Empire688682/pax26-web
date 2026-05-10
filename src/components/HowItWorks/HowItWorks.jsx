@@ -47,7 +47,7 @@ const STEPS = [
     color: "#38bdf8",
     num: "02",
     title: "Train Your Agent",
-    text: "Feed the AI your business info, products, FAQs and tone. It learns your brand instantly.",
+    text: "Feed your agent your business info, products, FAQs and tone. It learns your brand instantly.",
     badge: "One-time setup",
   },
   {
@@ -63,7 +63,7 @@ const STEPS = [
     color: "#a78bfa",
     num: "04",
     title: "Agent Replies Customers",
-    text: "Sit back — your AI handles every message, qualifies leads and books sales 24/7.",
+    text: "Sit back — your agent handles every message, qualifies leads and books sales 24/7.",
     badge: "Runs 24/7",
   },
 ];
@@ -118,7 +118,7 @@ export default function HowItWorks() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base max-w-xl mx-auto"
               style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-              Four simple steps and your AI assistant is live — no code,
+              Four simple steps and your sales agent is live — no code,
               no technical skills, no headaches.
             </motion.p>
           </div>

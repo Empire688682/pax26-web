@@ -63,6 +63,7 @@ export const config = {
     "/buy-data",
     "/contact",
     "/dashboard",
+    "/dashboard/prevent-ban",
     "/dashboard/services/buy-data",
     "/dashboard/services/buy-tv",
     "/dashboard/services/buy-airtime",
