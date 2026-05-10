@@ -187,7 +187,7 @@ export default function AiAutomationHomePage() {
               <IconSpark /> Automations Library
             </button>
             {
-              !userData?.whatsapp.connected &&
+              !userData?.whatsapp?.connected &&
               <button
                 className="aah-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
                 onClick={() => router.push("/dashboard/automations/whatsapp#connect")}

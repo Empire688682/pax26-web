@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
-export function GET(req) {
-  const res = NextResponse.redirect(new URL("/", req.url));
-  res.cookies.delete("UserToken", { path: "/" });
-  return res;
+export async function GET(req) {
+  const response = NextResponse.json(
+    { success: true, message: "Logged out successfully" },
+    { status: 200 }
+  );
+  
+  response.cookies.delete("UserToken", { path: "/" });
+  return response;
 }

@@ -24,9 +24,9 @@ const fadeInUp = {
 };
 
 const Page = () => {
-  const {openModal} = useGlobalContext();
+  const { openModal } = useGlobalContext();
   useEffect(() => {
-     const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(window.location.search);
     if (typeof window !== "undefined") {
       const refCode = searchParams.get("ref");
 
@@ -66,8 +66,8 @@ const Page = () => {
 
       {/* How it Works */}
       <motion.div
-        initial={{opacity:0, x:-100 }}
-        whileInView={{opacity:1, x:0 }}
+        initial={{ opacity: 0, x: -100 }}
+        whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.1 }}
         variants={fadeInUp}
@@ -88,21 +88,21 @@ const Page = () => {
 
       {/* AutomationFeatures */}
       <div className='border-t-[2px] border-black/80'>
-         <motion.div
-        initial={{opacity:0, x:100 }}
-        whileInView={{opacity:1, x:0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        variants={fadeInUp}
-      >
-        <AutomationFeatures />
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          variants={fadeInUp}
+        >
+          <AutomationFeatures />
+        </motion.div>
       </div>
 
       {/* HowItWorks */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.4 }}
         variants={fadeInUp}
@@ -112,8 +112,8 @@ const Page = () => {
 
       {/* Demo */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.5 }}
         variants={fadeInUp}
@@ -123,8 +123,8 @@ const Page = () => {
 
       {/* Pricing */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.6 }}
         variants={fadeInUp}
@@ -134,8 +134,8 @@ const Page = () => {
 
       {/* Utilities */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.7 }}
         variants={fadeInUp}
@@ -145,8 +145,8 @@ const Page = () => {
 
       {/* Testimonials */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.7 }}
         variants={fadeInUp}
@@ -156,8 +156,8 @@ const Page = () => {
 
       {/* CTA */}
       <motion.div
-        initial={{opacity:0, y:50}}
-        whileInView={{opacity:1, y:0}}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.7 }}
         variants={fadeInUp}

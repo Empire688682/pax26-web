@@ -31,14 +31,29 @@ const CSS = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .am-backdrop { animation: am-backdrop 0.2s ease both; }
+  .am-backdrop { 
+    animation: am-backdrop 0.2s ease both; 
+    padding-top: 5rem; /* Default for desktop */
+  }
+  @media (max-width: 640px) {
+    .am-backdrop { padding-top: 1.5rem; align-items: flex-start; }
+    .am-modal-in { margin-bottom: 2rem; }
+  }
+
   .am-modal-in { animation: am-modal-in 0.3s cubic-bezier(0.22,1,0.36,1) both; }
   .am-shake    { animation: am-shake 0.35s ease both; }
   .am-spin     { animation: am-spin 0.75s linear infinite; }
   .am-slide    { animation: am-slide 0.25s ease both; }
 
-  .am-input  { transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+  .am-input  { transition: border-color 0.18s ease, box-shadow 0.18s ease; font-size: 16px; }
   .am-input:focus { outline: none; }
+  
+  @media (max-width: 480px) {
+    .am-modal-in { border-radius: 24px !important; }
+    .am-input { padding-top: 14px; padding-bottom: 14px; }
+    .am-modal-header { padding-left: 20px !important; padding-right: 20px !important; }
+    .am-modal-body { padding-left: 20px !important; padding-right: 20px !important; }
+  }
 
   .am-btn { transition: opacity 0.15s ease, transform 0.15s ease; }
   .am-btn:hover:not(:disabled) { opacity: 0.87; transform: translateY(-1px); }
@@ -173,7 +188,7 @@ export default function SignupPage() {
       <style>{CSS}</style>
 
       {/* backdrop */}
-      <div className="am-backdrop overflow-y-auto pt-32 h-[100%] fixed inset-0 z-70 flex items-center justify-center px-4"
+      <div className="am-backdrop overflow-y-auto h-[100%] fixed inset-0 z-70 flex items-center justify-center px-4"
         style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}>
 
         {/* modal */}
@@ -185,7 +200,7 @@ export default function SignupPage() {
             style={{ background: `linear-gradient(90deg, ${primary}, ${primary}66, transparent)` }} />
 
           {/* header */}
-          <div className="px-7 pt-7 pb-5 flex items-start justify-between">
+          <div className="am-modal-header px-7 pt-7 pb-5 flex items-start justify-between">
             <div>
               {/* brand mark */}
               <div className="flex items-center gap-2 mb-4">
@@ -210,7 +225,7 @@ export default function SignupPage() {
           </div>
 
           {/* form body */}
-          <div className="px-7 pb-7">
+          <div className="am-modal-body px-7 pb-7">
             <form onSubmit={handleFormSubmission} className="space-y-3">
 
               {/* name — register only */}
