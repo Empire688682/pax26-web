@@ -30,7 +30,7 @@ const PROBLEMS = [
 ];
 
 const SOLUTIONS = [
-  { icon: Bot,         text: "AI replies to every customer instantly — 24/7, no days off."           },
+  { icon: Bot,         text: "Your agent replies to every customer instantly — 24/7, no days off."           },
   { icon: Zap,         text: "Automated follow-ups re-engage leads before they go cold."              },
   { icon: TrendingUp,  text: "Sub-second response times that make your brand look ultra-professional." },
   { icon: Users,       text: "Never miss a message — holidays, nights, weekends all covered."          },

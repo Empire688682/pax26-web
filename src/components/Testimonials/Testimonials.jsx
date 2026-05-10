@@ -38,7 +38,7 @@ const TESTIMONIALS = [
     avatar: "AO",
     color:  "#f472b6",
     stars:  5,
-    text:   "Pax26 AI replies my customers automatically on WhatsApp. It saves me hours every day and I've never missed a sale since I activated it.",
+    text:   "Pax26 replies to my customers automatically on WhatsApp. It saves me hours every day and I've never missed a sale since I activated it.",
   },
   {
     name:   "Chukwuemeka Nwosu",
@@ -46,7 +46,7 @@ const TESTIMONIALS = [
     avatar: "CN",
     color:  "#38bdf8",
     stars:  5,
-    text:   "The follow-up automation is insane. Leads that ghosted me started responding after the AI sent them a personalised message. My conversion rate went up 40%.",
+    text:   "The follow-up automation is insane. Leads that ghosted me started responding after receiving a personalised follow-up. My conversion rate went up 40%.",
   },
   {
     name:   "Fatima Aliyu",
@@ -54,7 +54,7 @@ const TESTIMONIALS = [
     avatar: "FA",
     color:  "#f59e0b",
     stars:  5,
-    text:   "I was spending 6 hours a day on WhatsApp. Now my AI handles all enquiries and I only step in when there's a serious buyer. It changed my business completely.",
+    text:   "I was spending 6 hours a day on WhatsApp. Now my agent handles all enquiries and I only step in when there's a serious buyer. It changed my business completely.",
   },
   {
     name:   "Tunde Babatunde",
@@ -70,7 +70,7 @@ const TESTIMONIALS = [
     avatar: "BE",
     color:  "#22c55e",
     stars:  5,
-    text:   "Customers book tables and place catering orders through WhatsApp 24/7 now. The AI handles reservations perfectly and sends confirmation messages automatically.",
+    text:   "Customers book tables and place catering orders through WhatsApp 24/7 now. The agent handles reservations perfectly and sends confirmation messages automatically.",
   },
   {
     name:   "Ibrahim Musa",
@@ -186,7 +186,7 @@ export default function Testimonials() {
             className="text-base max-w-xl mx-auto"
             style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
             Real Nigerian businesses, real results. Here's what our customers
-            say after switching to Pax26 AI automation.
+            say after switching to Pax26 automation.
           </motion.p>
         </div>
 

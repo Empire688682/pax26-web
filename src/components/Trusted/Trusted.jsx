@@ -140,7 +140,7 @@ export default function Trusted() {
       icon: MessageCircle, color: GREEN,
       countTarget: 10000, suffix: "+",
       label: "Automated Conversations",
-      sub: "Messages handled by AI every day without human intervention",
+      sub: "Messages handled by your agent every day, automatically",
       delay: "0s",
     },
     {
@@ -153,8 +153,8 @@ export default function Trusted() {
     {
       icon: Clock, color: AMBER,
       countTarget: null, suffix: "24/7",
-      label: "AI Customer Support",
-      sub: "Replies don't stop when you sleep — your AI stays live",
+      label: "Always-On Support",
+      sub: "Replies don't stop when you sleep — your agent stays live",
       delay: "0.2s",
     },
     {

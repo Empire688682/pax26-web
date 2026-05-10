@@ -61,14 +61,14 @@ const PLANS = [
     cta: "Get Started Free",
     features: [
       "1 WhatsApp number",
-      "Up to 500 AI replies/month",
+      "Up to 500 auto-replies/month",
       "Basic chatbot setup",
       "Airtime & Data VTU",
       "Email support",
     ],
     missing: [
       "Smart follow-up automation",
-      "Lead qualification AI",
+      "Smart lead qualification",
       "Priority support",
     ],
   },
@@ -82,8 +82,8 @@ const PLANS = [
     cta: "Start Growing",
     features: [
       "1 WhatsApp number",
-      "Up to 5,000 AI replies/month",
-      "Full AI chatbot + training",
+      "Up to 5,000 auto-replies/month",
+      "Full smart assistant + training",
       "Smart follow-up automation",
       "Lead qualification flows",
       "All VTU services",
@@ -103,8 +103,8 @@ const PLANS = [
     cta: "Go Business",
     features: [
       "Up to 3 WhatsApp numbers",
-      "Unlimited AI replies",
-      "Full AI chatbot + training",
+      "Unlimited auto-replies",
+      "Full smart assistant + training",
       "Smart follow-up automation",
       "Lead qualification flows",
       "All VTU services",

@@ -62,7 +62,7 @@ const STEPS = [
     icon: Bot,
     color: "#a78bfa",
     num: "04",
-    title: "AI Replies Customers",
+    title: "Agent Replies Customers",
     text: "Sit back — your AI handles every message, qualifies leads and books sales 24/7.",
     badge: "Runs 24/7",
   },
