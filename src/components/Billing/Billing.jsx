@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { toast } from "react-toastify";
@@ -58,8 +58,8 @@ const IconStar = ({ size = 20 }) => <svg width={size} height={size} viewBox="0 0
 const IconArrow = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
 const IconWallet = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" /><path d="M18 12a2 2 0 0 0 0 4h4v-4Z" /></svg>;
 
-/* ─── Plan catalogue (mirrors API) ───────────────────────────── */
-const PLANS = [
+/* ─── Plan catalogue (fallback) ───────────────────────────── */
+const FALLBACK_PLANS = [
   {
     key: "starter",
     label: "Starter",
@@ -149,7 +149,7 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
         <div className="absolute top-4 right-4">
           <span className="bl-mono text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
             style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}40` }}>
-            Most Popular
+            {plan.usersCount ? `Most Used (${plan.usersCount})` : "Most Popular"}
           </span>
         </div>
       )}
@@ -231,12 +231,52 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
 export default function Billing() {
   const { pax26, userData, userWallet, fetchUser, router } = useGlobalContext();
 
+  const [plans, setPlans] = useState(FALLBACK_PLANS);
   const [selected, setSelected] = useState(null);
   const [paying, setPaying] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+        if (!adminUrl) return;
+        const res = await fetch(`${adminUrl}/plans`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
+        
+        if (plansList.length > 0) {
+          const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
+          
+          const mergedPlans = plansList.map((fetchedPlan) => {
+            const fallback = FALLBACK_PLANS.find(p => p.key === fetchedPlan.key || p.label.toLowerCase() === (fetchedPlan.name || fetchedPlan.label)?.toLowerCase()) || FALLBACK_PLANS[0];
+            const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
+            
+            return {
+              key: (fetchedPlan.name || fetchedPlan.label)?.toLowerCase() || fallback.key,
+              label: fetchedPlan.name || fetchedPlan.label || fallback.label,
+              icon: fallback.icon,
+              price: Number(fetchedPlan.price) || fallback.price,
+              accentHex: fallback.accentHex,
+              popular: isMostUsed,
+              tagline: fetchedPlan.tagline || fallback.tagline,
+              messages: fetchedPlan.messages || fallback.messages,
+              features: fetchedPlan.features?.length > 0 ? fetchedPlan.features : fallback.features,
+              usersCount: fetchedPlan.usersCount || 0
+            };
+          });
+          setPlans(mergedPlans);
+        }
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+      }
+    };
+    fetchPlans();
+  }, []);
+
   const currentPlan = userData?.paxAI?.plan || "free";
-  const selectedMeta = PLANS.find((p) => p.key === selected);
+  const selectedMeta = plans.find((p) => p.key === selected);
 
   const GOLD = "#C9A84C";
   const GREEN = "#4CAF7D";
@@ -328,7 +368,7 @@ export default function Billing() {
 
               {/* Plan grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bl-slide" style={{ animationDelay: "0.1s" }}>
-                {PLANS.map((plan, i) => (
+                {plans.map((plan, i) => (
                   <PlanCard
                     key={plan.key}
                     plan={plan}

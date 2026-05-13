@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import { CheckCircle2, Zap, Crown, Sparkles, ArrowRight } from "lucide-react";
@@ -50,7 +50,7 @@ const CSS = `
 `;
 
 /* ── Plan config ──────────────────────────────────────────────── */
-const PLANS = [
+const FALLBACK_PLANS = [
   {
     name: "Starter",
     icon: Zap,
@@ -149,7 +149,7 @@ function PlanCard({ plan, index, pax26, inView }) {
       {plan.popular && (
         <div className="absolute -top-0 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-b-xl text-xs font-bold text-white z-10"
           style={{ background: primary, boxShadow: `0 4px 14px ${primary}50` }}>
-          <Sparkles size={11} /> Most Popular
+          <Sparkles size={11} /> {plan.usersCount ? `Most Used (${plan.usersCount})` : "Most Popular"}
         </div>
       )}
 
@@ -225,6 +225,47 @@ export default function Pricing() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
+  const [plans, setPlans] = useState(FALLBACK_PLANS);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+        if (!adminUrl) return;
+        const res = await fetch(`${adminUrl}/plans`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
+        
+        if (plansList.length > 0) {
+          const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
+          
+          const mergedPlans = plansList.map((fetchedPlan) => {
+            const fallback = FALLBACK_PLANS.find(p => p.name.toLowerCase() === fetchedPlan.key?.toLowerCase() || p.name.toLowerCase() === (fetchedPlan.name || fetchedPlan.label)?.toLowerCase()) || FALLBACK_PLANS[0];
+            const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
+            
+            return {
+              name: fetchedPlan.name || fetchedPlan.label || fallback.name,
+              icon: fallback.icon,
+              price: fetchedPlan.price ? `₦${Number(fetchedPlan.price).toLocaleString()}` : fallback.price,
+              period: fallback.period,
+              tagline: fetchedPlan.tagline || fallback.tagline,
+              popular: isMostUsed,
+              cta: fallback.cta,
+              features: fetchedPlan.features?.length > 0 ? fetchedPlan.features : fallback.features,
+              missing: fetchedPlan.missing || fallback.missing,
+              usersCount: fetchedPlan.usersCount || 0
+            };
+          });
+          setPlans(mergedPlans);
+        }
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+      }
+    };
+    fetchPlans();
+  }, []);
+
   return (
     <>
       <style>{CSS}</style>
@@ -276,7 +317,7 @@ export default function Pricing() {
 
           {/* ── Plans grid ──────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
-            {PLANS.map((plan, i) => (
+            {plans.map((plan, i) => (
               <PlanCard
                 key={i}
                 plan={plan}

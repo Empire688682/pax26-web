@@ -7,10 +7,13 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
         const payload = {
             messaging_product: "whatsapp",
             to,
-            type: "text",
-            text: {
-                body: text,
-            },
+            type: "template",
+            template: {
+                name: "pax26",
+                language: {
+                    code: "en_US"
+                }
+            }
         };
 
         const headers = {
@@ -22,6 +25,8 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
         console.log("Using phoneNumberId:", phoneNumberId);
 
         const response = await axios.post(url, payload, { headers });
+
+        console.log("WhatsApp reply response:", response.data);
 
         const messageId = response.data?.messages?.[0]?.id;
 
