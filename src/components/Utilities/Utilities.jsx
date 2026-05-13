@@ -31,53 +31,53 @@ const CSS = `
 /* ── Service config ───────────────────────────────────────────── */
 const SERVICES = [
   {
-    icon:     Phone,
-    color:    "#f97316",
-    name:     "Airtime",
-    desc:     "Recharge any network instantly",
-    detail:   "MTN · Glo · Airtel · 9mobile",
-    href:     "/dashboard/services/buy-airtime",
+    icon: Phone,
+    color: "#f97316",
+    name: "Airtime",
+    desc: "Recharge any network instantly",
+    detail: "MTN · Glo · Airtel · 9mobile",
+    href: "/dashboard/services/buy-airtime",
   },
   {
-    icon:     Database,
-    color:    "#38bdf8",
-    name:     "Data",
-    desc:     "Buy data for any number",
-    detail:   "All networks supported",
-    href:     "/dashboard/services/buy-data",
+    icon: Database,
+    color: "#38bdf8",
+    name: "Data",
+    desc: "Buy data for any number",
+    detail: "All networks supported",
+    href: "/dashboard/services/buy-data",
   },
   {
-    icon:     Zap,
-    color:    "#fbbf24",
-    name:     "Electricity",
-    desc:     "Pay bills & buy tokens",
-    detail:   "Prepaid & Postpaid meters",
-    href:     "/dashboard",
+    icon: Zap,
+    color: "#fbbf24",
+    name: "Electricity",
+    desc: "Pay bills & buy tokens",
+    detail: "Prepaid & Postpaid meters",
+    href: "/dashboard",
   },
   {
-    icon:     Tv,
-    color:    "#a78bfa",
-    name:     "TV Subscription",
-    desc:     "Renew your decoder",
-    detail:   "DSTV · GOtv · Startimes",
-    href:     "/dashboard/services/buy-tv",
+    icon: Tv,
+    color: "#a78bfa",
+    name: "TV Subscription",
+    desc: "Renew your decoder",
+    detail: "DSTV · GOtv · Startimes",
+    href: "/dashboard/services/buy-tv-subscription",
   },
   {
-    icon:     Gift,
-    color:    "#f472b6",
-    name:     "Gift Cards",
-    desc:     "Buy & redeem gift cards",
-    detail:   "iTunes · Amazon · Steam",
-    href:     "/dashboard#VTU",
+    icon: Gift,
+    color: "#f472b6",
+    name: "Gift Cards",
+    desc: "Buy & redeem gift cards",
+    detail: "iTunes · Amazon · Steam",
+    href: "/dashboard#VTU",
   },
   {
-    icon:     Plus,
-    color:    "#22c55e",
-    name:     "More Coming",
-    desc:     "New services launching soon",
-    detail:   "Stay tuned for updates",
-    href:     "#",
-    soon:     true,
+    icon: Plus,
+    color: "#22c55e",
+    name: "More Coming",
+    desc: "New services launching soon",
+    detail: "Stay tuned for updates",
+    href: "#",
+    soon: true,
   },
 ];
 
@@ -94,9 +94,9 @@ function ServiceCard({ service, index, pax26, inView }) {
       className={`ut-card relative rounded-2xl p-5 flex flex-col gap-3 overflow-hidden ${service.soon ? "cursor-default" : "cursor-pointer"}`}
       style={{
         background: pax26?.bg,
-        border:     `1px solid ${pax26?.border}`,
+        border: `1px solid ${pax26?.border}`,
         textDecoration: "none",
-        opacity:    service.soon ? 0.65 : 1,
+        opacity: service.soon ? 0.65 : 1,
       }}>
 
       {/* corner glow */}
@@ -146,7 +146,7 @@ function ServiceCard({ service, index, pax26, inView }) {
 /* ── Main Utilities section ───────────────────────────────────── */
 export default function Utilities() {
   const { pax26 } = useGlobalContext();
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
@@ -218,10 +218,10 @@ export default function Utilities() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-wrap items-center justify-center gap-4">
             {[
-              { text: "Instant delivery",    color: "#22c55e" },
-              { text: "Wallet-powered",       color: primary   },
-              { text: "All Nigerian networks",color: "#f97316" },
-              { text: "24/7 availability",    color: "#38bdf8" },
+              { text: "Instant delivery", color: "#22c55e" },
+              { text: "Wallet-powered", color: primary },
+              { text: "All Nigerian networks", color: "#f97316" },
+              { text: "24/7 availability", color: "#38bdf8" },
             ].map(({ text, color }) => (
               <div key={text} className="flex items-center gap-2">
                 <CheckCircle2 size={13} style={{ color }} />

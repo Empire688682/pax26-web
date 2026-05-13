@@ -34,7 +34,7 @@ const CSS = `
 const VTU_SERVICES = [
   { href: "/dashboard/services/buy-airtime", icon: Phone, label: "Airtime", color: "#f97316" },
   { href: "/dashboard/services/buy-data", icon: Database, label: "Data", color: "#38bdf8" },
-  { href: "/dashboard/services/buy-tv", icon: Tv, label: "TV Sub", color: "#a78bfa" },
+  { href: "/dashboard/services/buy-tv-subscription", icon: Tv, label: "TV Sub", color: "#a78bfa" },
   { href: "/dashboard/services/buy-electricity", icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
   { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards", color: "#f472b6" },
 ];

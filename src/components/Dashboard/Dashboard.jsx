@@ -245,24 +245,23 @@ export default function Dashboard() {
   useEffect(() => {
     getUserRealTimeData();
     fetchUser();
-    
+
     // Fetch VTU services from Admin Backend
     const fetchServices = async () => {
       try {
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
         if (!adminUrl) return;
-        
+
         // Robustly construct the URL as requested: env url + /api/misc/services
-        const baseUrl = adminUrl.endsWith('/api') ? adminUrl.slice(0, -4) : adminUrl;
-        const fetchUrl = `${baseUrl}/api/misc/services`;
-        
+        const fetchUrl = `${adminUrl}/misc/services`;
+
         const res = await fetch(fetchUrl);
         if (!res.ok) {
-           console.error("VTU services fetch failed:", res.status);
-           return;
+          console.error("VTU services fetch failed:", res.status);
+          return;
         }
         const data = await res.json();
-        
+
         if (data.success && data.data) {
           // Filter out active VTU services
           const vtu = data.data.filter(s => s.category === "vtu" && s.active !== false);
@@ -295,24 +294,24 @@ export default function Dashboard() {
 
   // ── Hero theme tokens that mirror the AI plan card exactly ──
   // Text always uses pax26 tokens, never hardcoded dark values
-  const heroTextPrimary   = pax26?.textPrimary;   // same as AI plan card title "free"
+  const heroTextPrimary = pax26?.textPrimary;   // same as AI plan card title "free"
   const heroTextSecondary = pax26?.textSecondary; // same as AI plan card "Messages used"
-  const heroTextMuted     = isLightTheme
+  const heroTextMuted = isLightTheme
     ? `color-mix(in srgb, ${pax26?.textSecondary} 70%, transparent)`
     : "rgba(226,232,240,0.52)";
 
   // Pill backgrounds mirror the AI plan card's badge style
-  const heroPillBg     = isLightTheme ? pax26?.secondaryBg : "rgba(255,255,255,0.05)";
-  const heroPillBorder = isLightTheme ? pax26?.border      : "rgba(255,255,255,0.1)";
+  const heroPillBg = isLightTheme ? pax26?.secondaryBg : "rgba(255,255,255,0.05)";
+  const heroPillBorder = isLightTheme ? pax26?.border : "rgba(255,255,255,0.1)";
 
   // Stat mini cards mirror the AI plan card's inner container
-  const heroStatBg     = isLightTheme ? pax26?.secondaryBg : "rgba(255,255,255,0.04)";
-  const heroStatBorder = isLightTheme ? pax26?.border      : "rgba(255,255,255,0.085)";
+  const heroStatBg = isLightTheme ? pax26?.secondaryBg : "rgba(255,255,255,0.04)";
+  const heroStatBorder = isLightTheme ? pax26?.border : "rgba(255,255,255,0.085)";
 
   // Ghost CTA button mirrors the AI plan "Manage plan" button
-  const heroGhostBg     = isLightTheme ? pax26?.secondaryBg               : "rgba(255,255,255,0.06)";
-  const heroGhostBorder = isLightTheme ? pax26?.border                    : "rgba(255,255,255,0.12)";
-  const heroGhostColor  = isLightTheme ? pax26?.textPrimary               : "rgba(248,250,252,0.72)";
+  const heroGhostBg = isLightTheme ? pax26?.secondaryBg : "rgba(255,255,255,0.06)";
+  const heroGhostBorder = isLightTheme ? pax26?.border : "rgba(255,255,255,0.12)";
+  const heroGhostColor = isLightTheme ? pax26?.textPrimary : "rgba(248,250,252,0.72)";
 
   // Noise opacity lighter on light theme (same as the card's surface feel)
   const heroNoiseOpacity = isLightTheme ? 0.012 : 0.035;
@@ -391,8 +390,8 @@ export default function Dashboard() {
               role="button" tabIndex={0}
               className="db-hero-inner"
               style={{ cursor: "pointer", background: pax26?.card ?? pax26?.bg, boxShadow: heroInnerShadow }}
-              >
-              
+            >
+
 
               <div style={{ position: "relative", zIndex: 3, padding: "clamp(24px,5vw,40px)" }}>
 
@@ -464,9 +463,9 @@ export default function Dashboard() {
                 {/* ── Stat tiles — styled like the AI plan card's inner containers ── */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 11, marginBottom: 28 }}>
                   {[
-                    { label: "Automations",  val: userData?.workflows       || 0, icon: <Layers size={15} />,       color: P },
+                    { label: "Automations", val: userData?.workflows || 0, icon: <Layers size={15} />, color: P },
                     { label: "Msgs handled", val: userData?.messagesHandled || 0, icon: <MessageSquare size={15} />, color: T },
-                    { label: "Contacts",     val: userData?.contacts        || 0, icon: <Users size={15} />,         color: G },
+                    { label: "Contacts", val: userData?.contacts || 0, icon: <Users size={15} />, color: G },
                   ].map((c) => (
                     <div key={c.label} className="db-stat-mini" style={{
                       borderRadius: 15, padding: "14px 16px",
@@ -638,26 +637,26 @@ export default function Dashboard() {
                     const IconComponent = ICON_MAP[svc.iconName] || Zap;
                     // For standard VTU, usually routing to 'buy-key'
                     const linkUrl = svc.key === "transfer" ? "/dashboard/services/transfer" : `/dashboard/services/buy-${svc.key.replace("buy-", "")}`;
-                    
+
                     return (
-                      <SvcCard 
-                        key={svc.key} 
-                        title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")} 
+                      <SvcCard
+                        key={svc.key}
+                        title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")}
                         link={linkUrl}
-                        icon={<IconComponent size={18} strokeWidth={2.2} />} 
-                        color={svc.color || P} 
-                        pax26={pax26} 
-                        router={router} 
+                        icon={<IconComponent size={18} strokeWidth={2.2} />}
+                        color={svc.color || P}
+                        pax26={pax26}
+                        router={router}
                       />
                     );
                   })
                 ) : (
                   <>
-                    <SvcCard title="Airtime"     link="/dashboard/services/buy-airtime"     icon={<Phone size={18} strokeWidth={2.2} />}          color={G}  pax26={pax26} router={router} />
-                    <SvcCard title="Data"        link="/dashboard/services/buy-data"        icon={<Wifi size={18} strokeWidth={2.2} />}           color={T}  pax26={pax26} router={router} />
-                    <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} strokeWidth={2.2} />}            color={Am} pax26={pax26} router={router} />
-                    <SvcCard title="TV"          link="/dashboard/services/buy-tv"          icon={<Tv size={18} strokeWidth={2.2} />}             color={Vi} pax26={pax26} router={router} />
-                    <SvcCard title="Transfer"    link="/dashboard/services/transfer"        icon={<ArrowRightLeft size={18} strokeWidth={2.2} />} color={Co} pax26={pax26} router={router} />
+                    <SvcCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={18} strokeWidth={2.2} />} color={G} pax26={pax26} router={router} />
+                    <SvcCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={18} strokeWidth={2.2} />} color={T} pax26={pax26} router={router} />
+                    <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} strokeWidth={2.2} />} color={Am} pax26={pax26} router={router} />
+                    <SvcCard title="TV" link="/dashboard/services/buy-tv-subscription" icon={<Tv size={18} strokeWidth={2.2} />} color={Vi} pax26={pax26} router={router} />
+                    <SvcCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={18} strokeWidth={2.2} />} color={Co} pax26={pax26} router={router} />
                   </>
                 )}
               </div>

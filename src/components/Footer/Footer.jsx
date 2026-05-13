@@ -81,13 +81,13 @@ const Footer = () => {
   const pathName = usePathname();
 
   // Derive semi-transparent variants from the theme
-  const linkColor      = pax26.textSecondary;
-  const headingColor   = pax26.textSecondary;
-  const mutedColor     = pax26.textSecondary;
-  const chipBg         = pax26.border;
-  const dividerColor   = pax26.border;
-  const inputBg        = pax26.secondaryBg;
-  const inputBorder    = pax26.border;
+  const linkColor = pax26.textSecondary;
+  const headingColor = pax26.textSecondary;
+  const mutedColor = pax26.textSecondary;
+  const chipBg = pax26.border;
+  const dividerColor = pax26.border;
+  const inputBg = pax26.secondaryBg;
+  const inputBorder = pax26.border;
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
@@ -117,9 +117,9 @@ const Footer = () => {
   };
 
   if (pathName === "/reset-password" ||
-      pathName === "/automations/pax" ||
-      pathName === "/verify-user"
-    ) return null;
+    pathName === "/automations/pax" ||
+    pathName === "/verify-user"
+  ) return null;
 
   const year = new Date().getFullYear();
 
@@ -202,7 +202,7 @@ const Footer = () => {
                 <FootLink href="/dashboard/services/buy-data" icon={<Database size={13} />} textColor={linkColor}>Buy Data</FootLink>
                 <FootLink href="/dashboard/services/buy-airtime" icon={<Phone size={13} />} textColor={linkColor}>Airtime Recharge</FootLink>
                 <FootLink href="/dashboard" icon={<Zap size={13} />} textColor={linkColor}>Electricity Bills</FootLink>
-                <FootLink href="/dashboard/services/buy-tv" icon={<Tv size={13} />} textColor={linkColor}>TV Subscription</FootLink>
+                <FootLink href="/dashboard/services/buy-tv-subscription" icon={<Tv size={13} />} textColor={linkColor}>TV Subscription</FootLink>
                 <FootLink href="/dashboard#VTU" icon={<CreditCard size={13} />} textColor={linkColor}>Gift Cards</FootLink>
               </ul>
             </div>
