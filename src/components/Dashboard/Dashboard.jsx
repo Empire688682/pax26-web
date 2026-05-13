@@ -4,7 +4,13 @@ import {
   Bot, Phone, Wifi, Zap, Tv, ArrowRightLeft,
   Bell, ArrowRight, Eye, EyeOff, TrendingUp,
   MessageSquare, Users, Layers, ChevronRight, Crown, Sparkles,
+  Database, BookOpen, Gift, MessageCircle, Brain, Repeat
 } from "lucide-react";
+
+const ICON_MAP = {
+  Phone, Database, Zap, Tv, BookOpen, Gift,
+  MessageCircle, Brain, Repeat, ArrowRightLeft, Wifi
+};
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import CashBackBalance from "../CashBackBalance/CashBackBalance";
@@ -234,10 +240,39 @@ export default function Dashboard() {
   const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [vtuServices, setVtuServices] = useState([]);
 
   useEffect(() => {
     getUserRealTimeData();
     fetchUser();
+    
+    // Fetch VTU services from Admin Backend
+    const fetchServices = async () => {
+      try {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+        if (!adminUrl) return;
+        
+        // Robustly construct the URL as requested: env url + /api/misc/services
+        const baseUrl = adminUrl.endsWith('/api') ? adminUrl.slice(0, -4) : adminUrl;
+        const fetchUrl = `${baseUrl}/api/misc/services`;
+        
+        const res = await fetch(fetchUrl);
+        if (!res.ok) {
+           console.error("VTU services fetch failed:", res.status);
+           return;
+        }
+        const data = await res.json();
+        
+        if (data.success && data.data) {
+          // Filter out active VTU services
+          const vtu = data.data.filter(s => s.category === "vtu" && s.active !== false);
+          setVtuServices(vtu);
+        }
+      } catch (err) {
+        console.error("Error fetching services:", err);
+      }
+    };
+    fetchServices();
   }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
@@ -598,11 +633,33 @@ export default function Dashboard() {
                 Quick services
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 9 }} className="db-svc-grid" id="VTU">
-                <SvcCard title="Airtime"     link="/dashboard/services/buy-airtime"     icon={<Phone size={18} strokeWidth={2.2} />}          color={G}  pax26={pax26} router={router} />
-                <SvcCard title="Data"        link="/dashboard/services/buy-data"        icon={<Wifi size={18} strokeWidth={2.2} />}           color={T}  pax26={pax26} router={router} />
-                <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} strokeWidth={2.2} />}            color={Am} pax26={pax26} router={router} />
-                <SvcCard title="TV"          link="/dashboard/services/buy-tv"          icon={<Tv size={18} strokeWidth={2.2} />}             color={Vi} pax26={pax26} router={router} />
-                <SvcCard title="Transfer"    link="/dashboard/services/transfer"        icon={<ArrowRightLeft size={18} strokeWidth={2.2} />} color={Co} pax26={pax26} router={router} />
+                {vtuServices.length > 0 ? (
+                  vtuServices.map((svc) => {
+                    const IconComponent = ICON_MAP[svc.iconName] || Zap;
+                    // For standard VTU, usually routing to 'buy-key'
+                    const linkUrl = svc.key === "transfer" ? "/dashboard/services/transfer" : `/dashboard/services/buy-${svc.key.replace("buy-", "")}`;
+                    
+                    return (
+                      <SvcCard 
+                        key={svc.key} 
+                        title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")} 
+                        link={linkUrl}
+                        icon={<IconComponent size={18} strokeWidth={2.2} />} 
+                        color={svc.color || P} 
+                        pax26={pax26} 
+                        router={router} 
+                      />
+                    );
+                  })
+                ) : (
+                  <>
+                    <SvcCard title="Airtime"     link="/dashboard/services/buy-airtime"     icon={<Phone size={18} strokeWidth={2.2} />}          color={G}  pax26={pax26} router={router} />
+                    <SvcCard title="Data"        link="/dashboard/services/buy-data"        icon={<Wifi size={18} strokeWidth={2.2} />}           color={T}  pax26={pax26} router={router} />
+                    <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={18} strokeWidth={2.2} />}            color={Am} pax26={pax26} router={router} />
+                    <SvcCard title="TV"          link="/dashboard/services/buy-tv"          icon={<Tv size={18} strokeWidth={2.2} />}             color={Vi} pax26={pax26} router={router} />
+                    <SvcCard title="Transfer"    link="/dashboard/services/transfer"        icon={<ArrowRightLeft size={18} strokeWidth={2.2} />} color={Co} pax26={pax26} router={router} />
+                  </>
+                )}
               </div>
             </div>
           </aside>

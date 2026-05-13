@@ -119,9 +119,9 @@ const FALLBACK_PLANS = [
 function PlanCard({ plan, index, pax26, inView }) {
   const { openModal } = useGlobalContext();
   const primary = pax26?.primary || "#3b82f6";
-  const GOLD    = "#F59E0B";
-  const accent  = plan.popular ? primary : pax26?.textPrimary;
-  const Icon    = plan.icon;
+  const GOLD = "#F59E0B";
+  const accent = plan.popular ? primary : pax26?.textPrimary;
+  const Icon = plan.icon;
 
   return (
     <motion.div
@@ -221,7 +221,7 @@ function PlanCard({ plan, index, pax26, inView }) {
 /* ── Main Pricing section ─────────────────────────────────────── */
 export default function Pricing() {
   const { pax26 } = useGlobalContext();
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
@@ -236,14 +236,14 @@ export default function Pricing() {
         if (!res.ok) return;
         const data = await res.json();
         const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
-        
+
         if (plansList.length > 0) {
           const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
-          
+
           const mergedPlans = plansList.map((fetchedPlan) => {
             const fallback = FALLBACK_PLANS.find(p => p.name.toLowerCase() === fetchedPlan.key?.toLowerCase() || p.name.toLowerCase() === (fetchedPlan.name || fetchedPlan.label)?.toLowerCase()) || FALLBACK_PLANS[0];
             const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
-            
+
             return {
               name: fetchedPlan.name || fetchedPlan.label || fallback.name,
               icon: fallback.icon,
