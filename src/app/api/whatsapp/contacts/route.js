@@ -33,47 +33,8 @@ export async function GET(req) {
     const businessNumber = user.whatsapp?.displayPhone?.replace(/\D/g, "");
     const personalNumber = user.number?.replace(/\D/g, "");
 
-    // 🔥 AUTO-SYNC: Find numbers in message history that aren't in the contacts list
-    const messageStats = await AIMessageModel.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-      {
-        $project: {
-          partner: {
-            $cond: [
-              { $eq: ["$direction", "inbound"] },
-              "$from",
-              "$to"
-            ]
-          },
-          createdAt: 1
-        }
-      },
-      {
-        $group: {
-          _id: "$partner",
-          messageCount: { $sum: 1 },
-          lastMessageAt: { $max: "$createdAt" }
-        }
-      }
-    ]);
-
-    // Filter out numbers already in contacts and create "virtual" contacts for them
-    const existingPhones = new Set(contacts.map(c => c.phone));
-    const unknownContacts = messageStats
-      .filter(stat => stat._id && !existingPhones.has(stat._id) && stat._id.startsWith("+"))
-      .map(stat => ({
-        phone: stat._id,
-        status: "whitelist", // default for new visitors
-        messageCount: stat.messageCount,
-        lastMessageAt: stat.lastMessageAt,
-        leadStage: "new",
-        isVirtual: true // Mark as not yet formally saved in UserModel but visible
-      }));
-
-    const allContacts = [...contacts, ...unknownContacts];
-    
     // Filter out self-contacts
-    const finalContacts = allContacts.filter(c => {
+    const finalContacts = contacts.filter(c => {
       const cleaned = c.phone?.replace(/\D/g, "");
       if (!cleaned) return true;
       if (cleaned === businessNumber) return false;
