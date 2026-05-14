@@ -361,13 +361,14 @@ export const triggerAIResponse = async ({
 
         // Fallback: add contact if it didn't exist yet
         if (updateResult.matchedCount === 0) {
+            const policy = user.whatsapp?.contacts?.unknownContactPolicy || "allow";
             await UserModel.updateOne(
                 { _id: user._id },
                 {
                     $push: {
                         "whatsapp.contacts.list": {
                             phone: session?.visitorPhone,
-                            status: "whitelist",
+                            status: policy === "ask" ? "pending" : "whitelist",
                             messageCount: 1,
                             outboundCount: 1,
                             inboundCount: 0,

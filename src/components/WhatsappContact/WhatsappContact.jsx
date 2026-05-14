@@ -429,26 +429,43 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
             </div>
           </div>
 
-            <div style={{ display: "flex", itemsCenter: "center", gap: "6px" }}>
-              {/* Actions */}
-              <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                {isWhitelist && (
-                  <button
-                    onClick={() => toggleContact(contact?.phone, "blacklist")}
-                    disabled={isLoading}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "5px",
-                      padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
-                      border: "1px solid rgba(220,53,53,0.25)",
-                      background: "rgba(220,53,53,0.06)",
-                      color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
-                      opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
-                    }}
-                  >
-                    {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
-                  </button>
-                )}
-                {isBlacklist && (
+          <div style={{ display: "flex", itemsCenter: "center", gap: "6px" }}>
+            {/* Actions */}
+            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+              {isWhitelist && (
+                <button
+                  onClick={() => toggleContact(contact?.phone, "blacklist")}
+                  disabled={isLoading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                    border: "1px solid rgba(220,53,53,0.25)",
+                    background: "rgba(220,53,53,0.06)",
+                    color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                  }}
+                >
+                  {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
+                </button>
+              )}
+              {isBlacklist && (
+                <button
+                  onClick={() => toggleContact(contact?.phone, "whitelist")}
+                  disabled={isLoading}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "5px",
+                    padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                    border: `1px solid ${pax26?.primary}44`,
+                    background: `${pax26?.primary}12`,
+                    color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                  }}
+                >
+                  {isLoading ? <CardSpinner color={pax26?.primary} /> : "Whitelist"}
+                </button>
+              )}
+              {isPending && (
+                <div style={{ display: "flex", gap: "6px" }}>
                   <button
                     onClick={() => toggleContact(contact?.phone, "whitelist")}
                     disabled={isLoading}
@@ -463,70 +480,53 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
                   >
                     {isLoading ? <CardSpinner color={pax26?.primary} /> : "Whitelist"}
                   </button>
-                )}
-                {isPending && (
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <button
-                      onClick={() => toggleContact(contact?.phone, "whitelist")}
-                      disabled={isLoading}
-                      style={{
-                        display: "flex", alignItems: "center", gap: "5px",
-                        padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
-                        border: `1px solid ${pax26?.primary}44`,
-                        background: `${pax26?.primary}12`,
-                        color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
-                        opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
-                      }}
-                    >
-                      {isLoading ? <CardSpinner color={pax26?.primary} /> : "Whitelist"}
-                    </button>
-                    <button
-                      onClick={() => toggleContact(contact?.phone, "blacklist")}
-                      disabled={isLoading}
-                      style={{
-                        display: "flex", alignItems: "center", gap: "5px",
-                        padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
-                        border: "1px solid rgba(220,53,53,0.25)",
-                        background: "rgba(220,53,53,0.06)",
-                        color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
-                        opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
-                      }}
-                    >
-                      {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
-                    </button>
-                  </div>
-                )}
-                
-                {/* Delete button */}
-                <button
-                  onClick={() => {
-                    if (window.confirm("Delete this contact permanently?")) {
-                      deleteContact(contact?.phone);
-                    }
-                  }}
-                  disabled={isLoading}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    padding: "5px 8px", borderRadius: "8px",
-                    background: pax26?.secondaryBg,
-                    border: `1px solid ${pax26?.border}`,
-                    color: pax26?.textPrimary, opacity: 0.4,
-                    cursor: isLoading ? "not-allowed" : "pointer",
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.opacity = "1";
-                    e.currentTarget.style.color = "#dc3535";
-                    e.currentTarget.style.borderColor = "rgba(220,53,53,0.2)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.opacity = "0.4";
-                    e.currentTarget.style.color = pax26?.textPrimary;
-                    e.currentTarget.style.borderColor = pax26?.border;
-                  }}
-                >
-                  <TrashIcon />
-                </button>
-              </div>
+                  <button
+                    onClick={() => toggleContact(contact?.phone, "blacklist")}
+                    disabled={isLoading}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "5px",
+                      padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                      border: "1px solid rgba(220,53,53,0.25)",
+                      background: "rgba(220,53,53,0.06)",
+                      color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                    }}
+                  >
+                    {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
+                  </button>
+                </div>
+              )}
+
+              {/* Delete button */}
+              <button
+                onClick={() => {
+                  if (window.confirm("Delete this contact permanently?")) {
+                    deleteContact(contact?.phone);
+                  }
+                }}
+                disabled={isLoading}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  padding: "5px 8px", borderRadius: "8px",
+                  background: pax26?.secondaryBg,
+                  border: `1px solid ${pax26?.border}`,
+                  color: pax26?.textPrimary, opacity: 0.4,
+                  cursor: isLoading ? "not-allowed" : "pointer",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.color = "#dc3535";
+                  e.currentTarget.style.borderColor = "rgba(220,53,53,0.2)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.opacity = "0.4";
+                  e.currentTarget.style.color = pax26?.textPrimary;
+                  e.currentTarget.style.borderColor = pax26?.border;
+                }}
+              >
+                <TrashIcon />
+              </button>
+            </div>
 
             {/* Desktop Expand toggle */}
             {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
