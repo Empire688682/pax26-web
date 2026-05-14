@@ -59,7 +59,7 @@ const AppShell = ({ children }) => {
       )}
       <BackgroundFX pax26={pax26} />
       <div style={{ position: "relative", zIndex: 1 }}>
-        <div className="flex items-center shadow-md justify-start w-full">
+        <div className="flex items-start shadow-md justify-start w-full">
           <Sidebar />
           <div className="w-full overflow-hidden">
             {!hideHeader && <Header />}

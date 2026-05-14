@@ -655,7 +655,6 @@ export default function WhatsAppInbox() {
         background: "#0b141a",
         position: "relative",
       }}
-      className="rounded-lg"
     >
       {/* GLOBAL CSS */}
       <style>{`
