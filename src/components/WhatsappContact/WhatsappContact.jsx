@@ -326,11 +326,14 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
   const [expanded, setExpanded] = useState(false);
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
+  const isPending = contact.status === "pending";
   const isLoading = loadingPhone === contact.phone;
 
   const badgeStyle = isWhitelist
     ? { background: `${pax26?.primary}18`, color: pax26?.primary }
-    : { background: "rgba(220,53,53,0.12)", color: "#dc3535" };
+    : isPending
+      ? { background: "rgba(245,158,11,0.12)", color: "#f59e0b" }
+      : { background: "rgba(220,53,53,0.12)", color: "#dc3535" };
 
   return (
     <motion.div
@@ -417,12 +420,11 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
                 letterSpacing: "0.04em", textTransform: "capitalize",
                 ...badgeStyle,
               }}>
-              {isWhitelist ? "AI on" : "AI off"}
+              {isWhitelist ? "AI on" : isPending ? "Pending" : "AI off"}
             </div>
           </div>
 
           <div className="flex items-center gap-[6px]">
-            {/* Actions */}
             <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
               {isWhitelist && (
                 <button
@@ -437,10 +439,7 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
                     opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
                   }}
                 >
-                  {isLoading
-                    ? <><CardSpinner color="#dc3535" /><span>Saving…</span></>
-                    : "Blacklist"
-                  }
+                  {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
                 </button>
               )}
               {isBlacklist && (
@@ -456,11 +455,40 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
                     opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
                   }}
                 >
-                  {isLoading
-                    ? <><CardSpinner color={pax26?.primary} /><span>Saving…</span></>
-                    : "Whitelist"
-                  }
+                  {isLoading ? <CardSpinner color={pax26?.primary} /> : "Whitelist"}
                 </button>
+              )}
+              {isPending && (
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={() => toggleContact(contact?.phone, "whitelist")}
+                    disabled={isLoading}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "5px",
+                      padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                      border: `1px solid ${pax26?.primary}44`,
+                      background: `${pax26?.primary}12`,
+                      color: pax26?.primary, cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                    }}
+                  >
+                    {isLoading ? <CardSpinner color={pax26?.primary} /> : "Whitelist"}
+                  </button>
+                  <button
+                    onClick={() => toggleContact(contact?.phone, "blacklist")}
+                    disabled={isLoading}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "5px",
+                      padding: "5px 10px", borderRadius: "8px", fontWeight: 600,
+                      border: "1px solid rgba(220,53,53,0.25)",
+                      background: "rgba(220,53,53,0.06)",
+                      color: "#dc3535", cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1, minWidth: "80px", justifyContent: "center",
+                    }}
+                  >
+                    {isLoading ? <CardSpinner color="#dc3535" /> : "Blacklist"}
+                  </button>
+                </div>
               )}
             </div>
 
@@ -643,8 +671,9 @@ export default function WhatsappContact() {
 
   const tabs = [
     { key: "all", label: "All" },
-    { key: "whitelist", label: "Whitelist" },
-    { key: "blacklist", label: "Blacklist" },
+    { key: "whitelist", label: "Whitelisted" },
+    { key: "pending", label: "Pending" },
+    { key: "blacklist", label: "Blocked" },
   ];
 
   const filtered = contacts.filter(c => {
@@ -669,6 +698,7 @@ export default function WhatsappContact() {
   const stats = {
     total: contacts.length,
     whitelist: contacts.filter(c => c.status === "whitelist").length,
+    pending: contacts.filter(c => c.status === "pending").length,
     blacklist: contacts.filter(c => c.status === "blacklist").length,
     totalMessages: contacts.reduce((s, c) => s + (c.messageCount || 0), 0),
   };
@@ -794,9 +824,10 @@ export default function WhatsappContact() {
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-[5px] mb-[24px]">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-[5px] mb-[24px]">
         <StatCard label="Total" value={stats.total} pax26={pax26} />
         <StatCard label="Whitelisted" value={stats.whitelist} color={pax26?.primary} pax26={pax26} />
+        <StatCard label="Pending" value={stats.pending} color="#f59e0b" pax26={pax26} />
         <StatCard label="Blocked" value={stats.blacklist} color="#dc3535" pax26={pax26} />
         <StatCard label="Messages" value={stats.totalMessages} pax26={pax26} />
       </div>

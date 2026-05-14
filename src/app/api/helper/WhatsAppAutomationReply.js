@@ -24,8 +24,6 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
 
         const response = await axios.post(url, payload, { headers });
 
-        console.log("WhatsApp reply response:", response.data);
-
         const messageId = response.data?.messages?.[0]?.id;
 
         return {

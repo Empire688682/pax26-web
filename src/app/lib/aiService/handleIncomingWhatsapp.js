@@ -100,7 +100,13 @@ export const handleIncomingWhatsApp = async (payload) => {
 
     if (existingContact.status === "pending") {
       const text = inboundText.toLowerCase().trim();
-      if (text === "no" || text === "stop" || text === "cancel") {
+      
+      // Strict regex: Matches "yes", "y", "ok" as standalone words or at the start
+      const isYes = /^(yes|ok|yup|sure|y|proceed)(\b|$)/i.test(text);
+      // Strict regex: Matches "no", "n", "nope", "stop", "cancel" as standalone words
+      const isNo = /^(no|n|nope|stop|cancel)(\b|$)/i.test(text);
+
+      if (isNo) {
         console.log("🛡️ Contact replied 'No' to opt-in. Blacklisting.");
         await UserModel.updateOne(
           { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
@@ -114,13 +120,16 @@ export const handleIncomingWhatsApp = async (payload) => {
         return { ok: true };
       }
 
-      // If they say Yes or anything else, we whitelist them and proceed
-      console.log("🛡️ Contact replied to opt-in. Whitelisting and proceeding.");
-      await UserModel.updateOne(
-        { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
-        { $set: { "whatsapp.contacts.list.$.status": "whitelist" } }
-      );
-      // Continue to Step 3 so the AI can actually reply to their message
+      if (isYes) {
+        console.log("🛡️ Contact replied 'Yes' to opt-in. Whitelisting.");
+        await UserModel.updateOne(
+          { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+          { $set: { "whatsapp.contacts.list.$.status": "whitelist" } }
+        );
+      } else {
+        console.log("🛡️ Contact replied with something else. Staying 'pending' but allowing AI.");
+      }
+      // Proceed to Step 3 so the AI can actually reply to their message
     }
   } else {
     // New contact flow
