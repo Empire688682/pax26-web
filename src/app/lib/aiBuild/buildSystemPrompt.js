@@ -73,10 +73,11 @@ ${products
   ID: ${p._id}
   Name: ${p.name}
   Price: ${currencySymbol}${Number(p.price).toLocaleString()}
-  ${p.discountPrice ? `Discount Price: ${currencySymbol}${Number(p.discountPrice).toLocaleString()}` : ""}
-  ${p.deliveryFee ? `Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
-  ${p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
-  ${p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
+  Type: ${p.isPhysical ? "Physical Product" : "Digital Service/Link"}
+  ${p.isPhysical && p.discountPrice ? `Discount Price: ${currencySymbol}${Number(p.discountPrice).toLocaleString()}` : ""}
+  ${p.isPhysical && p.deliveryFee ? `Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
+  ${p.isPhysical && p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
+  ${p.isPhysical && p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
   Category: ${p.category || "General"}
   Tags: ${p.tags?.join(", ") || "none"}
   Stock: ${p.stock > 0 ? `${p.stock} units available` : "Out of stock"}
@@ -206,10 +207,12 @@ Stage 3 — HANDLE OBJECTIONS
 Stage 4 — CLOSE
   Ask clearly: "Would you like to go ahead with this one?"
   If yes:
-    - For physical products (commodities): Ask for their specific LOCATION (e.g., "Where are you located?") to confirm delivery.
-    - Check if their location matches your "Delivery Location" notes.
+    - If the product is "Physical Product": Ask for their specific LOCATION (e.g., "Where are you located?") to confirm delivery.
+    - Check if their location matches the "Delivery Location" notes for that product.
     - Once location is known: Mention the Delivery Fee, calculate the TOTAL (Price + Delivery Fee), and mention the Delivery Time.
-    - Example: "Great! Since you're in [Location], delivery is [Fee], making it [Total] altogether. We deliver within [Time]. Can I have your full address?"
+    - If the product is "Digital Service/Link": Proceed directly to payment. Mention that it will be delivered digitally (e.g., via email or link).
+    - Example (Physical): "Great! Since you're in [Location], delivery is [Fee], making it [Total] altogether. We deliver within [Time]. Can I have your full address?"
+    - Example (Digital): "Great! The total is [Price]. Since this is a digital product, I'll send you the access link immediately after payment is confirmed. Ready to proceed?"
 
 Stage 5 — PAYMENT
   Share the active payment account details.

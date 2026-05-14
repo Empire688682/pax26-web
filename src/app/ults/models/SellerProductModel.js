@@ -59,6 +59,12 @@ const SellerProductSchema = new mongoose.Schema({
         type: String, // "Only within Lagos", "Nationwide", etc
     },
 
+    isPhysical: {
+        type: Boolean,
+        default: true,
+        required: true,
+    },
+
     images: [
         {
             url: { type: String, required: true },

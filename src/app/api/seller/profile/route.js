@@ -166,6 +166,7 @@ export async function POST(req) {
                 deliveryFee: prod.deliveryFee,
                 deliveryTimeFrame: prod.deliveryTimeFrame,
                 locationNotes: prod.locationNotes,
+                isPhysical: prod.isPhysical ?? true,
             });
 
             // Bulk update existing products.

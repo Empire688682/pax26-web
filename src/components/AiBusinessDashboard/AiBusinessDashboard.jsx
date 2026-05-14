@@ -335,7 +335,7 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
    PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
 function ProductBuilder({ products, onChange, pax26, sellerId }) {
-  const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", description: "", category: "", tags: [], stock: "", images: [] });
+  const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", isPhysical: true, description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyProduct());
 
@@ -408,14 +408,29 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
             <ThemedInput label="Discount Price (₦)" pax26={p} type="number" value={draft.discountPrice} onChange={e => setDraft(d => ({ ...d, discountPrice: e.target.value }))} placeholder="4500" />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-            <ThemedInput label="Delivery Fee (₦)" pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
-            <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
-          </div>
-          <ThemedInput label="Delivery Location" pax26={p} value={draft.locationNotes} onChange={e => setDraft(d => ({ ...d, locationNotes: e.target.value }))} placeholder="e.g. Lagos only" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <ThemedSelect
+              label="Product Type *"
+              value={draft.isPhysical ? "true" : "false"}
+              onChange={v => setDraft(d => ({ ...d, isPhysical: v === "true" }))}
+              options={[
+                { value: "true", label: "Physical Product" },
+                { value: "false", label: "Digital Service / Link" },
+              ]}
+              pax26={p}
+            />
             <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes" />
-            <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
           </div>
+          <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
+          
+          {draft.isPhysical && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <ThemedInput label="Delivery Fee (₦)" pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
+                <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
+              </div>
+              <ThemedInput label="Delivery Location" pax26={p} value={draft.locationNotes} onChange={e => setDraft(d => ({ ...d, locationNotes: e.target.value }))} placeholder="e.g. Lagos only" />
+            </motion.div>
+          )}
           <ThemedTextarea label="Description" pax26={p} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="Describe the product…" rows={2} />
           <TagInput label="Search Tags" example="e.g. black, nike, size-42" tags={draft.tags} onChange={tags => setDraft(d => ({ ...d, tags }))} pax26={p} />
           <ProductMediaUploader
@@ -781,6 +796,14 @@ export default function AiBusinessDashboard() {
                         <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
                           <div style={{ marginBottom: "12px" }}>
                             <h4 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 800, color: p?.textPrimary }}>{prod.name}</h4>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                              <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "99px", background: prod.isPhysical ? `${p?.primary}15` : "#3b82f615", color: prod.isPhysical ? p?.primary : "#3b82f6", textTransform: "uppercase" }}>
+                                {prod.isPhysical ? "Physical" : "Digital"}
+                              </span>
+                              <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "99px", background: p?.border, color: p?.textPrimary, opacity: 0.7, textTransform: "uppercase" }}>
+                                {prod.category || "General"}
+                              </span>
+                            </div>
                             <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                               {prod.description || "No description provided for this product."}
                             </p>

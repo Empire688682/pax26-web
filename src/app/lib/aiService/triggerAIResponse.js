@@ -127,8 +127,10 @@ export const triggerAIResponse = async ({
             return;
         }
 
-        const LIMIT = 30;
-        const WARNING_THRESHOLD = 29;
+        // ── Plan-based conversation limits ───────────────────────
+        const plan = user.paxAI?.plan || "free";
+        const LIMIT = plan === "free" ? 100 : 5000; 
+        const WARNING_THRESHOLD = LIMIT - 5;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
         // ── Auto-restore session after 24h ────────────────────────
