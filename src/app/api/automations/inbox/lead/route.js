@@ -73,7 +73,20 @@ export async function GET(req) {
       );
     }
 
+    const businessNumber = user.whatsapp?.displayPhone?.replace(/\D/g, "");
+    const personalNumber = user.number?.replace(/\D/g, "");
+
     let contacts = user?.whatsapp?.contacts?.list ?? [];
+    
+    // Filter out self-contacts
+    contacts = contacts.filter(c => {
+      const cleaned = c.phone?.replace(/\D/g, "");
+      if (!cleaned) return true;
+      if (cleaned === businessNumber) return false;
+      if (personalNumber && cleaned.endsWith(personalNumber)) return false;
+      return true;
+    });
+
     if (stage) contacts = contacts.filter(c => c.leadStage === stage);
     contacts.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
 

@@ -4,6 +4,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
+import UserModel from "@/app/ults/models/UserModel";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import mongoose from "mongoose";
 
@@ -15,14 +16,39 @@ export async function GET(req) {
   try {
     await connectDb();
     const userId = await verifyToken(req);
+    const user = await UserModel.findById(userId).lean();
+    if (!user) {
+      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
 
-    // Get all unique conversations grouped by visitorPhone
+    const businessNumber = user.whatsapp?.displayPhone?.replace(/\D/g, "");
+    const personalNumber = user.number?.replace(/\D/g, "");
+
+    // Get all unique conversations grouped by the conversation partner (the visitor)
     const conversations = await AIMessageModel.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       { $sort: { createdAt: -1 } },
       {
+        $project: {
+          partner: {
+            $cond: [
+              { $eq: ["$direction", "inbound"] },
+              "$from",
+              "$to"
+            ]
+          },
+          text: 1,
+          createdAt: 1,
+          direction: 1,
+          senderType: 1,
+          status: 1,
+          sessionId: 1,
+          phoneNumberId: 1,
+        }
+      },
+      {
         $group: {
-          _id: "$from",
+          _id: "$partner",
           lastMessage: { $first: "$text" },
           lastMessageAt: { $first: "$createdAt" },
           lastDirection: { $first: "$direction" },
@@ -68,8 +94,17 @@ export async function GET(req) {
       })
     );
 
+    // Filter out self-conversations (where partner is the user's own business or personal number)
+    const filtered = enriched.filter(conv => {
+      const cleanedPartner = conv.phone?.replace(/\D/g, "");
+      if (!cleanedPartner) return true;
+      if (cleanedPartner === businessNumber) return false;
+      if (personalNumber && cleanedPartner.endsWith(personalNumber)) return false;
+      return true;
+    });
+
     return NextResponse.json(
-      { success: true, data: enriched },
+      { success: true, data: filtered },
       { status: 200, headers: corsHeaders() }
     );
   } catch (error) {

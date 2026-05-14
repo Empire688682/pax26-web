@@ -70,6 +70,15 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
   console.log("✅ Step 1 — User found:", user._id);
 
+  // ── Step 1.5: Guard against self-messages & echos ─────────
+  const userPersonalPhone = user.number?.replace(/\D/g, "");
+  const businessPhone = displayPhone?.replace(/\D/g, "");
+  
+  if (cleaned === businessPhone || (userPersonalPhone && cleaned.endsWith(userPersonalPhone))) {
+    console.log(`🚫 Ignoring self-message or echo from: ${visitorPhone}`);
+    return { ok: true };
+  }
+
   // ── Step 2: Load seller profile (for image search context) ─
   // Only needed for image messages but cheap to load early
   const sellerProfile = await SellerProfileModel.findOne({ userId: user._id }).lean();
