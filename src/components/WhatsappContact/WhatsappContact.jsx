@@ -626,7 +626,7 @@ const PolicyPill = ({ label, description, value, current, onClick, pax26 }) => {
 
 /* ── Main Component ──────────────────────────────────────── */
 export default function WhatsappContact() {
-  const { pax26, userData } = useGlobalContext();
+  const { pax26, userData, fetchUser } = useGlobalContext();
 
   const [contacts, setContacts] = useState([]);
   const [policy, setPolicy] = useState("allow");
@@ -687,6 +687,9 @@ export default function WhatsappContact() {
 
   useEffect(() => {
     fetchContacts();
+    if (userData?.whatsapp?.contacts?.unknownContactPolicy) {
+      setPolicy(userData.whatsapp.contacts.unknownContactPolicy);
+    }
   }, [userData]);
 
   const toggleContact = async (phone, status) => {
@@ -750,11 +753,12 @@ export default function WhatsappContact() {
       const response = await fetch("/api/contact/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ policy, contacts }),
+        body: JSON.stringify({ policy }),
       });
       if (response.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        if (fetchUser) fetchUser();
       }
     } catch (error) {
       console.error("Failed to save contact settings:", error);

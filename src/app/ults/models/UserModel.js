@@ -87,7 +87,7 @@ const UserSchema = new mongoose.Schema(
                 phone: { type: String, required: true },
                 status: {
                   type: String,
-                  enum: ["whitelist", "blacklist"],
+                  enum: ["whitelist", "blacklist", "pending"],
                   default: "whitelist"
                 },
                 tags: [{ type: String }],

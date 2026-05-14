@@ -7,6 +7,8 @@ import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js"
 import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
+import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
+import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply";
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -88,14 +90,48 @@ export const handleIncomingWhatsApp = async (payload) => {
     (c) => c.phone === visitorPhone
   );
 
-  // New contacts (not in the initially loaded user) are created with 'whitelist' status later
-  const contactIsWhitelisted = existingContact ? existingContact.status === "whitelist" : true;
+  const policy = user.whatsapp?.contacts?.unknownContactPolicy || "allow";
 
-  if (!contactIsWhitelisted) {
-    console.log("🚫 Auto-reply blocked by contact policy. Ignoring message and preventing db save.");
-    return { ok: true };
+  if (existingContact) {
+    if (existingContact.status === "blacklist") {
+      console.log("🚫 Auto-reply blocked by blacklist. Ignoring message.");
+      return { ok: true };
+    }
+
+    if (existingContact.status === "pending") {
+      const text = inboundText.toLowerCase().trim();
+      if (text === "no" || text === "stop" || text === "cancel") {
+        console.log("🛡️ Contact replied 'No' to opt-in. Blacklisting.");
+        await UserModel.updateOne(
+          { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+          { $set: { "whatsapp.contacts.list.$.status": "blacklist" } }
+        );
+        await sendWhatsAppAutomationReply({
+          phoneNumberId,
+          to: visitorPhone,
+          text: "No problem. I've noted that. Have a great day!",
+        });
+        return { ok: true };
+      }
+
+      // If they say Yes or anything else, we whitelist them and proceed
+      console.log("🛡️ Contact replied to opt-in. Whitelisting and proceeding.");
+      await UserModel.updateOne(
+        { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+        { $set: { "whatsapp.contacts.list.$.status": "whitelist" } }
+      );
+      // Continue to Step 3 so the AI can actually reply to their message
+    }
+  } else {
+    // New contact flow
+    if (policy === "block") {
+      console.log("🚫 Auto-reply blocked by 'block' unknown contact policy. Ignoring message.");
+      return { ok: true };
+    }
+
   }
-  console.log("✅ Step 2.5 — Auto-reply allowed");
+
+  console.log("✅ Step 2.5 — Auto-reply allowed (Policy:", policy, ")");
 
   // ── Step 3: Get or create session ─────────────────────────
   const session = await getOrCreateSession({
@@ -164,7 +200,7 @@ export const handleIncomingWhatsApp = async (payload) => {
           $addToSet: {
             "whatsapp.contacts.list": {
               phone: visitorPhone,
-              status: "whitelist",
+              status: policy === "ask" ? "pending" : "whitelist",
               leadStage: "new",
               leadSource: "whatsapp",
               messageCount: 1,
@@ -179,6 +215,44 @@ export const handleIncomingWhatsApp = async (payload) => {
       console.log("✅ Step 5 — New lead added:", visitorPhone);
     } else {
       console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
+    }
+
+    // ── Special Case: 'ask' policy for first-time contacts ───
+    if (!existingContact && policy === "ask") {
+      console.log("🛡️ Unknown contact policy is 'ask'. Sending opt-in prompt.");
+
+      let businessName = sellerProfile?.businessName;
+      if (!businessName) {
+        const genProfile = await GeneralBusinessProfileModel.findOne({ userId: user._id }).lean();
+        businessName = genProfile?.businessName || "our business";
+      }
+      
+      const optInMessage = `Hi! I'm the Agent assistant for ${businessName}. I'm here to help with your enquiries. Would you like to proceed with our Agent automated chat? (Reply with Yes or No to continue)`;
+
+      const response = await sendWhatsAppAutomationReply({
+        phoneNumberId,
+        to: visitorPhone,
+        text: optInMessage,
+      });
+
+      if (response) {
+        await AIMessageModel.create({
+          messageId: `optin_${Date.now()}`,
+          userId: user._id,
+          sessionId: session.sessionId,
+          platform: "whatsapp",
+          phoneNumberId,
+          from: displayPhone,
+          to: visitorPhone,
+          text: optInMessage,
+          direction: "outbound",
+          senderType: "system",
+          status: "sent",
+        });
+      }
+
+      console.log("✅ Opt-in sent. Skipping AI for now.");
+      return { ok: true };
     }
   } catch (err) {
     console.error("❌ Step 5 — Error updating contact list:", err);
