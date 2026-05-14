@@ -47,6 +47,8 @@ const CSS = `
   .bl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
   .bl-check-item { transition: opacity 0.15s ease; }
+
+  .p-disabled { filter: grayscale(1); opacity: 0.6; pointer-events: none; }
 `;
 
 /* ─── Icons ──────────────────────────────────────────────────── */
@@ -57,64 +59,15 @@ const IconRocket = ({ size = 20 }) => <svg width={size} height={size} viewBox="0
 const IconStar = ({ size = 20 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
 const IconArrow = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
 const IconWallet = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" /><path d="M18 12a2 2 0 0 0 0 4h4v-4Z" /></svg>;
+const IconAlert = ({ size = 48 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>;
 
-/* ─── Plan catalogue (fallback) ───────────────────────────── */
-const FALLBACK_PLANS = [
-  {
-    key: "starter",
-    label: "Starter",
-    icon: <IconZap size={22} />,
-    price: 5000,
-    accentHex: "#38BDF8",
-    popular: false,
-    tagline: "Perfect for solo entrepreneurs",
-    messages: "500 AI messages / month",
-    features: [
-      "500 AI WhatsApp replies / month",
-      "Lead capture & auto-tagging",
-      "Basic follow-up automation",
-      "Business profile training",
-      "Email support",
-    ],
-  },
-  {
-    key: "business",
-    label: "Business",
-    icon: <IconRocket size={22} />,
-    price: 25000,
-    accentHex: "#C9A84C",
-    popular: true,
-    tagline: "For growing businesses",
-    messages: "3,000 AI messages / month",
-    features: [
-      "3,000 AI WhatsApp replies / month",
-      "Advanced lead follow-up flows",
-      "Image search & product matching",
-      "Priority AI response speed",
-      "Full automation marketplace",
-      "Priority support",
-    ],
-  },
-  {
-    key: "enterprise",
-    label: "Enterprise",
-    icon: <IconStar size={22} />,
-    price: 75000,
-    accentHex: "#A78BFA",
-    popular: false,
-    tagline: "For high-volume teams",
-    messages: "20,000 AI messages / month",
-    features: [
-      "20,000 AI WhatsApp replies / month",
-      "Unlimited automation workflows",
-      "Custom AI personality & tone",
-      "Dedicated account manager",
-      "API access",
-      "White-label ready",
-      "24/7 priority support",
-    ],
-  },
-];
+const ICON_MAP = {
+  free: <IconZap size={22} />,
+  starter: <IconZap size={22} />,
+  business: <IconRocket size={22} />,
+  enterprise: <IconStar size={22} />,
+  default: <IconCrown size={22} />
+};
 
 /* ─── Spinner ────────────────────────────────────────────────── */
 function Spinner({ color }) {
@@ -133,8 +86,8 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
   return (
     <div
       id={`plan-card-${plan.key}`}
-      className="bl-card relative rounded-2xl overflow-hidden flex flex-col"
-      onClick={() => !isCurrent && onSelect(plan.key)}
+      className={`bl-card relative rounded-2xl overflow-hidden flex flex-col ${!plan.isActive ? 'p-disabled' : ''}`}
+      onClick={() => !isCurrent && plan.isActive && onSelect(plan.key)}
       style={{
         background: pax26?.bg,
         border: `2px solid ${isSelected ? accent : isCurrent ? `${accent}55` : pax26?.border}`,
@@ -164,12 +117,20 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
         </div>
       )}
 
+      {!plan.isActive && (
+        <div className="absolute top-4 left-4">
+          <span className="bl-mono text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full bg-red-100 text-red-600 border border-red-200">
+            Maintenance
+          </span>
+        </div>
+      )}
+
       <div className="p-6 flex flex-col gap-5 flex-1">
         {/* Icon + label */}
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl flex items-center justify-center"
             style={{ background: `${accent}15`, color: accent }}>
-            {plan.icon}
+            {ICON_MAP[plan.key] || ICON_MAP.default}
           </div>
           <div>
             <p className="bl-syne text-base font-bold" style={{ color: pax26?.textPrimary }}>{plan.label}</p>
@@ -210,8 +171,8 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
         {/* Select button */}
         <button
           className="bl-btn w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold mt-auto"
-          onClick={(e) => { e.stopPropagation(); !isCurrent && onSelect(plan.key); }}
-          disabled={isCurrent}
+          onClick={(e) => { e.stopPropagation(); !isCurrent && plan.isActive && onSelect(plan.key); }}
+          disabled={isCurrent || !plan.isActive}
           style={
             isSelected
               ? { background: accent, color: "#fff", boxShadow: `0 6px 20px ${accent}40` }
@@ -220,7 +181,7 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
                 : { background: `${accent}12`, color: accent, border: `1px solid ${accent}28` }
           }
         >
-          {isCurrent ? "Active Plan" : isSelected ? <><IconCheck size={14} /> Selected</> : "Select Plan"}
+          {isCurrent ? "Active Plan" : !plan.isActive ? "Maintenance" : isSelected ? <><IconCheck size={14} /> Selected</> : "Select Plan"}
         </button>
       </div>
     </div>
@@ -231,18 +192,26 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
 export default function Billing() {
   const { pax26, userData, userWallet, fetchUser, router } = useGlobalContext();
 
-  const [plans, setPlans] = useState(FALLBACK_PLANS);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [paying, setPaying] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     const fetchPlans = async () => {
+      setLoading(true);
       try {
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-        if (!adminUrl) return;
+        if (!adminUrl) {
+            setLoading(false);
+            return;
+        }
         const res = await fetch(`${adminUrl}/plans`);
-        if (!res.ok) return;
+        if (!res.ok) {
+            setLoading(false);
+            return;
+        }
         const data = await res.json();
         const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
         
@@ -250,26 +219,27 @@ export default function Billing() {
           const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
           
           const mergedPlans = plansList.map((fetchedPlan) => {
-            const fallback = FALLBACK_PLANS.find(p => p.key === fetchedPlan.key || p.label.toLowerCase() === (fetchedPlan.name || fetchedPlan.label)?.toLowerCase()) || FALLBACK_PLANS[0];
             const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
             
             return {
-              key: (fetchedPlan.name || fetchedPlan.label)?.toLowerCase() || fallback.key,
-              label: fetchedPlan.name || fetchedPlan.label || fallback.label,
-              icon: fallback.icon,
-              price: Number(fetchedPlan.price) || fallback.price,
-              accentHex: fallback.accentHex,
-              popular: isMostUsed,
-              tagline: fetchedPlan.tagline || fallback.tagline,
-              messages: fetchedPlan.messages || fallback.messages,
-              features: fetchedPlan.features?.length > 0 ? fetchedPlan.features : fallback.features,
-              usersCount: fetchedPlan.usersCount || 0
+              key: fetchedPlan.key,
+              label: fetchedPlan.label,
+              price: Number(fetchedPlan.price) || 0,
+              accentHex: fetchedPlan.accentHex || "#3b82f6",
+              popular: fetchedPlan.popular || isMostUsed,
+              tagline: fetchedPlan.tagline || "",
+              messages: fetchedPlan.messages || "",
+              features: fetchedPlan.features || [],
+              usersCount: fetchedPlan.usersCount || 0,
+              isActive: fetchedPlan.isActive !== undefined ? fetchedPlan.isActive : true
             };
           });
           setPlans(mergedPlans);
         }
       } catch (err) {
         console.error("Error fetching plans:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPlans();
@@ -339,8 +309,7 @@ export default function Billing() {
             </div>
             <h1 className="bl-syne font-extrabold leading-tight mb-2"
               style={{ fontSize: "clamp(24px, 4.5vw, 40px)", color: pax26?.textPrimary }}>
-              Choose your{" "}
-              <span style={{ color: GOLD }}>AI Power</span> level
+              Choose your <span style={{ color: GOLD }}>AI Power</span> level
             </h1>
             <p className="text-sm max-w-xl" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
               Unlock smarter automations, higher message volumes, and priority AI responses. All billed from your wallet — no card needed.
@@ -368,16 +337,31 @@ export default function Billing() {
 
               {/* Plan grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bl-slide" style={{ animationDelay: "0.1s" }}>
-                {plans.map((plan, i) => (
-                  <PlanCard
-                    key={plan.key}
-                    plan={plan}
-                    selected={selected}
-                    currentPlan={currentPlan}
-                    onSelect={setSelected}
-                    pax26={pax26}
-                  />
-                ))}
+                {loading ? (
+                    [1,2,3].map(i => (
+                        <div key={i} className="h-96 rounded-2xl bg-gray-100 animate-pulse border border-gray-200" />
+                    ))
+                ) : plans.length === 0 ? (
+                    <div className="col-span-full py-16 bg-amber-50 rounded-[32px] border border-amber-100 flex flex-col items-center text-center px-10">
+                        <IconAlert size={48} className="text-amber-500 mb-6" />
+                        <h3 className="bl-syne text-xl font-bold text-amber-900 mb-2">Subscription Engine Unavailable</h3>
+                        <p className="text-sm text-amber-800/70 max-w-sm">
+                            Our subscription services are currently undergoing maintenance. 
+                            Please check back later or contact support for assistance.
+                        </p>
+                    </div>
+                ) : (
+                    plans.map((plan, i) => (
+                      <PlanCard
+                        key={plan.key}
+                        plan={plan}
+                        selected={selected}
+                        currentPlan={currentPlan}
+                        onSelect={setSelected}
+                        pax26={pax26}
+                      />
+                    ))
+                )}
               </div>
 
               {/* ── FAQ / info cards ─────────────────────────────── */}
@@ -449,7 +433,7 @@ export default function Billing() {
                         <IconCrown size={22} />
                       </div>
                       <p className="text-xs text-center" style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
-                        Select a plan on the left to continue
+                        {plans.length === 0 ? 'Billing system offline' : 'Select a plan on the left to continue'}
                       </p>
                     </div>
                   )}
@@ -461,7 +445,7 @@ export default function Billing() {
                       <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
                         style={{ background: `${selectedMeta.accentHex}0D`, border: `1px solid ${selectedMeta.accentHex}22` }}>
                         <div className="flex items-center gap-2.5">
-                          <span style={{ color: selectedMeta.accentHex }}>{selectedMeta.icon}</span>
+                          <span style={{ color: selectedMeta.accentHex }}>{ICON_MAP[selectedMeta.key] || ICON_MAP.default}</span>
                           <div>
                             <p className="text-sm font-semibold" style={{ color: pax26?.textPrimary }}>
                               {selectedMeta.label} Plan

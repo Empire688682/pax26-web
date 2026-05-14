@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { useGlobalContext } from "../Context";
-import { CheckCircle2, Zap, Crown, Sparkles, ArrowRight } from "lucide-react";
+import { CheckCircle2, Zap, Crown, Sparkles, ArrowRight, AlertCircle, ShoppingBag } from "lucide-react";
 
 /* ── Keyframes + font ─────────────────────────────────────────── */
 const CSS = `
@@ -47,88 +47,30 @@ const CSS = `
   .pr-cta:hover::after { animation: pr-shine 0.6s ease forwards; }
   .pr-cta:hover { opacity: 0.9; transform: translateY(-1px); }
   .pr-cta:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .p-disabled { filter: grayscale(1); opacity: 0.7; pointer-events: none; }
 `;
 
-/* ── Plan config ──────────────────────────────────────────────── */
-const FALLBACK_PLANS = [
-  {
-    name: "Starter",
-    icon: Zap,
-    price: "₦0",
-    period: "/ month",
-    tagline: "Perfect to get started",
-    popular: false,
-    cta: "Get Started Free",
-    features: [
-      "1 WhatsApp number",
-      "Up to 500 auto-replies/month",
-      "Basic chatbot setup",
-      "Airtime & Data VTU",
-      "Email support",
-    ],
-    missing: [
-      "Smart follow-up automation",
-      "Smart lead qualification",
-      "Priority support",
-    ],
-  },
-  {
-    name: "Growth",
-    icon: Sparkles,
-    price: "₦9,000",
-    period: "/ month",
-    tagline: "For growing businesses",
-    popular: true,
-    cta: "Start Growing",
-    features: [
-      "1 WhatsApp number",
-      "Up to 5,000 auto-replies/month",
-      "Full smart assistant + training",
-      "Smart follow-up automation",
-      "Lead qualification flows",
-      "All VTU services",
-      "Priority chat support",
-    ],
-    missing: [
-      "Multiple WhatsApp numbers",
-    ],
-  },
-  {
-    name: "Business",
-    icon: Crown,
-    price: "₦25,000",
-    period: "/ month",
-    tagline: "For serious scaling",
-    popular: false,
-    cta: "Go Business",
-    features: [
-      "Up to 3 WhatsApp numbers",
-      "Unlimited auto-replies",
-      "Full smart assistant + training",
-      "Smart follow-up automation",
-      "Lead qualification flows",
-      "All VTU services",
-      "Custom automation workflows",
-      "Dedicated account manager",
-    ],
-    missing: [],
-  },
-];
+const ICON_MAP = {
+  starter: Zap,
+  business: Sparkles,
+  enterprise: Crown,
+  default: ShoppingBag
+};
 
 /* ── Plan card ────────────────────────────────────────────────── */
 function PlanCard({ plan, index, pax26, inView }) {
   const { openModal } = useGlobalContext();
   const primary = pax26?.primary || "#3b82f6";
-  const GOLD = "#F59E0B";
   const accent = plan.popular ? primary : pax26?.textPrimary;
-  const Icon = plan.icon;
+  const Icon = ICON_MAP[plan.key] || ICON_MAP.default;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.55, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative flex flex-col rounded-2xl overflow-hidden ${plan.popular ? "pr-popular-card" : "pr-card"}`}
+      className={`relative flex flex-col rounded-2xl overflow-hidden ${plan.popular ? "pr-popular-card" : "pr-card"} ${!plan.isActive ? 'p-disabled' : ''}`}
       style={{
         background: plan.popular ? pax26?.bg : pax26?.bg,
         border: `${plan.popular ? "2px" : "1px"} solid ${plan.popular ? primary : pax26?.border}`,
@@ -153,6 +95,12 @@ function PlanCard({ plan, index, pax26, inView }) {
         </div>
       )}
 
+      {!plan.isActive && (
+        <div className="absolute top-4 left-4 bg-gray-900 text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest z-20">
+          Maintenance
+        </div>
+      )}
+
       <div className="p-7 flex flex-col flex-1 relative z-10">
 
         {/* plan header */}
@@ -171,10 +119,10 @@ function PlanCard({ plan, index, pax26, inView }) {
         <div className="mb-6">
           <div className="flex items-end gap-1.5">
             <span className="pr-mono text-4xl font-bold leading-none" style={{ color: pax26?.textPrimary }}>
-              {plan.price}
+               ₦{plan.price.toLocaleString()}
             </span>
             <span className="text-sm mb-1" style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
-              {plan.period}
+              / {plan.period}
             </span>
           </div>
         </div>
@@ -191,27 +139,19 @@ function PlanCard({ plan, index, pax26, inView }) {
               {f}
             </li>
           ))}
-          {plan.missing.map((f, i) => (
-            <li key={`x-${i}`} className="flex items-center gap-2.5 text-xs"
-              style={{ color: pax26?.textSecondary, opacity: 0.3 }}>
-              <div className="w-3.5 h-3.5 flex items-center justify-center flex-shrink-0">
-                <div className="w-2.5 h-px rounded-full" style={{ background: pax26?.textSecondary }} />
-              </div>
-              {f}
-            </li>
-          ))}
         </ul>
 
         {/* CTA button */}
         <button
           onClick={() => openModal("register")}
+          disabled={!plan.isActive}
           className="pr-cta w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold"
           style={
             plan.popular
               ? { background: primary, color: "#fff", boxShadow: `0 10px 28px ${primary}40` }
               : { background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }
           }>
-          {plan.cta} <ArrowRight size={14} />
+          {plan.isActive ? (plan.key === 'free' ? 'Get Started' : 'Upgrade Now') : 'Coming Soon'} <ArrowRight size={14} />
         </button>
       </div>
     </motion.div>
@@ -225,15 +165,23 @@ export default function Pricing() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
-  const [plans, setPlans] = useState(FALLBACK_PLANS);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPlans = async () => {
+      setLoading(true);
       try {
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-        if (!adminUrl) return;
+        if (!adminUrl) {
+            setLoading(false);
+            return;
+        }
         const res = await fetch(`${adminUrl}/plans`);
-        if (!res.ok) return;
+        if (!res.ok) {
+            setLoading(false);
+            return;
+        }
         const data = await res.json();
         const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
 
@@ -241,26 +189,26 @@ export default function Pricing() {
           const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
 
           const mergedPlans = plansList.map((fetchedPlan) => {
-            const fallback = FALLBACK_PLANS.find(p => p.name.toLowerCase() === fetchedPlan.key?.toLowerCase() || p.name.toLowerCase() === (fetchedPlan.name || fetchedPlan.label)?.toLowerCase()) || FALLBACK_PLANS[0];
             const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
 
             return {
-              name: fetchedPlan.name || fetchedPlan.label || fallback.name,
-              icon: fallback.icon,
-              price: fetchedPlan.price ? `₦${Number(fetchedPlan.price).toLocaleString()}` : fallback.price,
-              period: fallback.period,
-              tagline: fetchedPlan.tagline || fallback.tagline,
-              popular: isMostUsed,
-              cta: fallback.cta,
-              features: fetchedPlan.features?.length > 0 ? fetchedPlan.features : fallback.features,
-              missing: fetchedPlan.missing || fallback.missing,
-              usersCount: fetchedPlan.usersCount || 0
+              key: fetchedPlan.key,
+              name: fetchedPlan.name || fetchedPlan.label,
+              price: fetchedPlan.price || 0,
+              period: fetchedPlan.period || "month",
+              tagline: fetchedPlan.tagline || "",
+              popular: fetchedPlan.popular || isMostUsed,
+              features: fetchedPlan.features || [],
+              usersCount: fetchedPlan.usersCount || 0,
+              isActive: fetchedPlan.isActive !== undefined ? fetchedPlan.isActive : true
             };
           });
           setPlans(mergedPlans);
         }
       } catch (err) {
         console.error("Error fetching plans:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPlans();
@@ -317,15 +265,35 @@ export default function Pricing() {
 
           {/* ── Plans grid ──────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
-            {plans.map((plan, i) => (
-              <PlanCard
-                key={i}
-                plan={plan}
-                index={i}
-                pax26={pax26}
-                inView={inView}
-              />
-            ))}
+            {loading ? (
+                [1,2,3].map(i => (
+                    <div key={i} className="h-96 rounded-2xl bg-gray-800/20 animate-pulse border border-gray-700/50" />
+                ))
+            ) : plans.length === 0 ? (
+                <div className="col-span-full py-20 bg-gray-900/40 rounded-[32px] border border-gray-800/50 flex flex-col items-center text-center px-10">
+                    <div className="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-6 border border-amber-500/20">
+                        <AlertCircle size={40} className="text-amber-500" />
+                    </div>
+                    <h3 className="text-2xl font-black mb-3 text-white">Subscription Engine Maintenance</h3>
+                    <p className="text-gray-400 max-w-md mx-auto leading-relaxed">
+                        We're currently updating our subscription plans to bring you better features. 
+                        Please check back in a few minutes or contact support for manual upgrades.
+                    </p>
+                    <div className="mt-8 flex gap-4">
+                        <button className="px-8 py-3 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-all">Contact Support</button>
+                    </div>
+                </div>
+            ) : (
+                plans.map((plan, i) => (
+                    <PlanCard
+                        key={i}
+                        plan={plan}
+                        index={i}
+                        pax26={pax26}
+                        inView={inView}
+                    />
+                ))
+            )}
           </div>
 
           {/* ── Bottom reassurance ──────────────────────── */}

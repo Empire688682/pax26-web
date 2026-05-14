@@ -4,28 +4,7 @@ import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import UserModel from "@/app/ults/models/UserModel";
 import TransactionModel from "@/app/ults/models/TransactionModel";
-
-/* ── Plan catalogue (single source of truth) ─────────────────── */
-export const PLAN_CATALOGUE = {
-  starter: {
-    label: "Starter Plan",
-    price: 3500,
-    maxMonthlyMessages: 2000,
-    billingCycle: "monthly",
-  },
-  business: {
-    label: "Business Plan",
-    price: 10000,
-    maxMonthlyMessages: 10000,
-    billingCycle: "monthly",
-  },
-  enterprise: {
-    label: "Enterprise Plan",
-    price: 30000,
-    maxMonthlyMessages: 50000,
-    billingCycle: "monthly",
-  },
-};
+import PlanModel from "@/app/ults/models/PlanModel";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -43,14 +22,23 @@ export async function POST(req) {
       );
     }
 
-    const { plan } = await req.json();
-    console.log("plan: ", plan);
+    const { plan: planKey } = await req.json();
+    console.log("Subscribing to plan: ", planKey);
 
-    const planMeta = PLAN_CATALOGUE[plan];
+    // Fetch plan details from Database instead of hardcoded catalogue
+    const planMeta = await PlanModel.findOne({ key: planKey });
+    
     if (!planMeta) {
       return NextResponse.json(
-        { success: false, message: "Invalid plan selected" },
-        { status: 400, headers: corsHeaders() }
+        { success: false, message: "This plan is no longer available." },
+        { status: 404, headers: corsHeaders() }
+      );
+    }
+
+    if (!planMeta.isActive) {
+      return NextResponse.json(
+        { success: false, message: "This plan is currently undergoing maintenance and cannot be purchased." },
+        { status: 403, headers: corsHeaders() }
       );
     }
 
@@ -81,8 +69,8 @@ export async function POST(req) {
 
     /* ── Deduct wallet + upgrade plan atomically ──────────────── */
     user.walletBalance = balanceAfter;
-    user.paxAI.plan = plan;
-    user.paxAI.maxMonthlyMessages = planMeta.maxMonthlyMessages;
+    user.paxAI.plan = planKey;
+    user.paxAI.maxMonthlyMessages = planMeta.messagesLimit;
     user.paxAI.messagesUsedThisMonth = 0;       // reset monthly counter
     user.paxAI.planStartedAt = now;              // start new billing cycle
     user.paxAI.lastUpdated = now;
@@ -96,7 +84,7 @@ export async function POST(req) {
     await user.save();
 
     /* ── Record transaction ───────────────────────────────────── */
-    const reference = `PAX-SUB-${plan.toUpperCase()}-${Date.now()}`;
+    const reference = `PAX-SUB-${planKey.toUpperCase()}-${Date.now()}`;
     await TransactionModel.create({
       userId,
       type: "ai-automation-subscription",
@@ -107,7 +95,7 @@ export async function POST(req) {
       meta: {
         subscription: {
           plan: planMeta.label,
-          billingCycle: planMeta.billingCycle,
+          billingCycle: "monthly",
           featureTag: "ai-automation",
           expiresAt,
         },
@@ -117,8 +105,8 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        message: `You are now on the ${planMeta.label}! 🎉`,
-        plan,
+        message: `You are now on the ${planMeta.label} plan! 🎉`,
+        plan: planKey,
         balanceAfter,
         expiresAt,
       },
