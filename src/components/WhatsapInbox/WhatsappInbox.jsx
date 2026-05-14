@@ -44,6 +44,14 @@ const DoubleCheckIcon = () => (
   </svg>
 );
 
+const InfoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+
 /* ─────────────────────────────────────────────
    LEAD STAGES
 ───────────────────────────────────────────── */
@@ -319,6 +327,9 @@ export default function WhatsAppInbox() {
 
   const [showSidebar, setShowSidebar] =
     useState(true);
+
+  const [showFlowInfo, setShowFlowInfo] = 
+    useState(false);
 
   const messagesContainerRef = useRef(null);
 
@@ -1066,6 +1077,22 @@ export default function WhatsAppInbox() {
                         : "Managed by AI"}
                     </span>
 
+                    <button
+                      onClick={() => setShowFlowInfo(!showFlowInfo)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "#8696a0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "2px",
+                      }}
+                      title="How it works"
+                    >
+                      <InfoIcon />
+                    </button>
+
                     {selectedContact?.leadStage && (
                       <span
                         style={{
@@ -1091,6 +1118,63 @@ export default function WhatsAppInbox() {
                   </div>
                 </div>
               </div>
+
+              {/* FLOW INFO POPUP */}
+              <AnimatePresence>
+                {showFlowInfo && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    style={{
+                      position: "absolute",
+                      top: "65px",
+                      left: "14px",
+                      width: "280px",
+                      background: "#2a3942",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "16px",
+                      padding: "20px",
+                      zIndex: 100,
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+                      color: "#e9edef"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                      <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 800 }}>Conversation Flow</h4>
+                      <button onClick={() => setShowFlowInfo(false)} style={{ background: "transparent", border: "none", color: "#8696a0", cursor: "pointer" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {[
+                        { step: "1", text: "AI manages the chat by default (Green status)." },
+                        { step: "2", text: "Click Take Over to chat manually (Orange status)." },
+                        { step: "3", text: "AI pauses while you are in control." },
+                        { step: "4", text: "Click Hand Back to resume AI management." }
+                      ].map(item => (
+                        <div key={item.step} style={{ display: "flex", gap: "12px" }}>
+                          <span style={{ 
+                            width: "20px", 
+                            height: "20px", 
+                            background: "rgba(255,255,255,0.1)", 
+                            borderRadius: "50%", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center", 
+                            fontSize: "10px", 
+                            fontWeight: 900,
+                            flexShrink: 0
+                          }}>
+                            {item.step}
+                          </span>
+                          <p style={{ margin: 0, fontSize: "12px", opacity: 0.8, lineHeight: 1.4 }}>{item.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {selectedConv?.isHandedOff ? (
                 <button

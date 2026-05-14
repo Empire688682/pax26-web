@@ -10,6 +10,7 @@ import BackgroundFX from "@/components/BackgroundFX";
 
 // Inner component so it can access context for theme/pax26
 const AppShell = ({ children }) => {
+  const { pax26 } = useGlobalContext();
   const pathname = usePathname();
   const hideFooter = pathname === "/dashboard/automations/whatsapp-inbox";
 
