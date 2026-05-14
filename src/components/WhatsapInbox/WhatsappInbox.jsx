@@ -331,6 +331,9 @@ export default function WhatsAppInbox() {
   const [showFlowInfo, setShowFlowInfo] = 
     useState(false);
 
+  const [isAlertVisible, setIsAlertVisible] = 
+    useState(true);
+
   const messagesContainerRef = useRef(null);
 
   const inputRef = useRef(null);
@@ -496,6 +499,7 @@ export default function WhatsAppInbox() {
     if (selected?.phone) {
       fetchMessages(selected.phone);
       fetchContact(selected.phone);
+      setIsAlertVisible(true);
     }
   }, [selected]);
 
@@ -1075,7 +1079,7 @@ export default function WhatsAppInbox() {
                     >
                       {selectedConv?.isHandedOff
                         ? "Managed by you"
-                        : "Managed by AI"}
+                        : "Smart Agent Active"}
                     </span>
 
                     <button
@@ -1149,10 +1153,10 @@ export default function WhatsAppInbox() {
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                       {[
-                        { step: "1", text: "AI manages the chat by default (Green status)." },
-                        { step: "2", text: "Click Take Over to chat manually (Orange status)." },
-                        { step: "3", text: "AI pauses while you are in control." },
-                        { step: "4", text: "Click Hand Back to resume AI management." }
+                        { step: "1", text: "Smart Agent manages the chat by default." },
+                        { step: "2", text: "Click Take Over to chat manually." },
+                        { step: "3", text: "Smart Agent pauses while you are in control." },
+                        { step: "4", text: "Click Hand Back to resume automation." }
                       ].map(item => (
                         <div key={item.step} style={{ display: "flex", gap: "12px" }}>
                           <span style={{ 
@@ -1337,9 +1341,14 @@ export default function WhatsAppInbox() {
               <textarea
                 ref={inputRef}
                 value={replyText}
-                disabled={
+                readOnly={
                   !selectedConv?.isHandedOff
                 }
+                onClick={() => {
+                  if (!selectedConv?.isHandedOff) {
+                    setIsAlertVisible(true);
+                  }
+                }}
                 onChange={(e) =>
                   setReplyText(e.target.value)
                 }
@@ -1407,7 +1416,7 @@ export default function WhatsAppInbox() {
 
             {/* Takeover Notice Overlay - Fixed at center of Chat Area */}
             <AnimatePresence>
-              {!selectedConv?.isHandedOff && (
+              {(!selectedConv?.isHandedOff && isAlertVisible) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20, x: "-50%" }}
                   animate={{ opacity: 1, y: 0, x: "-50%" }}
@@ -1418,39 +1427,64 @@ export default function WhatsAppInbox() {
                     left: "50%",
                     width: "90%",
                     maxWidth: "380px",
-                    background: "rgba(245, 158, 11, 0.1)",
-                    backdropFilter: "blur(12px)",
+                    background: "rgba(17, 27, 33, 0.7)",
+                    backdropFilter: "blur(20px)",
                     border: "1px solid rgba(245, 158, 11, 0.4)",
-                    padding: "20px",
-                    borderRadius: "24px",
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
+                    padding: "24px",
+                    borderRadius: "28px",
+                    boxShadow: "0 25px 50px rgba(0,0,0,0.6)",
                     zIndex: 50,
                     color: "#fff",
                     textAlign: "center",
                   }}
                 >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setIsAlertVisible(false)}
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      right: "16px",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "none",
+                      color: "#8696a0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+
                   <div style={{ 
-                    width: "44px", 
-                    height: "44px", 
+                    width: "48px", 
+                    height: "48px", 
                     background: "#f59e0b", 
-                    borderRadius: "14px", 
+                    borderRadius: "16px", 
                     display: "flex", 
                     alignItems: "center", 
                     justifyContent: "center",
-                    margin: "0 auto 12px",
-                    boxShadow: "0 0 20px rgba(245, 158, 11, 0.3)"
+                    margin: "0 auto 16px",
+                    boxShadow: "0 0 25px rgba(245, 158, 11, 0.4)"
                   }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                       <line x1="12" y1="9" x2="12" y2="13"/>
                       <line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: "16px", marginBottom: "6px" }}>
-                    AI is Managing this Chat
+                  <div style={{ fontWeight: 800, fontSize: "18px", marginBottom: "8px", letterSpacing: "-0.01em" }}>
+                    Smart Agent Active
                   </div>
-                  <p style={{ fontSize: "13px", opacity: 0.9, marginBottom: "20px", lineHeight: 1.5 }}>
-                    The AI agent is currently handling this conversation. To send a manual message or take full control, click the Take Over button.
+                  <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "24px", lineHeight: 1.6 }}>
+                    Our Smart Agent is currently managing this conversation. To send a manual message, please take over first.
                   </p>
                   <button
                     disabled={takingOver}
@@ -1460,13 +1494,13 @@ export default function WhatsAppInbox() {
                       background: "#f59e0b",
                       color: "#fff",
                       border: "none",
-                      padding: "12px",
-                      borderRadius: "14px",
+                      padding: "14px",
+                      borderRadius: "16px",
                       fontWeight: 800,
                       fontSize: "14px",
                       cursor: "pointer",
                       transition: "all 0.2s",
-                      boxShadow: "0 4px 12px rgba(245, 158, 11, 0.2)"
+                      boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)"
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
