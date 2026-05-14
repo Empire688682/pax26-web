@@ -275,6 +275,14 @@ export default function Dashboard() {
   }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   const P = pax26?.primary || "#3b82f6";
   const G = "#34d399";
   const T = "#22d3ee";
@@ -346,18 +354,9 @@ export default function Dashboard() {
         {/* ── HEADER ── */}
         <header className="db-s1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: `linear-gradient(145deg, ${P}22, transparent)`,
-              border: `1px solid ${surfaceRing}`,
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 32px ${P}12`,
-            }}>
-              <span style={{ fontSize: 22 }} aria-hidden>✦</span>
-            </div>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: pax26?.textSecondary, opacity: 0.45, margin: "0 0 6px" }}>
-                Welcome back
+                {getGreeting()}
               </p>
               <h1 style={{ fontSize: "clamp(1.55rem, 4vw, 1.95rem)", fontWeight: 800, letterSpacing: "-0.03em", color: pax26?.textPrimary, margin: 0, lineHeight: 1.15 }}>
                 {firstName}<span style={{ opacity: 0.9 }}> 👋</span>
