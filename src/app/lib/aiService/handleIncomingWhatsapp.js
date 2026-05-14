@@ -6,6 +6,7 @@ import { getOrCreateSession } from "./session";
 import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js";
 import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import PlanModel from "@/app/ults/models/PlanModel";
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -195,7 +196,11 @@ export const handleIncomingWhatsApp = async (payload) => {
   const now          = new Date();
   const planStarted  = user.paxAI?.planStartedAt ? new Date(user.paxAI.planStartedAt) : now;
   const daysSinceStart = (now - planStarted) / (1000 * 60 * 60 * 24);
-  const maxMessages  = user.paxAI?.maxMonthlyMessages ?? 100;
+  
+  // Fetch latest limit from PlanModel to ensure sync with Admin
+  const currentPlan = user.paxAI?.plan || "free";
+  const planMeta = await PlanModel.findOne({ key: currentPlan });
+  const maxMessages = planMeta?.messagesLimit || user.paxAI?.maxMonthlyMessages || 200;
   let   usedMessages = user.paxAI?.messagesUsedThisMonth ?? 0;
 
   // Reset monthly counter if 30 days have passed since the plan period started

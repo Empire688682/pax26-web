@@ -132,7 +132,7 @@ const UserSchema = new mongoose.Schema(
       trained: { type: Boolean, default: false },
       systemPrompt: { type: String, default: "" }, // their custom AI personality
       knowledgeBase: [{ type: String }],           // URLs or text chunks
-      maxMonthlyMessages: { type: Number, default: 50 },
+      maxMonthlyMessages: { type: Number, default: 200 },
       messagesUsedThisMonth: { type: Number, default: 0 },
       plan: {
         type: String,

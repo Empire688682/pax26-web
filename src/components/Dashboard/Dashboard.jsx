@@ -295,10 +295,10 @@ export default function Dashboard() {
   const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
 
   const currentPlanMeta = aiPlans?.find(p => p.key === plan);
-  const quota = userData?.paxAI?.maxMonthlyMessages || currentPlanMeta?.messagesLimit || (
+  const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages || (
     plan === "starter" ? 500 :
     plan === "business" ? 2000 :
-    plan === "enterprise" ? 10000 : 50
+    plan === "enterprise" ? 10000 : 200
   );
   const pct = Math.min((used / (quota || 1)) * 100, 100);
   const planCol = { free: pax26?.textSecondary, starter: T, business: Am, enterprise: Vi }[plan] ?? pax26?.textSecondary;
