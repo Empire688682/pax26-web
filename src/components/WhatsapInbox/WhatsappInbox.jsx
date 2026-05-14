@@ -984,7 +984,7 @@ export default function WhatsAppInbox() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "0 14px",
+                padding: "10px 14px",
                 position: "sticky",
                 top: 0,
                 zIndex: 10,
@@ -1079,7 +1079,7 @@ export default function WhatsAppInbox() {
                     >
                       {selectedConv?.isHandedOff
                         ? "Managed by you"
-                        : "Smart Agent Active"}
+                        : "Agent Active"}
                     </span>
 
                     <button

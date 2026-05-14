@@ -5,7 +5,7 @@ import WhatsAppInbox from '@/components/WhatsapInbox/WhatsappInbox';
 const page = () => {
   return (
     <div>
-      <div className="px-6 py-10">
+      <div>
         <WhatsAppInbox />
       </div>
     </div>
