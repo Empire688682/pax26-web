@@ -335,7 +335,7 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
    PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
 function ProductBuilder({ products, onChange, pax26, sellerId }) {
-  const emptyProduct = () => ({ name: "", price: "", description: "", category: "", tags: [], stock: "", images: [] });
+  const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyProduct());
 
@@ -351,7 +351,13 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
 
   const save = () => {
     if (!draft.name.trim() || !String(draft.price).trim()) return;
-    const item = { ...draft, price: parseFloat(draft.price) || 0, stock: parseInt(draft.stock) || 0 };
+    const item = { 
+      ...draft, 
+      price: parseFloat(draft.price) || 0, 
+      discountPrice: draft.discountPrice ? parseFloat(draft.discountPrice) : undefined,
+      deliveryFee: draft.deliveryFee ? parseFloat(draft.deliveryFee) : undefined,
+      stock: parseInt(draft.stock) || 0 
+    };
     if (editing === "new") onChange([...products, item]);
     else onChange(products.map((p, i) => i === editing ? item : p));
     setEditing(null);
@@ -377,7 +383,15 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{prod.name}</p>
             <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.55 }}>
-              ₦{Number(prod.price).toLocaleString()}{prod.stock ? ` · ${prod.stock} in stock` : ""}
+              {prod.discountPrice ? (
+                <>
+                  <span style={{ textDecoration: "line-through", marginRight: "6px" }}>₦{Number(prod.price).toLocaleString()}</span>
+                  <span style={{ color: p?.primary, fontWeight: 700 }}>₦{Number(prod.discountPrice).toLocaleString()}</span>
+                </>
+              ) : (
+                `₦${Number(prod.price).toLocaleString()}`
+              )}
+              {prod.stock ? ` · ${prod.stock} in stock` : ""}
             </p>
           </div>
           <button onClick={() => startEdit(i)} style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "11px", fontWeight: 600, cursor: "pointer" }}>Edit</button>
@@ -391,9 +405,17 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
             <ThemedInput label="Price (₦) *" pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
+            <ThemedInput label="Discount Price (₦)" pax26={p} type="number" value={draft.discountPrice} onChange={e => setDraft(d => ({ ...d, discountPrice: e.target.value }))} placeholder="4500" />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <ThemedInput label="Delivery Fee (₦)" pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
+            <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
+          </div>
+          <ThemedInput label="Delivery Location" pax26={p} value={draft.locationNotes} onChange={e => setDraft(d => ({ ...d, locationNotes: e.target.value }))} placeholder="e.g. Lagos only" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes" />
             <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
           </div>
-          <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes, Bags, Electronics" />
           <ThemedTextarea label="Description" pax26={p} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="Describe the product…" rows={2} />
           <TagInput label="Search Tags" example="e.g. black, nike, size-42" tags={draft.tags} onChange={tags => setDraft(d => ({ ...d, tags }))} pax26={p} />
           <ProductMediaUploader
@@ -736,10 +758,21 @@ export default function AiBusinessDashboard() {
                               +{prod.images.length - 1}
                             </div>
                           )}
-                          <div style={{ position: "absolute", bottom: "12px", right: "12px" }}>
-                            <div style={{ padding: "6px 14px", borderRadius: "99px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "13px", fontWeight: 800, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                              ₦{Number(prod.price).toLocaleString()}
-                            </div>
+                          <div style={{ position: "absolute", bottom: "12px", right: "12px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                            {prod.discountPrice ? (
+                              <>
+                                <div style={{ padding: "2px 8px", borderRadius: "99px", background: "rgba(0,0,0,0.4)", color: "#fff", fontSize: "10px", fontWeight: 700, textDecoration: "line-through", backdropFilter: "blur(4px)" }}>
+                                  ₦{Number(prod.price).toLocaleString()}
+                                </div>
+                                <div style={{ padding: "6px 14px", borderRadius: "99px", background: p?.primary, color: "#fff", fontSize: "13px", fontWeight: 800, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                                  ₦{Number(prod.discountPrice).toLocaleString()}
+                                </div>
+                              </>
+                            ) : (
+                              <div style={{ padding: "6px 14px", borderRadius: "99px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "13px", fontWeight: 800, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                                ₦{Number(prod.price).toLocaleString()}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>

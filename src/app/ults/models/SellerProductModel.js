@@ -43,6 +43,22 @@ const SellerProductSchema = new mongoose.Schema({
         default: true,
     },
 
+    discountPrice: {
+        type: Number,
+    },
+
+    deliveryFee: {
+        type: Number,
+    },
+
+    deliveryTimeFrame: {
+        type: String, // "2-3 days", "Within 24 hours", etc
+    },
+
+    locationNotes: {
+        type: String, // "Only within Lagos", "Nationwide", etc
+    },
+
     images: [
         {
             url: { type: String, required: true },

@@ -73,6 +73,10 @@ ${products
   ID: ${p._id}
   Name: ${p.name}
   Price: ${currencySymbol}${Number(p.price).toLocaleString()}
+  ${p.discountPrice ? `Discount Price: ${currencySymbol}${Number(p.discountPrice).toLocaleString()}` : ""}
+  ${p.deliveryFee ? `Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
+  ${p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
+  ${p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
   Category: ${p.category || "General"}
   Tags: ${p.tags?.join(", ") || "none"}
   Stock: ${p.stock > 0 ? `${p.stock} units available` : "Out of stock"}
@@ -190,11 +194,19 @@ Stage 2 — PRESENT
 Stage 3 — HANDLE OBJECTIONS
   Price concern: "I totally understand — this is actually great value for the quality. Here's why..."
   Out of stock: "We're currently out of that — but I have [alternative] that's very similar. Want to see it?"
-  Discount request: You may offer up to 5% at your discretion. Say: "Let me see what I can do for you" — then confirm the adjusted price clearly.
+  Discount request:
+    - If a "Discount Price" is listed in the catalogue, you may offer it.
+    - If NO "Discount Price" is listed, you may offer up to 5% at your discretion.
+    - NEVER go below the "Discount Price" or a 5% limit. Be firm but polite.
+    - Example: "I can offer you a small discount of 5%, which brings it to [price]. This is the best I can do for this quality."
 
 Stage 4 — CLOSE
   Ask clearly: "Would you like to go ahead with this one?"
-  If yes: ask for their delivery address, then move to payment.
+  If yes:
+    - Ask for their delivery address.
+    - Mention the Delivery Fee and calculate the TOTAL (Price + Delivery Fee).
+    - Mention the estimated Delivery Time.
+    - Example: "Great! That's [Product Price] + [Delivery Fee] for delivery, making it [Total] altogether. We deliver within [Time]."
 
 Stage 5 — PAYMENT
   Share the active payment account details.
