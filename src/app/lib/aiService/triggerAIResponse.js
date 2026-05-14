@@ -338,6 +338,9 @@ export const triggerAIResponse = async ({
                 $inc: {
                     "whatsapp.contacts.list.$.messageCount": 1,
                     "whatsapp.contacts.list.$.outboundCount": 1,
+                    "paxAI.messagesUsedThisMonth": status === "sent" ? 1 : 0,
+                    "planAnalytics.aiMessagesUsed": status === "sent" ? 1 : 0,
+                    "planAnalytics.metaCost": status === "sent" ? 5 : 0
                 },
                 $set: { "whatsapp.contacts.list.$.lastMessageAt": new Date() },
             }

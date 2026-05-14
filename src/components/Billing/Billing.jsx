@@ -190,7 +190,7 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
 
 /* ─── Main Billing Component ─────────────────────────────────── */
 export default function Billing() {
-  const { pax26, userData, userWallet, fetchUser, router } = useGlobalContext();
+  const { pax26, userData, userWallet, fetchUser, router, aiPlans } = useGlobalContext();
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,51 +199,31 @@ export default function Billing() {
   const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      setLoading(true);
-      try {
-        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-        if (!adminUrl) {
-            setLoading(false);
-            return;
-        }
-        const res = await fetch(`${adminUrl}/plans`);
-        if (!res.ok) {
-            setLoading(false);
-            return;
-        }
-        const data = await res.json();
-        const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
+    if (aiPlans && aiPlans.length > 0) {
+      const maxUsersCount = Math.max(...aiPlans.map(p => p.usersCount || 0));
+      
+      const mergedPlans = aiPlans.map((fetchedPlan) => {
+        const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
         
-        if (plansList.length > 0) {
-          const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
-          
-          const mergedPlans = plansList.map((fetchedPlan) => {
-            const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
-            
-            return {
-              key: fetchedPlan.key,
-              label: fetchedPlan.label,
-              price: Number(fetchedPlan.price) || 0,
-              accentHex: fetchedPlan.accentHex || "#3b82f6",
-              popular: fetchedPlan.popular || isMostUsed,
-              tagline: fetchedPlan.tagline || "",
-              messages: fetchedPlan.messages || "",
-              features: fetchedPlan.features || [],
-              usersCount: fetchedPlan.usersCount || 0,
-              isActive: fetchedPlan.isActive !== undefined ? fetchedPlan.isActive : true
-            };
-          });
-          setPlans(mergedPlans);
-        }
-      } catch (err) {
-        console.error("Error fetching plans:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPlans();
-  }, []);
+        return {
+          key: fetchedPlan.key,
+          label: fetchedPlan.label,
+          price: Number(fetchedPlan.price) || 0,
+          accentHex: fetchedPlan.accentHex || "#3b82f6",
+          popular: fetchedPlan.popular || isMostUsed,
+          tagline: fetchedPlan.tagline || "",
+          messages: fetchedPlan.messages || "",
+          features: fetchedPlan.features || [],
+          usersCount: fetchedPlan.usersCount || 0,
+          isActive: fetchedPlan.isActive !== undefined ? fetchedPlan.isActive : true
+        };
+      });
+      setPlans(mergedPlans);
+      setLoading(false);
+    } else if (aiPlans) {
+      setLoading(false);
+    }
+  }, [aiPlans]);
 
   const currentPlan = userData?.paxAI?.plan || "free";
   const selectedMeta = plans.find((p) => p.key === selected);

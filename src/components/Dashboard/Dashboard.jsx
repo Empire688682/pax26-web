@@ -237,7 +237,7 @@ function TxRow({ tx, onClick, pax26 }) {
 }
 
 export default function Dashboard() {
-  const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser } = useGlobalContext();
+  const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser, aiPlans } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [vtuServices, setVtuServices] = useState([]);
@@ -293,7 +293,13 @@ export default function Dashboard() {
   const plan = userData?.paxAI?.plan || "free";
   const isAiOn = !!userData?.paxAI?.enabled;
   const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
-  const quota = userData?.paxAI?.maxMonthlyMessages ?? 50;
+
+  const currentPlanMeta = aiPlans?.find(p => p.key === plan);
+  const quota = userData?.paxAI?.maxMonthlyMessages || currentPlanMeta?.messagesLimit || (
+    plan === "starter" ? 500 :
+    plan === "business" ? 2000 :
+    plan === "enterprise" ? 10000 : 50
+  );
   const pct = Math.min((used / (quota || 1)) * 100, 100);
   const planCol = { free: pax26?.textSecondary, starter: T, business: Am, enterprise: Vi }[plan] ?? pax26?.textSecondary;
 

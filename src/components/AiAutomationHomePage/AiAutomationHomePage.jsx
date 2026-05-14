@@ -127,7 +127,7 @@ function SectionLabel({ text, pax26 }) {
 
 /* ─── Main Page ───────────────────────────────────────────────── */
 export default function AiAutomationHomePage() {
-  const { pax26, router, fetchUser, userData } = useGlobalContext();
+  const { pax26, router, fetchUser, userData, aiPlans } = useGlobalContext();
   const [apiRun, setApiRun] = useState(false);
 
   useEffect(() => {
@@ -203,7 +203,12 @@ export default function AiAutomationHomePage() {
           const plan = userData?.paxAI?.plan || "free";
           const isActive = userData?.paxAI?.enabled ?? false;
           const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
-          const quota = userData?.paxAI?.maxMonthlyMessages ?? 50;
+          const currentPlanMeta = aiPlans?.find(p => p.key === plan);
+          const quota = userData?.paxAI?.maxMonthlyMessages || currentPlanMeta?.messagesLimit || (
+            plan === "starter" ? 500 :
+            plan === "business" ? 2000 :
+            plan === "enterprise" ? 10000 : 50
+          );
           const lastUpd = userData?.paxAI?.planStartedAt;
           const usagePct = Math.min((used / (quota || 1)) * 100, 100);
 

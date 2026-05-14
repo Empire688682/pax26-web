@@ -66,6 +66,7 @@ export const AppProvider = ({ children }) => {
   const [refHostCode, setRefHostCode] = useState(null);
 
   const [isWhatsappNumberConnected, setIsWhatsappNumberConnected] = useState(false);
+  const [aiPlans, setAiPlans] = useState([]);
 
   /* ================================
      DATA STATES
@@ -284,6 +285,22 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const fetchAiPlans = async () => {
+      try {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+        if (!adminUrl) return;
+        const res = await axios.get(`${adminUrl}/plans`);
+        const data = res.data;
+        const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
+        setAiPlans(plansList);
+      } catch (err) {
+        console.error("Error fetching AI plans:", err);
+      }
+    };
+    fetchAiPlans();
+  }, []);
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const storedId = localStorage.getItem("ReferralCode");
       const now = new Date().getTime();
@@ -375,6 +392,7 @@ export const AppProvider = ({ children }) => {
         setIsWhatsappNumberConnected,
 
         fetchUser,
+        aiPlans,
       }}
     >
       {children}
