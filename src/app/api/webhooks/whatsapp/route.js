@@ -94,7 +94,7 @@ export async function POST(req) {
         responseTime,
       });
 
-      return NextResponse.json({ message: "ok_user" },{status: 200});
+      return NextResponse.json({ message: "ok_user" }, { status: 200 });
     }
 
     // =========================
@@ -114,14 +114,14 @@ export async function POST(req) {
       ? new Date(visitor.lastTimeMessage).getTime()
       : 0;
 
-      console.log("Visitor messages sent in last 24h:", last);
+    console.log("Visitor messages sent in last 24h:", last);
 
     if (
       visitor.messagesSent >= 1 &&
       last &&
       now - last < TWENTY_FOUR_HOURS
     ) {
-      return NextResponse.json({ success:false, message:"visitor_rate_limited" }, { status: 429 });
+      return NextResponse.json({ success: false, message: "visitor_rate_limited" }, { status: 429 });
     }
 
     // 🔓 Reset after 24 hours
@@ -139,9 +139,9 @@ export async function POST(req) {
       text: replyText,
     });
 
-    if(!response) {
+    if (!response) {
       console.error("Failed to send WhatsApp reply to visitor");
-      return NextResponse.json({ success:false, message:"failed_to_send_reply" }, { status: 500 });
+      return NextResponse.json({ success: false, message: "failed_to_send_reply" }, { status: 500 });
     }
 
     await AIMessageModel.create({
@@ -160,7 +160,7 @@ export async function POST(req) {
     await visitor.save();
 
 
-    return NextResponse.json({ message: "ok_visitor" }, {status:200});
+    return NextResponse.json({ message: "ok_visitor" }, { status: 200 });
   } catch (error) {
     console.error("❌ Webhook error:", error);
     return NextResponse.json(

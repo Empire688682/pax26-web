@@ -229,7 +229,16 @@ export const handleIncomingWhatsApp = async (payload) => {
         user,
         inboundText: buildImageNoMatchContext(),
       });
-      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+      await UserModel.updateOne(
+        { _id: user._id },
+        { 
+          $inc: { 
+            "paxAI.messagesUsedThisMonth": 1,
+            "planAnalytics.aiMessagesUsed": 1,
+            "planAnalytics.metaCost": 5 
+          } 
+        }
+      );
       return { ok: true };
     }
 
@@ -266,7 +275,16 @@ export const handleIncomingWhatsApp = async (payload) => {
         // triggerAIResponse should forward this to buildSystemPrompt
         imageSearchContext: true,
       });
-      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+      await UserModel.updateOne(
+        { _id: user._id },
+        { 
+          $inc: { 
+            "paxAI.messagesUsedThisMonth": 1,
+            "planAnalytics.aiMessagesUsed": 1,
+            "planAnalytics.metaCost": 5 
+          } 
+        }
+      );
       console.log("📊 Step 8 — messagesUsedThisMonth incremented");
 
     } catch (err) {
@@ -278,7 +296,16 @@ export const handleIncomingWhatsApp = async (payload) => {
         inboundText: buildImageNoMatchContext(),
         imageSearchContext: true,
       });
-      await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+      await UserModel.updateOne(
+        { _id: user._id },
+        { 
+          $inc: { 
+            "paxAI.messagesUsedThisMonth": 1,
+            "planAnalytics.aiMessagesUsed": 1,
+            "planAnalytics.metaCost": 5 
+          } 
+        }
+      );
     }
 
     return { ok: true };
@@ -287,7 +314,16 @@ export const handleIncomingWhatsApp = async (payload) => {
   // ── Step 9: Standard text — trigger AI response ───────────
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText });
-  await UserModel.updateOne({ _id: user._id }, { $inc: { "paxAI.messagesUsedThisMonth": 1 } });
+  await UserModel.updateOne(
+    { _id: user._id },
+    { 
+      $inc: { 
+        "paxAI.messagesUsedThisMonth": 1,
+        "planAnalytics.aiMessagesUsed": 1,
+        "planAnalytics.metaCost": 5 
+      } 
+    }
+  );
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
 
   return { ok: true };

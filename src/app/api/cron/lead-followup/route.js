@@ -211,6 +211,19 @@ async function runFollowUp() {
 
         if (response?.success) {
           totalSent++;
+
+          // Increment Plan Analytics Tracking
+          await UserModel.updateOne(
+            { _id: session.userId },
+            {
+              $inc: {
+                "paxAI.messagesUsedThisMonth": 1,
+                "planAnalytics.aiMessagesUsed": 1,
+                "planAnalytics.metaCost": 5
+              }
+            }
+          );
+
           console.log(`[lead-followup] ✅ Sent follow-up to ${session.visitorPhone} (session: ${session.sessionId})`);
         } else {
           console.warn(`[lead-followup] ⚠️ WhatsApp delivery failed for ${session.visitorPhone}`);

@@ -141,6 +141,15 @@ const UserSchema = new mongoose.Schema(
       },
       planStartedAt: { type: Date, default: Date.now }, // when the current plan period began (signup / upgrade / monthly reset)
       lastUpdated: { type: Date, default: Date.now },
+    },
+    /* =====================
+       PLAN ANALYTICS (Profitability Tracking)
+    ====================== */
+    planAnalytics: {
+      aiMessagesUsed: { type: Number, default: 0 }, // Total AI messages sent
+      broadcastSent: { type: Number, default: 0 },  // Total broadcasts sent
+      planRevenue: { type: Number, default: 0 },    // Total revenue from this user
+      metaCost: { type: Number, default: 0 },       // Estimated cost from Meta (WhatsApp API)
     }
   }, { timestamps: true });
 

@@ -9,20 +9,20 @@ import TransactionModel from "@/app/ults/models/TransactionModel";
 export const PLAN_CATALOGUE = {
   starter: {
     label: "Starter Plan",
-    price: 5000,
-    maxMonthlyMessages: 500,
+    price: 3500,
+    maxMonthlyMessages: 2000,
     billingCycle: "monthly",
   },
   business: {
     label: "Business Plan",
-    price: 25000,
-    maxMonthlyMessages: 3000,
+    price: 10000,
+    maxMonthlyMessages: 10000,
     billingCycle: "monthly",
   },
   enterprise: {
     label: "Enterprise Plan",
-    price: 75000,
-    maxMonthlyMessages: 20000,
+    price: 30000,
+    maxMonthlyMessages: 50000,
     billingCycle: "monthly",
   },
 };
@@ -86,6 +86,13 @@ export async function POST(req) {
     user.paxAI.messagesUsedThisMonth = 0;       // reset monthly counter
     user.paxAI.planStartedAt = now;              // start new billing cycle
     user.paxAI.lastUpdated = now;
+
+    // Increment Plan Revenue Tracking
+    if (!user.planAnalytics) {
+      user.planAnalytics = { aiMessagesUsed: 0, broadcastSent: 0, planRevenue: 0, metaCost: 0 };
+    }
+    user.planAnalytics.planRevenue += planMeta.price;
+
     await user.save();
 
     /* ── Record transaction ───────────────────────────────────── */
