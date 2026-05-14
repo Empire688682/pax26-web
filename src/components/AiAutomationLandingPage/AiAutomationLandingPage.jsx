@@ -174,7 +174,7 @@ export default function AiAutomationLandingPage() {
       <div className="al-root max-w-7xl mx-auto">
 
         {/* ════════════════════════════ HERO ════════════════════════════ */}
-        <section className="relative pt-20 pb-16 overflow-hidden">
+        <section className="relative pt-10 pb-10 overflow-hidden">
           {/* decorative orbs */}
           <div className="al-orb absolute -top-16 -right-24 w-80 h-80 rounded-full pointer-events-none"
             style={{ background: `${primary}15`, filter: "blur(72px)" }} />
@@ -195,18 +195,17 @@ export default function AiAutomationLandingPage() {
               </motion.div>
 
               {/* headline — 3-line stagger */}
-              <div className="mb-6 space-y-1">
+              <div className="mb-4 space-y-0.5">
                 {[
-                  { text: "Your Business,", serif: false },
-                  { text: "Always On.", serif: false },
-                  { text: "Always Closing.", serif: true },
+                  { text: "Automation", serif: false },
+                  { text: "Hub", serif: true },
                 ].map((l, i) => (
-                  <motion.span key={i} className="block"
+                  <motion.span key={i} className="inline-block mr-3"
                     initial={{ opacity: 0, y: 28 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: i * 0.13, ease: [0.22, 1, 0.36, 1] }}
                     style={{
-                      fontSize: "clamp(32px, 6vw, 58px)",
+                      fontSize: "clamp(28px, 5vw, 42px)",
                       fontWeight: l.serif ? 700 : 800,
                       fontFamily: l.serif ? "'Playfair Display',serif" : "'Syne',sans-serif",
                       fontStyle: l.serif ? "italic" : "normal",
@@ -228,14 +227,14 @@ export default function AiAutomationLandingPage() {
               <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
                 className="flex flex-wrap gap-3 mb-6">
                 <button className="al-btn flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white"
-                  onClick={() => router.push("/dashboard/automations/home")}
+                  onClick={() => router.push("/dashboard/automations/whatsapp-inbox")}
                   style={{ background: primary, boxShadow: `0 12px 32px ${primary}40` }}>
-                  Start Free Automation <IcoArrow />
+                  Open WhatsApp Inbox <IcoArrow />
                 </button>
                 <button className="al-btn flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-semibold"
                   onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
                   style={{ background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }}>
-                  Train Your Agent
+                  Manage AI Training
                 </button>
               </motion.div>
 
