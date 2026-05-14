@@ -101,34 +101,28 @@ export const handleIncomingWhatsApp = async (payload) => {
     if (existingContact.status === "pending") {
       const text = inboundText.toLowerCase().trim();
       
-      // Strict regex: Matches "yes", "y", "ok" as standalone words or at the start
-      const isYes = /^(yes|ok|yup|sure|y|proceed)(\b|$)/i.test(text);
-      // Strict regex: Matches "no", "n", "nope", "stop", "cancel" as standalone words
-      const isNo = /^(no|n|nope|stop|cancel)(\b|$)/i.test(text);
+      // ONLY check for opt-out on the VERY FIRST response to our opt-in prompt
+      // (When inboundCount is 1, it means we just received the 2nd message)
+      if (existingContact.inboundCount === 1) {
+        // Strict regex: Matches "no", "n", "nope", "stop", "cancel" as standalone words
+        const isNo = /^(no|n|nope|stop|cancel)(\b|$)/i.test(text);
 
-      if (isNo) {
-        console.log("🛡️ Contact replied 'No' to opt-in. Blacklisting.");
-        await UserModel.updateOne(
-          { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
-          { $set: { "whatsapp.contacts.list.$.status": "blacklist" } }
-        );
-        await sendWhatsAppAutomationReply({
-          phoneNumberId,
-          to: visitorPhone,
-          text: "No problem. I've noted that. Have a great day!",
-        });
-        return { ok: true };
+        if (isNo) {
+          console.log("🛡️ Contact replied 'No' to opt-in. Blacklisting.");
+          await UserModel.updateOne(
+            { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+            { $set: { "whatsapp.contacts.list.$.status": "blacklist" } }
+          );
+          await sendWhatsAppAutomationReply({
+            phoneNumberId,
+            to: visitorPhone,
+            text: "No problem. I've noted that. Have a great day!",
+          });
+          return { ok: true };
+        }
       }
-
-      if (isYes) {
-        console.log("🛡️ Contact replied 'Yes' to opt-in. Whitelisting.");
-        await UserModel.updateOne(
-          { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
-          { $set: { "whatsapp.contacts.list.$.status": "whitelist" } }
-        );
-      } else {
-        console.log("🛡️ Contact replied with something else. Staying 'pending' but allowing AI.");
-      }
+      
+      console.log("🛡️ Contact is pending. Allowing AI response while awaiting manual approval.");
       // Proceed to Step 3 so the AI can actually reply to their message
     }
   } else {
