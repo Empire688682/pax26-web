@@ -73,6 +73,7 @@ export default function AiWhatsappConnectionPage() {
   const { pax26, router, isWhatsappNumberConnected, userData, fetchUser } = useGlobalContext();
   const [loading, setLoading] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
+  const [metaLoading, setMetaLoading] = useState(false);
 
   const GREEN = "#22c55e";
   const AMBER = "#f59e0b";
@@ -130,6 +131,8 @@ export default function AiWhatsappConnectionPage() {
     } catch (err) {
       console.error(err);
       alert("Connection failed");
+    } finally {
+      setMetaLoading(false);
     }
   };
 
@@ -138,17 +141,21 @@ export default function AiWhatsappConnectionPage() {
       alert("Please wait, Facebook SDK is loading...");
       return;
     }
+    setMetaLoading(true);
     window.FB.login(
       function (response) {
         console.log("FB RESPONSE:", response);
         if (response.authResponse) {
           const accessToken = response.authResponse.accessToken;
           if (!accessToken) {
+            setMetaLoading(false);
             alert("No access token returned. Check your config.");
             return;
           }
 
           handleWithToken(accessToken);
+        } else {
+          setMetaLoading(false);
         }
       },
       {
@@ -408,6 +415,37 @@ export default function AiWhatsappConnectionPage() {
             ))}
           </div>
         </div>
+
+        {/* Loading Overlay */}
+        {metaLoading && (
+          <div style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(12px)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "24px",
+            color: "#fff",
+            animation: "wa-slide 0.3s ease-out"
+          }}>
+            <div className="relative">
+               <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 wa-spin" />
+               <div className="absolute inset-0 flex items-center justify-center">
+                  <IcoMeta />
+               </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">Connecting to Meta</h3>
+              <p className="text-sm opacity-60 max-w-xs">
+                Securely authenticating with WhatsApp Cloud API. Please do not close this window.
+              </p>
+            </div>
+          </div>
+        )}
 
       </div>
     </>
