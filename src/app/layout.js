@@ -158,26 +158,6 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientWrapper>
 
-            {/* Live Chat */}
-            <Script
-              id="tawk-to-live-chat"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-                  (function(){
-                    var s1 = document.createElement("script"),
-                        s0 = document.getElementsByTagName("script")[0];
-                    s1.async = true;
-                    s1.src = 'https://embed.tawk.to/6965d586c6fd22197dd5a8e3/1jeqsk619';
-                    s1.charset = 'UTF-8';
-                    s1.setAttribute('crossorigin','*');
-                    s0.parentNode.insertBefore(s1, s0);
-                  })();
-                `,
-              }}
-            />
-
             {children}
             <ToastContainer />
 

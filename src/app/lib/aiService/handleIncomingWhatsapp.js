@@ -132,20 +132,22 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Steps 5 & 6 (parallel): Update contact + session ──────
-  const contactUpdatePromise = UserModel.updateOne(
-    { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
-    {
-      $set: {
-        "whatsapp.contacts.list.$.lastMessageAt": new Date(),
-        "whatsapp.contacts.list.$.updatedAt": new Date(),
-      },
-      $inc: {
-        "whatsapp.contacts.list.$.messageCount": 1,
-        "whatsapp.contacts.list.$.inboundCount": 1,
-      },
-    }
-  ).then(async (result) => {
-    if (result.matchedCount === 0) {
+  try {
+    const contactUpdateResult = await UserModel.updateOne(
+      { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+      {
+        $set: {
+          "whatsapp.contacts.list.$.lastMessageAt": new Date(),
+          "whatsapp.contacts.list.$.updatedAt": new Date(),
+        },
+        $inc: {
+          "whatsapp.contacts.list.$.messageCount": 1,
+          "whatsapp.contacts.list.$.inboundCount": 1,
+        },
+      }
+    );
+
+    if (contactUpdateResult.matchedCount === 0) {
       await UserModel.updateOne(
         { _id: user._id },
         {
@@ -168,7 +170,9 @@ export const handleIncomingWhatsApp = async (payload) => {
     } else {
       console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
     }
-  });
+  } catch (err) {
+    console.error("❌ Step 5 — Error updating contact list:", err);
+  }
 
   const sessionUpdatePromise = SessionModel.updateOne(
     { _id: session._id },
@@ -184,8 +188,8 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
   );
 
-  await Promise.all([contactUpdatePromise, sessionUpdatePromise]);
-  console.log("✅ Steps 5 & 6 — Contact + Session updated in parallel");
+  await sessionUpdatePromise;
+  console.log("✅ Step 6 — Session updated");
 
   // ── Step 7: Monthly usage reset + quota check ─────────────
   const now          = new Date();
