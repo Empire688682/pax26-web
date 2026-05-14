@@ -1146,9 +1146,78 @@ export default function WhatsAppInbox() {
                 `,
                 backgroundSize: "100px 100px",
                 backgroundColor: "#0b141a",
+                position: "relative"
               }}
             >
               <AnimatePresence>
+                {/* Takeover Notice Overlay */}
+                {!selectedConv?.isHandedOff && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20, x: "-50%" }}
+                    animate={{ opacity: 1, y: 0, x: "-50%" }}
+                    exit={{ opacity: 0, y: 20, x: "-50%" }}
+                    style={{
+                      position: "absolute",
+                      bottom: "20px",
+                      left: "50%",
+                      width: "90%",
+                      maxWidth: "380px",
+                      background: "rgba(245, 158, 11, 0.1)",
+                      backdropFilter: "blur(12px)",
+                      border: "1px solid rgba(245, 158, 11, 0.3)",
+                      padding: "20px",
+                      borderRadius: "20px",
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      zIndex: 30,
+                      color: "#fff",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div style={{ 
+                      width: "40px", 
+                      height: "40px", 
+                      background: "#f59e0b", 
+                      borderRadius: "12px", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      margin: "0 auto 12px"
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                    </div>
+                    <div style={{ fontWeight: 800, fontSize: "16px", marginBottom: "6px" }}>
+                      AI is Managing this Chat
+                    </div>
+                    <p style={{ fontSize: "13px", opacity: 0.8, marginBottom: "20px", lineHeight: 1.5 }}>
+                      The AI agent is currently handling this conversation. To send a manual message or take full control, click the Take Over button.
+                    </p>
+                    <button
+                      disabled={takingOver}
+                      onClick={() => handleHandoff("takeover")}
+                      style={{
+                        width: "100%",
+                        background: "#f59e0b",
+                        color: "#fff",
+                        border: "none",
+                        padding: "12px",
+                        borderRadius: "12px",
+                        fontWeight: 800,
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
+                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                    >
+                      {takingOver ? "Taking Over..." : "Take Over Now"}
+                    </button>
+                  </motion.div>
+                )}
+
                 {messages.map((msg) => {
                   const isOutbound =
                     msg.direction === "outbound";
