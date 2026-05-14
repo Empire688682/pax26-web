@@ -162,6 +162,10 @@ export async function POST(req) {
                 stock: prod.stock,
                 images: prod.images ?? [],
                 isAvailable: prod.isAvailable ?? true,
+                discountPrice: prod.discountPrice,
+                deliveryFee: prod.deliveryFee,
+                deliveryTimeFrame: prod.deliveryTimeFrame,
+                locationNotes: prod.locationNotes,
             });
 
             // Bulk update existing products.
