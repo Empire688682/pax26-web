@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wifi, DollarSign, LayoutDashboard, FileCode, Wallet,
   Phone, LogOut, Info, History, Settings, Bell, X,
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
   ChevronDown, Home, Shield, Users, ShieldAlert,
+  MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -40,31 +43,70 @@ const VTU_SERVICES = [
 ];
 
 /* ── Plain nav item ───────────────────────────────────────────── */
-const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26 }) => (
-  <Link
-    href={href || '#'}
-    onClick={onClick}
-    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group"
-    style={{ color: danger ? '#f87171' : pax26?.textSecondary }}
-    onMouseEnter={e => {
-      e.currentTarget.style.background = pax26?.secondaryBg;
-      e.currentTarget.style.color = danger ? '#f87171' : pax26?.primary;
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.background = 'transparent';
-      e.currentTarget.style.color = danger ? '#f87171' : pax26?.textSecondary;
-    }}
-  >
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
-        style={{ background: pax26?.secondaryBg }}>
-        <Icon size={15} />
-      </div>
-      <span className="text-sm font-medium">{label}</span>
-    </div>
-    <ChevronRight size={13} className="opacity-0 group-hover:opacity-40 transition-opacity" />
-  </Link>
-);
+const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNew = false }) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+  const primary = pax26?.primary || '#3b82f6';
+  
+  return (
+    <motion.div
+      whileHover={{ x: 4 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <Link
+        href={href || '#'}
+        onClick={onClick}
+        className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative"
+        style={{ 
+          color: isActive ? primary : (danger ? '#f87171' : pax26?.textSecondary),
+          background: isActive ? `${primary}12` : 'transparent'
+        }}
+        onMouseEnter={e => {
+          if (!isActive) {
+            e.currentTarget.style.background = pax26?.secondaryBg;
+            e.currentTarget.style.color = danger ? '#f87171' : pax26?.primary;
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isActive) {
+            e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.color = danger ? '#f87171' : pax26?.textSecondary;
+          }
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300"
+            style={{ 
+              background: isActive ? `${primary}20` : pax26?.secondaryBg,
+              color: isActive ? primary : 'inherit',
+              boxShadow: isActive ? `0 0 15px ${primary}30` : 'none'
+            }}>
+            <Icon size={15} strokeWidth={isActive ? 2.5 : 2} />
+          </div>
+          <div className="flex flex-col">
+            <span className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
+          </div>
+          {isNew && (
+            <span className="ml-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider animate-pulse"
+              style={{ background: primary, color: '#fff' }}>
+              New
+            </span>
+          )}
+        </div>
+        
+        {isActive && (
+          <motion.div 
+            layoutId="active-pill"
+            className="absolute left-0 w-1 h-5 rounded-r-full"
+            style={{ background: primary }}
+          />
+        )}
+        
+        <ChevronRight size={13} className={`transition-all duration-300 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
+      </Link>
+    </motion.div>
+  );
+};
 
 /* ── VTU nav item with expandable submenu ─────────────────────── */
 const VtuNavItem = ({ pax26, onClose }) => {
@@ -141,10 +183,13 @@ const VtuNavItem = ({ pax26, onClose }) => {
 
 /* ── Section label ────────────────────────────────────────────── */
 const SectionLabel = ({ label, pax26 }) => (
-  <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-1 mt-2"
-    style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
-    {label}
-  </p>
+  <div className="flex items-center gap-2 px-3 mb-1.5 mt-5 first:mt-1">
+    <p className="text-[10px] font-bold uppercase tracking-[0.15em] whitespace-nowrap"
+      style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
+      {label}
+    </p>
+    <div className="h-[1px] w-full" style={{ background: pax26?.border, opacity: 0.3 }} />
+  </div>
 );
 
 /* ── Divider ──────────────────────────────────────────────────── */
@@ -215,47 +260,43 @@ export default function Sidebar() {
             ) : (
               /* Authenticated menu */
               <>
-                <SectionLabel label="Overview" pax26={pax26} />
+                <SectionLabel label="General" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations" icon={Wifi} label="Agent Automation" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect Whatsapp" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Zap} label="Automations Home" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Zap} label="Train Agent" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contacts" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="Prevent WhatsApp Ban" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/market-place" icon={Layers} label="Marketplace" onClick={close} pax26={pax26} />
 
-                <Divider pax26={pax26} />
-                <SectionLabel label="Finance" pax26={pax26} />
-                <NavItem href="/fund-wallet" icon={Wallet} label="Fund Wallet" onClick={close} pax26={pax26} />
+                <SectionLabel label="AI & Automations" pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Training" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contact Manager" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="Anti-Ban Tool" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations" icon={Cpu} label="Agent Workflow" onClick={close} pax26={pax26} />
+
+                <SectionLabel label="Financials" pax26={pax26} />
+                <NavItem href="/fund-wallet" icon={CreditCard} label="Add Funds" onClick={close} pax26={pax26} />
                 <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
-
-                {/* VTU with submenu */}
                 <VtuNavItem pax26={pax26} onClose={close} />
 
-                <Divider pax26={pax26} />
-                <SectionLabel label="Account" pax26={pax26} />
-                <NavItem href="/profile" icon={Settings} label="Profile & Settings" onClick={close} pax26={pax26} />
+                <SectionLabel label="Preferences" pax26={pax26} />
+                <NavItem href="/profile" icon={Settings} label="Settings" onClick={close} pax26={pax26} />
                 <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
-                <NavItem href="/contact" icon={Phone} label="Contact Support" onClick={close} pax26={pax26} />
-                <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
-                <NavItem href="/terms" icon={Shield} label="Terms & Conditions" onClick={close} pax26={pax26} />
-                <NavItem href="/privacy" icon={Shield} label="Privacy Policy" onClick={close} pax26={pax26} />
-                <NavItem href="/survey" icon={Info} label="Your Feedback" onClick={close} pax26={pax26} />
+                <NavItem href="/contact" icon={Phone} label="Support" onClick={close} pax26={pax26} />
 
-                <Divider pax26={pax26} />
-                <button
-                  onClick={() => { close(); logoutUser(); }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200"
-                  style={{ color: '#f87171' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ background: 'rgba(248,113,113,0.1)' }}>
-                    <LogOut size={15} className="text-red-400" />
-                  </div>
-                  <span className="text-sm font-medium">Logout</span>
-                </button>
+                <div className="mt-auto pt-4">
+                  <button
+                    onClick={() => { close(); logoutUser(); }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200 group"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                      style={{ background: 'rgba(248,113,113,0.1)' }}>
+                      <LogOut size={15} className="text-red-400 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="text-sm font-medium">Logout</span>
+                  </button>
+                </div>
 
                 {/* Bottom padding so last item clears the pinned footer */}
                 <div className="h-4 shrink-0" />
