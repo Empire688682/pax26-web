@@ -534,6 +534,16 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
                 </div>
               )}
 
+              {/* Phone Number (Visible when expanded) */}
+              <div>
+                <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
+                  Phone Number
+                </div>
+                <p style={{ fontSize: "13px", fontWeight: 700, color: pax26?.primary, margin: 0 }}>
+                  {contact.phone}
+                </p>
+              </div>
+
               {/* Dates */}
               <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
                 {contact.createdAt && (
