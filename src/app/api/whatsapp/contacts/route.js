@@ -18,7 +18,7 @@ export async function GET(req) {
     const userId = await verifyToken(req);
 
     const user = await UserModel.findById(userId)
-      .select("whatsapp.contacts")
+      .select("whatsapp.contacts whatsapp.displayPhone number")
       .lean();
 
     if (!user) {
@@ -30,12 +30,27 @@ export async function GET(req) {
 
     const contacts = user?.whatsapp?.contacts?.list ?? [];
 
+    const businessNumber = user.whatsapp?.displayPhone?.replace(/\D/g, "");
+    const personalNumber = user.number?.replace(/\D/g, "");
+
     // 🔥 AUTO-SYNC: Find numbers in message history that aren't in the contacts list
     const messageStats = await AIMessageModel.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
+        $project: {
+          partner: {
+            $cond: [
+              { $eq: ["$direction", "inbound"] },
+              "$from",
+              "$to"
+            ]
+          },
+          createdAt: 1
+        }
+      },
+      {
         $group: {
-          _id: "$from",
+          _id: "$partner",
           messageCount: { $sum: 1 },
           lastMessageAt: { $max: "$createdAt" }
         }
@@ -55,7 +70,16 @@ export async function GET(req) {
         isVirtual: true // Mark as not yet formally saved in UserModel but visible
       }));
 
-    const finalContacts = [...contacts, ...unknownContacts];
+    const allContacts = [...contacts, ...unknownContacts];
+    
+    // Filter out self-contacts
+    const finalContacts = allContacts.filter(c => {
+      const cleaned = c.phone?.replace(/\D/g, "");
+      if (!cleaned) return true;
+      if (cleaned === businessNumber) return false;
+      if (personalNumber && cleaned.endsWith(personalNumber)) return false;
+      return true;
+    });
 
     return NextResponse.json(
       { success: true, data: finalContacts },

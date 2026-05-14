@@ -326,7 +326,7 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
   const [expanded, setExpanded] = useState(false);
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
-  const isLoading   = loadingPhone === contact.phone;
+  const isLoading = loadingPhone === contact.phone;
 
   const badgeStyle = isWhitelist
     ? { background: `${pax26?.primary}18`, color: pax26?.primary }
@@ -370,7 +370,7 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
               )}
             </div>
           </div>
-          
+
           {/* Mobile Expand Toggle */}
           <div className="flex sm:hidden items-center gap-[6px] mt-[2px]">
             {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
@@ -638,6 +638,16 @@ export default function WhatsappContact() {
   ];
 
   const filtered = contacts.filter(c => {
+    // Hide self-contacts (business or personal)
+    const cleanedContact = c.phone?.replace(/\D/g, "");
+    const businessPhone = userData?.whatsapp?.displayPhone?.replace(/\D/g, "");
+    const personalPhone = userData?.number?.replace(/\D/g, "");
+
+    if (cleanedContact) {
+      if (cleanedContact === businessPhone) return false;
+      if (personalPhone && cleanedContact.endsWith(personalPhone)) return false;
+    }
+
     const matchTab = activeTab === "all" || c.status === activeTab;
     const matchSearch = !search
       || c.phone.includes(search)
@@ -744,7 +754,7 @@ export default function WhatsappContact() {
   };
 
   return (
-    <div className="px-4 md:px-0" style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "720px", margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "800px", margin: "0 auto" }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* ── Page header ── */}
