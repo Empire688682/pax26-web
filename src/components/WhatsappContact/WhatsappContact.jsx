@@ -353,8 +353,8 @@ const ContactCard = ({ contact, toggleContact, loadingPhone, pax26 }) => {
         {/* Phone & Meta Section */}
         <div className="flex items-start justify-between sm:w-auto" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
-            <div className="truncate" style={{ fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px", fontSize: "13px" }}>
-              {contact.phone}
+            <div className="truncate" style={{ fontWeight: 600, color: pax26?.textPrimary, marginBottom: "2px", fontSize: "13px", textTransform: "capitalize" }}>
+              {contact.notes || contact.phone}
             </div>
             {/* Meta row */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>

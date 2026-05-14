@@ -874,9 +874,10 @@ export default function WhatsAppInbox() {
                           color: "#e9edef",
                           fontSize: "14px",
                           fontWeight: 600,
+                          textTransform: "capitalize",
                         }}
                       >
-                        {conv.phone}
+                        {conv.notes || conv.phone}
                       </div>
 
                       <div

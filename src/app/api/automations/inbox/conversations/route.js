@@ -78,6 +78,8 @@ export async function GET(req) {
           status: { $in: ["active", "waiting"] }
         }).lean();
 
+        const contact = user?.whatsapp?.contacts?.list?.find(c => c.phone === conv._id);
+
         return {
           phone: conv._id,
           lastMessage: conv.lastMessage,
@@ -90,6 +92,7 @@ export async function GET(req) {
           phoneNumberId: conv.phoneNumberId,
           isHandedOff: session?.handoff?.isHandedOff || false,
           sessionStatus: session?.status || "expired",
+          notes: contact?.notes || "",
         };
       })
     );
