@@ -6,13 +6,11 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
 
         const payload = {
             messaging_product: "whatsapp",
+            recipient_type: "individual",
             to,
-            type: "template",
-            template: {
-                name: "pax26",
-                language: {
-                    code: "en_US"
-                }
+            type: "text",
+            text: {
+                body: text
             }
         };
 
