@@ -591,17 +591,17 @@ export default function AiBusinessDashboard() {
     fetchProfile();
   }, [fetchProfile]);
 
-  const saveProfile = async () => {
+  const saveProfile = async (explicitData = null) => {
     setSaving(true);
     try {
+      const dataToSave = explicitData || form;
       const res = await fetch("/api/seller/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(dataToSave),
       });
       const data = await res.json();
       if (data.success) {
-        // Update local state with saved data (including IDs)
         if (data.profile) {
           setForm(f => ({
             ...f,
@@ -609,7 +609,8 @@ export default function AiBusinessDashboard() {
             products: data.profile.products || []
           }));
         }
-        alert("Changes saved successfully!");
+        // Only alert if it's a manual profile save
+        if (!explicitData) alert("Profile updated successfully!");
       } else {
         alert("Failed to save: " + (data.message || "Unknown error"));
       }
@@ -622,7 +623,9 @@ export default function AiBusinessDashboard() {
   };
 
   const handleProductChange = (newProducts) => {
-    setForm(f => ({ ...f, products: newProducts }));
+    const updatedForm = { ...form, products: newProducts };
+    setForm(updatedForm);
+    saveProfile(updatedForm);
   };
 
   if (loading) {
@@ -894,10 +897,41 @@ export default function AiBusinessDashboard() {
                 <div style={{ background: p?.secondaryBg, padding: "32px", borderRadius: "24px", border: `1px solid ${p?.border}` }}>
                   <InfoBanner pax26={p} text="Add your bank details below. Your AI will securely share these with customers when they are ready to purchase." />
                   <div style={{ marginTop: "20px" }}>
-                    <PaymentBuilder payments={form.paymentDetails} onChange={v => setForm(f => ({ ...f, paymentDetails: v }))} pax26={p} />
+                    <PaymentBuilder 
+                      payments={form.paymentDetails} 
+                      onChange={v => {
+                        const updated = { ...form, paymentDetails: v };
+                        setForm(updated);
+                        saveProfile(updated);
+                      }} 
+                      pax26={p} 
+                    />
                   </div>
                 </div>
               </section>
+
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+                <button
+                  onClick={() => saveProfile()}
+                  disabled={saving}
+                  style={{
+                    padding: "16px 48px",
+                    borderRadius: "16px",
+                    background: p?.primary,
+                    color: "#fff",
+                    fontWeight: 800,
+                    fontSize: "16px",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    boxShadow: `0 12px 32px ${p?.primary}55`,
+                  }}
+                >
+                  {saving ? <><Spinner /> Saving...</> : "Update Business Profile"}
+                </button>
+              </div>
             </div>
           )}
 
@@ -947,41 +981,7 @@ export default function AiBusinessDashboard() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Footer Save Button */}
-      {activeTab !== "overview" && (
-        <div style={{
-          position: "sticky",
-          bottom: "20px",
-          display: "flex",
-          justifyContent: "center",
-          zIndex: 100,
-          marginTop: "20px"
-        }}>
-          <button
-            onClick={saveProfile}
-            disabled={saving}
-            style={{
-              padding: "16px 48px",
-              borderRadius: "16px",
-              background: p?.primary,
-              color: "#fff",
-              fontWeight: 800,
-              fontSize: "16px",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              boxShadow: `0 12px 32px ${p?.primary}55`,
-              transition: "transform 0.2s, box-shadow 0.2s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.02)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}
-          >
-            {saving ? <><Spinner /> Saving...</> : "Save Dashboard Changes"}
-          </button>
-        </div>
-      )}
+      {/* Footer Save Button Removed for Better UX */}
 
       <style jsx global>{`
         @keyframes spin {
