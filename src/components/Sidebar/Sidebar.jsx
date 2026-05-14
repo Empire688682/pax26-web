@@ -264,7 +264,7 @@ export default function Sidebar() {
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/market-place" icon={Layers} label="Marketplace" onClick={close} pax26={pax26} />
 
-                <SectionLabel label="AI & Automations" pax26={pax26} />
+                <SectionLabel label="Automations" pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} isNew={true} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Dashboard" onClick={close} pax26={pax26} />
