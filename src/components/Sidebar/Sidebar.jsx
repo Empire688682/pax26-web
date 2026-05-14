@@ -47,7 +47,7 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
   const pathname = usePathname();
   const isActive = pathname === href;
   const primary = pax26?.primary || '#3b82f6';
-  
+
   return (
     <motion.div
       whileHover={{ x: 4 }}
@@ -57,7 +57,7 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
         href={href || '#'}
         onClick={onClick}
         className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative"
-        style={{ 
+        style={{
           color: isActive ? primary : (danger ? '#f87171' : pax26?.textSecondary),
           background: isActive ? `${primary}12` : 'transparent'
         }}
@@ -76,7 +76,7 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300"
-            style={{ 
+            style={{
               background: isActive ? `${primary}20` : pax26?.secondaryBg,
               color: isActive ? primary : 'inherit',
               boxShadow: isActive ? `0 0 15px ${primary}30` : 'none'
@@ -93,15 +93,15 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
             </span>
           )}
         </div>
-        
+
         {isActive && (
-          <motion.div 
+          <motion.div
             layoutId="active-pill"
             className="absolute left-0 w-1 h-5 rounded-r-full"
             style={{ background: primary }}
           />
         )}
-        
+
         <ChevronRight size={13} className={`transition-all duration-300 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
       </Link>
     </motion.div>
@@ -267,7 +267,7 @@ export default function Sidebar() {
                 <SectionLabel label="AI & Automations" pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} isNew={true} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Training" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Dashboard" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contact Manager" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="Anti-Ban Tool" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Agent Workflow" onClick={close} pax26={pax26} />
