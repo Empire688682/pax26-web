@@ -75,10 +75,10 @@ function FloatingBadge({ icon: Icon, label, color, className, style }) {
 /* ── Main CTA ─────────────────────────────────────────────────── */
 export default function CTA() {
   const { openModal, pax26 } = useGlobalContext();
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
-  const GREEN   = "#22c55e";
+  const GREEN = "#22c55e";
 
   return (
     <>
@@ -106,9 +106,9 @@ export default function CTA() {
         </div>
 
         {/* ── Floating badges (decorative) ────────────── */}
-        <FloatingBadge icon={Bot}           label="AI is replying…"     color={primary} className="ct-orb-1 top-16 left-16" />
-        <FloatingBadge icon={MessageCircle} label="124 chats handled"   color={GREEN}   className="ct-orb-3 top-24 right-20" />
-        <FloatingBadge icon={Zap}           label="0.3s response time"  color="#f59e0b" className="ct-orb-2 bottom-20 left-20" />
+        <FloatingBadge icon={Bot} label="AI is replying…" color={primary} className="ct-orb-1 top-16 left-16" />
+        <FloatingBadge icon={MessageCircle} label="124 chats handled" color={GREEN} className="ct-orb-3 top-24 right-20" />
+        <FloatingBadge icon={Zap} label="0.3s response time" color="#f59e0b" className="ct-orb-2 bottom-20 left-20" />
 
         {/* ── Content ─────────────────────────────────── */}
         <div className="relative max-w-3xl mx-auto text-center">
@@ -133,7 +133,7 @@ export default function CTA() {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
             <h2 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
               style={{ color: pax26?.textPrimary }}>
-              Let AI handle your{" "}
+              Let Pax26 handle your{" "}
               <span className="ct-serif block" style={{ color: primary }}>
                 customer conversations
               </span>
