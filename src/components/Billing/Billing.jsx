@@ -102,7 +102,7 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
         <div className="absolute top-4 right-4">
           <span className="bl-mono text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full"
             style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}40` }}>
-            {plan.usersCount ? `Most Used (${plan.usersCount})` : "Most Popular"}
+            Most Popular
           </span>
         </div>
       )}
@@ -200,17 +200,13 @@ export default function Billing() {
 
   useEffect(() => {
     if (aiPlans && aiPlans.length > 0) {
-      const maxUsersCount = Math.max(...aiPlans.map(p => p.usersCount || 0));
-      
       const mergedPlans = aiPlans.map((fetchedPlan) => {
-        const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
-        
         return {
           key: fetchedPlan.key,
           label: fetchedPlan.label,
           price: Number(fetchedPlan.price) || 0,
           accentHex: fetchedPlan.accentHex || "#3b82f6",
-          popular: fetchedPlan.popular || isMostUsed,
+          popular: fetchedPlan.popular || false,
           tagline: fetchedPlan.tagline || "",
           messages: fetchedPlan.messages || "",
           features: fetchedPlan.features || [],

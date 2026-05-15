@@ -91,7 +91,7 @@ function PlanCard({ plan, index, pax26, inView }) {
       {plan.popular && (
         <div className="absolute -top-0 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-b-xl text-xs font-bold text-white z-10"
           style={{ background: primary, boxShadow: `0 4px 14px ${primary}50` }}>
-          <Sparkles size={11} /> {plan.usersCount ? `Most Used (${plan.usersCount})` : "Most Popular"}
+          <Sparkles size={11} /> Most Popular
         </div>
       )}
 
@@ -186,18 +186,14 @@ export default function Pricing() {
         const plansList = Array.isArray(data) ? data : (data.data || data.plans || []);
 
         if (plansList.length > 0) {
-          const maxUsersCount = Math.max(...plansList.map(p => p.usersCount || 0));
-
           const mergedPlans = plansList.map((fetchedPlan) => {
-            const isMostUsed = fetchedPlan.usersCount === maxUsersCount && maxUsersCount > 0;
-
             return {
               key: fetchedPlan.key,
               name: fetchedPlan.name || fetchedPlan.label,
               price: fetchedPlan.price || 0,
               period: fetchedPlan.period || "month",
               tagline: fetchedPlan.tagline || "",
-              popular: fetchedPlan.popular || isMostUsed,
+              popular: fetchedPlan.popular || false,
               features: fetchedPlan.features || [],
               usersCount: fetchedPlan.usersCount || 0,
               isActive: fetchedPlan.isActive !== undefined ? fetchedPlan.isActive : true
