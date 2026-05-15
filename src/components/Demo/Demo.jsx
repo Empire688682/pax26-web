@@ -46,12 +46,12 @@ const SCENARIOS = [
       "Payment link sent without human involvement",
     ],
     messages: [
-      { from: "user", text: "Hi! Do you sell shoes?",                                                      t: 0    },
-      { from: "bot",  text: "Yes! \uD83D\uDC5F We have:\n\n1\uFE0F\u20E3 Nike Air Max — \u20A655,000\n2\uFE0F\u20E3 Adidas Ultraboost — \u20A648,000\n3\uFE0F\u20E3 Jordan 1 — \u20A662,000\n\nWhich do you want?", t: 900  },
-      { from: "user", text: "Nike please, size 42",                                                         t: 2400 },
-      { from: "bot",  text: "Great choice! \uD83D\uDD25 Size 42 is in stock.\n\nShall I send a payment link? \uD83D\uDCB3", t: 3400 },
-      { from: "user", text: "Yes!",                                                                          t: 4600 },
-      { from: "bot",  text: "Done \u2705 Payment link sent. Your order ships within 2 hrs!",                 t: 5500 },
+      { from: "user", text: "Hi! Do you sell shoes?", t: 0 },
+      { from: "bot", text: "Yes! \uD83D\uDC5F We have:\n\n1\uFE0F\u20E3 Nike Air Max — \u20A655,000\n2\uFE0F\u20E3 Adidas Ultraboost — \u20A648,000\n3\uFE0F\u20E3 Jordan 1 — \u20A662,000\n\nWhich do you want?", t: 900 },
+      { from: "user", text: "Nike please, size 42", t: 2400 },
+      { from: "bot", text: "Great choice! \uD83D\uDD25 Size 42 is in stock.\n\nShall I send a payment link? \uD83D\uDCB3", t: 3400 },
+      { from: "user", text: "Yes!", t: 4600 },
+      { from: "bot", text: "Done \u2705 Payment link sent. Your order ships within 2 hrs!", t: 5500 },
     ],
   },
   {
@@ -66,12 +66,12 @@ const SCENARIOS = [
       "Urgency created with reserved stock tactic",
     ],
     messages: [
-      { from: "bot",  text: "Hi \uD83D\uDC4B You checked out Air Max 270 yesterday but didn't complete your order.", t: 0    },
-      { from: "bot",  text: "We held the last pair in your size — it's still available! \uD83D\uDE4C",               t: 1000 },
-      { from: "user", text: "Oh really? I thought it was sold out",                                                    t: 2800 },
-      { from: "bot",  text: "Not at all! We reserved it for you \uD83D\uDE0A\n\nWant me to send a payment link?",     t: 3800 },
-      { from: "user", text: "Yes please, let's do it",                                                                 t: 5200 },
-      { from: "bot",  text: "Sent! \uD83C\uDF89 Complete within 30 mins and we'll add free delivery.",                t: 6100 },
+      { from: "bot", text: "Hi \uD83D\uDC4B You checked out Air Max 270 yesterday but didn't complete your order.", t: 0 },
+      { from: "bot", text: "We held the last pair in your size — it's still available! \uD83D\uDE4C", t: 1000 },
+      { from: "user", text: "Oh really? I thought it was sold out", t: 2800 },
+      { from: "bot", text: "Not at all! We reserved it for you \uD83D\uDE0A\n\nWant me to send a payment link?", t: 3800 },
+      { from: "user", text: "Yes please, let's do it", t: 5200 },
+      { from: "bot", text: "Sent! \uD83C\uDF89 Complete within 30 mins and we'll add free delivery.", t: 6100 },
     ],
   },
   {
@@ -86,21 +86,21 @@ const SCENARIOS = [
       "Routes hot leads to sales team instantly",
     ],
     messages: [
-      { from: "user", text: "I want to buy data in bulk for my company",                                    t: 0    },
-      { from: "bot",  text: "Awesome! \uD83D\uDE80 Quick questions:\n\nHow many staff need data?",          t: 900  },
-      { from: "user", text: "About 50 employees",                                                           t: 2400 },
-      { from: "bot",  text: "Got it. What's your monthly budget?",                                          t: 3300 },
-      { from: "user", text: "Around \u20A6500,000 a month",                                                 t: 4700 },
-      { from: "bot",  text: "You qualify for our Business Plan \uD83D\uDCBC\n\nConnecting you with our sales team now — they'll reach you in under 5 mins!", t: 5700 },
+      { from: "user", text: "I want to buy data in bulk for my company", t: 0 },
+      { from: "bot", text: "Awesome! \uD83D\uDE80 Quick questions:\n\nHow many staff need data?", t: 900 },
+      { from: "user", text: "About 50 employees", t: 2400 },
+      { from: "bot", text: "Got it. What's your monthly budget?", t: 3300 },
+      { from: "user", text: "Around \u20A6500,000 a month", t: 4700 },
+      { from: "bot", text: "You qualify for our Business Plan \uD83D\uDCBC\n\nConnecting you with our sales team now — they'll reach you in under 5 mins!", t: 5700 },
     ],
   },
 ];
 
 /* ── Chat window component ────────────────────────────────────── */
 function ChatWindow({ scenario, pax26 }) {
-  const [visible, setVisible]   = useState(0);
-  const [running, setRunning]   = useState(false);
-  const timersRef               = useRef([]);
+  const [visible, setVisible] = useState(0);
+  const [running, setRunning] = useState(false);
+  const timersRef = useRef([]);
 
   function start() {
     timersRef.current.forEach(clearTimeout);
@@ -114,7 +114,7 @@ function ChatWindow({ scenario, pax26 }) {
     });
 
     const lastT = scenario.messages[scenario.messages.length - 1].t + 1200;
-    const done  = setTimeout(() => setRunning(false), lastT);
+    const done = setTimeout(() => setRunning(false), lastT);
     timersRef.current.push(done);
   }
 
@@ -129,7 +129,7 @@ function ChatWindow({ scenario, pax26 }) {
     return () => timersRef.current.forEach(clearTimeout);
   }, []);
 
-  const nextIsBot  = visible < scenario.messages.length && scenario.messages[visible]?.from === "bot";
+  const nextIsBot = visible < scenario.messages.length && scenario.messages[visible]?.from === "bot";
   const showTyping = running && visible > 0 && nextIsBot;
 
   return (
@@ -171,11 +171,11 @@ function ChatWindow({ scenario, pax26 }) {
               className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[80%] px-3 py-2 text-sm leading-snug"
                 style={{
-                  background:   m.from === "user" ? "#DCF8C6" : "#ffffff",
+                  background: m.from === "user" ? "#DCF8C6" : "#ffffff",
                   borderRadius: m.from === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  color:        "#111827",
-                  whiteSpace:   "pre-line",
-                  boxShadow:    "0 1px 2px rgba(0,0,0,0.1)",
+                  color: "#111827",
+                  whiteSpace: "pre-line",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 }}>
                 {m.text}
               </div>
@@ -243,8 +243,8 @@ function ContextPanel({ scenario, pax26 }) {
       {/* stats row */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Response time", value: "< 1s"   },
-          { label: "Availability",  value: "24 / 7" },
+          { label: "Response time", value: "< 1s" },
+          { label: "Availability", value: "24 / 7" },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-xl p-4"
             style={{ background: `${scenario.color}08`, border: `1px solid ${scenario.color}20` }}>
@@ -259,11 +259,11 @@ function ContextPanel({ scenario, pax26 }) {
 
 /* ── Main Demo section ────────────────────────────────────────── */
 export default function Demo() {
-  const { pax26 }   = useGlobalContext();
-  const ref         = useRef(null);
-  const inView      = useInView(ref, { once: true, margin: "-80px" });
+  const { pax26 } = useGlobalContext();
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
   const [activeTab, setActiveTab] = useState(0);
-  const primary     = pax26?.primary || "#3b82f6";
+  const primary = pax26?.primary || "#3b82f6";
 
   return (
     <>
@@ -297,7 +297,7 @@ export default function Demo() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-3xl md:text-5xl font-extrabold leading-tight mb-4"
               style={{ color: pax26?.textPrimary }}>
-              See Pax26 AI{" "}
+              See Pax26 Agent{" "}
               <span className="dm-serif" style={{ color: primary }}>in action</span>
             </motion.h2>
 
@@ -319,16 +319,16 @@ export default function Demo() {
             className="flex justify-center gap-3 mb-10 flex-wrap">
             {SCENARIOS.map((s, i) => {
               const TabIcon = s.icon;
-              const active  = activeTab === i;
+              const active = activeTab === i;
               return (
                 <button key={i}
                   onClick={() => setActiveTab(i)}
                   className="dm-tab flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
                   style={{
                     background: active ? s.color : pax26?.bg,
-                    color:      active ? "#fff"  : pax26?.textSecondary,
-                    border:    `1px solid ${active ? s.color : pax26?.border}`,
-                    boxShadow:  active ? `0 6px 20px ${s.color}40` : "none",
+                    color: active ? "#fff" : pax26?.textSecondary,
+                    border: `1px solid ${active ? s.color : pax26?.border}`,
+                    boxShadow: active ? `0 6px 20px ${s.color}40` : "none",
                   }}>
                   <TabIcon size={15} />
                   {s.label}

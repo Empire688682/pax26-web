@@ -42,8 +42,8 @@ const FEATURES = [
     icon: Brain,
     color: "#38bdf8",
     tag: "AI-Powered",
-    title: "AI Chatbot",
-    text: "Train the AI once with your business info, tone and FAQs. It replies exactly like you would — on-brand, every time.",
+    title: "Agent Chatbot",
+    text: "Train the Agent once with your business info, tone and FAQs. It replies exactly like you would — on-brand, every time.",
     bullets: ["Learns your products & services", "Handles objections & FAQs", "Escalates complex queries to you"],
   },
   {
@@ -127,7 +127,7 @@ function FeatureCard({ feature, index, pax26, inView }) {
 
 export default function AutomationFeatures() {
   const { pax26 } = useGlobalContext();
-  const ref    = useRef(null);
+  const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
 
