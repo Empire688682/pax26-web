@@ -79,6 +79,13 @@ export async function POST(req) {
     user.paxAI.planStartedAt = now;              // start new billing cycle
     user.paxAI.lastUpdated = now;
 
+    // Reset message handled count for all contacts
+    if (user.whatsapp && user.whatsapp.contacts && Array.isArray(user.whatsapp.contacts.list)) {
+      user.whatsapp.contacts.list.forEach(contact => {
+        contact.messageCount = 0;
+      });
+    }
+
     // Increment Plan Revenue Tracking
     if (!user.planAnalytics) {
       user.planAnalytics = { aiMessagesUsed: 0, broadcastSent: 0, planRevenue: 0, metaCost: 0 };

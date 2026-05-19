@@ -22,7 +22,7 @@ export async function POST(req) {
   session.startTransaction(); // 👈 Begin the transaction
 
   try {
-    const { network, plan, planId, number, amount, pin, usedCashBack } = reqBody;
+    const { network, plan, planId, number, amount, pin } = reqBody;
 
     if (!network || !plan || !planId || !number || !amount || !pin) {
       await session.abortTransaction();
@@ -62,15 +62,7 @@ export async function POST(req) {
       );
     };
 
-    let walletToUse = Number(amount);
-    let cashBackToUse = 0
-
-    if (usedCashBack) {
-      cashBackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
-      walletToUse = Number(amount) - cashBackToUse;
-    }
-
-    if (verifyUser.walletBalance < walletToUse) {
+    if (verifyUser.walletBalance < Number(amount)) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Insufficient balance" },
@@ -144,11 +136,8 @@ export async function POST(req) {
       { new: true, upsert: true }
     );
 
-    // ✅ Deduct wallet and log transaction (within session)
-    if (cashBackToUse > 0) {
-      verifyUser.cashBackBalance -= cashBackToUse
-    }
-    verifyUser.walletBalance -= walletToUse;
+    // ✅ Deduct wallet
+    verifyUser.walletBalance -= Number(amount);
     await verifyUser.save({ session });
 
     const fee = Number(amount) - Number(result.amount);

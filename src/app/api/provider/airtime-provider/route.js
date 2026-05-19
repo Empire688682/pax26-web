@@ -23,7 +23,7 @@ export async function POST(req) {
   session.startTransaction();
 
   try {
-    const { network, amount, number, pin, usedCashBack } = reqBody;
+    const { network, amount, number, pin } = reqBody;
 
     if (!network || !amount || !number || !pin) {
       await session.abortTransaction(); session.endSession();
@@ -62,17 +62,8 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Cashback + Wallet Deduction Logic
-    let cashbackToUse = 0;
-    let walletToUse = Number(amount);
-
-    if (usedCashBack) {
-      cashbackToUse = Math.min(verifyUser.cashBackBalance, Number(amount));
-      walletToUse = Number(amount) - cashbackToUse;
-    }
-
     // Check wallet sufficiency
-    if (verifyUser.walletBalance < walletToUse) {
+    if (verifyUser.walletBalance < Number(amount)) {
       await session.abortTransaction(); session.endSession();
       return NextResponse.json(
         { success: false, message: "Insufficient wallet balance" },
@@ -81,10 +72,7 @@ export async function POST(req) {
     }
 
     // Deduct balances
-    if (cashbackToUse > 0) {
-      verifyUser.cashBackBalance -= cashbackToUse;
-    }
-    verifyUser.walletBalance -= walletToUse;
+    verifyUser.walletBalance -= Number(amount);
     await verifyUser.save({ session });
 
     // 👉 Call external API
@@ -105,12 +93,7 @@ export async function POST(req) {
       );
     }
 
-    if(!usedCashBack){
-        const apiAmount = Number(result.amount);
-        const userCashback = Number(amount) - Number(apiAmount);
-        verifyUser.cashBackBalance += Math.floor(userCashback);
-        await verifyUser.save({ session });
-      }
+    const fee = Number(amount) - Number(result.amount);
 
     // ✅ Update Provider balance
     await ProviderModel.findOneAndUpdate(
@@ -132,6 +115,7 @@ export async function POST(req) {
         amount,
         status: "success",
         reference: result.orderid,
+        fee,
         meta:{
           airtimeData: {
             network: result?.mobilenetwork,

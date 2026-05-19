@@ -13,7 +13,6 @@ const ICON_MAP = {
 };
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
-import CashBackBalance from "../CashBackBalance/CashBackBalance";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap');
@@ -602,7 +601,7 @@ export default function Dashboard() {
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: pax26?.textSecondary, opacity: 0.42, margin: "0 0 6px" }}>
                     Wallet
                   </p>
-                  <p style={{ fontSize: 15, fontWeight: 800, color: pax26?.textPrimary, margin: 0, letterSpacing: "-0.02em" }}>Balance &amp; cashback</p>
+                  <p style={{ fontSize: 15, fontWeight: 800, color: pax26?.textPrimary, margin: 0, letterSpacing: "-0.02em" }}>Wallet Balance</p>
                 </div>
                 <button type="button" className="db-btn"
                   onClick={() => setShowWallet(!showWallet)}
@@ -621,12 +620,6 @@ export default function Dashboard() {
               {showWallet && (
                 <div className="db-exp" style={{ padding: "0 22px 22px", borderTop: `1px solid ${pax26?.border}`, paddingTop: 18 }}>
                   <WalletBalance showMore={showMore} setShowMore={setShowMore} />
-                  <div style={{ borderRadius: 14, padding: 16, background: pax26?.secondaryBg, marginTop: 14, border: `1px solid ${pax26?.border}` }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: pax26?.textSecondary, opacity: 0.42, margin: "0 0 10px" }}>
-                      Cashback
-                    </p>
-                    <CashBackBalance />
-                  </div>
                 </div>
               )}
             </div>

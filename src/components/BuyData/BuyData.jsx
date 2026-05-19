@@ -7,7 +7,6 @@ import WalletBalance from "../WalletBalance/WalletBalance";
 import { useGlobalContext } from "../Context";
 import axios from "axios";
 import { applyMarkup } from "../utils/helper";
-import CashBackOption from "../ui/CashBackOption";
 import { phoneCarrierDetector } from "../utils/phoneCarrierDetector";
 import {
   Phone, Lock, Wifi, ChevronDown, CheckCircle2,
@@ -104,7 +103,7 @@ function ThemedSelect({ pax26, isFocused, children, ...props }) {
 }
 
 /* ── Confirm modal ────────────────────────────────────────────── */
-function ConfirmModal({ visible, onConfirm, onCancel, loading, form, cashbackUsed, cashbackAmount, finalAmount, pax26 }) {
+function ConfirmModal({ visible, onConfirm, onCancel, loading, form, pax26 }) {
   if (!visible) return null;
   const GREEN   = "#22c55e";
   const network = NETWORKS[form.network];
@@ -113,9 +112,7 @@ function ConfirmModal({ visible, onConfirm, onCancel, loading, form, cashbackUse
     { label: "Phone",    value: form.number,    highlight: true  },
     { label: "Network",  value: network?.name,  color: network?.color },
     { label: "Plan",     value: form.plan,      highlight: false },
-    { label: "Amount",   value: `₦${Number(form.amount).toLocaleString()}` },
-    ...(cashbackUsed ? [{ label: "Cashback", value: `-₦${cashbackAmount.toLocaleString()}`, color: GREEN }] : []),
-    { label: "You Pay",  value: `₦${Number(finalAmount).toLocaleString()}`, highlight: true },
+    { label: "Amount",   value: `₦${Number(form.amount).toLocaleString()}`, highlight: true },
   ];
 
   return (
@@ -300,14 +297,13 @@ function DataHelpPanel({ form, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyData = () => {
-  const { dataPlan, getUserRealTimeData, userData, profitConfig, pax26, userCashBack } = useGlobalContext();
+  const { dataPlan, getUserRealTimeData, userData, profitConfig, pax26 } = useGlobalContext();
 
   const initialForm = { network: "", plan: "", planId: "", amount: "", number: "", pin: "" };
 
   const [form, setForm]                     = useState(initialForm);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [loading, setLoading]               = useState(false);
-  const [checked, setChecked]               = useState(false);
   const [phoneCarrier, setPhoneCarrier]     = useState("");
   const [phoneNumberValid, setPhoneValid]   = useState(false);
   const [focused, setFocused]               = useState("");
@@ -358,10 +354,7 @@ const BuyData = () => {
     if (plan) setForm(p => ({ ...p, plan: selected, planId: plan.code, amount: plan.sellingPrice.toString() }));
   };
 
-  /* cashback */
-  const cashbackUsed   = checked && userCashBack > 0 && Number(form.amount) >= 50;
-  const cashbackAmount = cashbackUsed ? Math.min(Number(form.amount), userCashBack) : 0;
-  const finalAmount    = Math.max(0, Number(form.amount) - cashbackAmount);
+
 
   /* Step 1 — validate → open modal */
   const handleReview = e => {
@@ -380,7 +373,6 @@ const BuyData = () => {
     try {
       const res = await axios.post("/api/provider/data-provider", {
         ...form,
-        usedCashBack: cashbackUsed,
         network: NETWORKS[form.network]?.apiName,
       });
       if (res.data.success) {
@@ -427,9 +419,6 @@ const BuyData = () => {
         onCancel={() => setShowConfirm(false)}
         loading={loading}
         form={form}
-        cashbackUsed={cashbackUsed}
-        cashbackAmount={cashbackAmount}
-        finalAmount={finalAmount}
         pax26={pax26}
       />
 
@@ -479,7 +468,6 @@ const BuyData = () => {
                       </p>
                     </div>
                   </div>
-                  <CashBackOption userCashBack={userCashBack} setChecked={setChecked} checked={checked} />
                 </div>
 
                 <form onSubmit={handleReview} className="p-6 space-y-5">
@@ -585,23 +573,6 @@ const BuyData = () => {
                           </span>
                         </div>
 
-                        {/* cashback preview */}
-                        {cashbackUsed && (
-                          <div className="bd-fade mt-2 flex items-center justify-between px-4 py-3 rounded-xl"
-                            style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                            <div>
-                              <p className="bd-mono text-[10px] uppercase tracking-wider mb-0.5"
-                                style={{ color: pax26?.textSecondary, opacity: 0.5 }}>Cashback applied</p>
-                              <p className="text-xs" style={{ color: pax26?.textPrimary }}>
-                                ₦{Number(form.amount).toLocaleString()}{" "}
-                                <span style={{ color: GREEN }}>− ₦{cashbackAmount.toLocaleString()}</span>
-                              </p>
-                            </div>
-                            <p className="bd-mono text-sm font-bold" style={{ color: GREEN }}>
-                              = ₦{finalAmount.toLocaleString()}
-                            </p>
-                          </div>
-                        )}
                       </Field>
                     </div>
                   )}

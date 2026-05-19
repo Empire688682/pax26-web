@@ -6,7 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import axios from "axios";
 import { useGlobalContext } from "../Context";
-import CashBackOption from "../ui/CashBackOption";
 import { phoneCarrierDetector } from "../utils/phoneCarrierDetector";
 import {
   Phone, Lock, Smartphone, ChevronDown,
@@ -86,7 +85,7 @@ function Field({ label, pax26, children }) {
 }
 
 /* ── Confirm Modal ────────────────────────────────────────────── */
-function ConfirmModal({ visible, onConfirm, onCancel, loading, data, cashbackUsed, cashbackAmount, finalAmount, pax26 }) {
+function ConfirmModal({ visible, onConfirm, onCancel, loading, data, pax26 }) {
   if (!visible) return null;
 
   const primary = pax26?.primary;
@@ -96,9 +95,7 @@ function ConfirmModal({ visible, onConfirm, onCancel, loading, data, cashbackUse
   const rows = [
     { label: "Phone",    value: data.number,      highlight: true  },
     { label: "Network",  value: network?.name,    color: network?.color },
-    { label: "Amount",   value: `₦${Number(data.amount).toLocaleString()}`, highlight: false },
-    ...(cashbackUsed ? [{ label: "Cashback",  value: `-₦${cashbackAmount}`, color: GREEN }] : []),
-    { label: "You Pay",  value: `₦${Number(finalAmount).toLocaleString()}`, highlight: true  },
+    { label: "Amount",   value: `₦${Number(data.amount).toLocaleString()}`, highlight: true },
   ];
 
   return (
@@ -271,13 +268,12 @@ function AirtimeHelpPanel({ data, pax26 }) {
 
 /* ── Main component ───────────────────────────────────────────── */
 const BuyAirtime = () => {
-  const { getUserRealTimeData, userData, userCashBack, pax26 } = useGlobalContext();
+  const { getUserRealTimeData, userData, pax26 } = useGlobalContext();
 
   const initialData = { network: "", amount: "", number: "", pin: "" };
 
   const [data, setData]                   = useState(initialData);
   const [loading, setLoading]             = useState(false);
-  const [checked, setChecked]             = useState(false);
   const [phoneCarrier, setPhoneCarrier]   = useState("");
   const [phoneNumberValid, setPhoneValid] = useState(false);
   const [focused, setFocused]             = useState("");
@@ -298,10 +294,7 @@ const BuyAirtime = () => {
 
   const handleChange = e => setData(p => ({ ...p, [e.target.name]: e.target.value }));
 
-  /* cashback calculation */
-  const cashbackUsed   = checked && userCashBack > 0;
-  const cashbackAmount = cashbackUsed ? Math.min(Number(data.amount), userCashBack) : 0;
-  const finalAmount    = Math.max(0, Number(data.amount) - cashbackAmount);
+
 
   /* Step 1 — validate → open confirm modal */
   const handleReview = e => {
@@ -319,7 +312,7 @@ const BuyAirtime = () => {
   const handleConfirmedSubmit = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("/api/provider/airtime-provider", { ...data, usedCashBack: cashbackUsed });
+      const res = await axios.post("/api/provider/airtime-provider", { ...data });
       if (res.data.success) {
         getUserRealTimeData();
         toast.success(res.data.message);
@@ -351,9 +344,6 @@ const BuyAirtime = () => {
         onCancel={() => setShowConfirm(false)}
         loading={loading}
         data={data}
-        cashbackUsed={cashbackUsed}
-        cashbackAmount={cashbackAmount}
-        finalAmount={finalAmount}
         pax26={pax26}
       />
 
@@ -403,9 +393,6 @@ const BuyAirtime = () => {
                       </p>
                     </div>
                   </div>
-                  {/* cashback toggle */}
-                  <CashBackOption userCashBack={userCashBack} setChecked={setChecked} checked={checked} />
-                </div>
 
                 <form onSubmit={handleReview} className="p-6 space-y-5">
 
@@ -512,23 +499,7 @@ const BuyAirtime = () => {
                       ))}
                     </div>
 
-                    {/* cashback preview */}
-                    {cashbackUsed && data.amount && Number(data.amount) >= 50 && (
-                      <div className="ba-fade mt-3 flex items-center justify-between px-4 py-3 rounded-xl"
-                        style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
-                        <div>
-                          <p className="ba-mono text-[10px] uppercase tracking-wider mb-0.5"
-                            style={{ color: pax26?.textSecondary, opacity: 0.5 }}>Cashback applied</p>
-                          <p className="text-xs" style={{ color: pax26?.textPrimary }}>
-                            ₦{Number(data.amount).toLocaleString()}{" "}
-                            <span style={{ color: GREEN }}>− ₦{cashbackAmount.toLocaleString()}</span>
-                          </p>
-                        </div>
-                        <p className="ba-mono text-sm font-bold" style={{ color: GREEN }}>
-                          = ₦{finalAmount.toLocaleString()}
-                        </p>
-                      </div>
-                    )}
+
                   </Field>
 
                   {/* PIN */}
