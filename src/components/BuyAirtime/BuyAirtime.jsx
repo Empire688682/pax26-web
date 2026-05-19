@@ -393,6 +393,7 @@ const BuyAirtime = () => {
                       </p>
                     </div>
                   </div>
+                </div>
 
                 <form onSubmit={handleReview} className="p-6 space-y-5">
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
-import { verifyToken } from "../../../helper/VerifyToken";
+import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
