@@ -189,7 +189,7 @@ export const triggerAIResponse = async ({
             loadProfileAndProducts(user._id),
             AIMessageModel.find({ sessionId: session.sessionId })
                 .sort({ createdAt: -1 })
-                .limit(10)
+                .limit(20)
                 .lean(),
         ]);
 
@@ -226,7 +226,7 @@ export const triggerAIResponse = async ({
             content: m.text || "[image]",
         }));
 
-        const trimmedMessages = historyMessages.slice(-6);
+        const trimmedMessages = historyMessages.slice(-16);
 
         // When imageSearchContext is true, inboundText already contains the
         // [SYSTEM: ...] block from buildImageMatchContext / buildImageNoMatchContext.
