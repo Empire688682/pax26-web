@@ -64,11 +64,12 @@ export default function SalesNotificationDashboard() {
 
   const fetchProfileSettings = async () => {
     try {
-      const res = await axios.get("/api/user/profile"); // Assuming profile holds seller config
-      if (res.data.success && res.data.user.sellerProfile) {
+      const res = await axios.get("/api/user/profile");
+      const profile = res.data?.profile;
+      if (res.data.success && profile?.businessProfile) {
         setSettings({
-          enabled: res.data.user.sellerProfile.salesNotificationsEnabled || false,
-          channel: res.data.user.sellerProfile.salesNotificationChannel || "in-app"
+          enabled: profile.businessProfile.salesNotificationsEnabled || false,
+          channel: profile.businessProfile.salesNotificationChannel || "in-app"
         });
       }
     } catch (error) {
