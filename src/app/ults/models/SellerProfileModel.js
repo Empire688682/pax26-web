@@ -112,6 +112,25 @@ const SellerProfileSchema = new mongoose.Schema({
         default: Date.now,
     },
 
+    // Sales Notifications & Tracking
+    salesNotificationsEnabled: {
+        type: Boolean,
+        default: false,
+    },
+    salesNotificationChannel: {
+        type: String,
+        enum: ["in-app", "whatsapp", "email", "both"],
+        default: "in-app",
+    },
+    totalSalesCount: {
+        type: Number,
+        default: 0,
+    },
+    totalSalesAmount: {
+        type: Number,
+        default: 0,
+    },
+
 }, { timestamps: true });
 
 export default mongoose.models.SellerProfile ||
