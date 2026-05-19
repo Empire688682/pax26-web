@@ -9,7 +9,7 @@ import {
   Phone, LogOut, Info, History, Settings, Bell, X,
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
   ChevronDown, Home, Shield, Users, ShieldAlert,
-  MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers
+  MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -274,6 +274,7 @@ export default function Sidebar() {
 
                 <SectionLabel label="Financials" pax26={pax26} />
                 <NavItem href="/fund-wallet" icon={CreditCard} label="Add Funds" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referrals" onClick={close} pax26={pax26} isNew={true} />
                 <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
                 <VtuNavItem pax26={pax26} onClose={close} />
 

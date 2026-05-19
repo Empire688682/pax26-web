@@ -2,7 +2,6 @@ import axios from 'axios';
 import { NextResponse } from 'next/server';
 import { connectDb } from '../../ults/db/ConnectDb';
 import UserModel from '../../ults/models/UserModel';
-import ReferralModel from '../../ults/models/ReferralModel';
 import { verifyToken } from '../helper/VerifyToken';
 import TransactionModel from '@/app/ults/models/TransactionModel';
 import { corsHeaders } from '@/app/ults/corsHeaders/corsHeaders';
@@ -89,16 +88,6 @@ export async function POST(req) {
       await existingPayment.save();
 
       await UserModel.findByIdAndUpdate(userId, { $inc: { walletBalance: cleanAmount } });
-
-      // Referral settlement
-      const referral = await ReferralModel.findOne({ referredUser: userId, rewardGiven: false });
-      if (referral) {
-        const bonusAmount = cleanAmount >= 1000 ? 50 : 10;
-        await UserModel.findByIdAndUpdate(referral.referrer, { $inc: { commissionBalance: bonusAmount } });
-        referral.rewardGiven = true;
-        referral.fundedAmount = bonusAmount;
-        await referral.save();
-      }
 
       return NextResponse.json(
         { success: true, message: 'Payment verified and wallet updated' },

@@ -56,8 +56,24 @@ const UserSchema = new mongoose.Schema(
     /* =====================
        REFERRALS
     ====================== */
-    referralCode: { type: String, default: "", unique: true },
-    referralHostId: { type: String, default: "" },
+    referralCode: { type: String, default: "", unique: true, sparse: true },
+    referralHostId: { type: String, default: "" },  // legacy field — kept for compat
+
+    // Who referred this user (ObjectId of the referrer)
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+
+    // Referral counters
+    totalReferrals: { type: Number, default: 0 },       // total sign-ups via this user's code
+    successfulReferrals: { type: Number, default: 0 },  // referrals who became paying subscribers
+
+    /* ── Referral Wallet (separate from main VTU wallet) ─────────── */
+    referralWalletBalance: { type: Number, default: 0 },   // spendable balance (₦)
+    pendingReferralBonus: { type: Number, default: 0 },    // awaiting payment confirmation
+    releasedReferralBonus: { type: Number, default: 0 },   // lifetime total credited
+
+    // Withdrawal eligibility
+    canWithdraw: { type: Boolean, default: false },
+    withdrawalEligibleAt: { type: Date, default: null },   // 14-day lock from last reward
 
     /* =====================
    WHATSAPP CONFIG WHATSAPP (META)

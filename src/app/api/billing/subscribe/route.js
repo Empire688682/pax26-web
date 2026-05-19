@@ -5,6 +5,10 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import UserModel from "@/app/ults/models/UserModel";
 import TransactionModel from "@/app/ults/models/TransactionModel";
 import PlanModel from "@/app/ults/models/PlanModel";
+import {
+  ensureReferralCode,
+  processReferralReward,
+} from "@/app/lib/referralService";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -27,7 +31,7 @@ export async function POST(req) {
 
     // Fetch plan details from Database instead of hardcoded catalogue
     const planMeta = await PlanModel.findOne({ key: planKey });
-    
+
     if (!planMeta) {
       return NextResponse.json(
         { success: false, message: "This plan is no longer available." },
@@ -83,6 +87,9 @@ export async function POST(req) {
 
     await user.save();
 
+    /* ── Ensure paid user gets a referral code ────────────────── */
+    await ensureReferralCode(user);
+
     /* ── Record transaction ───────────────────────────────────── */
     const reference = `PAX-SUB-${planKey.toUpperCase()}-${Date.now()}`;
     await TransactionModel.create({
@@ -102,6 +109,18 @@ export async function POST(req) {
       },
     });
 
+    /* ── Process referral reward (if this user was referred) ──── */
+    let referralRewarded = false;
+    let referralRewardAmount = 0;
+    try {
+      const result = await processReferralReward(userId, planKey);
+      referralRewarded = result.rewarded;
+      referralRewardAmount = result.amount;
+    } catch (refErr) {
+      // Non-fatal — log and continue
+      console.error("Referral reward error (non-fatal):", refErr.message);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -109,6 +128,9 @@ export async function POST(req) {
         plan: planKey,
         balanceAfter,
         expiresAt,
+        referral: referralRewarded
+          ? { rewarded: true, amount: referralRewardAmount }
+          : undefined,
       },
       { status: 200, headers: corsHeaders() }
     );

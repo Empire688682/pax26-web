@@ -89,10 +89,15 @@ const registerUser = async (req) => {
     const referralCode = "PAX" + prefx + nanoid() + nextUserNumber;
 
     //Get referral host id
-    let referralHostId = undefined
+    let referralHostId = undefined;
+    let referredByUserId = undefined;
     if (refHostCode) {
       const refHost = await UserModel.findOne({ referralCode: refHostCode });
-      referralHostId = refHost?  refHost._id : undefined;
+      if (refHost) {
+        // Prevent self-referral (extra guard — can't self-refer at sign-up, but safety check)
+        referralHostId   = refHost._id;
+        referredByUserId = refHost._id;
+      }
     }
 
     const authTimestamp = Date.now()
@@ -105,6 +110,7 @@ const registerUser = async (req) => {
       pin: null,
       authTimestamp,
       referralHostId: referralHostId,
+      referredBy: referredByUserId || null,
       provider,
       isPasswordSet: true,
       providerId: providerId || null,
@@ -114,11 +120,22 @@ const registerUser = async (req) => {
 
 
     // Handle referral if provided
-    if (refHostCode) {
-      if (referralHostId) {
+    if (refHostCode && referredByUserId) {
+      // Check not already referred (prevent duplicate records)
+      const existingReferral = await ReferralModel.findOne({
+        referrer: referredByUserId,
+        referredUser: newUser._id,
+      });
+      if (!existingReferral) {
         await ReferralModel.create({
-          referrer: referralHostId,
+          referrer: referredByUserId,
           referredUser: newUser._id,
+          referralCodeUsed: refHostCode,
+          status: 'pending',
+        });
+        // Increment referrer's totalReferrals counter
+        await UserModel.findByIdAndUpdate(referredByUserId, {
+          $inc: { totalReferrals: 1 },
         });
       }
     }

@@ -13,6 +13,7 @@ const PlanSchema = new mongoose.Schema({
   features: [{ type: String }],
   popular:  { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
+  referralReward: { type: Number, default: 0 },
 }, { timestamps: true });
 
 const PlanModel = mongoose.models.Plan || mongoose.model("Plan", PlanSchema);
