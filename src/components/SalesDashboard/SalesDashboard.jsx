@@ -4,14 +4,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "../Context";
-import { 
-  TrendingUp, ShoppingBag, DollarSign, Calendar, 
+import {
+  TrendingUp, ShoppingBag, DollarSign, Calendar,
   ArrowUpRight, Download, Users, RefreshCw, BarChart2,
   Lock, AlertCircle, Percent, Receipt, CheckCircle, XCircle, ExternalLink
 } from "lucide-react";
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer 
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer
 } from "recharts";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -35,11 +35,8 @@ const CSS = `
   .sd-table-row {
     transition: background-color 0.15s ease-in-out;
   }
-  .sd-table-row.is-dark:hover {
-    background-color: rgba(255, 255, 255, 0.04) !important;
-  }
-  .sd-table-row.is-light:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+  .sd-table-row:hover {
+    background-color: var(--sd-row-hover);
   }
 `;
 
@@ -51,7 +48,7 @@ export default function SalesDashboard() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [processingOrderId, setProcessingOrderId] = useState(null);
   const [processingStatus, setProcessingStatus] = useState(null);
-  
+
   const [startDate, setStartDate] = useState(
     new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]
   );
@@ -94,6 +91,7 @@ export default function SalesDashboard() {
   const handleOrderStatus = async (orderId, status) => {
     try {
       setProcessingOrderId(orderId);
+      setProcessingStatus(status);
       const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
       if (res.data.success) {
         toast.success(status === "confirmed" ? "Order confirmed" : "Order updated");
@@ -105,6 +103,7 @@ export default function SalesDashboard() {
       toast.error(error.response?.data?.message || "Failed to update order");
     } finally {
       setProcessingOrderId(null);
+      setProcessingStatus(null);
     }
   };
 
@@ -137,40 +136,43 @@ export default function SalesDashboard() {
   const topProducts = data?.topProducts || [];
   const salesTrend = data?.salesTrend || [];
 
+  // Row hover color — subtle in both modes
+  const rowHoverBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.035)";
+
   return (
     <>
       <style>{CSS}</style>
       <div className="sd-root min-h-screen px-5 py-10" style={{ background: pax26?.bg }}>
         <div className="max-w-7xl mx-auto space-y-6">
-          
+
           {/* Header & Date Range Select */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-gray-800" style={{ borderColor: pax26?.border }}>
             <div>
               <h1 className="text-3xl font-extrabold" style={{ color: pax26?.textPrimary }}>Sales Analytics</h1>
               <p className="text-sm mt-1" style={{ color: pax26?.textSecondary }}>Monitor revenue, conversion rates, and recent orders</p>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
                 <Calendar size={16} style={{ color: pax26?.textSecondary }} />
-                <input 
-                  type="date" 
-                  value={startDate} 
-                  onChange={(e) => setStartDate(e.target.value)} 
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                   className="bg-transparent text-sm focus:outline-none"
                   style={{ color: pax26?.textPrimary }}
                 />
                 <span className="text-xs" style={{ color: pax26?.textSecondary }}>to</span>
-                <input 
-                  type="date" 
-                  value={endDate} 
-                  onChange={(e) => setEndDate(e.target.value)} 
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
                   className="bg-transparent text-sm focus:outline-none"
                   style={{ color: pax26?.textPrimary }}
                 />
               </div>
 
-              <button 
+              <button
                 onClick={handleExport}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
                 style={{ background: isStarter ? "rgba(255,255,255,0.05)" : primary, color: "#fff" }}
@@ -180,7 +182,7 @@ export default function SalesDashboard() {
                 {isStarter && <Lock size={12} />}
               </button>
 
-              <button 
+              <button
                 onClick={fetchAnalytics}
                 className="p-2.5 rounded-xl"
                 style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}`, color: pax26?.textSecondary }}
@@ -290,20 +292,20 @@ export default function SalesDashboard() {
                 <AreaChart data={salesTrend}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={primary} stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor={primary} stopOpacity={0}/>
+                      <stop offset="5%" stopColor={primary} stopOpacity={0.4} />
+                      <stop offset="95%" stopColor={primary} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                   <XAxis dataKey="date" stroke={pax26?.textSecondary} style={{ fontSize: 11 }} />
                   <YAxis stroke={pax26?.textSecondary} style={{ fontSize: 11 }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: pax26?.bg, 
+                  <Tooltip
+                    contentStyle={{
+                      background: pax26?.bg,
                       borderColor: pax26?.border,
                       borderRadius: 12,
                       color: pax26?.textPrimary
-                    }} 
+                    }}
                   />
                   <Area type="monotone" dataKey="revenue" stroke={primary} fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={2.5} />
                 </AreaChart>
@@ -313,7 +315,7 @@ export default function SalesDashboard() {
 
           {/* Recent Orders & Top Selling Products */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+
             {/* Recent Orders */}
             <div className="col-span-1 md:col-span-2 rounded-2xl overflow-hidden" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
               <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: pax26?.border }}>
@@ -339,7 +341,11 @@ export default function SalesDashboard() {
                       </tr>
                     ) : (
                       recentOrders.map(order => (
-                        <tr key={order._id} className="hover:bg-opacity-5 hover:bg-white transition-all">
+                        <tr
+                          key={order._id}
+                          className="sd-table-row"
+                          style={{ "--sd-row-hover": rowHoverBg }}
+                        >
                           <td className="px-6 py-4">
                             <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
                             <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>{order.customerPhone}</p>
@@ -376,7 +382,7 @@ export default function SalesDashboard() {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase`}
-                              style={{ 
+                              style={{
                                 background: order.status === "paid" || order.status === "confirmed" ? "rgba(34,197,94,0.15)" : order.status === "cancelled" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
                                 color: order.status === "paid" || order.status === "confirmed" ? "#22c55e" : order.status === "cancelled" ? "#ef4444" : "#eab308"
                               }}>
@@ -388,19 +394,30 @@ export default function SalesDashboard() {
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "confirmed")}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all hover:bg-opacity-25"
+                                  disabled={processingOrderId === order._id}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                   style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
                                   title="Confirm order"
                                 >
-                                  <CheckCircle size={12} /> Confirm
+                                  {processingOrderId === order._id && processingStatus === "confirmed" ? (
+                                    <RefreshCw size={12} className="sd-spin" />
+                                  ) : (
+                                    <CheckCircle size={12} />
+                                  )}
+                                  {processingOrderId === order._id && processingStatus === "confirmed" ? "Saving..." : "Confirm"}
                                 </button>
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "cancelled")}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all hover:bg-opacity-25"
+                                  disabled={processingOrderId === order._id}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                   style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
                                   title="Cancel order"
                                 >
-                                  <XCircle size={12} />
+                                  {processingOrderId === order._id && processingStatus === "cancelled" ? (
+                                    <RefreshCw size={12} className="sd-spin" />
+                                  ) : (
+                                    <XCircle size={12} />
+                                  )}
                                 </button>
                               </div>
                             )}
@@ -454,11 +471,11 @@ export default function SalesDashboard() {
 
       {/* Receipt Image Modal */}
       {selectedReceiptImage && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75 backdrop-blur-sm transition-all"
           onClick={() => { setSelectedReceiptImage(null); setSelectedOrder(null); }}
         >
-          <div 
+          <div
             className="relative max-w-3xl w-full rounded-2xl overflow-hidden shadow-2xl border flex flex-col"
             style={{ background: pax26?.secondaryBg || "#1e293b", borderColor: pax26?.border || "#334155" }}
             onClick={(e) => e.stopPropagation()}
@@ -473,7 +490,7 @@ export default function SalesDashboard() {
                   </p>
                 )}
               </div>
-              <button 
+              <button
                 onClick={() => { setSelectedReceiptImage(null); setSelectedOrder(null); }}
                 className="p-1.5 rounded-lg hover:bg-opacity-10 hover:bg-white transition-all"
                 style={{ color: pax26?.textSecondary || "#94a3b8" }}
@@ -484,9 +501,9 @@ export default function SalesDashboard() {
 
             {/* Modal Body */}
             <div className="flex-1 overflow-auto max-h-[60vh] p-6 flex justify-center items-center bg-black bg-opacity-40">
-              <img 
-                src={selectedReceiptImage} 
-                alt="Payment Receipt Preview" 
+              <img
+                src={selectedReceiptImage}
+                alt="Payment Receipt Preview"
                 className="max-h-[50vh] max-w-full object-contain rounded-lg shadow-md"
               />
             </div>
