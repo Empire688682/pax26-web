@@ -4,6 +4,7 @@ import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerLeadModel from "@/app/ults/models/SellerLeadModel";
 import UserModel from "@/app/ults/models/UserModel";
 
@@ -39,9 +40,19 @@ export async function GET(req) {
         const endDateParam = searchParams.get("endDate");
         const exportFormat = searchParams.get("export"); // e.g. "csv" or "json"
 
-        let start = startDateParam ? new Date(startDateParam) : new Date(new Date().setDate(new Date().getDate() - 30));
+        const defaultStart = new Date();
+        defaultStart.setDate(defaultStart.getDate() - 30);
+
+        let start = startDateParam ? new Date(startDateParam) : defaultStart;
         let end = endDateParam ? new Date(endDateParam) : new Date();
-        // Make sure end date goes to the end of the day
+
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+            return NextResponse.json(
+                { success: false, message: "Invalid date range" },
+                { status: 400, headers: corsHeaders() }
+            );
+        }
+
         end.setHours(23, 59, 59, 999);
 
         // Fetch orders in date range
@@ -51,8 +62,9 @@ export async function GET(req) {
         };
 
         const orders = await SellerOrderModel.find(query)
-            .populate("productId", "name price")
-            .sort({ createdAt: -1 });
+            .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
+            .sort({ createdAt: -1 })
+            .lean();
 
         // If export requested
         if (exportFormat === "csv") {
@@ -96,7 +108,9 @@ export async function GET(req) {
 
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
         const todaySales = allSuccessfulOrders.filter(o => o.createdAt >= startOfToday).reduce((sum, o) => sum + (o.totalPrice || 0), 0);
@@ -121,9 +135,15 @@ export async function GET(req) {
         // Top Selling Products
         const productSales = {};
         successfulOrders.forEach(o => {
-            const key = o.productId?.toString() || "Unknown";
+            const product = o.productId;
+            const key = product?._id?.toString() || product?.toString() || "Unknown";
             if (!productSales[key]) {
-                productSales[key] = { id: key, name: "Product", count: 0, revenue: 0 };
+                productSales[key] = {
+                    id: key,
+                    name: product?.name || "Product",
+                    count: 0,
+                    revenue: 0,
+                };
             }
             productSales[key].count += o.quantity || 1;
             productSales[key].revenue += o.totalPrice || 0;
@@ -176,7 +196,10 @@ export async function GET(req) {
         }, { status: 200, headers: corsHeaders() });
 
     } catch (error) {
-        console.error("Sales Analytics API error:", error);
-        return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500, headers: corsHeaders() });
+        console.error("Sales Analytics API error:", error?.message || error);
+        return NextResponse.json(
+            { success: false, message: "Internal server error", detail: error?.message },
+            { status: 500, headers: corsHeaders() }
+        );
     }
 }
