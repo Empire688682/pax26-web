@@ -37,6 +37,8 @@ export default function SalesDashboard() {
   const { pax26, userData } = useGlobalContext();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [selectedReceiptImage, setSelectedReceiptImage] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   
   const [startDate, setStartDate] = useState(
     new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]
@@ -332,17 +334,29 @@ export default function SalesDashboard() {
                           </td>
                           <td className="px-6 py-4">
                             {order.paymentReceiptUrl ? (
-                              <a
-                                href={order.paymentReceiptUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-[10px] font-bold"
-                                style={{ color: primary }}
-                              >
-                                <ExternalLink size={12} /> View
-                              </a>
+                              <div className="flex flex-col gap-1 items-start">
+                                <img
+                                  src={order.paymentReceiptUrl}
+                                  alt="Receipt thumbnail"
+                                  className="w-10 h-10 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                  style={{ borderColor: pax26?.border }}
+                                  onClick={() => {
+                                    setSelectedReceiptImage(order.paymentReceiptUrl);
+                                    setSelectedOrder(order);
+                                  }}
+                                />
+                                <a
+                                  href={order.paymentReceiptUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-0.5 text-[10px] font-bold hover:underline"
+                                  style={{ color: primary }}
+                                >
+                                  <ExternalLink size={10} /> Link
+                                </a>
+                              </div>
                             ) : (
-                              <span className="text-[10px]" style={{ color: pax26?.textSecondary }}>—</span>
+                              <span className="text-[10px]" style={{ color: pax26?.textSecondary }}>No receipt</span>
                             )}
                           </td>
                           <td className="px-6 py-4">
@@ -359,16 +373,15 @@ export default function SalesDashboard() {
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "confirmed")}
-                                  disabled={!order.paymentReceiptUrl}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold disabled:opacity-40"
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all hover:bg-opacity-25"
                                   style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
-                                  title={order.paymentReceiptUrl ? "Confirm order" : "Awaiting payment receipt"}
+                                  title="Confirm order"
                                 >
                                   <CheckCircle size={12} /> Confirm
                                 </button>
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "cancelled")}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold"
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold transition-all hover:bg-opacity-25"
                                   style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
                                   title="Cancel order"
                                 >
@@ -423,6 +436,76 @@ export default function SalesDashboard() {
 
         </div>
       </div>
+
+      {/* Receipt Image Modal */}
+      {selectedReceiptImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75 backdrop-blur-sm transition-all"
+          onClick={() => { setSelectedReceiptImage(null); setSelectedOrder(null); }}
+        >
+          <div 
+            className="relative max-w-3xl w-full rounded-2xl overflow-hidden shadow-2xl border flex flex-col"
+            style={{ background: pax26?.secondaryBg || "#1e293b", borderColor: pax26?.border || "#334155" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: pax26?.border || "#334155" }}>
+              <div>
+                <h3 className="font-bold text-lg" style={{ color: pax26?.textPrimary || "#ffffff" }}>Payment Receipt</h3>
+                {selectedOrder && (
+                  <p className="text-xs" style={{ color: pax26?.textSecondary || "#94a3b8" }}>
+                    Order for {selectedOrder.customerName || "Customer"} ({selectedOrder.customerPhone}) - ₦{selectedOrder.totalPrice?.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <button 
+                onClick={() => { setSelectedReceiptImage(null); setSelectedOrder(null); }}
+                className="p-1.5 rounded-lg hover:bg-opacity-10 hover:bg-white transition-all"
+                style={{ color: pax26?.textSecondary || "#94a3b8" }}
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-auto max-h-[60vh] p-6 flex justify-center items-center bg-black bg-opacity-40">
+              <img 
+                src={selectedReceiptImage} 
+                alt="Payment Receipt Preview" 
+                className="max-h-[50vh] max-w-full object-contain rounded-lg shadow-md"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            {selectedOrder && selectedOrder.status === "pending" && (
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t" style={{ borderColor: pax26?.border || "#334155" }}>
+                <button
+                  onClick={() => {
+                    handleOrderStatus(selectedOrder._id, "cancelled");
+                    setSelectedReceiptImage(null);
+                    setSelectedOrder(null);
+                  }}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-opacity-25"
+                  style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444" }}
+                >
+                  Cancel Order
+                </button>
+                <button
+                  onClick={() => {
+                    handleOrderStatus(selectedOrder._id, "confirmed");
+                    setSelectedReceiptImage(null);
+                    setSelectedOrder(null);
+                  }}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-opacity-25"
+                  style={{ background: "rgba(34, 197, 94, 0.15)", color: "#22c55e" }}
+                >
+                  Confirm Payment
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

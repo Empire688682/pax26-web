@@ -38,12 +38,7 @@ export async function PATCH(req, { params }) {
             return NextResponse.json({ success: false, message: "Order not found" }, { status: 404, headers: corsHeaders() });
         }
 
-        if (status === "confirmed" && !order.paymentReceiptUrl) {
-            return NextResponse.json(
-                { success: false, message: "Cannot confirm order without a customer payment receipt." },
-                { status: 400, headers: corsHeaders() }
-            );
-        }
+        // Allow manual confirmation without a receipt if verified directly by the seller.
 
         const previousStatus = order.status;
         order.status = status;
