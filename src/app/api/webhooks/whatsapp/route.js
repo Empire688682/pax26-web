@@ -41,10 +41,18 @@ export async function POST(req) {
     const from = value.messages[0].from;
     const userName = value.contacts?.[0]?.profile?.name || "";
     const message = value.messages?.[0];
-    if (!message || !message.text?.body) {
+    if (!message) {
       return NextResponse.json({ status: "unsupported_message" });
     }
-    const userText = message.text.body;
+
+    if (message.type !== "text" && message.type !== "image") {
+      return NextResponse.json({ status: "unsupported_type" });
+    }
+
+    const userText =
+      message.type === "text"
+        ? message.text?.body
+        : message.image?.caption || "[Customer sent an image]";
 
     if (!userText) return NextResponse.json({ status: "no_text" });
 

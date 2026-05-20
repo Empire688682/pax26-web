@@ -35,11 +35,11 @@ export async function POST(req) {
 
         // console.log("Incoming whatsapp message: ", message);
 
-        if (!message || !message.text?.body) {
+        if (!message) {
             return NextResponse.json({ status: "unsupported_message" });
         }
 
-        if (message.type !== "text") {
+        if (message.type !== "text" && message.type !== "image") {
             console.log("Unsupported type:", message.type);
             return NextResponse.json({ status: "ignored_type" });
         }
