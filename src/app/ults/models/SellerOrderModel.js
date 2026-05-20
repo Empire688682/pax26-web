@@ -35,6 +35,16 @@ const SellerOrderSchema = new mongoose.Schema({
 
     deliveryAddress: String,
 
+    paymentReceiptUrl: String,
+    paymentReceiptPublicId: String,
+    paymentReceiptSubmittedAt: Date,
+
+    confirmedAt: Date,
+    confirmedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+
 }, { timestamps: true });
 
 export default mongoose.models.SellerOrder ||

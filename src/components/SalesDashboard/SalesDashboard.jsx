@@ -7,7 +7,7 @@ import { useGlobalContext } from "../Context";
 import { 
   TrendingUp, ShoppingBag, DollarSign, Calendar, 
   ArrowUpRight, Download, Users, RefreshCw, BarChart2,
-  Lock, AlertCircle, Percent, Receipt
+  Lock, AlertCircle, Percent, Receipt, CheckCircle, XCircle, ExternalLink
 } from "lucide-react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
@@ -74,6 +74,20 @@ export default function SalesDashboard() {
       toast.error(error.response?.data?.message || "Failed to load sales analytics");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOrderStatus = async (orderId, status) => {
+    try {
+      const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
+      if (res.data.success) {
+        toast.success(status === "confirmed" ? "Order confirmed" : "Order updated");
+        fetchAnalytics();
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update order");
     }
   };
 
@@ -295,14 +309,16 @@ export default function SalesDashboard() {
                     <tr style={{ background: pax26?.bg, borderBottom: `1px solid ${pax26?.border}` }}>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Customer</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Total Price</th>
+                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Receipt</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Status</th>
+                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Actions</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ divideColor: pax26?.border }}>
                     {recentOrders.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="text-center py-8" style={{ color: pax26?.textSecondary }}>No sales orders recorded</td>
+                        <td colSpan="6" className="text-center py-8" style={{ color: pax26?.textSecondary }}>No sales orders recorded</td>
                       </tr>
                     ) : (
                       recentOrders.map(order => (
@@ -311,17 +327,54 @@ export default function SalesDashboard() {
                             <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
                             <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>{order.customerPhone}</p>
                           </td>
-                          <td className="px-6 py-4 font-bold sn-mono" style={{ color: pax26?.textPrimary }}>
+                          <td className="px-6 py-4 font-bold sd-mono" style={{ color: pax26?.textPrimary }}>
                             ₦{(order.totalPrice || 0).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            {order.paymentReceiptUrl ? (
+                              <a
+                                href={order.paymentReceiptUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold"
+                                style={{ color: primary }}
+                              >
+                                <ExternalLink size={12} /> View
+                              </a>
+                            ) : (
+                              <span className="text-[10px]" style={{ color: pax26?.textSecondary }}>—</span>
+                            )}
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase`}
                               style={{ 
-                                background: order.status === "paid" || order.status === "confirmed" ? "rgba(34,197,94,0.15)" : "rgba(234,179,8,0.15)",
-                                color: order.status === "paid" || order.status === "confirmed" ? "#22c55e" : "#eab308"
+                                background: order.status === "paid" || order.status === "confirmed" ? "rgba(34,197,94,0.15)" : order.status === "cancelled" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
+                                color: order.status === "paid" || order.status === "confirmed" ? "#22c55e" : order.status === "cancelled" ? "#ef4444" : "#eab308"
                               }}>
                               {order.status}
                             </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {order.status === "pending" && order.paymentReceiptUrl && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleOrderStatus(order._id, "confirmed")}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold"
+                                  style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
+                                  title="Confirm order"
+                                >
+                                  <CheckCircle size={12} /> Confirm
+                                </button>
+                                <button
+                                  onClick={() => handleOrderStatus(order._id, "cancelled")}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold"
+                                  style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
+                                  title="Cancel order"
+                                >
+                                  <XCircle size={12} />
+                                </button>
+                              </div>
+                            )}
                           </td>
                           <td className="px-6 py-4" style={{ color: pax26?.textSecondary }}>
                             {new Date(order.createdAt).toLocaleDateString()}

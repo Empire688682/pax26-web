@@ -5,8 +5,6 @@ import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
 import GeneralBusinessProfileModel from "../../ults/models/GeneralBusinessProfileModel.js";
 import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
-import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
-import { sendSalesNotification } from "../salesNotificationService.js";
 import { callGroqAI } from "./grok.js";
 import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
@@ -334,75 +332,6 @@ export const triggerAIResponse = async ({
             status,
             automation: { isAutoReply: true },
         });
-
-        if (status === "sent" && profileType === "seller") {
-            const isConfirmationText = /confirm(ed)? (the )?payment|order (is )?confirm(ed)?/i.test(cleanText);
-            if (isConfirmationText) {
-                try {
-                    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-                    const existingRecentOrder = await SellerOrderModel.findOne({
-                        sellerId: businessProfile._id,
-                        customerPhone: session.visitorPhone,
-                        createdAt: { $gte: fiveMinutesAgo }
-                    });
-
-                    if (!existingRecentOrder) {
-                        let matchedProduct = null;
-                        const conversationText = messages.map(m => m.content).join(" ").toLowerCase();
-                        for (const prod of products) {
-                            if (prod.name && conversationText.includes(prod.name.toLowerCase())) {
-                                matchedProduct = prod;
-                                break;
-                            }
-                        }
-                        if (!matchedProduct && products.length > 0) {
-                            matchedProduct = products[0];
-                        }
-
-                        let deliveryAddress = "";
-                        const visitorMessages = messages.filter(m => m.role === "user");
-                        if (visitorMessages.length > 0) {
-                            const lastUserMsg = visitorMessages[visitorMessages.length - 1].content;
-                            if (lastUserMsg.length < 100) {
-                                deliveryAddress = lastUserMsg;
-                            }
-                        }
-
-                        const contactInfo = user.whatsapp?.contacts?.list?.find(c => c.phone === session.visitorPhone);
-                        const customerName = contactInfo?.name || "WhatsApp Customer";
-
-                        const newOrder = await SellerOrderModel.create({
-                            sellerId: businessProfile._id,
-                            productId: matchedProduct?._id,
-                            customerPhone: session.visitorPhone,
-                            customerName,
-                            quantity: 1,
-                            totalPrice: matchedProduct?.price || 0,
-                            status: "confirmed",
-                            deliveryAddress,
-                        });
-
-                        await SellerProfileModel.findByIdAndUpdate(businessProfile._id, {
-                            $inc: { 
-                                totalSalesCount: 1, 
-                                totalSalesAmount: newOrder.totalPrice 
-                            }
-                        });
-
-                        await sendSalesNotification(user._id, {
-                            orderId: newOrder._id.toString(),
-                            customerName: newOrder.customerName || newOrder.customerPhone,
-                            productName: matchedProduct?.name || "Product Order",
-                            amountPaid: newOrder.totalPrice
-                        });
-
-                        console.log(`🎉 Automated Order logged and notification sent for ${customerName}`);
-                    }
-                } catch (orderErr) {
-                    console.error("Failed to automatically log order from AI confirmation:", orderErr);
-                }
-            }
-        }
 
         // ── Parallelise all post-send DB writes ───────────────────
         const contactUpdate = UserModel.updateOne(

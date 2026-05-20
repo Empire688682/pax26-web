@@ -5,6 +5,7 @@ import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
 import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js";
 import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
+import { handlePaymentReceipt, buildPaymentReceiptContext } from "@/app/lib/aiService/handlePaymentReceipt.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
@@ -328,8 +329,43 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
 
     try {
-      // Resolve the Meta image ID → actual download URL
       const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
+      const caption = message.image?.caption || "";
+
+      const recentMessages = await AIMessageModel.find({
+        sessionId: session.sessionId,
+        userId: user._id,
+      })
+        .sort({ createdAt: -1 })
+        .limit(12)
+        .lean();
+
+      const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
+      const customerName = contactInfo?.name || "WhatsApp Customer";
+
+      const receiptResult = await handlePaymentReceipt({
+        sellerId: sellerProfile._id,
+        sellerUserId: user._id,
+        mediaUrl,
+        customerPhone: visitorPhone,
+        customerName,
+        caption,
+        recentMessages: recentMessages.reverse().map((m) => ({
+          role: m.direction === "inbound" ? "user" : "assistant",
+          content: m.text,
+        })),
+      });
+
+      if (receiptResult.handled) {
+        console.log("💳 Payment receipt saved for order:", receiptResult.order._id);
+        await triggerAIResponse({
+          session,
+          user,
+          inboundText: buildPaymentReceiptContext(),
+          imageSearchContext: true,
+        });
+        return { ok: true };
+      }
 
       // Run the full image search pipeline:
       // download → upload to Cloudinary → visual similarity search → map to products
