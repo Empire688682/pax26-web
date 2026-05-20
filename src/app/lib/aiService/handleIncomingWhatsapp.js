@@ -5,7 +5,8 @@ import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
 import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js";
 import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
-import { handlePaymentReceipt, buildPaymentReceiptContext } from "@/app/lib/aiService/handlePaymentReceipt.js";
+import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFromText } from "@/app/lib/aiService/handlePaymentReceipt.js";
+import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
@@ -164,7 +165,6 @@ export const handleIncomingWhatsApp = async (payload) => {
       direction: "inbound",
       senderType: "visitor",
       status: "received",
-      // Store image metadata if present — useful for audit and future reference
       ...(isImageMessage && {
         mediaType: "image",
         mediaId: message.image?.id,
@@ -340,8 +340,36 @@ export const handleIncomingWhatsApp = async (payload) => {
         .limit(12)
         .lean();
 
+      const conversationContext = recentMessages.reverse().map((m) => ({
+        role: m.direction === "inbound" ? "user" : "assistant",
+        content: m.text,
+      }));
+
       const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
       const customerName = contactInfo?.name || "WhatsApp Customer";
+
+      // Upload once for inbox display + payment/product flows
+      let uploadedImage = null;
+      try {
+        uploadedImage = await uploadCustomerImageToCloudinary(
+          mediaUrl,
+          sellerProfile._id,
+          visitorPhone,
+          "customer-images"
+        );
+        await AIMessageModel.updateOne(
+          { messageId: message.id },
+          {
+            $set: {
+              mediaUrl: uploadedImage.url,
+              mediaType: "image",
+              text: caption || "📷 Image",
+            },
+          }
+        );
+      } catch (uploadErr) {
+        console.warn("⚠️ Inbox image upload failed:", uploadErr.message);
+      }
 
       const receiptResult = await handlePaymentReceipt({
         sellerId: sellerProfile._id,
@@ -350,10 +378,9 @@ export const handleIncomingWhatsApp = async (payload) => {
         customerPhone: visitorPhone,
         customerName,
         caption,
-        recentMessages: recentMessages.reverse().map((m) => ({
-          role: m.direction === "inbound" ? "user" : "assistant",
-          content: m.text,
-        })),
+        recentMessages: conversationContext,
+        imageUrl: uploadedImage?.url,
+        imagePublicId: uploadedImage?.publicId,
       });
 
       if (receiptResult.handled) {
@@ -367,8 +394,6 @@ export const handleIncomingWhatsApp = async (payload) => {
         return { ok: true };
       }
 
-      // Run the full image search pipeline:
-      // download → upload to Cloudinary → visual similarity search → map to products
       const { matches, hasMatches, customerImageUrl } = await handleCustomerImage({
         sellerId: sellerProfile._id,
         mediaUrl,
@@ -413,6 +438,31 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 9: Standard text — trigger AI response ───────────
+  if (sellerProfile && isTextMessage) {
+    const recentMessages = await AIMessageModel.find({
+      sessionId: session.sessionId,
+      userId: user._id,
+    })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .lean();
+
+    const conversationContext = recentMessages.reverse().map((m) => ({
+      role: m.direction === "inbound" ? "user" : "assistant",
+      content: m.text,
+    }));
+
+    const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
+    await createPendingOrderFromText({
+      sellerId: sellerProfile._id,
+      sellerUserId: user._id,
+      customerPhone: visitorPhone,
+      customerName: contactInfo?.name || "WhatsApp Customer",
+      recentMessages: conversationContext,
+      inboundText,
+    });
+  }
+
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText });
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");

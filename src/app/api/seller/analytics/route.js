@@ -173,6 +173,22 @@ export async function GET(req) {
         });
         const salesTrend = Object.values(trendDataMap).sort((a, b) => a.date.localeCompare(b.date));
 
+        const pendingOrdersAll = await SellerOrderModel.find({
+            sellerId: sellerProfile._id,
+            status: "pending",
+        })
+            .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const confirmedInRange = orders.filter((o) => o.status !== "pending");
+        const recentOrdersMerged = [
+            ...pendingOrdersAll,
+            ...confirmedInRange.filter(
+                (o) => !pendingOrdersAll.some((p) => p._id.toString() === o._id.toString())
+            ),
+        ].slice(0, 15);
+
         return NextResponse.json({
             success: true,
             plan,
@@ -190,7 +206,8 @@ export async function GET(req) {
                 averageOrderValue,
                 repeatCustomers
             },
-            recentOrders: orders.slice(0, 10), // Limit to 10 for dashboard preview
+            pendingOrders: pendingOrdersAll,
+            recentOrders: recentOrdersMerged,
             topProducts: topProductsList.slice(0, 5),
             salesTrend
         }, { status: 200, headers: corsHeaders() });

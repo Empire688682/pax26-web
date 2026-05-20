@@ -23,6 +23,14 @@ const MessageSchema = new mongoose.Schema({
 
   text: { type: String, required: true },
 
+  mediaType: {
+    type: String,
+    enum: ["image", "document", "audio", "video"],
+  },
+  mediaId: String,
+  mediaUrl: String,
+  mediaCaption: String,
+
   direction: {
     type: String,
     enum: ["inbound", "outbound"],
@@ -37,7 +45,7 @@ const MessageSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["received", "processing", "sent", "failed"],
+    enum: ["received", "read", "processing", "sent", "failed"],
     default: "received"
   },
 
@@ -52,7 +60,10 @@ const MessageSchema = new mongoose.Schema({
   aiMeta: {
     model: String,
     tokensUsed: Number,
-    cost: Number
+    cost: Number,
+    imagesSent: Number,
+    imageUrls: [String],
+    wasImageSearch: Boolean,
   }
 }, { timestamps: true });
 

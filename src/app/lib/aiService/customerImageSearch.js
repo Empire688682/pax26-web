@@ -35,7 +35,7 @@ const MAX_MATCHES = 3;            // max products to return to the AI
    WhatsApp media URLs require auth headers — fetch via your
    Meta API credentials before passing the buffer to Cloudinary.
 ───────────────────────────────────────────────────────────── */
-async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone) {
+export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone, folder = "customer-images") {
     // Fetch the image from WhatsApp (requires Bearer token for Meta API media URLs)
     const response = await fetch(mediaUrl, {
         headers: {
@@ -57,10 +57,10 @@ async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone
     const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.v2.uploader.upload_stream(
             {
-                folder: `pax26/${sellerId}/customer-images`,
-                tags: [`seller-${sellerId}`, `customer-${customerPhone}`, "customer-image"],
+                folder: `pax26/${sellerId}/${folder}`,
+                tags: [`seller-${sellerId}`, `customer-${customerPhone}`, folder === "payment-receipts" ? "payment-receipt" : "customer-image"],
                 // 🔑 This enables Cloudinary Visual Search indexing
-                visual_search: true,
+                visual_search: folder !== "payment-receipts",
                 resource_type: "image",
             },
             (error, result) => {

@@ -355,13 +355,14 @@ export default function SalesDashboard() {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            {order.status === "pending" && order.paymentReceiptUrl && (
+                            {order.status === "pending" && (
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "confirmed")}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold"
+                                  disabled={!order.paymentReceiptUrl}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold disabled:opacity-40"
                                   style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
-                                  title="Confirm order"
+                                  title={order.paymentReceiptUrl ? "Confirm order" : "Awaiting payment receipt"}
                                 >
                                   <CheckCircle size={12} /> Confirm
                                 </button>

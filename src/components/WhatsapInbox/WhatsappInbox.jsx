@@ -306,6 +306,7 @@ export default function WhatsAppInbox() {
     useState([]);
 
   const [messages, setMessages] = useState([]);
+  const [resolvedMediaUrls, setResolvedMediaUrls] = useState({});
 
   const [selected, setSelected] =
     useState(null);
@@ -509,6 +510,36 @@ export default function WhatsAppInbox() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  /* Resolve legacy image messages that only have mediaId */
+  useEffect(() => {
+    messages.forEach(async (msg) => {
+      if (
+        msg.mediaType !== "image" ||
+        msg.mediaUrl ||
+        !msg.mediaId ||
+        resolvedMediaUrls[msg.messageId]
+      ) {
+        return;
+      }
+      try {
+        const res = await fetch(
+          `/api/automations/inbox/media?messageId=${encodeURIComponent(msg.messageId)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.mediaUrl) {
+            setResolvedMediaUrls((prev) => ({
+              ...prev,
+              [msg.messageId]: data.mediaUrl,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to resolve inbox image:", err);
+      }
+    });
+  }, [messages, resolvedMediaUrls]);
 
   /* ─────────────────────────────────────────────
      SEND MESSAGE
@@ -1278,6 +1309,12 @@ export default function WhatsAppInbox() {
                   const isHuman =
                     msg.senderType === "human";
 
+                  const imageUrls = msg.mediaUrl
+                    ? [msg.mediaUrl]
+                    : resolvedMediaUrls[msg.messageId]
+                      ? [resolvedMediaUrls[msg.messageId]]
+                      : msg.aiMeta?.imageUrls || [];
+
                   return (
                     <motion.div
                       key={msg._id}
@@ -1325,7 +1362,30 @@ export default function WhatsAppInbox() {
                           wordBreak: "break-word",
                         }}
                       >
-                        <div>{msg.text}</div>
+                        {imageUrls.length > 0 && (
+                          <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
+                            {imageUrls.map((url, i) => (
+                              <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
+                                <img
+                                  src={url}
+                                  alt="WhatsApp attachment"
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "280px",
+                                    borderRadius: "6px",
+                                    objectFit: "cover",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        {msg.text &&
+                          msg.text !== "📷 Image" &&
+                          msg.text !== "[Customer sent an image]" && (
+                          <div>{msg.text}</div>
+                        )}
 
                         <div
                           style={{

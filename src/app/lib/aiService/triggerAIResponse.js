@@ -324,9 +324,14 @@ export const triggerAIResponse = async ({
             aiMeta: {
                 model: aiResponse?.model,
                 tokensUsed: aiResponse?.tokensUsed,
-                imagesSent: imageUrls.length,        // track how many images were sent
-                wasImageSearch: imageSearchContext,  // flag for analytics
+                imagesSent: imageUrls.length,
+                imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
+                wasImageSearch: imageSearchContext,
             },
+            ...(imageUrls.length > 0 && {
+                mediaType: "image",
+                mediaUrl: imageUrls[0],
+            }),
             direction: "outbound",
             senderType: "ai",
             status,
