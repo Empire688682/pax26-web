@@ -31,6 +31,16 @@ const CSS = `
     backdrop-filter: blur(4px);
     background: rgba(15, 23, 42, 0.65);
   }
+
+  .sd-table-row {
+    transition: background-color 0.15s ease-in-out;
+  }
+  .sd-table-row.is-dark:hover {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+  }
+  .sd-table-row.is-light:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
 `;
 
 export default function SalesDashboard() {
@@ -39,6 +49,8 @@ export default function SalesDashboard() {
   const [data, setData] = useState(null);
   const [selectedReceiptImage, setSelectedReceiptImage] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [processingOrderId, setProcessingOrderId] = useState(null);
+  const [processingStatus, setProcessingStatus] = useState(null);
   
   const [startDate, setStartDate] = useState(
     new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]
@@ -81,6 +93,7 @@ export default function SalesDashboard() {
 
   const handleOrderStatus = async (orderId, status) => {
     try {
+      setProcessingOrderId(orderId);
       const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
       if (res.data.success) {
         toast.success(status === "confirmed" ? "Order confirmed" : "Order updated");
@@ -90,6 +103,8 @@ export default function SalesDashboard() {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update order");
+    } finally {
+      setProcessingOrderId(null);
     }
   };
 
