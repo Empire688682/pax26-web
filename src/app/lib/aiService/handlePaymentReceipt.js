@@ -2,6 +2,11 @@ import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
 import { uploadCustomerImageToCloudinary } from "./customerImageSearch.js";
 import { sendSalesNotification } from "../salesNotificationService.js";
+import Groq from "groq-sdk";
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
 
 const PAYMENT_KEYWORDS = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
 
@@ -53,6 +58,81 @@ async function resolveProduct(sellerId, recentMessages) {
     return findProductFromConversation(sellerId, recentMessages);
 }
 
+async function verifyReceiptWithGroq({ imageUrl, mediaUrl }) {
+    try {
+        const apiKey = process.env.GROQ_API_KEY;
+        if (!apiKey) {
+            console.warn("⚠️ GROQ_API_KEY is not set, falling back to text heuristics");
+            return true; // Fallback to true to preserve existing behavior if API key is missing
+        }
+
+        let buffer;
+        let mimeType = "image/jpeg";
+
+        if (imageUrl) {
+            console.log("Fetching image from Cloudinary for Groq check:", imageUrl);
+            const res = await fetch(imageUrl);
+            if (!res.ok) throw new Error(`Failed to fetch Cloudinary image: ${res.statusText}`);
+            const arrayBuffer = await res.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+            mimeType = res.headers.get("content-type") || "image/jpeg";
+        } else if (mediaUrl) {
+            console.log("Fetching image from WhatsApp CDN for Groq check:", mediaUrl);
+            const res = await fetch(mediaUrl, {
+                headers: {
+                    Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+                },
+            });
+            if (!res.ok) throw new Error(`Failed to fetch WhatsApp media: ${res.statusText}`);
+            const arrayBuffer = await res.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+            mimeType = res.headers.get("content-type") || "image/jpeg";
+        } else {
+            console.warn("No imageUrl or mediaUrl provided for Groq check");
+            return false;
+        }
+
+        const prompt = `Analyze this image. Determine if it is a bank transfer receipt, payment proof, transaction confirmation screenshot, deposit slip, or billing receipt.
+Respond with a JSON object containing:
+- "isPaymentReceipt": boolean (true if it is a proof of payment, false otherwise)
+- "confidence": number (between 0 and 1)
+- "reason": string (brief explanation of why)
+
+Return ONLY the raw JSON object, without any markdown formatting blocks (like \`\`\`json) or extra text.`;
+
+        const chatCompletion = await groq.chat.completions.create({
+            model: "meta-llama/llama-4-scout-17b-16e-instruct",
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: prompt },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: `data:${mimeType};base64,${buffer.toString("base64")}`,
+                            },
+                        },
+                    ],
+                },
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            max_tokens: 300,
+        });
+
+        const text = chatCompletion.choices[0].message.content.trim();
+        console.log("Groq Payment Receipt verification response:", text);
+
+        const json = JSON.parse(text);
+        return json.isPaymentReceipt === true && json.confidence > 0.65;
+    } catch (err) {
+        console.error("❌ Error verifying payment receipt with Groq:", err);
+        // Fallback: in case of API/parsing failure, we default to true to avoid blocking payment receipt processing
+        return true;
+    }
+}
+
 /**
  * Attach a customer payment receipt to a pending order (or create one).
  */
@@ -100,6 +180,13 @@ export async function handlePaymentReceipt({
             console.error("Payment receipt upload failed:", err.message);
             if (!pendingOrder) return { handled: false };
         }
+    }
+
+    // Verify using Groq vision model that the image is actually a payment receipt
+    const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
+    if (!isVerifiedReceipt) {
+        console.log("🤖 Groq verified image is NOT a payment receipt. Proceeding to product/conversation handling.");
+        return { handled: false };
     }
 
     const matchedProduct = await resolveProduct(sellerId, recentMessages);

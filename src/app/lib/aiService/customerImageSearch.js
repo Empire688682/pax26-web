@@ -19,13 +19,14 @@ import cloudinary from "cloudinary";
 import SellerMediaModel from "../../ults/models/SellerMediaModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
 
-// ── Cloudinary config ────────────────────────────────────────
-// Make sure your env has: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
-cloudinary.v2.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Helper to ensure Cloudinary is configured at call-time using standard or NEXT_PUBLIC keys
+function configureCloudinary() {
+    cloudinary.v2.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET || process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
+    });
+}
 
 const SIMILARITY_THRESHOLD = 0.7; // 0–1: how similar the image must be (tune this)
 const MAX_MATCHES = 3;            // max products to return to the AI
@@ -36,6 +37,7 @@ const MAX_MATCHES = 3;            // max products to return to the AI
    Meta API credentials before passing the buffer to Cloudinary.
 ───────────────────────────────────────────────────────────── */
 export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone, folder = "customer-images") {
+    configureCloudinary();
     // Fetch the image from WhatsApp (requires Bearer token for Meta API media URLs)
     const response = await fetch(mediaUrl, {
         headers: {
@@ -85,6 +87,7 @@ export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, custom
 ───────────────────────────────────────────────────────────── */
 async function findSimilarCloudinaryImages(customerPublicId, sellerId) {
     try {
+        configureCloudinary();
         const searchResult = await cloudinary.v2.search
             .expression(
                 // Only search within this seller's product images (not customer uploads)
