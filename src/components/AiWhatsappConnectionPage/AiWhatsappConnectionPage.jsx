@@ -100,15 +100,15 @@ export default function AiWhatsappConnectionPage() {
     })(document, "script", "facebook-jssdk");
   }, []);
 
-  const handleWithToken = async (accessToken) => {
-    console.log("Using accessToken:", accessToken ? "received" : "missing");
+  const handleWithCode = async (code) => {
+    console.log("Using authorization code:", code ? "received" : "missing");
     try {
-      const res = await fetch("/api/meta/use-token", {
+      const res = await fetch("/api/meta/exchange-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ code }),
       });
 
       const data = await res.json();
@@ -118,16 +118,8 @@ export default function AiWhatsappConnectionPage() {
         return;
       }
 
-      // ✅ SINGLE → go dashboard
-      if (data.type === "single") {
-        await fetchUser();
-        router.push("/dashboard/automations/market-place?whatsapp=connected");
-      }
-
-      // ✅ MULTIPLE → go select page
-      if (data.type === "multiple") {
-        router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
-      }
+      // ✅ Redirect to select-phone page to choose and connect a number
+      router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
 
     } catch (err) {
       console.error(err);
@@ -147,22 +139,22 @@ export default function AiWhatsappConnectionPage() {
       function (response) {
         console.log("FB RESPONSE:", response);
         if (response.authResponse) {
-          // With response_type: "token", we get accessToken directly — no server-side code exchange needed
-          const accessToken = response.authResponse.accessToken;
-          if (!accessToken) {
+          // With response_type: "code", Meta returns an authorization code
+          const code = response.authResponse.code;
+          if (!code) {
             setMetaLoading(false);
-            alert("No access token returned. Check your config.");
+            alert("No authorization code returned. Check your config.");
             return;
           }
 
-          handleWithToken(accessToken);
+          handleWithCode(code);
         } else {
           setMetaLoading(false);
         }
       },
       {
         config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
-        response_type: "token",
+        response_type: "code",
         override_default_response_type: true,
         extras: {
           feature: "whatsapp_embedded_signup",
