@@ -20,27 +20,41 @@ export async function POST(req) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
     }
 
-    // ── Step 2: Get code from request body ────────────────────
-    const { code } = await req.json();
-    if (!code) {
-      return NextResponse.json({ success: false, message: "No code provided" }, { status: 400, headers: corsHeaders() });
+    // ── Step 2: Get accessToken from request body ─────────────
+    // Client uses FB.login() with response_type: "token" (Embedded Signup),
+    // so we receive the user access token directly.
+    const { accessToken: shortLivedToken } = await req.json();
+    if (!shortLivedToken) {
+      return NextResponse.json({ success: false, message: "No access token provided" }, { status: 400, headers: corsHeaders() });
     }
 
-    // ── Step 3: Exchange code for access token ────────────────
-    const tokenRes = await fetch(
-      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&code=${code}&redirect_uri=${encodeURIComponent(process.env.META_REDIRECT_URI)}`
+    // ── Step 3a: Validate token with Meta ────────────────────
+    // Prevents accepting fake/expired tokens from malicious clients.
+    const debugRes = await fetch(
+      `https://graph.facebook.com/v22.0/debug_token?input_token=${shortLivedToken}&access_token=${process.env.META_APP_ID}|${process.env.META_APP_SECRET}`
     );
-    const tokenData = await tokenRes.json();
+    const debugData = await debugRes.json();
 
-    console.log("🔄 tokenData:", tokenData);
+    if (!debugData?.data?.is_valid) {
+      console.error("❌ Invalid token from client:", debugData);
+      return NextResponse.json({ success: false, message: "Invalid Meta access token." }, { status: 401, headers: corsHeaders() });
+    }
+    console.log("✅ Token validated");
 
-    if (tokenData.error) {
-      console.error("Token exchange error:", tokenData.error);
-      return NextResponse.json({ success: false, message: tokenData.error.message }, { status: 400, headers: corsHeaders() });
+    // ── Step 3b: Exchange for long-lived token (~60 days) ────
+    // Short-lived tokens from FB.login() expire in ~1 hour — unusable for production.
+    const exchangeRes = await fetch(
+      `https://graph.facebook.com/v22.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&fb_exchange_token=${shortLivedToken}`
+    );
+    const exchangeData = await exchangeRes.json();
+
+    if (exchangeData.error || !exchangeData.access_token) {
+      console.error("❌ Long-lived token exchange failed:", exchangeData.error);
+      return NextResponse.json({ success: false, message: "Failed to upgrade token." }, { status: 500, headers: corsHeaders() });
     }
 
-    const accessToken = tokenData.access_token;
-    console.log("✅ Access token received");
+    const accessToken = exchangeData.access_token;
+    console.log("✅ Long-lived token obtained");
 
     // ── Step 4: Get Businesses ────────────────────────────────
     const bizRes = await fetch(

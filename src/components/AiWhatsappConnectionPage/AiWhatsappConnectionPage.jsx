@@ -100,15 +100,15 @@ export default function AiWhatsappConnectionPage() {
     })(document, "script", "facebook-jssdk");
   }, []);
 
-  const handleWithToken = async (code) => {
-    console.log("Using code:", code);
+  const handleWithToken = async (accessToken) => {
+    console.log("Using accessToken:", accessToken ? "received" : "missing");
     try {
       const res = await fetch("/api/meta/use-token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ accessToken }),
       });
 
       const data = await res.json();
@@ -147,21 +147,22 @@ export default function AiWhatsappConnectionPage() {
       function (response) {
         console.log("FB RESPONSE:", response);
         if (response.authResponse) {
-          const code = response.authResponse.code;
-          if (!code) {
+          // With response_type: "token", we get accessToken directly — no server-side code exchange needed
+          const accessToken = response.authResponse.accessToken;
+          if (!accessToken) {
             setMetaLoading(false);
-            alert("No code returned. Check your config.");
+            alert("No access token returned. Check your config.");
             return;
           }
 
-          handleWithToken(code);
+          handleWithToken(accessToken);
         } else {
           setMetaLoading(false);
         }
       },
       {
         config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
-        response_type: "code", // 🔥 CHANGE THIS
+        response_type: "token",
         override_default_response_type: true,
         extras: {
           feature: "whatsapp_embedded_signup",
