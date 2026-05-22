@@ -27,9 +27,8 @@ export async function POST(req) {
     }
 
     // ── Step 3: Exchange code for access token ────────────────
-    // NOTE: No redirect_uri — Embedded Signup doesn't use one
     const tokenRes = await fetch(
-      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&code=${code}`
+      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&code=${code}&redirect_uri=${encodeURIComponent(process.env.META_REDIRECT_URI)}`
     );
     const tokenData = await tokenRes.json();
 
