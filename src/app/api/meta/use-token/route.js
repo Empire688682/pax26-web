@@ -14,17 +14,41 @@ export async function POST(req) {
   try {
     await connectDb();
 
+    // ── Step 1: Verify logged-in user ─────────────────────────
     const userId = await verifyToken(req);
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
     }
 
-    const { accessToken } = await req.json();
-    if (!accessToken) {
-      return NextResponse.json({ success: false, message: "No access token" }, { status: 400 });
+    // ── Step 2: Get code from request body ────────────────────
+    const { code } = await req.json();
+    if (!code) {
+      return NextResponse.json({ success: false, message: "No code provided" }, { status: 400, headers: corsHeaders() });
     }
 
-    // 🔥 Step 1: Get Businesses
+    // ── Step 3: Exchange code for access token ────────────────
+    const params = new URLSearchParams({
+      client_id: process.env.META_APP_ID,
+      client_secret: process.env.META_APP_SECRET,
+      code,
+    });
+
+    const tokenRes = await fetch(
+      `https://graph.facebook.com/v22.0/oauth/access_token?${params}`
+    );
+    const tokenData = await tokenRes.json();
+
+    console.log("🔄 tokenData:", tokenData);
+
+    if (tokenData.error) {
+      console.error("Token exchange error:", tokenData.error);
+      return NextResponse.json({ success: false, message: tokenData.error.message }, { status: 400, headers: corsHeaders() });
+    }
+
+    const accessToken = tokenData.access_token;
+    console.log("✅ Access token received");
+
+    // ── Step 4: Get Businesses ────────────────────────────────
     const bizRes = await fetch(
       `https://graph.facebook.com/v22.0/me/businesses?access_token=${accessToken}`
     );
@@ -33,15 +57,12 @@ export async function POST(req) {
     console.log("🏢 Businesses:", bizData);
 
     if (!bizData?.data?.length) {
-      return NextResponse.json({
-        success: false,
-        message: "No business found",
-      });
+      return NextResponse.json({ success: false, message: "No business found on this account." }, { status: 404, headers: corsHeaders() });
     }
 
+    // ── Step 5: Loop businesses → WABAs → phone numbers ──────
     const allPhones = [];
 
-    // 🔥 Step 2: Loop businesses → get WABAs
     for (const biz of bizData.data) {
       const wabaRes = await fetch(
         `https://graph.facebook.com/v22.0/${biz.id}/owned_whatsapp_business_accounts?access_token=${accessToken}`
@@ -51,7 +72,6 @@ export async function POST(req) {
       console.log(`📦 WABAs for business ${biz.id}:`, wabaData);
 
       for (const waba of wabaData?.data || []) {
-        // 🔥 Step 3: Get phone numbers
         const phoneRes = await fetch(
           `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?access_token=${accessToken}`
         );
@@ -73,13 +93,12 @@ export async function POST(req) {
     }
 
     if (allPhones.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message: "No phone numbers found",
-      });
+      return NextResponse.json({ success: false, message: "No phone numbers found on this account." }, { status: 404, headers: corsHeaders() });
     }
 
-    // ✅ SINGLE PHONE → AUTO CONNECT
+    console.log(`✅ Found ${allPhones.length} phone(s)`);
+
+    // ── Step 6a: Single phone → auto connect ─────────────────
     if (allPhones.length === 1) {
       const phone = allPhones[0];
 
@@ -97,13 +116,15 @@ export async function POST(req) {
         paxAI: { enabled: true },
       });
 
-      return NextResponse.json({
-        success: true,
-        type: "single",
-      });
+      console.log("✅ Single phone auto-connected");
+
+      return NextResponse.json(
+        { success: true, type: "single" },
+        { status: 200, headers: corsHeaders() }
+      );
     }
 
-    // 📲 MULTIPLE PHONES → CREATE SESSION
+    // ── Step 6b: Multiple phones → create TempSession ────────
     const sessionId = crypto.randomUUID();
 
     await TempSessionModel.create({
@@ -114,15 +135,15 @@ export async function POST(req) {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    return NextResponse.json({
-      success: true,
-      type: "multiple",
-      sessionId,
-    });
+    console.log(`✅ TempSession created: ${sessionId}`);
+
+    return NextResponse.json(
+      { success: true, type: "multiple", sessionId },
+      { status: 200, headers: corsHeaders() }
+    );
 
   } catch (error) {
-    console.log("use-tokenErr:", error);
-    console.log("use-token error:", error.message);
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+    console.error("use-token error:", error.message);
+    return NextResponse.json({ success: false, message: "Server error. Please try again." }, { status: 500, headers: corsHeaders() });
   }
 }

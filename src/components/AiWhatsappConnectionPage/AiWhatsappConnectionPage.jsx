@@ -86,7 +86,7 @@ export default function AiWhatsappConnectionPage() {
         appId: process.env.NEXT_PUBLIC_META_APP_ID,
         cookie: true,
         xfbml: true,
-        version: "v19.0",
+        version: "v22.0",
       });
       setSdkReady(true);
     };
@@ -100,14 +100,15 @@ export default function AiWhatsappConnectionPage() {
     })(document, "script", "facebook-jssdk");
   }, []);
 
-  const handleWithToken = async (accessToken) => {
+  const handleWithToken = async (code) => {
+    console.log("Using code:", code);
     try {
       const res = await fetch("/api/meta/use-token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ code }),
       });
 
       const data = await res.json();
@@ -146,23 +147,25 @@ export default function AiWhatsappConnectionPage() {
       function (response) {
         console.log("FB RESPONSE:", response);
         if (response.authResponse) {
-          const accessToken = response.authResponse.accessToken;
-          if (!accessToken) {
+          const code = response.authResponse.code;
+          if (!code) {
             setMetaLoading(false);
-            alert("No access token returned. Check your config.");
+            alert("No code returned. Check your config.");
             return;
           }
 
-          handleWithToken(accessToken);
+          handleWithToken(code);
         } else {
           setMetaLoading(false);
         }
       },
       {
         config_id: process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID,
-        response_type: "token", // 🔥 CHANGE THIS
+        response_type: "code", // 🔥 CHANGE THIS
         override_default_response_type: true,
         extras: {
+          feature: "whatsapp_embedded_signup",
+          sessionInfoVersion: 3,
           setup: {
             business: {
               name: "Pax26 Technologies",
@@ -433,10 +436,10 @@ export default function AiWhatsappConnectionPage() {
             animation: "wa-slide 0.3s ease-out"
           }}>
             <div className="relative">
-               <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 wa-spin" />
-               <div className="absolute inset-0 flex items-center justify-center">
-                  <IcoMeta />
-               </div>
+              <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 wa-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <IcoMeta />
+              </div>
             </div>
             <div className="text-center">
               <h3 className="text-xl font-bold mb-2">Connecting to Meta</h3>
