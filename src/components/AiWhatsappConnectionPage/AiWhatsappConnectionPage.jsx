@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
@@ -74,11 +74,20 @@ export default function AiWhatsappConnectionPage() {
   const [loading, setLoading] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
   const [metaLoading, setMetaLoading] = useState(false);
+  const popupTimerRef = useRef(null);
 
   const GREEN = "#22c55e";
   const AMBER = "#f59e0b";
 
   useEffect(() => { fetchUser(); }, []);
+
+  useEffect(() => {
+    return () => {
+      if (popupTimerRef.current) {
+        clearInterval(popupTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     window.fbAsyncInit = function () {
@@ -135,6 +144,14 @@ export default function AiWhatsappConnectionPage() {
       return;
     }
     setMetaLoading(true);
+
+    let popupWindow = null;
+    const originalWindowOpen = window.open;
+    window.open = function (...args) {
+      popupWindow = originalWindowOpen.apply(this, args);
+      return popupWindow;
+    };
+
     window.FB.login(
       function (response) {
         console.log("FB RESPONSE:", response);
@@ -167,6 +184,19 @@ export default function AiWhatsappConnectionPage() {
         },
       }
     );
+
+    window.open = originalWindowOpen;
+
+    if (popupWindow) {
+      if (popupTimerRef.current) clearInterval(popupTimerRef.current);
+      popupTimerRef.current = setInterval(() => {
+        if (popupWindow.closed) {
+          clearInterval(popupTimerRef.current);
+          popupTimerRef.current = null;
+          setMetaLoading(false);
+        }
+      }, 1000);
+    }
   };
 
   const disconnectNumber = async () => {
@@ -434,11 +464,36 @@ export default function AiWhatsappConnectionPage() {
                 <IcoMeta />
               </div>
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col items-center">
               <h3 className="text-xl font-bold mb-2">Connecting to Meta</h3>
-              <p className="text-sm opacity-60 max-w-xs">
+              <p className="text-sm opacity-60 max-w-xs mb-6">
                 Securely authenticating with WhatsApp Cloud API. Please do not close this window.
               </p>
+              <button
+                onClick={() => {
+                  setMetaLoading(false);
+                  if (popupTimerRef.current) {
+                    clearInterval(popupTimerRef.current);
+                    popupTimerRef.current = null;
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide border transition-all duration-200"
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  borderColor: "rgba(255, 255, 255, 0.15)",
+                  color: "rgba(255, 255, 255, 0.8)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.25)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                }}
+              >
+                Cancel Connection
+              </button>
             </div>
           </div>
         )}
