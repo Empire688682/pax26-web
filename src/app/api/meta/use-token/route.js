@@ -27,14 +27,9 @@ export async function POST(req) {
     }
 
     // ── Step 3: Exchange code for access token ────────────────
-    const params = new URLSearchParams({
-      client_id: process.env.META_APP_ID,
-      client_secret: process.env.META_APP_SECRET,
-      code,
-    });
-
+    // NOTE: No redirect_uri — Embedded Signup doesn't use one
     const tokenRes = await fetch(
-      `https://graph.facebook.com/v22.0/oauth/access_token?${params}`
+      `https://graph.facebook.com/v22.0/oauth/access_token?client_id=${process.env.META_APP_ID}&client_secret=${process.env.META_APP_SECRET}&code=${code}`
     );
     const tokenData = await tokenRes.json();
 
