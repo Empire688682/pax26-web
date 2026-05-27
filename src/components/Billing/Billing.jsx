@@ -224,6 +224,16 @@ export default function Billing() {
   const currentPlan = userData?.paxAI?.plan || "free";
   const selectedMeta = plans.find((p) => p.key === selected);
 
+  const lastUpd = userData?.paxAI?.planStartedAt;
+  let remainingDays = null;
+  if (currentPlan !== "free" && lastUpd) {
+    const start = new Date(lastUpd);
+    const now = new Date();
+    const diffTime = now - start;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    remainingDays = Math.max(0, 30 - Math.floor(diffDays));
+  }
+
   const GOLD = "#C9A84C";
   const GREEN = "#4CAF7D";
   const CORAL = "#FB923C";
@@ -301,7 +311,7 @@ export default function Billing() {
                 Current plan:{" "}
               </span>
               <span className="bl-mono text-xs font-bold uppercase tracking-wider" style={{ color: GOLD }}>
-                {currentPlan}
+                {currentPlan} {remainingDays !== null ? `(${remainingDays} days remaining)` : ""}
               </span>
             </div>
           </div>

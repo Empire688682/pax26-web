@@ -206,11 +206,20 @@ export default function AiAutomationHomePage() {
           const currentPlanMeta = aiPlans?.find(p => p.key === plan);
           const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages || (
             plan === "starter" ? 500 :
-            plan === "business" ? 2000 :
-            plan === "enterprise" ? 10000 : 200
+              plan === "business" ? 2000 :
+                plan === "enterprise" ? 10000 : 200
           );
           const lastUpd = userData?.paxAI?.planStartedAt;
           const usagePct = Math.min((used / (quota || 1)) * 100, 100);
+
+          let remainingDays = null;
+          if (plan !== "free" && lastUpd) {
+            const start = new Date(lastUpd);
+            const now = new Date();
+            const diffTime = now - start;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+            remainingDays = Math.max(0, 30 - Math.floor(diffDays));
+          }
 
           const PLAN_META = {
             free: { label: "Free Plan", price: "₦0 / month", color: pax26?.textSecondary },
@@ -261,6 +270,11 @@ export default function AiAutomationHomePage() {
                       {lastUpd && (
                         <span className="ml-2 opacity-50">
                           · Updated {new Date(lastUpd).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                        </span>
+                      )}
+                      {remainingDays !== null && (
+                        <span className="ml-2 font-bold" style={{ color: remainingDays <= 5 ? CORAL : accentColor }}>
+                          · {remainingDays} days left
                         </span>
                       )}
                     </p>

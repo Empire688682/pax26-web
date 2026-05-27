@@ -302,6 +302,16 @@ export default function Dashboard() {
   const pct = Math.min((used / (quota || 1)) * 100, 100);
   const planCol = { free: pax26?.textSecondary, starter: T, business: Am, enterprise: Vi }[plan] ?? pax26?.textSecondary;
 
+  const lastUpd = userData?.paxAI?.planStartedAt;
+  let remainingDays = null;
+  if (plan !== "free" && lastUpd) {
+    const start = new Date(lastUpd);
+    const now = new Date();
+    const diffTime = now - start;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    remainingDays = Math.max(0, 30 - Math.floor(diffDays));
+  }
+
   const surfaceRing = typeof pax26?.border === "string" ? pax26.border : "rgba(241,245,249,0.08)";
   const isLightTheme = String(pax26?.card || "").toLowerCase() === "#ffffff";
 
@@ -550,6 +560,11 @@ export default function Dashboard() {
                       <p style={{ fontSize: 15, fontWeight: 800, color: pax26?.textPrimary, margin: 0, textTransform: "capitalize", letterSpacing: "-0.02em" }}>
                         {plan}
                       </p>
+                      {remainingDays !== null && (
+                        <p style={{ fontSize: 10, fontWeight: 600, color: remainingDays <= 5 ? "#fb7185" : pax26?.textSecondary, opacity: 0.65, margin: "2px 0 0" }}>
+                          Expires in {remainingDays} days
+                        </p>
+                      )}
                     </div>
                   </div>
                   <span style={{
