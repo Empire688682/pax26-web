@@ -31,10 +31,14 @@ export async function POST(req) {
     }
 
     // ── Step 3: Exchange code for access token ────────────────
+    // NOTE: redirect_uri is intentionally omitted here.
+    // When FB.login() is used via the JS SDK popup, Meta internally uses
+    // its own xd_arbiter URL as the redirect_uri — not any URL we control.
+    // Sending any redirect_uri causes the "Error validating verification code"
+    // mismatch. Omitting it entirely is the correct fix for this flow.
     const params = new URLSearchParams({
       client_id: process.env.META_APP_ID,
       client_secret: process.env.META_APP_SECRET,
-      redirect_uri: redirectUri || process.env.META_REDIRECT_URI,
       code,
     });
 
