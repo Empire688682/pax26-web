@@ -83,12 +83,17 @@ export async function POST(req) {
       const phoneData = await phoneRes.json();
 
       for (const phone of phoneData?.data || []) {
+        // Map Meta's qualityRating to our schema's quality enum
+        const qualityMap = { GREEN: "GREEN", YELLOW: "YELLOW", RED: "RED" };
+        const quality = qualityMap[phone.quality_rating] || "UNKNOWN";
+
         phones.push({
           id: phone.id,
           display: phone.display_phone_number,
+          name: phone.verified_name,
+          quality,
           wabaId: waba.id,
-          verifiedName: phone.verified_name,
-          qualityRating: phone.quality_rating,
+          wabaName: waba.name || "",
         });
       }
     }

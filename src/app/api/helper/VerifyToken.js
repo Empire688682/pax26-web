@@ -17,10 +17,11 @@ export const verifyToken = (req) => {
         const decodedId = jwt.verify(token, process.env.SECRET_KEY);
         return decodedId.userId
     } catch (error) {
-        console.log("ERROR:", error);
-        if(error.TokenExpiredError.message === "jwt expired"){
+        if (error instanceof jwt.TokenExpiredError) {
             console.log("Token expired");
+        } else {
+            console.log("VerifyToken ERROR:", error.message);
         }
-        return null
+        return null;
     }
 };

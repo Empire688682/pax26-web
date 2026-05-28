@@ -115,6 +115,7 @@ export default function AiWhatsappConnectionPage() {
       const redirectUri = window.location.origin + window.location.pathname;
       const res = await fetch("/api/meta/exchange-code", {
         method: "POST",
+        credentials: "include",   // ✅ send UserToken cookie so verifyToken works
         headers: {
           "Content-Type": "application/json",
         },
