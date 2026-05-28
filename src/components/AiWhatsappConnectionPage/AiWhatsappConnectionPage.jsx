@@ -157,22 +157,25 @@ export default function AiWhatsappConnectionPage() {
     // ✅ Listen for Meta's postMessage with waba_id + phone_number_id
     // This fires BEFORE FB.login callback and is the most reliable source
     const handleSessionMessage = (event) => {
+      // Log ALL postMessages so we can see what Meta actually sends
       try {
-        const data =
-          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        if (
-          data?.type === "WA_EMBEDDED_SIGNUP" &&
-          data?.event === "FINISH" &&
-          data?.data
-        ) {
-          console.log("📨 Meta postMessage session info:", data.data);
-          sessionInfoRef.current = {
-            wabaId: data.data.waba_id,
-            phoneNumberId: data.data.phone_number_id,
-          };
+        const raw = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (raw && typeof raw === "object") {
+          console.log("📬 postMessage from", event.origin, "→", JSON.stringify(raw));
+          if (
+            raw?.type === "WA_EMBEDDED_SIGNUP" &&
+            raw?.event === "FINISH" &&
+            raw?.data
+          ) {
+            console.log("📨 Meta session info captured:", raw.data);
+            sessionInfoRef.current = {
+              wabaId: raw.data.waba_id,
+              phoneNumberId: raw.data.phone_number_id,
+            };
+          }
         }
       } catch {
-        // non-JSON message — ignore
+        // non-JSON messages (e.g. from other extensions) — ignore
       }
     };
     window.addEventListener("message", handleSessionMessage);
@@ -186,7 +189,9 @@ export default function AiWhatsappConnectionPage() {
 
     window.FB.login(
       function (response) {
-        console.log("FB RESPONSE:", response);
+        // Log the FULL response to see all available data
+        console.log("FB RESPONSE (full):", JSON.stringify(response));
+        console.log("sessionInfo captured:", sessionInfoRef.current);
         window.removeEventListener("message", handleSessionMessage);
         window.open = originalWindowOpen;
         if (popupTimerRef.current) {

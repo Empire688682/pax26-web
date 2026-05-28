@@ -97,60 +97,71 @@ export async function POST(req) {
       });
 
     } else {
-      // ✅ PATH B — Fallback: discover WABAs via correct Graph API endpoint
-      console.log("🔍 No session info — falling back to WABA discovery");
+      // ✅ PATH B — Fallback: discover WABAs via business portfolios
+      console.log("🔍 No session info — falling back to business-based WABA discovery");
 
-      // Get the user's Facebook ID first
-      const meRes = await fetch(
-        `https://graph.facebook.com/v22.0/me?access_token=${accessToken}`
+      const bizRes = await fetch(
+        `https://graph.facebook.com/v22.0/me/businesses?access_token=${accessToken}`
       );
-      const meData = await meRes.json();
+      const bizData = await bizRes.json();
 
-      if (meData.error) {
-        console.error("User fetch error:", meData.error);
-        return NextResponse.json(
-          { success: false, message: `User lookup failed: ${meData.error.message}` },
-          { status: 400, headers: corsHeaders() }
-        );
-      }
+      console.log("🏢 Businesses response:", JSON.stringify(bizData));
 
-      console.log("👤 User ID:", meData.id);
-
-      // Correct endpoint: GET /{user-id}/whatsapp_business_accounts
-      const wabaListRes = await fetch(
-        `https://graph.facebook.com/v22.0/${meData.id}/whatsapp_business_accounts?access_token=${accessToken}`
-      );
-      const wabaListData = await wabaListRes.json();
-
-      console.log("📋 WABA list response:", JSON.stringify(wabaListData));
-
-      if (wabaListData.error) {
-        // Return the real Meta error so we can diagnose it
-        console.error("WABA list error:", wabaListData.error);
+      if (bizData.error) {
+        console.error("Businesses fetch error:", bizData.error);
         return NextResponse.json(
           {
             success: false,
-            message: `WABA lookup failed: ${wabaListData.error.message} (code ${wabaListData.error.code})`,
+            message: `Business lookup failed: ${bizData.error.message} (code ${bizData.error.code})`,
           },
           { status: 400, headers: corsHeaders() }
         );
       }
 
-      for (const waba of wabaListData?.data || []) {
-        const phoneRes = await fetch(
-          `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
+      const businesses = bizData?.data || [];
+      if (businesses.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "No business portfolios found on this Meta account." },
+          { status: 400, headers: corsHeaders() }
         );
-        const phoneData = await phoneRes.json();
+      }
 
-        for (const phone of phoneData?.data || []) {
-          phones.push({
-            id: phone.id,
-            display: phone.display_phone_number,
-            name: phone.verified_name,
-            quality: qualityMap[phone.quality_rating] || "UNKNOWN",
-            wabaId: waba.id,
-            wabaName: waba.name || "",
-          });
+      for (const biz of businesses) {
+        const wabaRes = await fetch(
+          `https://graph.facebook.com/v22.0/${biz.id}/owned_whatsapp_business_accounts?access_token=${accessToken}`
+        );
+        const wabaData = await wabaRes.json();
+
+        console.log(`📦 WABAs for business ${biz.id}:`, JSON.stringify(wabaData));
+
+        if (wabaData.error) {
+          console.error(`WABA list error for business ${biz.id}:`, wabaData.error);
+          continue;
+        }
+
+        for (const waba of wabaData?.data || []) {
+          const phoneRes = await fetch(
+            `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
+          );
+          const phoneData = await phoneRes.json();
+
+          console.log(`📞 Phones for WABA ${waba.id}:`, JSON.stringify(phoneData));
+
+          if (phoneData.error) {
+            console.error(`Phone list error for WABA ${waba.id}:`, phoneData.error);
+            continue;
+          }
+
+          for (const phone of phoneData?.data || []) {
+            phones.push({
+              id: phone.id,
+              display: phone.display_phone_number,
+              name: phone.verified_name,
+              quality: qualityMap[phone.quality_rating] || "UNKNOWN",
+              wabaId: waba.id,
+              wabaName: waba.name || "",
+            });
+          }
         }
       }
     }
