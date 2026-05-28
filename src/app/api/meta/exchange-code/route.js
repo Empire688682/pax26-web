@@ -21,8 +21,9 @@ export async function POST(req) {
       );
     }
 
-    // ── Step 2: Get code from request body ────────────────────
-    const { code, redirectUri } = await req.json();
+    // ── Step 2: Get code + optional session info from body ────
+    // wabaId + phoneNumberId come from Meta's postMessage (sessionInfoVersion: 3)
+    const { code, wabaId: hintWabaId, phoneNumberId: hintPhoneId } = await req.json();
     if (!code) {
       return NextResponse.json(
         { success: false, message: "No code provided" },
@@ -31,11 +32,8 @@ export async function POST(req) {
     }
 
     // ── Step 3: Exchange code for access token ────────────────
-    // NOTE: redirect_uri is intentionally omitted here.
-    // When FB.login() is used via the JS SDK popup, Meta internally uses
-    // its own xd_arbiter URL as the redirect_uri — not any URL we control.
-    // Sending any redirect_uri causes the "Error validating verification code"
-    // mismatch. Omitting it entirely is the correct fix for this flow.
+    // NOTE: redirect_uri intentionally omitted — FB.login() popup uses
+    // Meta's internal xd_arbiter URL; including any URI causes a mismatch error.
     const params = new URLSearchParams({
       client_id: process.env.META_APP_ID,
       client_secret: process.env.META_APP_SECRET,
@@ -47,7 +45,7 @@ export async function POST(req) {
     );
     const tokenData = await tokenRes.json();
 
-    console.log("🔄 tokenData: ", tokenData);
+    console.log("🔄 tokenData:", tokenData);
 
     if (tokenData.error) {
       console.error("Token exchange error:", tokenData.error);
@@ -60,41 +58,100 @@ export async function POST(req) {
     const accessToken = tokenData.access_token;
     console.log("✅ Access token received");
 
-    // ── Step 4: Fetch WABAs linked to this user ───────────────
-    const wabaRes = await fetch(
-      `https://graph.facebook.com/v22.0/me?fields=whatsapp_business_accounts&access_token=${accessToken}`
-    );
-    const wabaData = await wabaRes.json();
-
-    if (wabaData.error) {
-      console.error("WABA fetch error:", wabaData.error);
-      return NextResponse.json(
-        { success: false, message: "Failed to fetch WhatsApp accounts" },
-        { status: 400, headers: corsHeaders() }
-      );
-    }
-
-    // ── Step 5: Fetch phone numbers for each WABA ─────────────
+    // ── Step 4: Build phone list ───────────────────────────────
+    // PATH A: Use WABA + phone IDs from Meta's postMessage (fastest, most reliable)
+    // PATH B: Discover via Graph API (fallback)
+    const qualityMap = { GREEN: "GREEN", YELLOW: "YELLOW", RED: "RED" };
     const phones = [];
-    for (const waba of wabaData?.whatsapp_business_accounts?.data || []) {
+
+    if (hintWabaId && hintPhoneId) {
+      // ✅ PATH A — session info from postMessage
+      console.log("📨 Using session info from postMessage:", { hintWabaId, hintPhoneId });
+
       const phoneRes = await fetch(
-        `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?access_token=${accessToken}`
+        `https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
       );
       const phoneData = await phoneRes.json();
 
-      for (const phone of phoneData?.data || []) {
-        // Map Meta's qualityRating to our schema's quality enum
-        const qualityMap = { GREEN: "GREEN", YELLOW: "YELLOW", RED: "RED" };
-        const quality = qualityMap[phone.quality_rating] || "UNKNOWN";
+      if (phoneData.error) {
+        console.error("Phone fetch error:", phoneData.error);
+        return NextResponse.json(
+          { success: false, message: `Phone lookup failed: ${phoneData.error.message}` },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
 
-        phones.push({
-          id: phone.id,
-          display: phone.display_phone_number,
-          name: phone.verified_name,
-          quality,
-          wabaId: waba.id,
-          wabaName: waba.name || "",
-        });
+      // Get WABA name for display
+      const wabaRes = await fetch(
+        `https://graph.facebook.com/v22.0/${hintWabaId}?fields=id,name&access_token=${accessToken}`
+      );
+      const wabaData = await wabaRes.json();
+
+      phones.push({
+        id: phoneData.id,
+        display: phoneData.display_phone_number,
+        name: phoneData.verified_name,
+        quality: qualityMap[phoneData.quality_rating] || "UNKNOWN",
+        wabaId: hintWabaId,
+        wabaName: wabaData.name || "",
+      });
+
+    } else {
+      // ✅ PATH B — Fallback: discover WABAs via correct Graph API endpoint
+      console.log("🔍 No session info — falling back to WABA discovery");
+
+      // Get the user's Facebook ID first
+      const meRes = await fetch(
+        `https://graph.facebook.com/v22.0/me?access_token=${accessToken}`
+      );
+      const meData = await meRes.json();
+
+      if (meData.error) {
+        console.error("User fetch error:", meData.error);
+        return NextResponse.json(
+          { success: false, message: `User lookup failed: ${meData.error.message}` },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+
+      console.log("👤 User ID:", meData.id);
+
+      // Correct endpoint: GET /{user-id}/whatsapp_business_accounts
+      const wabaListRes = await fetch(
+        `https://graph.facebook.com/v22.0/${meData.id}/whatsapp_business_accounts?access_token=${accessToken}`
+      );
+      const wabaListData = await wabaListRes.json();
+
+      console.log("📋 WABA list response:", JSON.stringify(wabaListData));
+
+      if (wabaListData.error) {
+        // Return the real Meta error so we can diagnose it
+        console.error("WABA list error:", wabaListData.error);
+        return NextResponse.json(
+          {
+            success: false,
+            message: `WABA lookup failed: ${wabaListData.error.message} (code ${wabaListData.error.code})`,
+          },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+
+      for (const waba of wabaListData?.data || []) {
+        const phoneRes = await fetch(
+          `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
+        );
+        const phoneData = await phoneRes.json();
+
+        for (const phone of phoneData?.data || []) {
+          phones.push({
+            id: phone.id,
+            display: phone.display_phone_number,
+            name: phone.verified_name,
+            quality: qualityMap[phone.quality_rating] || "UNKNOWN",
+            wabaId: waba.id,
+            wabaName: waba.name || "",
+          });
+        }
       }
     }
 
@@ -107,7 +164,7 @@ export async function POST(req) {
 
     console.log(`✅ Found ${phones.length} phone(s)`);
 
-    // ── Step 6: Save to TempSession (expires in 10 mins) ──────
+    // ── Step 5: Save to TempSession (expires in 10 mins) ──────
     const sessionId = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -121,7 +178,7 @@ export async function POST(req) {
 
     console.log(`✅ TempSession created: ${sessionId}`);
 
-    // ── Step 7: Return sessionId + phones to frontend ─────────
+    // ── Step 6: Return sessionId + phones to frontend ─────────
     // accessToken is NOT returned to the browser
     return NextResponse.json(
       { success: true, sessionId, phones },
@@ -131,7 +188,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("exchange-code error:", error.message);
     return NextResponse.json(
-      { success: false, message: "Server error. Please try again." },
+      { success: false, message: `Server error: ${error.message}` },
       { status: 500, headers: corsHeaders() }
     );
   }

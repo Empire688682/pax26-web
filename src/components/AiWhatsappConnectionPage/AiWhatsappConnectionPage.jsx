@@ -75,6 +75,8 @@ export default function AiWhatsappConnectionPage() {
   const [sdkReady, setSdkReady] = useState(false);
   const [metaLoading, setMetaLoading] = useState(false);
   const popupTimerRef = useRef(null);
+  // Captures waba_id + phone_number_id sent by Meta's popup via postMessage
+  const sessionInfoRef = useRef(null);
 
   const GREEN = "#22c55e";
   const AMBER = "#f59e0b";
@@ -111,32 +113,36 @@ export default function AiWhatsappConnectionPage() {
 
   const handleWithCode = async (code) => {
     console.log("Using authorization code:", code ? "received" : "missing");
+    console.log("Session info from postMessage:", sessionInfoRef.current);
     try {
-      const redirectUri = window.location.origin + window.location.pathname;
       const res = await fetch("/api/meta/exchange-code", {
         method: "POST",
-        credentials: "include",   // ✅ send UserToken cookie so verifyToken works
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code, redirectUri }),
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          // ✅ Pass WABA/phone IDs captured from Meta's postMessage — backend uses these directly
+          wabaId: sessionInfoRef.current?.wabaId || null,
+          phoneNumberId: sessionInfoRef.current?.phoneNumberId || null,
+        }),
       });
 
       const data = await res.json();
+      console.log("exchange-code response:", data);
 
       if (!data.success) {
         alert(data.message || "Failed to connect");
         return;
       }
 
-      // ✅ Redirect to select-phone page to choose and connect a number
       router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
 
     } catch (err) {
-      console.error(err);
-      alert("Connection failed");
+      console.error("exchange-code fetch error:", err);
+      alert("Connection failed. Please try again.");
     } finally {
       setMetaLoading(false);
+      sessionInfoRef.current = null;
     }
   };
 
@@ -146,6 +152,30 @@ export default function AiWhatsappConnectionPage() {
       return;
     }
     setMetaLoading(true);
+    sessionInfoRef.current = null;
+
+    // ✅ Listen for Meta's postMessage with waba_id + phone_number_id
+    // This fires BEFORE FB.login callback and is the most reliable source
+    const handleSessionMessage = (event) => {
+      try {
+        const data =
+          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (
+          data?.type === "WA_EMBEDDED_SIGNUP" &&
+          data?.event === "FINISH" &&
+          data?.data
+        ) {
+          console.log("📨 Meta postMessage session info:", data.data);
+          sessionInfoRef.current = {
+            wabaId: data.data.waba_id,
+            phoneNumberId: data.data.phone_number_id,
+          };
+        }
+      } catch {
+        // non-JSON message — ignore
+      }
+    };
+    window.addEventListener("message", handleSessionMessage);
 
     let popupWindow = null;
     const originalWindowOpen = window.open;
@@ -157,15 +187,19 @@ export default function AiWhatsappConnectionPage() {
     window.FB.login(
       function (response) {
         console.log("FB RESPONSE:", response);
+        window.removeEventListener("message", handleSessionMessage);
+        window.open = originalWindowOpen;
+        if (popupTimerRef.current) {
+          clearInterval(popupTimerRef.current);
+          popupTimerRef.current = null;
+        }
         if (response.authResponse) {
-          // With response_type: "code", Meta returns an authorization code
           const code = response.authResponse.code;
           if (!code) {
             setMetaLoading(false);
-            alert("No authorization code returned. Check your config.");
+            alert("No authorization code returned. Check your app config.");
             return;
           }
-
           handleWithCode(code);
         } else {
           setMetaLoading(false);
@@ -178,16 +212,10 @@ export default function AiWhatsappConnectionPage() {
         extras: {
           feature: "whatsapp_embedded_signup",
           sessionInfoVersion: 3,
-          setup: {
-            business: {
-              name: "Pax26 Technologies",
-            },
-          },
+          setup: { business: { name: "Pax26 Technologies" } },
         },
       }
     );
-
-    window.open = originalWindowOpen;
 
     if (popupWindow) {
       if (popupTimerRef.current) clearInterval(popupTimerRef.current);
@@ -195,6 +223,8 @@ export default function AiWhatsappConnectionPage() {
         if (popupWindow.closed) {
           clearInterval(popupTimerRef.current);
           popupTimerRef.current = null;
+          window.removeEventListener("message", handleSessionMessage);
+          window.open = originalWindowOpen;
           setMetaLoading(false);
         }
       }, 1000);
