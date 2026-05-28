@@ -112,12 +112,13 @@ export default function AiWhatsappConnectionPage() {
   const handleWithCode = async (code) => {
     console.log("Using authorization code:", code ? "received" : "missing");
     try {
+      const redirectUri = window.location.origin + window.location.pathname;
       const res = await fetch("/api/meta/exchange-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, redirectUri }),
       });
 
       const data = await res.json();

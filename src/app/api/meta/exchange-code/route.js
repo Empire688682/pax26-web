@@ -22,7 +22,7 @@ export async function POST(req) {
     }
 
     // ── Step 2: Get code from request body ────────────────────
-    const { code } = await req.json();
+    const { code, redirectUri } = await req.json();
     if (!code) {
       return NextResponse.json(
         { success: false, message: "No code provided" },
@@ -34,7 +34,7 @@ export async function POST(req) {
     const params = new URLSearchParams({
       client_id: process.env.META_APP_ID,
       client_secret: process.env.META_APP_SECRET,
-      redirect_uri: process.env.META_REDIRECT_URI,
+      redirect_uri: redirectUri || process.env.META_REDIRECT_URI,
       code,
     });
 
