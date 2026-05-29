@@ -141,9 +141,16 @@ export async function POST(req) {
     try {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash',
         systemInstruction: systemPrompt,
       });
+
+      // Gemini requires history to start with 'user' and alternate roles
+      // Drop any leading assistant messages to avoid API errors
+      while (conversationHistory.length > 0 && conversationHistory[0].role !== 'user') {
+        conversationHistory.shift();
+      }
+
       const chat = model.startChat({ history: conversationHistory });
       const result = await chat.sendMessage(sanitizedMessage);
       aiText = result.response.text();
