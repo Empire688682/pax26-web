@@ -2,19 +2,20 @@ import { NextResponse } from 'next/server';
 import { connectDb } from '@/app/ults/db/ConnectDb';
 import { corsHeaders } from '@/app/ults/corsHeaders/corsHeaders';
 import ChatConversationModel from '@/app/ults/models/ChatConversationModel';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PAX26_KNOWLEDGE } from '@/config/pax26Knowledge';
 import { verifyToken } from '@/app/api/helper/VerifyToken';
+import { generateAIResponse } from '@/app/lib/aiProvider';
+import { getPax26Context } from '@/app/lib/pax26Context';
 
-// Handle preflight OPTIONS request
+// ---------------------------------------------------------------------------
+// OPTIONS — preflight
+// ---------------------------------------------------------------------------
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: corsHeaders(),
-  });
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
+// ---------------------------------------------------------------------------
 // Sanitize user input: strip HTML tags, JS URIs, and event handler attributes
+// ---------------------------------------------------------------------------
 function sanitize(text) {
   return text
     .replace(/<[^>]*>/g, '')
@@ -23,6 +24,9 @@ function sanitize(text) {
     .trim();
 }
 
+// ---------------------------------------------------------------------------
+// POST /api/chatbot/message
+// ---------------------------------------------------------------------------
 export async function POST(req) {
   try {
     // --- Parse and validate request body ---
@@ -101,7 +105,6 @@ export async function POST(req) {
       const windowEnd = new Date(windowStart.getTime() + 24 * 60 * 60 * 1000);
 
       if (now < windowEnd) {
-        // Window still active — check limit
         if (existingDoc.messageCount >= sessionLimit) {
           return NextResponse.json(
             {
@@ -119,48 +122,55 @@ export async function POST(req) {
       }
     }
 
-    // --- Knowledge base check ---
-    if (!PAX26_KNOWLEDGE || PAX26_KNOWLEDGE.trim() === '') {
-      return NextResponse.json(
-        { message: 'Knowledge base unavailable' },
-        { status: 500, headers: corsHeaders() }
-      );
-    }
+    // --- Build AI context (dynamic + cached) ---
+    const knowledgeContext = await getPax26Context();
 
-    // --- Build Gemini system prompt and conversation history ---
-    const systemPrompt = `${PAX26_KNOWLEDGE}\n\nYou are the official Pax26 assistant. Do not identify yourself as a generic AI model. Only answer questions related to Pax26 services, features, pricing, and support. If a question is unrelated to Pax26, politely acknowledge it is outside your scope and redirect the user to ask about Pax26 services.`;
+    // --- Build system prompt with updated brand positioning ---
+    const systemPrompt = `${knowledgeContext}
 
+---
+
+## IDENTITY
+You are the official Pax26 AI assistant. Pax26 is an AI automation and business growth platform focused on WhatsApp automation, AI chatbots, customer engagement, and smart workflow tools. VTU services (airtime, data, electricity, TV subscriptions) are secondary support services.
+
+## WHATSAPP ONBOARDING — CRITICAL FACT
+Pax26 does NOT use QR code scanning to connect WhatsApp. Pax26 uses Meta Embedded Signup — users connect their WhatsApp Business account through the official Meta/Facebook login flow directly inside the Pax26 dashboard. Never mention QR codes or WhatsApp scanning.
+
+## RESPONSE LENGTH RULES — STRICTLY FOLLOW
+- Short or simple questions (greetings, yes/no, single-topic): reply in 1–3 sentences maximum. No bullet points, no headers.
+- Medium questions (how-to, feature explanation): reply in 3–6 sentences or a short list of up to 4 items.
+- Long or complex questions (multi-part, detailed setup, comparisons): reply with structured detail, but still be concise — no padding, no filler phrases like "I hope this helps" or "Feel free to ask".
+- NEVER produce a long response for a short question. Match the depth of the answer to the depth of the question.
+- Do not end responses with follow-up questions unless the user explicitly asked for guidance.
+
+## SCOPE
+Only answer questions related to Pax26 services, features, pricing, and support. If a question is unrelated to Pax26, say so in one sentence and redirect.
+
+## BRAND PRIORITY
+Lead with AI automation capabilities. Mention VTU services only when directly asked or relevant.`;
+
+    // --- Build conversation history (last 20 messages, Gemini format) ---
     const recentMessages = existingDoc ? existingDoc.messages.slice(-20) : [];
     const conversationHistory = recentMessages.map((msg) => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: msg.text }],
     }));
 
-    // --- Call Gemini API ---
-    let aiText;
-    try {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: systemPrompt,
-      });
+    // --- Call AI provider (with automatic fallback chain) ---
+    const aiResult = await generateAIResponse(
+      systemPrompt,
+      conversationHistory,
+      sanitizedMessage
+    );
 
-      // Gemini requires history to start with 'user' and alternate roles
-      // Drop any leading assistant messages to avoid API errors
-      while (conversationHistory.length > 0 && conversationHistory[0].role !== 'user') {
-        conversationHistory.shift();
-      }
-
-      const chat = model.startChat({ history: conversationHistory });
-      const result = await chat.sendMessage(sanitizedMessage);
-      aiText = result.response.text();
-    } catch (aiError) {
-      console.error('Gemini API error:', aiError);
+    if (aiResult.error) {
       return NextResponse.json(
-        { message: 'AI service unavailable. Please try again.' },
-        { status: 500, headers: corsHeaders() }
+        { message: aiResult.error },
+        { status: 503, headers: corsHeaders() }
       );
     }
+
+    const aiText = aiResult.text;
 
     // --- Upsert conversation document ---
     let updatedDoc;
@@ -172,22 +182,22 @@ export async function POST(req) {
           $push: {
             messages: {
               $each: [
-                { role: 'user', text: sanitizedMessage, createdAt: now },
-                {
-                  role: 'assistant',
-                  text: aiText,
-                  createdAt: new Date(now.getTime() + 1),
-                },
+                { role: 'user',      text: sanitizedMessage,                    createdAt: now },
+                { role: 'assistant', text: aiText, createdAt: new Date(now.getTime() + 1) },
               ],
             },
           },
           $inc: { messageCount: 1 },
-          $setOnInsert: { windowStart: now, ipAddress: clientIp, userId: userId || null },
+          $setOnInsert: {
+            windowStart: now,
+            ipAddress: clientIp,
+            userId: userId || null,
+          },
         },
         { upsert: true, new: true }
       );
     } catch (dbError) {
-      console.error('DB upsert error:', dbError);
+      console.error('[chatbot/message] DB upsert error:', dbError);
       return NextResponse.json(
         { message: 'Failed to save message. Please try again.' },
         { status: 500, headers: corsHeaders() }
@@ -198,9 +208,7 @@ export async function POST(req) {
     const isAuth = !!userId;
     const max = isAuth ? 100 : 20;
     const windowExpiry = updatedDoc.windowStart
-      ? new Date(
-          updatedDoc.windowStart.getTime() + 24 * 60 * 60 * 1000
-        ).toISOString()
+      ? new Date(updatedDoc.windowStart.getTime() + 24 * 60 * 60 * 1000).toISOString()
       : null;
 
     return NextResponse.json(
@@ -215,9 +223,9 @@ export async function POST(req) {
       { status: 200, headers: corsHeaders() }
     );
   } catch (error) {
-    console.error('Chatbot message error:', error);
+    console.error('[chatbot/message] Unhandled error:', error);
     return NextResponse.json(
-      { message: 'An error occurred' },
+      { message: 'An unexpected error occurred. Please try again.' },
       { status: 500, headers: corsHeaders() }
     );
   }
