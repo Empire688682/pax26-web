@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import {
   Facebook, CheckCircle2, ShieldCheck, Phone,
   ArrowRight, Wifi, Lock, Zap, RefreshCw,
-  MessageCircle, AlertCircle, ExternalLink,
+  MessageCircle, AlertCircle, ExternalLink, AlertTriangle,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
@@ -268,6 +268,87 @@ export default function AiWhatsappConnectInfo() {
                     <span style={{
                       fontSize: "0.85rem", lineHeight: 1.55,
                       color: warn ? "#ef4444" : pax26?.textSecondary || "rgba(0,0,0,0.55)",
+                    }}>
+                      {text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Dedicated SIM warning card ────────────── */}
+          <div className="wi-s2 wi-card" style={{
+            background: pax26?.card || "#fff",
+            border: "1.5px solid rgba(245,158,11,0.3)",
+            borderRadius: "20px",
+            overflow: "hidden",
+            marginBottom: "16px",
+          }}>
+            <div style={{
+              height: "3px",
+              background: `linear-gradient(90deg,#f59e0b,#ef4444,transparent)`,
+            }} />
+            <div style={{ padding: "24px 24px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                <div style={{
+                  width: "34px", height: "34px", borderRadius: "10px",
+                  background: "rgba(245,158,11,0.12)", flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <AlertTriangle size={16} style={{ color: "#f59e0b" }} />
+                </div>
+                <p style={{ fontSize: "14px", fontWeight: 700, color: pax26?.textPrimary || "#111827" }}>
+                  Use a Dedicated Business SIM
+                </p>
+              </div>
+
+              <div style={{
+                padding: "12px 14px", borderRadius: "12px", marginBottom: "14px",
+                background: "rgba(239,68,68,0.06)",
+                border: "1px solid rgba(239,68,68,0.18)",
+                display: "flex", alignItems: "flex-start", gap: "8px",
+              }}>
+                <AlertCircle size={14} style={{ color: "#ef4444", flexShrink: 0, marginTop: "2px" }} />
+                <p style={{ fontSize: "0.83rem", color: "#ef4444", lineHeight: 1.6 }}>
+                  If you connect a personal number, it will be permanently removed from consumer WhatsApp and your customers will not be able to message it normally.
+                </p>
+              </div>
+
+              <p style={{
+                fontSize: "0.88rem", lineHeight: 1.75,
+                color: pax26?.textSecondary || "rgba(0,0,0,0.55)",
+                marginBottom: "14px",
+              }}>
+                For the best experience, always use a <strong style={{ color: pax26?.textPrimary || "#111827", fontWeight: 700 }}>fresh SIM card</strong> that has <strong style={{ color: pax26?.textPrimary || "#111827", fontWeight: 700 }}>never been registered on personal WhatsApp</strong>.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  { text: "Use a fresh SIM dedicated to your business", ok: true },
+                  { text: "Customers can message it immediately after setup", ok: true },
+                  { text: "Never use your personal WhatsApp number", ok: false },
+                ].map(({ text, ok }, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "flex-start", gap: "10px",
+                    padding: "10px 14px", borderRadius: "12px",
+                    background: ok ? (pax26?.secondaryBg || "#f8fafc") : "rgba(239,68,68,0.05)",
+                    border: `1px solid ${ok ? "rgba(0,0,0,0.06)" : "rgba(239,68,68,0.15)"}`,
+                  }}>
+                    <div style={{
+                      width: "20px", height: "20px", borderRadius: "50%", flexShrink: 0,
+                      background: ok ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      marginTop: "1px",
+                    }}>
+                      {ok
+                        ? <span style={{ color: "#22c55e", fontSize: "11px" }}>✓</span>
+                        : <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>✕</span>
+                      }
+                    </div>
+                    <span style={{
+                      fontSize: "0.85rem", lineHeight: 1.55,
+                      color: ok ? (pax26?.textSecondary || "rgba(0,0,0,0.55)") : "#ef4444",
                     }}>
                       {text}
                     </span>

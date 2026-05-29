@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook } from "lucide-react";
+import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
 const CSS = `
@@ -372,6 +372,34 @@ export default function AiWhatsappConnectionPage() {
                   You need an active WhatsApp Business account linked to a Meta Business Manager.
                   Personal WhatsApp numbers are not supported.
                 </p>
+              </div>
+            </div>
+
+            {/* ⚠️ Dedicated SIM warning */}
+            <div
+              className="rounded-xl p-4 space-y-3"
+              style={{ background: "rgba(245,158,11,0.07)", border: "1.5px solid rgba(245,158,11,0.3)" }}
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={15} className="flex-shrink-0" style={{ color: "#f59e0b" }} />
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f59e0b" }}>
+                  Important — Read before connecting
+                </p>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.85 }}>
+                For the best experience, use a <strong style={{ color: pax26?.textPrimary }}>dedicated business SIM</strong> that has <strong style={{ color: pax26?.textPrimary }}>never been registered on personal WhatsApp</strong>. If you migrate a personal number, it will be removed from consumer WhatsApp and your customers may not be able to reach it.
+              </p>
+              <div className="space-y-1.5 pt-0.5">
+                {[
+                  "Use a fresh SIM dedicated to your business",
+                  "Never been on regular/personal WhatsApp",
+                  "Customers can message it immediately after setup",
+                ].map((tip, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
+                    <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.75 }}>{tip}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
