@@ -34,18 +34,18 @@ export async function POST(req) {
         await UserModel.findByIdAndUpdate(
             userId,
             {
-                whatsapp: {
-                    connected: false,
-                    accessToken:"",
-                    wabaId: "",
-                    phoneNumberId: "",
-                    displayPhone: "",
-                    connectedAt: new Date(),
-                    permissions: {
+                $set: {
+                    "whatsapp.connected": false,
+                    "whatsapp.accessToken": "",
+                    "whatsapp.wabaId": "",
+                    "whatsapp.phoneNumberId": "",
+                    "whatsapp.displayPhone": "",
+                    "whatsapp.connectedAt": new Date(),
+                    "whatsapp.permissions": {
                         messaging: false,
                         management: false,
                     },
-                },
+                }
             },
             { new: true }
         );

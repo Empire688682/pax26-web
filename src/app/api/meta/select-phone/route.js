@@ -25,11 +25,9 @@ export async function POST(req) {
             );
         }
 
-        // 🔍 Look up session — must exist and not be expired
-        const session = await TempSessionModel.findOne({
-            sessionId,
-            expiresAt: { $gt: new Date() },
-        });
+        // 🔍 Look up session — must exist (expiry is handled by MongoDB TTL index)
+        const session = await TempSessionModel.findOne({ sessionId });
+
 
         if (!session) {
             return NextResponse.json(
@@ -48,24 +46,23 @@ export async function POST(req) {
             );
         }
 
-        // 💾 Save to user
+        // 💾 Save to user using $set and dot notation to prevent overwriting other fields (like contacts and custom paxAI prompt/plan)
         await UserModel.findByIdAndUpdate(
             session.userId,
             {
-                whatsapp: {
-                    connected: true,
-                    accessToken: session.accessToken, // ✅ retrieved from server, never from browser
-                    wabaId: phone.wabaId,
-                    phoneNumberId: phone.id,
-                    displayPhone: phone.display,
-                    connectedAt: new Date(),
-                    permissions: {
+                $set: {
+                    "whatsapp.connected": true,
+                    "whatsapp.accessToken": session.accessToken, // ✅ retrieved from server, never from browser
+                    "whatsapp.wabaId": phone.wabaId,
+                    "whatsapp.phoneNumberId": phone.id,
+                    "whatsapp.displayPhone": phone.display,
+                    "whatsapp.connectedAt": new Date(),
+                    "whatsapp.permissions": {
                         messaging: true,
                         management: true,
                     },
-                },
-                whatsappConnected: true,
-                paxAI: { enabled: true },
+                    "paxAI.enabled": true,
+                }
             },
             { new: true }
         );

@@ -70,6 +70,7 @@ export async function POST(req) {
 
     // ── Step 5: Loop businesses → WABAs → phone numbers ──────
     const allPhones = [];
+    const qualityMap = { GREEN: "GREEN", YELLOW: "YELLOW", RED: "RED" };
 
     for (const biz of bizData.data) {
       const wabaRes = await fetch(
@@ -92,7 +93,7 @@ export async function POST(req) {
             id: p.id,
             display: p.display_phone_number,
             name: p.verified_name,
-            quality: p.quality_rating,
+            quality: qualityMap[p.quality_rating] || "UNKNOWN",
             wabaId: waba.id,
             businessId: biz.id,
           });
@@ -111,17 +112,16 @@ export async function POST(req) {
       const phone = allPhones[0];
 
       await UserModel.findByIdAndUpdate(userId, {
-        whatsapp: {
-          connected: true,
-          accessToken,
-          wabaId: phone.wabaId,
-          phoneNumberId: phone.id,
-          displayPhone: phone.display,
-          connectedAt: new Date(),
-          permissions: { messaging: true, management: true },
-        },
-        whatsappConnected: true,
-        paxAI: { enabled: true },
+        $set: {
+          "whatsapp.connected": true,
+          "whatsapp.accessToken": accessToken,
+          "whatsapp.wabaId": phone.wabaId,
+          "whatsapp.phoneNumberId": phone.id,
+          "whatsapp.displayPhone": phone.display,
+          "whatsapp.connectedAt": new Date(),
+          "whatsapp.permissions": { messaging: true, management: true },
+          "paxAI.enabled": true,
+        }
       });
 
       console.log("✅ Single phone auto-connected");

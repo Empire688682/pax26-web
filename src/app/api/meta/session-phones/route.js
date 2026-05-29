@@ -27,7 +27,6 @@ export async function GET(req) {
 
         const session = await TempSessionModel.findOne({
             sessionId,
-            expiresAt: { $gt: new Date() },
         });
 
         if (!session) {
