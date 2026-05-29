@@ -292,6 +292,47 @@ const SelectPhone = () => {
                                 <p className="text-rose-400 text-sm">{error}</p>
                             </div>
                         )}
+
+                        {/* Quality Rating Warning / Guidance Alert */}
+                        {phones.length > 0 && selectedPhone && selectedPhone.quality !== "GREEN" && (
+                            <div 
+                                className="mt-4 p-4 rounded-2xl border flex flex-col gap-2.5 transition-all duration-300"
+                                style={{
+                                    background: selectedPhone.quality === "UNKNOWN" 
+                                        ? "rgba(148,163,184,0.06)" 
+                                        : "rgba(245,158,11,0.06)",
+                                    borderColor: selectedPhone.quality === "UNKNOWN"
+                                        ? "rgba(148,163,184,0.2)"
+                                        : "rgba(245,158,11,0.2)"
+                                }}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div 
+                                        className="w-2 h-2 rounded-full animate-ping"
+                                        style={{
+                                            background: selectedPhone.quality === "UNKNOWN" ? "#94a3b8" : "#f59e0b"
+                                        }}
+                                    />
+                                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: selectedPhone.quality === "UNKNOWN" ? "#94a3b8" : "#f59e0b" }}>
+                                        {selectedPhone.quality === "UNKNOWN" ? "Unrated Status Notice" : "Quality Status Notice"}
+                                    </p>
+                                </div>
+                                <p style={{ color: pax26?.textSecondary }} className="text-xs leading-relaxed opacity-85">
+                                    {selectedPhone.quality === "UNKNOWN" ? (
+                                        <>
+                                            This number's quality is <strong style={{ color: pax26?.textPrimary }}>Unrated</strong>. This is <strong>100% normal</strong> for newly registered WhatsApp Business numbers. It takes a few hours of active messaging for Meta to establish a rating. Your number is safe to connect!
+                                        </>
+                                    ) : (
+                                        <>
+                                            This number's quality is currently rated as <strong style={{ color: pax26?.textPrimary }}>{selectedPhone.quality === "YELLOW" ? "Fair" : "Poor"}</strong>. If you experience delay or error sending messages, please give it a few hours or contact Pax26 support.
+                                        </>
+                                    )}
+                                </p>
+                                <p style={{ color: pax26?.textSecondary }} className="text-[10px] leading-relaxed opacity-60 italic pt-1.5 border-t" style={{ borderColor: pax26?.border }}>
+                                    Need help? Reach out to support at <span style={{ color: pax26?.textPrimary }}>support@pax26.com</span>
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* CTA */}
