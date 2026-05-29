@@ -6,6 +6,7 @@ import SocialIcons from "../SocialIcons/SocialIcons";
 import { useGlobalContext } from "../Context";
 import { ArrowUp, Bot, Zap, Wifi, Tv, CreditCard, Phone, Database } from "lucide-react";
 import { usePathname } from "next/navigation";
+import ChatbotWidget from "../Chatbot/ChatbotWidget";
 
 /* ── Keyframes + font only ───────────────────────────────────── */
 const CSS = `
@@ -153,6 +154,9 @@ const Footer = () => {
           style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.5), rgba(99,102,241,0.4), transparent)" }} />
 
         <div className="relative max-w-6xl mx-auto px-5 py-16 lg:px-8">
+          <div>
+            <ChatbotWidget/>
+          </div>
 
           {/* ── Main grid ─────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">

@@ -175,7 +175,7 @@ Note: You need a WhatsApp Business account registered through Meta to use this f
 A: Pax26 is primarily an AI automation platform — it helps businesses automate WhatsApp customer support, build AI chatbots, and manage customer engagement. It also offers utility payment services like airtime, data, electricity, and TV subscriptions.
 
 **Q: How do I connect my WhatsApp to Pax26?**
-A: Through Meta Embedded Signup. Go to Automations → Connect WhatsApp, then sign in with the Facebook account linked to your WhatsApp Business account. No QR code scanning is involved.
+A: Go to Automations → Connect WhatsApp in your dashboard. A Meta/Facebook login popup will appear — sign in with the Facebook account linked to your WhatsApp Business account and grant the required permissions. That's it. There is no QR code and no scanning involved. Pax26 uses Meta Embedded Signup exclusively.
 
 **Q: What networks are supported for airtime and data?**
 A: MTN, Airtel, Glo, and 9mobile.
