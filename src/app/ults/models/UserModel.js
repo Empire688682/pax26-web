@@ -95,6 +95,17 @@ const UserSchema = new mongoose.Schema(
       },
 
       connectedAt: { type: Date, default: null },
+      // ─── ADD THIS: connection type ────────────────
+      connectionType: { type: String, enum: ["meta", "qr"], default: "meta" },
+
+      // ─── ADD THIS: QR / Baileys fields ───────────
+      qr: {
+        sessionId: { type: String, default: null },
+        sessionData: { type: String, default: null },
+        lastSeen: { type: Date, default: null },
+        qrCode: { type: String, default: null }, // base64, temporary
+        qrExpiresAt: { type: Date, default: null },
+      },
       contacts: {
         type: {
           list: {
