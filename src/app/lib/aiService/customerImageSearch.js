@@ -37,6 +37,22 @@ const MAX_MATCHES = 3;            // max products to return to the AI
    Meta API credentials before passing the buffer to Cloudinary.
 ───────────────────────────────────────────────────────────── */
 export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone, folder = "customer-images") {
+    if (mediaUrl && mediaUrl.includes("cloudinary.com")) {
+        let publicId = "";
+        const parts = mediaUrl.split("/upload/");
+        if (parts.length > 1) {
+            let pathPart = parts[1];
+            if (pathPart.match(/^v\d+\//)) {
+                pathPart = pathPart.substring(pathPart.indexOf("/") + 1);
+            }
+            publicId = pathPart.substring(0, pathPart.lastIndexOf("."));
+        }
+        return {
+            url: mediaUrl,
+            publicId: publicId || mediaUrl
+        };
+    }
+
     configureCloudinary();
     // Fetch the image from WhatsApp (requires Bearer token for Meta API media URLs)
     const response = await fetch(mediaUrl, {

@@ -1,7 +1,6 @@
 import Contact from "@/components/Contact/Contact";
 import React from "react";
 import Script from "next/script";
-import ChatbotWidget from "@/components/Chatbot/ChatbotWidget";
 
 export const metadata = {
   title: "Contact Pax26 – Support, Partnerships & Business Inquiries",
@@ -84,7 +83,6 @@ const Page = () => {
 
       <div>
         <Contact />
-        <ChatbotWidget />
       </div>
     </>
   );

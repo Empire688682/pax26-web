@@ -1,17 +1,6 @@
-/**
- * WhatsAppImageReply.js
- *
- * Sends an image message via the WhatsApp Cloud API.
- * Mirror of WhatsAppAutomationReply but for media type "image".
- *
- * Usage:
- *   await sendWhatsAppImageReply({
- *     phoneNumberId: "123456",
- *     to: "+2348012345678",
- *     imageUrl: "https://res.cloudinary.com/...",
- *     caption: "Here's what we have in stock!" // optional
- *   });
- */
+import UserModel from "@/app/ults/models/UserModel";
+import { connectDb } from "@/app/ults/db/ConnectDb";
+import axios from "axios";
 
 const WHATSAPP_API_VERSION = "v19.0";
 const WHATSAPP_API_BASE = "https://graph.facebook.com";
@@ -27,7 +16,30 @@ export async function sendWhatsAppImageReply({
         return { success: false, error: "Missing phoneNumberId, to, or imageUrl" };
     }
 
-    const url = `${WHATSAPP_API_BASE}/${WHATSAPP_API_VERSION}/${phoneNumberId}/messages`;
+    try {
+        await connectDb();
+        const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
+
+        if (user && user.whatsapp?.connectionType === "qr") {
+            const qrUrl = process.env.QR_SERVICE_URL || "http://localhost:3001";
+            const qrSecret = process.env.QR_SERVICE_SECRET || "pax26_qr_service_secret_688682";
+
+            const response = await axios.post(`${qrUrl}/api/message/send`, {
+                userId: user._id.toString(),
+                to,
+                imageUrl,
+                caption
+            }, {
+                headers: { "Authorization": `Bearer ${qrSecret}` }
+            });
+
+            return {
+                success: true,
+                messageId: response.data?.messageId
+            };
+        }
+
+        const url = `${WHATSAPP_API_BASE}/${WHATSAPP_API_VERSION}/${phoneNumberId}/messages`;
 
     try {
         const res = await fetch(url, {

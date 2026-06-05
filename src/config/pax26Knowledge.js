@@ -156,16 +156,31 @@ For the latest pricing details and to compare plans, visit https://pax26.com or 
 
 ## How to Connect WhatsApp
 
-Pax26 uses Meta Embedded Signup to connect WhatsApp — there is no QR code scanning.
+Pax26 supports two methods to connect your WhatsApp number. Both are available in the dashboard under Automations → Connect WhatsApp.
 
-1. Go to the "Automations" section in your Pax26 dashboard.
-2. Click "Connect WhatsApp."
-3. A Meta/Facebook login popup will appear — sign in with the Facebook account linked to your WhatsApp Business account.
-4. Follow the on-screen steps to grant Pax26 the required permissions.
-5. Once the Meta signup flow is complete, your WhatsApp Business number is connected automatically.
-6. Configure your auto-reply rules and activate the bot.
+### Method 1: Official Meta API (Recommended)
+Uses Meta Embedded Signup — a secure Facebook/Meta login flow. Best for businesses that want full WhatsApp Business API features.
 
-Note: You need a WhatsApp Business account registered through Meta to use this feature. Pax26 does not support personal WhatsApp numbers or QR code-based connections.
+1. Go to Automations → Connect WhatsApp in your Pax26 dashboard.
+2. Select the "Official Meta API" tab.
+3. Click "Continue with Meta."
+4. A Meta/Facebook login popup will appear — sign in with the Facebook account linked to your WhatsApp Business account.
+5. Follow the on-screen steps to select or create a WhatsApp Business number and grant Pax26 the required permissions.
+6. Once complete, your number is connected and AI replies activate instantly.
+
+Note: Requires a WhatsApp Business account registered through Meta. Personal WhatsApp numbers are not supported on this method.
+
+### Method 2: Direct QR Scan
+Uses a direct WhatsApp session via QR code. Works for both personal and business WhatsApp numbers.
+
+1. Go to Automations → Connect WhatsApp in your Pax26 dashboard.
+2. Select the "Direct QR Scan" tab.
+3. A QR code will appear on screen.
+4. Open WhatsApp on your phone → tap Menu (Android) or Settings (iOS) → select "Linked Devices" → "Link a Device."
+5. Point your phone's camera at the QR code.
+6. Your WhatsApp is connected once the scan is confirmed.
+
+Note: For best results with QR scan, use a dedicated business SIM that has never been on personal WhatsApp.
 
 ---
 
@@ -175,7 +190,7 @@ Note: You need a WhatsApp Business account registered through Meta to use this f
 A: Pax26 is primarily an AI automation platform — it helps businesses automate WhatsApp customer support, build AI chatbots, and manage customer engagement. It also offers utility payment services like airtime, data, electricity, and TV subscriptions.
 
 **Q: How do I connect my WhatsApp to Pax26?**
-A: Go to Automations → Connect WhatsApp in your dashboard. A Meta/Facebook login popup will appear — sign in with the Facebook account linked to your WhatsApp Business account and grant the required permissions. That's it. There is no QR code and no scanning involved. Pax26 uses Meta Embedded Signup exclusively.
+A: Pax26 supports two methods. The recommended option is Official Meta API — go to Automations → Connect WhatsApp, click "Continue with Meta," and sign in with your Facebook account linked to your WhatsApp Business number. The second option is Direct QR Scan — select the QR tab, scan the code with your phone's WhatsApp under Linked Devices, and you're connected. Both methods are available in the dashboard.
 
 **Q: What networks are supported for airtime and data?**
 A: MTN, Airtel, Glo, and 9mobile.

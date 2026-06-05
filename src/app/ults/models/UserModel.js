@@ -105,6 +105,8 @@ const UserSchema = new mongoose.Schema(
         lastSeen: { type: Date, default: null },
         qrCode: { type: String, default: null }, // base64, temporary
         qrExpiresAt: { type: Date, default: null },
+        // Timestamp when user accepted the QR risk disclaimer
+        riskAcknowledgedAt: { type: Date, default: null },
       },
       contacts: {
         type: {

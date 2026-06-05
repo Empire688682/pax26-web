@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Phone, ExternalLink, Wifi, WifiOff, Unplug, Webhook, AlertTriangle, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
 const CSS = `
@@ -81,7 +81,86 @@ export default function AiWhatsappConnectionPage() {
   const GREEN = "#22c55e";
   const AMBER = "#f59e0b";
 
+  // QR States
+  const [connectionMethod, setConnectionMethod] = useState("meta");
+  const [qrCode, setQrCode] = useState(null);
+  const [qrStatus, setQrStatus] = useState("DISCONNECTED");
+
+  // --- Risk acknowledgement state ---
+  const [showRiskModal, setShowRiskModal] = useState(false);
+  const [riskChecked, setRiskChecked] = useState(false);
+  const [riskAccepted, setRiskAccepted] = useState(false); // true once user submits
+
+  // --- Ban-risk warning state ---
+  const [qrUsage, setQrUsage] = useState(null); // { weeklyCount, dailyCount, dailyLimit, banRiskThreshold, isBanRisk }
+
   useEffect(() => { fetchUser(); }, []);
+
+  // Fetch QR usage stats for ban-risk banner (only when QR-connected)
+  useEffect(() => {
+    if (!userData?.whatsapp?.connected || userData?.whatsapp?.connectionType !== "qr") return;
+    const fetchUsage = async () => {
+      try {
+        const res = await fetch("/api/connection/qr/usage");
+        const data = await res.json();
+        if (data.success) setQrUsage(data);
+      } catch (err) {
+        console.error("Error fetching QR usage:", err);
+      }
+    };
+    fetchUsage();
+  }, [userData?.whatsapp?.connected, userData?.whatsapp?.connectionType]);
+
+  // When user switches to QR tab, show modal if not yet accepted
+  const handleQRTabSelect = () => {
+    setConnectionMethod("qr");
+    if (!riskAccepted) {
+      setShowRiskModal(true);
+    }
+  };
+
+  // User confirms risk modal
+  const handleRiskAccept = async () => {
+    try {
+      await fetch("/api/connection/qr/risk-ack", { method: "POST", credentials: "include" });
+    } catch (err) {
+      console.error("Failed to record risk acknowledgement:", err);
+    }
+    setRiskAccepted(true);
+    setShowRiskModal(false);
+  };
+
+  useEffect(() => {
+    let intervalId;
+    if (!isWhatsappNumberConnected && connectionMethod === "qr" && riskAccepted) {
+      const checkQrStatus = async () => {
+        try {
+          const res = await fetch("/api/connection/qr/status");
+          const data = await res.json();
+          if (data.success) {
+            setQrStatus(data.status);
+            if (data.status === "QR" && data.qr) {
+              setQrCode(data.qr);
+            } else if (data.status === "CONNECTED") {
+              await fetchUser();
+            }
+          }
+        } catch (err) {
+          console.error("Error polling QR status:", err);
+        }
+      };
+
+      checkQrStatus();
+      intervalId = setInterval(checkQrStatus, 4000);
+    } else {
+      setQrCode(null);
+      setQrStatus("DISCONNECTED");
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [connectionMethod, isWhatsappNumberConnected, riskAccepted]);
 
   useEffect(() => {
     return () => {
@@ -258,6 +337,174 @@ export default function AiWhatsappConnectionPage() {
       <style>{CSS}</style>
       <div className="wa-root max-w-5xl mx-auto py-10 pb-20 space-y-5">
 
+        {/* ── Risk Acknowledgement Modal (blocking overlay) ── */}
+        {showRiskModal && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "16px",
+          }}>
+            <div style={{
+              background: pax26?.bg, borderRadius: "20px", maxWidth: "440px", width: "100%",
+              border: "1.5px solid rgba(245,158,11,0.4)",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
+              overflow: "hidden",
+            }}>
+              {/* amber top strip */}
+              <div style={{ height: "3px", background: "linear-gradient(90deg, #f59e0b, #ef4444, transparent)" }} />
+              <div style={{ padding: "28px 24px 24px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
+                  <div style={{
+                    width: "44px", height: "44px", borderRadius: "12px", flexShrink: 0,
+                    background: "rgba(245,158,11,0.12)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <ShieldAlert size={22} style={{ color: "#f59e0b" }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "15px", fontWeight: 800, color: pax26?.textPrimary, marginBottom: "2px" }}>
+                      QR Connection Risk Notice
+                    </p>
+                    <p style={{ fontSize: "11px", color: pax26?.textSecondary, opacity: 0.5 }}>
+                      Read carefully before continuing
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  padding: "14px 16px", borderRadius: "12px", marginBottom: "20px",
+                  background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)",
+                }}>
+                  <p style={{ fontSize: "13px", lineHeight: 1.7, color: pax26?.textSecondary }}>
+                    QR connection uses an unofficial WhatsApp bridge. WhatsApp may detect automated activity
+                    and temporarily restrict or ban your number. <strong style={{ color: pax26?.textPrimary }}>
+                    Pax26 is not responsible for number restrictions.</strong> By continuing, you accept this risk.
+                  </p>
+                </div>
+
+                {/* Checkbox */}
+                <label style={{
+                  display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer",
+                  marginBottom: "20px",
+                }}>
+                  <div
+                    onClick={() => setRiskChecked(v => !v)}
+                    style={{
+                      width: "18px", height: "18px", borderRadius: "5px", flexShrink: 0, marginTop: "1px",
+                      border: `2px solid ${riskChecked ? "#f59e0b" : pax26?.border}`,
+                      background: riskChecked ? "rgba(245,158,11,0.15)" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.15s ease", cursor: "pointer",
+                    }}
+                  >
+                    {riskChecked && <span style={{ color: "#f59e0b", fontSize: "11px", fontWeight: 700 }}>✓</span>}
+                  </div>
+                  <span
+                    style={{ fontSize: "13px", color: pax26?.textSecondary, lineHeight: 1.5, cursor: "pointer" }}
+                    onClick={() => setRiskChecked(v => !v)}
+                  >
+                    I understand and accept the risk — Continue
+                  </span>
+                </label>
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button
+                    onClick={() => { setShowRiskModal(false); setConnectionMethod("meta"); setRiskChecked(false); }}
+                    style={{
+                      flex: 1, padding: "11px", borderRadius: "12px", fontSize: "13px", fontWeight: 600,
+                      background: pax26?.secondaryBg, color: pax26?.textSecondary,
+                      border: `1px solid ${pax26?.border}`, cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRiskAccept}
+                    disabled={!riskChecked}
+                    style={{
+                      flex: 1, padding: "11px", borderRadius: "12px", fontSize: "13px", fontWeight: 700,
+                      background: riskChecked ? "#f59e0b" : "rgba(245,158,11,0.3)",
+                      color: riskChecked ? "#fff" : "rgba(255,255,255,0.4)",
+                      border: "none", cursor: riskChecked ? "pointer" : "not-allowed",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    Continue with QR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Ban-risk warning banner (shows when connected via QR + high usage) ── */}
+        {userData?.whatsapp?.connected && userData?.whatsapp?.connectionType === "qr" && qrUsage?.isBanRisk && (
+          <div style={{
+            padding: "14px 18px", borderRadius: "14px",
+            background: "rgba(245,158,11,0.08)", border: "1.5px solid rgba(245,158,11,0.35)",
+            display: "flex", alignItems: "flex-start", gap: "12px",
+          }}>
+            <AlertTriangle size={18} style={{ color: "#f59e0b", flexShrink: 0, marginTop: "1px" }} />
+            <div>
+              <p style={{ fontSize: "13px", fontWeight: 700, color: "#f59e0b", marginBottom: "4px" }}>
+                High Volume Warning
+              </p>
+              <p style={{ fontSize: "12px", color: pax26?.textSecondary, lineHeight: 1.6 }}>
+                You&apos;ve sent a high volume of automated messages this week using QR connection.
+                High volume increases ban risk. Consider upgrading to Official Meta API for a dedicated business number.
+              </p>
+              <button
+                onClick={() => setConnectionMethod("meta")}
+                style={{
+                  marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "6px",
+                  fontSize: "12px", fontWeight: 700, color: pax26?.primary,
+                  background: "transparent", border: "none", cursor: "pointer", padding: 0,
+                }}
+              >
+                Learn about Meta API <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Meta API upgrade nudge (visible to QR-connected users) ── */}
+        {userData?.whatsapp?.connected && userData?.whatsapp?.connectionType === "qr" && (
+          <div style={{
+            padding: "14px 18px", borderRadius: "14px",
+            background: `${pax26?.primary}08`, border: `1px dashed ${pax26?.primary}35`,
+            display: "flex", alignItems: "flex-start", gap: "12px",
+          }}>
+            <div style={{
+              width: "32px", height: "32px", borderRadius: "8px", flexShrink: 0,
+              background: `${pax26?.primary}15`, color: pax26?.primary,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <ArrowRight size={15} />
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "4px" }}>
+                Upgrade to Official Meta API
+              </p>
+              <p style={{ fontSize: "12px", color: pax26?.textSecondary, lineHeight: 1.65, opacity: 0.8 }}>
+                You don&apos;t have to abandon your personal number. Get a ₦500 SIM from any network, activate
+                WhatsApp Business on it, and use it purely for customer replies. Your clients see your
+                business name — not just a number. Meta API is stable, ban-proof, and has no daily limits.
+              </p>
+              <button
+                onClick={() => router.push("/dashboard/automations/whatsapp-connect-info")}
+                style={{
+                  marginTop: "10px", display: "inline-flex", alignItems: "center", gap: "6px",
+                  fontSize: "12px", fontWeight: 700, color: pax26?.primary,
+                  background: "transparent", border: "none", cursor: "pointer", padding: 0,
+                }}
+              >
+                How Meta API works <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Page header */}
         <div className="wa-slide-1 space-y-1 mb-8">
           <div className="flex items-center gap-2 mb-3">
@@ -312,12 +559,17 @@ export default function AiWhatsappConnectionPage() {
                   </span>
                 </div>
                 {isWhatsappNumberConnected ? (
-                  <p className="wa-mono text-xs font-medium" style={{ color: GREEN }}>
-                    {userData?.whatsappBusinessNo}
-                  </p>
+                  <div className="space-y-0.5">
+                    <p className="wa-mono text-xs font-medium" style={{ color: GREEN }}>
+                      {userData?.whatsappBusinessNo || userData?.whatsapp?.displayPhone}
+                    </p>
+                    <p className="text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
+                      Connected via {userData?.whatsapp?.connectionType === "qr" ? "Direct QR Scan" : "Meta Cloud API"}
+                    </p>
+                  </div>
                 ) : (
                   <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
-                    No WhatsApp Business number connected
+                    No WhatsApp number connected
                   </p>
                 )}
               </div>
@@ -349,106 +601,183 @@ export default function AiWhatsappConnectionPage() {
             className="wa-card wa-slide-3 rounded-2xl p-6 space-y-6"
             style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
 
-            <div>
-              <h2 className="text-base font-bold mb-1" style={{ color: pax26?.textPrimary }}>
-                Connect WhatsApp Business
-              </h2>
-              <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
-                Only Business accounts are supported — personal numbers won't work.
-              </p>
+            {/* Tab Switcher */}
+            <div className="flex gap-2 p-1 rounded-xl" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
+              <button
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200"
+                onClick={() => setConnectionMethod("meta")}
+                style={{
+                  background: connectionMethod === "meta" ? pax26?.bg : "transparent",
+                  color: connectionMethod === "meta" ? pax26?.textPrimary : pax26?.textSecondary,
+                  boxShadow: connectionMethod === "meta" ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+                  border: connectionMethod === "meta" ? `1px solid ${pax26?.border}` : "1px solid transparent"
+                }}
+              >
+                Official Meta API
+              </button>
+              <button
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200"
+                onClick={handleQRTabSelect}
+                style={{
+                  background: connectionMethod === "qr" ? pax26?.bg : "transparent",
+                  color: connectionMethod === "qr" ? pax26?.textPrimary : pax26?.textSecondary,
+                  boxShadow: connectionMethod === "qr" ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+                  border: connectionMethod === "qr" ? `1px solid ${pax26?.border}` : "1px solid transparent"
+                }}
+              >
+                Direct QR Scan
+              </button>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-xl"
-              style={{ background: `${pax26?.primary}08`, border: `1px dashed ${pax26?.primary}35` }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: `${pax26?.primary}15`, color: pax26?.primary }}>
-                <Phone size={15} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold mb-0.5" style={{ color: pax26?.textPrimary }}>
-                  WhatsApp Business required
-                </p>
-                <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-                  You need an active WhatsApp Business account linked to a Meta Business Manager.
-                  Personal WhatsApp numbers are not supported.
-                </p>
-              </div>
-            </div>
+            {connectionMethod === "meta" ? (
+              <>
+                <div>
+                  <h2 className="text-base font-bold mb-1" style={{ color: pax26?.textPrimary }}>
+                    Connect WhatsApp Business
+                  </h2>
+                  <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
+                    Only Business accounts are supported — personal numbers won't work.
+                  </p>
+                </div>
 
-            {/* ⚠️ Dedicated SIM warning */}
-            <div
-              className="rounded-xl p-4 space-y-3"
-              style={{ background: "rgba(245,158,11,0.07)", border: "1.5px solid rgba(245,158,11,0.3)" }}
-            >
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={15} className="flex-shrink-0" style={{ color: "#f59e0b" }} />
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f59e0b" }}>
-                  Important — Read before connecting
-                </p>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.85 }}>
-                For the best experience, use a <strong style={{ color: pax26?.textPrimary }}>dedicated business SIM</strong> that has <strong style={{ color: pax26?.textPrimary }}>never been registered on personal WhatsApp</strong>. If you migrate a personal number, it will be removed from consumer WhatsApp and your customers may not be able to reach it.
-              </p>
-              <div className="space-y-1.5 pt-0.5">
-                {[
-                  "Use a fresh SIM dedicated to your business",
-                  "Never been on regular/personal WhatsApp",
-                  "Customers can message it immediately after setup",
-                ].map((tip, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
-                    <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.75 }}>{tip}</p>
+                <div className="flex items-start gap-3 p-4 rounded-xl"
+                  style={{ background: `${pax26?.primary}08`, border: `1px dashed ${pax26?.primary}35` }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ background: `${pax26?.primary}15`, color: pax26?.primary }}>
+                    <Phone size={15} />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div>
+                    <p className="text-sm font-semibold mb-0.5" style={{ color: pax26?.textPrimary }}>
+                      WhatsApp Business required
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
+                      You need an active WhatsApp Business account linked to a Meta Business Manager.
+                      Personal WhatsApp numbers are not supported.
+                    </p>
+                  </div>
+                </div>
 
-            <div id="whatsapp-connect">
-              <p className="text-xs font-bold uppercase tracking-widest mb-2"
-                style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
-                What happens next
-              </p>
-              <div className="divide-y" style={{ borderColor: pax26?.border }}>
-                {[
-                  "Log in with your Facebook account",
-                  "Create or select a Meta Business account",
-                  "Choose your WhatsApp Business number",
-                  "Approve Pax26 to manage AI replies",
-                ].map((step, i) => <Step key={i} num={i + 1} text={step} pax26={pax26} />)}
-              </div>
-            </div>
+                {/* ⚠️ Dedicated SIM warning */}
+                <div
+                  className="rounded-xl p-4 space-y-3"
+                  style={{ background: "rgba(245,158,11,0.07)", border: "1.5px solid rgba(245,158,11,0.3)" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="flex-shrink-0" style={{ color: "#f59e0b" }} />
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f59e0b" }}>
+                      Important — Read before connecting
+                    </p>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.85 }}>
+                    For the best experience, use a <strong style={{ color: pax26?.textPrimary }}>dedicated business SIM</strong> that has <strong style={{ color: pax26?.textPrimary }}>never been registered on personal WhatsApp</strong>. If you migrate a personal number, it will be removed from consumer WhatsApp and your customers may not be able to reach it.
+                  </p>
+                  <div className="space-y-1.5 pt-0.5">
+                    {[
+                      "Use a fresh SIM dedicated to your business",
+                      "Never been on regular/personal WhatsApp",
+                      "Customers can message it immediately after setup",
+                    ].map((tip, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
+                        <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.75 }}>{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            {/* CTA buttons */}
-            <div className="space-y-3 pt-1">
-              <button
-                className="wa-btn w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white"
-                onClick={launchWhatsAppSignup}
-                disabled={!sdkReady}
-                style={{
-                  background: "#1877F2",
-                  boxShadow: "0 10px 28px rgba(24,119,242,0.35)",
-                }}>
-                {sdkReady
-                  ? <><IcoMeta /> Continue with Meta <ExternalLink size={14} /></>
-                  : "Loading SDK..."
-                }
-              </button>
+                <div id="whatsapp-connect">
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2"
+                    style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+                    What happens next
+                  </p>
+                  <div className="divide-y" style={{ borderColor: pax26?.border }}>
+                    {[
+                      "Log in with your Facebook account",
+                      "Create or select a Meta Business account",
+                      "Choose your WhatsApp Business number",
+                      "Approve Pax26 to manage AI replies",
+                    ].map((step, i) => <Step key={i} num={i + 1} text={step} pax26={pax26} />)}
+                  </div>
+                </div>
 
-              <button
-                className="wa-btn w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-semibold"
-                onClick={() => router.push("/dashboard/automations/whatsapp-connect-info")}
-                style={{
-                  background: pax26?.secondaryBg,
-                  color: pax26?.textSecondary,
-                  border: `1px solid ${pax26?.border}`,
-                }}>
-                How does WhatsApp connection work? <IcoArrow />
-              </button>
+                {/* CTA buttons */}
+                <div className="space-y-3 pt-1">
+                  <button
+                    className="wa-btn w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white"
+                    onClick={launchWhatsAppSignup}
+                    disabled={!sdkReady}
+                    style={{
+                      background: "#1877F2",
+                      boxShadow: "0 10px 28px rgba(24,119,242,0.35)",
+                    }}>
+                    {sdkReady
+                      ? <><IcoMeta /> Continue with Meta <ExternalLink size={14} /></>
+                      : "Loading SDK..."
+                    }
+                  </button>
 
-              <p className="wa-mono text-center text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.35 }}>
-                Pax26 uses Meta's official WhatsApp Cloud API
-              </p>
-            </div>
+                  <button
+                    className="wa-btn w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-semibold"
+                    onClick={() => router.push("/dashboard/automations/whatsapp-connect-info")}
+                    style={{
+                      background: pax26?.secondaryBg,
+                      color: pax26?.textSecondary,
+                      border: `1px solid ${pax26?.border}`,
+                    }}>
+                    How does WhatsApp connection work? <IcoArrow />
+                  </button>
+
+                  <p className="wa-mono text-center text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.35 }}>
+                    Pax26 uses Meta's official WhatsApp Cloud API
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <h2 className="text-base font-bold mb-1" style={{ color: pax26?.textPrimary }}>
+                    Connect via Direct QR Scan
+                  </h2>
+                  <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
+                    Connect personal or business WhatsApp numbers via QR scanning.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-6 border rounded-2xl space-y-4" style={{ borderColor: pax26?.border, background: pax26?.secondaryBg }}>
+                  {qrStatus === "INITIALIZING" || qrStatus === "DISCONNECTED" ? (
+                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                      <div className="w-12 h-12 rounded-full border-4 border-t-transparent wa-spin" style={{ borderColor: `${pax26?.primary}20`, borderTopColor: pax26?.primary }} />
+                      <p className="text-xs font-semibold" style={{ color: pax26?.textSecondary, opacity: 0.8 }}>
+                        Initializing secure WhatsApp session...
+                      </p>
+                    </div>
+                  ) : qrStatus === "QR" && qrCode ? (
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="relative p-3 bg-white rounded-2xl shadow-sm border" style={{ borderColor: pax26?.border }}>
+                        <img src={qrCode} alt="WhatsApp QR Code" className="w-56 h-56 rounded-lg select-none" />
+                      </div>
+                      <p className="text-xs text-center font-medium" style={{ color: pax26?.textSecondary, opacity: 0.8 }}>
+                        Scan the QR code above with your phone's WhatsApp.
+                      </p>
+                    </div>
+                  ) : qrStatus === "CONNECTED" ? (
+                    <div className="flex flex-col items-center justify-center py-10 space-y-2 text-green-500">
+                      <CheckCircle2 size={36} />
+                      <p className="text-sm font-bold">Successfully Connected!</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="divide-y" style={{ borderColor: pax26?.border }}>
+                  {[
+                    "Open WhatsApp on your mobile phone",
+                    "Tap Menu (Android) or Settings (iOS)",
+                    "Select 'Linked Devices' then 'Link a Device'",
+                    "Point your phone's camera at the QR code above"
+                  ].map((step, i) => <Step key={i} num={i + 1} text={step} pax26={pax26} />)}
+                </div>
+              </>
+            )}
           </div>
         )}
 

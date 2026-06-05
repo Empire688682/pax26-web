@@ -19,10 +19,11 @@ export async function OPTIONS() {
 export async function POST(req) {
   await connectDb();
   const body = await req.json();
+  console.log("Body: ", body);
   const { disco, meterNumber, meterType, customerAddress, customerName, amount, phone, pin } = body;
   try {
     // Validate request
-    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName || !customerAddress) {
+    if (!disco || !meterNumber || !meterType || !amount || !phone || !pin || !customerName) {
       return NextResponse.json({ success: false, message: "All fields required" }, { status: 400, headers: corsHeaders() });
     }
 

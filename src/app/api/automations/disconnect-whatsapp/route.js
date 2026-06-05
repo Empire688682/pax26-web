@@ -3,6 +3,7 @@ import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import axios from "axios";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -30,12 +31,26 @@ export async function POST(req) {
             );
         }
 
+        // Stop active QR session if connection is QR
+        if (user.whatsapp?.connectionType === "qr") {
+            try {
+                const qrUrl = process.env.QR_SERVICE_URL || "http://localhost:3001";
+                const qrSecret = process.env.QR_SERVICE_SECRET || "pax26_qr_service_secret_688682";
+
+                await axios.post(`${qrUrl}/api/session/stop`, { userId: user._id.toString() }, {
+                    headers: { "Authorization": `Bearer ${qrSecret}` }
+                });
+            } catch (err) {
+                console.error("Failed to stop QR session on disconnect:", err.message);
+            }
+        }
 
         await UserModel.findByIdAndUpdate(
             userId,
             {
                 $set: {
                     "whatsapp.connected": false,
+                    "whatsapp.connectionType": "meta",
                     "whatsapp.accessToken": "",
                     "whatsapp.wabaId": "",
                     "whatsapp.phoneNumberId": "",
@@ -45,6 +60,9 @@ export async function POST(req) {
                         messaging: false,
                         management: false,
                     },
+                    "whatsapp.qr.sessionId": null,
+                    "whatsapp.qr.qrCode": null,
+                    "whatsapp.qr.qrExpiresAt": null,
                 }
             },
             { new: true }
