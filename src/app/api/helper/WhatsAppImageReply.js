@@ -18,8 +18,10 @@ export async function sendWhatsAppImageReply({
 
     try {
         await connectDb();
+
         const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
 
+        // Route through QR service for QR-connected users
         if (user && user.whatsapp?.connectionType === "qr") {
             const qrUrl = process.env.QR_SERVICE_URL || "http://localhost:3001";
             const qrSecret = process.env.QR_SERVICE_SECRET || "pax26_qr_service_secret_688682";
@@ -28,20 +30,20 @@ export async function sendWhatsAppImageReply({
                 userId: user._id.toString(),
                 to,
                 imageUrl,
-                caption
+                caption,
             }, {
-                headers: { "Authorization": `Bearer ${qrSecret}` }
+                headers: { "Authorization": `Bearer ${qrSecret}` },
             });
 
             return {
                 success: true,
-                messageId: response.data?.messageId
+                messageId: response.data?.messageId,
             };
         }
 
+        // Default: Meta Cloud API
         const url = `${WHATSAPP_API_BASE}/${WHATSAPP_API_VERSION}/${phoneNumberId}/messages`;
 
-    try {
         const res = await fetch(url, {
             method: "POST",
             headers: {
