@@ -617,15 +617,25 @@ export default function AiWhatsappConnectionPage() {
               </button>
               <button
                 className="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-200"
-                onClick={handleQRTabSelect}
+                onClick={() => setConnectionMethod("qr")}
                 style={{
                   background: connectionMethod === "qr" ? pax26?.bg : "transparent",
                   color: connectionMethod === "qr" ? pax26?.textPrimary : pax26?.textSecondary,
                   boxShadow: connectionMethod === "qr" ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
-                  border: connectionMethod === "qr" ? `1px solid ${pax26?.border}` : "1px solid transparent"
+                  border: connectionMethod === "qr" ? `1px solid ${pax26?.border}` : "1px solid transparent",
+                  position: "relative",
                 }}
               >
                 Direct QR Scan
+                <span style={{
+                  position: "absolute", top: "-6px", right: "-4px",
+                  fontSize: "8px", fontWeight: 700, letterSpacing: "0.04em",
+                  background: "#f59e0b", color: "#fff",
+                  padding: "1px 5px", borderRadius: "20px",
+                  textTransform: "uppercase",
+                }}>
+                  Soon
+                </span>
               </button>
             </div>
 
@@ -736,45 +746,57 @@ export default function AiWhatsappConnectionPage() {
               <>
                 <div>
                   <h2 className="text-base font-bold mb-1" style={{ color: pax26?.textPrimary }}>
-                    Connect via Direct QR Scan
+                    Direct QR Scan — Coming Soon
                   </h2>
                   <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
                     Connect personal or business WhatsApp numbers via QR scanning.
                   </p>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-6 border rounded-2xl space-y-4" style={{ borderColor: pax26?.border, background: pax26?.secondaryBg }}>
-                  {qrStatus === "INITIALIZING" || qrStatus === "DISCONNECTED" ? (
-                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
-                      <div className="w-12 h-12 rounded-full border-4 border-t-transparent wa-spin" style={{ borderColor: `${pax26?.primary}20`, borderTopColor: pax26?.primary }} />
-                      <p className="text-xs font-semibold" style={{ color: pax26?.textSecondary, opacity: 0.8 }}>
-                        Initializing secure WhatsApp session...
-                      </p>
-                    </div>
-                  ) : qrStatus === "QR" && qrCode ? (
-                    <div className="flex flex-col items-center space-y-4">
-                      <div className="relative p-3 bg-white rounded-2xl shadow-sm border" style={{ borderColor: pax26?.border }}>
-                        <img src={qrCode} alt="WhatsApp QR Code" className="w-56 h-56 rounded-lg select-none" />
-                      </div>
-                      <p className="text-xs text-center font-medium" style={{ color: pax26?.textSecondary, opacity: 0.8 }}>
-                        Scan the QR code above with your phone's WhatsApp.
-                      </p>
-                    </div>
-                  ) : qrStatus === "CONNECTED" ? (
-                    <div className="flex flex-col items-center justify-center py-10 space-y-2 text-green-500">
-                      <CheckCircle2 size={36} />
-                      <p className="text-sm font-bold">Successfully Connected!</p>
-                    </div>
-                  ) : null}
-                </div>
+                <div style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  padding: "48px 24px", borderRadius: "16px", textAlign: "center",
+                  background: pax26?.secondaryBg, border: `1px dashed ${pax26?.border}`,
+                }}>
+                  {/* QR placeholder icon */}
+                  <div style={{
+                    width: "72px", height: "72px", borderRadius: "16px", marginBottom: "20px",
+                    background: "rgba(245,158,11,0.1)", border: "1.5px solid rgba(245,158,11,0.3)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1"/>
+                      <path d="M14 14h2v2h-2zM18 14h3M14 18h2M18 18h3v3M14 21h2"/>
+                    </svg>
+                  </div>
 
-                <div className="divide-y" style={{ borderColor: pax26?.border }}>
-                  {[
-                    "Open WhatsApp on your mobile phone",
-                    "Tap Menu (Android) or Settings (iOS)",
-                    "Select 'Linked Devices' then 'Link a Device'",
-                    "Point your phone's camera at the QR code above"
-                  ].map((step, i) => <Step key={i} num={i + 1} text={step} pax26={pax26} />)}
+                  <span style={{
+                    display: "inline-block", marginBottom: "12px",
+                    fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                    background: "rgba(245,158,11,0.12)", color: "#f59e0b",
+                    padding: "3px 12px", borderRadius: "20px", border: "1px solid rgba(245,158,11,0.3)",
+                  }}>
+                    Coming Soon
+                  </span>
+
+                  <p style={{ fontSize: "14px", fontWeight: 700, color: pax26?.textPrimary, marginBottom: "8px" }}>
+                    QR connection is in development
+                  </p>
+                  <p style={{ fontSize: "12px", color: pax26?.textSecondary, opacity: 0.65, lineHeight: 1.6, maxWidth: "280px" }}>
+                    We&apos;re working to make QR scanning available. In the meantime, use the Official Meta API — it&apos;s more stable and ban-proof.
+                  </p>
+
+                  <button
+                    onClick={() => setConnectionMethod("meta")}
+                    style={{
+                      marginTop: "20px", display: "inline-flex", alignItems: "center", gap: "6px",
+                      padding: "10px 20px", borderRadius: "12px", fontSize: "12px", fontWeight: 700,
+                      background: pax26?.primary, color: "#fff", border: "none", cursor: "pointer",
+                    }}
+                  >
+                    Switch to Meta API
+                  </button>
                 </div>
               </>
             )}
