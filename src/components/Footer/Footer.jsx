@@ -155,7 +155,7 @@ const Footer = () => {
 
         <div className="relative max-w-6xl mx-auto px-5 py-16 lg:px-8">
           <div>
-            <ChatbotWidget/>
+            <ChatbotWidget />
           </div>
 
           {/* ── Main grid ─────────────────────────────────── */}
@@ -172,7 +172,7 @@ const Footer = () => {
               </div>
 
               <p className="text-sm leading-relaxed mb-5" style={{ color: mutedColor }}>
-                AI-powered WhatsApp automation and digital services for Nigerian businesses.
+                AI-powered WhatsApp automation and digital services for African businesses.
                 Smart follow-ups, chatbots, and instant VTU — all in one place.
               </p>
 

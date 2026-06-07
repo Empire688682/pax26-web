@@ -89,7 +89,6 @@ function ChatMockup({ pax26 }) {
   return (
     <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
       style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-
       {/* top bar */}
       <div className="flex items-center gap-3 px-4 py-3.5" style={{ background: GREEN }}>
         <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
@@ -104,7 +103,6 @@ function ChatMockup({ pax26 }) {
           </div>
         </div>
       </div>
-
       {/* messages */}
       <div className="p-4 flex flex-col gap-2.5 min-h-64">
         {MSGS.slice(0, visible).map((m, i) => (
@@ -126,7 +124,7 @@ function ChatMockup({ pax26 }) {
               <div key={i} className="w-1.5 h-1.5 rounded-full"
                 style={{
                   background: pax26?.textSecondary, opacity: 0.35,
-                  animation: `al-bubble 0.6s ease ${i * 0.15}s infinite alternate`
+                  animation: `al-bubble 0.6s ease ${i * 0.15}s infinite alternate`,
                 }} />
             ))}
           </div>
@@ -173,9 +171,65 @@ export default function AiAutomationLandingPage() {
       <style>{CSS}</style>
       <div className="al-root max-w-7xl mx-auto">
 
-        {/* ════════════════════════════ HERO ════════════════════════════ */}
-        <section className="relative pt-10 pb-10 overflow-hidden">
-          {/* decorative orbs */}
+        {/* ══════════════ 1. ACTION CTA (moved to top) ══════════════════ */}
+        <section className="relative rounded-3xl overflow-hidden text-center p-10 md:p-14 mt-6 mb-10"
+          style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
+          {/* orbs */}
+          <div className="al-orb absolute -top-16 -left-12 w-72 h-72 rounded-full pointer-events-none"
+            style={{ background: `${primary}16`, filter: "blur(72px)" }} />
+          <div className="al-orb-b absolute -bottom-12 -right-10 w-60 h-60 rounded-full pointer-events-none"
+            style={{ background: `${GREEN}10`, filter: "blur(60px)" }} />
+          {/* grid */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+            style={{
+              backgroundImage: `linear-gradient(${pax26?.textPrimary} 1px, transparent 1px), linear-gradient(90deg, ${pax26?.textPrimary} 1px, transparent 1px)`,
+              backgroundSize: "40px 40px",
+            }} />
+
+          <div className="relative z-10">
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5"
+              style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
+              <span className="w-2 h-2 rounded-full al-ping block" style={{ background: GREEN }} />
+              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: primary }}>
+                Ready in under 5 minutes
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }}
+              className="text-3xl md:text-4xl font-black leading-tight mb-3"
+              style={{ color: pax26?.textPrimary }}>
+              Start Automating{" "}
+              <span className="al-serif" style={{ color: primary }}>Your WhatsApp</span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
+              className="text-sm leading-relaxed max-w-md mx-auto mb-8"
+              style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
+              Respond faster, capture more leads, and grow your business automatically. No tech skills required.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+              className="flex flex-wrap gap-3 justify-center">
+              <button className="al-btn flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white"
+                onClick={() => router.push("/dashboard/automations/market-place")}
+                style={{ background: primary, boxShadow: `0 14px 40px ${primary}42` }}>
+                Create Automation <IcoArrow />
+              </button>
+              <button className="al-btn flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-semibold"
+                onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
+                style={{ background: pax26?.bg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }}>
+                Train Your Agent First
+              </button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ══════════════ 2. HERO ═══════════════════════════════════════ */}
+        <section className="relative pt-4 pb-10 overflow-hidden">
           <div className="al-orb absolute -top-16 -right-24 w-80 h-80 rounded-full pointer-events-none"
             style={{ background: `${primary}15`, filter: "blur(72px)" }} />
           <div className="al-orb-b absolute bottom-0 -left-16 w-56 h-56 rounded-full pointer-events-none"
@@ -184,7 +238,6 @@ export default function AiAutomationLandingPage() {
           <div className="relative z-10 flex flex-col lg:flex-row gap-14 items-center">
             {/* left: copy */}
             <div className="flex-1">
-              {/* eyebrow pill */}
               <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-6"
                 style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
@@ -194,7 +247,6 @@ export default function AiAutomationLandingPage() {
                 </span>
               </motion.div>
 
-              {/* headline — 3-line stagger */}
               <div className="mb-4 space-y-0.5">
                 {[
                   { text: "Automation", serif: false },
@@ -223,7 +275,6 @@ export default function AiAutomationLandingPage() {
                 Automatically reply to customers, capture leads, and convert conversations into revenue — powered by AI trained on your business.
               </motion.p>
 
-              {/* CTA row */}
               <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
                 className="flex flex-wrap gap-3 mb-6">
                 <button className="al-btn flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white"
@@ -238,7 +289,6 @@ export default function AiAutomationLandingPage() {
                 </button>
               </motion.div>
 
-              {/* micro trust */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
                 className="flex flex-wrap gap-4">
                 {["✓ No technical skills", "✓ Live in 5 minutes", "✓ Active 24/7"].map(t => (
@@ -256,7 +306,7 @@ export default function AiAutomationLandingPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════ MARQUEE ════════════════════════ */}
+        {/* ══════════════ 3. MARQUEE ════════════════════════════════════ */}
         <div className="overflow-hidden -mx-5 py-4"
           style={{ borderTop: `1px solid ${pax26?.border}`, borderBottom: `1px solid ${pax26?.border}` }}>
           <div className="flex al-marquee">
@@ -269,7 +319,7 @@ export default function AiAutomationLandingPage() {
           </div>
         </div>
 
-        {/* ════════════════════════════ FEATURES ═══════════════════════ */}
+        {/* ══════════════ 4. FEATURES ═══════════════════════════════════ */}
         <section className="py-20">
           <Reveal>
             <Label text="What You Get" primary={primary} />
@@ -302,7 +352,7 @@ export default function AiAutomationLandingPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════ HOW IT WORKS ═══════════════════ */}
+        {/* ══════════════ 5. HOW IT WORKS ══════════════════════════════ */}
         <section className="relative rounded-3xl p-10 md:p-14 mb-20 overflow-hidden"
           style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
           <div className="al-orb absolute -top-20 -right-20 w-96 h-96 rounded-full pointer-events-none"
@@ -332,7 +382,7 @@ export default function AiAutomationLandingPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════ USE CASES ══════════════════════ */}
+        {/* ══════════════ 6. USE CASES ══════════════════════════════════ */}
         <section className="mb-20">
           <Reveal>
             <Label text="Use Cases" primary={primary} />
@@ -358,11 +408,10 @@ export default function AiAutomationLandingPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════ SECURITY ═══════════════════════ */}
+        {/* ══════════════ 7. SECURITY ═══════════════════════════════════ */}
         <Reveal>
-          <section className="flex flex-col sm:flex-row items-center gap-10 rounded-3xl p-10 mb-20"
+          <section className="flex flex-col sm:flex-row items-center gap-10 rounded-3xl p-10 mb-24"
             style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
-            {/* spinning shield ring */}
             <div className="relative w-24 h-24 flex-shrink-0">
               <svg className="al-spin absolute inset-0 w-full h-full" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="46" fill="none" stroke={`${primary}22`} strokeWidth="2" strokeDasharray="8 6" />
@@ -388,58 +437,6 @@ export default function AiAutomationLandingPage() {
                     <IcoCheck /> {t}
                   </span>
                 ))}
-              </div>
-            </div>
-          </section>
-        </Reveal>
-
-        {/* ════════════════════════════ FINAL CTA ══════════════════════ */}
-        <Reveal>
-          <section className="relative rounded-3xl overflow-hidden text-center p-14 md:p-20 mb-24"
-            style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
-            {/* orbs */}
-            <div className="al-orb absolute -top-16 -left-12 w-72 h-72 rounded-full pointer-events-none"
-              style={{ background: `${primary}16`, filter: "blur(72px)" }} />
-            <div className="al-orb-b absolute -bottom-12 -right-10 w-60 h-60 rounded-full pointer-events-none"
-              style={{ background: `${GREEN}10`, filter: "blur(60px)" }} />
-            {/* subtle grid */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
-              style={{
-                backgroundImage: `linear-gradient(${pax26?.textPrimary} 1px, transparent 1px), linear-gradient(90deg, ${pax26?.textPrimary} 1px, transparent 1px)`,
-                backgroundSize: "40px 40px",
-              }} />
-
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-6"
-                style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
-                <span className="w-2 h-2 rounded-full al-ping block" style={{ background: GREEN }} />
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: primary }}>
-                  Ready in under 5 minutes
-                </span>
-              </div>
-
-              <h2 className="text-4xl md:text-5xl font-black leading-tight mb-4"
-                style={{ color: pax26?.textPrimary }}>
-                Start Automating{" "}
-                <span className="al-serif" style={{ color: primary }}>Your WhatsApp</span>
-                <br />Today
-              </h2>
-              <p className="text-base leading-relaxed max-w-md mx-auto mb-10"
-                style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-                Respond faster, capture more leads, and grow your business automatically. No tech skills required.
-              </p>
-
-              <div className="flex flex-wrap gap-3 justify-center">
-                <button className="al-btn flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white"
-                  onClick={() => router.push("/dashboard/automations/market-place")}
-                  style={{ background: primary, boxShadow: `0 14px 40px ${primary}42` }}>
-                  Create Automation <IcoArrow />
-                </button>
-                <button className="al-btn flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-semibold"
-                  onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
-                  style={{ background: pax26?.bg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }}>
-                  Train Your Agent First
-                </button>
               </div>
             </div>
           </section>

@@ -34,7 +34,7 @@ const WHY = [
   "Fast and reliable digital utility payments",
   "Secure wallet for seamless transactions",
   "Affordable plans with cashback opportunities",
-  "Built for both businesses and individuals",
+  "Built for businesses and individuals across Africa",
 ];
 
 /* ── Section label ────────────────────────────────────────────── */
@@ -97,12 +97,13 @@ const About = () => {
               <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
                 Pax26 is a product of PAX26 TECHNOLOGIES,
-                a registered Nigerian technology company.
+                a technology company born in Africa, built for Africa.
               </p>
               <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-                PAX26 TECHNOLOGIES is an AI automation platform that helps businesses automate customer interactions,
-                capture leads, and streamline digital operations — alongside seamless VTU services for everyday needs.
+                PAX26 TECHNOLOGIES is an AI automation platform that helps businesses across the continent
+                automate customer interactions, capture leads, and streamline digital operations —
+                alongside seamless VTU services for everyday needs.
               </p>
             </div>
           </div>
@@ -118,8 +119,8 @@ const About = () => {
             <p className="text-sm leading-relaxed max-w-3xl"
               style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
               PAX26 TECHNOLOGIES combines artificial intelligence with digital utility services to help businesses
-              operate smarter. Our AI tools automatically respond to customers, capture leads, and manage
-              conversations on WhatsApp — while our digital services give instant access to airtime, data,
+              across Africa operate smarter. Our AI tools automatically respond to customers, capture leads, and
+              manage conversations on WhatsApp — while our digital services give instant access to airtime, data,
               electricity payments, TV subscriptions and more.
             </p>
           </div>
@@ -131,13 +132,13 @@ const About = () => {
                 icon: Target, color: primary,
                 label: "Mission",
                 title: "Our Mission",
-                text: "To empower businesses and individuals with intelligent automation tools that simplify communication, improve efficiency, and make digital services more accessible across Africa.",
+                text: "To empower businesses and individuals across Africa with intelligent automation tools that simplify communication, improve efficiency, and make digital services more accessible — from Lagos to Nairobi, Accra to Cairo.",
               },
               {
                 icon: Eye, color: AMBER,
                 label: "Vision",
                 title: "Our Vision",
-                text: "To become Africa's leading AI automation platform — helping businesses automate operations, engage customers smarter, and scale faster without needing technical expertise.",
+                text: "To become Africa's leading AI automation platform — helping businesses on the continent automate operations, engage customers smarter, and scale faster without needing technical expertise.",
               },
             ].map(({ icon: Icon, color, label, title, text }, i) => (
               <div key={i} className="ab-card rounded-2xl p-7 overflow-hidden relative"
@@ -213,7 +214,8 @@ const About = () => {
                   style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
                   Juwon founded Pax26 with a clear mission: build a platform where AI automation
                   and digital services come together to simplify business operations and everyday
-                  transactions for Nigerians and Africans everywhere.
+                  transactions for businesses and individuals across Africa — starting from the
+                  ground up, with integrity and long-term reputation at the core.
                 </p>
               </div>
             </div>
