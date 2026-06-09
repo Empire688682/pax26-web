@@ -39,7 +39,9 @@ const registerUser = async (req) => {
       profileImage,
       providerId,
       provider,
+      country,
     } = reBody;
+
 
     // Validate required fields
     if (!name || !email) {
@@ -48,6 +50,14 @@ const registerUser = async (req) => {
         { status: 400, headers: corsHeaders() }
       );
     }
+
+    if (!country) {
+      return NextResponse.json(
+        { success: false, message: "Country is required" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
 
     if (!password || !number) {
       return NextResponse.json(
@@ -115,8 +125,10 @@ const registerUser = async (req) => {
       isPasswordSet: true,
       providerId: providerId || null,
       referralCode,
-      profileImage
+      profileImage,
+      country: country || null,
     });
+
 
 
     // Handle referral if provided

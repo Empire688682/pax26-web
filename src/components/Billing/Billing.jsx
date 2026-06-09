@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import Script from "next/script";
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { toast } from "react-toastify";
@@ -49,6 +50,17 @@ const CSS = `
   .bl-check-item { transition: opacity 0.15s ease; }
 
   .p-disabled { filter: grayscale(1); opacity: 0.6; pointer-events: none; }
+
+  .bl-pm-tab {
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .bl-pm-tab:hover:not(.active) { opacity: 0.8; }
+
+  @keyframes bl-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .bl-scale-in { animation: bl-scale-in 0.22s ease both; }
 `;
 
 /* ─── Icons ──────────────────────────────────────────────────── */
@@ -59,7 +71,9 @@ const IconRocket = ({ size = 20 }) => <svg width={size} height={size} viewBox="0
 const IconStar = ({ size = 20 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
 const IconArrow = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
 const IconWallet = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" /><path d="M3 5v14a2 2 0 0 0 2 2h16v-5" /><path d="M18 12a2 2 0 0 0 0 4h4v-4Z" /></svg>;
-const IconAlert = ({ size = 48 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>;
+const IconAlert  = ({ size = 48 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>;
+const IconCard   = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>;
+const IconShield = ({ size = 12 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
 
 const ICON_MAP = {
   free: <IconZap size={22} />,
@@ -197,6 +211,7 @@ export default function Billing() {
   const [selected, setSelected] = useState(null);
   const [paying, setPaying] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("wallet"); // "wallet" | "card"
 
   useEffect(() => {
     if (aiPlans && aiPlans.length > 0) {
@@ -242,20 +257,20 @@ export default function Billing() {
   const canAfford = selected ? (userWallet >= (selectedMeta?.price ?? 0)) : false;
   const shortfall = selected ? Math.max(0, (selectedMeta?.price ?? 0) - userWallet) : 0;
 
-  /* ── Subscribe handler ─────────────────────────────────────── */
-  const handleSubscribe = async () => {
+  /* ── Subscribe via wallet ───────────────────────────────────── */
+  const handleSubscribeWallet = async () => {
     if (!selected || paying) return;
     setPaying(true);
     try {
       const res = await fetch("/api/billing/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selected }),
+        body: JSON.stringify({ plan: selected, paymentType: "wallet" }),
       });
       const data = await res.json();
       if (data.success) {
         toast.success(data.message);
-        await fetchUser();        // refresh userData so plan badge updates everywhere
+        await fetchUser();
         setSelected(null);
         router.push("/dashboard/automations");
       } else {
@@ -269,8 +284,74 @@ export default function Billing() {
     }
   };
 
+  /* ── Subscribe via Paystack card ────────────────────────────── */
+  const handlePaystackCard = useCallback(() => {
+    if (!selected || !selectedMeta || paying) return;
+    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    if (!paystackKey) {
+      toast.error("Card payments are not configured yet. Please use wallet.");
+      return;
+    }
+    if (typeof window === "undefined" || !window.PaystackPop) {
+      toast.error("Payment gateway not loaded. Please refresh and try again.");
+      return;
+    }
+
+    const reference = `PAX-CARD-${selected.toUpperCase()}-${Date.now()}`;
+
+    const handler = window.PaystackPop.setup({
+      key: paystackKey,
+      email: userData?.email || "",
+      amount: selectedMeta.price * 100, // Paystack uses kobo
+      currency: "NGN",
+      ref: reference,
+      metadata: {
+        custom_fields: [
+          { display_name: "Plan", variable_name: "plan", value: selectedMeta.label },
+          { display_name: "User", variable_name: "user", value: userData?._id || "" },
+        ],
+      },
+      callback: async (response) => {
+        // response.reference is the verified reference
+        setPaying(true);
+        try {
+          const res = await fetch("/api/billing/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              plan: selected,
+              paymentType: "paystack",
+              reference: response.reference,
+            }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            toast.success(data.message);
+            await fetchUser();
+            setSelected(null);
+            router.push("/dashboard/automations");
+          } else {
+            toast.error(data.message || "Subscription failed");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Could not activate plan. Contact support with ref: " + response.reference);
+        } finally {
+          setPaying(false);
+        }
+      },
+      onClose: () => {
+        toast("Payment cancelled.", { icon: "💳" });
+      },
+    });
+
+    handler.openIframe();
+  }, [selected, selectedMeta, paying, userData, fetchUser, router]);
+
   return (
     <>
+      {/* Paystack Inline SDK */}
+      <Script src="https://js.paystack.co/v1/inline.js" strategy="lazyOnload" />
       <style>{CSS}</style>
       <div className="bl-root max-w-6xl mx-auto px-5 py-10 pb-24">
 
@@ -471,58 +552,128 @@ export default function Billing() {
                         </div>
                       </div>
 
-                      {/* Wallet info row */}
-                      <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
-                        style={{ background: pax26?.secondaryBg || `${pax26?.border}50`, border: `1px solid ${pax26?.border}` }}>
-                        <div className="flex items-center gap-2">
-                          <IconWallet size={14} style={{ color: pax26?.textSecondary }} />
-                          <span className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>Wallet</span>
-                        </div>
-                        <span className="bl-mono text-xs font-bold"
-                          style={{ color: canAfford ? GREEN : CORAL }}>
-                          ₦{userWallet?.toLocaleString("en-NG", { minimumFractionDigits: 2 }) || "0.00"}
-                        </span>
+                      {/* ── Payment method toggle ─────────────────── */}
+                      <div className="flex gap-2 rounded-xl p-1" style={{ background: `${pax26?.border}60` }}>
+                        {[
+                          { id: "wallet", label: "Wallet", icon: <IconWallet size={13} /> },
+                          { id: "card",   label: "Card",   icon: <IconCard size={13} /> },
+                        ].map(({ id, label, icon }) => {
+                          const active = paymentMethod === id;
+                          return (
+                            <button
+                              key={id}
+                              id={`billing-pm-${id}`}
+                              className={`bl-pm-tab flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold${active ? " active" : ""}`}
+                              onClick={() => setPaymentMethod(id)}
+                              style={active
+                                ? { background: selectedMeta?.accentHex || pax26?.primary, color: "#fff", boxShadow: `0 2px 10px ${selectedMeta?.accentHex || pax26?.primary}40` }
+                                : { color: pax26?.textSecondary }}
+                            >
+                              {icon} {label}
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      {/* Insufficient funds warning */}
-                      {!canAfford && (
-                        <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
-                          style={{ background: `${CORAL}0D`, border: `1px solid ${CORAL}25`, color: CORAL }}>
-                          ⚠️ You need{" "}
-                          <span className="bl-mono font-bold">₦{shortfall.toLocaleString()}</span>{" "}
-                          more. Fund your wallet first.
-                          <button
-                            className="bl-btn block mt-2 w-full py-2 rounded-xl text-xs font-bold text-white"
-                            style={{ background: pax26?.primary, boxShadow: `0 4px 14px ${pax26?.primary}40` }}
-                            onClick={() => router.push("/fund-wallet")}
-                          >
-                            Fund Wallet →
-                          </button>
+                      {/* ── Wallet panel ──────────────────────────── */}
+                      {paymentMethod === "wallet" && (
+                        <div className="bl-scale-in flex flex-col gap-3">
+                          {/* Wallet balance row */}
+                          <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                            style={{ background: pax26?.secondaryBg || `${pax26?.border}50`, border: `1px solid ${pax26?.border}` }}>
+                            <div className="flex items-center gap-2">
+                              <IconWallet size={14} style={{ color: pax26?.textSecondary }} />
+                              <span className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>Wallet balance</span>
+                            </div>
+                            <span className="bl-mono text-xs font-bold"
+                              style={{ color: canAfford ? GREEN : CORAL }}>
+                              ₦{userWallet?.toLocaleString("en-NG", { minimumFractionDigits: 2 }) || "0.00"}
+                            </span>
+                          </div>
+
+                          {/* Insufficient funds */}
+                          {!canAfford && (
+                            <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
+                              style={{ background: `${CORAL}0D`, border: `1px solid ${CORAL}25`, color: CORAL }}>
+                              ⚠️ You need{" "}
+                              <span className="bl-mono font-bold">₦{shortfall.toLocaleString()}</span>{" "}
+                              more. Fund your wallet first, or switch to Card payment.
+                              <button
+                                className="bl-btn block mt-2 w-full py-2 rounded-xl text-xs font-bold text-white"
+                                style={{ background: pax26?.primary, boxShadow: `0 4px 14px ${pax26?.primary}40` }}
+                                onClick={() => router.push("/fund-wallet")}
+                              >
+                                Fund Wallet →
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Wallet pay CTA */}
+                          {canAfford && (
+                            <button
+                              id="billing-pay-wallet-btn"
+                              className="bl-btn w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white"
+                              disabled={paying}
+                              onClick={handleSubscribeWallet}
+                              style={{
+                                background: `linear-gradient(135deg, ${selectedMeta.accentHex}, ${selectedMeta.accentHex}cc)`,
+                                boxShadow: `0 8px 24px ${selectedMeta.accentHex}40`,
+                              }}
+                            >
+                              {paying ? (
+                                <><Spinner color="#fff" /> Processing…</>
+                              ) : (
+                                <>
+                                  <IconWallet size={14} />
+                                  Pay ₦{selectedMeta.price.toLocaleString()} from Wallet
+                                  <IconArrow size={14} />
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                       )}
 
-                      {/* Pay CTA */}
-                      {canAfford && (
-                        <button
-                          id="billing-pay-btn"
-                          className="bl-btn w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white"
-                          disabled={paying}
-                          onClick={handleSubscribe}
-                          style={{
-                            background: `linear-gradient(135deg, ${selectedMeta.accentHex}, ${selectedMeta.accentHex}cc)`,
-                            boxShadow: `0 8px 24px ${selectedMeta.accentHex}40`,
-                          }}
-                        >
-                          {paying ? (
-                            <><Spinner color="#fff" /> Processing…</>
-                          ) : (
-                            <>
-                              <IconCrown size={16} />
-                              Pay ₦{selectedMeta.price.toLocaleString()} · Activate Now
-                              <IconArrow size={14} />
-                            </>
-                          )}
-                        </button>
+                      {/* ── Card / Paystack panel ────────────────── */}
+                      {paymentMethod === "card" && (
+                        <div className="bl-scale-in flex flex-col gap-3">
+                          {/* Card info */}
+                          <div className="rounded-xl px-4 py-3"
+                            style={{ background: `${pax26?.border}40`, border: `1px solid ${pax26?.border}` }}>
+                            <p className="text-xs font-semibold mb-1" style={{ color: pax26?.textPrimary }}>Pay with Debit / Credit Card</p>
+                            <p className="text-[10px] leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                              Securely powered by Paystack. Visa, Mastercard & Verve accepted.
+                            </p>
+                          </div>
+
+                          {/* Card pay CTA */}
+                          <button
+                            id="billing-pay-card-btn"
+                            className="bl-btn w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white"
+                            disabled={paying}
+                            onClick={handlePaystackCard}
+                            style={{
+                              background: `linear-gradient(135deg, #00C3A0, #009B7E)`,
+                              boxShadow: `0 8px 24px #00C3A040`,
+                            }}
+                          >
+                            {paying ? (
+                              <><Spinner color="#fff" /> Processing…</>
+                            ) : (
+                              <>
+                                <IconCard size={15} />
+                                Pay ₦{selectedMeta.price.toLocaleString()} via Card
+                                <IconArrow size={14} />
+                              </>
+                            )}
+                          </button>
+
+                          {/* Security badge */}
+                          <div className="flex items-center justify-center gap-1.5 text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
+                            <IconShield size={10} />
+                            256-bit SSL encrypted · Powered by Paystack
+                          </div>
+                        </div>
                       )}
 
                       <p className="text-center text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.4 }}>

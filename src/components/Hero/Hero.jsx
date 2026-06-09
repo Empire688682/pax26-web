@@ -171,10 +171,11 @@ function Badge({ children, className = "", bg, border }) {
 
 /* ─── Marquee items ───────────────────────────────────────────────────── */
 const TICKER = [
-  "WhatsApp Agent", "·", "Airtime & Data", "·", "Electricity Bills", "·",
-  "TV Subscriptions", "·", "No-Code Setup", "·", "24/7 Auto-Replies", "·",
-  "Lead Follow-Up", "·", "Instant Activation", "·",
+  "Pax26 × Meta", "·", "Official WhatsApp API", "·", "Airtime & Data", "·",
+  "Electricity Bills", "·", "TV Subscriptions", "·", "Meta Business Partners", "·",
+  "Most Affordable in NG 🇳🇬", "·", "24/7 Auto-Replies", "·",
 ];
+
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function Hero() {
@@ -187,16 +188,17 @@ export default function Hero() {
   const bdr = pax26?.border;
 
   const chips = [
-    { icon: Bot, label: "WhatsApp Sales Agent", color: WA, border: `${WA}40` },
-    { icon: CreditCard, label: "Bill Payments", color: p, border: `${p}40` },
-    { icon: Smartphone, label: "Airtime & Data", color: "#a855f7", border: "#a855f740" },
+    { icon: Bot,        label: "Official WhatsApp Business API", color: WA, border: `${WA}40` },
+    { icon: CreditCard, label: "Meta Business Partner",          color: p,  border: `${p}40`  },
+    { icon: Smartphone, label: "Airtime & Data",                 color: "#a855f7", border: "#a855f740" },
   ];
 
   const stats = [
-    { value: "24/7", label: "Always Online" },
-    { value: "5 min", label: "Setup Time" },
-    { value: "100%", label: "Auto-Reply" },
+    { value: "24/7",  label: "Always Online" },
+    { value: "#1",    label: "Most Affordable NG" },
+    { value: "100%",  label: "Official API" },
   ];
+
 
   return (
     <>
@@ -231,39 +233,63 @@ export default function Hero() {
             {/* ══ LEFT ════════════════════════════════════════════ */}
             <div className="flex flex-col gap-4 sm:gap-5">
 
-              {/* Eyebrow */}
+              {/* Eyebrow — Pax26 × Meta branding */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}
-                className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full"
-                style={{ background: `${WA}14`, border: `1px solid ${WA}35` }}>
-                <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
-                <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: WA }}>
-                  WhatsApp Automation
-                </span>
+                className="flex flex-col gap-2 self-start"
+              >
+                {/* Pax26 × Meta pill */}
+                <div
+                  className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full"
+                  style={{ background: `${WA}14`, border: `1px solid ${WA}35` }}>
+                  <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
+                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: WA }}>
+                    Pax26 × Meta
+                  </span>
+                </div>
+                {/* Affordable badge */}
+                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full"
+                  style={{ background: `${p}10`, border: `1px solid ${p}28` }}>
+                  <span className="text-[10px] font-bold tracking-wide" style={{ color: p }}>
+                    Most Affordable Platform in NG 🇳🇬
+                  </span>
+                </div>
+                {/* Registered Nigerian tech company badge */}
+                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full"
+                  style={{ background: `${ts}08`, border: `1px solid ${ts}20` }}>
+                  <span style={{ fontSize: 10, opacity: 0.55 }}>🏢</span>
+                  <span className="text-[10px] font-semibold tracking-wide" style={{ color: ts, opacity: 0.65 }}>
+                    Registered Nigerian Tech Company
+                  </span>
+                </div>
               </motion.div>
 
-              {/* Headline — WhatsApp is the star */}
+
+              {/* Headline */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: .65, delay: .08, ease: [.22, 1, .36, 1] }}>
                 <h1 style={{ color: tp, lineHeight: 1.08 }}
                   className="text-[clamp(30px,6.5vw,58px)] font-black tracking-tight">
-                  Your WhatsApp,<br />
-                  <span className="hr-serif" style={{ color: p }}>Now Sells 24/7.</span>
+                  Nigeria&apos;s #1 Official<br />
+                  <span className="hr-serif" style={{ color: p }}>WhatsApp Platform.</span>
                 </h1>
               </motion.div>
 
-              {/* Sub-text — punchy & short */}
+
+              {/* Sub-text */}
               <motion.p
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }}
                 className="text-[13.5px] sm:text-[15px] leading-relaxed"
                 style={{ color: ts, opacity: .78 }}>
-                Pax26 Technologies — a registered Nigerian tech company — turns your WhatsApp into a{" "}
-                <strong style={{ color: tp }}>24/7 sales agent</strong> that chats, converts, and closes deals while you sleep.{" "}
-                Plus instant airtime, data, bills & TV subscriptions in one platform.
+                Pax26 Technologies is powered by the{" "}
+                <strong style={{ color: tp }}>Official WhatsApp Business API</strong>{" "}and is a verified{" "}
+                <strong style={{ color: tp }}>Meta Business Partner</strong> — giving Nigerian businesses
+                the most affordable way to automate sales, support and VTU services on WhatsApp.
               </motion.p>
 
-              {/* Service chips */}
+
+              {/* Trust pills — Official API & Meta Partner */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .42 }}
                 className="flex flex-wrap gap-2">
@@ -271,9 +297,10 @@ export default function Hero() {
                 <div className="hr-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
                   style={{ background: `${p}10`, border: `1px solid ${p}30`, color: p }}>
                   <CheckCircle size={11} />
-                  No-code setup
+                  No-code · Live in 5 mins
                 </div>
               </motion.div>
+
 
               {/* CTA row */}
               <motion.div
@@ -287,9 +314,10 @@ export default function Hero() {
                     boxShadow: `0 12px 30px ${p}40`,
                   }}>
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M11.999 2.003C6.476 2.003 2 6.479 2 12.003c0 1.843.484 3.57 1.33 5.065L2.004 22l5.074-1.329A9.935 9.935 0 0012 22.003c5.523 0 9.999-4.476 9.999-10s-4.476-9.997-10-9.997z" fillOpacity=".25" /></svg>
-                  Automate on WhatsApp
+                  Get Started Free
                   <ArrowRight size={15} />
                 </button>
+
                 <Link href="#pricing"
                   className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold"
                   style={{ color: tp, border: `1px solid ${bdr}`, background: "transparent" }}>
@@ -331,7 +359,8 @@ export default function Hero() {
                     style={{ background: `${WA}20` }}>
                     <Zap size={10} style={{ color: WA }} />
                   </div>
-                  <span className="text-[11px] font-bold" style={{ color: tp }}>Agent responding…</span>
+                  <span className="text-[11px] font-bold" style={{ color: tp }}>Official WhatsApp API ✓</span>
+
                 </motion.div>
 
                 <ChatDemo />
@@ -343,7 +372,8 @@ export default function Hero() {
                   style={{ bottom: "-14px", right: "-14px", background: bg, border: `1px solid ${bdr}` }}
                   className="absolute z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-lg">
                   <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
-                  <span className="text-[11px] font-bold" style={{ color: tp }}>5k+ msgs / day</span>
+                  <span className="text-[11px] font-bold" style={{ color: tp }}>Meta Business Partner 🇳🇬</span>
+
                 </motion.div>
               </div>
             </motion.div>

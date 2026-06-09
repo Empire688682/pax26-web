@@ -20,6 +20,8 @@ const UserSchema = new mongoose.Schema(
 
     isAdmin: { type: Boolean, default: false },
 
+    country: { type: String, default: null }, // e.g. "Nigeria", "Ghana", "Kenya"
+
     /* =====================
        VERIFICATION
     ====================== */
@@ -163,6 +165,14 @@ const UserSchema = new mongoose.Schema(
       knowledgeBase: [{ type: String }],           // URLs or text chunks
       maxMonthlyMessages: { type: Number, default: 200 },
       messagesUsedThisMonth: { type: Number, default: 0 },
+      broadcastContactsLimit: { type: Number, default: 0 },
+      broadcastContactsUsedThisMonth: { type: Number, default: 0 },
+      scheduledBroadcast: { type: Boolean, default: false },
+      segmentation: { type: Boolean, default: false },
+      bulkSequences: { type: Boolean, default: false },
+      removeBranding: { type: Boolean, default: false },
+      multiStaff: { type: Number, default: 0 },
+      webhookAccess: { type: Boolean, default: false },
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],

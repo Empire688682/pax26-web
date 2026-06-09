@@ -62,7 +62,7 @@ const ICON_MAP = {
 function PlanCard({ plan, index, pax26, inView }) {
   const { openModal } = useGlobalContext();
   const primary = pax26?.primary || "#3b82f6";
-  const accent = plan.popular ? primary : pax26?.textPrimary;
+  const accent = plan.accentHex || (plan.popular ? primary : pax26?.textPrimary);
   const Icon = ICON_MAP[plan.key] || ICON_MAP.default;
 
   return (
@@ -72,25 +72,25 @@ function PlanCard({ plan, index, pax26, inView }) {
       transition={{ duration: 0.55, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
       className={`relative flex flex-col rounded-2xl overflow-hidden ${plan.popular ? "pr-popular-card" : "pr-card"} ${!plan.isActive ? 'p-disabled' : ''}`}
       style={{
-        background: plan.popular ? pax26?.bg : pax26?.bg,
-        border: `${plan.popular ? "2px" : "1px"} solid ${plan.popular ? primary : pax26?.border}`,
-        boxShadow: plan.popular ? `0 0 0 1px ${primary}30, 0 24px 60px ${primary}20` : "none",
+        background: pax26?.bg,
+        border: `${plan.popular ? "2px" : "1px"} solid ${plan.popular ? accent : pax26?.border}`,
+        boxShadow: plan.popular ? `0 0 0 1px ${accent}30, 0 24px 60px ${accent}20` : "none",
       }}>
 
       {/* popular glow orb */}
       {plan.popular && (
         <div className="pr-glow absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full pointer-events-none"
-          style={{ background: primary, filter: "blur(40px)" }} />
+          style={{ background: accent, filter: "blur(40px)" }} />
       )}
 
       {/* top strip */}
       <div className="h-1 w-full"
-        style={{ background: plan.popular ? `linear-gradient(90deg, ${primary}, ${primary}88, transparent)` : pax26?.border }} />
+        style={{ background: `linear-gradient(90deg, ${accent}, ${accent}88, transparent)` }} />
 
       {/* popular badge */}
       {plan.popular && (
         <div className="absolute -top-0 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-b-xl text-xs font-bold text-white z-10"
-          style={{ background: primary, boxShadow: `0 4px 14px ${primary}50` }}>
+          style={{ background: accent, boxShadow: `0 4px 14px ${accent}50` }}>
           <Sparkles size={11} /> Most Popular
         </div>
       )}
@@ -125,6 +125,7 @@ function PlanCard({ plan, index, pax26, inView }) {
               / {plan.period}
             </span>
           </div>
+          <p className="text-[10px] mt-1.5 font-medium" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>* USD pricing coming soon</p>
         </div>
 
         {/* divider */}
@@ -133,10 +134,10 @@ function PlanCard({ plan, index, pax26, inView }) {
         {/* included features */}
         <ul className="space-y-2.5 flex-1 mb-6">
           {plan.features.map((f, i) => (
-            <li key={i} className="flex items-center gap-2.5 text-xs font-medium"
+            <li key={i} className="flex items-start gap-2.5 text-xs font-medium"
               style={{ color: pax26?.textSecondary }}>
-              <CheckCircle2 size={13} style={{ color: plan.popular ? primary : "#22c55e", flexShrink: 0 }} />
-              {f}
+              <CheckCircle2 size={13} style={{ color: accent, flexShrink: 0, marginTop: "2px" }} />
+              <span>{f}</span>
             </li>
           ))}
         </ul>
@@ -145,10 +146,10 @@ function PlanCard({ plan, index, pax26, inView }) {
         <button
           onClick={() => openModal("register")}
           disabled={!plan.isActive}
-          className="pr-cta w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold"
+          className="pr-cta w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold mt-auto"
           style={
             plan.popular
-              ? { background: primary, color: "#fff", boxShadow: `0 10px 28px ${primary}40` }
+              ? { background: accent, color: "#fff", boxShadow: `0 10px 28px ${accent}40` }
               : { background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }
           }>
           {plan.isActive ? (plan.key === 'free' ? 'Get Started' : 'Upgrade Now') : 'Coming Soon'} <ArrowRight size={14} />
@@ -260,9 +261,9 @@ export default function Pricing() {
           </div>
 
           {/* ── Plans grid ──────────────────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
             {loading ? (
-                [1,2,3].map(i => (
+                [1,2,3,4].map(i => (
                     <div key={i} className="h-96 rounded-2xl bg-gray-800/20 animate-pulse border border-gray-700/50" />
                 ))
             ) : plans.length === 0 ? (

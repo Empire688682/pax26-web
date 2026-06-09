@@ -327,8 +327,18 @@ const CardSpinner = ({ color }) => (
 );
 
 /* ── Contact Card ────────────────────────────────────────── */
-const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax26 }) => {
+const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax26, onContactUpdated }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTags, setEditTags] = useState(contact.tags || []);
+  const [editNotes, setEditNotes] = useState(contact.notes || "");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  useEffect(() => {
+    setEditTags(contact.tags || []);
+    setEditNotes(contact.notes || "");
+  }, [contact]);
+
   const isWhitelist = contact.status === "whitelist";
   const isBlacklist = contact.status === "blacklist";
   const isPending = contact.status === "pending";
@@ -381,20 +391,18 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
 
           {/* Mobile Expand Toggle */}
           <div className="flex sm:hidden items-center gap-[6px] mt-[2px]">
-            {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
-              <button
-                onClick={() => setExpanded(v => !v)}
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
-                  display: "flex", alignItems: "center",
-                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s, opacity: 0.2s",
-                }}
-              >
-                <ChevronDownIcon />
-              </button>
-            )}
+            <button
+              onClick={() => setExpanded(v => !v)}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
+                display: "flex", alignItems: "center",
+                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s, opacity: 0.2s",
+              }}
+            >
+              <ChevronDownIcon />
+            </button>
           </div>
         </div>
 
@@ -529,23 +537,20 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
             </div>
 
             {/* Desktop Expand toggle */}
-            {(contact.notes || contact.tags?.length > 0 || contact.createdAt) && (
-              <button
-                className="hidden sm:flex"
-                onClick={() => setExpanded(v => !v)}
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
-                  alignItems: "center",
-                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s, opacity: 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
-              >
-                <ChevronDownIcon />
-              </button>
-            )}
+            <button
+              onClick={() => setExpanded(v => !v)}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: pax26?.textPrimary, opacity: 0.4, padding: "4px",
+                display: "flex", alignItems: "center",
+                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s, opacity: 0.2s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
+              onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
+            >
+              <ChevronDownIcon />
+            </button>
           </div>
         </div>
       </div>
@@ -564,83 +569,178 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
               padding: "12px 14px 14px",
               borderTop: `1px solid ${pax26?.border}`,
               background: pax26?.secondaryBg,
-              display: "flex", flexDirection: "column", gap: "10px",
+              display: "flex", flexDirection: "column", gap: "12px",
             }}>
-              {/* Tags */}
-              {contact.tags?.length > 0 && (
-                <div>
-                  <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "6px" }}>
-                    Tags
+              {isEditing ? (
+                <>
+                  {/* Tag Editor */}
+                  <TagInput tags={editTags} onChange={setEditTags} pax26={pax26} />
+
+                  {/* Notes Editor */}
+                  <ThemedTextarea
+                    pax26={pax26}
+                    label="Notes"
+                    placeholder="Add a note about this contact…"
+                    value={editNotes}
+                    onChange={e => setEditNotes(e.target.value)}
+                  />
+
+                  {/* Actions (Save / Cancel) */}
+                  <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "8px" }}>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditTags(contact.tags || []);
+                        setEditNotes(contact.notes || "");
+                      }}
+                      disabled={savingEdit}
+                      style={{
+                        padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 600,
+                        border: `1px solid ${pax26?.border}`, background: "transparent",
+                        color: pax26?.textPrimary, cursor: "pointer", opacity: 0.7,
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setSavingEdit(true);
+                        try {
+                          const response = await fetch("/api/automations/inbox/lead", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              phone: contact.phone,
+                              tags: editTags,
+                              notes: editNotes,
+                            }),
+                          });
+                          if (response.ok) {
+                            setIsEditing(false);
+                            if (onContactUpdated) {
+                              await onContactUpdated();
+                            }
+                          } else {
+                            console.error("Failed to update contact:", await response.text());
+                          }
+                        } catch (error) {
+                          console.error("Failed to update contact:", error);
+                        } finally {
+                          setSavingEdit(false);
+                        }
+                      }}
+                      disabled={savingEdit}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "5px",
+                        padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+                        border: `1px solid ${pax26?.primary}44`,
+                        background: pax26?.primary, color: "#fff",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {savingEdit ? <CardSpinner color="#fff" /> : "Save Changes"}
+                    </button>
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-                    {contact.tags.map(t => (
-                      <span key={t} style={{
-                        padding: "3px 9px", borderRadius: "999px", fontSize: "11px", fontWeight: 600,
-                        background: `${pax26?.primary}18`, color: pax26?.primary,
-                        border: `1px solid ${pax26?.primary}30`,
-                      }}>
-                        {t}
-                      </span>
-                    ))}
+                </>
+              ) : (
+                <>
+                  {/* Tags display */}
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "6px" }}>
+                      Tags
+                    </div>
+                    {contact.tags?.length > 0 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                        {contact.tags.map(t => (
+                          <span key={t} style={{
+                            padding: "3px 9px", borderRadius: "999px", fontSize: "11px", fontWeight: 600,
+                            background: `${pax26?.primary}18`, color: pax26?.primary,
+                            border: `1px solid ${pax26?.primary}30`,
+                          }}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.4, margin: 0 }}>No tags applied</p>
+                    )}
                   </div>
-                </div>
+
+                  {/* Notes display */}
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
+                      Notes
+                    </div>
+                    {contact.notes ? (
+                      <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.65, margin: 0, lineHeight: 1.6 }}>
+                        {contact.notes}
+                      </p>
+                    ) : (
+                      <p style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.4, margin: 0 }}>No notes</p>
+                    )}
+                  </div>
+
+                  {/* Phone Number (Visible when expanded) */}
+                  <div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
+                      Phone Number
+                    </div>
+                    <p style={{ fontSize: "13px", fontWeight: 700, color: pax26?.primary, margin: 0 }}>
+                      {contact.phone}
+                    </p>
+                  </div>
+
+                  {/* Dates */}
+                  <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end" }}>
+                    <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                      {contact.createdAt && (
+                        <div>
+                          <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                            Added
+                          </div>
+                          <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                            {formatDate(contact.createdAt)}
+                          </div>
+                        </div>
+                      )}
+                      {contact.updatedAt && (
+                        <div>
+                          <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                            Updated
+                          </div>
+                          <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                            {formatDate(contact.updatedAt)}
+                          </div>
+                        </div>
+                      )}
+                      {contact.lastMessageAt && (
+                        <div>
+                          <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
+                            Last message
+                          </div>
+                          <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
+                            {formatDate(contact.lastMessageAt)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Edit button */}
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      style={{
+                        padding: "5px 12px", borderRadius: "8px", fontSize: "11px", fontWeight: 700,
+                        border: `1px solid ${pax26?.primary}44`,
+                        background: `${pax26?.primary}12`,
+                        color: pax26?.primary, cursor: "pointer",
+                        height: "28px"
+                      }}
+                    >
+                      Edit Info
+                    </button>
+                  </div>
+                </>
               )}
-
-              {/* Notes */}
-              {contact.notes && (
-                <div>
-                  <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
-                    Notes
-                  </div>
-                  <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.65, margin: 0, lineHeight: 1.6 }}>
-                    {contact.notes}
-                  </p>
-                </div>
-              )}
-
-              {/* Phone Number (Visible when expanded) */}
-              <div>
-                <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.45, marginBottom: "4px" }}>
-                  Phone Number
-                </div>
-                <p style={{ fontSize: "13px", fontWeight: 700, color: pax26?.primary, margin: 0 }}>
-                  {contact.phone}
-                </p>
-              </div>
-
-              {/* Dates */}
-              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-                {contact.createdAt && (
-                  <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
-                      Added
-                    </div>
-                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
-                      {formatDate(contact.createdAt)}
-                    </div>
-                  </div>
-                )}
-                {contact.updatedAt && (
-                  <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
-                      Updated
-                    </div>
-                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
-                      {formatDate(contact.updatedAt)}
-                    </div>
-                  </div>
-                )}
-                {contact.lastMessageAt && (
-                  <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.4, marginBottom: "2px" }}>
-                      Last message
-                    </div>
-                    <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6 }}>
-                      {formatDate(contact.lastMessageAt)}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           </motion.div>
         )}
@@ -963,12 +1063,12 @@ export default function WhatsappContact() {
               display: "flex", alignItems: "center", gap: "6px",
               padding: "8px 14px", borderRadius: "10px",
               fontSize: "12px", fontWeight: 700, cursor: "pointer",
-              border: `1px solid ${pax26?.primary}44`,
-              background: showAddForm ? `${pax26?.primary}20` : `${pax26?.primary}10`,
-              color: pax26?.primary, transition: "all 0.2s",
+              border: "1px solid rgba(220,53,53,0.4)",
+              background: showAddForm ? "rgba(220,53,53,0.2)" : "rgba(220,53,53,0.1)",
+              color: "#dc3535", transition: "all 0.2s",
             }}
           >
-            <PlusIcon /> Add contact
+            <UserXIcon /> Blacklist number
           </button>
         </div>
 
@@ -1020,34 +1120,20 @@ export default function WhatsappContact() {
                   </button>
                   <div className="flex gap-[8px] w-full sm:w-auto">
                     <button
-                      className="flex-1 sm:flex-none justify-center"
+                      className="w-full sm:w-auto justify-center"
                       onClick={() => handleAddContact("blacklist")}
                       disabled={!phone.trim() || addingContact}
                       style={{
                         display: "flex", alignItems: "center", gap: "6px",
-                        padding: "9px 16px", borderRadius: "10px",
+                        padding: "9px 24px", borderRadius: "10px",
                         fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                        border: "1px solid rgba(220,53,53,0.3)",
-                        background: "rgba(220,53,53,0.08)", color: "#dc3535",
+                        border: "1px solid rgba(220,53,53,0.4)",
+                        background: "rgba(220,53,53,0.12)", color: "#dc3535",
                         opacity: phone.trim() ? 1 : 0.5,
+                        minWidth: "140px",
                       }}
                     >
-                      {addingContact ? <Spinner /> : <><UserXIcon /> Block</>}
-                    </button>
-                    <button
-                      className="flex-1 sm:flex-none justify-center"
-                      onClick={() => handleAddContact("whitelist")}
-                      disabled={!phone.trim() || addingContact}
-                      style={{
-                        display: "flex", alignItems: "center", gap: "6px",
-                        padding: "9px 16px", borderRadius: "10px",
-                        fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
-                        border: `1px solid ${pax26?.primary}44`,
-                        background: `${pax26?.primary}15`, color: pax26?.primary,
-                        opacity: phone.trim() ? 1 : 0.5,
-                      }}
-                    >
-                      {addingContact ? <Spinner /> : <><UserCheckIcon /> Allow</>}
+                      {addingContact ? <Spinner /> : <><UserXIcon /> Blacklist Number</>}
                     </button>
                   </div>
                 </div>
@@ -1113,6 +1199,7 @@ export default function WhatsappContact() {
                   deleteContact={deleteContact}
                   loadingPhone={loadingPhone}
                   pax26={pax26}
+                  onContactUpdated={fetchContacts}
                 />
               ))
             )}

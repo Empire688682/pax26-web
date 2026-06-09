@@ -1,6 +1,7 @@
 'use client';
 
-import { X, Mail, Lock, User, Phone, Eye, EyeOff, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Mail, Lock, User, Phone, Eye, EyeOff, Zap, ArrowRight, ShieldCheck, Globe } from 'lucide-react';
+
 import { useGlobalContext } from '../Context';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -257,6 +258,44 @@ export default function SignupPage() {
                   onFocus={() => setFocused("number")} onBlur={() => setFocused("")}
                   {...inputProps}
                 />
+              )}
+
+              {/* country — register only */}
+              {authType === "register" && (
+                <div className="relative">
+                  <Globe size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: focused === "country" ? primary : textPrimary, opacity: focused === "country" ? 0.8 : 0.3 }} />
+                  <select
+                    name="country"
+                    value={data.country || ""}
+                    onChange={handleOnchange}
+                    required
+                    className="am-input w-full pl-9 pr-4 py-3 rounded-xl text-sm appearance-none"
+                    style={{
+                      background: secondaryBg,
+                      color: data.country ? textPrimary : `${textPrimary}55`,
+                      border: `1px solid ${focused === "country" ? primary : border}`,
+                      boxShadow: focused === "country" ? `0 0 0 3px ${primary}15` : "none",
+                    }}
+                    onFocus={() => setFocused("country")}
+                    onBlur={() => setFocused("")}
+                  >
+                    <option value="" disabled>Select your country</option>
+                    <option value="Nigeria">🇳🇬 Nigeria</option>
+                    <option value="Ghana">🇬🇭 Ghana</option>
+                    <option value="Kenya">🇰🇪 Kenya</option>
+                    <option value="South Africa">🇿🇦 South Africa</option>
+                    <option value="Uganda">🇺🇬 Uganda</option>
+                    <option value="Tanzania">🇹🇿 Tanzania</option>
+                    <option value="Rwanda">🇷🇼 Rwanda</option>
+                    <option value="Senegal">🇸🇳 Senegal</option>
+                    <option value="Cameroon">🇨🇲 Cameroon</option>
+                    <option value="Ivory Coast">🇨🇮 Ivory Coast</option>
+                    <option value="Ethiopia">🇪🇹 Ethiopia</option>
+                    <option value="Egypt">🇪🇬 Egypt</option>
+                    <option value="Other">🌍 Other</option>
+                  </select>
+                </div>
               )}
 
               {/* password */}

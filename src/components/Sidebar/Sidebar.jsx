@@ -9,7 +9,8 @@ import {
   Phone, LogOut, Info, History, Settings, Bell, X,
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
   ChevronDown, Home, Shield, Users, ShieldAlert,
-  MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2
+  MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2,
+  Radio, Send
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -273,6 +274,8 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Agent Workflow" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/sales-notifications" icon={Bell} label="Sales Alerts" onClick={close} pax26={pax26} isNew={true} />
                 <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Dashboard" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Broadcast" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Campaigns" onClick={close} pax26={pax26} isNew={true} />
 
                 <SectionLabel label="Financials" pax26={pax26} />
                 <NavItem href="/fund-wallet" icon={CreditCard} label="Add Funds" onClick={close} pax26={pax26} />

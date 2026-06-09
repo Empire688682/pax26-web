@@ -26,8 +26,8 @@ export async function POST(req) {
       );
     }
 
-    const { plan: planKey } = await req.json();
-    console.log("Subscribing to plan: ", planKey);
+    const { plan: planKey, paymentType = "wallet", reference } = await req.json();
+    console.log("Subscribing to plan: ", planKey, "via", paymentType);
 
     // Fetch plan details from Database instead of hardcoded catalogue
     const planMeta = await PlanModel.findOne({ key: planKey });
@@ -54,28 +54,40 @@ export async function POST(req) {
       );
     }
 
-    /* ── Wallet check ─────────────────────────────────────────── */
+    /* ── Payment deduction check ────────────────────────────── */
     const balanceBefore = user.walletBalance;
-    if (balanceBefore < planMeta.price) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Insufficient wallet balance. You need ₦${planMeta.price.toLocaleString()} but have ₦${balanceBefore.toLocaleString()}.`,
-        },
-        { status: 400, headers: corsHeaders() }
-      );
+    let balanceAfter = balanceBefore;
+
+    if (paymentType === "wallet") {
+      if (balanceBefore < planMeta.price) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Insufficient wallet balance. You need ₦${planMeta.price.toLocaleString()} but have ₦${balanceBefore.toLocaleString()}.`,
+          },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+      balanceAfter = balanceBefore - planMeta.price;
+      user.walletBalance = balanceAfter;
     }
 
-    const balanceAfter = balanceBefore - planMeta.price;
     const now = new Date();
     const expiresAt = new Date(now);
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    /* ── Deduct wallet + upgrade plan atomically ──────────────── */
-    user.walletBalance = balanceAfter;
+    /* ── Upgrade plan atomically ────────────────────────────── */
     user.paxAI.plan = planKey;
     user.paxAI.maxMonthlyMessages = planMeta.messagesLimit;
     user.paxAI.messagesUsedThisMonth = 0;       // reset monthly counter
+    user.paxAI.broadcastContactsLimit = planMeta.broadcastContactsLimit;
+    user.paxAI.broadcastContactsUsedThisMonth = 0;
+    user.paxAI.scheduledBroadcast = planMeta.scheduledBroadcast;
+    user.paxAI.segmentation = planMeta.segmentation;
+    user.paxAI.bulkSequences = planMeta.bulkSequences;
+    user.paxAI.removeBranding = planMeta.removeBranding;
+    user.paxAI.multiStaff = planMeta.multiStaff;
+    user.paxAI.webhookAccess = planMeta.webhookAccess;
     user.paxAI.planStartedAt = now;              // start new billing cycle
     user.paxAI.lastUpdated = now;
 
@@ -97,15 +109,15 @@ export async function POST(req) {
     /* ── Ensure paid user gets a referral code ────────────────── */
     await ensureReferralCode(user);
 
-    /* ── Record transaction ───────────────────────────────────── */
-    const reference = `PAX-SUB-${planKey.toUpperCase()}-${Date.now()}`;
+     /* ── Record transaction ───────────────────────────────────── */
+    const finalReference = reference || `PAX-SUB-${planKey.toUpperCase()}-${Date.now()}`;
     await TransactionModel.create({
       userId,
       type: "ai-automation-subscription",
       amount: planMeta.price,
       currency: "NGN",
       status: "success",
-      reference,
+      reference: finalReference,
       meta: {
         subscription: {
           plan: planMeta.label,

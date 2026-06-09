@@ -1,24 +1,33 @@
 import mongoose from "mongoose";
 
 const PlanSchema = new mongoose.Schema({
-  key:      { type: String, required: true, unique: true },
-  label:    { type: String, required: true },
-  price:    { type: Number, required: true },
-  period:   { type: String, default: "month" },
-  accentHex: { type: String, default: "#3b82f6" },
-  tagline:  { type: String },
-  messages: { type: String }, // Human readable: "500 AI messages / month"
-  messagesLimit: { type: Number, default: 0 }, // Machine readable: 500 (0 = unlimited)
-  extraMessagePrice: { type: Number, default: 0 },
-  features: [{ type: String }],
-  popular:  { type: Boolean, default: false },
-  isActive: { type: Boolean, default: true },
-  referralReward: { type: Number, default: 0 },
+  key:                     { type: String, required: true, unique: true },
+  name:                    { type: String, required: true },
+  label:                   { type: String }, // Keep for backward compatibility
+  price:                   { type: Number, required: true },
+  currency:                { type: String, default: "NGN" },
+  period:                  { type: String, default: "month" },
+  accentHex:               { type: String, default: "#3b82f6" },
+  tagline:                 { type: String },
+  messages:                { type: String }, // Human readable
+  messagesLimit:           { type: Number, default: 0 },
+  whatsappNumbersLimit:    { type: Number, default: 1 },
+  broadcastContactsLimit:  { type: Number, default: null }, // null = unlimited
+  bulkSequences:           { type: Boolean, default: false },
+  scheduledBroadcast:      { type: Boolean, default: false },
+  segmentation:            { type: Boolean, default: false },
+  campaignReports:         { type: Boolean, default: false },
+  removeBranding:          { type: Boolean, default: false },
+  multiStaff:              { type: Number, default: 0 }, // max staff, 0 = no multi-staff
+  webhookAccess:           { type: Boolean, default: false },
+  whitelabel:              { type: Boolean, default: false },
+  extraMessagePrice:       { type: Number, default: 0 },
+  features:                [{ type: String }],
+  popular:                 { type: Boolean, default: false },
+  isActive:                { type: Boolean, default: true },
+  referralReward:          { type: Number, default: 0 },
 
   // ── WhatsApp connection type this plan supports ────────────────
-  // "qr"    → QR scan (unofficial Baileys bridge, Starter tier)
-  // "meta"  → Official Meta Cloud API (Growth/paid tier)
-  // "any"   → Either method (legacy / admin-override)
   connectionType: {
     type: String,
     enum: ["qr", "meta", "any"],
@@ -26,14 +35,8 @@ const PlanSchema = new mongoose.Schema({
   },
 
   // ── QR-specific limits (enforced backend-side) ─────────────────
-  // Daily outbound message limit for QR users on this plan (0 = unlimited)
   dailyMessageLimit: { type: Number, default: 200 },
-
-  // Weekly outbound message limit for QR users — ban-risk threshold
-  // When weeklyMessageLimit > 0 AND usage >= banRiskThreshold → warning triggered
-  weeklyMessageLimit: { type: Number, default: 0 }, // 0 = no weekly cap
-
-  // Weekly usage count at which a ban-risk warning is shown
+  weeklyMessageLimit: { type: Number, default: 0 },
   banRiskThreshold: { type: Number, default: 500 },
 
 }, { timestamps: true });

@@ -37,7 +37,9 @@ export async function POST(req) {
             profileImage,
             providerId,
             provider,
+            country,
         } = reBody;
+
 
         // Validate required fields
         if (!name || !email) {
@@ -98,8 +100,15 @@ export async function POST(req) {
                 referralCode,
                 profileImage,
                 userVerify: true,
-                emailVerification: { isVerified: true }
+                emailVerification: { isVerified: true },
+                country: country || null,
             });
+        }
+
+        /* Patch country on returning user if they didn't have one yet */
+        if (user && !user.country && country) {
+            await UserModel.findByIdAndUpdate(user._id, { $set: { country } });
+            user = await UserModel.findById(user._id);
         }
 
 

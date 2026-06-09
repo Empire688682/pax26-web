@@ -46,7 +46,9 @@ export const AppProvider = ({ children }) => {
     email: "",
     number: "",
     password: "",
+    country: "",
   });
+
 
 
   /* ================================
@@ -112,8 +114,10 @@ export const AppProvider = ({ children }) => {
         email: "",
         number: "",
         password: "",
+        country: "",
         provider: "credentials",
       });
+
     }
   };
 
@@ -216,7 +220,8 @@ export const AppProvider = ({ children }) => {
   =================================*/
 
   useEffect(() => {
-    setData({ name: "", email: "", number: "", password: "" });
+    setData({ name: "", email: "", number: "", password: "", country: "" });
+
   }, [authType]);
 
   useEffect(() => {

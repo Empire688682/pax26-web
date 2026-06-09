@@ -116,6 +116,12 @@ const formatConversationTime = (date) => {
 /* ─────────────────────────────────────────────
    LEAD PANEL
 ───────────────────────────────────────────── */
+const XIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
 function LeadPanel({
   contact,
   phone,
@@ -129,9 +135,14 @@ function LeadPanel({
     contact?.notes || ""
   );
 
+  const [tags, setTags] = useState(
+    contact?.tags || []
+  );
+
   useEffect(() => {
     setStage(contact?.leadStage || "new");
     setNotes(contact?.notes || "");
+    setTags(contact?.tags || []);
   }, [contact]);
 
   const saveLead = async () => {
@@ -145,12 +156,14 @@ function LeadPanel({
           phone,
           leadStage: stage,
           notes,
+          tags,
         }),
       });
 
       onUpdate?.({
         leadStage: stage,
         notes,
+        tags,
       });
     } catch (error) {
       console.error(error);
@@ -187,6 +200,8 @@ function LeadPanel({
           display: "flex",
           flexDirection: "column",
           gap: "16px",
+          overflowY: "auto",
+          flex: 1,
         }}
       >
         <div>
@@ -252,6 +267,74 @@ function LeadPanel({
               textTransform: "uppercase",
             }}
           >
+            Tags
+          </div>
+
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "6px",
+            alignItems: "center",
+            padding: "8px 10px",
+            borderRadius: "10px",
+            background: "#202c33",
+            border: "1px solid rgba(255,255,255,0.08)",
+            minHeight: "40px",
+            boxSizing: "border-box",
+          }}>
+            {tags.map(t => (
+              <span key={t} style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "3px 8px",
+                borderRadius: "999px",
+                fontSize: "11px",
+                fontWeight: 600,
+                background: "rgba(0,168,132,0.15)",
+                color: "#00a884",
+                border: "1px solid rgba(0,168,132,0.25)",
+              }}>
+                {t}
+                <span onClick={() => setTags(tags.filter(x => x !== t))} style={{ cursor: "pointer", opacity: 0.7, lineHeight: 1 }}>
+                  <XIcon />
+                </span>
+              </span>
+            ))}
+            <input
+              placeholder={tags.length ? "" : "Add tags..."}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  const val = e.target.value.trim().replace(/,+$/, "");
+                  if (val && !tags.includes(val)) {
+                    setTags([...tags, val]);
+                  }
+                  e.target.value = "";
+                }
+              }}
+              style={{
+                flex: 1,
+                minWidth: "80px",
+                border: "none",
+                outline: "none",
+                background: "transparent",
+                fontSize: "13px",
+                color: "#e9edef",
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div
+            style={{
+              color: "#8696a0",
+              fontSize: "11px",
+              marginBottom: "8px",
+              textTransform: "uppercase",
+            }}
+          >
             Notes
           </div>
 
@@ -286,6 +369,8 @@ function LeadPanel({
             color: "white",
             fontWeight: 700,
             cursor: "pointer",
+            flexShrink: 0,
+            marginTop: "8px",
           }}
         >
           Save Lead

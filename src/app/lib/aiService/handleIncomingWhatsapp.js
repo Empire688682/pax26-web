@@ -11,7 +11,6 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
 import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply";
-import { trackQRUsage } from "@/app/lib/qrUsageTracker";
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -313,16 +312,7 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
   console.log(`✅ Step 7 — Usage OK: ${usedMessages}/${maxMessages}`);
 
-  // ── Step 7b: QR daily limit enforcement ──────────────────
-  // Only applies to QR-connected users (Meta API has no daily cap here)
-  if (user.whatsapp?.connectionType === "qr") {
-    const qrCheck = await trackQRUsage(user._id.toString(), currentPlan);
-    if (qrCheck.blocked) {
-      console.log(`🚫 Step 7b — QR daily limit reached for user ${user._id}. Skipping AI reply.`);
-      return { ok: true };
-    }
-    console.log(`✅ Step 7b — QR usage OK: daily=${qrCheck.dailyCount} weekly=${qrCheck.weeklyCount} banRisk=${qrCheck.isBanRisk}`);
-  }
+
 
 
   // ── Step 8: Handle image vs text separately ───────────────
@@ -341,9 +331,7 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
 
     try {
-      const mediaUrl = user.whatsapp?.connectionType === "qr"
-        ? message.image.url
-        : await resolveWhatsAppMediaUrl(message.image.id);
+      const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
       const caption = message.image?.caption || "";
 
       const recentMessages = await AIMessageModel.find({

@@ -5,7 +5,8 @@ import {
   Bell, ArrowRight, Eye, EyeOff, TrendingUp,
   MessageSquare, Users, Layers, Crown, Sparkles,
   Database, BookOpen, Gift, MessageCircle, Brain, Repeat,
-  Activity, ChevronRight, BarChart2, Shield
+  Activity, ChevronRight, BarChart2, Shield, MapPin,
+  Radio, Send
 } from "lucide-react";
 
 const ICON_MAP = {
@@ -653,31 +654,90 @@ export default function Dashboard() {
               {/* ── QUICK SERVICES ── */}
               <div className={`px-s4 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "24px" }}>
                 <Label text="Quick Services" isDark={isDark} />
-                <div className="px-svc-grid">
-                  {vtuServices.length > 0 ? vtuServices.map((svc) => {
-                    const IconComponent = ICON_MAP[svc.iconName] || Zap;
-                    const linkUrl = svc.key === "transfer"
-                      ? "/dashboard/services/transfer"
-                      : `/dashboard/services/buy-${svc.key.replace("buy-", "")}`;
-                    return (
-                      <SvcCard key={svc.key}
-                        title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")}
-                        link={linkUrl}
-                        icon={<IconComponent size={19} strokeWidth={2.2} />}
-                        color={svc.color || C.emerald}
-                        isDark={isDark} router={router}
-                      />
-                    );
-                  }) : (
-                    <>
-                      <SvcCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
-                      <SvcCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
-                      <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
-                      <SvcCard title="TV" link="/dashboard/services/buy-tv-subscription" icon={<Tv size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
-                      <SvcCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={19} strokeWidth={2.2} />} color={C.orange} isDark={isDark} router={router} />
-                    </>
-                  )}
-                </div>
+
+                {userData?.country === "Nigeria" ? (
+                  /* ── Nigeria: show VTU grid ── */
+                  <div className="px-svc-grid">
+                    {vtuServices.length > 0 ? vtuServices.map((svc) => {
+                      const IconComponent = ICON_MAP[svc.iconName] || Zap;
+                      const linkUrl = svc.key === "transfer"
+                        ? "/dashboard/services/transfer"
+                        : `/dashboard/services/buy-${svc.key.replace("buy-", "")}`;
+                      return (
+                        <SvcCard key={svc.key}
+                          title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")}
+                          link={linkUrl}
+                          icon={<IconComponent size={19} strokeWidth={2.2} />}
+                          color={svc.color || C.emerald}
+                          isDark={isDark} router={router}
+                        />
+                      );
+                    }) : (
+                      <>
+                        <SvcCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
+                        <SvcCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
+                        <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
+                        <SvcCard title="TV" link="/dashboard/services/buy-tv-subscription" icon={<Tv size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
+                        <SvcCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={19} strokeWidth={2.2} />} color={C.orange} isDark={isDark} router={router} />
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  /* ── Non-Nigerian: friendly notice card ── */
+                  <div style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 16,
+                    padding: "20px 22px",
+                    borderRadius: 18,
+                    background: isDark ? "rgba(251,191,36,0.05)" : "rgba(251,191,36,0.06)",
+                    border: `1px solid ${isDark ? "rgba(251,191,36,0.18)" : "rgba(251,191,36,0.25)"}`,
+                  }}>
+                    {/* globe icon badge */}
+                    <div style={{
+                      flexShrink: 0,
+                      width: 44, height: 44, borderRadius: 13,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: "rgba(251,191,36,0.12)",
+                      border: "1px solid rgba(251,191,36,0.22)",
+                      color: C.amber,
+                    }}>
+                      <MapPin size={19} strokeWidth={2.2} />
+                    </div>
+
+                    {/* text content */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 6 }}>
+                        <span style={{
+                          fontSize: 13.5, fontWeight: 700,
+                          color: isDark ? "rgba(226,232,240,0.92)" : "rgba(15,23,42,0.9)",
+                          fontFamily: "'Outfit', sans-serif",
+                        }}>
+                          🌍 Utility Services
+                        </span>
+                        {/* Coming Soon badge */}
+                        <span style={{
+                          fontSize: 9, fontWeight: 800, letterSpacing: "0.1em",
+                          textTransform: "uppercase", padding: "3px 10px", borderRadius: 999,
+                          background: "rgba(251,191,36,0.15)",
+                          color: C.amber,
+                          border: "1px solid rgba(251,191,36,0.3)",
+                          fontFamily: "'DM Mono', monospace",
+                        }}>
+                          Coming Soon
+                        </span>
+                      </div>
+                      <p style={{
+                        fontSize: 12.5, lineHeight: 1.65, margin: 0, fontWeight: 400,
+                        color: isDark ? "rgba(148,163,184,0.75)" : "rgba(71,85,105,0.8)",
+                        fontFamily: "'Outfit', sans-serif",
+                      }}>
+                        Utility services (Airtime, Data, Electricity, TV &amp; Transfers) are currently available in{" "}
+                        <strong style={{ color: C.amber, fontWeight: 700 }}>Nigeria</strong>{" "}only — more countries coming soon.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -827,9 +887,11 @@ export default function Dashboard() {
                 <Label text="Quick Links" isDark={isDark} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
-                    { label: "AI Automations", href: "/dashboard/automations", icon: <Bot size={15} />, color: C.emerald },
-                    { label: "Analytics", href: "/dashboard/automations/ai-business-dashboard", icon: <BarChart2 size={15} />, color: C.cyan },
-                    { label: "Billing & Plans", href: "/dashboard/billing", icon: <Crown size={15} />, color: C.amber },
+                    { label: "AI Automations",  href: "/dashboard/automations",                    icon: <Bot size={15} />,     color: C.emerald },
+                    { label: "Analytics",        href: "/dashboard/automations/ai-business-dashboard", icon: <BarChart2 size={15} />, color: C.cyan    },
+                    { label: "Broadcast",        href: "/dashboard/automations/broadcast",           icon: <Radio size={15} />,   color: C.indigo  },
+                    { label: "Campaigns",         href: "/dashboard/automations/broadcast/campaigns", icon: <Send size={15} />,    color: C.orange  },
+                    { label: "Billing & Plans",   href: "/dashboard/billing",                         icon: <Crown size={15} />,   color: C.amber   },
                   ].map(({ label, href, icon, color }) => (
                     <button key={label} type="button" className="px-btn"
                       onClick={() => router.push(href)}
