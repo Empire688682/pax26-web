@@ -18,14 +18,7 @@ import {
   Info
 } from "lucide-react";
 
-// Cookie helper
-const getCookie = (name) => {
-  if (typeof document === "undefined") return "";
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return "";
-};
+// No cookie helper needed — we use a server-side proxy route instead
 
 export default function CampaignsPage() {
   const { pax26 } = useGlobalContext();
@@ -36,17 +29,9 @@ export default function CampaignsPage() {
   const fetchCampaigns = async () => {
     setLoading(true);
     try {
-      const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-      if (!adminUrl) {
-        throw new Error("Admin backend connection not configured.");
-      }
-
-      const token = getCookie("UserToken");
-      const res = await axios.get(`${adminUrl}/broadcast/campaigns`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      // Use the server-side proxy — it can read the httpOnly cookie that
+      // client-side getCookie() cannot access across domains
+      const res = await axios.get("/api/proxy/broadcast/campaigns");
 
       if (res.data?.success) {
         setCampaigns(res.data.data || []);

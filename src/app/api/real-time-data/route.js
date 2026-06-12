@@ -21,7 +21,10 @@ export async function GET(req) {
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 404, headers:corsHeaders() });
         }
-        const transactions = await TransactionModel.find({ userId });
+        const transactions = await TransactionModel.find({ userId })
+            .sort({ createdAt: -1 })
+            .limit(50)   // cap at 50 most recent — fetching ALL transactions kills performance
+            .lean();
         const walletBalance = user.walletBalance || 0;
         const commissionBalance = user.commissionBalance || 0;
         const cashBackBalance = user.cashBackBalance || 0;

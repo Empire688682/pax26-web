@@ -1,7 +1,3 @@
-/**
- * GET /api/referral/stats
- * Returns referral statistics for the authenticated user.
- */
 import { NextResponse } from 'next/server';
 import { connectDb } from '@/app/ults/db/ConnectDb';
 import { verifyToken } from '../../helper/VerifyToken';
@@ -11,6 +7,9 @@ import ReferralModel from '@/app/ults/models/ReferralModel';
 import WalletTransactionModel from '@/app/ults/models/WalletTransactionModel';
 import PlanModel from '@/app/ults/models/PlanModel';
 import { isPaidPlan } from '@/app/lib/referralService';
+
+// Module-level cache for plans — avoids hitting MongoDB on every request
+let cachedPlans = null;
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -27,29 +26,29 @@ export async function GET(req) {
       );
     }
 
-    const user = await UserModel.findById(userId).select(
-      'referralCode referralWalletBalance pendingReferralBonus releasedReferralBonus ' +
-      'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI'
-    );
+    // Cache plans in module scope — they rarely change, no need to hit DB on every request
+    if (!cachedPlans) {
+      cachedPlans = await PlanModel.find({ isActive: true }).lean();
+      // Refresh cache every 10 minutes
+      setTimeout(() => { cachedPlans = null; }, 10 * 60 * 1000);
+    }
+    const plans = cachedPlans;
 
+    // Run all independent DB queries in parallel
+    const [user, recentTransactions, pendingReferrals] = await Promise.all([
+      UserModel.findById(userId).select(
+        'referralCode referralWalletBalance pendingReferralBonus releasedReferralBonus ' +
+        'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI'
+      ),
+      WalletTransactionModel.find({ userId }).sort({ createdAt: -1 }).limit(10).lean(),
+      ReferralModel.countDocuments({ referrer: userId, status: 'pending' }),
+    ]);
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
         { status: 404, headers: corsHeaders() }
       );
     }
-
-    // Fetch the last 10 wallet transactions for this user
-    const recentTransactions = await WalletTransactionModel.find({ userId })
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean();
-
-    // Fetch pending referrals (signed up but not yet subscribed)
-    const pendingReferrals = await ReferralModel.countDocuments({
-      referrer: userId,
-      status: 'pending',
-    });
 
     const isPaidUser = await isPaidPlan(user.paxAI?.plan);
 
@@ -60,8 +59,6 @@ export async function GET(req) {
       user.userVerify === true &&
       user.canWithdraw === true;
 
-    // Fetch dynamic plan rewards from database
-    const plans = await PlanModel.find({ isActive: true }).lean();
     const planRewards = {};
     let maxReward = 0;
     plans.forEach(plan => {

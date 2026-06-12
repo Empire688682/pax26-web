@@ -21,14 +21,8 @@ import {
   Lock
 } from "lucide-react";
 
-// Cookie helper to fetch UserToken on client side
-const getCookie = (name) => {
-  if (typeof document === "undefined") return "";
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return "";
-};
+// Cookie helper removed — using server-side proxy routes instead
+// (httpOnly cookies can't be read by getCookie on cross-domain requests)
 
 export default function BroadcastPage() {
   const { pax26, userData } = useGlobalContext();
@@ -152,15 +146,11 @@ export default function BroadcastPage() {
 
     setSending(true);
     try {
-      const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-      if (!adminUrl) {
-        throw new Error("Admin backend connection not configured (NEXT_PUBLIC_ADMIN_URL is missing).");
-      }
-
-      const token = getCookie("UserToken");
-      const endpoint = isSchedule 
-        ? `${adminUrl}/broadcast/schedule` 
-        : `${adminUrl}/broadcast/send`;
+      // Use server-side proxy routes — they can read the httpOnly cookie
+      // that client-side getCookie() cannot access across domains
+      const endpoint = isSchedule
+        ? "/api/proxy/broadcast/schedule"
+        : "/api/proxy/broadcast/send";
 
       const payload = {
         title,
@@ -169,11 +159,7 @@ export default function BroadcastPage() {
         ...(isSchedule && { scheduledAt: new Date(scheduleDate).toISOString() })
       };
 
-      const res = await axios.post(endpoint, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await axios.post(endpoint, payload);
 
       if (res.data?.success) {
         toast.success(res.data.message);

@@ -19,17 +19,20 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "No Id found" }, { status: 404, headers: corsHeaders() })
         }
 
-        const user = await UserModel.findById(userId);
+        // Run all 3 DB queries in parallel instead of sequentially
+        const [user, userSellerProfile, doc] = await Promise.all([
+            UserModel.findById(userId),
+            SellerProfileModel.findOne({ userId }),
+            UserAutomationModel.findOne({ userId }),
+        ]);
+
         if (!user) {
             return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
 
-        const userSellerProfile = await SellerProfileModel.findOne({ userId });
-
         const userMessageList = user.whatsapp?.contacts?.list;
         const messagesHandled = userMessageList.reduce((total, contact) => total + contact?.messageCount, 0);
-        const doc = await UserAutomationModel.findOne({ userId });
-        const workflows = doc.automations.filter(auto => auto.enabled).length ?? 0;
+        const workflows = doc?.automations?.filter(auto => auto.enabled).length ?? 0;
 
         // Prepare safe user object
         const userObj = user.toObject();
