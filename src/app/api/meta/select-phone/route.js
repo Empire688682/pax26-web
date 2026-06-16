@@ -46,13 +46,32 @@ export async function POST(req) {
             );
         }
 
-        // 💾 Save to user using $set and dot notation to prevent overwriting other fields (like contacts and custom paxAI prompt/plan)
+        // ── Confirm activation via Graph API ─────────────────────
+        // Verify the number actually flipped to VERIFIED / CONNECTED
+        // before marking it active in our DB.
+        let confirmedStatus = phone.verificationStatus || "UNKNOWN";
+        try {
+            const statusRes = await fetch(
+                `https://graph.facebook.com/v22.0/${phone.id}?fields=code_verification_status,status&access_token=${session.accessToken}`
+            );
+            const statusData = await statusRes.json();
+            if (statusData.error) {
+                console.error(`❌ Status confirmation failed for ${phone.id}:`, JSON.stringify(statusData.error));
+            } else {
+                confirmedStatus = statusData.code_verification_status || confirmedStatus;
+                console.log(`✅ Phone ${phone.id} status confirmed: code_verification_status=${confirmedStatus}, status=${statusData.status}`);
+            }
+        } catch (err) {
+            console.error(`❌ Status confirmation exception for ${phone.id}:`, err.message);
+        }
+
+        // 💾 Save to user — additive fields only, no existing field renamed or removed
         await UserModel.findByIdAndUpdate(
             session.userId,
             {
                 $set: {
                     "whatsapp.connected": true,
-                    "whatsapp.accessToken": session.accessToken, // ✅ retrieved from server, never from browser
+                    "whatsapp.accessToken": session.accessToken,
                     "whatsapp.wabaId": phone.wabaId,
                     "whatsapp.phoneNumberId": phone.id,
                     "whatsapp.displayPhone": phone.display,
@@ -61,6 +80,9 @@ export async function POST(req) {
                         messaging: true,
                         management: true,
                     },
+                    // NEW additive fields — safe to add
+                    "whatsapp.codeVerificationStatus": confirmedStatus,
+                    ...(phone.registrationPin && { "whatsapp.registrationPin": phone.registrationPin }),
                     "paxAI.enabled": true,
                 }
             },
