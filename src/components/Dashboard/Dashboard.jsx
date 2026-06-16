@@ -469,7 +469,7 @@ export default function Dashboard() {
                 <Bell size={18} color={textSec} strokeWidth={2} />
               </button>
               <button type="button" className="px-btn"
-                onClick={() => router.push("/dashboard/settings")}
+                onClick={() => router.push("/profile")}
                 style={{
                   width: 46, height: 46, borderRadius: 14,
                   display: "flex", alignItems: "center", justifyContent: "center",

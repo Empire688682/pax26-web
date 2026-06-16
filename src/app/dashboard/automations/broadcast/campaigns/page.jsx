@@ -15,7 +15,9 @@ import {
   FileText,
   Percent,
   RefreshCw,
-  Info
+  Info,
+  Lock,
+  Zap
 } from "lucide-react";
 
 // No cookie helper needed — we use a server-side proxy route instead
@@ -25,12 +27,12 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reportsAccess, setReportsAccess] = useState(false);
+  const [planError, setPlanError] = useState(null); // holds 403 upgrade message
 
   const fetchCampaigns = async () => {
     setLoading(true);
+    setPlanError(null);
     try {
-      // Use the server-side proxy — it can read the httpOnly cookie that
-      // client-side getCookie() cannot access across domains
       const res = await axios.get("/api/proxy/broadcast/campaigns");
 
       if (res.data?.success) {
@@ -38,8 +40,17 @@ export default function CampaignsPage() {
         setReportsAccess(!!res.data.reportsAccess);
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Could not load campaign history.");
+      const status = err.response?.status;
+      const code = err.response?.data?.code;
+      const message = err.response?.data?.message;
+
+      if (status === 403 && (code === "UPGRADE_REQUIRED" || code === "LIMIT_REACHED")) {
+        // Plan restriction — show upgrade UI instead of a toast error
+        setPlanError({ code, message });
+      } else {
+        console.error(err);
+        toast.error("Could not load campaign history.");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,7 +86,48 @@ export default function CampaignsPage() {
           </button>
         </div>
 
+        {/* Plan restriction UI */}
+        {planError && (
+          <div className="rounded-2xl border p-8 flex flex-col items-center text-center gap-5"
+            style={{
+              background: planError.code === "LIMIT_REACHED"
+                ? "rgba(245,158,11,0.04)"
+                : "rgba(139,92,246,0.04)",
+              borderColor: planError.code === "LIMIT_REACHED"
+                ? "rgba(245,158,11,0.2)"
+                : "rgba(139,92,246,0.2)",
+            }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{
+                background: planError.code === "LIMIT_REACHED"
+                  ? "rgba(245,158,11,0.1)"
+                  : "rgba(139,92,246,0.1)",
+              }}>
+              {planError.code === "LIMIT_REACHED"
+                ? <AlertCircle size={24} className="text-amber-400" />
+                : <Lock size={24} style={{ color: "#8b5cf6" }} />
+              }
+            </div>
+            <div>
+              <p className="text-sm font-extrabold mb-1"
+                style={{ color: pax26?.textPrimary }}>
+                {planError.code === "LIMIT_REACHED" ? "Monthly Limit Reached" : "Plan Upgrade Required"}
+              </p>
+              <p className="text-xs leading-relaxed max-w-sm"
+                style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
+                {planError.message}
+              </p>
+            </div>
+            <a href="/dashboard/billing"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-transform active:scale-95"
+              style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}>
+              <Zap size={13} /> Upgrade Plan
+            </a>
+          </div>
+        )}
+
         {/* Campaign List */}
+        {!planError && (
         <div className="rounded-2xl border p-6 overflow-hidden"
           style={{
             background: pax26?.bg || "rgba(12, 20, 40, 0.72)",
@@ -192,6 +244,7 @@ export default function CampaignsPage() {
           </div>
 
         </div>
+        )}
 
       </div>
     </PlanGate>

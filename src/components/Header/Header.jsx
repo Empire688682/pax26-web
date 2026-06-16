@@ -22,6 +22,7 @@ const Header = () => {
     }
     
     return (
+        <>
         <div
             className={`shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between`}
             style={{ backgroundColor: pax26.header }}>
@@ -89,14 +90,15 @@ const Header = () => {
                     !isHomePage && <Menu onClick={toggleMenu} size={30} color={pax26.textPrimary} className='cursor-pointer' />
                 }
             </div>
+        </div>
             {
                 pinModal && (
-                    <div className='w-full h-full bg-black/50 flex items-center justify-center fixed top-0 left-0'>
+                    <div className='w-full h-full bg-black/80 flex items-center justify-center fixed top-0 left-0 z-[100]'>
                         <TransactionPin />
                     </div>
                 )
             }
-        </div>
+        </>
     )
 }
 

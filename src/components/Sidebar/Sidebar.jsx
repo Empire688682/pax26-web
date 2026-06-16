@@ -266,20 +266,20 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations/market-place" icon={Layers} label="Marketplace" onClick={close} pax26={pax26} />
 
                 <SectionLabel label="Automations" pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Dashboard" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contact Manager" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="Anti-Ban Tool" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Agent Workflow" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/sales-notifications" icon={Bell} label="Sales Alerts" onClick={close} pax26={pax26} isNew={true} />
-                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Dashboard" onClick={close} pax26={pax26} isNew={true} />
-                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Broadcast" onClick={close} pax26={pax26} isNew={true} />
-                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Campaigns" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/automations/sales-notifications" icon={Bell} label="Sales Alerts" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Dashboard" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Broadcast" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Campaigns" onClick={close} pax26={pax26} />
 
                 <SectionLabel label="Financials" pax26={pax26} />
                 <NavItem href="/fund-wallet" icon={CreditCard} label="Add Funds" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referrals" onClick={close} pax26={pax26} isNew={true} />
+                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referrals" onClick={close} pax26={pax26} />
                 <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
                 <VtuNavItem pax26={pax26} onClose={close} />
 

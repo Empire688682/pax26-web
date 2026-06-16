@@ -67,10 +67,14 @@ const WalletBalance = ({ setShowMore, showMore }) => {
   const accNum  = userData?.number ? userData.number.slice(-10) : "**********";
 
   useEffect(() => {
-  if (!userData || typeof userData !== "object") return;
-
-  setPinModal(!userData.isTransactionPinSet);
-}, [userData]);
+    if (!userData || typeof userData !== "object") return;
+    // Only open the PIN modal once on mount if the PIN hasn't been set yet.
+    // Do NOT re-run on every userData update — that would reopen the modal
+    // immediately after the user sets their PIN and fetchUser() refreshes userData.
+    if (!userData.isTransactionPinSet) {
+      setPinModal(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* initial fetch + 30s polling */
   useEffect(() => {

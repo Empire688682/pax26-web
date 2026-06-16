@@ -918,6 +918,55 @@ export default function WhatsAppInbox() {
             >
               Loading...
             </div>
+          ) : filteredConversations.length === 0 ? (
+            /* ── NO CONVERSATIONS EMPTY STATE ── */
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "40px 24px",
+              gap: "16px",
+              flex: 1,
+              height: "100%",
+            }}>
+              {/* Animated chat bubble icon */}
+              <div style={{
+                width: "72px",
+                height: "72px",
+                borderRadius: "50%",
+                background: "rgba(0,168,132,0.1)",
+                border: "1.5px solid rgba(0,168,132,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a884" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <line x1="9" y1="10" x2="15" y2="10"/>
+                  <line x1="12" y1="7" x2="12" y2="13"/>
+                </svg>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "#e9edef", fontSize: "14px", fontWeight: 700, margin: "0 0 6px 0" }}>
+                  No messages yet
+                </p>
+                <p style={{ color: "#8696a0", fontSize: "12px", margin: 0, lineHeight: 1.6, maxWidth: "220px" }}>
+                  When customers message your WhatsApp number, their conversations will appear here.
+                </p>
+              </div>
+              <div style={{
+                padding: "8px 14px",
+                borderRadius: "999px",
+                background: "rgba(0,168,132,0.08)",
+                border: "1px solid rgba(0,168,132,0.2)",
+                color: "#00a884",
+                fontSize: "11px",
+                fontWeight: 600,
+              }}>
+                Waiting for incoming messages
+              </div>
+            </div>
           ) : (
             filteredConversations.map((conv) => {
               const isActive =
@@ -1113,12 +1162,94 @@ export default function WhatsAppInbox() {
             style={{
               flex: 1,
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              color: "#8696a0",
+              gap: "20px",
+              padding: "40px 24px",
             }}
           >
-            Select a conversation
+            {/* WhatsApp-style decorative background pattern */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `radial-gradient(circle at 20% 80%, rgba(0,168,132,0.03) 0%, transparent 50%),
+                                radial-gradient(circle at 80% 20%, rgba(0,168,132,0.03) 0%, transparent 50%)`,
+              pointerEvents: "none",
+            }} />
+
+            {/* Icon */}
+            <div style={{
+              width: "88px",
+              height: "88px",
+              borderRadius: "50%",
+              background: "rgba(0,168,132,0.08)",
+              border: "1.5px solid rgba(0,168,132,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+            }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00a884" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              {/* Pulse ring */}
+              <div style={{
+                position: "absolute",
+                inset: "-8px",
+                borderRadius: "50%",
+                border: "1px solid rgba(0,168,132,0.1)",
+                animation: "pulse-ring 2.5s ease-out infinite",
+              }} />
+            </div>
+
+            <div style={{ textAlign: "center", maxWidth: "280px" }}>
+              <p style={{
+                color: "#e9edef",
+                fontSize: "18px",
+                fontWeight: 700,
+                margin: "0 0 8px 0",
+                letterSpacing: "-0.3px",
+              }}>
+                Your Inbox
+              </p>
+              <p style={{
+                color: "#8696a0",
+                fontSize: "13px",
+                margin: 0,
+                lineHeight: 1.7,
+              }}>
+                Select a conversation from the left to view messages, reply to customers, and manage lead stages.
+              </p>
+            </div>
+
+            <div style={{
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}>
+              {["AI-Powered", "Lead Tracking", "Live Handoff"].map(tag => (
+                <span key={tag} style={{
+                  padding: "6px 12px",
+                  borderRadius: "999px",
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  color: "#8696a0",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <style>{`
+              @keyframes pulse-ring {
+                0% { transform: scale(1); opacity: 0.4; }
+                100% { transform: scale(1.4); opacity: 0; }
+              }
+            `}</style>
           </div>
         ) : (
           <>
