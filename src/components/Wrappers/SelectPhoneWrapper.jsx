@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGlobalContext } from "@/components/Context";
 
@@ -97,6 +97,220 @@ const PhoneCard = ({ phone, selected, onSelect, pax26 }) => {
     );
 };
 
+const OtpStep = ({ phone, sessionId, pax26, onVerified, onSkip }) => {
+    const [method, setMethod]     = useState("SMS");
+    const [otpSent, setOtpSent]   = useState(false);
+    const [code, setCode]         = useState("");
+    const [loading, setLoading]   = useState(false);
+    const [error, setError]       = useState(null);
+    const [success, setSuccess]   = useState(false);
+    const inputRefs               = useRef([]);
+    const digits                  = code.padEnd(6, " ").split("").slice(0, 6);
+
+    const requestOtp = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/meta/verify-phone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "request", sessionId, phoneId: phone.id, method }),
+            });
+            const data = await res.json();
+            if (data.alreadyVerified) { onVerified(); return; }
+            if (!data.success) { setError(data.message); return; }
+            setOtpSent(true);
+        } catch { setError("Network error. Please try again."); }
+        finally { setLoading(false); }
+    };
+
+    const handleDigit = (val, idx) => {
+        const digit = val.replace(/\D/g, "").slice(-1);
+        const next  = code.split("");
+        next[idx]   = digit;
+        const newCode = next.join("").replace(/ /g, "").slice(0, 6);
+        setCode(newCode);
+        if (digit && idx < 5) inputRefs.current[idx + 1]?.focus();
+    };
+
+    const handleKeyDown = (e, idx) => {
+        if (e.key === "Backspace" && !code[idx] && idx > 0) {
+            inputRefs.current[idx - 1]?.focus();
+        }
+    };
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+        setCode(pasted);
+        inputRefs.current[Math.min(pasted.length, 5)]?.focus();
+    };
+
+    const verifyOtp = async () => {
+        if (code.length < 6) { setError("Please enter the full 6-digit code."); return; }
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/meta/verify-phone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "verify", sessionId, phoneId: phone.id, code }),
+            });
+            const data = await res.json();
+            if (!data.success) { setError(data.message); return; }
+            setSuccess(true);
+            setTimeout(onVerified, 1200);
+        } catch { setError("Network error. Please try again."); }
+        finally { setLoading(false); }
+    };
+
+    return (
+        <div className="px-6 py-6 flex flex-col gap-5">
+            {/* Header */}
+            <div>
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-amber-400/15 flex items-center justify-center flex-shrink-0">
+                        <span style={{ fontSize: 14 }}>🔐</span>
+                    </div>
+                    <p className="font-bold text-sm" style={{ color: pax26?.textPrimary }}>
+                        Verify your number
+                    </p>
+                </div>
+                <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
+                    <strong style={{ color: "#f59e0b" }}>{phone.display}</strong> is not yet verified with Meta.
+                    We need to send an OTP to this number to activate it.
+                </p>
+            </div>
+
+            {!otpSent ? (
+                <>
+                    {/* Method toggle */}
+                    <div className="flex gap-2">
+                        {["SMS", "VOICE"].map((m) => (
+                            <button
+                                key={m}
+                                onClick={() => setMethod(m)}
+                                className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all"
+                                style={method === m
+                                    ? { background: "#4ade80", color: "#000" }
+                                    : { background: pax26?.secondaryBg, color: pax26?.textSecondary, border: `1px solid ${pax26?.border}` }
+                                }
+                            >
+                                {m === "SMS" ? "📱 SMS" : "📞 Voice Call"}
+                            </button>
+                        ))}
+                    </div>
+
+                    {error && (
+                        <p className="text-xs text-rose-400 px-1">{error}</p>
+                    )}
+
+                    <button
+                        onClick={requestOtp}
+                        disabled={loading}
+                        className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
+                        style={{ background: "#4ade80", color: "#000", opacity: loading ? 0.6 : 1 }}
+                    >
+                        {loading
+                            ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Sending OTP…</>
+                            : `Send OTP via ${method}`
+                        }
+                    </button>
+
+                    <button
+                        onClick={onSkip}
+                        className="text-xs text-center underline opacity-40 hover:opacity-60 transition-opacity"
+                        style={{ color: pax26?.textSecondary }}
+                    >
+                        Skip for now (number may not send messages)
+                    </button>
+                </>
+            ) : success ? (
+                <div className="flex flex-col items-center gap-3 py-4">
+                    <div className="w-14 h-14 rounded-full bg-green-400/15 flex items-center justify-center text-3xl">✅</div>
+                    <p className="font-bold text-sm" style={{ color: "#4ade80" }}>Number verified!</p>
+                    <p className="text-xs opacity-60" style={{ color: pax26?.textSecondary }}>Completing connection…</p>
+                </div>
+            ) : (
+                <>
+                    <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
+                        OTP sent to <strong style={{ color: pax26?.textPrimary }}>{phone.display}</strong> via {method}.
+                        Enter the code below.
+                    </p>
+
+                    {/* OTP boxes */}
+                    <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <input
+                                key={i}
+                                ref={el => inputRefs.current[i] = el}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={1}
+                                value={code[i] || ""}
+                                onChange={e => handleDigit(e.target.value, i)}
+                                onKeyDown={e => handleKeyDown(e, i)}
+                                className="w-11 h-12 rounded-xl text-center text-lg font-bold outline-none transition-all"
+                                style={{
+                                    background: code[i] ? "rgba(74,222,128,0.08)" : pax26?.secondaryBg,
+                                    border: `2px solid ${code[i] ? "#4ade80" : pax26?.border}`,
+                                    color: pax26?.textPrimary,
+                                    boxShadow: code[i] ? "0 0 0 3px rgba(74,222,128,0.1)" : "none",
+                                }}
+                            />
+                        ))}
+                    </div>
+
+                    {error && <p className="text-xs text-rose-400 text-center">{error}</p>}
+
+                    <button
+                        onClick={verifyOtp}
+                        disabled={loading || code.length < 6}
+                        className="w-full py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
+                        style={{
+                            background: code.length === 6 && !loading ? "#4ade80" : pax26?.secondaryBg,
+                            color: code.length === 6 && !loading ? "#000" : pax26?.textSecondary,
+                            border: code.length < 6 ? `1px solid ${pax26?.border}` : "none",
+                            opacity: loading ? 0.7 : 1,
+                        }}
+                    >
+                        {loading
+                            ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Verifying…</>
+                            : "Confirm Code"
+                        }
+                    </button>
+
+                    <div className="flex justify-between items-center">
+                        <button
+                            onClick={() => { setOtpSent(false); setCode(""); setError(null); }}
+                            className="text-xs underline opacity-40 hover:opacity-60 transition-opacity"
+                            style={{ color: pax26?.textSecondary }}
+                        >
+                            ← Change method
+                        </button>
+                        <button
+                            onClick={requestOtp}
+                            disabled={loading}
+                            className="text-xs underline opacity-40 hover:opacity-60 transition-opacity"
+                            style={{ color: pax26?.textSecondary }}
+                        >
+                            Resend OTP
+                        </button>
+                    </div>
+
+                    <button
+                        onClick={onSkip}
+                        className="text-xs text-center underline opacity-30 hover:opacity-50 transition-opacity"
+                        style={{ color: pax26?.textSecondary }}
+                    >
+                        Skip verification (number may not send messages)
+                    </button>
+                </>
+            )}
+        </div>
+    );
+};
+
 const SelectPhone = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -108,6 +322,8 @@ const SelectPhone = () => {
     const [loading, setLoading] = useState(true);
     const [connecting, setConnecting] = useState(false);
     const [error, setError] = useState(null);
+    // "select" | "otp" — otp step only shown for unverified numbers
+    const [step, setStep] = useState("select");
 
     useEffect(() => {
         const session = searchParams.get("session");
@@ -146,6 +362,20 @@ const SelectPhone = () => {
 
     const handleConnect = async () => {
         if (!selectedId || !sessionId) return;
+
+        const phone = phones.find((p) => p.id === selectedId);
+
+        // Only show OTP step if Meta says the number is NOT verified
+        if (phone?.verificationStatus !== "VERIFIED") {
+            setStep("otp");
+            return;
+        }
+
+        // Already verified — connect directly
+        await finishConnect();
+    };
+
+    const finishConnect = async () => {
         setConnecting(true);
         setError(null);
 
@@ -163,10 +393,12 @@ const SelectPhone = () => {
             } else {
                 setError(data.message || "Something went wrong.");
                 setConnecting(false);
+                setStep("select");
             }
         } catch {
             setError("Network error. Please try again.");
             setConnecting(false);
+            setStep("select");
         }
     };
 
@@ -255,7 +487,15 @@ const SelectPhone = () => {
 
                     {/* Phone list */}
                     <div className="px-6 py-6">
-                        {loading ? (
+                        {step === "otp" ? (
+                            <OtpStep
+                                phone={phones.find(p => p.id === selectedId)}
+                                sessionId={sessionId}
+                                pax26={pax26}
+                                onVerified={finishConnect}
+                                onSkip={finishConnect}
+                            />
+                        ) : loading ? (
                             <div className="flex flex-col items-center py-12 gap-3">
                                 <div className="w-8 h-8 border-2 border-green-400/30 border-t-green-400 rounded-full animate-spin" />
                                 <p style={{ color: pax26?.textSecondary }} className="text-sm opacity-60">
@@ -335,8 +575,8 @@ const SelectPhone = () => {
                         )}
                     </div>
 
-                    {/* CTA */}
-                    {!loading && phones.length > 0 && (
+                    {/* CTA — only shown on select step */}
+                    {!loading && phones.length > 0 && step === "select" && (
                         <div className="px-6 pb-6">
                             {selectedPhone && (
                                 <div

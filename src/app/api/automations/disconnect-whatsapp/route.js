@@ -38,7 +38,6 @@ export async function POST(req) {
             {
                 $set: {
                     "whatsapp.connected": false,
-                    "whatsapp.connectionType": "meta",
                     "whatsapp.accessToken": "",
                     "whatsapp.wabaId": "",
                     "whatsapp.phoneNumberId": "",
@@ -48,9 +47,6 @@ export async function POST(req) {
                         messaging: false,
                         management: false,
                     },
-                    "whatsapp.qr.sessionId": null,
-                    "whatsapp.qr.qrCode": null,
-                    "whatsapp.qr.qrExpiresAt": null,
                 }
             },
             { new: true }

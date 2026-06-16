@@ -69,7 +69,7 @@ export async function POST(req) {
       console.log("📨 Using session info from postMessage:", { hintWabaId, hintPhoneId });
 
       const phoneRes = await fetch(
-        `https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
+        `https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status&access_token=${accessToken}`
       );
       const phoneData = await phoneRes.json();
 
@@ -92,6 +92,7 @@ export async function POST(req) {
         display: phoneData.display_phone_number,
         name: phoneData.verified_name,
         quality: qualityMap[phoneData.quality_rating] || "UNKNOWN",
+        verificationStatus: phoneData.code_verification_status || "NOT_VERIFIED",
         wabaId: hintWabaId,
         wabaName: wabaData.name || "",
       });
@@ -141,7 +142,7 @@ export async function POST(req) {
 
         for (const waba of wabaData?.data || []) {
           const phoneRes = await fetch(
-            `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating&access_token=${accessToken}`
+            `https://graph.facebook.com/v22.0/${waba.id}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status&access_token=${accessToken}`
           );
           const phoneData = await phoneRes.json();
 
@@ -158,6 +159,7 @@ export async function POST(req) {
               display: phone.display_phone_number,
               name: phone.verified_name,
               quality: qualityMap[phone.quality_rating] || "UNKNOWN",
+              verificationStatus: phone.code_verification_status || "NOT_VERIFIED",
               wabaId: waba.id,
               wabaName: waba.name || "",
             });

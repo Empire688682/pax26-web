@@ -5,9 +5,20 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) => {
     try {
         await connectDb();
-        const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
 
+        // Always use the user's own WhatsApp access token — never a global fallback.
+        const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId })
+            .select("whatsapp.accessToken");
 
+        const token = user?.whatsapp?.accessToken;
+
+        if (!token) {
+            console.error(`❌ No accessToken found for phoneNumberId: ${phoneNumberId}`);
+            return {
+                success: false,
+                error: `No WhatsApp access token found for phoneNumberId: ${phoneNumberId}`
+            };
+        }
 
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
@@ -22,7 +33,7 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
         };
 
         const headers = {
-            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
         };
 
