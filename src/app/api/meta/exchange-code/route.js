@@ -48,10 +48,36 @@ async function subscribeToWaba(wabaId, accessToken) {
 /**
  * Register a phone number on WhatsApp Cloud API.
  * This is the step that moves the number from "Pending" to "Connected".
- * Returns { success, pin, encryptedPin } on success.
+ *
+ * PIN persistence order (safe against network blips):
+ *   1. Generate PIN + encrypted form
+ *   2. Return both to caller BEFORE the API call result is evaluated
+ *   3. Caller stores encrypted PIN in TempSession first
+ *   4. Then calls this function — if the network blips after register
+ *      succeeds but before DB write, the PIN is already in TempSession
+ *
+ * Returns { success, pin, encryptedPin, error?, conflictPin? }
  */
-async function registerPhoneNumber(phoneNumberId, accessToken) {
-  const { pin, stored } = generateAndEncryptPin();
+async function registerPhoneNumber(phoneNumberId, accessToken, existingEncryptedPin) {
+  // If we already have a PIN for this number (retry scenario), reuse it
+  // so we don't generate a new PIN that conflicts with what Meta already has.
+  let pin, stored;
+  if (existingEncryptedPin) {
+    // Decrypt to get the original PIN
+    try {
+      const key = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
+      const [ivHex, encHex] = existingEncryptedPin.split(":");
+      const decipher = crypto.createDecipheriv("aes-256-cbc", key, Buffer.from(ivHex, "hex"));
+      pin = Buffer.concat([decipher.update(Buffer.from(encHex, "hex")), decipher.final()]).toString("utf8");
+      stored = existingEncryptedPin;
+    } catch {
+      // If decrypt fails, generate fresh
+      ({ pin, stored } = generateAndEncryptPin());
+    }
+  } else {
+    ({ pin, stored } = generateAndEncryptPin());
+  }
+
   try {
     const res  = await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}/register`, {
       method: "POST",
@@ -59,14 +85,69 @@ async function registerPhoneNumber(phoneNumberId, accessToken) {
       body: JSON.stringify({ messaging_product: "whatsapp", pin }),
     });
     const data = await res.json();
+
     if (data.error) {
+      // Error 80007 / subcode 2494055 = number already registered with a different PIN
+      // (previous BSP set a PIN we don't know). Surface this clearly — do NOT silently skip.
+      const isPinConflict =
+        data.error.code === 80007 ||
+        (data.error.error_subcode && [2494055, 2494010].includes(data.error.error_subcode));
+
       console.error(`❌ register failed for phone ${phoneNumberId}:`, JSON.stringify(data.error));
-      return { success: false, error: data.error };
+
+      return {
+        success: false,
+        encryptedPin: stored, // still return so caller can persist it for retry
+        error: data.error,
+        isPinConflict,
+        userMessage: isPinConflict
+          ? "This number was previously registered with another WhatsApp service provider. Please remove it from that provider first, then reconnect."
+          : `Registration failed: ${data.error.message}`,
+      };
     }
-    console.log(`✅ register success for phone ${phoneNumberId}:`, JSON.stringify(data));
+
+    console.log(`✅ register success for phone ${phoneNumberId}`);
     return { success: true, pin, encryptedPin: stored };
+
   } catch (err) {
     console.error(`❌ register exception for phone ${phoneNumberId}:`, err.message);
+    return { success: false, encryptedPin: stored, error: err.message, isPinConflict: false,
+      userMessage: "Registration failed due to a network error. Please try again." };
+  }
+}
+
+/**
+ * Share our Meta Business Manager credit line to a client WABA.
+ * Required for the Tech Provider model — clients cannot use their own credit line.
+ * Call once per new WABA after registration succeeds.
+ *
+ * Requires META_CREDIT_LINE_ID in .env — get this from:
+ *   GET https://graph.facebook.com/v22.0/{business_id}/extendedcredits
+ * with your System User token.
+ */
+async function shareCreditLine(wabaId, accessToken) {
+  const creditLineId = process.env.META_CREDIT_LINE_ID;
+  if (!creditLineId) {
+    console.warn("⚠️  META_CREDIT_LINE_ID not set in .env — credit line sharing skipped. " +
+      "Sending may fail with billing errors on some accounts.");
+    return { success: false, skipped: true };
+  }
+
+  try {
+    const res  = await fetch(`https://graph.facebook.com/v22.0/${creditLineId}/whatsapp_credit_sharing_and_attach`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ waba_id: wabaId, waba_currency: "USD" }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      console.error(`❌ credit line sharing failed for WABA ${wabaId}:`, JSON.stringify(data.error));
+      return { success: false, error: data.error };
+    }
+    console.log(`✅ credit line shared to WABA ${wabaId}:`, JSON.stringify(data));
+    return { success: true };
+  } catch (err) {
+    console.error(`❌ credit line sharing exception for WABA ${wabaId}:`, err.message);
     return { success: false, error: err.message };
   }
 }
@@ -251,21 +332,40 @@ export async function POST(req) {
       // 5a — Subscribe our app to this WABA (idempotent, safe to repeat)
       if (!subscribedWabas.has(phone.wabaId)) {
         await subscribeToWaba(phone.wabaId, accessToken);
+
+        // 5b — Share our credit line to this client WABA (Tech Provider model requirement).
+        // Do this once per WABA right after subscribing. Non-blocking — log only on failure.
+        await shareCreditLine(phone.wabaId, accessToken);
+
         subscribedWabas.add(phone.wabaId);
       }
 
-      // 5b — Register the phone number on Cloud API
-      // This is the critical step that moves the number from Pending → Connected.
-      // We skip if already VERIFIED to avoid re-registering an active number.
+      // 5c — Register the phone number on Cloud API.
+      // Safe order: generate PIN + store on phone object FIRST, then call Meta.
+      // This ensures the encrypted PIN is in TempSession (persisted next step)
+      // even if a network blip hits between the Graph API response and our DB write.
       if (phone.verificationStatus !== "VERIFIED") {
-        const regResult = await registerPhoneNumber(phone.id, accessToken);
+        // Pre-generate and attach encrypted PIN to the phone record BEFORE calling Meta.
+        // The TempSession.create below will persist this regardless of register outcome.
+        const { pin: prePin, stored: preStored } = generateAndEncryptPin();
+        phone.registrationPin = preStored; // persisted in TempSession below
+
+        const regResult = await registerPhoneNumber(phone.id, accessToken, preStored);
+
         if (regResult.success) {
-          phone.registrationPin    = regResult.encryptedPin; // stored encrypted; passed to select-phone via TempSession
           phone.verificationStatus = "REGISTERED"; // optimistic — confirmed in select-phone
+        } else if (regResult.isPinConflict) {
+          // Number already registered with another BSP's PIN — must surface to user.
+          // Return a clear error now rather than silently proceeding to a broken state.
+          console.error(`🚫 PIN conflict for phone ${phone.id} — number previously registered with another provider`);
+          return NextResponse.json(
+            { success: false, message: regResult.userMessage },
+            { status: 409, headers: corsHeaders() }
+          );
         } else {
-          // Log but don't block — number may already be registered with a different pin
-          console.warn(`⚠️  register did not succeed for ${phone.id} — user may still proceed`);
-          phone.registrationPin = null;
+          // Non-conflict register failure — log, don't block. Number may still work
+          // if it was already registered previously (e.g., a reconnect scenario).
+          console.warn(`⚠️  register did not succeed for ${phone.id}: ${JSON.stringify(regResult.error)} — proceeding`);
         }
       } else {
         console.log(`ℹ️  Phone ${phone.id} already VERIFIED — skipping register`);
