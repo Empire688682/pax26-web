@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import TempSessionModel from "@/app/ults/models/TempSessionModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import crypto from "crypto";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -125,8 +126,70 @@ export async function POST(req) {
                 );
             }
 
+            // Find the phone in session to get the registration PIN
+            const phone = session.phones.find((p) => p.id === phoneId);
+            if (phone) {
+                let pin;
+                let encryptedPin = phone.registrationPin;
+                if (!encryptedPin) {
+                    // Generate a fresh PIN
+                    const rawPin = String(Math.floor(100000 + Math.random() * 900000));
+                    const key = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
+                    const iv = crypto.randomBytes(16);
+                    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+                    const encrypted = Buffer.concat([cipher.update(rawPin, "utf8"), cipher.final()]);
+                    encryptedPin = `${iv.toString("hex")}:${encrypted.toString("hex")}`;
+                    phone.registrationPin = encryptedPin;
+                    pin = rawPin;
+                } else {
+                    // Decrypt the existing PIN
+                    try {
+                        const key = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
+                        const [ivHex, encHex] = encryptedPin.split(":");
+                        const decipher = crypto.createDecipheriv("aes-256-cbc", key, Buffer.from(ivHex, "hex"));
+                        pin = Buffer.concat([decipher.update(Buffer.from(encHex, "hex")), decipher.final()]).toString("utf8");
+                    } catch (decErr) {
+                        console.error("❌ Decrypt existing PIN failed, generating a fresh one:", decErr.message);
+                        const rawPin = String(Math.floor(100000 + Math.random() * 900000));
+                        const key = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
+                        const iv = crypto.randomBytes(16);
+                        const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+                        const encrypted = Buffer.concat([cipher.update(rawPin, "utf8"), cipher.final()]);
+                        encryptedPin = `${iv.toString("hex")}:${encrypted.toString("hex")}`;
+                        phone.registrationPin = encryptedPin;
+                        pin = rawPin;
+                    }
+                }
+
+                try {
+                    // Call register API
+                    const regRes = await fetch(
+                        `https://graph.facebook.com/v22.0/${phoneId}/register`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ messaging_product: "whatsapp", pin }),
+                        }
+                    );
+                    const regData = await regRes.json();
+                    console.log("✅ Post-verify register response:", regData);
+                    if (regData.error) {
+                        console.error(`❌ Registration failed during verify-phone for ${phoneId}:`, regData.error);
+                    } else {
+                        phone.verificationStatus = "REGISTERED";
+                        await session.save();
+                        console.log(`✅ Phone ${phoneId} registered successfully after OTP verification`);
+                    }
+                } catch (regErr) {
+                    console.error("❌ Registration API call failed in verify-phone route:", regErr.message);
+                }
+            }
+
             return NextResponse.json(
-                { success: true, message: "Phone number verified successfully." },
+                { success: true, message: "Phone number verified and registered successfully." },
                 { status: 200, headers: corsHeaders() }
             );
         }
