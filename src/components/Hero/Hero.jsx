@@ -194,9 +194,9 @@ export default function Hero() {
   ];
 
   const stats = [
-    { value: "24/7",  label: "Always Online" },
-    { value: "#1",    label: "Most Affordable NG" },
-    { value: "100%",  label: "Official API" },
+    { value: "24/7",  label: "Automated Support" },
+    { value: "< 5m",  label: "API Activation" },
+    { value: "99.9%", label: "Uptime SLA" },
   ];
 
 
@@ -233,34 +233,26 @@ export default function Hero() {
             {/* ══ LEFT ════════════════════════════════════════════ */}
             <div className="flex flex-col gap-4 sm:gap-5">
 
-              {/* Eyebrow — Pax26 × Meta branding */}
+              {/* Eyebrow — Consolidated Premium Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}
-                className="flex flex-col gap-2 self-start"
+                className="self-start mb-2"
               >
-                {/* Pax26 × Meta pill */}
                 <div
-                  className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full"
-                  style={{ background: `${WA}14`, border: `1px solid ${WA}35` }}>
-                  <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
-                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: WA }}>
-                    Pax26 × Meta
+                  className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-md border text-[11px] font-medium"
+                  style={{
+                    background: `${WA}08`,
+                    borderColor: `${WA}25`,
+                    color: WA,
+                  }}
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
-                </div>
-                {/* Affordable badge */}
-                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full"
-                  style={{ background: `${p}10`, border: `1px solid ${p}28` }}>
-                  <span className="text-[10px] font-bold tracking-wide" style={{ color: p }}>
-                    Most Affordable Platform in NG 🇳🇬
-                  </span>
-                </div>
-                {/* Registered Nigerian tech company badge */}
-                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full"
-                  style={{ background: `${ts}08`, border: `1px solid ${ts}20` }}>
-                  <span style={{ fontSize: 10, opacity: 0.55 }}>🏢</span>
-                  <span className="text-[10px] font-semibold tracking-wide" style={{ color: ts, opacity: 0.65 }}>
-                    Registered Nigerian Tech Company
-                  </span>
+                  <span className="font-bold tracking-wider uppercase">Official Meta Partner</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                  <span style={{ color: ts, opacity: 0.8 }}>Registered Nigerian Tech Company</span>
                 </div>
               </motion.div>
 
@@ -289,15 +281,26 @@ export default function Hero() {
               </motion.p>
 
 
-              {/* Trust pills — Official API & Meta Partner */}
+              {/* Core capabilities list */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .42 }}
-                className="flex flex-wrap gap-2">
-                {chips.map((c, i) => <Chip key={i} {...c} />)}
-                <div className="hr-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-                  style={{ background: `${p}10`, border: `1px solid ${p}30`, color: p }}>
-                  <CheckCircle size={11} />
-                  No-code · Live in 5 mins
+                className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 mt-2 py-1"
+              >
+                <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
+                  <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
+                  <span>Official WhatsApp Business API</span>
+                </div>
+                <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
+                  <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
+                  <span>VTU Payments, Airtime & Bills</span>
+                </div>
+                <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
+                  <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
+                  <span>No-Code Chatbot Flow Builder</span>
+                </div>
+                <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
+                  <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
+                  <span>24/7 Automated Support & Sales</span>
                 </div>
               </motion.div>
 
@@ -348,33 +351,7 @@ export default function Hero() {
               transition={{ duration: .75, delay: .22, ease: [.22, 1, .36, 1] }}
               className="flex justify-center lg:justify-end">
               <div className="relative">
-
-                {/* floating badge — top left */}
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: .8 }}
-                  style={{ top: "-14px", left: "-16px", background: bg, border: `1px solid ${bdr}` }}
-                  className="absolute z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-lg">
-                  <div className="w-5 h-5 rounded-lg flex items-center justify-center"
-                    style={{ background: `${WA}20` }}>
-                    <Zap size={10} style={{ color: WA }} />
-                  </div>
-                  <span className="text-[11px] font-bold" style={{ color: tp }}>Official WhatsApp API ✓</span>
-
-                </motion.div>
-
                 <ChatDemo />
-
-                {/* floating badge — bottom right */}
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: .95 }}
-                  style={{ bottom: "-14px", right: "-14px", background: bg, border: `1px solid ${bdr}` }}
-                  className="absolute z-20 flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-lg">
-                  <span className="hr-pulse w-2 h-2 rounded-full block" style={{ background: WA }} />
-                  <span className="text-[11px] font-bold" style={{ color: tp }}>Meta Business Partner 🇳🇬</span>
-
-                </motion.div>
               </div>
             </motion.div>
 
