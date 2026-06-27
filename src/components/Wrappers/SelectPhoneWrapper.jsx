@@ -365,8 +365,8 @@ const SelectPhone = () => {
 
         const phone = phones.find((p) => p.id === selectedId);
 
-        // Only show OTP step if Meta says the number is NOT verified
-        if (phone?.verificationStatus !== "VERIFIED") {
+        // Only show OTP step if Meta says the number is NOT verified and NOT registered
+        if (phone?.verificationStatus !== "VERIFIED" && phone?.verificationStatus !== "REGISTERED") {
             setStep("otp");
             return;
         }

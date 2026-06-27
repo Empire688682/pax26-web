@@ -68,6 +68,8 @@ export async function POST(req) {
             console.log("📲 request_code response:", data);
 
             if (data.error) {
+                console.error("❌ request_code error details:", JSON.stringify(data.error));
+
                 // Code 63016 = already verified — treat as success so user can proceed
                 if (data.error.code === 63016) {
                     return NextResponse.json(
@@ -76,8 +78,18 @@ export async function POST(req) {
                     );
                 }
 
+                let friendlyMessage = data.error.message || "Failed to send OTP.";
+
+                if (data.error.error_subcode === 2388367) {
+                    friendlyMessage = "You have requested a verification code too many times. Please wait 24-48 hours for Meta to reset the rate limit, or verify the number directly in Meta Business Suite (WhatsApp Manager).";
+                } else if (data.error.error_subcode === 2388091) {
+                    friendlyMessage = "This number is not eligible for verification. If it is currently active on the WhatsApp Messenger or WhatsApp Business mobile app on your phone, you must delete your WhatsApp account from that app first to free it up for Cloud API.";
+                } else if (data.error.code === 136024) {
+                    friendlyMessage = `Failed to request code from Meta: ${data.error.message || "Request code error"}. Tip: You can verify this number directly inside the WhatsApp Manager in Meta Business Suite (under Phone Numbers), then return here to connect it.`;
+                }
+
                 return NextResponse.json(
-                    { success: false, message: data.error.message || "Failed to send OTP." },
+                    { success: false, message: friendlyMessage },
                     { status: 400, headers: corsHeaders() }
                 );
             }
@@ -115,6 +127,7 @@ export async function POST(req) {
             console.log("✅ verify_code response:", data);
 
             if (data.error) {
+                console.error("❌ verify_code error details:", JSON.stringify(data.error));
                 // Code 63012 = wrong code
                 const msg = data.error.code === 63012
                     ? "Incorrect code. Please try again."
