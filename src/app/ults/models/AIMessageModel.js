@@ -39,7 +39,7 @@ const MessageSchema = new mongoose.Schema({
 
   senderType: {
     type: String,
-    enum: ["user", "ai", "visitor", "admin", "system",],
+    enum: ["user", "ai", "visitor", "admin", "system", "human"],
     default: "user"
   },
 

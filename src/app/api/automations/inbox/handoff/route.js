@@ -89,7 +89,7 @@ export async function POST(req) {
         text: message.trim(),
       });
 
-      // Save to DB
+      // Save to DB — senderType "human" so the inbox shows "You" tag
       await AIMessageModel.create({
         messageId: `manual_${Date.now()}`,
         userId,
@@ -104,6 +104,24 @@ export async function POST(req) {
         status: "sent",
         automation: { isAutoReply: false },
       });
+
+      // Update session context so the AI has knowledge of this message
+      // when the conversation is handed back. The AI reads AIMessageModel
+      // directly (recent messages by sessionId) so no extra summary field
+      // is needed — but we update the session counters so the AI knows the
+      // conversation continued while it was paused.
+      await SessionModel.updateOne(
+        { _id: session._id },
+        {
+          $inc: {
+            "context.messageCount": 1,
+            "context.outboundCount": 1,
+          },
+          $set: {
+            lastMessageAt: new Date(),
+          },
+        }
+      );
 
       return NextResponse.json(
         { success: true, message: "Message sent" },

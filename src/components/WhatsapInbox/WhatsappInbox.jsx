@@ -786,6 +786,10 @@ export default function WhatsAppInbox() {
           background: rgba(255,255,255,0.08);
           border-radius: 999px;
         }
+
+        @keyframes inbox-spin {
+          to { transform: rotate(360deg); }
+        }
       `}</style>
 
       {/* SIDEBAR */}
@@ -1474,10 +1478,28 @@ export default function WhatsAppInbox() {
                     color: "white",
                     fontSize: "12px",
                     fontWeight: 700,
-                    cursor: "pointer",
+                    cursor: takingOver ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    opacity: takingOver ? 0.7 : 1,
                   }}
                 >
-                  Hand Back
+                  {takingOver ? (
+                    <>
+                      <span style={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.3)",
+                        borderTopColor: "#fff",
+                        animation: "inbox-spin 0.65s linear infinite",
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }} />
+                      Handing Back…
+                    </>
+                  ) : "Hand Back"}
                 </button>
               ) : (
                 <button
@@ -1493,10 +1515,28 @@ export default function WhatsAppInbox() {
                     color: "white",
                     fontSize: "12px",
                     fontWeight: 700,
-                    cursor: "pointer",
+                    cursor: takingOver ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    opacity: takingOver ? 0.7 : 1,
                   }}
                 >
-                  Take Over
+                  {takingOver ? (
+                    <>
+                      <span style={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.3)",
+                        borderTopColor: "#fff",
+                        animation: "inbox-spin 0.65s linear infinite",
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }} />
+                      Taking Over…
+                    </>
+                  ) : "Take Over"}
                 </button>
               )}
             </div>
@@ -1578,6 +1618,25 @@ export default function WhatsAppInbox() {
                           wordBreak: "break-word",
                         }}
                       >
+                        {/* "You" tag — only shown on human-sent outbound messages */}
+                        {isOutbound && isHuman && (
+                          <div style={{
+                            fontSize: "10px",
+                            fontWeight: 800,
+                            letterSpacing: "0.06em",
+                            textTransform: "uppercase",
+                            color: "rgba(255,255,255,0.75)",
+                            marginBottom: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                            </svg>
+                            You
+                          </div>
+                        )}
                         {imageUrls.length > 0 && (
                           <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
                             {imageUrls.map((url, i) => (
@@ -1806,14 +1865,33 @@ export default function WhatsAppInbox() {
                       borderRadius: "16px",
                       fontWeight: 800,
                       fontSize: "14px",
-                      cursor: "pointer",
+                      cursor: takingOver ? "not-allowed" : "pointer",
                       transition: "all 0.2s",
-                      boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)"
+                      boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      opacity: takingOver ? 0.7 : 1,
                     }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.02)"}
+                    onMouseEnter={e => { if (!takingOver) e.currentTarget.style.transform = "scale(1.02)"; }}
                     onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                   >
-                    {takingOver ? "Taking Over..." : "Take Over Now"}
+                    {takingOver ? (
+                      <>
+                        <span style={{
+                          width: "14px",
+                          height: "14px",
+                          borderRadius: "50%",
+                          border: "2px solid rgba(255,255,255,0.3)",
+                          borderTopColor: "#fff",
+                          animation: "inbox-spin 0.65s linear infinite",
+                          display: "inline-block",
+                          flexShrink: 0,
+                        }} />
+                        Taking Over…
+                      </>
+                    ) : "Take Over Now"}
                   </button>
                 </motion.div>
               )}
