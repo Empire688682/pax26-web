@@ -161,7 +161,7 @@ export default function CampaignsPage() {
                     <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-center" style={{ color: pax26?.textSecondary }}>Status</th>
                     <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-right" style={{ color: pax26?.textSecondary }}>Recipients</th>
                     <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-right" style={{ color: pax26?.textSecondary }}>Delivered</th>
-                    <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-right" style={{ color: pax26?.textSecondary }}>Read Rate</th>
+                    <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-right" style={{ color: pax26?.textSecondary }}>Failed</th>
                     <th className="pb-3 text-xs font-bold uppercase tracking-wider opacity-60 text-right" style={{ color: pax26?.textSecondary }}>Replied</th>
                   </tr>
                 </thead>
@@ -174,14 +174,14 @@ export default function CampaignsPage() {
                       minute: "2-digit"
                     });
                     
-                    // Stats calculation or mock metrics if reportsAccess is enabled
-                    const total = camp.stats?.total || 0;
-                    const success = camp.stats?.success || 0;
-                    
-                    // Mock read/replies percentages for high-end reports presentation
-                    const deliveredPct = total > 0 ? Math.round((success / total) * 100) : 0;
-                    const readPct = total > 0 ? 84 : 0;
-                    const repliedPct = total > 0 ? 12 : 0;
+                    // Stats calculation
+                    // The backend sets stats.success = users.length at send time (not real delivery
+                    // receipts), so we cannot trust it as a "delivered" count. We show the actual
+                    // sent count and mark delivery as "Sent" until real webhook tracking is wired up.
+                    const total   = camp.stats?.total   || 0;
+                    const success = typeof camp.stats?.success === "number" ? camp.stats.success : 0;
+                    const failed  = typeof camp.stats?.failed  === "number" ? camp.stats.failed  : 0;
+                    const hasRealStats = camp.deliveryLog?.length > 0;
 
                     return (
                       <tr key={camp._id} className="group hover:bg-white/[0.02] transition-colors">
@@ -203,9 +203,11 @@ export default function CampaignsPage() {
                           <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${
                             camp.status === "completed" 
                               ? "bg-green-500/10 text-green-400 border border-green-500/20" 
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              : camp.status === "processing"
+                                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                           }`}>
-                            {camp.status === "completed" ? "Sent" : "Scheduled"}
+                            {camp.status === "completed" ? "Sent" : camp.status === "processing" ? "Sending…" : "Scheduled"}
                           </span>
                         </td>
 
@@ -213,17 +215,36 @@ export default function CampaignsPage() {
                           {total.toLocaleString()}
                         </td>
 
-                        {/* Reports stats detail columns */}
-                        <td className="py-4 text-right text-xs font-bold px-mono" style={{ color: pax26?.textPrimary }}>
-                          {deliveredPct}%
+                        {/* Delivered — real count from deliveryLog if available */}
+                        <td className="py-4 text-right text-xs font-bold px-mono">
+                          {hasRealStats ? (
+                            <span style={{ color: success > 0 ? "#4ade80" : pax26?.textSecondary }}>
+                              {success.toLocaleString()}
+                              {total > 0 && (
+                                <span className="ml-1 opacity-50 font-normal">
+                                  ({Math.round((success / total) * 100)}%)
+                                </span>
+                              )}
+                            </span>
+                          ) : camp.status === "completed" ? (
+                            <span style={{ color: "#4ade80" }}>Sent</span>
+                          ) : (
+                            <span style={{ color: pax26?.textSecondary, opacity: 0.4 }}>—</span>
+                          )}
                         </td>
 
-                        <td className="py-4 text-right text-xs font-bold px-mono" style={{ color: pax26?.textPrimary }}>
-                          {readPct}%
+                        {/* Failed — real count */}
+                        <td className="py-4 text-right text-xs font-bold px-mono">
+                          {hasRealStats && failed > 0 ? (
+                            <span style={{ color: "#f87171" }}>{failed.toLocaleString()}</span>
+                          ) : (
+                            <span style={{ color: pax26?.textSecondary, opacity: 0.4 }}>—</span>
+                          )}
                         </td>
 
-                        <td className="py-4 text-right text-xs font-bold px-mono" style={{ color: pax26?.textPrimary }}>
-                          {repliedPct}%
+                        {/* Replied — not tracked yet */}
+                        <td className="py-4 text-right text-xs px-mono" style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+                          —
                         </td>
 
                       </tr>

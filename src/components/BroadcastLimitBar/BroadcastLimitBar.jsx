@@ -14,18 +14,18 @@ export default function BroadcastLimitBar() {
 
   // Calculate percentage
   let percentage = 0;
-  if (isEnterprise) {
-    percentage = 100;
-  } else if (broadcastLimit > 0) {
+  if (broadcastLimit > 0 && !isEnterprise) {
     percentage = Math.min(100, (broadcastUsed / broadcastLimit) * 100);
   }
 
-  // Bar color based on usage percentage
+  // Bar color based on usage percentage — never red/orange for enterprise
   let barColor = pax26?.primary || "#3b82f6";
-  if (percentage >= 90) {
-    barColor = "#ef4444"; // Red for danger
-  } else if (percentage >= 70) {
-    barColor = "#f97316"; // Orange for warning
+  if (!isEnterprise) {
+    if (percentage >= 90) {
+      barColor = "#ef4444"; // Red for danger
+    } else if (percentage >= 70) {
+      barColor = "#f97316"; // Orange for warning
+    }
   }
 
   return (
@@ -82,13 +82,16 @@ export default function BroadcastLimitBar() {
                 <AlertTriangle size={10} /> Approaching Limit
               </span>
             )}
-            <button
-              onClick={() => router.push("/dashboard/billing")}
-              className="flex items-center gap-1 text-[11px] font-bold transition-opacity hover:opacity-80"
-              style={{ color: barColor }}
-            >
-              Upgrade Plan <ArrowUpRight size={12} />
-            </button>
+            {/* Only show upgrade button if not already on enterprise */}
+            {!isEnterprise && (
+              <button
+                onClick={() => router.push("/dashboard/billing")}
+                className="flex items-center gap-1 text-[11px] font-bold transition-opacity hover:opacity-80"
+                style={{ color: barColor }}
+              >
+                Upgrade Plan <ArrowUpRight size={12} />
+              </button>
+            )}
           </div>
 
         </div>
@@ -97,9 +100,10 @@ export default function BroadcastLimitBar() {
         <div className="w-full h-2 rounded-full overflow-hidden" 
           style={{ background: pax26?.border || "rgba(255, 255, 255, 0.08)" }}>
           <div 
-            className="h-full rounded-full transition-all duration-500 limit-bar-shimmer"
+            className={`h-full rounded-full transition-all duration-500 ${isEnterprise ? "" : "limit-bar-shimmer"}`}
             style={{ 
-              width: `${percentage}%`,
+              width: isEnterprise ? "100%" : `${percentage}%`,
+              background: isEnterprise ? barColor : undefined,
             }} 
           />
         </div>
