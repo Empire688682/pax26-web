@@ -116,7 +116,8 @@ export async function POST(req) {
     }
 
     // 4. Check plan broadcast limit
-    const broadcastLimit = user.paxAI?.broadcastContactsLimit ?? 0;
+    // broadcastContactsLimit: null = unlimited (Enterprise), 0 = not allowed (Free), N = monthly cap
+    const broadcastLimit = user.paxAI?.broadcastContactsLimit;  // keep null as-is — do NOT coerce with ??
     const usedThisMonth  = user.paxAI?.broadcastContactsUsedThisMonth ?? 0;
     const plan           = user.paxAI?.plan || "free";
 
@@ -130,8 +131,20 @@ export async function POST(req) {
       );
     }
 
-    // null / Infinity means unlimited (enterprise)
-    if (broadcastLimit !== null && isFinite(broadcastLimit)) {
+    // broadcastLimit === null means unlimited (Enterprise) — skip the cap check entirely
+    // broadcastLimit === 0 means the plan has no broadcast allowance
+    if (broadcastLimit === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Broadcast messaging is not included in your current plan. Please upgrade to Starter or higher.",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (broadcastLimit !== null && broadcastLimit !== undefined) {
+      // Finite cap — check remaining
       const remaining = Math.max(0, broadcastLimit - usedThisMonth);
       if (targetContacts.length > remaining) {
         return NextResponse.json(
@@ -143,6 +156,7 @@ export async function POST(req) {
         );
       }
     }
+    // null = unlimited — no cap check needed
 
     // 5. Send messages via Meta WhatsApp Cloud API — same API automation uses
     let successCount = 0;
