@@ -1,3 +1,4 @@
+Not Connected
 "use client";
 import React, { useEffect, useState } from "react";
 import {
@@ -855,7 +856,7 @@ export default function Dashboard() {
               {/* ── WHATSAPP STATUS CARD ── */}
               <div className={`px-s5 ${isDark ? "px-glass" : "px-glass-light"}`}
                 style={{ padding: "22px", cursor: "pointer" }}
-                onClick={() => router.push("/dashboard/automations/whatsapp-connect")}>
+                onClick={() => router.push("/dashboard/automations/whatsapp#connect")}>
                 <Label text="WhatsApp" isDark={isDark} />
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>

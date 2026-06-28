@@ -14,6 +14,7 @@ import {
 } from "framer-motion";
 
 import { useGlobalContext } from "../Context";
+import AiReadinessBanner from "../AiReadinessBanner/AiReadinessBanner";
 
 /* ─────────────────────────────────────────────
    ICONS
@@ -770,8 +771,13 @@ export default function WhatsAppInbox() {
         overflow: "hidden",
         background: "#0b141a",
         position: "relative",
+        flexDirection: "column",
       }}
     >
+      {/* AI Readiness Banner — shown when WhatsApp connected but AI not trained */}
+      <AiReadinessBanner className="mx-3 mt-3" />
+
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
       {/* GLOBAL CSS */}
       <style>{`
         * {
@@ -1913,6 +1919,7 @@ export default function WhatsAppInbox() {
           }
         />
       )}
+      </div>  {/* closes inner flex row */}
     </div>
   );
 }

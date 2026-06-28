@@ -365,14 +365,19 @@ const SelectPhone = () => {
 
         const phone = phones.find((p) => p.id === selectedId);
 
-        // Only show OTP step if Meta says the number is NOT verified and NOT registered
-        if (phone?.verificationStatus !== "VERIFIED" && phone?.verificationStatus !== "REGISTERED") {
-            setStep("otp");
+        // Skip OTP for:
+        // 1. Numbers already VERIFIED or REGISTERED by Meta
+        // 2. Numbers with GREEN (Excellent) quality — fully approved by Meta, no OTP needed
+        const isVerified = phone?.verificationStatus === "VERIFIED" || phone?.verificationStatus === "REGISTERED";
+        const isExcellent = phone?.quality === "GREEN";
+
+        if (isVerified || isExcellent) {
+            await finishConnect();
             return;
         }
 
-        // Already verified — connect directly
-        await finishConnect();
+        // Show OTP step only for unverified, non-excellent numbers
+        setStep("otp");
     };
 
     const finishConnect = async () => {

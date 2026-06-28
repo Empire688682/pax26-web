@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import TempSessionModel from "@/app/ults/models/TempSessionModel";
+import UserModel from "@/app/ults/models/UserModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { verifyToken } from "../../helper/VerifyToken";
 import crypto from "crypto";
@@ -324,6 +325,28 @@ export async function POST(req) {
     }
 
     console.log(`✅ Found ${phones.length} phone(s)`);
+
+    // ── Step 4.5: Duplicate check — block before showing select-phone UI ─
+    // If any phone in this list is already connected to a DIFFERENT user's account,
+    // stop here with a clear error. The user should not even see the select-phone page.
+    for (const phone of phones) {
+      const existingOwner = await UserModel.findOne({
+        "whatsapp.phoneNumberId": phone.id,
+        "whatsapp.connected": true,
+        _id: { $ne: userId }, // allow the same user to reconnect their own number
+      }).select("_id").lean();
+
+      if (existingOwner) {
+        console.warn(`🚫 Duplicate number blocked: ${phone.id} already connected to another account`);
+        return NextResponse.json(
+          {
+            success: false,
+            message: `The number ${phone.display} is already connected to another Pax26 account. To use it here, the other account must disconnect it first at Dashboard → WhatsApp → Disconnect.`,
+          },
+          { status: 409, headers: corsHeaders() }
+        );
+      }
+    }
 
     // ── Step 5: Subscribe to WABA webhooks + register each phone ─
     // Collect unique WABA IDs and subscribe once per WABA.
