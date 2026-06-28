@@ -47,6 +47,23 @@ export async function POST(req) {
             );
         }
 
+        // 🔒 Uniqueness check — prevent two accounts from sharing the same number
+        const existingOwner = await UserModel.findOne({
+            "whatsapp.phoneNumberId": phone.id,
+            "whatsapp.connected": true,
+            _id: { $ne: session.userId }, // exclude the current user (reconnect case)
+        }).select("_id email").lean();
+
+        if (existingOwner) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "This WhatsApp number is already connected to another Pax26 account. Please disconnect it from that account first, or use a different number.",
+                },
+                { status: 409, headers: corsHeaders() }
+            );
+        }
+
         // ── Confirm activation via Graph API ─────────────────────
         // Verify the number actually flipped to VERIFIED / CONNECTED
         // before marking it active in our DB.
