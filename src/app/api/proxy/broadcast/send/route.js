@@ -246,9 +246,11 @@ export async function POST(req) {
     });
 
     // 7. Increment monthly usage
+    // 7. Increment monthly usage + lifetime analytics
     await UserModel.findByIdAndUpdate(userId, {
       $inc: {
         "paxAI.broadcastContactsUsedThisMonth": targetContacts.length,
+        "planAnalytics.broadcastSent":          successCount,
       },
     });
 
