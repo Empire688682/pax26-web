@@ -54,7 +54,7 @@ const formatAmount = (tx) => {
 const getStatusConfig = (status) => ({
   success: { label: "Success", color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.2)" },
   pending: { label: "Pending", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.2)" },
-  failed:  { label: "Failed",  color: "#ef4444", bg: "rgba(239,68,68,0.1)",  border: "rgba(239,68,68,0.2)"  },
+  failed: { label: "Failed", color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.2)" },
 }[status] || { label: status, color: "#94a3b8", bg: "rgba(148,163,184,0.1)", border: "rgba(148,163,184,0.2)" });
 
 const getTypeIcon = (type, isDebit) => {
@@ -160,11 +160,13 @@ const Page = () => {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
+  console.log("transactionHistory:", transactionHistory);
+
   useEffect(() => {
     getUserRealTimeData().then(() => setLoading(false));
   }, []);
 
-  const reversed = useMemo(() => [...(transactionHistory || [])].reverse(), [transactionHistory]);
+  const reversed = useMemo(() => [...(transactionHistory || [])], [transactionHistory]);
 
   const filtered = useMemo(() => reversed.filter(tx => {
     const matchesFilter = filter === "All" || tx.status.toLowerCase() === filter.toLowerCase();
@@ -177,7 +179,7 @@ const Page = () => {
   const stats = useMemo(() => {
     const success = reversed.filter(t => t.status === "success").length;
     const pending = reversed.filter(t => t.status === "pending").length;
-    const failed  = reversed.filter(t => t.status === "failed").length;
+    const failed = reversed.filter(t => t.status === "failed").length;
     const totalIn = reversed
       .filter(t => t.status === "success" && !(t.type === "transfer" && t?.metadata?.transferDetails?.direction === "debit"))
       .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -207,7 +209,7 @@ const Page = () => {
           <SummaryCard label="Total In" value={`₦${stats.totalIn.toLocaleString()}`} color="#10b981" pax26={pax26} />
           <SummaryCard label="Success" value={stats.success} color="#10b981" pax26={pax26} />
           <SummaryCard label="Pending" value={stats.pending} color="#f59e0b" pax26={pax26} />
-          <SummaryCard label="Failed"  value={stats.failed}  color="#ef4444" pax26={pax26} />
+          <SummaryCard label="Failed" value={stats.failed} color="#ef4444" pax26={pax26} />
         </div>
       )}
 
