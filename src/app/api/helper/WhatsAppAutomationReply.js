@@ -2,7 +2,7 @@ import axios from "axios";
 import UserModel from "@/app/ults/models/UserModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 
-export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) => {
+export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, imageUrl, caption }) => {
     try {
         await connectDb();
 
@@ -22,15 +22,25 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text }) =
 
         const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`;
 
-        const payload = {
-            messaging_product: "whatsapp",
-            recipient_type: "individual",
-            to,
-            type: "text",
-            text: {
-                body: text
+        // Build payload — image or text
+        const payload = imageUrl
+            ? {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to,
+                type: "image",
+                image: {
+                    link: imageUrl,
+                    ...(caption ? { caption } : {}),
+                },
             }
-        };
+            : {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to,
+                type: "text",
+                text: { body: text },
+            };
 
         const headers = {
             Authorization: `Bearer ${token}`,
