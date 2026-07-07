@@ -6,6 +6,7 @@ import SessionModel from "@/app/ults/models/SessionModel";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
+import { sendWhatsAppImageReply } from "@/app/api/helper/WhatsAppImageReply";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -15,7 +16,7 @@ export async function POST(req) {
   try {
     await connectDb();
     const userId = await verifyToken(req);
-    const { action, phone, message } = await req.json();
+    const { action, phone, message, imageUrl, caption } = await req.json();
 
     if (!phone || !action) {
       return NextResponse.json(
@@ -125,6 +126,70 @@ export async function POST(req) {
 
       return NextResponse.json(
         { success: true, message: "Message sent" },
+        { status: 200, headers: corsHeaders() }
+      );
+    }
+
+    // ── Manual image send — agent sends an image ──────────
+    if (action === "sendImage") {
+      if (!imageUrl?.trim()) {
+        return NextResponse.json(
+          { success: false, message: "imageUrl is required" },
+          { status: 400, headers: corsHeaders() }
+        );
+      }
+
+      const user = await UserModel.findById(userId).lean();
+      if (!user) {
+        return NextResponse.json(
+          { success: false, message: "User not found" },
+          { status: 404, headers: corsHeaders() }
+        );
+      }
+
+      const result = await sendWhatsAppImageReply({
+        phoneNumberId: user.whatsapp.phoneNumberId,
+        to: phone,
+        imageUrl: imageUrl.trim(),
+        caption: caption?.trim() || "",
+      });
+
+      if (!result.success) {
+        return NextResponse.json(
+          { success: false, message: `Image send failed: ${result.error?.message || result.error}` },
+          { status: 500, headers: corsHeaders() }
+        );
+      }
+
+      // Save to DB so it appears in inbox with the "You" tag and image preview
+      await AIMessageModel.create({
+        messageId: result.messageId || `manual_img_${Date.now()}`,
+        userId,
+        sessionId: session.sessionId,
+        platform: "whatsapp",
+        phoneNumberId: user.whatsapp.phoneNumberId,
+        from: user.whatsapp.displayPhone,
+        to: phone,
+        text: caption?.trim() || "📷 Image",
+        mediaType: "image",
+        mediaUrl: imageUrl.trim(),
+        mediaCaption: caption?.trim() || "",
+        direction: "outbound",
+        senderType: "human",
+        status: "sent",
+        automation: { isAutoReply: false },
+      });
+
+      await SessionModel.updateOne(
+        { _id: session._id },
+        {
+          $inc: { "context.messageCount": 1, "context.outboundCount": 1 },
+          $set: { lastMessageAt: new Date() },
+        }
+      );
+
+      return NextResponse.json(
+        { success: true, message: "Image sent" },
         { status: 200, headers: corsHeaders() }
       );
     }

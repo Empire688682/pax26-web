@@ -18,17 +18,26 @@ export async function sendWhatsAppImageReply({
     try {
         await connectDb();
 
-        const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
+        // Always use the user's own access token — never the global env token
+        const user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId })
+            .select("whatsapp.accessToken");
 
+        const token = user?.whatsapp?.accessToken;
 
+        if (!token) {
+            console.error(`❌ No accessToken found for phoneNumberId: ${phoneNumberId}`);
+            return {
+                success: false,
+                error: `No WhatsApp access token found for phoneNumberId: ${phoneNumberId}`,
+            };
+        }
 
-        // Default: Meta Cloud API
         const url = `${WHATSAPP_API_BASE}/${WHATSAPP_API_VERSION}/${phoneNumberId}/messages`;
 
         const res = await fetch(url, {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({

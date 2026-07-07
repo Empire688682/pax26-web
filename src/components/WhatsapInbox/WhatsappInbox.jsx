@@ -412,6 +412,14 @@ export default function WhatsAppInbox() {
   const [takingOver, setTakingOver] =
     useState(false);
 
+  // Image send state
+  const [imageFile, setImageFile] = useState(null);       // File object from picker
+  const [imagePreview, setImagePreview] = useState(null); // local object URL for preview
+  const [imageCaption, setImageCaption] = useState("");
+  const [sendingImage, setSendingImage] = useState(false);
+  const [pendingImageId, setPendingImageId] = useState(null); // _id of the optimistic bubble
+  const imageInputRef = useRef(null);                     // hidden file input
+
   const [isMobile, setIsMobile] =
     useState(false);
 
@@ -682,6 +690,112 @@ export default function WhatsAppInbox() {
     } finally {
       setSending(false);
       inputRef.current?.focus();
+    }
+  };
+
+  /* ─────────────────────────────────────────────
+     IMAGE FILE PICKED
+  ───────────────────────────────────────────── */
+  const handleImageFilePicked = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    // reset input so the same file can be picked again
+    e.target.value = "";
+  };
+
+  const cancelImagePreview = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    setImageCaption("");
+  };
+
+  /* ─────────────────────────────────────────────
+     SEND IMAGE — upload to Cloudinary then WhatsApp
+  ───────────────────────────────────────────── */
+  const handleSendImage = async () => {
+    if (!imageFile || sendingImage || !selected) return;
+
+    setSendingImage(true);
+
+    // Optimistic preview in chat — show image immediately with loading state
+    const tempId = `temp_img_${Date.now()}`;
+    const localPreview = imagePreview;
+    setPendingImageId(tempId);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        _id: tempId,
+        text: imageCaption.trim() || "📷 Image",
+        mediaType: "image",
+        mediaUrl: localPreview,
+        direction: "outbound",
+        senderType: "human",
+        createdAt: new Date().toISOString(),
+        _uploading: true, // flag for loading overlay
+      },
+    ]);
+    scrollToBottom(true);
+
+    const captionToSend = imageCaption.trim();
+    const fileToUpload = imageFile;
+    cancelImagePreview(); // clear the picker state
+
+    try {
+      // Step 1 — Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      formData.append("folder", "inbox-images");
+
+      const uploadRes = await fetch("/api/upload/cloudinary", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json();
+
+      if (!uploadData.url) {
+        console.error("Cloudinary upload failed:", uploadData);
+        // Mark the bubble as failed
+        setMessages((prev) =>
+          prev.map((m) => m._id === tempId ? { ...m, _uploading: false, _failed: true } : m)
+        );
+        return;
+      }
+
+      // Step 2 — Send via WhatsApp through handoff route
+      await fetch("/api/automations/inbox/handoff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "sendImage",
+          phone: selected.phone,
+          imageUrl: uploadData.url,
+          caption: captionToSend,
+        }),
+      });
+
+      // Replace the optimistic local-preview bubble with the real Cloudinary URL
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === tempId
+            ? { ...m, mediaUrl: uploadData.url, _uploading: false }
+            : m
+        )
+      );
+
+      fetchMessages(selected.phone);
+    } catch (error) {
+      console.error("Image send error:", error);
+      setMessages((prev) =>
+        prev.map((m) => m._id === tempId ? { ...m, _uploading: false, _failed: true } : m)
+      );
+    } finally {
+      setSendingImage(false);
+      setPendingImageId(null);
     }
   };
 
@@ -1646,19 +1760,71 @@ export default function WhatsAppInbox() {
                         {imageUrls.length > 0 && (
                           <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
                             {imageUrls.map((url, i) => (
-                              <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
-                                <img
-                                  src={url}
-                                  alt="WhatsApp attachment"
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "280px",
+                              <div key={i} style={{ position: "relative", display: "block" }}>
+                                <a href={msg._uploading ? undefined : url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
+                                  <img
+                                    src={url}
+                                    alt="WhatsApp attachment"
+                                    style={{
+                                      maxWidth: "100%",
+                                      maxHeight: "280px",
+                                      borderRadius: "6px",
+                                      objectFit: "cover",
+                                      cursor: msg._uploading ? "default" : "pointer",
+                                      // dim the image while uploading
+                                      opacity: msg._uploading ? 0.55 : 1,
+                                      transition: "opacity 0.2s ease",
+                                    }}
+                                  />
+                                </a>
+
+                                {/* WhatsApp-style upload spinner overlay */}
+                                {msg._uploading && (
+                                  <div style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                     borderRadius: "6px",
-                                    objectFit: "cover",
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              </a>
+                                    background: "rgba(0,0,0,0.35)",
+                                    gap: "6px",
+                                  }}>
+                                    {/* circular progress ring */}
+                                    <svg width="36" height="36" viewBox="0 0 36 36">
+                                      <circle cx="18" cy="18" r="14"
+                                        fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+                                      <circle cx="18" cy="18" r="14"
+                                        fill="none" stroke="#fff" strokeWidth="3"
+                                        strokeDasharray="88" strokeDashoffset="22"
+                                        strokeLinecap="round"
+                                        style={{ transformOrigin: "center", animation: "inbox-spin 0.9s linear infinite" }}
+                                      />
+                                    </svg>
+                                    <span style={{ color: "#fff", fontSize: "10px", fontWeight: 600, letterSpacing: "0.03em" }}>
+                                      Uploading…
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Failed state */}
+                                {msg._failed && (
+                                  <div style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: "6px",
+                                    background: "rgba(0,0,0,0.5)",
+                                  }}>
+                                    <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
+                                      ✕ Failed
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             ))}
                           </div>
                         )}
@@ -1696,6 +1862,95 @@ export default function WhatsAppInbox() {
               </AnimatePresence>
             </div>
 
+            {/* IMAGE PREVIEW PANEL — WhatsApp-style, shown after file is picked */}
+            {imagePreview && selectedConv?.isHandedOff && (
+              <div style={{
+                padding: "12px",
+                background: "#1a2730",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+              }}>
+                {/* Preview + caption row */}
+                <div style={{ display: "flex", gap: "12px", alignItems: "flex-end" }}>
+                  {/* Thumbnail */}
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <img
+                      src={imagePreview}
+                      alt="preview"
+                      style={{
+                        width: "64px",
+                        height: "64px",
+                        objectFit: "cover",
+                        borderRadius: "10px",
+                        border: "2px solid rgba(255,255,255,0.1)",
+                      }}
+                    />
+                    {/* cancel X on thumbnail */}
+                    <button
+                      onClick={cancelImagePreview}
+                      style={{
+                        position: "absolute", top: "-6px", right: "-6px",
+                        width: "18px", height: "18px", borderRadius: "50%",
+                        background: "#ef4444", border: "none", color: "white",
+                        fontSize: "10px", cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}
+                    >✕</button>
+                  </div>
+
+                  {/* Caption input */}
+                  <input
+                    type="text"
+                    placeholder="Add a caption…"
+                    value={imageCaption}
+                    onChange={e => setImageCaption(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") handleSendImage(); }}
+                    style={{
+                      flex: 1, height: "42px", borderRadius: "12px", border: "none",
+                      outline: "none", padding: "0 14px", background: "#2a3942",
+                      color: "#e9edef", fontSize: "13px",
+                    }}
+                  />
+
+                  {/* Send button */}
+                  <button
+                    onClick={handleSendImage}
+                    disabled={sendingImage}
+                    style={{
+                      width: "46px", height: "46px", borderRadius: "50%", border: "none",
+                      background: sendingImage ? "#2a3942" : "#00a884",
+                      color: "white", cursor: sendingImage ? "not-allowed" : "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {sendingImage ? (
+                      <div style={{
+                        width: "16px", height: "16px", borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.2)",
+                        borderTopColor: "#fff",
+                        animation: "inbox-spin 0.65s linear infinite",
+                      }} />
+                    ) : (
+                      <SendIcon />
+                    )}
+                  </button>
+                </div>
+
+                <p style={{ margin: "8px 0 0 76px", fontSize: "10px", color: "#8696a0", opacity: 0.7 }}>
+                  {imageFile?.name} · Press Enter or click send
+                </p>
+              </div>
+            )}
+
+            {/* Hidden file input — triggers native file picker */}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleImageFilePicked}
+            />
+
             {/* REPLY BAR */}
             <div
               style={{
@@ -1711,6 +1966,26 @@ export default function WhatsAppInbox() {
                 zIndex: 10,
               }}
             >
+              {/* Image attach button — only when handed off */}
+              {selectedConv?.isHandedOff && (
+                <button
+                  onClick={() => imageInputRef.current?.click()}
+                  title="Send image"
+                  disabled={sendingImage}
+                  style={{
+                    width: "46px", height: "46px", borderRadius: "50%", border: "none",
+                    background: "#2a3942",
+                    color: sendingImage ? "#444" : "#8696a0",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: sendingImage ? "not-allowed" : "pointer", flexShrink: 0,
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </button>
+              )}
+
               <textarea
                 ref={inputRef}
                 value={replyText}
