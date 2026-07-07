@@ -5,14 +5,15 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import UserModel from "@/app/ults/models/UserModel";
 
-async function resolveWhatsAppMediaUrl(imageId) {
+async function resolveWhatsAppMediaUrl(imageId, accessToken) {
   const res = await fetch(`https://graph.facebook.com/v19.0/${imageId}`, {
-    headers: { Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (!res.ok) throw new Error(`Meta media resolve failed: ${res.statusText}`);
   const data = await res.json();
-  return data.url;
+  return { url: data.url };
 }
 
 export async function GET(req) {
@@ -41,11 +42,22 @@ export async function GET(req) {
       return NextResponse.json({ success: false, message: "No image on this message" }, { status: 404, headers: corsHeaders() });
     }
 
+    // Each user must have their own WhatsApp access token from Embedded Signup
+    const user = await UserModel.findById(userId).select("whatsapp.accessToken").lean();
+    const userAccessToken = user?.whatsapp?.accessToken;
+
+    if (!userAccessToken) {
+      return NextResponse.json(
+        { success: false, message: "WhatsApp not connected. Please connect your WhatsApp account to view media." },
+        { status: 403, headers: corsHeaders() }
+      );
+    }
+
     const sellerProfile = await SellerProfileModel.findOne({ userId }).lean();
     const sellerId = sellerProfile?._id || userId;
 
-    const metaUrl = await resolveWhatsAppMediaUrl(message.mediaId);
-    const uploaded = await uploadCustomerImageToCloudinary(metaUrl, sellerId, message.from, "customer-images");
+    const { url: metaUrl } = await resolveWhatsAppMediaUrl(message.mediaId, userAccessToken);
+    const uploaded = await uploadCustomerImageToCloudinary(metaUrl, sellerId, message.from, "customer-images", userAccessToken);
 
     await AIMessageModel.updateOne({ messageId }, { $set: { mediaUrl: uploaded.url } });
 

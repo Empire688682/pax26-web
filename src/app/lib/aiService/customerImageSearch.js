@@ -36,7 +36,7 @@ const MAX_MATCHES = 3;            // max products to return to the AI
    WhatsApp media URLs require auth headers — fetch via your
    Meta API credentials before passing the buffer to Cloudinary.
 ───────────────────────────────────────────────────────────── */
-export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone, folder = "customer-images") {
+export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, customerPhone, folder = "customer-images", accessToken = null) {
     if (mediaUrl && mediaUrl.includes("cloudinary.com")) {
         let publicId = "";
         const parts = mediaUrl.split("/upload/");
@@ -57,7 +57,7 @@ export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, custom
     // Fetch the image from WhatsApp (requires Bearer token for Meta API media URLs)
     const response = await fetch(mediaUrl, {
         headers: {
-            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+            Authorization: `Bearer ${accessToken}`,
         },
     });
 
