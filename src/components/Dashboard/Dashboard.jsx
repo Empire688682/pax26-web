@@ -362,6 +362,7 @@ export default function Dashboard() {
   const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages ||
     ({ starter: 500, business: 2000, enterprise: 10000 }[plan] ?? 200);
   const pct = Math.min((used / (quota || 1)) * 100, 100);
+  const pctDisplay = pct === 0 ? "0%" : pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
   const planCol = { free: C.blue, starter: C.cyan, business: C.amber, enterprise: C.indigo }[plan] ?? C.blue;
 
   const lastUpd = userData?.paxAI?.planStartedAt;
@@ -790,11 +791,11 @@ export default function Dashboard() {
                     </div>
                     <div className="px-progress-track" style={{ background: subBg, border: `1px solid ${subBdr}` }}>
                       <div className="px-progress-fill px-shimmer"
-                        style={{ width: `${pct}%` }} />
+                        style={{ width: `${pct}%`, minWidth: used > 0 ? 4 : 0 }} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 5 }}>
                       <span className="px-mono" style={{ fontSize: 9, color: pct >= 90 ? C.coral : textMuted }}>
-                        {Math.round(pct)}% used
+                        {pctDisplay} used
                       </span>
                     </div>
                   </div>
