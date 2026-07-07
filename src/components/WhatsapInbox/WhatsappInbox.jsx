@@ -461,7 +461,7 @@ export default function WhatsAppInbox() {
   /* ─────────────────────────────────────────────
      SMART SCROLL
   ───────────────────────────────────────────── */
-  const scrollToBottom = (force = false) => {
+  const scrollToBottom = (force = false, instant = false) => {
     const container = messagesContainerRef.current;
 
     if (!container) return;
@@ -477,7 +477,7 @@ export default function WhatsAppInbox() {
     if (force || isNearBottom) {
       container.scrollTo({
         top: container.scrollHeight,
-        behavior: "smooth",
+        behavior: instant ? "instant" : "smooth",
       });
     }
   };
@@ -598,11 +598,27 @@ export default function WhatsAppInbox() {
       fetchMessages(selected.phone);
       fetchContact(selected.phone);
       setIsAlertVisible(true);
+      // Reset scroll position instantly when switching conversations
+      requestAnimationFrame(() => {
+        const container = messagesContainerRef.current;
+        if (container) container.scrollTop = container.scrollHeight;
+      });
     }
   }, [selected]);
 
   useEffect(() => {
-    scrollToBottom();
+    // On first load of a conversation (messages go from empty to populated),
+    // jump instantly to the bottom — no animation, just like WhatsApp opening a chat.
+    // For subsequent message arrivals, use the smart scroll (smooth if near bottom).
+    if (messages.length > 0) {
+      // Use a small rAF to ensure the DOM has rendered the new messages
+      requestAnimationFrame(() => {
+        const container = messagesContainerRef.current;
+        if (!container) return;
+        const wasEmpty = container.scrollTop === 0 && container.scrollHeight > container.clientHeight;
+        scrollToBottom(wasEmpty, wasEmpty); // force + instant only on first load
+      });
+    }
   }, [messages]);
 
   /* Resolve legacy image messages that only have mediaId */
