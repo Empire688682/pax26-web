@@ -362,22 +362,10 @@ const SelectPhone = () => {
 
     const handleConnect = async () => {
         if (!selectedId || !sessionId) return;
-
-        const phone = phones.find((p) => p.id === selectedId);
-
-        // Skip OTP for:
-        // 1. Numbers already VERIFIED or REGISTERED by Meta
-        // 2. Numbers with GREEN (Excellent) quality — fully approved by Meta, no OTP needed
-        const isVerified = phone?.verificationStatus === "VERIFIED" || phone?.verificationStatus === "REGISTERED";
-        const isExcellent = phone?.quality === "GREEN";
-
-        if (isVerified || isExcellent) {
-            await finishConnect();
-            return;
-        }
-
-        // Show OTP step only for unverified, non-excellent numbers
-        setStep("otp");
+        // Always connect directly — verification message sending is skipped
+        // for unverified numbers since the app is now fully Meta-approved.
+        // Unverified/unrated numbers will be verified by Meta in the background.
+        await finishConnect();
     };
 
     const finishConnect = async () => {
@@ -492,15 +480,7 @@ const SelectPhone = () => {
 
                     {/* Phone list */}
                     <div className="px-6 py-6">
-                        {step === "otp" ? (
-                            <OtpStep
-                                phone={phones.find(p => p.id === selectedId)}
-                                sessionId={sessionId}
-                                pax26={pax26}
-                                onVerified={finishConnect}
-                                onSkip={finishConnect}
-                            />
-                        ) : loading ? (
+                        {loading ? (
                             <div className="flex flex-col items-center py-12 gap-3">
                                 <div className="w-8 h-8 border-2 border-green-400/30 border-t-green-400 rounded-full animate-spin" />
                                 <p style={{ color: pax26?.textSecondary }} className="text-sm opacity-60">
@@ -565,11 +545,11 @@ const SelectPhone = () => {
                                 <p style={{ color: pax26?.textSecondary }} className="text-xs leading-relaxed opacity-85">
                                     {selectedPhone.quality === "UNKNOWN" ? (
                                         <>
-                                            This number's quality is <strong style={{ color: pax26?.textPrimary }}>Unrated</strong>. This is <strong>100% normal</strong> for newly registered WhatsApp Business numbers. It takes a few hours of active messaging for Meta to establish a rating. Your number is safe to connect!
+                                            Your number is <strong style={{ color: pax26?.textPrimary }}>connected</strong>, but Meta has not rated it yet. This is completely normal for newly added numbers — please <strong>wait a few hours</strong> for Meta to confirm it, then try again later if needed.
                                         </>
                                     ) : (
                                         <>
-                                            This number's quality is currently rated as <strong style={{ color: pax26?.textPrimary }}>{selectedPhone.quality === "YELLOW" ? "Fair" : "Poor"}</strong>. If you experience delay or error sending messages, please give it a few hours or contact Pax26 support.
+                                            This number's quality is currently rated as <strong style={{ color: pax26?.textPrimary }}>{selectedPhone.quality === "YELLOW" ? "Fair" : "Poor"}</strong>. If you experience a delay or error sending messages, please give it a few hours or contact Pax26 support.
                                         </>
                                     )}
                                 </p>
