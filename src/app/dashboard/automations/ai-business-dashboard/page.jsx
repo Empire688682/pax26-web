@@ -7,7 +7,7 @@ const page = () => {
   const { pax26 } = useGlobalContext();
   return (
     <div>
-      <div className='px-6 py-10'>
+      <div className='py-10'>
         <AiBusinessDashboard />
       </div>
     </div>

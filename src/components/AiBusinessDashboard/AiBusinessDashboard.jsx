@@ -351,12 +351,12 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
 
   const save = () => {
     if (!draft.name.trim() || !String(draft.price).trim()) return;
-    const item = { 
-      ...draft, 
-      price: parseFloat(draft.price) || 0, 
+    const item = {
+      ...draft,
+      price: parseFloat(draft.price) || 0,
       discountPrice: draft.discountPrice ? parseFloat(draft.discountPrice) : undefined,
       deliveryFee: draft.deliveryFee ? parseFloat(draft.deliveryFee) : undefined,
-      stock: parseInt(draft.stock) || 0 
+      stock: parseInt(draft.stock) || 0
     };
     if (editing === "new") onChange([...products, item]);
     else onChange(products.map((p, i) => i === editing ? item : p));
@@ -421,7 +421,7 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
             <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes" />
           </div>
           <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
-          
+
           {draft.isPhysical && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
@@ -520,18 +520,18 @@ function PaymentBuilder({ payments, onChange, pax26 }) {
 
 const DashboardTab = ({ label, active, onClick, icon: Icon, pax26 }) => (
   <button
+    className="text-[10px] md:text-[14px]"
     onClick={onClick}
     style={{
       display: "flex",
       alignItems: "center",
-      gap: "8px",
+      gap: "3px",
       padding: "12px 20px",
       border: "none",
       background: active ? `${pax26?.primary}15` : "transparent",
       color: active ? pax26?.primary : pax26?.textPrimary,
       borderRadius: "12px",
       cursor: "pointer",
-      fontSize: "14px",
       fontWeight: 600,
       transition: "all 0.2s",
       opacity: active ? 1 : 0.6,
@@ -920,14 +920,14 @@ export default function AiBusinessDashboard() {
                 <div style={{ background: p?.secondaryBg, padding: "32px", borderRadius: "24px", border: `1px solid ${p?.border}` }}>
                   <InfoBanner pax26={p} text="Add your bank details below. Your AI will securely share these with customers when they are ready to purchase." />
                   <div style={{ marginTop: "20px" }}>
-                    <PaymentBuilder 
-                      payments={form.paymentDetails} 
+                    <PaymentBuilder
+                      payments={form.paymentDetails}
                       onChange={v => {
                         const updated = { ...form, paymentDetails: v };
                         setForm(updated);
                         saveProfile(updated);
-                      }} 
-                      pax26={p} 
+                      }}
+                      pax26={p}
                     />
                   </div>
                 </div>

@@ -119,7 +119,10 @@ const Footer = () => {
 
   if (pathName === "/reset-password" ||
     pathName === "/automations/pax" ||
-    pathName === "/verify-user"
+    pathName === "/verify-user" ||
+    pathName === "/dashboard/automations/ai-business-dashboard" ||
+    pathName === "/dashboard/automations/ai-business-dashboard/product-list" ||
+    pathName === "/dashboard/automations/ai-business-dashboard/payment-details"
   ) return null;
 
   const year = new Date().getFullYear();
