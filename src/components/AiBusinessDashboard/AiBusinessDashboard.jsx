@@ -691,8 +691,8 @@ export default function AiBusinessDashboard() {
         border: `1px solid ${p?.border}`,
         width: "fit-content"
       }}>
+        <DashboardTab label="Business Info" icon={StoreIcon} active={activeTab === "profile"} onClick={() => setActiveTab("profile")} pax26={p} />
         <DashboardTab label="All Products" icon={PackageIcon} active={activeTab === "products"} onClick={() => setActiveTab("products")} pax26={p} />
-        <DashboardTab label="Update Profile" icon={StoreIcon} active={activeTab === "profile"} onClick={() => setActiveTab("profile")} pax26={p} />
         <DashboardTab label="Overview" icon={ClipboardIcon} active={activeTab === "overview"} onClick={() => setActiveTab("overview")} pax26={p} />
       </div>
 
@@ -731,7 +731,7 @@ export default function AiBusinessDashboard() {
               </div>
 
               {showProductForm ? (
-                <div style={{ background: p?.secondaryBg, padding: "32px", borderRadius: "24px", border: `1px solid ${p?.border}`, boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+                <div style={{ background: p?.secondaryBg, padding: "15px", borderRadius: "24px", border: `1px solid ${p?.border}`, boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
                     <div>
                       <h3 style={{ margin: 0, color: p?.textPrimary, fontSize: "20px", fontWeight: 800 }}>{editingProductIndex !== null ? "Edit Product" : "Upload Product"}</h3>
