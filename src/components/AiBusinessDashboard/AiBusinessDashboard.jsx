@@ -520,7 +520,7 @@ function PaymentBuilder({ payments, onChange, pax26 }) {
 
 const DashboardTab = ({ label, active, onClick, icon: Icon, pax26 }) => (
   <button
-    className="text-[10px] md:text-[14px]"
+    className="text-[12px] md:text-[14px]"
     onClick={onClick}
     style={{
       display: "flex",
@@ -537,7 +537,7 @@ const DashboardTab = ({ label, active, onClick, icon: Icon, pax26 }) => (
       opacity: active ? 1 : 0.6,
     }}
   >
-    <Icon />
+    <Icon className="hidden md:block" />
     {label}
   </button>
 );
