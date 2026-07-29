@@ -537,7 +537,9 @@ const DashboardTab = ({ label, active, onClick, icon: Icon, pax26 }) => (
       opacity: active ? 1 : 0.6,
     }}
   >
-    <Icon className="hidden md:block" />
+    <div className="hidden md:block" >
+      <Icon />
+    </div>
     {label}
   </button>
 );
