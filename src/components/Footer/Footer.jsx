@@ -123,7 +123,12 @@ const Footer = () => {
     pathName === "/dashboard/automations/ai-business-dashboard" ||
     pathName === "/dashboard/automations/ai-business-dashboard/product-list" ||
     pathName === "/dashboard/automations/ai-business-dashboard/payment-details" ||
-    pathName === "/dashboard/automations/whatsapp-contacts"
+    pathName === "/dashboard/automations/whatsapp-contacts" ||
+    pathName === "/dashboard/automations/sales-notifications" ||
+    pathName === "/dashboard/automations/sales" ||
+    pathName === "/dashboard/automations/broadcast" ||
+    pathName === "/dashboard/automations/broadcast/campaigns" ||
+    pathName === "/dashboard/billing"
   ) return null;
 
   const year = new Date().getFullYear();
