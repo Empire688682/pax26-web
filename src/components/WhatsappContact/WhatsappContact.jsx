@@ -1,4 +1,5 @@
 "use client";
+Whitelisted
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -724,7 +725,7 @@ const ContactCard = ({ contact, toggleContact, deleteContact, loadingPhone, pax2
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Edit button */}
                     <button
                       onClick={() => setIsEditing(true)}
@@ -1144,7 +1145,7 @@ export default function WhatsappContact() {
 
         {/* Tabs + Search */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
             {tabs.map(t => (
               <button
                 key={t.key}
