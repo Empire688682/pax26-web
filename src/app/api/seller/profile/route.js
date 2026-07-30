@@ -3,6 +3,7 @@ import { verifyToken } from "../../helper/VerifyToken";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerMediaModel from "@/app/ults/models/SellerMediaModel";
+import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import UserModel from "@/app/ults/models/UserModel";
@@ -51,34 +52,49 @@ export async function GET(req) {
 
         // Fetch user and existing profile in parallel — no dependency between them.
         const [user, existingProfile] = await Promise.all([
-            UserModel.findById(userId).select("whatsapp.displayPhone").lean(),
+            UserModel.findById(userId).select("whatsapp.displayPhone whatsapp.connected").lean(),
             SellerProfileModel.findOne({ userId }).lean(),
         ]);
 
         const whatsappNumber = user?.whatsapp?.displayPhone;
-        if (!whatsappNumber) {
+        if (!user?.whatsapp?.connected || !whatsappNumber) {
             return NextResponse.json(
                 { success: false, message: "Seller whatsapp not found" },
                 { status: 404, headers: corsHeaders() }
             );
         }
 
-        // Only write to DB when the stored number is actually out of date.
-        // Avoids a write operation on every single GET request.
+        // First-time sellers have no profile yet — return empty shell (not 404)
+        if (!existingProfile) {
+            return NextResponse.json(
+                {
+                    success: true,
+                    profile: {
+                        whatsappNumber,
+                        businessName: "",
+                        businessDescription: "",
+                        industry: "",
+                        tone: "friendly",
+                        autoReplyEnabled: true,
+                        followUpEnabled: true,
+                        followUpDelayMinutes: 30,
+                        currency: "NGN",
+                        workingHours: "",
+                        paymentDetails: [],
+                        products: [],
+                    },
+                },
+                { status: 200, headers: corsHeaders() }
+            );
+        }
+
         let profile = existingProfile;
-        if (!profile || profile.whatsappNumber !== whatsappNumber) {
+        if (profile.whatsappNumber !== whatsappNumber) {
             profile = await SellerProfileModel.findOneAndUpdate(
                 { userId },
                 { $set: { whatsappNumber } },
-                { new: true, upsert: true }
+                { new: true }
             ).lean();
-        }
-
-        if (!profile) {
-            return NextResponse.json(
-                { success: false, message: "Profile not found" },
-                { status: 404, headers: corsHeaders() }
-            );
         }
 
         const products = await SellerProductModel.find({
@@ -116,10 +132,10 @@ export async function POST(req) {
 
         const user = await UserModel.findById(userId);
         const whatsappNumber = user?.whatsapp?.displayPhone;
-        if (!whatsappNumber) {
+        if (!user?.whatsapp?.connected || !whatsappNumber) {
             return NextResponse.json(
-                { success: false, message: "Seller whatsapp not found" },
-                { status: 401, headers: corsHeaders() }
+                { success: false, message: "Seller whatsapp not found. Connect WhatsApp before saving products." },
+                { status: 400, headers: corsHeaders() }
             );
         }
 
@@ -241,12 +257,19 @@ export async function POST(req) {
             await SellerProductModel.deleteMany({ sellerId });
         }
 
-        // 3. Update paxAI training status.
+        // 3. Update paxAI training status — one-type enforcement: deactivate service profile.
         if (user.paxAI) {
             user.paxAI.lastUpdated = Date.now();
             user.paxAI.trained = true;
+            user.paxAI.businessType = "seller"; // seller is now the active type
             await user.save();
         }
+
+        // Deactivate service profile so triggerAIResponse uses seller
+        await ServiceProfileModel.updateOne(
+            { userId },
+            { $set: { whatsappEnabled: false, aiTrained: false } }
+        );
 
         // 4. Return final state.
         const finalProducts = await SellerProductModel.find({ sellerId }).lean();

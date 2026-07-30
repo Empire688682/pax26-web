@@ -252,28 +252,13 @@ export const AppProvider = ({ children }) => {
   const verifyUserRedirect = async () => {
     if (!userData) return;
     if (userData && !userData.userVerify && pathname !== "/verify-user") {
-      try {
-        const res = await fetch("/api/auth/send-email-verification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await res.json();
-        if (data.success) {
-          toast.success("Verification email sent! Please check your inbox.");
-          router.push("/verify-user");
-        } else {
-          toast.error(data.message || "Failed to send verification email");
-        }
-      } catch {
-        console.log("Error sending verification email", error);
-        toast.error("Error sending verification email");
-      }
+      router.push("/verify-user");
     }
   }
 
   useEffect(() => {
     verifyUserRedirect();
-  }, [userData, router]);
+  }, [userData, pathname, router]);
 
   useEffect(() => {
     const fetchDataPlan = async () => {

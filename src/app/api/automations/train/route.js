@@ -1,9 +1,10 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -34,8 +35,11 @@ export async function PUT(req) {
     // Parse request body
     const data = await req.json();
 
-    // Update or create BusinessProfile
-    const profile = await GeneralBusinessProfileModel.findOneAndUpdate(
+    // One-type enforcement: deactivate seller profile when activating as service provider
+    await SellerProfileModel.updateOne({ userId }, { $set: { isActive: false } });
+
+    // Update or create ServiceProfile
+    const profile = await ServiceProfileModel.findOneAndUpdate(
       { userId },
       {
         ...data,
@@ -47,6 +51,7 @@ export async function PUT(req) {
 
     user.paxAI.enabled = true;
     user.paxAI.trained = true;
+    user.paxAI.businessType = "service"; // track active type
     user.paxAI.lastUpdated = new Date();
     // Set planStartedAt only the first time AI is activated (free plan start)
     if (!user.paxAI.planStartedAt) {

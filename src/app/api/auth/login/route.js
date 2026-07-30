@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import { sendUserVerification } from "../services/sendVerificationService";
 
 dotenv.config();
 
@@ -88,10 +87,6 @@ export async function POST(req) {
       sameSite: "lax",
       path: "/"
     });
-
-    if(!userObj.userVerify){
-       await sendUserVerification(userObj);
-    }
 
     return response;
   } catch (error) {

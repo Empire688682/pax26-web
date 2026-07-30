@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { TagInput } from "@/components/ui/TagInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalContext } from "../Context";
@@ -102,16 +102,40 @@ const XIcon = () => (
 );
 
 /* ══════════════════════════════════════════════════════════
-   STEPS CONFIG
+   STEPS CONFIG — Seller (existing flow)
 ══════════════════════════════════════════════════════════ */
-const STEPS = [
+const SELLER_STEPS = [
   { label: "Store Info",   icon: StoreIcon,        desc: "Your shop identity & logo" },
+  { label: "WhatsApp",     icon: MessageCircleIcon, desc: "Connect your number" },
   { label: "Products",     icon: PackageIcon,       desc: "What you sell" },
   { label: "Payment",      icon: CreditCardIcon,    desc: "How customers pay you" },
   { label: "AI Behaviour", icon: SlidersIcon,       desc: "Tone, hours & auto-reply" },
-  { label: "WhatsApp",     icon: MessageCircleIcon, desc: "Connect your number" },
   { label: "Review",       icon: ClipboardIcon,     desc: "Confirm your details" },
   { label: "Train AI",     icon: RocketIcon,        desc: "Launch your sales agent" },
+];
+
+/* ══════════════════════════════════════════════════════════
+   STEPS CONFIG — Service Provider (new flow)
+══════════════════════════════════════════════════════════ */
+const ServiceIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
+const FaqIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+const SERVICE_STEPS = [
+  { label: "Business Info",    icon: StoreIcon,        desc: "Your business identity" },
+  { label: "Services & FAQs",  icon: FaqIcon,           desc: "What you offer" },
+  { label: "Payment",          icon: CreditCardIcon,    desc: "How clients pay you" },
+  { label: "AI Behaviour",     icon: SlidersIcon,       desc: "Tone, hours & auto-reply" },
+  { label: "WhatsApp",         icon: MessageCircleIcon, desc: "Connect your number" },
+  { label: "Review",           icon: ClipboardIcon,     desc: "Confirm your details" },
+  { label: "Train AI",         icon: RocketIcon,        desc: "Launch your service agent" },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -410,15 +434,24 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
 /* ══════════════════════════════════════════════════════════
    PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
-function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId }) {
+function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId, locked = false }) {
   const emptyProduct = () => ({ name: "", price: "", description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null); // number | "new" | null
   const [draft, setDraft] = useState(emptyProduct());
 
-  const startNew = () => { setDraft(emptyProduct()); setEditing("new"); };
-  const startEdit = (i) => { setDraft({ ...products[i] }); setEditing(i); };
+  const startNew = () => {
+    if (locked) return;
+    setDraft(emptyProduct());
+    setEditing("new");
+  };
+  const startEdit = (i) => {
+    if (locked) return;
+    setDraft({ ...products[i] });
+    setEditing(i);
+  };
 
   const save = () => {
+    if (locked) return;
     if (!draft.name.trim() || !String(draft.price).trim()) return;
     const item = { ...draft, price: parseFloat(draft.price) || 0, stock: parseInt(draft.stock) || 0 };
     if (editing === "new") onChange([...products, item]);
@@ -426,9 +459,12 @@ function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId 
     setEditing(null);
   };
 
-  const remove = (i) => onChange(products.filter((_, j) => j !== i));
+  const remove = (i) => {
+    if (locked) return;
+    onChange(products.filter((_, j) => j !== i));
+  };
   const p = pax26;
-  const canSave = draft.name.trim() && String(draft.price).trim();
+  const canSave = !locked && draft.name.trim() && String(draft.price).trim();
   const symbol = getCurrencySymbol(currency);
 
   return (
@@ -445,12 +481,12 @@ function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId 
               {formatPrice(prod.price, currency)}{prod.stock ? ` · ${prod.stock} in stock` : ""}
             </p>
           </div>
-          <button onClick={() => startEdit(i)} style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "11px", fontWeight: 600, cursor: "pointer" }}>Edit</button>
-          <button onClick={() => remove(i)} style={{ padding: "6px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><TrashIcon /></button>
+          <button onClick={() => startEdit(i)} disabled={locked} style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "11px", fontWeight: 600, cursor: locked ? "not-allowed" : "pointer", opacity: locked ? 0.45 : 1 }}>Edit</button>
+          <button onClick={() => remove(i)} disabled={locked} style={{ padding: "6px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: locked ? "not-allowed" : "pointer", display: "flex", alignItems: "center", opacity: locked ? 0.45 : 1 }}><TrashIcon /></button>
         </div>
       ))}
 
-      {editing !== null ? (
+      {editing !== null && !locked ? (
         <div style={{ padding: "16px", borderRadius: "14px", border: `1px solid ${p?.primary}44`, background: `${p?.primary}06`, display: "flex", flexDirection: "column", gap: "12px" }}>
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{editing === "new" ? "New Product" : "Edit Product"}</p>
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
@@ -475,9 +511,10 @@ function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId 
       ) : (
         <button
           onClick={startNew}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: "pointer", opacity: 0.7, transition: "opacity 0.2s" }}
-          onMouseEnter={e => e.currentTarget.style.opacity = "1"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
+          disabled={locked}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 600, fontSize: "13px", cursor: locked ? "not-allowed" : "pointer", opacity: locked ? 0.45 : 0.7, transition: "opacity 0.2s" }}
+          onMouseEnter={e => { if (!locked) e.currentTarget.style.opacity = "1"; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = locked ? "0.45" : "0.7"; }}
         >
           <PlusIcon /> Add Product
         </button>
@@ -547,9 +584,168 @@ function PaymentBuilder({ payments, onChange, pax26 }) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   BUSINESS TYPE SELECTOR
+   Shown when businessType === null (first-time setup or after switch)
+══════════════════════════════════════════════════════════ */
+function BusinessTypeSelector({ onSelect, pax26 }) {
+  const p = pax26;
+  const [hovered, setHovered] = useState(null);
+
+  const cards = [
+    {
+      type: "seller",
+      emoji: "🛍️",
+      title: "Seller",
+      subtitle: "Products, pricing & delivery",
+      desc: "Sell physical or digital products on WhatsApp. Your AI handles enquiries, images, pricing, and orders.",
+      color: p?.primary,
+    },
+    {
+      type: "service",
+      emoji: "🛠️",
+      title: "Service Provider",
+      subtitle: "Services, FAQs & consultations",
+      desc: "For consultants, agencies & professionals. Your AI answers service questions and captures leads.",
+      color: "#8b5cf6",
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "8px 0 16px" }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <h2 style={{ fontSize: "20px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 6px" }}>What type of business are you setting up?</h2>
+        <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, margin: 0 }}>Choose the model that matches how you work</p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", width: "100%" }}>
+        {cards.map(card => (
+          <button
+            key={card.type}
+            onClick={() => onSelect(card.type)}
+            onMouseEnter={() => setHovered(card.type)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "10px",
+              padding: "20px 16px", borderRadius: "16px", border: `2px solid`,
+              borderColor: hovered === card.type ? card.color : p?.border,
+              background: hovered === card.type ? `${card.color}08` : p?.secondaryBg,
+              cursor: "pointer", textAlign: "left", transition: "all 0.18s",
+              boxShadow: hovered === card.type ? `0 6px 24px ${card.color}20` : "none",
+            }}
+          >
+            <span style={{ fontSize: "32px", lineHeight: 1 }}>{card.emoji}</span>
+            <div>
+              <p style={{ margin: 0, fontSize: "15px", fontWeight: 800, color: p?.textPrimary }}>{card.title}</p>
+              <p style={{ margin: "2px 0 0", fontSize: "11px", fontWeight: 600, color: card.color, opacity: 0.9 }}>{card.subtitle}</p>
+            </div>
+            <p style={{ margin: 0, fontSize: "12px", color: p?.textPrimary, opacity: 0.55, lineHeight: 1.5 }}>{card.desc}</p>
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   SERVICES & FAQS BUILDER
+   Used in step 1 of SERVICE_STEPS
+══════════════════════════════════════════════════════════ */
+function ServicesFaqsBuilder({ services, faqs, onServicesChange, onFaqsChange, pax26 }) {
+  const p = pax26;
+
+  const updateService = (i, val) => {
+    const next = [...services];
+    next[i] = val;
+    onServicesChange(next);
+  };
+  const removeService = (i) => onServicesChange(services.filter((_, j) => j !== i));
+  const addService = () => onServicesChange([...services, ""]);
+
+  const updateFaq = (i, field, val) => {
+    const next = faqs.map((f, j) => j === i ? { ...f, [field]: val } : f);
+    onFaqsChange(next);
+  };
+  const removeFaq = (i) => onFaqsChange(faqs.filter((_, j) => j !== i));
+  const addFaq = () => onFaqsChange([...faqs, { question: "", answer: "" }]);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      {/* Services section */}
+      <div>
+        <FieldLabel pax26={p}>Services Offered</FieldLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {services.map((svc, i) => (
+            <div key={i} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <input
+                value={svc}
+                onChange={e => updateService(i, e.target.value)}
+                placeholder={`e.g. Logo Design, Social Media Management`}
+                style={{ ...fieldBase(p), flex: 1 }}
+              />
+              <button
+                onClick={() => removeService(i)}
+                style={{ padding: "8px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center" }}
+              ><TrashIcon /></button>
+            </div>
+          ))}
+          <button
+            onClick={addService}
+            style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "13px", fontWeight: 600, cursor: "pointer", opacity: 0.7 }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
+          >
+            <PlusIcon /> Add Service
+          </button>
+        </div>
+      </div>
+
+      {/* FAQs section */}
+      <div>
+        <FieldLabel pax26={p}>Frequently Asked Questions</FieldLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {faqs.map((faq, i) => (
+            <div key={i} style={{ padding: "12px 14px", borderRadius: "12px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5 }}>FAQ {i + 1}</span>
+                <button onClick={() => removeFaq(i)} style={{ padding: "4px", borderRadius: "6px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><TrashIcon /></button>
+              </div>
+              <input
+                value={faq.question}
+                onChange={e => updateFaq(i, "question", e.target.value)}
+                placeholder="Question"
+                style={{ ...fieldBase(p) }}
+              />
+              <textarea
+                value={faq.answer}
+                onChange={e => updateFaq(i, "answer", e.target.value)}
+                placeholder="Answer"
+                rows={2}
+                style={{ ...fieldBase(p), resize: "vertical" }}
+              />
+            </div>
+          ))}
+          <button
+            onClick={addFaq}
+            style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 14px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "13px", fontWeight: 600, cursor: "pointer", opacity: 0.7 }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}
+          >
+            <PlusIcon /> Add FAQ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
    STEP RENDERER — proper React component (receives props object)
 ══════════════════════════════════════════════════════════ */
-function StepRenderer({ step, form, setForm, pax26, sellerId }) {
+function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected, whatsappPhone, onConnectWhatsApp }) {
   const p = pax26;
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -572,6 +768,21 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
             onChange={e => set("businessName", e.target.value)}
             placeholder="e.g. Kemi's Boutique"
           />
+          <ThemedTextarea
+            label="Business Description *"
+            pax26={p}
+            value={form.businessDescription}
+            onChange={e => set("businessDescription", e.target.value)}
+            placeholder="e.g. We sell premium fashion and accessories in Lagos…"
+            rows={3}
+          />
+          <ThemedInput
+            label="Industry / Category *"
+            pax26={p}
+            value={form.industry}
+            onChange={e => set("industry", e.target.value)}
+            placeholder="e.g. Fashion, Electronics"
+          />
           <ThemedSelect
             label="Currency"
             pax26={p}
@@ -582,25 +793,76 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
         </div>
       );
 
-    /* ── 1: Products ── */
+    /* ── 1: WhatsApp (before products) ── */
     case 1:
       return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <InfoBanner
+            text="WhatsApp must be connected before you can add products. This prevents failed saves and unused image uploads."
+            pax26={p}
+          />
+          {whatsappConnected ? (
+            <div style={{ padding: "16px", borderRadius: "14px", border: "1px solid #22c55e44", background: "#22c55e12", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#22c55e" }}>
+                <CheckIcon />
+                <p style={{ margin: 0, fontSize: "14px", fontWeight: 800 }}>WhatsApp connected</p>
+              </div>
+              <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.75 }}>
+                Linked number: <strong>{whatsappPhone || form.whatsappNumber}</strong>
+              </p>
+            </div>
+          ) : (
+            <div style={{ padding: "18px", borderRadius: "14px", border: "1px solid #f59e0b44", background: "#f59e0b12", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>WhatsApp not connected</p>
+              <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.65, lineHeight: 1.55 }}>
+                Connect your WhatsApp Business number first. You cannot continue to products until this is done.
+              </p>
+              <button
+                onClick={onConnectWhatsApp}
+                style={{ alignSelf: "flex-start", padding: "10px 16px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
+              >
+                Connect WhatsApp
+              </button>
+            </div>
+          )}
+        </div>
+      );
+
+    /* ── 2: Products ── */
+    case 2:
+      return (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: "0 0 4px" }}>
-            Add your products with prices, descriptions, and images. Your AI will use these to answer customer questions and take orders.
-          </p>
+          {!whatsappConnected ? (
+            <div style={{ padding: "18px", borderRadius: "14px", border: "1px solid #f59e0b44", background: "#f59e0b12", display: "flex", flexDirection: "column", gap: "12px", marginBottom: "8px" }}>
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>Connect WhatsApp first</p>
+              <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.65, lineHeight: 1.55 }}>
+                Product uploads are locked until WhatsApp is connected.
+              </p>
+              <button
+                onClick={onConnectWhatsApp}
+                style={{ alignSelf: "flex-start", padding: "10px 16px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
+              >
+                Connect WhatsApp
+              </button>
+            </div>
+          ) : (
+            <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: "0 0 4px" }}>
+              Add your products with prices, descriptions, and images. Your AI will use these to answer customer questions and take orders.
+            </p>
+          )}
           <ProductBuilder
             products={form.products}
             onChange={v => set("products", v)}
             pax26={p}
             currency={form.currency}
             sellerId={sellerId}
+            locked={!whatsappConnected}
           />
         </div>
       );
 
-    /* ── 2: Payment ── */
-    case 2:
+    /* ── 3: Payment ── */
+    case 3:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <InfoBanner text="Your AI will automatically share these payment details when customers are ready to pay." pax26={p} />
@@ -612,8 +874,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
         </div>
       );
 
-    /* ── 3: AI Behaviour ── */
-    case 3:
+    /* ── 4: AI Behaviour ── */
+    case 4:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <ThemedSelect
@@ -654,21 +916,6 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
         </div>
       );
 
-    /* ── 4: WhatsApp ── */
-    case 4:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <InfoBanner text="Use international format e.g. <strong>+2348012345678</strong>. This is the number your customers will message." pax26={p} />
-          <ThemedInput
-            label="WhatsApp Business Number *"
-            pax26={p}
-            value={form.whatsappNumber}
-            onChange={e => set("whatsappNumber", e.target.value)}
-            placeholder="+2348012345678"
-          />
-        </div>
-      );
-
     /* ── 5: Review ── */
     case 5:
       return (
@@ -679,6 +926,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
             </div>
           )}
           <ReviewRow label="Store"      value={form.businessName} pax26={p} />
+          <ReviewRow label="Industry"   value={form.industry} pax26={p} />
           <ReviewRow label="Currency"   value={form.currency} pax26={p} />
           <ReviewRow label="Products"   value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
           <ReviewRow label="Payment"    value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
@@ -686,7 +934,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
           <ReviewRow label="Hours"      value={form.workingHours} pax26={p} />
           <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
           <ReviewRow label="Follow-Up"  value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
-          <ReviewRow label="WhatsApp"   value={form.whatsappNumber} pax26={p} />
+          <ReviewRow label="WhatsApp"   value={whatsappPhone || form.whatsappNumber} pax26={p} />
           <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
             Everything look right? Hit "Launch Agent" to train your AI sales assistant.
           </p>
@@ -736,17 +984,221 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   SERVICE STEP RENDERER
+   Renders each step of the SERVICE_STEPS wizard
+══════════════════════════════════════════════════════════ */
+function ServiceStepRenderer({ step, form, setForm, pax26 }) {
+  const p = pax26;
+  const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
+
+  switch (step) {
+    /* ── 0: Business Info ── */
+    case 0:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <ThemedInput
+            label="Business Name *"
+            pax26={p}
+            value={form.businessName}
+            onChange={e => set("businessName", e.target.value)}
+            placeholder="e.g. Kemi Digital Agency"
+          />
+          <ThemedInput
+            label="Industry *"
+            pax26={p}
+            value={form.industry}
+            onChange={e => set("industry", e.target.value)}
+            placeholder="e.g. Marketing, Legal, Consulting"
+          />
+          <ThemedTextarea
+            label="Business Description"
+            pax26={p}
+            value={form.description}
+            onChange={e => set("description", e.target.value)}
+            placeholder="Tell the AI about what your business does…"
+            rows={3}
+          />
+          <ThemedInput
+            label="Website / Business URL"
+            pax26={p}
+            value={form.businessUrl}
+            onChange={e => set("businessUrl", e.target.value)}
+            placeholder="https://yourbusiness.com"
+          />
+          <ThemedSelect
+            label="Currency"
+            pax26={p}
+            value={form.currency}
+            options={CURRENCY_OPTIONS}
+            onChange={v => set("currency", v)}
+          />
+        </div>
+      );
+
+    /* ── 1: Services & FAQs ── */
+    case 1:
+      return (
+        <ServicesFaqsBuilder
+          services={form.services}
+          faqs={form.faqs}
+          onServicesChange={v => set("services", v)}
+          onFaqsChange={v => set("faqs", v)}
+          pax26={p}
+        />
+      );
+
+    /* ── 2: Payment ── */
+    case 2:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <InfoBanner text="Your AI will automatically share these payment details when clients are ready to pay." pax26={p} />
+          <PaymentBuilder
+            payments={form.paymentDetails}
+            onChange={v => set("paymentDetails", v)}
+            pax26={p}
+          />
+        </div>
+      );
+
+    /* ── 3: AI Behaviour ── */
+    case 3:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <ThemedSelect
+            label="Conversation Tone"
+            pax26={p}
+            value={form.tone}
+            options={[
+              { value: "professional", label: "Professional — formal & structured" },
+              { value: "friendly",     label: "Friendly — warm & conversational" },
+              { value: "salesy",       label: "Salesy — persuasive & conversion-focused" },
+            ]}
+            onChange={v => set("tone", v)}
+          />
+          <ThemedInput
+            label="Working Hours"
+            pax26={p}
+            value={form.workingHours}
+            onChange={e => set("workingHours", e.target.value)}
+            placeholder="e.g. Mon–Fri 9am–5pm"
+          />
+          <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
+          <Toggle label="Follow-Up Messages" hint="AI follows up on unresponded leads" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
+          {form.followUpEnabled && (
+            <ThemedSelect
+              label="Follow-Up Delay"
+              pax26={p}
+              value={String(form.followUpDelayMinutes)}
+              options={[
+                { value: "15",   label: "15 minutes" },
+                { value: "30",   label: "30 minutes" },
+                { value: "60",   label: "1 hour" },
+                { value: "120",  label: "2 hours" },
+                { value: "1440", label: "24 hours" },
+              ]}
+              onChange={v => set("followUpDelayMinutes", parseInt(v))}
+            />
+          )}
+        </div>
+      );
+
+    /* ── 4: WhatsApp ── */
+    case 4:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <InfoBanner text="Use international format e.g. <strong>+2348012345678</strong>. This is the number your clients will message." pax26={p} />
+          <ThemedInput
+            label="WhatsApp Business Number *"
+            pax26={p}
+            value={form.whatsappNumber}
+            onChange={e => set("whatsappNumber", e.target.value)}
+            placeholder="+2348012345678"
+          />
+        </div>
+      );
+
+    /* ── 5: Review ── */
+    case 5:
+      return (
+        <div>
+          <ReviewRow label="Business"   value={form.businessName} pax26={p} />
+          <ReviewRow label="Industry"   value={form.industry} pax26={p} />
+          <ReviewRow label="Services"   value={`${form.services.filter(s => s.trim()).length} service(s)`} pax26={p} />
+          <ReviewRow label="FAQs"       value={`${form.faqs.length} FAQ(s)`} pax26={p} />
+          <ReviewRow label="Payment"    value={`${form.paymentDetails.length} account(s)`} pax26={p} />
+          <ReviewRow label="Tone"       value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
+          <ReviewRow label="Hours"      value={form.workingHours} pax26={p} />
+          <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
+          <ReviewRow label="WhatsApp"   value={form.whatsappNumber} pax26={p} />
+          <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
+            Everything look right? Hit "Launch Agent" to train your AI service assistant.
+          </p>
+        </div>
+      );
+
+    /* ── 6: Launch ── */
+    case 6:
+      return (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "28px 0 16px", gap: "20px" }}>
+          <div style={{ position: "relative", width: "80px", height: "80px" }}>
+            <div className="animate-ping" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#8b5cf6", opacity: 0.15 }} />
+            <div style={{ position: "relative", width: "80px", height: "80px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#8b5cf618", border: "2px solid #8b5cf633", color: p?.textPrimary }}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h3 style={{ fontSize: "19px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 8px" }}>
+              Ready to launch{form.businessName ? ` ${form.businessName}'s` : " your"} Service Agent
+            </h3>
+            <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, maxWidth: "320px", lineHeight: 1.65, margin: "0 auto" }}>
+              Your AI will know your services, FAQs, payment details, and professional style — ready to handle client inquiries 24/7.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
+            {[
+              `${form.services.filter(s => s.trim()).length} services`,
+              `${form.faqs.length} FAQs`,
+              `${form.paymentDetails.length} payment accounts`,
+              form.tone,
+              form.workingHours || "hours not set",
+            ].map((pill, i) => (
+              <span key={i} style={{ fontSize: "11px", fontWeight: 700, padding: "5px 13px", borderRadius: "999px", background: "#8b5cf614", color: p?.textPrimary }}>{pill}</span>
+            ))}
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════ */
-export default function AiTrainingPage() {
-  const { pax26, router, setAIsPaxAiBusinessTrained } = useGlobalContext();
+const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
+  const { pax26, router, userData, setAIsPaxAiBusinessTrained, fetchUser } = useGlobalContext();
+
+  // ── Business type gate ──────────────────────────────────
+  // Derives from context; user may select via BusinessTypeSelector
+  const [businessType, setBusinessType] = useState(userData?.paxAI?.businessType || null);
+
+  useEffect(() => {
+    setBusinessType(userData?.paxAI?.businessType || null);
+  }, [userData?.paxAI?.businessType]);
+
   const [loading, setLoading] = useState(false);
+  const [trainError, setTrainError] = useState("");
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
 
+  // ── Unified form state — covers both seller and service flows ─
   const [form, setForm] = useState({
-    sellerId: "",           // populated from the fetched profile _id
+    sellerId: "",           // populated from the fetched seller profile _id
     businessName: "",
+    businessDescription: "",
     whatsappNumber: "",
     logo: null,             // { url, publicId }
     tone: "salesy",
@@ -757,10 +1209,30 @@ export default function AiTrainingPage() {
     workingHours: "",
     paymentDetails: [],
     products: [],
+    // Service-provider fields
+    industry: "",
+    description: "",
+    businessUrl: "",
+    services: [],
+    faqs: [],
   });
 
-  /* fetch existing seller profile on mount */
+  const whatsappConnected = !!(userData?.whatsapp?.connected && userData?.whatsapp?.displayPhone);
+  const whatsappPhone = userData?.whatsapp?.displayPhone || "";
+
+  // Keep form WhatsApp number in sync with the connected Meta number
+  useEffect(() => {
+    if (whatsappPhone) {
+      setForm((f) => (f.whatsappNumber === whatsappPhone ? f : { ...f, whatsappNumber: whatsappPhone }));
+    }
+  }, [whatsappPhone]);
+
+  // ── Derive active steps array based on businessType ────
+  const STEPS = businessType === "service" ? SERVICE_STEPS : SELLER_STEPS;
+
+  /* fetch existing seller profile on mount (seller flow only) */
   const fetchProfile = useCallback(async () => {
+    if (businessType !== "seller") return;
     try {
       const res = await fetch("/api/seller/profile");
       const data = await res.json();
@@ -771,6 +1243,8 @@ export default function AiTrainingPage() {
           ...f,
           sellerId:             p._id || "",
           businessName:         p.businessName || "",
+          businessDescription:  p.businessDescription || "",
+          industry:             p.industry || f.industry || "",
           whatsappNumber:       p.whatsappNumber || "",
           logo:                 p.logo || null,
           tone:                 p.tone || "salesy",
@@ -786,20 +1260,57 @@ export default function AiTrainingPage() {
     } catch (e) {
       console.error("fetchProfile error:", e);
     }
-  }, [setAIsPaxAiBusinessTrained]);
+  }, [setAIsPaxAiBusinessTrained, businessType]);
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
-  /* per-step validation */
+  // ── Expose wizard state via ref (Property 10) ───────────
+  useImperativeHandle(ref, () => ({
+    getWizardState: () => ({
+      businessType,
+      currentStep: step,
+      formData: {
+        businessName:         form.businessName,
+        businessDescription:  form.businessDescription,
+        industry:             form.industry,
+        description:          form.description,
+        businessUrl:          form.businessUrl,
+        currency:             form.currency,
+        tone:                 form.tone,
+        workingHours:         form.workingHours,
+        autoReplyEnabled:     form.autoReplyEnabled,
+        followUpEnabled:      form.followUpEnabled,
+        followUpDelayMinutes: form.followUpDelayMinutes,
+        paymentDetails:       form.paymentDetails,
+        services:             form.services,
+        faqs:                 form.faqs,
+        products:             form.products,
+        whatsappNumber:       form.whatsappNumber,
+      },
+    }),
+  }));
+
+  /* per-step validation — type-specific */
   const nextDisabled = () => {
+    if (businessType === "service") {
+      switch (step) {
+        case 0: return !form.businessName.trim() || !form.industry.trim();
+        case 1: return form.services.filter(s => s.trim()).length === 0 && form.faqs.length === 0;
+        case 2: return false; // payment optional
+        case 3: return !form.tone || !form.workingHours.trim();
+        case 4: return !(whatsappConnected || form.whatsappNumber.trim());
+        default: return false;
+      }
+    }
+    // seller — WhatsApp is step 1, Products is step 2
     switch (step) {
-      case 0: return !form.businessName.trim();
-      case 1: return form.products.length === 0;
-      case 2: return form.paymentDetails.length === 0;
-      case 3: return !form.tone || !form.workingHours.trim();
-      case 4: return !form.whatsappNumber.trim();
+      case 0: return !form.businessName.trim() || !form.businessDescription.trim() || !form.industry.trim();
+      case 1: return !whatsappConnected;
+      case 2: return !whatsappConnected || form.products.length === 0;
+      case 3: return form.paymentDetails.length === 0;
+      case 4: return !form.tone || !form.workingHours.trim();
       default: return false;
     }
   };
@@ -810,6 +1321,10 @@ export default function AiTrainingPage() {
   };
 
   const next = () => {
+    if (businessType === "seller") {
+      if (step === 1 && !whatsappConnected) return;
+      if (step === 2 && !whatsappConnected) return;
+    }
     if (step === STEPS.length - 1) { handleTrain(); return; }
     go(1);
     setStep(s => Math.min(s + 1, STEPS.length - 1));
@@ -821,56 +1336,127 @@ export default function AiTrainingPage() {
   };
 
   const handleTrain = async () => {
+    setTrainError("");
+    if (businessType === "seller" && !whatsappConnected) {
+      setTrainError("Connect WhatsApp before launching your seller agent.");
+      setStep(1);
+      return;
+    }
     try {
       setLoading(true);
-      const res = await fetch("/api/seller/train", {
+      const endpoint = businessType === "service"
+        ? "/api/automations/general-train"
+        : "/api/automations/seller-train";
+      const payload = businessType === "seller"
+        ? {
+            businessName: form.businessName,
+            businessDescription: form.businessDescription || form.description,
+            industry: form.industry,
+            tone: form.tone,
+            autoReplyEnabled: form.autoReplyEnabled,
+            followUpEnabled: form.followUpEnabled,
+            followUpDelayMinutes: form.followUpDelayMinutes,
+            currency: form.currency,
+            workingHours: form.workingHours,
+            paymentDetails: form.paymentDetails,
+            products: form.products,
+            whatsappNumber: whatsappPhone || form.whatsappNumber,
+          }
+        : {
+            ...form,
+            description: form.description || form.businessDescription,
+            whatsappNumber: whatsappPhone || form.whatsappNumber,
+          };
+      const res = await fetch(endpoint, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (data.success) {
+      const text = await res.text();
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        setTrainError("Training failed. Please try again.");
+        return;
+      }
+      if (res.ok && data?.success) {
         setAIsPaxAiBusinessTrained?.(true);
-        router.push("/dashboard/automations/home");
+        await fetchUser?.();
+        router.push("/dashboard/automations/ai-business-dashboard");
+      } else {
+        setTrainError(data?.message || "Training failed. Please try again.");
       }
     } catch (e) {
       console.error("handleTrain error:", e);
+      setTrainError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Business type gate: show selector if no type chosen ──
+  if (businessType === null) {
+    return (
+      <>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "640px", margin: "0 auto", paddingLeft: "16px", paddingRight: "16px" }}>
+          <div style={{ marginBottom: "28px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+              <div style={{ width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `${pax26?.primary}22`, color: pax26?.textPrimary }}>
+                <BotIcon />
+              </div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>AI Agent Setup</p>
+            </div>
+            <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>Set Up Your AI Agent</h1>
+            <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>Choose how your business works to get the right AI setup</p>
+          </div>
+          <BusinessTypeSelector onSelect={setBusinessType} pax26={pax26} />
+        </div>
+      </>
+    );
+  }
+
   const StepIcon = STEPS[step].icon;
   const progress = (step / (STEPS.length - 1)) * 100;
   const isLastStep = step === STEPS.length - 1;
   const disabled = nextDisabled() || loading;
+  const accentColor = businessType === "service" ? "#8b5cf6" : pax26?.primary;
 
   return (
     <>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } } .animate-ping { animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; } @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
 
       <div style={{ minHeight: "100vh", paddingBottom: "80px", paddingTop: "24px", maxWidth: "640px", margin: "0 auto", paddingLeft: "16px", paddingRight: "16px" }}>
 
         {/* ── Page header ── */}
         <div style={{ marginBottom: "28px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-            <div style={{ width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `${pax26?.primary}22`, color: pax26?.textPrimary }}>
+            <div style={{ width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `${accentColor}22`, color: pax26?.textPrimary }}>
               <BotIcon />
             </div>
-            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>AI Sales Agent</p>
+            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>
+              {businessType === "service" ? "AI Service Agent" : "AI Sales Agent"}
+            </p>
           </div>
-          <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>Train your Seller Agent</h1>
-          <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>Set up your store, products & payment so your AI can sell for you 24/7</p>
+          <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>
+            {businessType === "service" ? "Train your Service Agent" : "Train your Seller Agent"}
+          </h1>
+          <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>
+            {businessType === "service"
+              ? "Set up your services, FAQs & payment so your AI can handle clients 24/7"
+              : "Set up your store, products & payment so your AI can sell for you 24/7"}
+          </p>
         </div>
 
         {/* ── Progress bar ── */}
         <div style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
             <span style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>Step {step + 1} of {STEPS.length}</span>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: pax26?.primary }}>{Math.round(progress)}%</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: accentColor }}>{Math.round(progress)}%</span>
           </div>
           <div style={{ height: "4px", borderRadius: "999px", overflow: "hidden", background: pax26?.secondaryBg }}>
-            <div style={{ height: "100%", borderRadius: "999px", background: `linear-gradient(90deg, ${pax26?.primary}, ${pax26?.primary}cc)`, width: `${progress}%`, transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
+            <div style={{ height: "100%", borderRadius: "999px", background: `linear-gradient(90deg, ${accentColor}, ${accentColor}cc)`, width: `${progress}%`, transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
           </div>
         </div>
 
@@ -891,7 +1477,7 @@ export default function AiTrainingPage() {
                   padding: "6px 12px", borderRadius: "999px",
                   fontSize: "11px", fontWeight: 700, flexShrink: 0, border: "none",
                   cursor: i > step ? "not-allowed" : "pointer", transition: "all 0.2s",
-                  background: active ? pax26?.primary : done ? `${pax26?.primary}18` : pax26?.secondaryBg,
+                  background: active ? accentColor : done ? `${accentColor}18` : pax26?.secondaryBg,
                   color: active ? "#fff" : pax26?.textPrimary,
                   opacity: !active && !done ? 0.4 : 1,
                 }}
@@ -913,8 +1499,8 @@ export default function AiTrainingPage() {
             transition={{ duration: 0.22, ease: "easeInOut" }}
           >
             {/* Card header */}
-            <div style={{ borderRadius: "16px 16px 0 0", padding: "18px 20px", display: "flex", alignItems: "center", gap: "14px", background: `${pax26?.primary}0e`, borderBottom: `1px solid ${pax26?.primary}1a` }}>
-              <div style={{ width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", background: pax26?.primary, color: "#fff", flexShrink: 0 }}>
+            <div style={{ borderRadius: "16px 16px 0 0", padding: "18px 20px", display: "flex", alignItems: "center", gap: "14px", background: `${accentColor}0e`, borderBottom: `1px solid ${accentColor}1a` }}>
+              <div style={{ width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", background: accentColor, color: "#fff", flexShrink: 0 }}>
                 <StepIcon />
               </div>
               <div>
@@ -933,17 +1519,35 @@ export default function AiTrainingPage() {
               borderBottom: `1px solid ${pax26?.border}`,
               borderTop: "none",
             }}>
-              {/* ✅ Fixed: called as JSX element so React passes a single props object */}
-              <StepRenderer
-                step={step}
-                form={form}
-                setForm={setForm}
-                pax26={pax26}
-                sellerId={form.sellerId}
-              />
+              {businessType === "service" ? (
+                <ServiceStepRenderer
+                  step={step}
+                  form={form}
+                  setForm={setForm}
+                  pax26={pax26}
+                />
+              ) : (
+                <StepRenderer
+                  step={step}
+                  form={form}
+                  setForm={setForm}
+                  pax26={pax26}
+                  sellerId={form.sellerId}
+                  whatsappConnected={whatsappConnected}
+                  whatsappPhone={whatsappPhone}
+                  onConnectWhatsApp={() => router.push("/dashboard/automations/whatsapp#connect")}
+                />
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* ── Train error ── */}
+        {trainError && (
+          <div style={{ marginTop: "12px", padding: "10px 14px", borderRadius: "10px", background: "#ff444415", border: "1px solid #ff444433", color: "#ff4444", fontSize: "13px" }}>
+            {trainError}
+          </div>
+        )}
 
         {/* ── Navigation ── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px", gap: "12px" }}>
@@ -952,7 +1556,7 @@ export default function AiTrainingPage() {
               onClick={back}
               disabled={loading}
               style={{ display: "flex", alignItems: "center", gap: "6px", padding: "11px 20px", borderRadius: "12px", fontSize: "13px", fontWeight: 600, cursor: "pointer", background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}`, transition: "border-color 0.2s" }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = pax26?.primary + "44"}
+              onMouseEnter={e => e.currentTarget.style.borderColor = accentColor + "44"}
               onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
             >
               <ChevronLeftIcon /> Back
@@ -967,11 +1571,11 @@ export default function AiTrainingPage() {
               padding: "11px 24px", borderRadius: "12px",
               fontSize: "13px", fontWeight: 800, marginLeft: "auto",
               cursor: disabled ? "not-allowed" : "pointer",
-              background: disabled ? pax26?.secondaryBg : pax26?.primary,
+              background: disabled ? pax26?.secondaryBg : accentColor,
               color: disabled ? pax26?.textPrimary : "#fff",
               border: `1px solid ${disabled ? pax26?.border : "transparent"}`,
               opacity: nextDisabled() ? 0.5 : 1,
-              boxShadow: !disabled ? `0 6px 20px ${pax26?.primary}35` : "none",
+              boxShadow: !disabled ? `0 6px 20px ${accentColor}35` : "none",
               transition: "all 0.2s",
             }}
           >
@@ -987,4 +1591,6 @@ export default function AiTrainingPage() {
       </div>
     </>
   );
-}
+});
+
+export default AiTrainingPage;

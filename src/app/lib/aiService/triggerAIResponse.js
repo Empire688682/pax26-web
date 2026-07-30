@@ -32,38 +32,38 @@ function extractImageTags(text) {
 
 // ─────────────────────────────────────────────────────────────
 // Load the right profile depending on whether the user is a
-// seller or a general business (consultant, marketer, etc.)
+// seller or a service provider.
 //
-// Returns: { businessProfile, profileType, products, businessUrl }
+// Dispatches directly based on user.paxAI.businessType —
+// no cross-type fallback. If no type is set, automation is off.
+//
+// Returns: { businessProfile, profileType, products, businessUrl, isTrained }
 // ─────────────────────────────────────────────────────────────
 async function loadProfileAndProducts(userId, user = null) {
     const activeType = user?.paxAI?.businessType;
 
-    // If user specified service profile
-    if (activeType === "service") {
-        const serviceProfile = await ServiceProfileModel.findOne({
-            userId,
-            whatsappEnabled: true,
-        }).lean();
-
-        if (serviceProfile) {
-            return {
-                businessProfile: serviceProfile,
-                profileType: "service",
-                products: [],
-                businessUrl: serviceProfile?.businessUrl || null,
-                isTrained: serviceProfile?.aiTrained === true,
-            };
-        }
+    // If no type selected, automation is off — return null immediately
+    if (!activeType) {
+        return {
+            businessProfile: null,
+            profileType: null,
+            products: [],
+            businessUrl: null,
+            isTrained: false,
+        };
     }
 
-    // Default or seller specified: Check for seller profile
-    const sellerProfile = await SellerProfileModel.findOne({
-        userId,
-        isActive: true,
-    }).lean();
+    // Direct dispatch — no cross-type fallback
+    if (activeType === "seller") {
+        const sellerProfile = await SellerProfileModel.findOne({
+            userId,
+            isActive: true,
+        }).lean();
 
-    if (sellerProfile && activeType !== "service") {
+        if (!sellerProfile) {
+            return { businessProfile: null, profileType: "seller", products: [], businessUrl: null, isTrained: false };
+        }
+
         const products = await SellerProductModel.find({
             sellerId: sellerProfile._id,
             isAvailable: true,
@@ -78,19 +78,24 @@ async function loadProfileAndProducts(userId, user = null) {
         };
     }
 
-    // Fall back to service profile
-    const serviceProfile = await ServiceProfileModel.findOne({
-        userId,
-        whatsappEnabled: true,
-    }).lean();
+    if (activeType === "service") {
+        const serviceProfile = await ServiceProfileModel.findOne({
+            userId,
+            whatsappEnabled: true,
+            aiTrained: true,
+        }).lean();
 
-    return {
-        businessProfile: serviceProfile,
-        profileType: "service",
-        products: [],
-        businessUrl: serviceProfile?.businessUrl || null,
-        isTrained: serviceProfile?.aiTrained === true,
-    };
+        return {
+            businessProfile: serviceProfile || null,
+            profileType: "service",
+            products: [],
+            businessUrl: serviceProfile?.businessUrl || null,
+            isTrained: serviceProfile?.aiTrained === true,
+        };
+    }
+
+    // Unknown type — fail safe
+    return { businessProfile: null, profileType: null, products: [], businessUrl: null, isTrained: false };
 }
 
 // ─────────────────────────────────────────────────────────────

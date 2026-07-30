@@ -32,6 +32,7 @@ const UserSchema = new mongoose.Schema(
       isVerified: { type: Boolean, default: false },
       requestCount: { type: Number, default: 0 },
       firstRequestAt: { type: Date, default: null },
+      lastSentAt: { type: Date, default: null },
       token: { type: String },
       expiresAt: { type: Date }
     },
