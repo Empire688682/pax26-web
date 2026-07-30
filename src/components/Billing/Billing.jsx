@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { toast } from "react-toastify";
+import { CURRENCY_OPTIONS, formatPrice, convertCurrency, detectUserCurrency } from "@/app/lib/currency/currencyHelper";
 
 /* ─── Styles ─────────────────────────────────────────────────── */
 const CSS = `
@@ -92,10 +93,11 @@ function Spinner({ color }) {
 }
 
 /* ─── Plan Card ──────────────────────────────────────────────── */
-function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
+function PlanCard({ plan, selected, currentPlan, onSelect, pax26, displayCurrency = "NGN" }) {
   const accent = plan.accentHex;
   const isCurrent = currentPlan === plan.key;
   const isSelected = selected === plan.key;
+  const convertedPrice = convertCurrency(plan.price, "NGN", displayCurrency);
 
   return (
     <div
@@ -156,7 +158,7 @@ function PlanCard({ plan, selected, currentPlan, onSelect, pax26 }) {
         <div>
           <div className="flex items-end gap-1">
             <span className="bl-mono text-3xl font-bold" style={{ color: accent }}>
-              ₦{plan.price.toLocaleString()}
+              {formatPrice(convertedPrice, displayCurrency)}
             </span>
             <span className="text-xs pb-1.5" style={{ color: pax26?.textSecondary, opacity: 0.5 }}>/month</span>
           </div>
@@ -212,6 +214,13 @@ export default function Billing() {
   const [paying, setPaying] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("wallet"); // "wallet" | "card"
+  const [displayCurrency, setDisplayCurrency] = useState("NGN");
+
+  useEffect(() => {
+    detectUserCurrency().then(c => {
+       setDisplayCurrency(c);
+    });
+  }, []);
 
   useEffect(() => {
     if (aiPlans && aiPlans.length > 0) {
@@ -256,6 +265,10 @@ export default function Billing() {
   /* wallet is sufficient for selected plan */
   const canAfford = selected ? (userWallet >= (selectedMeta?.price ?? 0)) : false;
   const shortfall = selected ? Math.max(0, (selectedMeta?.price ?? 0) - userWallet) : 0;
+  
+  const displayWallet = convertCurrency(userWallet, "NGN", displayCurrency);
+  const displayShortfall = convertCurrency(shortfall, "NGN", displayCurrency);
+  const displaySelectedPrice = selectedMeta ? convertCurrency(selectedMeta.price, "NGN", displayCurrency) : 0;
 
   /* ── Subscribe via wallet ───────────────────────────────────── */
   const handleSubscribeWallet = async () => {
@@ -366,21 +379,46 @@ export default function Billing() {
         <div className="relative z-10">
 
           {/* ── Page header ────────────────────────────────────── */}
-          <div className="bl-slide mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
-              style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}30` }}>
-              <span className="bl-dot w-2 h-2 rounded-full block" style={{ background: GOLD }} />
-              <span className="bl-mono text-xs font-bold tracking-widest uppercase" style={{ color: GOLD }}>
-                AI Plans & Billing
-              </span>
+          <div className="bl-slide mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
+                style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}30` }}>
+                <span className="bl-dot w-2 h-2 rounded-full block" style={{ background: GOLD }} />
+                <span className="bl-mono text-xs font-bold tracking-widest uppercase" style={{ color: GOLD }}>
+                  AI Plans & Billing
+                </span>
+              </div>
+              <h1 className="bl-syne font-extrabold leading-tight mb-2"
+                style={{ fontSize: "clamp(24px, 4.5vw, 40px)", color: pax26?.textPrimary }}>
+                Choose your <span style={{ color: GOLD }}>AI Power</span> level
+              </h1>
+              <p className="text-sm max-w-xl" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                Unlock smarter automations, higher message volumes, and priority AI responses. All billed from your wallet — no card needed.
+              </p>
             </div>
-            <h1 className="bl-syne font-extrabold leading-tight mb-2"
-              style={{ fontSize: "clamp(24px, 4.5vw, 40px)", color: pax26?.textPrimary }}>
-              Choose your <span style={{ color: GOLD }}>AI Power</span> level
-            </h1>
-            <p className="text-sm max-w-xl" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-              Unlock smarter automations, higher message volumes, and priority AI responses. All billed from your wallet — no card needed.
-            </p>
+            
+            <div className="flex-shrink-0 relative">
+              <select 
+                value={displayCurrency} 
+                onChange={e => setDisplayCurrency(e.target.value)}
+                className="bl-syne text-sm px-4 py-2.5 rounded-xl cursor-pointer"
+                style={{ 
+                  background: pax26?.secondaryBg || pax26?.bg, 
+                  color: pax26?.textPrimary, 
+                  border: `1px solid ${pax26?.border}`, 
+                  outline: 'none',
+                  appearance: 'none',
+                  paddingRight: '36px'
+                }}
+              >
+                {CURRENCY_OPTIONS.map(c => (
+                  <option key={c.value} value={c.value} style={{ background: pax26?.bg, color: pax26?.textPrimary }}>{c.label}</option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: pax26?.textSecondary }}>
+                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
           </div>
 
           {/* ── Current plan chip ──────────────────────────────── */}
@@ -426,6 +464,7 @@ export default function Billing() {
                         currentPlan={currentPlan}
                         onSelect={setSelected}
                         pax26={pax26}
+                        displayCurrency={displayCurrency}
                       />
                     ))
                 )}
@@ -536,18 +575,18 @@ export default function Billing() {
                         <div className="flex justify-between text-xs" style={{ color: pax26?.textSecondary }}>
                           <span>Plan price</span>
                           <span className="bl-mono font-semibold" style={{ color: pax26?.textPrimary }}>
-                            ₦{selectedMeta.price.toLocaleString()}
+                            {formatPrice(displaySelectedPrice, displayCurrency)}
                           </span>
                         </div>
                         <div className="flex justify-between text-xs" style={{ color: pax26?.textSecondary }}>
                           <span>Processing fee</span>
-                          <span className="bl-mono font-semibold" style={{ color: GREEN }}>₦0.00</span>
+                          <span className="bl-mono font-semibold" style={{ color: GREEN }}>{formatPrice(0, displayCurrency)}</span>
                         </div>
                         <div className="h-px w-full" style={{ background: pax26?.border }} />
                         <div className="flex justify-between text-sm font-bold">
                           <span style={{ color: pax26?.textPrimary }}>Total</span>
                           <span className="bl-mono" style={{ color: selectedMeta.accentHex }}>
-                            ₦{selectedMeta.price.toLocaleString()}
+                            {formatPrice(displaySelectedPrice, displayCurrency)}
                           </span>
                         </div>
                       </div>
@@ -587,7 +626,7 @@ export default function Billing() {
                             </div>
                             <span className="bl-mono text-xs font-bold"
                               style={{ color: canAfford ? GREEN : CORAL }}>
-                              ₦{userWallet?.toLocaleString("en-NG", { minimumFractionDigits: 2 }) || "0.00"}
+                              {formatPrice(displayWallet, displayCurrency)}
                             </span>
                           </div>
 
@@ -596,7 +635,7 @@ export default function Billing() {
                             <div className="rounded-xl px-4 py-3 text-xs leading-relaxed"
                               style={{ background: `${CORAL}0D`, border: `1px solid ${CORAL}25`, color: CORAL }}>
                               ⚠️ You need{" "}
-                              <span className="bl-mono font-bold">₦{shortfall.toLocaleString()}</span>{" "}
+                              <span className="bl-mono font-bold">{formatPrice(displayShortfall, displayCurrency)}</span>{" "}
                               more. Fund your wallet first, or switch to Card payment.
                               <button
                                 className="bl-btn block mt-2 w-full py-2 rounded-xl text-xs font-bold text-white"
@@ -625,7 +664,7 @@ export default function Billing() {
                               ) : (
                                 <>
                                   <IconWallet size={14} />
-                                  Pay ₦{selectedMeta.price.toLocaleString()} from Wallet
+                                  Pay {formatPrice(displaySelectedPrice, displayCurrency)} from Wallet
                                   <IconArrow size={14} />
                                 </>
                               )}
@@ -662,7 +701,7 @@ export default function Billing() {
                             ) : (
                               <>
                                 <IconCard size={15} />
-                                Pay ₦{selectedMeta.price.toLocaleString()} via Card
+                                Pay {formatPrice(displaySelectedPrice, displayCurrency)} via Card
                                 <IconArrow size={14} />
                               </>
                             )}

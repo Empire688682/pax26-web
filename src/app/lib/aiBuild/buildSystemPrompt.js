@@ -52,8 +52,10 @@ function buildSellerPrompt({ profile, products, businessUrl, urlContent }) {
       "You are enthusiastic, persuasive, and conversion-focused. You highlight value, create desire, and close naturally.",
   };
 
-  const currencySymbol =
-    profile.currency === "USD" ? "$" : profile.currency === "GBP" ? "£" : "₦";
+  const currencyMap = {
+    NGN: "₦", USD: "$", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R", CAD: "CA$", AUD: "A$", INR: "₹", AED: "AED"
+  };
+  const currencySymbol = currencyMap[profile.currency?.toUpperCase()] || "₦";
 
   // ── Products catalogue (with image metadata) ──────────────
   const productsSection = products?.length

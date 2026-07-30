@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { TagInput } from "@/components/ui/TagInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalContext } from "../Context";
+import { CURRENCY_OPTIONS, detectUserCurrency, formatPrice, getCurrencySymbol } from "@/app/lib/currency/currencyHelper";
 
 /* ══════════════════════════════════════════════════════════
    ICONS
@@ -409,7 +410,7 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
 /* ══════════════════════════════════════════════════════════
    PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
-function ProductBuilder({ products, onChange, pax26, sellerId }) {
+function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId }) {
   const emptyProduct = () => ({ name: "", price: "", description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null); // number | "new" | null
   const [draft, setDraft] = useState(emptyProduct());
@@ -428,6 +429,7 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
   const remove = (i) => onChange(products.filter((_, j) => j !== i));
   const p = pax26;
   const canSave = draft.name.trim() && String(draft.price).trim();
+  const symbol = getCurrencySymbol(currency);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -440,7 +442,7 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{prod.name}</p>
             <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.55 }}>
-              ₦{Number(prod.price).toLocaleString()}{prod.stock ? ` · ${prod.stock} in stock` : ""}
+              {formatPrice(prod.price, currency)}{prod.stock ? ` · ${prod.stock} in stock` : ""}
             </p>
           </div>
           <button onClick={() => startEdit(i)} style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "11px", fontWeight: 600, cursor: "pointer" }}>Edit</button>
@@ -453,7 +455,7 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{editing === "new" ? "New Product" : "Edit Product"}</p>
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-            <ThemedInput label="Price (₦) *" pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
+            <ThemedInput label={`Price (${symbol}) *`} pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
             <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
           </div>
           <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes, Bags, Electronics" />
@@ -574,11 +576,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
             label="Currency"
             pax26={p}
             value={form.currency}
-            options={[
-              { value: "NGN", label: "NGN — Nigerian Naira (₦)" },
-              { value: "USD", label: "USD — US Dollar ($)" },
-              { value: "GBP", label: "GBP — British Pound (£)" },
-            ]}
+            options={CURRENCY_OPTIONS}
             onChange={v => set("currency", v)}
           />
         </div>
@@ -595,6 +593,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId }) {
             products={form.products}
             onChange={v => set("products", v)}
             pax26={p}
+            currency={form.currency}
             sellerId={sellerId}
           />
         </div>

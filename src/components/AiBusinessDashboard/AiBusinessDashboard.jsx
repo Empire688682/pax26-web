@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { TagInput } from "@/components/ui/TagInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalContext } from "../Context";
+import { CURRENCY_OPTIONS, formatPrice, getCurrencySymbol } from "@/app/lib/currency/currencyHelper";
 
 /* ══════════════════════════════════════════════════════════
    ICONS
@@ -334,7 +335,7 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
 /* ══════════════════════════════════════════════════════════
    PRODUCT BUILDER
 ══════════════════════════════════════════════════════════ */
-function ProductBuilder({ products, onChange, pax26, sellerId }) {
+function ProductBuilder({ products, onChange, pax26, sellerId, currency = "NGN" }) {
   const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", isPhysical: true, description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyProduct());
@@ -385,11 +386,11 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
             <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.55 }}>
               {prod.discountPrice ? (
                 <>
-                  <span style={{ textDecoration: "line-through", marginRight: "6px" }}>₦{Number(prod.price).toLocaleString()}</span>
-                  <span style={{ color: p?.primary, fontWeight: 700 }}>₦{Number(prod.discountPrice).toLocaleString()}</span>
+                  <span style={{ textDecoration: "line-through", marginRight: "6px" }}>{formatPrice(prod.price, currency)}</span>
+                  <span style={{ color: p?.primary, fontWeight: 700 }}>{formatPrice(prod.discountPrice, currency)}</span>
                 </>
               ) : (
-                `₦${Number(prod.price).toLocaleString()}`
+                `${formatPrice(prod.price, currency)}`
               )}
               {prod.stock ? ` · ${prod.stock} in stock` : ""}
             </p>
@@ -404,8 +405,8 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{editing === "new" ? "New Product" : "Edit Product"}</p>
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-            <ThemedInput label="Price (₦) *" pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
-            <ThemedInput label="Discount Price (₦)" pax26={p} type="number" value={draft.discountPrice} onChange={e => setDraft(d => ({ ...d, discountPrice: e.target.value }))} placeholder="4500" />
+            <ThemedInput label={`Price (${getCurrencySymbol(currency)}) *`} pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
+            <ThemedInput label={`Discount Price (${getCurrencySymbol(currency)})`} pax26={p} type="number" value={draft.discountPrice} onChange={e => setDraft(d => ({ ...d, discountPrice: e.target.value }))} placeholder="4500" />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
             <ThemedSelect
@@ -425,7 +426,7 @@ function ProductBuilder({ products, onChange, pax26, sellerId }) {
           {draft.isPhysical && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                <ThemedInput label="Delivery Fee (₦)" pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
+                <ThemedInput label={`Delivery Fee (${getCurrencySymbol(currency)})`} pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
                 <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
               </div>
               <ThemedInput label="Delivery Location" pax26={p} value={draft.locationNotes} onChange={e => setDraft(d => ({ ...d, locationNotes: e.target.value }))} placeholder="e.g. Lagos only" />
@@ -749,6 +750,7 @@ export default function AiBusinessDashboard() {
                     onChange={handleProductChange}
                     pax26={p}
                     sellerId={form.sellerId}
+                    currency={form.currency}
                   />
                 </div>
               ) : (
@@ -782,15 +784,15 @@ export default function AiBusinessDashboard() {
                             {prod.discountPrice ? (
                               <>
                                 <div style={{ padding: "2px 8px", borderRadius: "99px", background: "rgba(0,0,0,0.4)", color: "#fff", fontSize: "10px", fontWeight: 700, textDecoration: "line-through", backdropFilter: "blur(4px)" }}>
-                                  ₦{Number(prod.price).toLocaleString()}
+                                  {formatPrice(prod.price, form.currency)}
                                 </div>
                                 <div style={{ padding: "6px 14px", borderRadius: "99px", background: p?.primary, color: "#fff", fontSize: "13px", fontWeight: 800, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                                  ₦{Number(prod.discountPrice).toLocaleString()}
+                                  {formatPrice(prod.discountPrice, form.currency)}
                                 </div>
                               </>
                             ) : (
                               <div style={{ padding: "6px 14px", borderRadius: "99px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "13px", fontWeight: 800, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                                ₦{Number(prod.price).toLocaleString()}
+                                {formatPrice(prod.price, form.currency)}
                               </div>
                             )}
                           </div>
@@ -898,10 +900,7 @@ export default function AiBusinessDashboard() {
                       label="Preferred Currency"
                       value={form.currency}
                       onChange={v => setForm(f => ({ ...f, currency: v }))}
-                      options={[
-                        { value: "NGN", label: "Nigerian Naira (₦)" },
-                        { value: "USD", label: "US Dollar ($)" },
-                      ]}
+                      options={CURRENCY_OPTIONS}
                       pax26={p}
                     />
                   </div>
