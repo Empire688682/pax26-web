@@ -9,7 +9,7 @@ import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFro
 import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
-import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
+import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply";
 
 // ─────────────────────────────────────────────────────────────
@@ -227,8 +227,8 @@ export const handleIncomingWhatsApp = async (payload) => {
 
       let businessName = sellerProfile?.businessName;
       if (!businessName) {
-        const genProfile = await GeneralBusinessProfileModel.findOne({ userId: user._id }).lean();
-        businessName = genProfile?.businessName || "our business";
+        const serviceProfile = await ServiceProfileModel.findOne({ userId: user._id }).lean();
+        businessName = serviceProfile?.businessName || "our business";
       }
       
       const optInMessage = `Hi! I'm the Agent assistant for ${businessName}. I'm here to help with your enquiries. Would you like to proceed with our Agent automated chat? (Reply with Yes or No to continue)`;

@@ -4,7 +4,8 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import UserModel from "@/app/ults/models/UserModel";
-import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
+import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -33,16 +34,19 @@ export async function PATCH(req, { params }) {
       );
     };
 
-    const userBussinessProfile = await GeneralBusinessProfileModel.findOne({ userId: user._id });
+    const serviceProfile = await ServiceProfileModel.findOne({ userId: user._id });
+    const sellerProfile = await SellerProfileModel.findOne({ userId: user._id });
 
-    if (!userBussinessProfile) {
+    const activeProfile = serviceProfile || sellerProfile;
+
+    if (!activeProfile) {
       return NextResponse.json(
-        { success: false, message: "Business profile not found. Please create a business profile by train PaxAI to use automations." },
+        { success: false, message: "Business profile not found. Please create a business profile by training PaxAI to use automations." },
         { status: 404, headers: corsHeaders() }
       );
     }
 
-    if (!userBussinessProfile.aiTrained) {
+    if (serviceProfile && !serviceProfile.aiTrained && !sellerProfile) {
       return NextResponse.json(
         { success: false, message: "PaxAI not trained. Please train PaxAI to use automations." },
         { status: 403, headers: corsHeaders() }

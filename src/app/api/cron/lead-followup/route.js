@@ -17,7 +17,7 @@ import SessionModel from "@/app/ults/models/SessionModel";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 import UserModel from "@/app/ults/models/UserModel";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
-import GeneralBusinessProfileModel from "@/app/ults/models/GeneralBusinessProfileModel";
+import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 import { callGroqAI } from "@/app/lib/aiService/grok";
 import { callGeminiAI } from "@/app/lib/aiService/gemini";
@@ -158,7 +158,7 @@ async function runFollowUp() {
         if (!user) continue;
         if (!user.whatsapp?.connected || !user.whatsapp?.phoneNumberId) continue;
 
-        const businessProfile = await GeneralBusinessProfileModel.findOne({
+        const businessProfile = await ServiceProfileModel.findOne({
           userId: session.userId,
           whatsappEnabled: true,
           aiTrained: true,

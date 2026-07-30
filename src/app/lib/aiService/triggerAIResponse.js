@@ -2,7 +2,7 @@ import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomation
 import { sendWhatsAppImageReply } from "../../api/helper/WhatsAppImageReply.js";
 import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
-import GeneralBusinessProfileModel from "../../ults/models/GeneralBusinessProfileModel.js";
+import ServiceProfileModel from "../../ults/models/ServiceProfileModel.js";
 import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
 import { callGroqAI } from "./grok.js";
@@ -36,15 +36,34 @@ function extractImageTags(text) {
 //
 // Returns: { businessProfile, profileType, products, businessUrl }
 // ─────────────────────────────────────────────────────────────
-async function loadProfileAndProducts(userId) {
-    // Check for seller profile first — seller takes priority
+async function loadProfileAndProducts(userId, user = null) {
+    const activeType = user?.paxAI?.businessType;
+
+    // If user specified service profile
+    if (activeType === "service") {
+        const serviceProfile = await ServiceProfileModel.findOne({
+            userId,
+            whatsappEnabled: true,
+        }).lean();
+
+        if (serviceProfile) {
+            return {
+                businessProfile: serviceProfile,
+                profileType: "service",
+                products: [],
+                businessUrl: serviceProfile?.businessUrl || null,
+                isTrained: serviceProfile?.aiTrained === true,
+            };
+        }
+    }
+
+    // Default or seller specified: Check for seller profile
     const sellerProfile = await SellerProfileModel.findOne({
         userId,
         isActive: true,
     }).lean();
 
-    if (sellerProfile) {
-        // Load available products in parallel with nothing else needed
+    if (sellerProfile && activeType !== "service") {
         const products = await SellerProductModel.find({
             sellerId: sellerProfile._id,
             isAvailable: true,
@@ -55,23 +74,22 @@ async function loadProfileAndProducts(userId) {
             profileType: "seller",
             products,
             businessUrl: sellerProfile.businessUrl || null,
-            // Seller profiles don't have aiTrained flag — presence of profile is enough
             isTrained: true,
         };
     }
 
-    // Fall back to general business profile
-    const generalProfile = await GeneralBusinessProfileModel.findOne({
+    // Fall back to service profile
+    const serviceProfile = await ServiceProfileModel.findOne({
         userId,
         whatsappEnabled: true,
     }).lean();
 
     return {
-        businessProfile: generalProfile,
-        profileType: "general",
+        businessProfile: serviceProfile,
+        profileType: "service",
         products: [],
-        businessUrl: generalProfile?.businessUrl || null,
-        isTrained: generalProfile?.aiTrained === true,
+        businessUrl: serviceProfile?.businessUrl || null,
+        isTrained: serviceProfile?.aiTrained === true,
     };
 }
 
@@ -184,7 +202,7 @@ export const triggerAIResponse = async ({
         // ── Load profile (seller or general) + message history ────
         // These are independent — run in parallel
         const [profileData, rawHistory] = await Promise.all([
-            loadProfileAndProducts(user._id),
+            loadProfileAndProducts(user._id, user),
             AIMessageModel.find({ sessionId: session.sessionId })
                 .sort({ createdAt: -1 })
                 .limit(20)

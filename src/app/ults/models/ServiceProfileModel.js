@@ -1,0 +1,124 @@
+import mongoose from "mongoose";
+
+const BusinessProfileSchema = new mongoose.Schema(
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true,
+        },
+
+        businessUrl: { type: String, default: '' },
+
+        // Cached website content — populated at training time, not per-message
+        urlCache: { type: String, default: '' },
+        urlCachedAt: { type: Date, default: null },
+
+        aiTrained: {
+            type: Boolean,
+            default: false,
+        },
+
+        businessName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 120,
+        },
+
+        industry: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        description: {
+            type: String,
+            trim: true,
+            maxlength: 500,
+        },
+
+        services: {
+            type: [String],
+            default: [],
+        },
+
+        faqs: [
+            {
+                question: {
+                    type: String,
+                    required: true,
+                },
+                answer: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
+
+        workingHours: {
+            type: String,
+            trim: true,
+            // Example: "Mon–Fri 9am–6pm"
+        },
+
+        currency: {
+            type: String,
+            default: "NGN",
+        },
+
+        style: {
+            type: String,
+        },
+
+        language: {
+            type: String,
+            default: "en",
+        },
+
+        knowledgeBase: [
+            {
+                question: String,
+                answer: String
+            }
+        ],
+
+        tone: {
+            type: String,
+            enum: ["friendly", "professional", "salesy"],
+            default: "friendly",
+        },
+
+        whatsappEnabled: {
+            type: Boolean,
+            default: true,
+        },
+
+        lastUpdated: {
+            type: Date,
+            default: Date.now,
+        },
+        //payment details
+        paymentDetails: [
+            {
+                label: { type: String, default: '' },        // e.g. "GTBank", "Opay"
+                bankName: { type: String, default: '' },
+                accountNumber: {
+                    type: String,
+                    default: '',
+                    maxlength: 10,
+                    match: [/^\d{10}$/, 'Account number must be 10 digits']
+                },
+                accountName: { type: String, default: '' },
+                active: { type: Boolean, default: false }
+            }
+        ]
+    },
+    {
+        timestamps: true, // adds createdAt & updatedAt automatically
+    }
+);
+
+const ServiceProfileModel = mongoose.models.BusinessProfile || mongoose.model("BusinessProfile", BusinessProfileSchema);
+export default ServiceProfileModel;

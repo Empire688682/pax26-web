@@ -170,6 +170,7 @@ const UserSchema = new mongoose.Schema(
         enum: ["free", "starter", "business", "enterprise"],
         default: "free"
       },
+      businessType: { type: String, enum: ["seller", "service"], default: null },
       planStartedAt: { type: Date, default: Date.now }, // when the current plan period began (signup / upgrade / monthly reset)
       lastUpdated: { type: Date, default: Date.now },
     },

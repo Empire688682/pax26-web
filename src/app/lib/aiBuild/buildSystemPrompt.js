@@ -1,5 +1,5 @@
 import { fetchUrl } from "../fetchUrl.js";
-import GeneralBusinessProfileModel from "../../../app/ults/models/GeneralBusinessProfileModel.js";
+import ServiceProfileModel from "../../../app/ults/models/ServiceProfileModel.js";
 
 const URL_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -21,7 +21,7 @@ async function getUrlContent(profile) {
   try {
     const freshContent = await fetchUrl(profile.businessUrl);
     if (freshContent) {
-      GeneralBusinessProfileModel.findByIdAndUpdate(profile._id, {
+      ServiceProfileModel.findByIdAndUpdate(profile._id, {
         urlCache: freshContent,
         urlCachedAt: new Date(),
       }).catch((err) => console.warn("⚠️ Failed to save urlCache:", err.message));
@@ -351,9 +351,9 @@ ${urlSection}
 /* ─────────────────────────────────────────────────────────────
    MAIN EXPORT
 
-   @param profile      SellerProfile or GeneralBusinessProfile doc
+   @param profile      SellerProfile or ServiceProfile doc
    @param businessUrl  Business website URL string
-   @param profileType  "seller" | "general"
+   @param profileType  "seller" | "service" | "general"
    @param products     Array of SellerProduct docs (seller only).
                        Fetch before calling:
                        SellerProduct.find({ sellerId: profile._id, isAvailable: true })
