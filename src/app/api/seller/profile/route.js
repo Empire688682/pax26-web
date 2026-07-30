@@ -80,6 +80,8 @@ export async function GET(req) {
                         followUpDelayMinutes: 30,
                         currency: "NGN",
                         workingHours: "",
+                        onlineStoreUrl: "",
+                        liveLocation: "",
                         paymentDetails: [],
                         products: [],
                     },
@@ -105,7 +107,15 @@ export async function GET(req) {
         const enrichedProducts = await attachMediaToProducts(products);
 
         return NextResponse.json(
-            { success: true, profile: { ...profile, products: enrichedProducts } },
+            {
+                success: true,
+                profile: {
+                    ...profile,
+                    onlineStoreUrl: profile.onlineStoreUrl ?? "",
+                    liveLocation: profile.liveLocation ?? "",
+                    products: enrichedProducts,
+                },
+            },
             { status: 200, headers: corsHeaders() }
         );
     } catch (error) {
@@ -141,11 +151,23 @@ export async function POST(req) {
 
         const { products, ...profileData } = await req.json();
 
-        // 1. Upsert profile.
+        // Explicitly extract the new presence fields so they're always included in the update
+        const { onlineStoreUrl, liveLocation, ...restProfileData } = profileData;
+
+        // 1. Upsert profile — use $set to avoid document replacement and bypass runValidators issues.
         const profile = await SellerProfileModel.findOneAndUpdate(
             { userId },
-            { ...profileData, whatsappNumber, userId, lastUpdated: new Date() },
-            { upsert: true, new: true, runValidators: true }
+            {
+                $set: {
+                    ...restProfileData,
+                    ...(onlineStoreUrl !== undefined && { onlineStoreUrl }),
+                    ...(liveLocation !== undefined && { liveLocation }),
+                    whatsappNumber,
+                    userId,
+                    lastUpdated: new Date(),
+                },
+            },
+            { upsert: true, new: true }
         ).lean();
 
         if (!profile) throw new Error("Failed to save profile");

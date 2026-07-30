@@ -24,6 +24,10 @@ const SellerProfileSchema = new mongoose.Schema({
     urlCache: { type: String, default: '' },
     urlCachedAt: { type: Date, default: null },
 
+    // Online presence
+    onlineStoreUrl: { type: String, default: '', trim: true },
+    liveLocation: { type: String, default: '', trim: true },
+
     industry: {
         type: String,
         required: true,

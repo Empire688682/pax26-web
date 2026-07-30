@@ -15,6 +15,10 @@ const BusinessProfileSchema = new mongoose.Schema(
         urlCache: { type: String, default: '' },
         urlCachedAt: { type: Date, default: null },
 
+        // Online presence
+        onlineStoreUrl: { type: String, default: '', trim: true },
+        liveLocation: { type: String, default: '', trim: true },
+
         aiTrained: {
             type: Boolean,
             default: false,

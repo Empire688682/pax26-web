@@ -124,6 +124,9 @@ ${urlContent}
 --- END ---`
     : "";
 
+  const onlineStoreUrl = profile.onlineStoreUrl || businessUrl || null;
+  const liveLocation = profile.liveLocation || null;
+
   return `
 You are an AI sales agent for *${profile.businessName}*, operating on WhatsApp.
 Industry: ${profile.industry || "Retail / Ecommerce"}
@@ -145,7 +148,8 @@ ABOUT THE BUSINESS
 ━━━━━━━━━━━━━━━━━━━━━━━━
 ${profile.businessDescription || ""}
 
-Website: ${businessUrl || "Not provided"}
+Online Store / Shop Link: ${onlineStoreUrl || "Not provided"}
+Business Location / Address: ${liveLocation || "Not specified"}
 Working Hours: ${profile.workingHours || "Not specified"}
 Currency: ${profile.currency || "NGN"} (${currencySymbol})
 
@@ -294,6 +298,9 @@ ${urlContent}
 --- END ---`
     : "";
 
+  const onlineStoreUrl = profile.onlineStoreUrl || businessUrl || null;
+  const liveLocation = profile.liveLocation || null;
+
   return `
 You are an AI assistant representing *${profile.businessName}*${profile.industry ? `, a ${profile.industry} practice` : ""
     }.
@@ -319,7 +326,8 @@ ABOUT THE PRACTICE
 ━━━━━━━━━━━━━━━━━━━━━━━━
 ${profile.description || profile.businessDescription || ""}
 
-Website: ${businessUrl || "Not provided"}
+Website / Booking Link: ${onlineStoreUrl || "Not provided"}
+Business Location / Address: ${liveLocation || "Not specified"}
 Working Hours: ${profile.workingHours || "Not specified"}
 
 ${servicesSection}

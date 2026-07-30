@@ -42,6 +42,8 @@ export async function GET(req) {
             followUpDelayMinutes: 30,
             currency: "NGN",
             workingHours: "",
+            onlineStoreUrl: "",
+            liveLocation: "",
             paymentDetails: [],
             services: [],
             faqs: [],
@@ -58,6 +60,8 @@ export async function GET(req) {
         profile: {
           ...profile,
           businessDescription: profile.description || "",
+          onlineStoreUrl: profile.onlineStoreUrl ?? "",
+          liveLocation: profile.liveLocation ?? "",
           whatsappNumber: user?.whatsapp?.displayPhone || profile.whatsappNumber || "",
         },
       },
@@ -97,6 +101,9 @@ export async function PUT(req) {
     // Parse request body
     const data = await req.json();
 
+    // Explicitly extract the new presence fields so they're always included in the update
+    const { onlineStoreUrl, liveLocation, ...restData } = data;
+
     // Validate required fields (Property 9)
     const hasBusinessName = typeof data.businessName === "string" && data.businessName.trim() !== "";
     const hasIndustry = typeof data.industry === "string" && data.industry.trim() !== "";
@@ -117,9 +124,13 @@ export async function PUT(req) {
     const profile = await ServiceProfileModel.findOneAndUpdate(
       { userId },
       {
-        ...data,
-        aiTrained: true,
-        lastUpdated: new Date(),
+        $set: {
+          ...restData,
+          ...(onlineStoreUrl !== undefined && { onlineStoreUrl }),
+          ...(liveLocation !== undefined && { liveLocation }),
+          aiTrained: true,
+          lastUpdated: new Date(),
+        },
       },
       { upsert: true, new: true }
     );

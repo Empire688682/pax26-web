@@ -772,6 +772,8 @@ export default function AiBusinessDashboard() {
     followUpDelayMinutes: 30,
     currency: "NGN",
     workingHours: "",
+    onlineStoreUrl: "",
+    liveLocation: "",
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -813,6 +815,8 @@ export default function AiBusinessDashboard() {
           currency: profile.currency || "NGN",
           whatsappNumber: profile.whatsappNumber || userData?.whatsapp?.displayPhone || "",
           workingHours: profile.workingHours || "",
+          onlineStoreUrl: profile.onlineStoreUrl || "",
+          liveLocation: profile.liveLocation || "",
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -898,7 +902,15 @@ export default function AiBusinessDashboard() {
       const data = await res.json();
       if (data.success) {
         if (data.profile) {
-          setForm(f => ({ ...f, ...data.profile, products: data.profile.products || [], services: data.profile.services || [], faqs: data.profile.faqs || [] }));
+          setForm(f => ({
+            ...f,
+            ...data.profile,
+            onlineStoreUrl: data.profile.onlineStoreUrl ?? f.onlineStoreUrl,
+            liveLocation: data.profile.liveLocation ?? f.liveLocation,
+            products: data.profile.products || f.products,
+            services: data.profile.services || f.services,
+            faqs: data.profile.faqs || f.faqs,
+          }));
         }
         if (!explicitData) alert("Profile updated!");
       } else {
@@ -1175,6 +1187,24 @@ export default function AiBusinessDashboard() {
                     <ThemedInput label="Industry / Category" value={form.industry} onChange={e => setForm(f => ({ ...f, industry: e.target.value }))} pax26={p} placeholder={isSeller ? "e.g. Fashion, Electronics" : "e.g. Marketing, Legal, Design"} />
                     <ThemedInput label="Operating Hours" value={form.workingHours} onChange={e => setForm(f => ({ ...f, workingHours: e.target.value }))} pax26={p} placeholder="e.g. Mon-Sat 8am-9pm" />
                   </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
+                    <ThemedInput
+                      label={isSeller ? "Online Store / Shop Link" : "Booking / Website Link"}
+                      value={form.onlineStoreUrl}
+                      onChange={e => setForm(f => ({ ...f, onlineStoreUrl: e.target.value }))}
+                      pax26={p}
+                      placeholder={isSeller ? "e.g. https://yourshop.com or Jumia/Konga store link" : "e.g. https://yoursite.com or Calendly booking link"}
+                      type="url"
+                    />
+                    <ThemedInput
+                      label="Business Location / Address"
+                      value={form.liveLocation}
+                      onChange={e => setForm(f => ({ ...f, liveLocation: e.target.value }))}
+                      pax26={p}
+                      placeholder="e.g. 15 Broad Street, Lagos Island, Lagos"
+                    />
+                  </div>
+                  <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your AI agent when they ask where to buy or find you." />
                 </div>
               </section>
 

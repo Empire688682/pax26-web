@@ -34,6 +34,7 @@ export async function PUT(req) {
 
     // Parse request body
     const data = await req.json();
+    const { onlineStoreUrl, liveLocation, ...restData } = data;
 
     // One-type enforcement: deactivate seller profile when activating as service provider
     await SellerProfileModel.updateOne({ userId }, { $set: { isActive: false } });
@@ -42,9 +43,13 @@ export async function PUT(req) {
     const profile = await ServiceProfileModel.findOneAndUpdate(
       { userId },
       {
-        ...data,
-        aiTrained: true,
-        lastUpdated: new Date(),
+        $set: {
+          ...restData,
+          ...(onlineStoreUrl !== undefined && { onlineStoreUrl }),
+          ...(liveLocation !== undefined && { liveLocation }),
+          aiTrained: true,
+          lastUpdated: new Date(),
+        },
       },
       { upsert: true, new: true }
     );
