@@ -175,7 +175,7 @@ export default function ReferralDashboard() {
             Referral Program
           </h2>
           <p className="text-sm mt-1" style={{ color: pax26?.textSecondary }}>
-            Earn up to ₦{(stats?.maxReward || 3000).toLocaleString()} per referral when they subscribe.
+            Earn up to ₦{(stats?.maxReward || 2000).toLocaleString()} per referral when they subscribe.
           </p>
         </div>
         <button
@@ -205,7 +205,7 @@ export default function ReferralDashboard() {
             </p>
             <p className="text-xs mt-1 leading-relaxed" style={{ color: pax26?.textSecondary }}>
               Referral codes are available for paid plan subscribers.
-              Subscribe to a paid plan and start earning up to <strong>₦{(stats?.maxReward || 3000).toLocaleString()} per referral.</strong>
+              Subscribe to a paid plan and start earning up to <strong>₦{(stats?.maxReward || 2000).toLocaleString()} per referral.</strong>
             </p>
             <a
               href="/dashboard/billing"
@@ -474,7 +474,7 @@ export default function ReferralDashboard() {
           </div>
           <p className="font-bold text-sm" style={{ color: pax26?.textPrimary }}>Start Earning Today</p>
           <p className="text-xs mt-2 max-w-xs mx-auto leading-relaxed" style={{ color: pax26?.textSecondary }}>
-            Share your referral code with friends and businesses. Earn up to ₦{(stats?.maxReward || 3000).toLocaleString()} each time someone you referred subscribes to a paid plan.
+            Share your referral code with friends and businesses. Earn up to ₦{(stats?.maxReward || 2000).toLocaleString()} each time someone you referred subscribes to a paid plan.
           </p>
           <button
             onClick={shareCode}

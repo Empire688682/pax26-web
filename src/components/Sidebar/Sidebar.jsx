@@ -40,7 +40,7 @@ const VTU_SERVICES = [
   { href: "/dashboard/services/buy-data", icon: Database, label: "Data", color: "#38bdf8" },
   { href: "/dashboard/services/buy-tv-subscription", icon: Tv, label: "TV Sub", color: "#a78bfa" },
   { href: "/dashboard/services/buy-electricity", icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
-  { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards", color: "#f472b6" },
+  // { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards", color: "#f472b6" },
 ];
 
 /* ── Plain nav item ───────────────────────────────────────────── */
@@ -263,30 +263,30 @@ export default function Sidebar() {
               <>
                 <SectionLabel label="General" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Layers} label="Marketplace" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
 
                 <SectionLabel label="Automations" pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Contact Manager" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="Anti-Ban Tool" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations" icon={Cpu} label="Agent Workflow" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Setup" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations" icon={Cpu} label="Automation Rules" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/sales-notifications" icon={Bell} label="Sales Alerts" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Broadcast" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Campaigns" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} />
 
                 <SectionLabel label="Financials" pax26={pax26} />
-                <NavItem href="/fund-wallet" icon={CreditCard} label="Add Funds" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referrals" onClick={close} pax26={pax26} />
-                <NavItem href="/transactions" icon={History} label="Transactions" onClick={close} pax26={pax26} />
+                <NavItem href="/fund-wallet" icon={CreditCard} label="Fund Wallet" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referral Program" onClick={close} pax26={pax26} />
+                <NavItem href="/transactions" icon={History} label="Transaction History" onClick={close} pax26={pax26} />
                 <VtuNavItem pax26={pax26} onClose={close} />
 
                 <SectionLabel label="Preferences" pax26={pax26} />
-                <NavItem href="/profile" icon={Settings} label="Settings" onClick={close} pax26={pax26} />
+                <NavItem href="/profile" icon={Settings} label="Account Settings" onClick={close} pax26={pax26} />
                 <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
-                <NavItem href="/contact" icon={Phone} label="Support" onClick={close} pax26={pax26} />
+                <NavItem href="/contact" icon={Phone} label="Help & Support" onClick={close} pax26={pax26} />
 
                 <div className="mt-auto pt-4">
                   <button
