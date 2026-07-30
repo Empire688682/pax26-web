@@ -19,7 +19,7 @@ function extractImageTags(text) {
     const imageRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]]+)\]/g;
     const imageUrls = [];
 
-    const cleanText = text
+    let cleanText = text
         .replace(imageRegex, (_, url) => {
             imageUrls.push(url.trim());
             return "";
@@ -27,7 +27,35 @@ function extractImageTags(text) {
         .replace(/\n{3,}/g, "\n\n") // collapse triple+ newlines left by removed tags
         .trim();
 
+    // If images are already being sent, strip redundant "want me to send pictures?" offers
+    if (imageUrls.length > 0) {
+        cleanText = stripRedundantImageOffers(cleanText);
+    }
+
     return { imageUrls, cleanText };
+}
+
+function stripRedundantImageOffers(text) {
+    if (!text) return text;
+
+    let cleaned = text
+        // Full sentences offering to send pictures/photos/images
+        .replace(
+            /(?:^|[.!?]\s*)(?:Want me to|Would you like(?: me)? to|Shall I|Should I|Can I|Do you want(?: me)? to)\s+send(?:\s+you)?\s+(?:(?:a|some|the)\s+)?(?:pictures?|photos?|images?)(?:\s+of\s+(?:it|them|this|that))?[?.!]*/gi,
+            (match) => (match.trimStart().match(/^[.!?]/) ? match.trimStart()[0] : "")
+        )
+        // Trailing offer fragments after a period
+        .replace(
+            /\s*(?:Want me to|Would you like(?: me)? to|Shall I|Should I)\s+send(?:\s+you)?\s+(?:(?:a|some|the)\s+)?(?:pictures?|photos?|images?)(?:\s+of\s+(?:it|them|this|that))?[?.!]*/gi,
+            ""
+        )
+        .replace(/\s{2,}/g, " ")
+        .replace(/\s+([.!?])/g, "$1")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+    // If cleanup wiped everything, keep original (better than empty WhatsApp message)
+    return cleaned || text.trim();
 }
 
 // ─────────────────────────────────────────────────────────────
