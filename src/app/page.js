@@ -5,7 +5,6 @@ import DownloadOurApp from '@/components/DownloadOurApp/DownloadOurApp';
 import Hero from '@/components/Hero/Hero';
 import Pricing from '@/components/Pricing/Pricing';
 import Services from '@/components/Services/Services';
-import SignupPage from '@/components/SignupPage/SignupPage';
 import Testimonials from '@/components/Testimonials/Testimonials';
 import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
 import React, { useEffect } from 'react';
@@ -51,7 +50,6 @@ const Page = () => {
 
   return (
     <div className='overflow-hidden'>
-      <SignupPage />
 
       {/* Hero Section */}
       <motion.div

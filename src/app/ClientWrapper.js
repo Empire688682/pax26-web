@@ -7,6 +7,7 @@ import { AppProvider, useGlobalContext } from "@/components/Context";
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import BackgroundFX from "@/components/BackgroundFX";
+import SignupPage from "@/components/SignupPage/SignupPage";
 
 // Inner component so it can access context for theme/pax26
 const AppShell = ({ children }) => {
@@ -19,6 +20,7 @@ const AppShell = ({ children }) => {
   return (
     <>
       <BackgroundFX pax26={pax26} />
+      <SignupPage />
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="flex items-start shadow-md justify-start w-full">
           <Sidebar />
