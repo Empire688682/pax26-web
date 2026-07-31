@@ -34,7 +34,7 @@ const COUNTRY_CSS = `
     to   { opacity: 1; }
   }
   @keyframes cp-card-in {
-    from { opacity: 0; transform: translateY(32px) scale(0.96); }
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0)    scale(1); }
   }
   @keyframes cp-spin {
@@ -42,16 +42,12 @@ const COUNTRY_CSS = `
   }
   @keyframes cp-float {
     0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-8px); }
+    50%       { transform: translateY(-5px); }
   }
   @keyframes cp-pulse-ring {
     0%   { transform: scale(0.85); opacity: 0.6; }
     70%  { transform: scale(1.15); opacity: 0; }
     100% { transform: scale(1.15); opacity: 0; }
-  }
-  @keyframes cp-shimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
   }
   @keyframes cp-tick-in {
     from { transform: scale(0) rotate(-45deg); opacity: 0; }
@@ -61,19 +57,22 @@ const COUNTRY_CSS = `
   .cp-backdrop {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.82);
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     animation: cp-backdrop-in 0.25s ease both;
+    overflow-y: auto;
   }
 
   .cp-card {
-    width: 100%; max-width: 480px;
-    border-radius: 28px;
+    width: 100%; max-width: 460px;
+    max-height: calc(100dvh - 24px);
+    display: flex; flex-direction: column;
+    border-radius: 24px;
     overflow: hidden;
-    animation: cp-card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06);
+    animation: cp-card-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
   }
 
   .cp-globe-icon {
@@ -85,19 +84,18 @@ const COUNTRY_CSS = `
 
   .cp-country-btn {
     width: 100%;
-    padding: 14px 20px;
-    border-radius: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
     border: 2px solid transparent;
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; gap: 8px;
     cursor: pointer;
-    font-size: 15px; font-weight: 600;
     text-align: left;
     transition: all 0.18s ease;
-    position: relative;
     outline: none;
+    min-width: 0;
   }
   .cp-country-btn:hover {
-    transform: translateX(4px);
+    transform: translateY(-1px);
   }
 
   .cp-tick {
@@ -105,24 +103,24 @@ const COUNTRY_CSS = `
   }
 
   .cp-confirm-btn {
-    width: 100%; padding: 16px;
-    border-radius: 16px; border: none;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-size: 15px; font-weight: 800;
+    width: 100%; padding: 14px 18px;
+    border-radius: 14px; border: none;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 14px; font-weight: 800;
     color: #fff; cursor: pointer;
     transition: all 0.18s ease;
     letter-spacing: 0.01em;
     font-family: 'Syne', sans-serif;
   }
   .cp-confirm-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
   .cp-confirm-btn:disabled {
     cursor: not-allowed;
   }
 
   .cp-spinner {
-    width: 18px; height: 18px; border-radius: 50%;
+    width: 16px; height: 16px; border-radius: 50%;
     border: 2.5px solid rgba(255,255,255,0.25);
     border-top-color: #fff;
     animation: cp-spin 0.7s linear infinite;
@@ -179,72 +177,77 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
         >
           {/* gradient top strip */}
           <div style={{
-            height: 4, width: "100%",
+            height: 4, width: "100%", flexShrink: 0,
             background: `linear-gradient(90deg, ${primary}, ${primary}88, ${primary}22)`,
           }} />
 
-          {/* hero section */}
+          {/* hero header section */}
           <div style={{
-            padding: "36px 36px 28px",
+            flexShrink: 0,
+            padding: "20px 20px 14px",
             background: `linear-gradient(160deg, ${primary}14 0%, ${bg} 60%)`,
             borderBottom: `1px solid ${border}`,
             textAlign: "center",
           }}>
             {/* floating globe icon */}
-            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
               {/* pulse ring */}
               <div className="cp-pulse-ring" style={{
-                position: "absolute", inset: -8,
+                position: "absolute", inset: -6,
                 borderRadius: "50%",
                 border: `2px solid ${primary}`,
               }} />
               <div className="cp-globe-icon" style={{
-                width: 72, height: 72, borderRadius: "50%",
+                width: 52, height: 52, borderRadius: "50%",
                 background: `linear-gradient(135deg, ${primary}28, ${primary}10)`,
                 border: `2px solid ${primary}40`,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                <Globe size={32} style={{ color: primary }} strokeWidth={1.5} />
+                <Globe size={24} style={{ color: primary }} strokeWidth={1.75} />
               </div>
             </div>
 
             {/* step label */}
-            <p className="cp-step-label" style={{ color: textSecondary, marginBottom: 8 }}>
+            <p className="cp-step-label" style={{ color: textSecondary, marginBottom: 4 }}>
               Step 2 of 2 — Almost there!
             </p>
 
             <h2 style={{
               fontFamily: "'Syne', sans-serif",
-              fontSize: 26, fontWeight: 800,
-              color: textPrimary, margin: "0 0 8px",
-              lineHeight: 1.2,
+              fontSize: "clamp(18px, 4.5vw, 22px)", fontWeight: 800,
+              color: textPrimary, margin: "0 0 4px",
+              lineHeight: 1.25,
             }}>
               Hi {firstName}, where are you based?
             </h2>
             <p style={{
-              fontSize: 14, color: textSecondary,
-              margin: 0, lineHeight: 1.6, opacity: 0.75,
+              fontSize: 12, color: textSecondary,
+              margin: 0, lineHeight: 1.45, opacity: 0.75,
             }}>
               Pick your country so we can tailor services &amp; local payment options for you.
             </p>
           </div>
 
-          {/* country grid */}
-          <div style={{ padding: "24px 28px 28px" }}>
+          {/* scrollable country grid body */}
+          <div style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "14px 16px",
+            minHeight: 0,
+          }}>
             <div style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 10,
-              maxHeight: 300,
-              overflowY: "auto",
-              paddingRight: 4,
-              marginBottom: 20,
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: 8,
             }}>
               {COUNTRIES.map((c) => {
                 const isSelected = country === c.value;
+                const flag = c.label.split(" ")[0];
+                const name = c.label.replace(/^\S+\s*/, "");
                 return (
                   <button
                     key={c.value}
+                    type="button"
                     className="cp-country-btn"
                     onClick={() => setCountry(c.value)}
                     style={{
@@ -253,22 +256,22 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
                         : secondaryBg,
                       border: `2px solid ${isSelected ? primary : border}`,
                       color: isSelected ? textPrimary : textSecondary,
-                      boxShadow: isSelected ? `0 0 0 3px ${primary}20, 0 4px 16px ${primary}22` : "none",
+                      boxShadow: isSelected ? `0 0 0 3px ${primary}20, 0 4px 14px ${primary}22` : "none",
                     }}
                   >
-                    <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>
-                      {c.label.split(" ")[0]}
+                    <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>
+                      {flag}
                     </span>
-                    <span style={{
-                      fontSize: 13, fontWeight: 600,
-                      flex: 1, lineHeight: 1.3,
+                    <span className="truncate" style={{
+                      fontSize: 12, fontWeight: 600,
+                      flex: 1, lineHeight: 1.2, textAlign: "left",
                     }}>
-                      {c.label.replace(/^\S+\s*/, "")}
+                      {name}
                     </span>
                     {isSelected && (
                       <CheckCircle2
                         className="cp-tick"
-                        size={16}
+                        size={14}
                         style={{ color: primary, flexShrink: 0 }}
                       />
                     )}
@@ -276,22 +279,31 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
                 );
               })}
             </div>
+          </div>
 
+          {/* pinned bottom footer with confirm button */}
+          <div style={{
+            flexShrink: 0,
+            padding: "14px 16px 16px",
+            borderTop: `1px solid ${border}`,
+            background: bg,
+          }}>
             {/* selected pill */}
             {country && (
               <div style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "10px 14px", borderRadius: 12, marginBottom: 16,
+                padding: "8px 12px", borderRadius: 10, marginBottom: 12,
                 background: `${primary}14`, border: `1px solid ${primary}30`,
-                fontSize: 13, color: primary, fontWeight: 600,
+                fontSize: 12, color: primary, fontWeight: 600,
               }}>
-                <MapPin size={13} />
-                Selected: {COUNTRIES.find(c => c.value === country)?.label}
+                <MapPin size={13} flexShrink={0} />
+                <span className="truncate">Selected: {COUNTRIES.find(c => c.value === country)?.label}</span>
               </div>
             )}
 
             {/* confirm button */}
             <button
+              type="button"
               className="cp-confirm-btn"
               disabled={!country || submitting}
               onClick={handleConfirm}
@@ -300,7 +312,7 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
                   ? `${primary}55`
                   : `linear-gradient(135deg, ${primary}, ${primary}cc)`,
                 boxShadow: country && !submitting
-                  ? `0 12px 32px ${primary}55`
+                  ? `0 10px 28px ${primary}55`
                   : "none",
                 opacity: !country || submitting ? 0.6 : 1,
               }}
@@ -308,23 +320,23 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
               {submitting ? (
                 <>
                   <div className="cp-spinner" />
-                  Setting up your account…
+                  <span>Setting up your account…</span>
                 </>
               ) : (
                 <>
                   <Zap size={16} />
-                  Complete Setup
+                  <span>{country ? `Continue with ${country}` : "Select a country above"}</span>
                   <ArrowRight size={16} />
                 </>
               )}
             </button>
 
             <p style={{
-              textAlign: "center", marginTop: 14,
-              fontSize: 11, color: textSecondary, opacity: 0.45,
+              textAlign: "center", marginTop: 10,
+              fontSize: 10, color: textSecondary, opacity: 0.45,
               fontFamily: "'DM Mono', monospace",
             }}>
-              Your data is protected with bank-grade encryption
+              Secured with bank-grade encryption
             </p>
           </div>
         </div>
@@ -332,6 +344,7 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
     </>
   );
 }
+
 
 /* ── Main component ───────────────────────────────────────────── */
 export default function GoogleLoginButton({ loading, setAwayLoading }) {
