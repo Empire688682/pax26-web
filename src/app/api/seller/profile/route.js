@@ -82,6 +82,9 @@ export async function GET(req) {
                         workingHours: "",
                         onlineStoreUrl: "",
                         liveLocation: "",
+                        slug: "",
+                        logoUrl: "",
+                        storeTheme: "classic",
                         paymentDetails: [],
                         products: [],
                     },
@@ -113,6 +116,9 @@ export async function GET(req) {
                     ...profile,
                     onlineStoreUrl: profile.onlineStoreUrl ?? "",
                     liveLocation: profile.liveLocation ?? "",
+                    slug: profile.slug ?? "",
+                    logoUrl: profile.logoUrl ?? "",
+                    storeTheme: profile.storeTheme ?? "classic",
                     products: enrichedProducts,
                 },
             },
@@ -152,7 +158,7 @@ export async function POST(req) {
         const { products, ...profileData } = await req.json();
 
         // Explicitly extract the new presence fields so they're always included in the update
-        const { onlineStoreUrl, liveLocation, ...restProfileData } = profileData;
+        const { onlineStoreUrl, liveLocation, slug, logoUrl, storeTheme, ...restProfileData } = profileData;
 
         // 1. Upsert profile — use $set to avoid document replacement and bypass runValidators issues.
         const profile = await SellerProfileModel.findOneAndUpdate(
@@ -162,6 +168,9 @@ export async function POST(req) {
                     ...restProfileData,
                     ...(onlineStoreUrl !== undefined && { onlineStoreUrl }),
                     ...(liveLocation !== undefined && { liveLocation }),
+                    ...(slug && typeof slug === "string" && { slug: slug.toLowerCase().trim() }),
+                    ...(logoUrl !== undefined && { logoUrl }),
+                    ...(storeTheme && typeof storeTheme === "string" && { storeTheme }),
                     whatsappNumber,
                     userId,
                     lastUpdated: new Date(),

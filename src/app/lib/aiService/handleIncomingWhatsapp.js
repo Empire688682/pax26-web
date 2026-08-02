@@ -11,6 +11,8 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply";
+import { searchProducts, shouldSearch } from "@/app/lib/store/searchProducts.js";
+import { buildSearchMatchContext } from "@/app/lib/store/buildSearchContext.js";
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -465,8 +467,40 @@ export const handleIncomingWhatsApp = async (payload) => {
     });
   }
 
+  // ── Step 9.5: Semantic product search (seller + text only) ───────────
+  // If the message looks like a product enquiry, run a real search and
+  // inject the matched products as grounded context for the AI.
+  // Mirrors the image search flow — AI gets facts, not guesses.
+  let enrichedText = inboundText;
+
+  if (sellerProfile && isTextMessage && shouldSearch(inboundText)) {
+    try {
+      const { results, hasResults } = await searchProducts(
+        sellerProfile._id,
+        inboundText
+      );
+
+      if (hasResults) {
+        const searchContext = buildSearchMatchContext(
+          results,
+          inboundText,
+          sellerProfile.currency || "NGN"
+        );
+        // searchContext is a [SYSTEM: ...] block — pass it as the user turn
+        // so the AI responds based on real matched data (same as image search)
+        if (searchContext) enrichedText = searchContext;
+        console.log(`✅ Step 9.5 — Product search: ${results.length} match(es) injected into AI context`);
+      } else {
+        console.log("⚠️  Step 9.5 — Product search: no matches, AI falls back to system prompt catalogue");
+      }
+    } catch (err) {
+      // Non-fatal — AI still has the full catalogue in its system prompt
+      console.warn("⚠️  Step 9.5 — Product search failed (non-fatal):", err.message);
+    }
+  }
+
   console.log("🤖 Step 9 — Triggering AI response...");
-  await triggerAIResponse({ session, user, inboundText });
+  await triggerAIResponse({ session, user, inboundText: enrichedText });
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
 
   return { ok: true };

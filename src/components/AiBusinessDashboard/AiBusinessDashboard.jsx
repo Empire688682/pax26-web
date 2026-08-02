@@ -5,6 +5,7 @@ import { TagInput } from "@/components/ui/TagInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import { CURRENCY_OPTIONS, formatPrice, getCurrencySymbol } from "@/app/lib/currency/currencyHelper";
+import { THEME_LIST } from "@/app/lib/store/storeThemes";
 
 /* ══════════════════════════════════════════════════════════
    ICONS
@@ -74,6 +75,17 @@ const XIcon = () => (
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const LinkIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+const CopyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </svg>
 );
 
@@ -738,6 +750,144 @@ function WhatsAppGate({ pax26, router }) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   SLUG FIELD — storefront URL manager
+   Shows current slug, availability check, copy button, and
+   a "View My Store" link that opens the public storefront.
+══════════════════════════════════════════════════════════ */
+function SlugField({ value, onChange, onSave, pax26, businessName }) {
+  const p = pax26;
+  const [checking, setChecking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [availability, setAvailability] = useState(null); // null | "available" | "taken"
+  const [copied, setCopied] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [draft, setDraft] = useState(value || "");
+
+  // Sync draft when parent value changes (e.g. on first load)
+  useEffect(() => { setDraft(value || ""); }, [value]);
+
+  const storeUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/store/${draft}`
+    : `/store/${draft}`;
+
+  const checkSlug = async (slug) => {
+    if (!slug || slug.length < 2) { setAvailability(null); return; }
+    setChecking(true);
+    try {
+      const res = await fetch(`/api/store/check-slug?slug=${encodeURIComponent(slug)}`);
+      const data = await res.json();
+      setAvailability(data.available ? "available" : "taken");
+    } catch { setAvailability(null); }
+    finally { setChecking(false); }
+  };
+
+  const handleDraftChange = (e) => {
+    // Auto-slug format: lowercase, hyphens only
+    const clean = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").slice(0, 60);
+    setDraft(clean);
+    setAvailability(null);
+  };
+
+  const autoGenerate = () => {
+    if (!businessName) return;
+    const slug = businessName.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, "").replace(/[\s]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+    setDraft(slug);
+    setAvailability(null);
+    setEditMode(true);
+  };
+
+  // Apply the slug locally AND immediately persist it to the DB
+  const applyDraft = async () => {
+    if (availability === "taken" || !draft) return;
+    onChange(draft);  // update local form state
+    setEditMode(false);
+    // Immediately save just the slug to the DB so it's persisted even if
+    // the user navigates away before clicking "Update Business Profile"
+    if (onSave) {
+      setSaving(true);
+      try {
+        await onSave(draft);
+      } catch { /* non-fatal */ }
+      finally { setSaving(false); }
+    }
+  };
+
+  const copyUrl = () => {
+    navigator.clipboard.writeText(storeUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  const statusColor = availability === "available" ? "#22c55e" : availability === "taken" ? "#ef4444" : p?.textPrimary;
+  const statusText = checking ? "Checking…" : availability === "available" ? "Available ✓" : availability === "taken" ? "Already taken" : "";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <FieldLabel pax26={p}>Your Store URL (Slug)</FieldLabel>
+
+      {/* Current slug display / edit toggle */}
+      {!editMode ? (
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: "200px", display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", background: p?.secondaryBg, border: `1px solid ${p?.border}` }}>
+            <span style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.5 }}>{typeof window !== "undefined" ? window.location.origin : ""}/store/</span>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: value ? p?.primary : p?.textPrimary, opacity: value ? 1 : 0.4 }}>
+              {value || "not set yet"}
+            </span>
+          </div>
+          {value && (
+            <button onClick={copyUrl} title="Copy store link" style={{ padding: "10px 12px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: copied ? "#22c55e" : p?.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 600 }}>
+              <CopyIcon /> {copied ? "Copied!" : "Copy"}
+            </button>
+          )}
+          {value && (
+            <a href={`/store/${value}`} target="_blank" rel="noopener noreferrer" style={{ padding: "10px 14px", borderRadius: "10px", border: `1px solid ${p?.primary}44`, background: `${p?.primary}10`, color: p?.primary, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, textDecoration: "none" }}>
+              <LinkIcon /> View My Store
+            </a>
+          )}
+          <button onClick={() => setEditMode(true)} style={{ padding: "10px 14px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, cursor: "pointer", fontSize: "12px", fontWeight: 600 }}>
+            {value ? "Edit" : "Set Slug"}
+          </button>
+          {!value && businessName && (
+            <button onClick={autoGenerate} style={{ padding: "10px 14px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.primary, cursor: "pointer", fontSize: "12px", fontWeight: 600 }}>
+              Auto-generate
+            </button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ flex: 1, minWidth: "200px", display: "flex", alignItems: "center", borderRadius: "10px", overflow: "hidden", border: `1px solid ${availability === "taken" ? "#ef4444" : availability === "available" ? "#22c55e" : p?.primary}`, boxShadow: `0 0 0 3px ${p?.primary}18` }}>
+              <span style={{ padding: "10px 10px 10px 14px", fontSize: "13px", color: p?.textPrimary, opacity: 0.45, whiteSpace: "nowrap", background: p?.secondaryBg, borderRight: `1px solid ${p?.border}` }}>
+                /store/
+              </span>
+              <input
+                value={draft}
+                onChange={handleDraftChange}
+                onBlur={() => checkSlug(draft)}
+                placeholder="your-store-name"
+                autoFocus
+                style={{ flex: 1, padding: "10px 12px", fontSize: "14px", fontWeight: 600, background: p?.secondaryBg, color: p?.textPrimary, border: "none", outline: "none", fontFamily: "inherit" }}
+              />
+            </div>
+            <button onClick={applyDraft} disabled={availability === "taken" || !draft || saving || checking} style={{ padding: "10px 16px", borderRadius: "10px", border: "none", background: availability === "taken" || !draft ? p?.border : p?.primary, color: "#fff", fontWeight: 700, fontSize: "13px", cursor: availability === "taken" || !draft ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+              {saving ? <><div style={{ width: "13px", height: "13px", border: "2px solid #ffffff40", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> Saving…</> : "Save"}
+            </button>
+            <button onClick={() => { setDraft(value || ""); setEditMode(false); setAvailability(null); }} style={{ padding: "10px 14px", borderRadius: "10px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
+              Cancel
+            </button>
+          </div>
+          {statusText && (
+            <p style={{ fontSize: "12px", fontWeight: 600, color: statusColor, margin: "0 2px" }}>{statusText}</p>
+          )}
+          <p style={{ fontSize: "11px", color: p?.textPrimary, opacity: 0.45, margin: "0 2px" }}>
+            Only lowercase letters, numbers, and hyphens. This becomes your public store URL.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
    MAIN DASHBOARD COMPONENT
 ══════════════════════════════════════════════════════════ */
 export default function AiBusinessDashboard() {
@@ -745,7 +895,6 @@ export default function AiBusinessDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
-  const [showProductForm, setShowProductForm] = useState(false);
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [switchingType, setSwitchingType] = useState(false);
   const [selectingType, setSelectingType] = useState(false);
@@ -756,7 +905,7 @@ export default function AiBusinessDashboard() {
 
   // Sync default tab when type changes
   useEffect(() => {
-    if (businessType === "seller") setActiveTab("products");
+    if (businessType === "seller") setActiveTab("profile");
     else if (businessType === "service") setActiveTab("services");
     else setActiveTab(null);
   }, [businessType]);
@@ -774,6 +923,9 @@ export default function AiBusinessDashboard() {
     workingHours: "",
     onlineStoreUrl: "",
     liveLocation: "",
+    slug: "",
+    logoUrl: "",
+    storeTheme: "classic",
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -817,6 +969,9 @@ export default function AiBusinessDashboard() {
           workingHours: profile.workingHours || "",
           onlineStoreUrl: profile.onlineStoreUrl || "",
           liveLocation: profile.liveLocation || "",
+          slug: profile.slug || "",
+          logoUrl: profile.logoUrl || "",
+          storeTheme: profile.storeTheme || "classic",
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -907,6 +1062,9 @@ export default function AiBusinessDashboard() {
             ...data.profile,
             onlineStoreUrl: data.profile.onlineStoreUrl ?? f.onlineStoreUrl,
             liveLocation: data.profile.liveLocation ?? f.liveLocation,
+            slug: data.profile.slug ?? f.slug,
+            logoUrl: data.profile.logoUrl ?? f.logoUrl,
+            storeTheme: data.profile.storeTheme ?? f.storeTheme,
             products: data.profile.products || f.products,
             services: data.profile.services || f.services,
             faqs: data.profile.faqs || f.faqs,
@@ -922,12 +1080,6 @@ export default function AiBusinessDashboard() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleProductChange = (newProducts) => {
-    const updated = { ...form, products: newProducts };
-    setForm(updated);
-    saveProfile(updated);
   };
 
   const whatsappConnected = !!(userData?.whatsapp?.connected && userData?.whatsapp?.displayPhone);
@@ -1043,9 +1195,16 @@ export default function AiBusinessDashboard() {
       <div style={{ display: "flex", gap: "4px", padding: "6px", background: p?.secondaryBg, borderRadius: "16px", border: `1px solid ${p?.border}`, overflowX: "auto" }}>
         {isSeller && (
           <>
-            <DashboardTab label="Products" icon={PackageIcon} active={activeTab === "products"} onClick={() => setActiveTab("products")} pax26={p} />
             <DashboardTab label="Business Info" icon={StoreIcon} active={activeTab === "profile"} onClick={() => setActiveTab("profile")} pax26={p} />
             <DashboardTab label="Overview" icon={ClipboardIcon} active={activeTab === "overview"} onClick={() => setActiveTab("overview")} pax26={p} />
+            <button
+              onClick={() => router.push("/dashboard/automations/products")}
+              style={{ display: "flex", alignItems: "center", gap: "6px", padding: "10px 18px", border: "none", background: "transparent", color: p?.textPrimary, borderRadius: "12px", cursor: "pointer", fontWeight: 600, fontSize: "13px", opacity: 0.6, whiteSpace: "nowrap" }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${p?.primary}15`; e.currentTarget.style.color = p?.primary; e.currentTarget.style.opacity = "1"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = p?.textPrimary; e.currentTarget.style.opacity = "0.6"; }}
+            >
+              <PackageIcon /> Products ↗
+            </button>
           </>
         )}
         {isService && (
@@ -1060,66 +1219,6 @@ export default function AiBusinessDashboard() {
       {/* ── Tab content ─────────────────────────────────── */}
       <AnimatePresence mode="wait">
         <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.18 }} style={{ flex: 1 }}>
-
-          {/* ════ SELLER: Products tab ════ */}
-          {isSeller && activeTab === "products" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Manage Inventory</h2>
-                <button onClick={() => setShowProductForm(v => !v)} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 18px", borderRadius: "12px", background: `${p?.primary}15`, color: p?.primary, fontWeight: 700, border: "none", cursor: "pointer", fontSize: "13px" }}>
-                  <PlusIcon /> Upload New Product
-                </button>
-              </div>
-
-              {showProductForm && (
-                <div style={{ background: p?.secondaryBg, padding: "20px", borderRadius: "24px", border: `1px solid ${p?.border}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                    <h3 style={{ margin: 0, color: p?.textPrimary, fontSize: "18px", fontWeight: 800 }}>Upload Product</h3>
-                    <button onClick={() => setShowProductForm(false)} style={{ width: "34px", height: "34px", borderRadius: "50%", background: "transparent", border: `1px solid ${p?.border}`, cursor: "pointer", color: p?.textPrimary, display: "flex", alignItems: "center", justifyContent: "center" }}><XIcon /></button>
-                  </div>
-                  <ProductBuilder products={form.products} onChange={handleProductChange} pax26={p} sellerId={form.sellerId} currency={form.currency} />
-                </div>
-              )}
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: "20px" }}>
-                {form.products.length > 0 ? form.products.map((prod, i) => (
-                  <div key={i} style={{ background: p?.secondaryBg, borderRadius: "20px", border: `1px solid ${p?.border}`, overflow: "hidden", display: "flex", flexDirection: "column", transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.07)"; }} onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
-                    <div style={{ position: "relative", paddingTop: "72%", background: `${p?.primary}08` }}>
-                      {(() => { const firstImg = prod.images?.[0]; const imgUrl = typeof firstImg === "string" ? firstImg : firstImg?.url; return imgUrl ? (<img src={imgUrl} alt={prod.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />) : (<div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: p?.primary, opacity: 0.25 }}><PackageIcon /></div>); })()}
-                      <div style={{ position: "absolute", bottom: "10px", right: "10px" }}>
-                        <div style={{ padding: "5px 12px", borderRadius: "99px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: "12px", fontWeight: 800, backdropFilter: "blur(8px)" }}>
-                          {prod.discountPrice ? formatPrice(prod.discountPrice, form.currency) : formatPrice(prod.price, form.currency)}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column" }}>
-                      <h4 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 800, color: p?.textPrimary }}>{prod.name}</h4>
-                      <p style={{ margin: "0 0 12px", fontSize: "12px", color: p?.textPrimary, opacity: 0.55, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{prod.description || "No description."}</p>
-                      <div style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px", borderTop: `1px solid ${p?.border}` }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: prod.stock > 0 ? "#22c55e" : "#ff4444" }} />
-                          <span style={{ fontSize: "11px", fontWeight: 600, color: p?.textPrimary, opacity: 0.6 }}>{prod.stock || 0} in stock</span>
-                        </div>
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          <button onClick={() => { setShowProductForm(true); }} style={{ width: "32px", height: "32px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                          </button>
-                          <button onClick={() => handleProductChange(form.products.filter((_, j) => j !== i))} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><TrashIcon /></button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )) : (
-                  <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "72px 40px", background: p?.secondaryBg, borderRadius: "24px", border: `2px dashed ${p?.border}` }}>
-                    <div style={{ width: "72px", height: "72px", borderRadius: "50%", background: `${p?.primary}10`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", color: p?.primary }}><PackageIcon /></div>
-                    <h3 style={{ fontSize: "20px", fontWeight: 800, color: p?.textPrimary, margin: "0 0 10px" }}>Your store is empty</h3>
-                    <p style={{ margin: "0 auto 28px", fontSize: "14px", color: p?.textPrimary, opacity: 0.55, maxWidth: "360px" }}>Upload your products so your AI agent can start selling them on WhatsApp.</p>
-                    <button onClick={() => setShowProductForm(true)} style={{ padding: "12px 28px", borderRadius: "14px", background: p?.primary, color: "#fff", fontWeight: 800, border: "none", cursor: "pointer", boxShadow: `0 8px 20px ${p?.primary}33` }}>Upload First Product</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* ════ SERVICE: Services & FAQs tab ════ */}
           {isService && activeTab === "services" && (
@@ -1207,6 +1306,73 @@ export default function AiBusinessDashboard() {
                   <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your AI agent when they ask where to buy or find you." />
                 </div>
               </section>
+
+              {/* ── Storefront — SELLER ONLY ─────────────────── */}
+              {isSeller && (
+                <section>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                    <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: `${p?.primary}15`, color: p?.primary, display: "flex", alignItems: "center", justifyContent: "center" }}><LinkIcon /></div>
+                    <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Your Pax26 Storefront</h3>
+                  </div>
+                  <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <InfoBanner pax26={p} text="Your <strong>free storefront</strong> lets customers browse your products online. Your AI agent will share this link on WhatsApp. You can also preview it exactly as your customers see it." />
+                    <SlugField
+                      value={form.slug}
+                      onChange={slug => setForm(f => ({ ...f, slug }))}
+                      onSave={async (slug) => {
+                        // Immediately persist slug to DB — don't make the user
+                        // also click "Update Business Profile"
+                        const res = await fetch("/api/seller/profile", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ ...form, slug }),
+                        });
+                        const data = await res.json();
+                        if (data.success && data.profile) {
+                          setForm(f => ({ ...f, slug: data.profile.slug ?? slug }));
+                        }
+                      }}
+                      pax26={p}
+                      businessName={form.businessName}
+                    />
+
+                    {/* ── Theme Picker ── */}
+                    <div>
+                      <FieldLabel pax26={p}>Store Theme</FieldLabel>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px", marginTop: "4px" }}>
+                        {THEME_LIST.map(theme => {
+                          const isSelected = form.storeTheme === theme.id;
+                          return (
+                            <button
+                              key={theme.id}
+                              onClick={() => setForm(f => ({ ...f, storeTheme: theme.id }))}
+                              style={{
+                                padding: "12px 14px",
+                                borderRadius: "12px",
+                                border: isSelected ? `2px solid ${p?.primary}` : `1.5px solid ${p?.border}`,
+                                background: isSelected ? `${p?.primary}10` : p?.secondaryBg,
+                                cursor: "pointer",
+                                textAlign: "left",
+                                transition: "all 0.15s",
+                                boxShadow: isSelected ? `0 0 0 3px ${p?.primary}18` : "none",
+                              }}
+                            >
+                              {/* Color dots preview */}
+                              <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }}>
+                                {theme.preview.map((color, i) => (
+                                  <div key={i} style={{ width: "16px", height: "16px", borderRadius: "50%", background: color, border: "1px solid rgba(0,0,0,0.1)", flexShrink: 0 }} />
+                                ))}
+                              </div>
+                              <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{theme.name}</p>
+                              <p style={{ margin: "2px 0 0", fontSize: "10px", color: p?.textPrimary, opacity: 0.5, lineHeight: 1.4 }}>{theme.description}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
 
               {/* AI Settings */}
               <section>

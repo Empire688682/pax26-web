@@ -3,6 +3,7 @@ import { verifyToken } from "../../helper/VerifyToken";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerMediaModel from "@/app/ults/models/SellerMediaModel";
+import { generateSlug, makeUniqueSlug } from "@/app/lib/store/generateSlug";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
@@ -18,17 +19,29 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
 
-        const profile = await SellerProfileModel.findOne({ userId });
+        const profile = await SellerProfileModel.findOne({ userId }).lean();
         if (!profile) {
             return NextResponse.json({ success: false, message: "Seller profile not found" }, { status: 404, headers: corsHeaders() });
         }
 
-        const products = await SellerProductModel.find({ sellerId: profile._id }).sort({ createdAt: -1 });
+        const { searchParams } = new URL(req.url);
+        const category = searchParams.get("category");
+        const q = searchParams.get("q");
+        const available = searchParams.get("available"); // "true" | "false" | undefined
 
-        // For each product, we might want to attach its primary image if we were using SellerMediaModel separately,
-        // but the current frontend seems to expect images inside the product object based on StepRenderer.
-        // Let's check how the frontend handles it.
-        
+        const filter = { sellerId: profile._id };
+        if (category) filter.category = category;
+        if (available !== null && available !== undefined) filter.isAvailable = available === "true";
+        if (q) {
+            filter.$or = [
+                { name: { $regex: q, $options: "i" } },
+                { category: { $regex: q, $options: "i" } },
+                { tags: { $elemMatch: { $regex: q, $options: "i" } } },
+            ];
+        }
+
+        const products = await SellerProductModel.find(filter).sort({ createdAt: -1 }).lean();
+
         return NextResponse.json({ success: true, products }, { status: 200, headers: corsHeaders() });
     } catch (error) {
         console.error("GET /api/seller/products error:", error);
@@ -44,7 +57,7 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
 
-        const profile = await SellerProfileModel.findOne({ userId });
+        const profile = await SellerProfileModel.findOne({ userId }).lean();
         if (!profile) {
             return NextResponse.json({ success: false, message: "Seller profile required" }, { status: 400, headers: corsHeaders() });
         }
@@ -52,26 +65,43 @@ export async function POST(req) {
         const data = await req.json();
         const { images, ...productData } = data;
 
+        // Auto-generate slug from name if not provided
+        let slug = productData.slug ? generateSlug(productData.slug) : generateSlug(productData.name || "");
+
+        // Ensure slug is unique within this seller's catalogue
+        if (slug) {
+            const exists = await SellerProductModel.findOne({ sellerId: profile._id, slug }).lean();
+            if (exists) {
+                slug = makeUniqueSlug(productData.name || slug, { appendSuffix: true });
+            }
+        }
+
         const product = await SellerProductModel.create({
             ...productData,
-            sellerId: profile._id
+            slug: slug || undefined,
+            sellerId: profile._id,
         });
 
-        // Handle images if provided
+        // Handle images — store in product.images (inline) so the AI prompt can access them
         if (images && images.length > 0) {
-            await Promise.all(images.map((img, index) => 
+            await SellerProductModel.findByIdAndUpdate(product._id, {
+                $set: { images: images.map(img => ({ url: img.url, publicId: img.publicId })) },
+            });
+            // Also write to SellerMediaModel for Cloudinary visual search
+            await Promise.all(images.map((img, index) =>
                 SellerMediaModel.create({
                     sellerId: profile._id,
                     productId: product._id,
                     url: img.url,
                     publicId: img.publicId,
                     isPrimary: index === 0,
-                    type: "image"
+                    type: "image",
                 })
             ));
         }
 
-        return NextResponse.json({ success: true, product }, { status: 201, headers: corsHeaders() });
+        const saved = await SellerProductModel.findById(product._id).lean();
+        return NextResponse.json({ success: true, product: saved }, { status: 201, headers: corsHeaders() });
     } catch (error) {
         console.error("POST /api/seller/products error:", error);
         return NextResponse.json({ success: false, message: error.message || "Server error" }, { status: 500, headers: corsHeaders() });

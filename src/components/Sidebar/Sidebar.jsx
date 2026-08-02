@@ -10,7 +10,7 @@ import {
   ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
   ChevronDown, Home, Shield, Users, ShieldAlert,
   MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2,
-  Radio, Send
+  Radio, Send, Store, Package
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { Button } from '../ui/Button';
@@ -269,6 +269,12 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Setup" onClick={close} pax26={pax26} />
+                {userData?.paxAI?.businessType === "seller" && (
+                  <NavItem href="/dashboard/my-store" icon={Store} label="My Storefront" onClick={close} pax26={pax26} isNew />
+                )}
+                {userData?.paxAI?.businessType === "seller" && (
+                  <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
+                )}
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Automation Rules" onClick={close} pax26={pax26} />

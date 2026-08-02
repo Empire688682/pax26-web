@@ -42,7 +42,7 @@ async function getUrlContent(profile) {
    Understands: products (with images), payment details,
    lead stages, order flow, and media sending.
 ───────────────────────────────────────────────────────────── */
-function buildSellerPrompt({ profile, products, businessUrl, urlContent }) {
+function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl }) {
   const toneMap = {
     friendly:
       "You are warm, approachable, and easy to talk to. You build genuine rapport before nudging towards a purchase.",
@@ -113,6 +113,32 @@ ${activePayments
     } minutes. Keep it casual: "Hey! Just checking if you'd still like to grab the [product name]. I can hold it for you."`
     : "- Do not send unsolicited follow-up messages. Only reply when the customer messages first.";
 
+  // ── Storefront browse link ────────────────────────────────
+  const storefrontSection = storefrontUrl
+    ? `
+━━━━━━━━━━━━━━━━━━━━━━━━
+STOREFRONT — BROWSE ONLINE
+━━━━━━━━━━━━━━━━━━━━━━━━
+The seller has a mini online store where the customer can browse all products with images.
+Storefront URL: ${storefrontUrl}
+
+WHEN to share the storefront link:
+  - Customer asks "can I see all your products?" or "do you have more options?"
+  - Customer is comparing multiple items and wants to browse freely
+  - Customer asks "do you have a website?" or "where can I see everything?"
+  - After showing 2–3 products and the customer still hasn't found what they want
+
+HOW to share it:
+  Keep it natural. Example:
+  "You can browse our full collection here: ${storefrontUrl}
+  Each product has pictures and prices. Tap any item and message us directly to order."
+
+RULES:
+  - Only share the storefront URL when it's genuinely useful — do not spam it in every message
+  - Never say the link is "secure" or make security claims — just share it naturally
+  - If a customer clicks the link and comes back asking about a specific product, continue the conversation normally`
+    : "";
+
   // ── URL knowledge ─────────────────────────────────────────
   const urlSection = urlContent
     ? `
@@ -156,6 +182,8 @@ Currency: ${profile.currency || "NGN"} (${currencySymbol})
 ${productsSection}
 
 ${paymentSection}
+
+${storefrontSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 HOW TO SEND PRODUCT IMAGES
@@ -363,14 +391,13 @@ ${urlSection}
 /* ─────────────────────────────────────────────────────────────
    MAIN EXPORT
 
-   @param profile      SellerProfile or ServiceProfile doc
-   @param businessUrl  Business website URL string
-   @param profileType  "seller" | "service" | "general"
-   @param products     Array of SellerProduct docs (seller only).
-                       Fetch before calling:
-                       SellerProduct.find({ sellerId: profile._id, isAvailable: true })
+   @param profile        SellerProfile or ServiceProfile doc
+   @param businessUrl    Business website URL string
+   @param profileType    "seller" | "service" | "general"
+   @param products       Array of SellerProduct docs (seller only).
+   @param storefrontUrl  Full /store/{slug}?session=TOKEN URL (seller only, optional)
 ───────────────────────────────────────────────────────────── */
-export const buildSystemPrompt = async (profile, businessUrl, profileType, products = []) => {
+export const buildSystemPrompt = async (profile, businessUrl, profileType, products = [], storefrontUrl = null) => {
   if (!profile) {
     return "You are a helpful business assistant on WhatsApp. Be concise, friendly, and professional.";
   }
@@ -378,7 +405,7 @@ export const buildSystemPrompt = async (profile, businessUrl, profileType, produ
   const urlContent = await getUrlContent(profile);
 
   if (profileType === "seller") {
-    return buildSellerPrompt({ profile, products, businessUrl, urlContent });
+    return buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl });
   }
 
   return buildGeneralPrompt({ profile, businessUrl, urlContent });

@@ -24,6 +24,22 @@ const SellerProfileSchema = new mongoose.Schema({
     urlCache: { type: String, default: '' },
     urlCachedAt: { type: Date, default: null },
 
+    // ── Storefront ────────────────────────────────────────────
+    // slug: unique URL identifier  e.g. "jaystore" → /store/jaystore
+    slug: {
+        type: String,
+        trim: true,
+        lowercase: true,
+        sparse: true,   // allows multiple docs with no slug yet
+        unique: true,
+        index: true,
+    },
+    // logoUrl: shown on storefront hero, product pages, and WhatsApp messages
+    logoUrl: { type: String, default: '' },
+    // storeTheme: controls the storefront color scheme
+    // Options: "classic" | "midnight" | "forest" | "sunset" | "royal" | "ember"
+    storeTheme: { type: String, default: 'classic' },
+
     // Online presence
     onlineStoreUrl: { type: String, default: '', trim: true },
     liveLocation: { type: String, default: '', trim: true },

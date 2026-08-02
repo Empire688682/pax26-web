@@ -2,6 +2,7 @@ import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomation
 import { sendWhatsAppImageReply } from "../../api/helper/WhatsAppImageReply.js";
 import AIMessageModel from "../../ults/models/AIMessageModel.js";
 import { buildSystemPrompt } from "../aiBuild/buildSystemPrompt.js";
+import { buildStorefrontUrl } from "../store/buildStorefrontUrl.js";
 import ServiceProfileModel from "../../ults/models/ServiceProfileModel.js";
 import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
@@ -256,11 +257,26 @@ export const triggerAIResponse = async ({
         }
 
         // ── Build system prompt (type-aware) ──────────────────────
+        // For seller profiles: generate a session-scoped storefront URL
+        // so the AI can send customers a browse link during the conversation.
+        // This runs in parallel with nothing (fast, non-blocking for service type).
+        let storefrontUrl = null;
+        if (profileType === "seller" && businessProfile.slug) {
+            storefrontUrl = await buildStorefrontUrl({
+                sellerProfile: businessProfile,
+                customerPhone: session.visitorPhone,
+            }).catch(err => {
+                console.warn("⚠️ Storefront URL generation failed (non-fatal):", err.message);
+                return null;
+            });
+        }
+
         const systemPrompt = await buildSystemPrompt(
             businessProfile,
             businessUrl,
-            profileType,   // "seller" | "general"
-            products       // [] for general profiles
+            profileType,    // "seller" | "general"
+            products,       // [] for general profiles
+            storefrontUrl   // null for service profiles or sellers without a slug
         );
 
         if (!systemPrompt) {
