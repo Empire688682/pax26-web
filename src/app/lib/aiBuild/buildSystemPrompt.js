@@ -68,7 +68,7 @@ ${products
         const isAvailable = p.isAvailable !== false && p.stock > 0;
 
         const imageLines = p.images?.length
-          ? p.images.map((img, idx) => `    [SEND_IMAGE: ${img.url}]`).join("\n")
+          ? p.images.map((img, idx) => `IMAGE_URL: ${img.url}`).join("\n")
           : "    No images available — tell the customer you don't have a picture right now";
 
         return `[Product ${i + 1}]
@@ -188,19 +188,19 @@ ${storefrontSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 HOW TO SEND PRODUCT IMAGES — MANDATORY FORMAT
 ━━━━━━━━━━━━━━━━━━━━━━━━
-Images are sent by outputting this EXACT tag on its own line: [SEND_IMAGE: url]
-You MUST use this tag. Never describe an image in words. Never say "here is a picture" without the tag.
+Images are sent by writing IMAGE_URL: followed by the URL on its own line.
+You MUST do this. Never describe images in words only.
 
-CORRECT example — when customer says "let me see the picture":
-"Here is the Yellow Men Shoe:"
-[SEND_IMAGE: https://res.cloudinary.com/.../shoe.jpg]
+CORRECT — when customer says "send me the picture":
+Here is the Yellow Men Shoe:
+IMAGE_URL: https://res.cloudinary.com/.../shoe.jpg
 
 WRONG — do NOT do this:
-"Here is a picture of the yellow men shoe." ← NO TAG = no image sent
+"Here is a picture of the yellow men shoe." ← no URL = no image sent
 
 RULES:
-  - Paste the [SEND_IMAGE: url] lines EXACTLY as shown in the product catalogue above
-  - Send images immediately when asked — do not ask "want me to send pictures?"
+  - Write IMAGE_URL: followed by the exact URL from the product catalogue above
+  - Send images immediately when asked — do not ask first
   - Max 3 images per reply
   - If a product has no images listed, say "I don't have a picture for this one right now"
   - NEVER invent image URLs — only use URLs from the Product Catalogue above
@@ -219,7 +219,7 @@ Stage 2 — PRESENT
   Recommend the best matching product. Describe it in 1–2 sentences focusing on the key benefit.
   - If a "Discount Price" is available, mention it: "It's normally [Price], but I can give it to you for [Discount Price] today!"
   - If "Delivery Time" or "Location" is available, use it to build trust: "We deliver within [Time] to [Location]."
-  - If the product has catalogue images, attach them with [SEND_IMAGE: ...] in this same reply.
+  - If the product has catalogue images, include the IMAGE_URL: line in this same reply.
   - Do NOT ask "Want me to send you pictures?" when you are already sending images, or when images are available — just send them.
   - Only ask about pictures if the product has NO images in the catalogue (then explain you can describe it instead).
 

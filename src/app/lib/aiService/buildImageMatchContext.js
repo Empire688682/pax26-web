@@ -41,7 +41,7 @@ export function buildImageMatchContext(matches, customerImageUrl, currency = "NG
     const productSummaries = matches
         .map((p, i) => {
             const imageList = p.images?.length
-                ? p.images.slice(0, 3).map((img) => `    [SEND_IMAGE: ${img.url}]`).join("\n")
+                ? p.images.slice(0, 3).map((img) => `IMAGE_URL: ${img.url}`).join("\n")
                 : "    No images available";
 
             return `Match ${i + 1}:

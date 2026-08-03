@@ -37,7 +37,7 @@ export function buildSearchMatchContext(products, originalQuery, currency = "NGN
       const hasDiscount = p.discountPrice && p.discountPrice < p.price;
 
       const imageList = p.images?.length
-        ? p.images.slice(0, 3).map(img => `    [SEND_IMAGE: ${img.url}]`).join("\n")
+        ? p.images.slice(0, 3).map(img => `IMAGE_URL: ${img.url}`).join("\n")
         : "    No images available";
 
       const variantSummary = p.variants?.length

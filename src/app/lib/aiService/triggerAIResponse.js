@@ -17,15 +17,17 @@ import SessionModel from "../../ults/models/SessionModel.js";
 // Returns the image URLs and the clean text separately.
 // ─────────────────────────────────────────────────────────────
 function extractImageTags(text) {
-    const imageRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]]+)\]/g;
+    // Match both formats:
+    // [SEND_IMAGE: https://...]  — legacy bracket format
+    // IMAGE_URL: https://...     — plain format models output more reliably
+    const bracketRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]\s]+)\]/g;
+    const plainRegex   = /^IMAGE_URL:\s*(https?:\/\/\S+)/gm;
     const imageUrls = [];
 
     let cleanText = text
-        .replace(imageRegex, (_, url) => {
-            imageUrls.push(url.trim());
-            return "";
-        })
-        .replace(/\n{3,}/g, "\n\n") // collapse triple+ newlines left by removed tags
+        .replace(bracketRegex, (_, url) => { imageUrls.push(url.trim()); return ""; })
+        .replace(plainRegex,   (_, url) => { imageUrls.push(url.trim()); return ""; })
+        .replace(/\n{3,}/g, "\n\n")
         .trim();
 
     // If images are already being sent, strip redundant "want me to send pictures?" offers
