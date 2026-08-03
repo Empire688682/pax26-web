@@ -61,15 +61,15 @@ function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefr
   const productsSection = products?.length
     ? `
 ## Product Catalogue:
-Each product below may have images you can send to the customer.
-Use the exact image URLs listed when sending pictures.
+CRITICAL: When a customer asks to see pictures of any product listed below, you MUST output the image tag [SEND_IMAGE: url] on its own line. This is the ONLY way to send images. Do not describe images in words — output the tag.
 
 ${products
       .map((p, i) => {
         const isAvailable = p.isAvailable !== false && p.stock > 0;
-        const imageList = p.images?.length
-          ? p.images.map((img, idx) => `    Image ${idx + 1}: ${img.url}`).join("\n")
-          : "    No images available";
+
+        const imageLines = p.images?.length
+          ? p.images.map((img, idx) => `    [SEND_IMAGE: ${img.url}]`).join("\n")
+          : "    No images available — tell the customer you don't have a picture right now";
 
         return `[Product ${i + 1}]
   ID: ${p._id}
@@ -85,8 +85,8 @@ ${products
   Stock: ${p.stock > 0 ? `${p.stock} units available` : "Out of stock"}
   Available: ${isAvailable ? "Yes" : "No"}
   Description: ${p.description || "No description"}
-  Images:
-${imageList}`;
+  TO SEND IMAGES — copy these lines exactly into your reply:
+${imageLines}`;
       })
       .join("\n\n")}`
     : "\n## Product Catalogue:\nNo products have been added yet. Let customers know you will update them shortly.";
@@ -186,33 +186,24 @@ ${paymentSection}
 ${storefrontSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
-HOW TO SEND PRODUCT IMAGES
+HOW TO SEND PRODUCT IMAGES — MANDATORY FORMAT
 ━━━━━━━━━━━━━━━━━━━━━━━━
-Sending pictures is a CORE part of your job as a sales agent. Images drive sales.
+Images are sent by outputting this EXACT tag on its own line: [SEND_IMAGE: url]
+You MUST use this tag. Never describe an image in words. Never say "here is a picture" without the tag.
 
-WHEN to send images:
-  - Customer asks "do you have [product]?" → describe it briefly, then send images in the SAME reply
-  - Customer asks about price, details, or availability of a product → include images in that reply
-  - Customer says "show me", "send picture", "I want to see it" → send immediately
-  - You recommend a product that has catalogue images → send the images in the SAME reply (do not ask first)
+CORRECT example — when customer says "let me see the picture":
+"Here is the Yellow Men Shoe:"
+[SEND_IMAGE: https://res.cloudinary.com/.../shoe.jpg]
 
-HOW to send images — output format:
-  Write your message first, then put each image URL on its own line in this exact tag:
-  [SEND_IMAGE: <url>]
+WRONG — do NOT do this:
+"Here is a picture of the yellow men shoe." ← NO TAG = no image sent
 
-  Example reply:
-  "Sure! Here are pictures of our Black Nike Sneakers in size 42:"
-  [SEND_IMAGE: https://res.cloudinary.com/demo/image/upload/sneaker1.jpg]
-  [SEND_IMAGE: https://res.cloudinary.com/demo/image/upload/sneaker2.jpg]
-
-RULES for sending images:
-  - Only use image URLs listed in the Product Catalogue above — never invent or guess URLs
-  - Send a max of 3 images per reply to avoid flooding the chat
-  - Always include at least one sentence of context before sending images
-  - If a product has images in the catalogue, SEND them with [SEND_IMAGE: ...] — do NOT ask "Want me to send pictures?" first
-  - NEVER ask whether to send pictures in the same reply where you already included [SEND_IMAGE: ...] tags
-  - If a product has no images listed, say: "I don't have pictures right now but I can describe it in detail"
-  - Never send images for out-of-stock items without mentioning the stock status
+RULES:
+  - Paste the [SEND_IMAGE: url] lines EXACTLY as shown in the product catalogue above
+  - Send images immediately when asked — do not ask "want me to send pictures?"
+  - Max 3 images per reply
+  - If a product has no images listed, say "I don't have a picture for this one right now"
+  - NEVER invent image URLs — only use URLs from the Product Catalogue above
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 SALES CONVERSATION FLOW

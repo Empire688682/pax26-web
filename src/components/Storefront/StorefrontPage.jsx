@@ -143,6 +143,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
 /* ── Product Card ───────────────────────────────────────── */
 function ProductCard({ product, store, slug, sessionToken, theme, highlighted }) {
   const [imgError, setImgError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const t = theme;
   const currency = store.currency || "NGN";
   const displayPrice = product.discountPrice || product.price;
@@ -150,10 +151,18 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
   const productHref = `/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
 
   return (
-    <Link href={productHref} style={{ textDecoration: "none" }}>
-      <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", cursor: "pointer", display: "flex", flexDirection: "column" }}
+    <Link href={productHref} style={{ textDecoration: "none" }} onClick={() => setLoading(true)}>
+      <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", cursor: "pointer", display: "flex", flexDirection: "column", position: "relative" }}
         onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.12)`; }}
         onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : "none"; }}>
+
+        {/* Loading overlay */}
+        {loading && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "16px" }}>
+            <div style={{ width: "32px", height: "32px", border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
+          </div>
+        )}
+
         {/* Image */}
         <div style={{ position: "relative", paddingTop: "80%", background: t.pageBg, overflow: "hidden" }}>
           {product.images?.[0]?.url && !imgError ? (

@@ -80,12 +80,17 @@ function RelatedProducts({ products, currentId, store, slug, sessionToken, theme
   );
 }
 
-function buildWhatsAppMessage(product, selectedVariants, currency) {
+function buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken) {
   const price = product.discountPrice || product.price;
+  const BASE = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
+  const productUrl = `${BASE}/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
+
   let text = `Hi! I'm interested in *${product.name}*`;
   const variantParts = Object.entries(selectedVariants).map(([label, value]) => `${label}: ${value}`).filter(Boolean);
   if (variantParts.length > 0) text += ` (${variantParts.join(", ")})`;
-  text += ` — priced at ${formatPrice(price, currency)}. Could you assist me with this?`;
+  text += ` — priced at ${formatPrice(price, currency)}.`;
+  text += `\n\nProduct page: ${productUrl}`;
+  text += "\n\nCould you assist me with this?";
   return encodeURIComponent(text);
 }
 
@@ -103,7 +108,7 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
   const isOutOfStock = product.stock === 0;
   const images = product.images || [];
 
-  const whatsappMessage = buildWhatsAppMessage(product, selectedVariants, currency);
+  const whatsappMessage = buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken);
   const whatsappHref = store.whatsappHref ? `${store.whatsappHref}?text=${whatsappMessage}` : null;
   const storeHref = `/store/${slug}${sessionToken ? `?session=${sessionToken}` : ""}`;
 

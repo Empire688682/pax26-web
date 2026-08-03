@@ -21,7 +21,7 @@ import { createSessionToken, sessionExpiresAt } from "./signSession.js";
 import StorefrontSessionModel from "../../ults/models/StorefrontSessionModel.js";
 import { connectDb } from "../../ults/db/ConnectDb.js";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://pax26.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
 
 /**
  * @param {object} options
