@@ -77,8 +77,8 @@ export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, custom
             {
                 folder: `pax26/${sellerId}/${folder}`,
                 tags: [`seller-${sellerId}`, `customer-${customerPhone}`, folder === "payment-receipts" ? "payment-receipt" : "customer-image"],
-                // 🔑 This enables Cloudinary Visual Search indexing
                 visual_search: folder !== "payment-receipts",
+                access_mode: "public",   // ensure WhatsApp can fetch the URL without auth
                 resource_type: "image",
             },
             (error, result) => {

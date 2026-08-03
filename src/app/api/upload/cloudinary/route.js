@@ -56,6 +56,7 @@ export async function POST(req) {
                     folder,
                     tags: tags ? String(tags).split(",") : [],
                     resource_type: "image",
+                    access_mode: "public",   // ensure WhatsApp can fetch without auth
                     visual_search: true,
                 },
                 (err, result) => {

@@ -4,24 +4,223 @@
 // Also accepts a manual GET request with a Bearer CRON_SECRET for testing.
 //
 // Finds conversations that:
-//   • belong to a user with "follow_up" automation enabled
-//   • had the last message > 24 hours ago
+//   • belong to a user with paxAI.trained = true and followUpEnabled = true
+//     (works for both seller and service profiles)
+//   • had the last message > followUpDelayMinutes ago (default 30 min)
 //   • the last message was outbound (AI spoke last, lead went silent)
 //   • a follow-up has NOT already been sent in this silence window
-// Then sends an AI-generated follow-up WhatsApp message.
 
 import { NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SessionModel from "@/app/ults/models/SessionModel";
-import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
 import UserModel from "@/app/ults/models/UserModel";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 import { callGroqAI } from "@/app/lib/aiService/grok";
 import { callGeminiAI } from "@/app/lib/aiService/gemini";
 import { callMistralAI } from "@/app/lib/aiService/mistral";
+
+// ── QStash signature verifier ──────────────────────────────────
+const receiver = new Receiver({
+  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
+  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || "",
+});
+
+// ── Auth: QStash signature OR manual Bearer token ──────────────
+async function isAuthorized(req, rawBody) {
+  const signature = req.headers.get("upstash-signature");
+  if (signature && process.env.QSTASH_CURRENT_SIGNING_KEY) {
+    try {
+      const isValid = await receiver.verify({ signature, body: rawBody });
+      if (isValid) return true;
+    } catch { /* fall through */ }
+  }
+  const authHeader = req.headers.get("authorization") || "";
+  const secret = process.env.CRON_SECRET;
+  if (secret && authHeader === `Bearer ${secret}`) return true;
+  return false;
+}
+
+// ── Load the business profile for a user (seller or service) ──
+async function loadBusinessProfile(userId, businessType) {
+  if (businessType === "seller") {
+    return SellerProfileModel.findOne({ userId, isActive: true }).lean();
+  }
+  if (businessType === "service") {
+    return ServiceProfileModel.findOne({ userId, aiTrained: true }).lean();
+  }
+  return null;
+}
+
+// ── Build a warm AI follow-up message ─────────────────────────
+async function buildFollowUpMessage(businessProfile, lastAiMessage) {
+  const businessName = businessProfile?.businessName || "our team";
+  const tone = businessProfile?.tone || "friendly";
+
+  const systemPrompt = `You are a ${tone} follow-up assistant for "${businessName}". 
+Your job is to send a short, warm follow-up WhatsApp message to a potential customer who went quiet.
+Keep it brief (1–2 sentences), human, and non-pushy. Don't repeat the previous message verbatim. 
+End with an open question or a gentle nudge. Use plain text — no markdown, no asterisks, no emojis.`;
+
+  const messages = [{
+    role: "user",
+    content: `The last thing our AI said to this customer was: "${lastAiMessage}". Write a short follow-up message to re-engage them.`,
+  }];
+
+  try {
+    const r = await callGroqAI({ systemPrompt, messages });
+    if (r?.text) return r.text;
+  } catch (err) { if (err?.status !== 429) console.error("Groq follow-up error:", err?.message); }
+
+  try {
+    const r = await callGeminiAI({ systemPrompt, messages });
+    if (r?.text) return r.text;
+  } catch (err) { if (err?.status !== 429) console.error("Gemini follow-up error:", err?.message); }
+
+  try {
+    const r = await callMistralAI({ systemPrompt, messages });
+    if (r?.text) return r.text;
+  } catch (err) { if (err?.status !== 429) console.error("Mistral follow-up error:", err?.message); }
+
+  return `Hey! Just checking in — we'd love to help if you have any questions. Feel free to reply anytime.`;
+}
+
+// ── Shared follow-up runner ────────────────────────────────────
+async function runFollowUp() {
+  await connectDb();
+
+  let totalSent = 0;
+  let totalChecked = 0;
+  const errors = [];
+
+  try {
+    // Step 1 — Find all users who have AI trained and WhatsApp connected
+    // This works for BOTH sellers and service providers without needing UserAutomationModel
+    const users = await UserModel.find({
+      "paxAI.trained": true,
+      "paxAI.enabled": true,
+      "whatsapp.connected": true,
+      "whatsapp.phoneNumberId": { $exists: true, $ne: "" },
+    }).select("_id paxAI whatsapp").lean();
+
+    if (!users.length) {
+      return NextResponse.json({ success: true, message: "No eligible users", sent: 0 });
+    }
+
+    console.log(`[lead-followup] Checking ${users.length} trained user(s)`);
+
+    for (const user of users) {
+      try {
+        // Load their business profile to check followUpEnabled + delay
+        const businessProfile = await loadBusinessProfile(user._id, user.paxAI?.businessType);
+        if (!businessProfile) continue;
+
+        // Skip if follow-up is disabled for this seller/service provider
+        if (businessProfile.followUpEnabled === false) continue;
+
+        // Use their configured delay (default 30 min) — not hardcoded 24h
+        const delayMs = (businessProfile.followUpDelayMinutes || 30) * 60 * 1000;
+        const cutoff = new Date(Date.now() - delayMs);
+
+        // Step 2 — Find eligible sessions for this user
+        const sessions = await SessionModel.find({
+          userId: user._id,
+          status: { $in: ["active", "waiting"] },
+          lastMessageAt: { $lt: cutoff },
+          "followUp.sent": { $ne: true },
+        }).lean();
+
+        totalChecked += sessions.length;
+
+        for (const session of sessions) {
+          try {
+            // Last message must be outbound (AI spoke last, customer went quiet)
+            const lastMsg = await AIMessageModel.findOne({ sessionId: session.sessionId })
+              .sort({ createdAt: -1 })
+              .lean();
+
+            if (!lastMsg || lastMsg.direction !== "outbound") continue;
+
+            // Generate and send follow-up
+            const followUpText = await buildFollowUpMessage(businessProfile, lastMsg.text);
+
+            const response = await sendWhatsAppAutomationReply({
+              phoneNumberId: user.whatsapp.phoneNumberId,
+              to: session.visitorPhone,
+              text: followUpText,
+            });
+
+            const msgStatus = response?.success ? "sent" : "failed";
+
+            // Save outbound message record
+            await AIMessageModel.create({
+              messageId: response?.messageId || `followup_${Date.now()}_${session.sessionId}`,
+              userId: session.userId,
+              sessionId: session.sessionId,
+              platform: "whatsapp",
+              phoneNumberId: user.whatsapp.phoneNumberId,
+              from: user.whatsapp.displayPhone || user.whatsapp.phoneNumberId,
+              to: session.visitorPhone,
+              text: followUpText,
+              direction: "outbound",
+              senderType: "ai",
+              status: msgStatus,
+              automation: { isAutoReply: true, workflowId: "lead_followup" },
+            });
+
+            // Mark session — follow-up sent
+            await SessionModel.updateOne(
+              { _id: session._id },
+              {
+                $set: { "followUp.sent": true, "followUp.sentAt": new Date() },
+                $inc: { "followUp.totalSent": 1 },
+              }
+            );
+
+            if (response?.success) {
+              totalSent++;
+              await UserModel.updateOne(
+                { _id: session.userId },
+                { $inc: { "paxAI.messagesUsedThisMonth": 1, "planAnalytics.aiMessagesUsed": 1, "planAnalytics.metaCost": 5 } }
+              );
+              console.log(`[lead-followup] ✅ Sent to ${session.visitorPhone} after ${businessProfile.followUpDelayMinutes}min silence`);
+            } else {
+              console.warn(`[lead-followup] ⚠️ Delivery failed for ${session.visitorPhone}`);
+            }
+          } catch (sessionErr) {
+            console.error(`[lead-followup] ❌ Session ${session.sessionId}:`, sessionErr?.message);
+            errors.push({ sessionId: session.sessionId, error: sessionErr?.message });
+          }
+        }
+      } catch (userErr) {
+        console.error(`[lead-followup] ❌ User ${user._id}:`, userErr?.message);
+      }
+    }
+
+    return NextResponse.json({ success: true, checked: totalChecked, sent: totalSent, errors: errors.length ? errors : undefined });
+  } catch (err) {
+    console.error("[lead-followup] Fatal error:", err);
+    return NextResponse.json({ success: false, message: "Internal server error", error: err.message }, { status: 500 });
+  }
+}
+
+// ── POST — called by Upstash QStash ──────────────────────────
+export async function POST(req) {
+  const rawBody = await req.text();
+  const authorized = await isAuthorized(req, rawBody);
+  if (!authorized) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  return runFollowUp();
+}
+
+// ── GET — manual trigger for testing ─────────────────────────
+export async function GET(req) {
+  const authorized = await isAuthorized(req, "");
+  if (!authorized) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  return runFollowUp();
+}
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; // ms
 
