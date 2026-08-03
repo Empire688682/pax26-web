@@ -11,7 +11,6 @@
 //   • a follow-up has NOT already been sent in this silence window
 
 import { NextResponse } from "next/server";
-import { Receiver } from "@upstash/qstash";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
@@ -23,20 +22,20 @@ import { callGroqAI } from "@/app/lib/aiService/grok";
 import { callGeminiAI } from "@/app/lib/aiService/gemini";
 import { callMistralAI } from "@/app/lib/aiService/mistral";
 
-// ── QStash signature verifier ──────────────────────────────────
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || "",
-});
-
 // ── Auth: QStash signature OR manual Bearer token ──────────────
+// Receiver is imported dynamically to avoid webpack bundling Node-only crypto APIs
 async function isAuthorized(req, rawBody) {
   const signature = req.headers.get("upstash-signature");
   if (signature && process.env.QSTASH_CURRENT_SIGNING_KEY) {
     try {
+      const { Receiver } = await import("@upstash/qstash");
+      const receiver = new Receiver({
+        currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
+        nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || "",
+      });
       const isValid = await receiver.verify({ signature, body: rawBody });
       if (isValid) return true;
-    } catch { /* fall through */ }
+    } catch { /* fall through to Bearer check */ }
   }
   const authHeader = req.headers.get("authorization") || "";
   const secret = process.env.CRON_SECRET;

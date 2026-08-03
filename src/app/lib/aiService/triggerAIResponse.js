@@ -138,6 +138,7 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
     // Subsequent images (2nd, 3rd) are sent as standalone image messages.
     if (imageUrls.length > 0) {
         const firstUrl = imageUrls[0];
+        console.log("🖼️ Sending image URL (full):", firstUrl);
         // First image carries the text as a caption — keeps the conversation coherent
         try {
             const result = await sendWhatsAppImageReply({
@@ -146,7 +147,7 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
                 imageUrl: firstUrl,
                 caption: cleanText || "",   // caption can be empty — that's fine
             });
-            console.log("🖼️  Image sent:", firstUrl.slice(0, 60) + "...");
+            console.log("🖼️  Image send result:", JSON.stringify(result));
             // Send remaining images (2nd, 3rd) without caption
             for (const url of imageUrls.slice(1, 3)) {
                 try {

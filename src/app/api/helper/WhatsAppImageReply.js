@@ -55,7 +55,7 @@ export async function sendWhatsAppImageReply({
         const data = await res.json();
 
         if (!res.ok || data.error) {
-            console.error("❌ WhatsApp image send failed:", data.error || data);
+            console.error("❌ WhatsApp image send failed:", JSON.stringify(data));
             return {
                 success: false,
                 error: data.error,
@@ -64,7 +64,7 @@ export async function sendWhatsAppImageReply({
         }
 
         const messageId = data.messages?.[0]?.id || null;
-        console.log("✅ WhatsApp image sent, messageId:", messageId);
+        console.log("✅ WhatsApp image sent, messageId:", messageId, "| status:", data.messages?.[0]?.message_status);
 
         return { success: true, messageId };
     } catch (err) {
