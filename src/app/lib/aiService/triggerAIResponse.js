@@ -134,18 +134,36 @@ async function loadProfileAndProducts(userId, user = null) {
 // Images appear above the text message in the chat thread
 // ─────────────────────────────────────────────────────────────
 async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
-    // Send each image (max 3 — already enforced in buildImageMatchContext)
-    for (const url of imageUrls.slice(0, 3)) {
+    // When there are images, send the first one with the text as caption (if text exists).
+    // Subsequent images (2nd, 3rd) are sent as standalone image messages.
+    if (imageUrls.length > 0) {
+        const firstUrl = imageUrls[0];
+        // First image carries the text as a caption — keeps the conversation coherent
         try {
-            await sendWhatsAppImageReply({ phoneNumberId, to, imageUrl: url });
-            console.log("🖼️  Image sent:", url.slice(0, 60) + "...");
+            const result = await sendWhatsAppImageReply({
+                phoneNumberId,
+                to,
+                imageUrl: firstUrl,
+                caption: cleanText || "",   // caption can be empty — that's fine
+            });
+            console.log("🖼️  Image sent:", firstUrl.slice(0, 60) + "...");
+            // Send remaining images (2nd, 3rd) without caption
+            for (const url of imageUrls.slice(1, 3)) {
+                try {
+                    await sendWhatsAppImageReply({ phoneNumberId, to, imageUrl: url });
+                    console.log("🖼️  Image sent:", url.slice(0, 60) + "...");
+                } catch (err) {
+                    console.warn("⚠️  Failed to send additional image:", err.message);
+                }
+            }
+            // Return the first image send result — it has the messageId
+            return result;
         } catch (err) {
-            // Non-fatal — log and continue to next image / text
             console.warn("⚠️  Failed to send image:", err.message);
         }
     }
 
-    // Send text reply (always, even if images failed)
+    // No images — send text only
     if (cleanText) {
         return sendWhatsAppAutomationReply({ phoneNumberId, to, text: cleanText });
     }
@@ -369,8 +387,8 @@ export const triggerAIResponse = async ({
             cleanText,
         });
 
-        if (!response?.messageId) {
-            console.warn("⚠️ No messageId from WhatsApp — possible tracking issue");
+        if (!response?.success) {
+            console.warn("⚠️ WhatsApp send failed — possible delivery issue");
         }
 
         if (response?.error?.code === 190) {
