@@ -49,13 +49,27 @@ export async function POST(req) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
+        // Parse incoming tags and ensure product images always have the seller tag
+        // so Cloudinary visual search can find them by seller-{sellerId}
+        const tagList = tags ? String(tags).split(",").map(t => t.trim()).filter(Boolean) : [];
+
+        // If this is a product upload, inject the seller tag using the folder path
+        // folder format: pax26/{sellerId}/products
+        if (isProductUpload(folder, tags)) {
+            const folderParts = String(folder).split("/");
+            const sellerIdFromFolder = folderParts[1]; // pax26/SELLERID/products
+            if (sellerIdFromFolder && !tagList.includes(`seller-${sellerIdFromFolder}`)) {
+                tagList.push(`seller-${sellerIdFromFolder}`);
+            }
+        }
+
         // Upload to Cloudinary — force JPEG conversion so WhatsApp can display it
         // WhatsApp does not support WebP, AVIF or other modern formats
         const result = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream(
                 {
                     folder,
-                    tags: tags ? String(tags).split(",") : [],
+                    tags: tagList,
                     resource_type: "image",
                     format: "jpg",           // always deliver as JPEG — WhatsApp compatible
                     quality: "auto:good",    // smart compression, keeps file size small

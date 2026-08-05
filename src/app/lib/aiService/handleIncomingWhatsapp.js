@@ -3,16 +3,45 @@ import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
-import { handleCustomerImage } from "@/app/lib/aiService/customerImageSearch.js";
-import { buildImageMatchContext, buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
-import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFromText } from "@/app/lib/aiService/handlePaymentReceipt.js";
 import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch.js";
+import { buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
+import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFromText } from "@/app/lib/aiService/handlePaymentReceipt.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomationReply";
 import { searchProducts, shouldSearch } from "@/app/lib/store/searchProducts.js";
 import { buildSearchMatchContext } from "@/app/lib/store/buildSearchContext.js";
+import { buildStorefrontUrl } from "@/app/lib/store/buildStorefrontUrl.js";
+
+/**
+ * buildImageReceivedContext
+ *
+ * When a customer sends an image, instead of running visual search,
+ * we direct them to the storefront where they can browse visually.
+ * If no storefront is set up, we ask them to describe what they want.
+ */
+function buildImageReceivedContext({ caption, storefrontUrl, businessName }) {
+  if (storefrontUrl) {
+    return `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}.
+Instead of visual search, guide them to browse the storefront.
+
+INSTRUCTIONS:
+- Acknowledge their image warmly in 1 sentence
+- Tell them they can browse the full collection with pictures and prices at: ${storefrontUrl}
+- Keep it short and natural — do not list products, just send the link
+- Example: "Thanks for sharing! You can browse our full collection here: ${storefrontUrl} — tap any item to get details and message us directly."
+]`;
+  }
+
+  return `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}.
+The store doesn't have a storefront set up yet.
+
+INSTRUCTIONS:
+- Acknowledge their image and ask them to describe what they are looking for in words
+- Example: "Thanks for the image! Could you describe what you're looking for — the type, colour, or size? That'll help me find the right product for you."
+]`;
+}
 
 // ─────────────────────────────────────────────────────────────
 // Fetch actual WhatsApp media download URL from Meta API
@@ -317,20 +346,9 @@ export const handleIncomingWhatsApp = async (payload) => {
 
 
 
-  // ── Step 8: Handle image vs text separately ───────────────
+  // ── Step 8: Handle image messages ───────────────────────
   if (isImageMessage) {
-    console.log("🖼️  Step 8 — Image message detected, running visual search...");
-
-    // If the seller has no profile set up, fall back to a polite reply
-    if (!sellerProfile) {
-      console.log("⚠️  No seller profile found — skipping image search");
-      await triggerAIResponse({
-        session,
-        user,
-        inboundText: buildImageNoMatchContext(),
-      });
-      return { ok: true };
-    }
+    console.log("🖼️  Step 8 — Image message detected");
 
     try {
       const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
@@ -352,12 +370,12 @@ export const handleIncomingWhatsApp = async (payload) => {
       const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
       const customerName = contactInfo?.name || "WhatsApp Customer";
 
-      // Upload once for inbox display + payment/product flows
+      // Still upload the image for inbox display purposes
       let uploadedImage = null;
       try {
         uploadedImage = await uploadCustomerImageToCloudinary(
           mediaUrl,
-          sellerProfile._id,
+          sellerProfile?._id || user._id,
           visitorPhone,
           "customer-images"
         );
@@ -375,61 +393,58 @@ export const handleIncomingWhatsApp = async (payload) => {
         console.warn("⚠️ Inbox image upload failed:", uploadErr.message);
       }
 
-      const receiptResult = await handlePaymentReceipt({
-        sellerId: sellerProfile._id,
-        sellerUserId: user._id,
-        mediaUrl,
-        customerPhone: visitorPhone,
-        customerName,
-        caption,
-        recentMessages: conversationContext,
-        imageUrl: uploadedImage?.url,
-        imagePublicId: uploadedImage?.publicId,
-      });
-
-      if (receiptResult.handled) {
-        console.log("💳 Payment receipt saved for order:", receiptResult.order._id);
-        await triggerAIResponse({
-          session,
-          user,
-          inboundText: buildPaymentReceiptContext(),
-          imageSearchContext: true,
+      // ── Payment receipt check — keep this, it's separate from product search
+      if (sellerProfile) {
+        const receiptResult = await handlePaymentReceipt({
+          sellerId: sellerProfile._id,
+          sellerUserId: user._id,
+          mediaUrl,
+          customerPhone: visitorPhone,
+          customerName,
+          caption,
+          recentMessages: conversationContext,
+          imageUrl: uploadedImage?.url,
+          imagePublicId: uploadedImage?.publicId,
         });
-        return { ok: true };
+
+        if (receiptResult.handled) {
+          console.log("💳 Payment receipt saved for order:", receiptResult.order._id);
+          await triggerAIResponse({
+            session,
+            user,
+            inboundText: buildPaymentReceiptContext(),
+            imageSearchContext: true,
+          });
+          return { ok: true };
+        }
       }
 
-      const { matches, hasMatches, customerImageUrl } = await handleCustomerImage({
-        sellerId: sellerProfile._id,
-        mediaUrl,
-        customerPhone: visitorPhone,
+      // ── Instead of visual search, send storefront link ────
+      // Build a context block telling the AI to acknowledge the image
+      // and direct the customer to browse the storefront visually
+      const storefrontUrl = sellerProfile?.slug
+        ? await buildStorefrontUrl({
+            sellerProfile,
+            customerPhone: visitorPhone,
+          }).catch(() => null)
+        : null;
+
+      const imageContext = buildImageReceivedContext({
+        caption,
+        storefrontUrl,
+        businessName: sellerProfile?.businessName,
       });
 
-      console.log(
-        hasMatches
-          ? `✅ Step 8 — Image search found ${matches.length} match(es)`
-          : "⚠️  Step 8 — No visual matches found"
-      );
-
-      // Build a grounded context block for the AI:
-      // Contains only real product data — AI cannot hallucinate matches
-      const imageContext = hasMatches
-        ? buildImageMatchContext(matches, customerImageUrl, sellerProfile.currency)
-        : buildImageNoMatchContext();
-
-      // Trigger AI with the image context injected as the user message
+      console.log("🏪 Step 8 — Directing customer to storefront for visual browsing");
       await triggerAIResponse({
         session,
         user,
         inboundText: imageContext,
-        // Pass products so the system prompt is fully hydrated
-        // triggerAIResponse should forward this to buildSystemPrompt
         imageSearchContext: true,
       });
-      console.log("📊 Step 8 — messagesUsedThisMonth incremented");
 
     } catch (err) {
-      console.error("❌ Step 8 — Image processing error:", err.message);
-      // Fail gracefully — tell the AI search failed, let it ask the customer to describe
+      console.error("❌ Step 8 — Image handling error:", err.message);
       await triggerAIResponse({
         session,
         user,
