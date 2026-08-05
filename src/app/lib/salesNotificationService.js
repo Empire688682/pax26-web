@@ -8,9 +8,16 @@ export const sendSalesNotification = async (userId, orderData) => {
         const user = await UserModel.findById(userId);
         if (!user) return { success: false, message: "User not found" };
 
+        // ── Plan gate: salesAlertsEnabled ─────────────────────────
+        // If the plan explicitly disables sales alerts, skip silently.
+        // Default true so legacy users (pre-flag) still receive notifications.
+        const salesAlertsEnabled = user.paxAI?.salesAlertsEnabled ?? true;
+        if (!salesAlertsEnabled) {
+            console.log(`[salesNotification] Sales alerts disabled for plan '${user.paxAI?.plan}' — skipping`);
+            return { success: false, message: "Sales alerts not available on this plan" };
+        }
+
         const plan = user.paxAI?.plan || "free";
-        // Free plan = no sales notifications
-        if (plan === "free") return { success: false, message: "Not available on free plan" };
 
         const sellerProfile = await SellerProfileModel.findOne({ userId });
         if (!sellerProfile || !sellerProfile.salesNotificationsEnabled) {
@@ -18,9 +25,12 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
 
         // Determine allowed channels based on plan
+        // business+ get WhatsApp + email. starter gets in-app + email. free gets in-app only.
         let allowedChannels = ["in-app"];
         if (plan === "business" || plan === "enterprise") {
             allowedChannels = ["in-app", "whatsapp", "email", "both"];
+        } else if (plan === "starter") {
+            allowedChannels = ["in-app", "email"];
         }
 
         const preferredChannel = sellerProfile.salesNotificationChannel || "in-app";

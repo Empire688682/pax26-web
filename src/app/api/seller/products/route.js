@@ -3,6 +3,7 @@ import { verifyToken } from "../../helper/VerifyToken";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerMediaModel from "@/app/ults/models/SellerMediaModel";
+import UserModel from "@/app/ults/models/UserModel";
 import { generateSlug, makeUniqueSlug } from "@/app/lib/store/generateSlug";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
@@ -60,6 +61,26 @@ export async function POST(req) {
         const profile = await SellerProfileModel.findOne({ userId }).lean();
         if (!profile) {
             return NextResponse.json({ success: false, message: "Seller profile required" }, { status: 400, headers: corsHeaders() });
+        }
+
+        // ── Plan: enforce product limit ────────────────────────────
+        const user = await UserModel.findById(userId).select("paxAI").lean();
+        const productsLimit = user?.paxAI?.productsLimit ?? 10; // 0 = unlimited
+
+        if (productsLimit > 0) {
+            const currentCount = await SellerProductModel.countDocuments({ sellerId: profile._id });
+            if (currentCount >= productsLimit) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: `You have reached your plan's product limit of ${productsLimit}. Upgrade your plan to add more products.`,
+                        limitReached: true,
+                        currentCount,
+                        productsLimit,
+                    },
+                    { status: 403, headers: corsHeaders() }
+                );
+            }
         }
 
         const data = await req.json();

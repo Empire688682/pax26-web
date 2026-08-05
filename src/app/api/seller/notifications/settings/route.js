@@ -23,13 +23,22 @@ export async function PATCH(req) {
         if (!user) return NextResponse.json({ success: false, message: "User not found" }, { status: 404, headers: corsHeaders() });
 
         const plan = user.paxAI?.plan || "free";
-        if (plan === "free") {
-            return NextResponse.json({ success: false, message: "Upgrade your plan to use Sales Notifications" }, { status: 403, headers: corsHeaders() });
+        // Use the plan flag rather than a hardcoded plan name check
+        const salesAlertsEnabled = user.paxAI?.salesAlertsEnabled ?? true;
+        if (!salesAlertsEnabled) {
+            return NextResponse.json({
+                success: false,
+                message: "Sales alerts are not available on your current plan. Please upgrade to enable this feature.",
+                upgradeRequired: true,
+            }, { status: 403, headers: corsHeaders() });
         }
 
+        // Channel access: business+ get WhatsApp+email; starter gets email+in-app; free gets in-app
         let actualChannel = channel;
-        if (plan === "starter" && channel !== "in-app") {
-            actualChannel = "in-app"; // Starter only gets in-app
+        if (plan === "starter" && channel === "whatsapp") {
+            actualChannel = "email"; // Starter: no WhatsApp channel for seller alerts
+        } else if (plan === "free") {
+            actualChannel = "in-app";
         }
 
         const sellerProfile = await SellerProfileModel.findOneAndUpdate(

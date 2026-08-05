@@ -154,8 +154,8 @@ const UserSchema = new mongoose.Schema(
     paxAI: {
       enabled: { type: Boolean, default: false },
       trained: { type: Boolean, default: false },
-      systemPrompt: { type: String, default: "" }, // their custom AI personality
-      knowledgeBase: [{ type: String }],           // URLs or text chunks
+      systemPrompt: { type: String, default: "" },
+      knowledgeBase: [{ type: String }],
       maxMonthlyMessages: { type: Number, default: 200 },
       messagesUsedThisMonth: { type: Number, default: 0 },
       broadcastContactsLimit: { type: Number, default: 0 },
@@ -163,16 +163,30 @@ const UserSchema = new mongoose.Schema(
       scheduledBroadcast: { type: Boolean, default: false },
       segmentation: { type: Boolean, default: false },
       bulkSequences: { type: Boolean, default: false },
-      removeBranding: { type: Boolean, default: false },
       multiStaff: { type: Number, default: 0 },
-      webhookAccess: { type: Boolean, default: false },
+
+      // ── Storefront & Commerce ──────────────────────────────
+      storefrontEnabled:        { type: Boolean, default: true  },
+      productsLimit:            { type: Number,  default: 10    }, // 0 = unlimited
+      orderReceiptsEnabled:     { type: Boolean, default: true  },
+      salesAlertsEnabled:       { type: Boolean, default: true  },
+      salesAnalyticsEnabled:    { type: Boolean, default: false },
+      salesAnalyticsDays:       { type: Number,  default: 7     },
+      customStorefrontDomain:   { type: Boolean, default: false },
+
+      // ── AI feature flags ───────────────────────────────────
+      aiAgentEnabled:           { type: Boolean, default: true  },
+      leadFollowupEnabled:      { type: Boolean, default: false },
+      leadQualificationEnabled: { type: Boolean, default: false },
+      productRecommendations:   { type: Boolean, default: false },
+
       plan: {
         type: String,
         enum: ["free", "starter", "business", "enterprise"],
         default: "free"
       },
       businessType: { type: String, enum: ["seller", "service"], default: null },
-      planStartedAt: { type: Date, default: Date.now }, // when the current plan period began (signup / upgrade / monthly reset)
+      planStartedAt: { type: Date, default: Date.now },
       lastUpdated: { type: Date, default: Date.now },
     },
     /* =====================

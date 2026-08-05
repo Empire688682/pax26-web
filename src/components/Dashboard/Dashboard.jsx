@@ -11,6 +11,7 @@ import {
 
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
+import MessageQuotaBar from "../MessageQuotaBar/MessageQuotaBar";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -758,9 +759,13 @@ export default function Dashboard() {
                 )}
               </div>
 
+              {/* ── MESSAGE QUOTA BAR ── */}
+              <div className="px-s5">
+                <MessageQuotaBar compact />
+              </div>
+
               {/* ── WHATSAPP STATUS CARD ── */}
               <div className={`px-s5 ${isDark ? "px-glass" : "px-glass-light"}`}
-                style={{ padding: "22px", cursor: "pointer" }}
                 onClick={() => router.push("/dashboard/automations/whatsapp#connect")}>
                 <Label text="WhatsApp" isDark={isDark} />
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

@@ -328,12 +328,12 @@ export async function POST(req) {
 
     // ── Step 4.5: Duplicate check — block before showing select-phone UI ─
     // If any phone in this list is already connected to a DIFFERENT user's account,
-    // stop here with a clear error. The user should not even see the select-phone page.
+    // stop here with a clear error.
     for (const phone of phones) {
       const existingOwner = await UserModel.findOne({
         "whatsapp.phoneNumberId": phone.id,
         "whatsapp.connected": true,
-        _id: { $ne: userId }, // allow the same user to reconnect their own number
+        _id: { $ne: userId },
       }).select("_id").lean();
 
       if (existingOwner) {
@@ -346,6 +346,30 @@ export async function POST(req) {
           { status: 409, headers: corsHeaders() }
         );
       }
+    }
+
+    // ── Step 4.6: WhatsApp numbers limit check ─────────────────
+    // Count how many distinct phone numbers this user already has connected.
+    // The plan's whatsappNumbersLimit caps this.
+    const currentUser = await UserModel.findById(userId).select("paxAI whatsapp").lean();
+    const userPlan = currentUser?.paxAI?.plan || "free";
+
+    // Derive limit from plan tier (Business=3, Enterprise=10, others=1)
+    const whatsappLimits = { free: 1, starter: 1, business: 3, enterprise: 10 };
+    const whatsappNumbersLimit = whatsappLimits[userPlan] ?? 1;
+
+    const alreadyConnected = currentUser?.whatsapp?.connected ? 1 : 0;
+    // Count newly incoming phones that are NOT already the user's number
+    const newNumbers = phones.filter(p => p.id !== currentUser?.whatsapp?.phoneNumberId).length;
+
+    if (alreadyConnected + newNumbers > whatsappNumbersLimit) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Your current plan (${userPlan}) allows up to ${whatsappNumbersLimit} WhatsApp number${whatsappNumbersLimit > 1 ? "s" : ""}. You already have ${alreadyConnected} connected. Upgrade to Business or Enterprise to connect more numbers.`,
+        },
+        { status: 403, headers: corsHeaders() }
+      );
     }
 
     // ── Step 5: Subscribe to WABA webhooks + register each phone ─

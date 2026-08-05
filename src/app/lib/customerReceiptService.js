@@ -24,10 +24,18 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             return { success: false, message: "Seller profile not found" };
         }
 
-        const user = await UserModel.findById(sellerProfile.userId).select("whatsapp").lean();
+        const user = await UserModel.findById(sellerProfile.userId).select("whatsapp paxAI").lean();
         if (!user?.whatsapp?.connected || !user?.whatsapp?.phoneNumberId) {
             console.log(`[customerReceipt] WhatsApp not connected for seller ${sellerProfile.userId}`);
             return { success: false, message: "WhatsApp not connected for seller" };
+        }
+
+        // ── Plan gate: orderReceiptsEnabled ──────────────────────
+        // Default true so legacy users continue to receive receipts.
+        const orderReceiptsEnabled = user.paxAI?.orderReceiptsEnabled ?? true;
+        if (!orderReceiptsEnabled) {
+            console.log(`[customerReceipt] Order receipts disabled on plan '${user.paxAI?.plan}' for seller ${sellerProfile.userId}`);
+            return { success: false, message: "Order receipts not available on this plan" };
         }
 
         const businessName = sellerProfile.businessName || "Our Store";

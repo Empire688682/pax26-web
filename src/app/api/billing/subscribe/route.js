@@ -79,19 +79,32 @@ export async function POST(req) {
     /* ── Upgrade plan atomically ────────────────────────────── */
     user.paxAI.plan = planKey;
     user.paxAI.maxMonthlyMessages = planMeta.messagesLimit;
-    user.paxAI.messagesUsedThisMonth = 0;       // reset monthly counter
+    user.paxAI.messagesUsedThisMonth = 0;
     user.paxAI.broadcastContactsLimit = planMeta.broadcastContactsLimit;
     user.paxAI.broadcastContactsUsedThisMonth = 0;
+    // Broadcast features
     user.paxAI.scheduledBroadcast = planMeta.scheduledBroadcast;
-    user.paxAI.segmentation = planMeta.segmentation;
-    user.paxAI.bulkSequences = planMeta.bulkSequences;
+    user.paxAI.segmentation       = planMeta.segmentation;
+    user.paxAI.bulkSequences      = planMeta.bulkSequences;
+    // Branding & team
     user.paxAI.removeBranding = planMeta.removeBranding;
-    user.paxAI.multiStaff = planMeta.multiStaff;
-    user.paxAI.webhookAccess = planMeta.webhookAccess;
-    user.paxAI.planStartedAt = now;              // start new billing cycle
-    user.paxAI.lastUpdated = now;
-
-    // Reset message handled count for all contacts
+    user.paxAI.multiStaff     = planMeta.multiStaff;
+    // Storefront & Commerce flags
+    user.paxAI.storefrontEnabled        = planMeta.storefrontEnabled        ?? true;
+    user.paxAI.productsLimit            = planMeta.productsLimit            ?? 10;
+    user.paxAI.orderReceiptsEnabled     = planMeta.orderReceiptsEnabled     ?? true;
+    user.paxAI.salesAlertsEnabled       = planMeta.salesAlertsEnabled       ?? true;
+    user.paxAI.salesAnalyticsEnabled    = planMeta.salesAnalyticsEnabled    ?? false;
+    user.paxAI.salesAnalyticsDays       = planMeta.salesAnalyticsDays       ?? 7;
+    user.paxAI.customStorefrontDomain   = planMeta.customStorefrontDomain   ?? false;
+    // AI feature flags
+    user.paxAI.aiAgentEnabled           = planMeta.aiAgentEnabled           ?? true;
+    user.paxAI.leadFollowupEnabled      = planMeta.leadFollowupEnabled      ?? false;
+    user.paxAI.leadQualificationEnabled = planMeta.leadQualificationEnabled ?? false;
+    user.paxAI.productRecommendations   = planMeta.productRecommendations   ?? false;
+    // Billing cycle
+    user.paxAI.planStartedAt = now;
+    user.paxAI.lastUpdated   = now;
     if (user.whatsapp && user.whatsapp.contacts && Array.isArray(user.whatsapp.contacts.list)) {
       user.whatsapp.contacts.list.forEach(contact => {
         contact.messageCount = 0;

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   return {
     title: `${post.title} – Pax26 Blog`,
     description: post.excerpt,
-    keywords: post.keywords || ["pax26 blog", "whatsapp commerce", "sell on whatsapp", "ai automation"],
+    keywords: post.keywords || ["pax26 blog", "ai automation", "digital services"],
     alternates: { canonical: `https://pax26.com/blog/${post.slug}` },
     openGraph: {
       title: `${post.title} – Pax26 Blog`,

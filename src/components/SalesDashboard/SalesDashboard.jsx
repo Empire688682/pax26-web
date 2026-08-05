@@ -58,11 +58,17 @@ export default function SalesDashboard() {
   const primary = pax26?.primary || "#4f46e5";
   const isDark = pax26?.bg === "#0f172a" || pax26?.bg === "#000000";
 
-  // Check plan accessibility
-  const hasAccess = plan !== "free";
-  const isStarter = plan === "starter";
+  // Check plan accessibility using live paxAI flags
+  const salesAnalyticsEnabled = userData?.paxAI?.salesAnalyticsEnabled ?? (plan !== "free");
+  const salesAnalyticsDays    = userData?.paxAI?.salesAnalyticsDays ?? 7;
+  const hasAccess  = salesAnalyticsEnabled;
+  const isStarter  = plan === "starter";
   const isBusiness = plan === "business";
   const isEnterprise = plan === "enterprise";
+
+  // Clamp the default start date to the plan's allowed history window
+  const defaultStart = new Date();
+  defaultStart.setDate(defaultStart.getDate() - salesAnalyticsDays);
 
   useEffect(() => {
     if (hasAccess) {

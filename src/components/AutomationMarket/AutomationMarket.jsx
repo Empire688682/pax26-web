@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Zap, MessageCircle, Bot, Edit, Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { Zap, MessageCircle, Bot, Edit, Wifi, WifiOff, RefreshCw, Lock } from "lucide-react";
 import { useGlobalContext } from "../Context";
+import { usePlanLimits } from "@/app/hooks/usePlanLimits";
 
 /* ── Keyframes only — Tailwind handles everything else ───────── */
 const CSS = `
@@ -134,16 +135,20 @@ function SkeletonCard({ pax26 }) {
 }
 
 /* ── Automation card ──────────────────────────────────────────── */
-function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTrained, pax26 }) {
+function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTrained, pax26, isLocked, requiredPlan, onUpgrade }) {
   const cfg = TYPE_CONFIG[auto.type] || { icon: <Bot size={20} />, color: pax26?.primary, label: "Automation" };
   const GREEN = "#22c55e";
+  const AMBER = "#f59e0b";
+
+  const planColors = { starter: "#38BDF8", business: "#C9A84C", enterprise: "#A78BFA" };
+  const lockColor = planColors[requiredPlan] || AMBER;
 
   return (
     <div className="am-card am-slide rounded-2xl overflow-hidden flex flex-col"
-      style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
+      style={{ background: pax26?.bg, border: `1px solid ${isLocked ? `${lockColor}40` : pax26?.border}`, opacity: isLocked ? 0.85 : 1 }}>
 
       {/* colored top strip */}
-      <div className="h-1 w-full" style={{ background: auto.enabled ? cfg.color : pax26?.border }} />
+      <div className="h-1 w-full" style={{ background: isLocked ? lockColor : (auto.enabled ? cfg.color : pax26?.border) }} />
 
       <div className="p-5 flex flex-col gap-4 flex-1">
         {/* header row */}
@@ -160,7 +165,18 @@ function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTr
               </span>
             </div>
           </div>
-          <Toggle enabled={auto.enabled} loading={toggling} onClick={() => onToggle(auto)} />
+          {isLocked ? (
+            <button
+              onClick={onUpgrade}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold"
+              style={{ background: `${lockColor}12`, color: lockColor, border: `1px solid ${lockColor}30` }}
+              title={`Requires ${requiredPlan} plan`}>
+              <Lock size={11} />
+              {requiredPlan ? requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1) : "Upgrade"}
+            </button>
+          ) : (
+            <Toggle enabled={auto.enabled} loading={toggling} onClick={() => onToggle(auto)} />
+          )}
         </div>
 
         {/* title + desc */}
@@ -247,6 +263,15 @@ export default function AutomationMarket() {
     isWhatsappNumberConnected, fetchUser,
   } = useGlobalContext();
 
+  const limits = usePlanLimits();
+
+  // Map automation type → plan feature flag + required plan name
+  const AUTOMATION_GATES = {
+    whatsapp_follow_up: { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
+    follow_up:          { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
+    sms_follow_up:      { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
+  };
+
   const [automations, setAutomations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
@@ -309,8 +334,19 @@ export default function AutomationMarket() {
       setToggling(true);
       const res = await fetch(`/api/automations/${auto.id}/toggle`, { method: "PATCH" });
       const data = await res.json();
-      if (data.success) await fetchAutomations();
-      else alert(`Error: ${data.message}`);
+      if (data.success) {
+        await fetchAutomations();
+      } else if (data.upgradeRequired) {
+        // Plan gate — redirect to billing with a friendly message
+        const planName = data.requiredPlan
+          ? data.requiredPlan.charAt(0).toUpperCase() + data.requiredPlan.slice(1)
+          : "higher";
+        if (confirm(`${data.message}\n\nWould you like to upgrade your plan now?`)) {
+          router.push("/dashboard/billing");
+        }
+      } else {
+        alert(`Error: ${data.message}`);
+      }
     } catch (err) { console.error(err); }
     finally { setToggling(false); }
   };
@@ -473,19 +509,26 @@ export default function AutomationMarket() {
                   <p className="text-sm opacity-40">No automations available yet</p>
                 </div>
               )
-              : automations.map((auto, i) => (
-                <div key={auto.automationId} style={{ animationDelay: `${i * 0.07}s` }}>
-                  <AutoCard
-                    auto={auto}
-                    toggling={toggling}
-                    onToggle={toggleAutomationAPI}
-                    onView={() => router.push(`/dashboard/automations/${auto.automationId}`)}
-                    onTrain={() => router.push("/dashboard/automations/ai-business-dashboard")}
-                    isPaxAiBusinessTrained={isPaxAiBusinessTrained}
-                    pax26={pax26}
-                  />
-                </div>
-              ))
+              : automations.map((auto, i) => {
+                  const gate = AUTOMATION_GATES[auto.type];
+                  const isLocked = gate ? !limits[gate.flag] : false;
+                  return (
+                    <div key={auto.automationId} style={{ animationDelay: `${i * 0.07}s` }}>
+                      <AutoCard
+                        auto={auto}
+                        toggling={toggling}
+                        onToggle={toggleAutomationAPI}
+                        onView={() => router.push(`/dashboard/automations/${auto.automationId}`)}
+                        onTrain={() => router.push("/dashboard/automations/ai-business-dashboard")}
+                        onUpgrade={() => router.push("/dashboard/billing")}
+                        isPaxAiBusinessTrained={isPaxAiBusinessTrained}
+                        isLocked={isLocked}
+                        requiredPlan={gate?.requiredPlan}
+                        pax26={pax26}
+                      />
+                    </div>
+                  );
+                })
           }
         </div>
 

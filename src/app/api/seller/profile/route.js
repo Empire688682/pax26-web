@@ -161,6 +161,19 @@ export async function POST(req) {
             );
         }
 
+        // ── Plan gate: storefrontEnabled ──────────────────────────
+        const storefrontEnabled = user.paxAI?.storefrontEnabled ?? true; // default on for all
+        if (!storefrontEnabled) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Your current plan does not include access to the storefront feature. Please upgrade your plan.",
+                    upgradeRequired: true,
+                },
+                { status: 403, headers: corsHeaders() }
+            );
+        }
+
         const { products, ...profileData } = await req.json();
 
         // Explicitly extract the new presence fields so they're always included in the update

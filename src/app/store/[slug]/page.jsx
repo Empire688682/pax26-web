@@ -10,6 +10,7 @@ import StorefrontPage from "@/components/Storefront/StorefrontPage";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
+import UserModel from "@/app/ults/models/UserModel";
 
 async function getStoreData(slug) {
   try {
@@ -20,6 +21,9 @@ async function getStoreData(slug) {
     }).lean();
 
     if (!profile) return null;
+
+    // Get user's plan flags (removeBranding, etc.)
+    const user = await UserModel.findById(profile.userId).select("paxAI").lean();
 
     const products = await SellerProductModel.find({
       sellerId: profile._id,

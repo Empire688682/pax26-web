@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useGlobalContext } from "@/components/Context";
+import { usePlanLimits } from "@/app/hooks/usePlanLimits";
 import { formatPrice, getCurrencySymbol } from "@/app/lib/currency/currencyHelper";
 import { generateSlug } from "@/app/lib/store/generateSlug";
 
@@ -357,6 +358,7 @@ function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSl
 ══════════════════════════════════════════════════════════ */
 export default function ProductManager() {
   const { pax26: p, userData, router } = useGlobalContext();
+  const limits = usePlanLimits();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -369,6 +371,10 @@ export default function ProductManager() {
   const [currency, setCurrency] = useState("NGN");
 
   const isSellerUser = userData?.paxAI?.businessType === "seller";
+
+  // Plan limits
+  const productsLimit = limits.productsLimit;            // 0 = unlimited
+  const atLimit = productsLimit > 0 && products.length >= productsLimit;
 
   // Fetch products + profile data
   const fetchAll = useCallback(async () => {
@@ -496,7 +502,14 @@ export default function ProductManager() {
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 26px)", fontWeight: 900, color: p?.textPrimary, letterSpacing: "-0.03em" }}>Product Manager</h1>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", color: p?.textPrimary, opacity: 0.5 }}>{products.length} product{products.length !== 1 ? "s" : ""} · {products.filter(x => x.isAvailable).length} live</p>
+          <p style={{ margin: "4px 0 0", fontSize: "13px", color: p?.textPrimary, opacity: 0.5 }}>
+            {products.length} product{products.length !== 1 ? "s" : ""} · {products.filter(x => x.isAvailable).length} live
+            {productsLimit > 0 && (
+              <span style={{ marginLeft: "8px", color: atLimit ? "#ef4444" : p?.primary, fontWeight: 700 }}>
+                ({products.length}/{productsLimit} plan limit)
+              </span>
+            )}
+          </p>
         </div>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           {storeSlug && (
@@ -504,11 +517,47 @@ export default function ProductManager() {
               <EyeIcon /> View Store
             </a>
           )}
-          <button onClick={() => setView("create")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", borderRadius: "12px", background: p?.primary, color: "#fff", fontWeight: 800, border: "none", cursor: "pointer", fontSize: "13px", boxShadow: `0 4px 14px ${p?.primary}40` }}>
-            <PlusIcon /> Add Product
+          <button
+            onClick={() => {
+              if (atLimit) {
+                router.push("/dashboard/billing");
+              } else {
+                setView("create");
+              }
+            }}
+            title={atLimit ? `You've reached your plan's ${productsLimit}-product limit. Upgrade to add more.` : "Add a new product"}
+            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", borderRadius: "12px", background: atLimit ? "#f59e0b" : p?.primary, color: "#fff", fontWeight: 800, border: "none", cursor: "pointer", fontSize: "13px", boxShadow: `0 4px 14px ${atLimit ? "#f59e0b" : p?.primary}40` }}>
+            <PlusIcon /> {atLimit ? "Upgrade to Add More" : "Add Product"}
           </button>
         </div>
       </div>
+
+      {/* Products limit progress bar — shown when a limit applies */}
+      {productsLimit > 0 && (
+        <div style={{ padding: "12px 16px", borderRadius: "12px", background: p?.secondaryBg, border: `1px solid ${atLimit ? "#ef444433" : p?.border}` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 600, color: p?.textSecondary, opacity: 0.7 }}>Products used</span>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: atLimit ? "#ef4444" : p?.primary }}>
+              {products.length} / {productsLimit}
+              {productsLimit === 0 && " (unlimited)"}
+            </span>
+          </div>
+          <div style={{ width: "100%", height: "6px", borderRadius: "999px", background: p?.border, overflow: "hidden" }}>
+            <div style={{
+              height: "100%",
+              borderRadius: "999px",
+              width: `${Math.min(100, (products.length / productsLimit) * 100)}%`,
+              background: atLimit ? "#ef4444" : products.length / productsLimit >= 0.7 ? "#f59e0b" : p?.primary,
+              transition: "width 0.5s ease",
+            }} />
+          </div>
+          {atLimit && (
+            <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>
+              You've reached your plan limit. <button onClick={() => router.push("/dashboard/billing")} style={{ background: "none", border: "none", color: "#ef4444", fontWeight: 700, cursor: "pointer", padding: 0, textDecoration: "underline", fontSize: "11px" }}>Upgrade your plan</button> to add more products.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Search + Category filter */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>

@@ -315,25 +315,64 @@ export const handleIncomingWhatsApp = async (payload) => {
   const planStarted  = user.paxAI?.planStartedAt ? new Date(user.paxAI.planStartedAt) : now;
   const daysSinceStart = (now - planStarted) / (1000 * 60 * 60 * 24);
   
-  // Fetch latest limit from PlanModel to ensure sync with Admin
+  // Fetch latest limits from PlanModel to ensure sync with Admin
   const currentPlan = user.paxAI?.plan || "free";
-  const planMeta = await PlanModel.findOne({ key: currentPlan });
+  const planMeta = await PlanModel.findOne({ key: currentPlan }).lean();
   const maxMessages = planMeta?.messagesLimit || user.paxAI?.maxMonthlyMessages || 200;
   let   usedMessages = user.paxAI?.messagesUsedThisMonth ?? 0;
 
-  // Reset monthly counter if 30 days have passed since the plan period started
+  // Reset monthly counters if 30 days have passed since the plan period started
   if (daysSinceStart >= 30) {
     await UserModel.updateOne(
       { _id: user._id },
       {
         $set: {
           "paxAI.messagesUsedThisMonth": 0,
+          "paxAI.broadcastContactsUsedThisMonth": 0,
           "paxAI.planStartedAt": now,
         },
       }
     );
     usedMessages = 0;
-    console.log("🔄 Step 7 — Monthly message counter reset for user:", user._id);
+    console.log("🔄 Step 7 — Monthly counters reset for user:", user._id);
+  }
+
+  // Also sync plan-level feature flags from PlanModel in case admin updated them
+  if (planMeta) {
+    const featuresChanged =
+      (planMeta.orderReceiptsEnabled   !== undefined && planMeta.orderReceiptsEnabled   !== user.paxAI?.orderReceiptsEnabled)   ||
+      (planMeta.salesAlertsEnabled     !== undefined && planMeta.salesAlertsEnabled     !== user.paxAI?.salesAlertsEnabled)     ||
+      (planMeta.salesAnalyticsEnabled  !== undefined && planMeta.salesAnalyticsEnabled  !== user.paxAI?.salesAnalyticsEnabled)  ||
+      (planMeta.leadFollowupEnabled    !== undefined && planMeta.leadFollowupEnabled    !== user.paxAI?.leadFollowupEnabled)    ||
+      (planMeta.leadQualificationEnabled !== undefined && planMeta.leadQualificationEnabled !== user.paxAI?.leadQualificationEnabled) ||
+      (planMeta.productRecommendations !== undefined && planMeta.productRecommendations !== user.paxAI?.productRecommendations) ||
+      (planMeta.storefrontEnabled      !== undefined && planMeta.storefrontEnabled      !== user.paxAI?.storefrontEnabled)      ||
+      (planMeta.productsLimit          !== undefined && planMeta.productsLimit          !== user.paxAI?.productsLimit);
+
+    if (featuresChanged) {
+      await UserModel.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            "paxAI.orderReceiptsEnabled":     planMeta.orderReceiptsEnabled     ?? user.paxAI?.orderReceiptsEnabled,
+            "paxAI.salesAlertsEnabled":       planMeta.salesAlertsEnabled       ?? user.paxAI?.salesAlertsEnabled,
+            "paxAI.salesAnalyticsEnabled":    planMeta.salesAnalyticsEnabled    ?? user.paxAI?.salesAnalyticsEnabled,
+            "paxAI.salesAnalyticsDays":       planMeta.salesAnalyticsDays       ?? user.paxAI?.salesAnalyticsDays,
+            "paxAI.leadFollowupEnabled":      planMeta.leadFollowupEnabled      ?? user.paxAI?.leadFollowupEnabled,
+            "paxAI.leadQualificationEnabled": planMeta.leadQualificationEnabled ?? user.paxAI?.leadQualificationEnabled,
+            "paxAI.productRecommendations":   planMeta.productRecommendations   ?? user.paxAI?.productRecommendations,
+            "paxAI.storefrontEnabled":        planMeta.storefrontEnabled        ?? user.paxAI?.storefrontEnabled,
+            "paxAI.productsLimit":            planMeta.productsLimit            ?? user.paxAI?.productsLimit,
+            "paxAI.maxMonthlyMessages":       planMeta.messagesLimit            ?? user.paxAI?.maxMonthlyMessages,
+            "paxAI.broadcastContactsLimit":   planMeta.broadcastContactsLimit   ?? user.paxAI?.broadcastContactsLimit,
+            "paxAI.lastUpdated": now,
+          }
+        }
+      );
+      // Refresh user reference so downstream steps use fresh flags
+      user = await UserModel.findById(user._id).lean();
+      console.log("🔄 Step 7 — Plan feature flags synced from PlanModel for user:", user._id);
+    }
   }
 
   // Block AI reply if monthly quota is exhausted
@@ -505,6 +544,31 @@ export const handleIncomingWhatsApp = async (payload) => {
       }
     } catch (err) {
       console.warn("⚠️  Step 9.5 — Product search failed (non-fatal):", err.message);
+    }
+  }
+
+  // ── Step 9.6: Lead qualification hint (business+ plan) ──────────────
+  // If leadQualificationEnabled, inject a lightweight scoring instruction
+  // so the AI asks qualifying questions before routing to a human.
+  if (sellerProfile && isTextMessage && user.paxAI?.leadQualificationEnabled) {
+    const sessionMsgCount = session.context?.inboundCount || 0;
+    // Only inject for the first few messages (qualification window)
+    if (sessionMsgCount <= 3) {
+      const qualHint = `[SYSTEM-HINT: Lead qualification is active. If you don't yet know the customer's budget, timeline, or specific need, ask ONE short qualifying question before presenting products. Do not pitch before qualifying.]`;
+      enrichedText = `${qualHint}\n\n${enrichedText}`;
+      console.log("🎯 Step 9.6 — Lead qualification hint injected");
+    }
+  }
+
+  // ── Step 9.7: Product recommendations hint (business+ plan) ─────────
+  // If productRecommendations is enabled and a customer has already ordered or
+  // expressed clear intent, prompt the AI to suggest related/complementary items.
+  if (sellerProfile && isTextMessage && user.paxAI?.productRecommendations) {
+    const UPSELL_INTENT = /what else|anything else|recommend|similar|also|other|more|add on/i;
+    if (UPSELL_INTENT.test(inboundText)) {
+      const recHint = `[SYSTEM-HINT: Product recommendations are enabled. The customer seems open to suggestions. Recommend 1–2 complementary or related products from the catalogue above. Be brief and natural — don't read out the full catalogue.]`;
+      enrichedText = `${recHint}\n\n${enrichedText}`;
+      console.log("🛍️ Step 9.7 — Product recommendation hint injected");
     }
   }
 

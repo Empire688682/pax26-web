@@ -2,10 +2,20 @@ import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
+import AdminAutomationModel from "@/app/ults/models/AdminAutomationModel";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import UserModel from "@/app/ults/models/UserModel";
 import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+
+// Map automation types → plan feature flags on user.paxAI
+const AUTOMATION_PLAN_GATES = {
+  whatsapp_follow_up: "leadFollowupEnabled",
+  follow_up:          "leadFollowupEnabled",
+  sms_follow_up:      "leadFollowupEnabled",
+  // AI chatbox types are gated by aiAgentEnabled (default true for all plans)
+  // No explicit gate needed for broadcast — handled separately
+};
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -17,14 +27,13 @@ export async function PATCH(req, { params }) {
 
     const { automationId } = await params;
 
-    // 🔐 Get user from token
     const userId = await verifyToken(req);
     if (!userId) {
       return NextResponse.json(
         { success: false, message: "Invalid userId" },
         { status: 401, headers: corsHeaders() }
       );
-    };
+    }
 
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -32,12 +41,11 @@ export async function PATCH(req, { params }) {
         { success: false, message: "Unauthorized" },
         { status: 401, headers: corsHeaders() }
       );
-    };
+    }
 
     const serviceProfile = await ServiceProfileModel.findOne({ userId: user._id });
-    const sellerProfile = await SellerProfileModel.findOne({ userId: user._id });
-
-    const activeProfile = serviceProfile || sellerProfile;
+    const sellerProfile  = await SellerProfileModel.findOne({ userId: user._id });
+    const activeProfile  = serviceProfile || sellerProfile;
 
     if (!activeProfile) {
       return NextResponse.json(
@@ -53,9 +61,38 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    const userAutomation = await UserAutomationModel.findOne({
-      userId: user._id,
-    });
+    // ── Load the admin automation to know its type ─────────────
+    const adminAutomation = await AdminAutomationModel.findById(automationId).lean();
+
+    // ── Plan gate check ────────────────────────────────────────
+    if (adminAutomation) {
+      const automationType   = adminAutomation.type;
+      const planFlagKey      = AUTOMATION_PLAN_GATES[automationType];
+
+      if (planFlagKey) {
+        const hasAccess = user.paxAI?.[planFlagKey] ?? false;
+        if (!hasAccess) {
+          // Map flag → human-readable plan name for the error message
+          const FLAG_PLAN_MAP = {
+            leadFollowupEnabled:      "Starter",
+            leadQualificationEnabled: "Business",
+            productRecommendations:   "Business",
+          };
+          const requiredPlan = FLAG_PLAN_MAP[planFlagKey] || "a higher";
+          return NextResponse.json(
+            {
+              success: false,
+              message: `"${adminAutomation.name}" requires the ${requiredPlan} plan or higher. Upgrade your plan to enable this automation.`,
+              upgradeRequired: true,
+              requiredPlan: requiredPlan.toLowerCase(),
+            },
+            { status: 403, headers: corsHeaders() }
+          );
+        }
+      }
+    }
+
+    const userAutomation = await UserAutomationModel.findOne({ userId: user._id });
 
     if (!userAutomation) {
       return NextResponse.json(
@@ -75,15 +112,13 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    // 🔄 Toggle
+    // Toggle
     automation.enabled = !automation.enabled;
-
     await userAutomation.save();
 
     return NextResponse.json({
       success: true,
-      message: `Automation ${automation.enabled ? "enabled" : "disabled"
-        } successfully`,
+      message: `Automation ${automation.enabled ? "enabled" : "disabled"} successfully`,
       data: automation,
     });
   } catch (error) {

@@ -36,9 +36,7 @@ const PlanSchema = new mongoose.Schema({
   productRecommendations:  { type: Boolean, default: false },  // AI product recommendation in chat
 
   // ── Branding & Team ────────────────────────────────────────────
-  removeBranding:          { type: Boolean, default: false },
   multiStaff:              { type: Number, default: 0 }, // max staff inboxes, 0 = owner only
-  webhookAccess:           { type: Boolean, default: false },
   whitelabel:              { type: Boolean, default: false },
 
   // ── Pricing & Billing ──────────────────────────────────────────

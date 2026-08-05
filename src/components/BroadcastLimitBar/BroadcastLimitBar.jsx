@@ -7,16 +7,10 @@ import { Users, AlertTriangle, ArrowUpRight } from "lucide-react";
 
 export default function BroadcastLimitBar() {
   const { pax26, router } = useGlobalContext();
-  const { plan, broadcastLimit, broadcastUsed, broadcastRemaining } = usePlanLimits();
+  const { plan, canBroadcast, broadcastLimit, broadcastUsed, broadcastRemaining, broadcastPct, isEnterprise } = usePlanLimits();
 
   const isFree = plan === "free";
-  const isEnterprise = plan === "enterprise";
-
-  // Calculate percentage
-  let percentage = 0;
-  if (broadcastLimit > 0 && !isEnterprise) {
-    percentage = Math.min(100, (broadcastUsed / broadcastLimit) * 100);
-  }
+  const percentage = broadcastPct;
 
   // Bar color based on usage percentage — never red/orange for enterprise
   let barColor = pax26?.primary || "#3b82f6";

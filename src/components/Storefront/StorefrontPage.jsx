@@ -322,6 +322,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
         </main>
 
         {/* ── PAX26 AD FOOTER ──────────────────────────── */}
+        {/* Always shown on all storefronts — Pax26 advertising */}
         <Pax26Footer />
 
       </div>

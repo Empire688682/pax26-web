@@ -26,9 +26,21 @@ export async function GET(req) {
         }
 
         const plan = user.paxAI?.plan || "free";
-        if (plan === "free") {
-            return NextResponse.json({ success: false, message: "Sales Dashboard is not available on Free plan" }, { status: 403, headers: corsHeaders() });
+        if (plan === "free" || !user.paxAI?.salesAnalyticsEnabled) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: plan === "free"
+                        ? "Sales Analytics is not available on the Free plan. Upgrade to Starter or higher."
+                        : "Sales Analytics is not enabled on your current plan.",
+                    upgradeRequired: true,
+                },
+                { status: 403, headers: corsHeaders() }
+            );
         }
+
+        // Clamp analytics history to what the plan allows
+        const maxDays = user.paxAI?.salesAnalyticsDays ?? 7;
 
         const sellerProfile = await SellerProfileModel.findOne({ userId });
         if (!sellerProfile) {
@@ -51,6 +63,13 @@ export async function GET(req) {
                 { success: false, message: "Invalid date range" },
                 { status: 400, headers: corsHeaders() }
             );
+        }
+
+        // Enforce plan's analytics history window
+        const earliestAllowed = new Date();
+        earliestAllowed.setDate(earliestAllowed.getDate() - maxDays);
+        if (start < earliestAllowed) {
+            start = earliestAllowed;
         }
 
         end.setHours(23, 59, 59, 999);
