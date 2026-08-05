@@ -188,6 +188,8 @@ const UserSchema = new mongoose.Schema(
       },
       businessType: { type: String, enum: ["seller", "service"], default: null },
       planStartedAt: { type: Date, default: Date.now },
+      planExpiresAt: { type: Date, default: null },  // planStartedAt + 30 days
+      autoRenew:     { type: Boolean, default: false }, // auto-charge wallet on expiry
       lastUpdated: { type: Date, default: Date.now },
     },
     /* =====================
