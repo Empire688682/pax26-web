@@ -278,7 +278,6 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Automation Rules" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/sales-notifications" icon={Bell} label="Sales Alerts" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} />

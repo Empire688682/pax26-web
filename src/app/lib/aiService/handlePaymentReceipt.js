@@ -197,8 +197,11 @@ export async function handlePaymentReceipt({
     }
 
     const matchedProduct = await resolveProduct(sellerId, recentMessages);
-    if (!pendingOrder && !matchedProduct?._id) {
-        console.warn("Payment receipt received but no seller products found");
+
+    // If we're in payment stage (AI already asked for proof), handle it regardless
+    // of whether we can identify a specific product — the payment context is enough.
+    if (!pendingOrder && !matchedProduct?._id && !paymentStage) {
+        console.warn("Payment receipt received but no seller products found and not in payment stage");
         return { handled: false };
     }
 
@@ -207,11 +210,11 @@ export async function handlePaymentReceipt({
     if (!order) {
         order = await SellerOrderModel.create({
             sellerId,
-            productId: matchedProduct._id,
+            productId: matchedProduct?._id || null,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
             quantity: 1,
-            totalPrice: matchedProduct.price || 0,
+            totalPrice: matchedProduct?.price || 0,
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",

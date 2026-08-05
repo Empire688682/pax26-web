@@ -1,11 +1,6 @@
-import React from "react";
-import SalesNotificationDashboard from "@/components/SalesNotificationDashboard/SalesNotificationDashboard";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Sales Notifications - Pax26",
-  description: "Manage your real-time sales alerts",
-};
-
+// Sales Notifications has been merged into Sales Analytics
 export default function Page() {
-  return <SalesNotificationDashboard />;
+  redirect("/dashboard/automations/sales");
 }
