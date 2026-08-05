@@ -38,6 +38,7 @@ const FEATURE_MAP = {
 
   // Branding & Team
   removeBranding:   { flag: "removeBranding",           label: "Remove Pax26 Branding",        plan: "starter",    icon: Sparkles },
+  multiStaff:       { flag: "hasMultiStaff",            label: "Multi-Staff Team Inboxes",     plan: "business",   icon: Users },
 };
 
 const PLAN_COLORS = {

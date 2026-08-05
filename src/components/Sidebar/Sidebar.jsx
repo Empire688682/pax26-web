@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wifi, LayoutDashboard, FileCode,
   Phone, LogOut, Info, History, Settings, Bell, X,
-  ChevronRight, Zap,
+  ChevronRight, Zap, Crown, ArrowUpRight,
   Home, Shield, Users, ShieldAlert,
   MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2,
   Radio, Send, Store, Package
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
+import { usePlanLimits } from '@/app/hooks/usePlanLimits';
 import { Button } from '../ui/Button';
 import ThemeToggle from '../ThemeToogle/ThemeToogle';
 
@@ -119,6 +120,7 @@ const Divider = ({ pax26 }) => (
 /* ── Main Sidebar ─────────────────────────────────────────────── */
 export default function Sidebar() {
   const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
+  const limits = usePlanLimits();
   const close = () => setIsOpen(false);
 
   return (
@@ -194,6 +196,7 @@ export default function Sidebar() {
                   <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
                 )}
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/staff" icon={Users} label="Team & Staff Inboxes" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations" icon={Cpu} label="Automation Rules" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
@@ -210,7 +213,52 @@ export default function Sidebar() {
                 <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
                 <NavItem href="/contact" icon={Phone} label="Help & Support" onClick={close} pax26={pax26} />
 
-                <div className="mt-auto pt-4">
+                {/* Plan status widget */}
+                <div className="mx-1 my-3 p-3 rounded-xl border flex flex-col gap-2"
+                  style={{
+                    background: pax26?.secondaryBg || 'rgba(255,255,255,0.03)',
+                    borderColor: pax26?.border || 'rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Crown size={13} className="text-amber-400" />
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider" style={{ color: pax26?.textPrimary }}>
+                        {limits.plan} Plan
+                      </span>
+                    </div>
+                    {!limits.isEnterprise && (
+                      <Link href="/dashboard/billing" onClick={close}
+                        className="text-[10px] font-bold flex items-center gap-0.5"
+                        style={{ color: pax26?.primary || '#3b82f6' }}>
+                        Upgrade <ArrowUpRight size={10} />
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* AI messages progress */}
+                  <div>
+                    <div className="flex justify-between items-center text-[9px] mb-1" style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
+                      <span>AI Replies</span>
+                      <span className="font-mono">
+                        {limits.isEnterprise ? "Unlimited" : `${limits.messagesUsed}/${limits.messagesLimit}`}
+                      </span>
+                    </div>
+                    {!limits.isEnterprise && (
+                      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: pax26?.border }}>
+                        <div
+                          className="h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${limits.messagesPct}%`,
+                            background: limits.messagesPct >= 90 ? "#ef4444" : limits.messagesPct >= 70 ? "#f97316" : (pax26?.primary || "#3b82f6")
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-2">
                   <button
                     onClick={() => { close(); logoutUser(); }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200 group"

@@ -13,6 +13,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer
 } from "recharts";
+import PlanGate from "@/components/PlanGate/PlanGate";
 import "react-toastify/dist/ReactToastify.css";
 
 const CSS = `
@@ -133,10 +134,10 @@ export default function SalesDashboard() {
   if (!hasAccess) {
     return (
       <div className="sd-root min-h-screen px-5 py-10" style={{ background: pax26?.bg }}>
-        <div className="max-w-4xl mx-auto text-center rounded-2xl p-10 mt-16" style={{ border: `1px solid ${pax26?.border}`, background: pax26?.secondaryBg }}>
-          <Lock size={48} className="mx-auto mb-4" style={{ color: pax26?.textSecondary, opacity: 0.5 }} />
-          <h2 className="text-2xl font-bold mb-2" style={{ color: pax26?.textPrimary }}>Sales Dashboard Locked</h2>
-          <p className="text-sm mb-6" style={{ color: pax26?.textSecondary }}>Upgrade to Starter, Business, or Enterprise to unlock real-time sales tracking, charts, and exportable reports.</p>
+        <div className="max-w-4xl mx-auto mt-8">
+          <PlanGate feature="salesAnalytics" requiredPlan="starter" title="Sales Analytics & Reports">
+            <div />
+          </PlanGate>
         </div>
       </div>
     );

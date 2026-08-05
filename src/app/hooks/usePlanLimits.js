@@ -30,15 +30,17 @@ export function usePlanLimits() {
   const messagesPct   = messagesLimit > 0 ? Math.min(100, (messagesUsed / messagesLimit) * 100) : 0;
 
   // ── Broadcast ─────────────────────────────────────────────
-  const broadcastLimit = paxAI.broadcastContactsLimit ?? 0;
+  const rawBroadcastLimit = paxAI.broadcastContactsLimit;
+  const isUnlimitedBroadcast = rawBroadcastLimit === null || (isEnterprise && rawBroadcastLimit === undefined);
+  const broadcastLimit = isUnlimitedBroadcast ? null : (rawBroadcastLimit ?? (isBusiness ? 500 : isStarter ? 100 : 0));
   const broadcastUsed  = paxAI.broadcastContactsUsedThisMonth ?? 0;
-  const canBroadcast   = plan !== "free" && broadcastLimit > 0;
-  const broadcastRemaining = isEnterprise
+  const canBroadcast   = plan !== "free" && (isUnlimitedBroadcast || (broadcastLimit ?? 0) > 0);
+  const broadcastRemaining = isUnlimitedBroadcast
     ? Infinity
-    : Math.max(0, broadcastLimit - broadcastUsed);
-  const broadcastPct = broadcastLimit > 0 && !isEnterprise
-    ? Math.min(100, (broadcastUsed / broadcastLimit) * 100)
-    : 0;
+    : Math.max(0, (broadcastLimit ?? 0) - broadcastUsed);
+  const broadcastPct = isUnlimitedBroadcast || !broadcastLimit || broadcastLimit === 0
+    ? 0
+    : Math.min(100, (broadcastUsed / broadcastLimit) * 100);
 
   // ── Broadcast advanced features ───────────────────────────
   const canSchedule     = !!paxAI.scheduledBroadcast;
@@ -48,12 +50,12 @@ export function usePlanLimits() {
 
   // ── Storefront & Commerce ──────────────────────────────────
   const storefrontEnabled      = paxAI.storefrontEnabled      ?? true;
-  const productsLimit          = paxAI.productsLimit          ?? 10;   // 0 = unlimited
+  const productsLimit          = paxAI.productsLimit          ?? (isEnterprise ? 0 : isBusiness ? 100 : isStarter ? 50 : 10);   // 0 = unlimited
   const orderReceiptsEnabled   = paxAI.orderReceiptsEnabled   ?? true;
   const salesAlertsEnabled     = paxAI.salesAlertsEnabled     ?? true;
   const salesAnalyticsEnabled  = paxAI.salesAnalyticsEnabled  ?? (plan !== "free");
-  const salesAnalyticsDays     = paxAI.salesAnalyticsDays     ?? 7;
-  const customStorefrontDomain = paxAI.customStorefrontDomain ?? false;
+  const salesAnalyticsDays     = paxAI.salesAnalyticsDays     ?? (isEnterprise ? 365 : isBusiness ? 90 : isStarter ? 14 : 7);
+  const customStorefrontDomain = paxAI.customStorefrontDomain ?? isEnterprise;
 
   // ── AI features ────────────────────────────────────────────
   const aiAgentEnabled           = paxAI.aiAgentEnabled           ?? true;
@@ -62,15 +64,18 @@ export function usePlanLimits() {
   const productRecommendations   = paxAI.productRecommendations   ?? isBusiness;
 
   // ── Branding & Team ────────────────────────────────────────
-  const removeBranding = !!paxAI.removeBranding;
-  const multiStaff     = paxAI.multiStaff ?? 0;
+  const removeBranding = !!paxAI.removeBranding || isStarter;
+  const multiStaff     = paxAI.multiStaff ?? (isEnterprise ? 10 : isBusiness ? 5 : 0);
 
   // ── WhatsApp numbers ──────────────────────────────────────
-  // Stored directly on the plan, not yet synced to user. Derive from plan tier.
-  const whatsappNumbersLimit =
-    plan === "enterprise" ? 10
-    : plan === "business"  ? 3
-    : 1; // free & starter
+  // Always 1 for all plans for now
+  const whatsappNumbersLimit = 1;
+
+  // ── Named Helper Methods ───────────────────────────────────
+  const canUseAnalytics = salesAnalyticsEnabled;
+  const canSendAIMessage = messagesLimit === 0 || messagesRemaining > 0;
+  const canCreateProduct = (currentCount = 0) => productsLimit === 0 || currentCount < productsLimit;
+  const canInviteStaff   = (currentCount = 0) => multiStaff > 0 && currentCount < multiStaff;
 
   return {
     // Raw
@@ -87,6 +92,7 @@ export function usePlanLimits() {
     messagesUsed,
     messagesRemaining,
     messagesPct,
+    canSendAIMessage,
 
     // Broadcast
     canBroadcast,
@@ -94,6 +100,7 @@ export function usePlanLimits() {
     broadcastUsed,
     broadcastRemaining,
     broadcastPct,
+    isUnlimitedBroadcast,
     canSchedule,
     canSegment,
     canBulkSequence,
@@ -117,6 +124,12 @@ export function usePlanLimits() {
     // Branding & Team
     removeBranding,
     multiStaff,
+    hasMultiStaff: multiStaff > 0,
     whatsappNumbersLimit,
+
+    // Named Helpers
+    canUseAnalytics,
+    canCreateProduct,
+    canInviteStaff,
   };
 }

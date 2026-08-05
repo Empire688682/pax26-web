@@ -128,23 +128,27 @@ function LeadPanel({
   phone,
   onUpdate,
 }) {
-  const [stage, setStage] = useState(
-    contact?.leadStage || "new"
+  const [assignedTo, setAssignedTo] = useState(
+    contact?.assignedTo || ""
   );
 
-  const [notes, setNotes] = useState(
-    contact?.notes || ""
-  );
-
-  const [tags, setTags] = useState(
-    contact?.tags || []
-  );
+  const [staffList, setStaffList] = useState([]);
 
   useEffect(() => {
     setStage(contact?.leadStage || "new");
     setNotes(contact?.notes || "");
     setTags(contact?.tags || []);
+    setAssignedTo(contact?.assignedTo || "");
   }, [contact]);
+
+  useEffect(() => {
+    fetch("/api/seller/staff")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setStaffList(data.data || []);
+      })
+      .catch(() => {});
+  }, []);
 
   const saveLead = async () => {
     try {
@@ -158,6 +162,7 @@ function LeadPanel({
           leadStage: stage,
           notes,
           tags,
+          assignedTo,
         }),
       });
 
@@ -165,6 +170,7 @@ function LeadPanel({
         leadStage: stage,
         notes,
         tags,
+        assignedTo,
       });
     } catch (error) {
       console.error(error);
@@ -257,6 +263,42 @@ function LeadPanel({
               );
             })}
           </div>
+        </div>
+
+        <div>
+          <div
+            style={{
+              color: "#8696a0",
+              fontSize: "11px",
+              marginBottom: "8px",
+              textTransform: "uppercase",
+            }}
+          >
+            Assigned Staff
+          </div>
+
+          <select
+            value={assignedTo}
+            onChange={(e) => setAssignedTo(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: "10px",
+              background: "#202c33",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "#e9edef",
+              fontSize: "12px",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="">Unassigned (Owner / All)</option>
+            {staffList.map((s) => (
+              <option key={s._id} value={s.name}>
+                {s.name} ({s.role})
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

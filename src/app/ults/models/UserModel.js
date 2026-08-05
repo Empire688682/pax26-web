@@ -179,6 +179,7 @@ const UserSchema = new mongoose.Schema(
       leadFollowupEnabled:      { type: Boolean, default: false },
       leadQualificationEnabled: { type: Boolean, default: false },
       productRecommendations:   { type: Boolean, default: false },
+      whatsappNumbersLimit:     { type: Number,  default: 1     },
 
       plan: {
         type: String,
