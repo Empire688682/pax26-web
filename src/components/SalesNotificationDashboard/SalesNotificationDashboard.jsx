@@ -91,7 +91,12 @@ export default function SalesNotificationDashboard() {
     try {
       const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
       if (res.data.success) {
-        toast.success(status === "confirmed" ? "Order confirmed ✓" : "Order cancelled");
+        const msg = status === "confirmed"
+          ? (res.data.customerReceiptSent
+              ? "Order confirmed! Branded receipt sent to customer via WhatsApp. 📲"
+              : "Order confirmed ✓")
+          : "Order cancelled";
+        toast.success(msg);
         fetchOrders();
       } else {
         toast.error(res.data.message);

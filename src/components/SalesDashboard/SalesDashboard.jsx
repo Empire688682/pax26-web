@@ -94,7 +94,12 @@ export default function SalesDashboard() {
       setProcessingStatus(status);
       const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
       if (res.data.success) {
-        toast.success(status === "confirmed" ? "Order confirmed" : "Order updated");
+        const msg = status === "confirmed"
+          ? (res.data.customerReceiptSent
+              ? "Order confirmed! Branded receipt sent to customer via WhatsApp. 📲"
+              : "Order confirmed successfully.")
+          : "Order updated";
+        toast.success(msg);
         fetchAnalytics();
       } else {
         toast.error(res.data.message);

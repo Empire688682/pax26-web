@@ -5,6 +5,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import { sendSalesNotification } from "@/app/lib/salesNotificationService";
+import { sendCustomerOrderReceiptWhatsApp } from "@/app/lib/customerReceiptService";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -50,6 +51,8 @@ export async function PATCH(req, { params }) {
 
         await order.save();
 
+        let customerReceiptResult = null;
+
         if (
             ["confirmed", "paid", "delivered"].includes(status) &&
             !["confirmed", "paid", "delivered"].includes(previousStatus)
@@ -58,15 +61,23 @@ export async function PATCH(req, { params }) {
             sellerProfile.totalSalesAmount += order.totalPrice || 0;
             await sellerProfile.save();
 
+            // 1. Notify seller
             await sendSalesNotification(userId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
                 productName: "Order confirmed",
                 amountPaid: order.totalPrice,
             });
+
+            // 2. Send brand receipt confirmation message to customer via WhatsApp
+            customerReceiptResult = await sendCustomerOrderReceiptWhatsApp(order._id);
         }
 
-        return NextResponse.json({ success: true, order }, { headers: corsHeaders() });
+        return NextResponse.json({
+            success: true,
+            order,
+            customerReceiptSent: customerReceiptResult?.success ?? false
+        }, { headers: corsHeaders() });
     } catch (error) {
         console.error("Order update error:", error);
         return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500, headers: corsHeaders() });
