@@ -2,6 +2,7 @@ import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import UserModel from "@/app/ults/models/UserModel";
+import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 
 /**
@@ -89,9 +90,51 @@ Thank you for shopping with *${businessName}*! 🎉`;
             });
         }
 
+        // Save to inbox for seller visibility (non-blocking)
+        if (result?.success) {
+            await _saveReceiptToInbox({
+                userId: sellerProfile.userId,
+                phoneNumberId: user.whatsapp.phoneNumberId,
+                customerPhone: order.customerPhone,
+                receiptMessage,
+                proofCode,
+                orderId: order._id.toString(),
+            });
+        }
+
         return result;
     } catch (error) {
         console.error("❌ Error in sendCustomerOrderReceiptWhatsApp:", error?.message || error);
         return { success: false, error: error?.message || error };
+    }
+}
+
+/**
+ * Saves the sent receipt as an AIMessageModel record so it
+ * appears in the WhatsApp Inbox for easy tracking.
+ */
+async function _saveReceiptToInbox({ userId, phoneNumberId, customerPhone, receiptMessage, proofCode, orderId }) {
+    try {
+        const messageId = `receipt_${orderId}_${Date.now()}`;
+        await AIMessageModel.create({
+            messageId,
+            userId,
+            platform: "whatsapp",
+            phoneNumberId,
+            from: phoneNumberId,
+            to: customerPhone,
+            text: receiptMessage,
+            direction: "outbound",
+            senderType: "system",
+            status: "sent",
+            aiMeta: {
+                isReceipt: true,
+                receiptProofCode: proofCode,
+                receiptOrderId: orderId,
+            },
+        });
+    } catch (err) {
+        // Non-critical — don't crash the receipt flow
+        console.warn("[customerReceipt] Could not save receipt to inbox:", err?.message || err);
     }
 }

@@ -11,7 +11,7 @@ const groq = new Groq({
 const PAYMENT_KEYWORDS = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
 
 const PAYMENT_STAGE_KEYWORDS =
-    /account number|bank name|account name|transfer|make payment|pay to|payment details|screenshot of your payment|payment confirmation|once you.?ve transferred|send.*receipt|send.*proof|payment proof/i;
+    /account number|bank name|account name|transfer|make payment|pay to|payment details|screenshot of your payment|payment confirmation|once you.?ve transferred|send.*receipt|send.*proof|payment proof|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity|fidelitybank|sterlingbank|wemabank|acct|acc\/num|bank:/i;
 
 function normalizePhone(phone) {
     if (!phone) return "";
@@ -23,7 +23,7 @@ function isLikelyPaymentReceipt(caption, recentMessages = []) {
     if (caption && PAYMENT_KEYWORDS.test(caption)) return true;
 
     const recentText = recentMessages
-        .slice(-8)
+        .slice(-10)
         .map((m) => m.content || m.text || "")
         .join(" ")
         .toLowerCase();
@@ -33,11 +33,15 @@ function isLikelyPaymentReceipt(caption, recentMessages = []) {
 
 function isPaymentStage(recentMessages = []) {
     const recentText = recentMessages
-        .slice(-12)
+        .slice(-15)
         .map((m) => m.content || m.text || "")
         .join(" ");
 
-    return PAYMENT_STAGE_KEYWORDS.test(recentText);
+    const has10DigitNum = /\b\d{10}\b/.test(recentText);
+    const hasPaymentKeyword = PAYMENT_STAGE_KEYWORDS.test(recentText);
+    const hasGeneralPaymentWord = /bank|account|transfer|payment|receipt|proof|pay|naira|₦/i.test(recentText);
+
+    return has10DigitNum || hasPaymentKeyword || (hasGeneralPaymentWord && recentMessages.length > 0);
 }
 
 async function findProductFromConversation(sellerId, recentMessages) {
@@ -305,8 +309,9 @@ export async function createPendingOrderFromText({
 }
 
 export function buildPaymentReceiptContext() {
-    return `[SYSTEM: Customer sent a payment receipt screenshot.
-The receipt has been saved and forwarded to the seller for manual verification.
-Do NOT confirm the order yourself.
-Reply briefly: thank them for the payment proof, say the team will verify it shortly, and they will receive a confirmation once approved.]`;
+    return `[SYSTEM: Customer sent a payment proof / receipt screenshot.
+The receipt has been recorded and sent to the seller team for verification.
+Reply IMMEDIATELY to the customer with this exact response (or very close variant):
+"Thank you for sending your payment proof! Our team is verifying your payment and will forward your official receipt once confirmed."
+Do NOT ask for any further proof or images.]`;
 }

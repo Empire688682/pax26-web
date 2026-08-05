@@ -23,23 +23,23 @@ import { buildStorefrontUrl } from "@/app/lib/store/buildStorefrontUrl.js";
  */
 function buildImageReceivedContext({ caption, storefrontUrl, businessName }) {
   if (storefrontUrl) {
-    return `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}.
-Instead of visual search, guide them to browse the storefront.
+    return `[SYSTEM: Customer sent a product picture/image${caption ? ` with caption: "${caption}"` : ""}.
+Do NOT perform visual image search. Politely send the customer our storefront URL so they can browse all products, images, and prices.
 
 INSTRUCTIONS:
-- Acknowledge their image warmly in 1 sentence
-- Tell them they can browse the full collection with pictures and prices at: ${storefrontUrl}
-- Keep it short and natural — do not list products, just send the link
-- Example: "Thanks for sharing! You can browse our full collection here: ${storefrontUrl} — tap any item to get details and message us directly."
+- Acknowledge receiving their image politely in 1 sentence.
+- Provide the storefront URL: ${storefrontUrl}
+- Encourage them to browse our store to view all available products and prices.
+- Example: "Thanks for sharing! You can browse our full collection with pictures and prices directly on our store here: ${storefrontUrl} — feel free to let me know if you need anything!"
 ]`;
   }
 
   return `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}.
-The store doesn't have a storefront set up yet.
+Do NOT perform visual image search.
 
 INSTRUCTIONS:
-- Acknowledge their image and ask them to describe what they are looking for in words
-- Example: "Thanks for the image! Could you describe what you're looking for — the type, colour, or size? That'll help me find the right product for you."
+- Acknowledge receiving their image politely and ask them to describe what product, size, or color they are looking for.
+- Example: "Thanks for sharing! Could you describe what you're looking for (product name, color, or size)? I'll be happy to help you find it!"
 ]`;
 }
 

@@ -1729,149 +1729,212 @@ export default function WhatsAppInbox() {
                         marginBottom: "10px",
                       }}
                     >
-                      <div
-                        style={{
-                          maxWidth: isMobile
-                            ? "88%"
-                            : "70%",
-                          padding: "8px 12px",
-                          borderRadius: isOutbound
-                            ? "8px 0 8px 8px"
-                            : "0 8px 8px 8px",
-                          background: isOutbound
-                            ? isHuman
-                              ? "#f59e0b"
-                              : "#005c4b"
-                            : "#202c33",
-                          color: "#e9edef",
-                          fontSize: "13px",
-                          lineHeight: 1.5,
-                          boxShadow:
-                            "0 1px 1px rgba(0,0,0,0.08)",
-                          border: isOutbound
-                            ? "none"
-                            : "1px solid rgba(255,255,255,0.04)",
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {/* "You" tag — only shown on human-sent outbound messages */}
-                        {isOutbound && isHuman && (
+                      {msg.aiMeta?.isReceipt ? (
+                        /* ── RECEIPT CARD ── */
+                        <div style={{
+                          maxWidth: isMobile ? "88%" : "70%",
+                          borderRadius: "12px",
+                          overflow: "hidden",
+                          boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
+                          border: "1px solid rgba(16,185,129,0.3)",
+                        }}>
                           <div style={{
-                            fontSize: "10px",
-                            fontWeight: 800,
-                            letterSpacing: "0.06em",
-                            textTransform: "uppercase",
-                            color: "rgba(255,255,255,0.75)",
-                            marginBottom: "4px",
+                            background: "linear-gradient(135deg, #005c4b 0%, #065f46 100%)",
+                            padding: "10px 14px",
                             display: "flex",
                             alignItems: "center",
-                            gap: "4px",
+                            gap: "8px",
                           }}>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                            </svg>
-                            You
-                          </div>
-                        )}
-                        {imageUrls.length > 0 && (
-                          <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
-                            {imageUrls.map((url, i) => (
-                              <div key={i} style={{ position: "relative", display: "block" }}>
-                                <a href={msg._uploading ? undefined : url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
-                                  <img
-                                    src={url}
-                                    alt="WhatsApp attachment"
-                                    style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "280px",
-                                      borderRadius: "6px",
-                                      objectFit: "cover",
-                                      cursor: msg._uploading ? "default" : "pointer",
-                                      // dim the image while uploading
-                                      opacity: msg._uploading ? 0.55 : 1,
-                                      transition: "opacity 0.2s ease",
-                                    }}
-                                  />
-                                </a>
-
-                                {/* WhatsApp-style upload spinner overlay */}
-                                {msg._uploading && (
-                                  <div style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: "6px",
-                                    background: "rgba(0,0,0,0.35)",
-                                    gap: "6px",
-                                  }}>
-                                    {/* circular progress ring */}
-                                    <svg width="36" height="36" viewBox="0 0 36 36">
-                                      <circle cx="18" cy="18" r="14"
-                                        fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
-                                      <circle cx="18" cy="18" r="14"
-                                        fill="none" stroke="#fff" strokeWidth="3"
-                                        strokeDasharray="88" strokeDashoffset="22"
-                                        strokeLinecap="round"
-                                        style={{ transformOrigin: "center", animation: "inbox-spin 0.9s linear infinite" }}
-                                      />
-                                    </svg>
-                                    <span style={{ color: "#fff", fontSize: "10px", fontWeight: 600, letterSpacing: "0.03em" }}>
-                                      Uploading…
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Failed state */}
-                                {msg._failed && (
-                                  <div style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: "6px",
-                                    background: "rgba(0,0,0,0.5)",
-                                  }}>
-                                    <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
-                                      ✕ Failed
-                                    </span>
-                                  </div>
-                                )}
+                            <span style={{ fontSize: "18px" }}>🧾</span>
+                            <div>
+                              <div style={{ color: "#10b981", fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                Order Receipt Sent
                               </div>
-                            ))}
+                              <div style={{ color: "#e9edef", fontSize: "12px", fontWeight: 700 }}>
+                                Payment Confirmed ✅
+                              </div>
+                            </div>
+                            {msg.aiMeta?.receiptProofCode && (
+                              <div style={{
+                                marginLeft: "auto",
+                                background: "rgba(16,185,129,0.2)",
+                                border: "1px solid rgba(16,185,129,0.4)",
+                                borderRadius: "6px",
+                                padding: "3px 8px",
+                                color: "#10b981",
+                                fontSize: "11px",
+                                fontWeight: 800,
+                                letterSpacing: "0.05em",
+                                whiteSpace: "nowrap",
+                              }}>
+                                #{msg.aiMeta.receiptProofCode}
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {msg.text &&
-                          msg.text !== "📷 Image" &&
-                          msg.text !== "[Customer sent an image]" && (
-                          <div>{msg.text}</div>
-                        )}
-
+                          <div style={{
+                            background: "#1a2e27",
+                            padding: "10px 14px",
+                            color: "#b2ccc7",
+                            fontSize: "11.5px",
+                            lineHeight: 1.65,
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                            maxHeight: "180px",
+                            overflowY: "auto",
+                          }}>
+                            {msg.text}
+                          </div>
+                          <div style={{
+                            background: "#1a2e27",
+                            padding: "4px 14px 8px",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontSize: "10px",
+                            color: "rgba(255,255,255,0.4)",
+                            borderTop: "1px solid rgba(255,255,255,0.04)",
+                          }}>
+                            {formatMessageTime(msg.createdAt)}
+                            <DoubleCheckIcon />
+                          </div>
+                        </div>
+                      ) : (
                         <div
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent:
-                              "flex-end",
-                            gap: "4px",
-                            marginTop: "4px",
-                            fontSize: "10px",
-                            color:
-                              "rgba(255,255,255,0.6)",
+                            maxWidth: isMobile
+                              ? "88%"
+                              : "70%",
+                            padding: "8px 12px",
+                            borderRadius: isOutbound
+                              ? "8px 0 8px 8px"
+                              : "0 8px 8px 8px",
+                            background: isOutbound
+                              ? isHuman
+                                ? "#f59e0b"
+                                : "#005c4b"
+                              : "#202c33",
+                            color: "#e9edef",
+                            fontSize: "13px",
+                            lineHeight: 1.5,
+                            boxShadow:
+                              "0 1px 1px rgba(0,0,0,0.08)",
+                            border: isOutbound
+                              ? "none"
+                              : "1px solid rgba(255,255,255,0.04)",
+                            wordBreak: "break-word",
                           }}
                         >
-                          {formatMessageTime(
-                            msg.createdAt
+                          {/* "You" tag — only shown on human-sent outbound messages */}
+                          {isOutbound && isHuman && (
+                            <div style={{
+                              fontSize: "10px",
+                              fontWeight: 800,
+                              letterSpacing: "0.06em",
+                              textTransform: "uppercase",
+                              color: "rgba(255,255,255,0.75)",
+                              marginBottom: "4px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                              </svg>
+                              You
+                            </div>
+                          )}
+                          {imageUrls.length > 0 && (
+                            <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
+                              {imageUrls.map((url, i) => (
+                                <div key={i} style={{ position: "relative", display: "block" }}>
+                                  <a href={msg._uploading ? undefined : url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
+                                    <img
+                                      src={url}
+                                      alt="WhatsApp attachment"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "280px",
+                                        borderRadius: "6px",
+                                        objectFit: "cover",
+                                        cursor: msg._uploading ? "default" : "pointer",
+                                        opacity: msg._uploading ? 0.55 : 1,
+                                        transition: "opacity 0.2s ease",
+                                      }}
+                                    />
+                                  </a>
+
+                                  {msg._uploading && (
+                                    <div style={{
+                                      position: "absolute",
+                                      inset: 0,
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      borderRadius: "6px",
+                                      background: "rgba(0,0,0,0.35)",
+                                      gap: "6px",
+                                    }}>
+                                      <svg width="36" height="36" viewBox="0 0 36 36">
+                                        <circle cx="18" cy="18" r="14"
+                                          fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+                                        <circle cx="18" cy="18" r="14"
+                                          fill="none" stroke="#fff" strokeWidth="3"
+                                          strokeDasharray="88" strokeDashoffset="22"
+                                          strokeLinecap="round"
+                                          style={{ transformOrigin: "center", animation: "inbox-spin 0.9s linear infinite" }}
+                                        />
+                                      </svg>
+                                      <span style={{ color: "#fff", fontSize: "10px", fontWeight: 600, letterSpacing: "0.03em" }}>
+                                        Uploading…
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {msg._failed && (
+                                    <div style={{
+                                      position: "absolute",
+                                      inset: 0,
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      borderRadius: "6px",
+                                      background: "rgba(0,0,0,0.5)",
+                                    }}>
+                                      <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
+                                        ✕ Failed
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {msg.text &&
+                            msg.text !== "📷 Image" &&
+                            msg.text !== "[Customer sent an image]" && (
+                            <div>{msg.text}</div>
                           )}
 
-                          {isOutbound && (
-                            <DoubleCheckIcon />
-                          )}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              gap: "4px",
+                              marginTop: "4px",
+                              fontSize: "10px",
+                              color: "rgba(255,255,255,0.6)",
+                            }}
+                          >
+                            {formatMessageTime(msg.createdAt)}
+                            {isOutbound && (
+                              <DoubleCheckIcon />
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </motion.div>
                   );
                 })}

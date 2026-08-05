@@ -64,6 +64,9 @@ const MessageSchema = new mongoose.Schema({
     imagesSent: Number,
     imageUrls: [String],
     wasImageSearch: Boolean,
+    isReceipt: Boolean,
+    receiptProofCode: String,
+    receiptOrderId: String,
   }
 }, { timestamps: true });
 
