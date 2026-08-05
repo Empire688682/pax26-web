@@ -5,6 +5,26 @@ const WHATSAPP_API_VERSION = "v19.0";
 const WHATSAPP_API_BASE = "https://graph.facebook.com";
 
 /**
+ * forceJpegUrl
+ * 
+ * Converts any Cloudinary URL to deliver as JPEG regardless of stored format.
+ * WhatsApp only supports JPEG/PNG — WebP and AVIF are silently dropped.
+ * 
+ * Cloudinary supports on-the-fly format conversion via URL transformation:
+ * /image/upload/f_jpg/v123.../file.webp  → delivers as JPEG
+ */
+function forceJpegUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  // Already a JPEG/PNG — no change needed
+  if (url.match(/\.(jpg|jpeg|png)(\?|$)/i)) return url;
+  // Insert Cloudinary transformation f_jpg,q_auto before the version segment
+  return url.replace(
+    /\/image\/upload\//,
+    "/image/upload/f_jpg,q_auto/"
+  );
+}
+
+/**
  * uploadImageToWhatsApp
  *
  * Downloads the image from Cloudinary, then uploads it to WhatsApp's
@@ -18,8 +38,11 @@ const WHATSAPP_API_BASE = "https://graph.facebook.com";
  */
 async function uploadImageToWhatsApp(imageUrl, phoneNumberId, token) {
   try {
-    // 1. Download the image from Cloudinary
-    const imgRes = await fetch(imageUrl);
+    // Force JPEG delivery from Cloudinary — WhatsApp rejects WebP silently
+    const jpegUrl = forceJpegUrl(imageUrl);
+    console.log("📥 Fetching image as JPEG:", jpegUrl);
+
+    const imgRes = await fetch(jpegUrl);
     if (!imgRes.ok) {
       console.error("❌ Failed to fetch image from Cloudinary:", imgRes.status, imageUrl);
       return null;

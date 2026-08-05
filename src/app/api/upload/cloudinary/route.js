@@ -49,14 +49,17 @@ export async function POST(req) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Upload to Cloudinary
+        // Upload to Cloudinary — force JPEG conversion so WhatsApp can display it
+        // WhatsApp does not support WebP, AVIF or other modern formats
         const result = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream(
                 {
                     folder,
                     tags: tags ? String(tags).split(",") : [],
                     resource_type: "image",
-                    access_mode: "public",   // ensure WhatsApp can fetch without auth
+                    format: "jpg",           // always deliver as JPEG — WhatsApp compatible
+                    quality: "auto:good",    // smart compression, keeps file size small
+                    access_mode: "public",
                     visual_search: true,
                 },
                 (err, result) => {

@@ -20,13 +20,17 @@ function extractImageTags(text) {
     // Match both formats:
     // [SEND_IMAGE: https://...]  — legacy bracket format
     // IMAGE_URL: https://...     — plain format models output more reliably
-    const bracketRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]\s]+)\]/g;
-    const plainRegex   = /^IMAGE_URL:\s*(https?:\/\/\S+)/gm;
+    // Both can appear anywhere in the text, mid-line or at line start
+    const bracketRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]\s]+)\]/gi;
+    const plainRegex   = /IMAGE_URL:\s*(https?:\/\/\S+)/gi;
     const imageUrls = [];
 
     let cleanText = text
         .replace(bracketRegex, (_, url) => { imageUrls.push(url.trim()); return ""; })
         .replace(plainRegex,   (_, url) => { imageUrls.push(url.trim()); return ""; })
+        // Clean up any orphaned IMAGE_URL: prefix without a URL
+        .replace(/IMAGE_URL:\s*/gi, "")
+        .replace(/\[SEND_IMAGE:\s*\]/gi, "")
         .replace(/\n{3,}/g, "\n\n")
         .trim();
 
