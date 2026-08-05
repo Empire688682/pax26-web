@@ -183,10 +183,17 @@ export async function handlePaymentReceipt({
     }
 
     // Verify using Groq vision model that the image is actually a payment receipt
-    const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
-    if (!isVerifiedReceipt) {
-        console.log("🤖 Groq verified image is NOT a payment receipt. Proceeding to product/conversation handling.");
-        return { handled: false };
+    // BUT: if there's a pending order OR we're clearly in payment stage, trust the context
+    // and skip AI verification — the conversation already told us payment was expected.
+    const skipVerification = !!pendingOrder || paymentStage;
+    if (!skipVerification) {
+        const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
+        if (!isVerifiedReceipt) {
+            console.log("🤖 Groq verified image is NOT a payment receipt. Proceeding to product/conversation handling.");
+            return { handled: false };
+        }
+    } else {
+        console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
     const matchedProduct = await resolveProduct(sellerId, recentMessages);
@@ -226,6 +233,20 @@ export async function handlePaymentReceipt({
         });
     } catch (err) {
         console.warn("Sales notification failed:", err.message);
+    }
+
+    // ── Email alert to seller — fire-and-forget ───────────────
+    // Trigger: customer has actually sent a payment receipt image and AI acknowledged it.
+    // This is the highest-confidence signal that a real sale happened.
+    try {
+        const { sendSalesAlertEmail } = await import("../salesAlertService.js");
+        sendSalesAlertEmail(sellerUserId, {
+            customerPhone: normalizedPhone,
+            productName: matchedProduct?.name || null,
+            isConfirmedReceipt: true,
+        }).catch(err => console.warn("[salesAlert] email fire-and-forget failed:", err.message));
+    } catch (err) {
+        console.warn("[salesAlert] import failed (non-fatal):", err.message);
     }
 
     return { handled: true, order };

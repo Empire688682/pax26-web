@@ -40,6 +40,10 @@ const SellerProfileSchema = new mongoose.Schema({
     // Options: "classic" | "midnight" | "forest" | "sunset" | "royal" | "ember"
     storeTheme: { type: String, default: 'classic' },
 
+    // ── Email sales alert ─────────────────────────────────────
+    // Sends the seller an email whenever the AI sends payment details to a customer
+    emailSalesAlerts: { type: Boolean, default: true },
+
     // Online presence
     onlineStoreUrl: { type: String, default: '', trim: true },
     liveLocation: { type: String, default: '', trim: true },
