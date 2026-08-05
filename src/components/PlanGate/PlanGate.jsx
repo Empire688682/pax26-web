@@ -3,7 +3,7 @@
 import React from "react";
 import { useGlobalContext } from "@/components/Context";
 import { usePlanLimits } from "@/app/hooks/usePlanLimits";
-import { ShieldAlert, Sparkles, Crown, Lock, Store, BarChart2, Bot, Package } from "lucide-react";
+import { ShieldAlert, Sparkles, Crown, Lock, Store, BarChart2, Bot, Package, Users } from "lucide-react";
 
 /**
  * PlanGate

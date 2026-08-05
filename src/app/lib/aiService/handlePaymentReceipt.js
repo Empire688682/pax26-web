@@ -235,25 +235,12 @@ export async function handlePaymentReceipt({
         await sendSalesNotification(sellerUserId, {
             orderId: order._id.toString(),
             customerName: order.customerName || order.customerPhone,
-            productName: "Payment receipt received — review required",
+            productName: matchedProduct?.name || "Payment receipt received",
             amountPaid: order.totalPrice,
+            isConfirmed: false,
         });
     } catch (err) {
         console.warn("Sales notification failed:", err.message);
-    }
-
-    // ── Email alert to seller — fire-and-forget ───────────────
-    // Trigger: customer has actually sent a payment receipt image and AI acknowledged it.
-    // This is the highest-confidence signal that a real sale happened.
-    try {
-        const { sendSalesAlertEmail } = await import("../salesAlertService.js");
-        sendSalesAlertEmail(sellerUserId, {
-            customerPhone: normalizedPhone,
-            productName: matchedProduct?.name || null,
-            isConfirmedReceipt: true,
-        }).catch(err => console.warn("[salesAlert] email fire-and-forget failed:", err.message));
-    } catch (err) {
-        console.warn("[salesAlert] import failed (non-fatal):", err.message);
     }
 
     return { handled: true, order };
@@ -298,8 +285,9 @@ export async function createPendingOrderFromText({
         await sendSalesNotification(sellerUserId, {
             orderId: order._id.toString(),
             customerName: order.customerName || order.customerPhone,
-            productName: "New pending order — awaiting payment proof",
+            productName: matchedProduct?.name || "Pending order — awaiting payment proof",
             amountPaid: order.totalPrice,
+            isConfirmed: false,
         });
     } catch (err) {
         console.warn("Sales notification failed:", err.message);

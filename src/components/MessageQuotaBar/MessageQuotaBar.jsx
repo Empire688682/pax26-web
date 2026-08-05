@@ -17,10 +17,8 @@ export default function MessageQuotaBar({ compact = false }) {
 
   // Colour reflects urgency
   let barColor = pax26?.primary || "#3b82f6";
-  if (!isEnterprise) {
-    if (messagesPct >= 90) barColor = "#ef4444";
-    else if (messagesPct >= 70) barColor = "#f97316";
-  }
+  if (messagesPct >= 90) barColor = "#ef4444";
+  else if (messagesPct >= 70) barColor = "#f97316";
 
   return (
     <>
@@ -40,7 +38,7 @@ export default function MessageQuotaBar({ compact = false }) {
         className="w-full rounded-2xl border relative overflow-hidden"
         style={{
           background: pax26?.bg,
-          borderColor: messagesPct >= 90 && !isEnterprise ? "rgba(239,68,68,0.3)" : pax26?.border,
+          borderColor: messagesPct >= 90 ? "rgba(239,68,68,0.3)" : pax26?.border,
           padding: compact ? "12px 16px" : "20px",
         }}
       >
@@ -63,20 +61,14 @@ export default function MessageQuotaBar({ compact = false }) {
                 Monthly AI Replies
               </p>
               <h4 className="text-lg font-black flex items-baseline gap-1" style={{ color: pax26?.textPrimary }}>
-                {isEnterprise ? (
-                  <span className="text-base">Unlimited</span>
-                ) : (
-                  <>
-                    <span className="text-xl font-bold">{messagesUsed.toLocaleString()}</span>
-                    <span className="text-xs font-medium opacity-40">/ {messagesLimit.toLocaleString()} used</span>
-                  </>
-                )}
+                <span className="text-xl font-bold">{messagesUsed.toLocaleString()}</span>
+                <span className="text-xs font-medium opacity-40">/ {messagesLimit.toLocaleString()} used</span>
               </h4>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {!isEnterprise && messagesPct >= 75 && (
+            {messagesPct >= 75 && (
               <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded"
                 style={{ background: "rgba(249,115,22,0.1)", color: "#f97316", border: "1px solid rgba(249,115,22,0.25)" }}>
                 <AlertTriangle size={10} /> Approaching Limit
@@ -100,10 +92,10 @@ export default function MessageQuotaBar({ compact = false }) {
           style={{ height: "8px", background: pax26?.border }}
         >
           <div
-            className={`h-full rounded-full transition-all duration-500 ${isEnterprise ? "" : "mq-bar-shimmer"}`}
+            className="h-full rounded-full transition-all duration-500 mq-bar-shimmer"
             style={{
-              width: isEnterprise ? "100%" : `${messagesPct}%`,
-              background: isEnterprise ? barColor : undefined,
+              width: `${messagesPct}%`,
+              background: barColor,
             }}
           />
         </div>
@@ -111,9 +103,7 @@ export default function MessageQuotaBar({ compact = false }) {
         {/* Footer text */}
         <div className="flex justify-between items-center mt-2 text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
           <span>
-            {isEnterprise
-              ? "Enterprise plan — unlimited AI replies."
-              : `${messagesRemaining.toLocaleString()} replies remaining this cycle`}
+            {`${messagesRemaining.toLocaleString()} replies remaining this cycle`}
           </span>
           <span className="uppercase tracking-wide">Plan: {plan}</span>
         </div>

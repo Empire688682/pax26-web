@@ -3,6 +3,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
+import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import { sendSalesNotification } from "@/app/lib/salesNotificationService";
 import { sendCustomerOrderReceiptWhatsApp } from "@/app/lib/customerReceiptService";
@@ -34,7 +35,7 @@ export async function PATCH(req, { params }) {
             return NextResponse.json({ success: false, message: "Seller profile not found" }, { status: 404, headers: corsHeaders() });
         }
 
-        const order = await SellerOrderModel.findOne({ _id: id, sellerId: sellerProfile._id });
+        const order = await SellerOrderModel.findOne({ _id: id, sellerId: sellerProfile._id }).populate({ path: "productId", model: SellerProductModel, select: "name", strictPopulate: false });
         if (!order) {
             return NextResponse.json({ success: false, message: "Order not found" }, { status: 404, headers: corsHeaders() });
         }
@@ -61,12 +62,13 @@ export async function PATCH(req, { params }) {
             sellerProfile.totalSalesAmount += order.totalPrice || 0;
             await sellerProfile.save();
 
-            // 1. Notify seller
+            // 1. Notify seller (in-app, WhatsApp, and email)
             await sendSalesNotification(userId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
-                productName: "Order confirmed",
+                productName: order.productId?.name || "Confirmed Order",
                 amountPaid: order.totalPrice,
+                isConfirmed: true,
             });
 
             // 2. Send brand receipt confirmation message to customer via WhatsApp

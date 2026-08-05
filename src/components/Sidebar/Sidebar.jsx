@@ -241,20 +241,18 @@ export default function Sidebar() {
                     <div className="flex justify-between items-center text-[9px] mb-1" style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
                       <span>AI Replies</span>
                       <span className="font-mono">
-                        {limits.isEnterprise ? "Unlimited" : `${limits.messagesUsed}/${limits.messagesLimit}`}
+                        {`${limits.messagesUsed.toLocaleString()}/${limits.messagesLimit.toLocaleString()}`}
                       </span>
                     </div>
-                    {!limits.isEnterprise && (
-                      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: pax26?.border }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{
-                            width: `${limits.messagesPct}%`,
-                            background: limits.messagesPct >= 90 ? "#ef4444" : limits.messagesPct >= 70 ? "#f97316" : (pax26?.primary || "#3b82f6")
-                          }}
-                        />
-                      </div>
-                    )}
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: pax26?.border }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${limits.messagesPct}%`,
+                          background: limits.messagesPct >= 90 ? "#ef4444" : limits.messagesPct >= 70 ? "#f97316" : (pax26?.primary || "#3b82f6")
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
 

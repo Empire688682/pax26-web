@@ -46,12 +46,22 @@ export async function POST(req) {
             sellerProfile.totalSalesAmount += newOrder.totalPrice;
             await sellerProfile.save();
 
-            // Trigger notification
+            // Trigger confirmed sale notification
             await sendSalesNotification(userId, {
                 orderId: newOrder._id.toString(),
                 customerName: newOrder.customerName || newOrder.customerPhone,
-                productName: "Product Order", // Could populate from productId in future
-                amountPaid: newOrder.totalPrice
+                productName: "Product Order",
+                amountPaid: newOrder.totalPrice,
+                isConfirmed: true,
+            });
+        } else {
+            // Trigger potential sale notification (notifying seller to log in & confirm)
+            await sendSalesNotification(userId, {
+                orderId: newOrder._id.toString(),
+                customerName: newOrder.customerName || newOrder.customerPhone,
+                productName: "Pending Order",
+                amountPaid: newOrder.totalPrice,
+                isConfirmed: false,
             });
         }
 

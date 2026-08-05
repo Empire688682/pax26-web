@@ -1,13 +1,11 @@
 /**
  * salesAlertService.js
  *
- * Sends the seller an email when a customer submits a payment receipt
- * and the AI agent acknowledges it.
+ * Sends the seller an email when a potential sale / payment proof is received
+ * (prompting them to log in to Sales Analytics to confirm the order),
+ * or when an order is confirmed.
  *
- * Trigger: after handlePaymentReceipt returns handled:true and the AI
- * sends "our team will verify your payment."
- *
- * Cost: zero — uses SendPulse SMTP (already integrated, free tier = 15k/month).
+ * Cost: zero — uses SendPulse SMTP (already integrated).
  * Available to ALL sellers regardless of plan.
  */
 
@@ -16,16 +14,27 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import sendpulse from "@/app/lib/sendpulse";
 
 /* ── Build the email HTML ───────────────────────────────────── */
-function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
-  const dashboardLink = "https://www.pax26.com/dashboard/automations/whatsapp-inbox";
-  const storeLink     = storeSlug ? `https://www.pax26.com/store/${storeSlug}` : null;
-  const settingsLink  = "https://www.pax26.com/dashboard/automations/ai-business-dashboard";
-  const year          = new Date().getFullYear();
-  const time          = new Date().toLocaleString("en-NG", {
+function buildEmail({ businessName, customerPhone, productName, amountPaid, orderId, storeSlug, isConfirmed }) {
+  const salesAnalyticsLink = "https://www.pax26.com/dashboard/automations/sales";
+  const inboxLink          = "https://www.pax26.com/dashboard/automations/whatsapp-inbox";
+  const settingsLink       = "https://www.pax26.com/dashboard/automations/ai-business-dashboard";
+  const year               = new Date().getFullYear();
+  const time               = new Date().toLocaleString("en-NG", {
     timeZone:  "Africa/Lagos",
     dateStyle: "medium",
     timeStyle: "short",
   });
+
+  const headerTitle = isConfirmed ? "🎉 New Confirmed Sale!" : "⚡ Potential Sale Alert";
+  const headerSubtitle = isConfirmed 
+    ? "An order has been verified and confirmed for your store!"
+    : "Action Required — Customer submitted payment proof / order";
+  const bodyIntro = isConfirmed
+    ? `Hi <strong>${businessName}</strong>, a sale of ${amountPaid ? `<strong>₦${Number(amountPaid).toLocaleString()}</strong>` : "a product"} has been confirmed for your store.`
+    : `Hi <strong>${businessName}</strong>, a potential customer just submitted payment proof / order on WhatsApp. Please log in and visit your <strong>Sales Analytics</strong> page to verify the transfer and confirm the order.`;
+  const statusBadge = isConfirmed
+    ? `<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Confirmed Sale ✓</span>`
+    : `<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Potential Sale — Action Required ⏳</span>`;
 
   return `
 <!DOCTYPE html>
@@ -43,16 +52,16 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
 
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:28px 32px;text-align:center;">
+          <td style="background:linear-gradient(135deg, ${isConfirmed ? "#059669,#10b981" : "#6366f1,#8b5cf6"});padding:28px 32px;text-align:center;">
             <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.15);border-radius:12px;padding:8px 16px;">
               <span style="font-size:20px;">⚡</span>
               <span style="color:#fff;font-weight:800;font-size:18px;letter-spacing:-0.02em;">Pax26</span>
             </div>
             <h1 style="color:#fff;margin:16px 0 4px;font-size:22px;font-weight:900;letter-spacing:-0.03em;">
-              💰 Payment Proof Received
+              ${headerTitle}
             </h1>
-            <p style="color:rgba(255,255,255,0.8);margin:0;font-size:14px;">
-              A customer has sent a payment receipt — review and confirm it
+            <p style="color:rgba(255,255,255,0.85);margin:0;font-size:14px;">
+              ${headerSubtitle}
             </p>
           </td>
         </tr>
@@ -62,7 +71,7 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
           <td style="padding:28px 32px;">
 
             <p style="color:#555;font-size:14px;margin:0 0 20px;line-height:1.6;">
-              Hi <strong>${businessName}</strong>, a customer just sent a payment receipt on WhatsApp and your AI agent has acknowledged it. Go to your inbox to verify the transfer and confirm the order.
+              ${bodyIntro}
             </p>
 
             <!-- Info card -->
@@ -77,6 +86,16 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
                   <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Product</td>
                   <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">${productName}</td>
                 </tr>` : ""}
+                ${amountPaid ? `
+                <tr>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Amount</td>
+                  <td style="padding:6px 0;font-size:14px;color:#10b981;font-weight:700;">₦${Number(amountPaid).toLocaleString()}</td>
+                </tr>` : ""}
+                ${orderId ? `
+                <tr>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Order ID</td>
+                  <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">#${orderId.toString().slice(-8).toUpperCase()}</td>
+                </tr>` : ""}
                 <tr>
                   <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Time</td>
                   <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">${time}</td>
@@ -84,7 +103,7 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
                 <tr>
                   <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Status</td>
                   <td style="padding:6px 0;">
-                    <span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Payment Proof Received ✓</span>
+                    ${statusBadge}
                   </td>
                 </tr>
               </table>
@@ -93,25 +112,24 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
             <!-- CTA buttons -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
               <tr>
-                <td style="padding-right:8px;" width="${storeLink ? "50%" : "100%"}">
-                  <a href="${dashboardLink}"
+                <td style="padding-right:8px;" width="50%">
+                  <a href="${salesAnalyticsLink}"
+                    style="display:block;text-align:center;background:#6366f1;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;">
+                    ${isConfirmed ? "View Sales Analytics →" : "Confirm Order in Analytics →"}
+                  </a>
+                </td>
+                <td style="padding-left:8px;" width="50%">
+                  <a href="${inboxLink}"
                     style="display:block;text-align:center;background:#111;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;">
                     Open WhatsApp Inbox
                   </a>
                 </td>
-                ${storeLink ? `
-                <td style="padding-left:8px;" width="50%">
-                  <a href="${storeLink}"
-                    style="display:block;text-align:center;background:#6366f1;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;">
-                    View Your Store
-                  </a>
-                </td>` : ""}
               </tr>
             </table>
 
             <p style="color:#aaa;font-size:12px;margin:0;text-align:center;line-height:1.6;">
-              You received this because a customer submitted payment proof on your WhatsApp store.<br/>
-              <a href="${settingsLink}" style="color:#6366f1;">Turn off email alerts</a> in AI Agent Settings.
+              You received this because a sale notification was triggered for your WhatsApp store.<br/>
+              <a href="${settingsLink}" style="color:#6366f1;">Manage sales notifications</a> in AI Agent Settings.
             </p>
 
           </td>
@@ -140,9 +158,9 @@ function buildEmail({ businessName, customerPhone, productName, storeSlug }) {
  * sendSalesAlertEmail
  *
  * @param {string|ObjectId} userId
- * @param {{ customerPhone: string, productName?: string }} options
+ * @param {{ customerPhone?: string, productName?: string, amountPaid?: number, orderId?: string, isConfirmed?: boolean }} options
  */
-export async function sendSalesAlertEmail(userId, { customerPhone, productName } = {}) {
+export async function sendSalesAlertEmail(userId, { customerPhone, productName, amountPaid, orderId, isConfirmed = false } = {}) {
   try {
     const [user, profile] = await Promise.all([
       UserModel.findById(userId).select("email name").lean(),
@@ -159,13 +177,20 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName }
 
     const html = buildEmail({
       businessName: profile.businessName || user.name || "there",
-      customerPhone,
+      customerPhone: customerPhone || "Customer",
       productName: productName || null,
-      storeSlug:   profile.slug || null,
+      amountPaid: amountPaid || null,
+      orderId: orderId || null,
+      storeSlug: profile.slug || null,
+      isConfirmed,
     });
 
+    const subject = isConfirmed
+      ? `🎉 New Confirmed Sale (${amountPaid ? `₦${Number(amountPaid).toLocaleString()}` : "Order"}) — ${profile.businessName || "your store"}`
+      : `⚡ Potential Sale Alert (${amountPaid ? `₦${Number(amountPaid).toLocaleString()}` : "Pending"}) — ${profile.businessName || "your store"}`;
+
     const emailPayload = {
-      subject: `💰 Payment proof received — ${profile.businessName || "your store"}`,
+      subject,
       from:    { name: "Pax26 Sales Alerts", email: "info@pax26.com" },
       to:      [{ email: user.email }],
       html,
@@ -174,7 +199,7 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName }
     await new Promise((resolve) => {
       sendpulse.smtpSendMail((result) => {
         if (result?.result === true) {
-          console.log(`[salesAlert] ✅ Email sent to ${user.email}`);
+          console.log(`[salesAlert] ✅ Email sent to ${user.email} (Confirmed: ${isConfirmed})`);
         } else {
           console.warn("[salesAlert] ⚠️ SendPulse failed:", result);
         }
@@ -182,7 +207,7 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName }
       }, emailPayload);
     });
   } catch (err) {
-    // Non-fatal — never block AI response for a notification
+    // Non-fatal — never block AI response or order confirmation for a notification
     console.warn("[salesAlert] Error:", err.message);
   }
 }

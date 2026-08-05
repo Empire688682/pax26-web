@@ -205,9 +205,9 @@ export default function AiAutomationHomePage() {
           const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
           const currentPlanMeta = aiPlans?.find(p => p.key === plan);
           const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages || (
-            plan === "starter" ? 500 :
-              plan === "business" ? 2000 :
-                plan === "enterprise" ? 10000 : 200
+            plan === "starter" ? 2000 :
+              plan === "business" ? 10000 :
+                plan === "enterprise" ? 50000 : 200
           );
           const lastUpd = userData?.paxAI?.planStartedAt;
           const usagePct = Math.min((used / (quota || 1)) * 100, 100);

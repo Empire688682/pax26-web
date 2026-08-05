@@ -2,6 +2,7 @@ import UserModel from "@/app/ults/models/UserModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
+import { sendSalesAlertEmail } from "@/app/lib/salesAlertService";
 
 export const sendSalesNotification = async (userId, orderData) => {
     try {
@@ -65,6 +66,23 @@ export const sendSalesNotification = async (userId, orderData) => {
                 } catch (err) {
                     console.error("WhatsApp notification failed:", err.message);
                 }
+            }
+        }
+
+        // ── Send Email sales notification ────────────────────────
+        // Fires for potential sales (to notify seller to log in & confirm) or confirmed sales
+        if (actualChannel === "email" || actualChannel === "both" || sellerProfile.emailSalesAlerts !== false) {
+            try {
+                await sendSalesAlertEmail(userId, {
+                    customerPhone: notification.customerName,
+                    productName: notification.productName,
+                    amountPaid: notification.amountPaid,
+                    orderId: notification.orderId,
+                    isConfirmed: orderData.isConfirmed ?? false,
+                });
+                messageSent = true;
+            } catch (err) {
+                console.error("Email sales notification failed:", err.message);
             }
         }
 
