@@ -65,10 +65,19 @@ function TSelect({ label, p, options = [], value, onChange, style }) {
 function ImageUploader({ images, onChange, p, sellerId }) {
   const ref = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [convertNotice, setConvertNotice] = useState("");
 
   const handleFiles = async (files) => {
     const arr = Array.from(files).slice(0, 6 - images.length);
     if (!arr.length) return;
+
+    // Detect non-JPEG/PNG files and show a notice that they'll be auto-converted
+    const hasNonStandard = arr.some(f => !f.type.match(/^image\/(jpeg|jpg|png)$/i));
+    if (hasNonStandard) {
+      setConvertNotice("WebP/AVIF files detected — we'll auto-convert them to JPEG for WhatsApp compatibility.");
+      setTimeout(() => setConvertNotice(""), 5000);
+    }
+
     setUploading(true);
     try {
       const results = await Promise.all(arr.map(async (file) => {
@@ -86,7 +95,21 @@ function ImageUploader({ images, onChange, p, sellerId }) {
 
   return (
     <div>
-      <Label p={p}>Images (up to 6)</Label>
+      <Label p={p}>Product Images (up to 6)</Label>
+      {/* WhatsApp format notice */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "8px 12px", borderRadius: "8px", background: `${p?.primary}0d`, border: `1px solid ${p?.primary}25`, marginBottom: "10px" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p?.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: "1px" }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style={{ margin: 0, fontSize: "11px", color: p?.textPrimary, opacity: 0.7, lineHeight: 1.5 }}>
+          Upload <strong>JPEG or PNG</strong> for best WhatsApp delivery. Any other format (WebP, AVIF, HEIC) will be <strong>automatically converted to JPEG</strong> — no action needed from you.
+        </p>
+      </div>
+
+      {convertNotice && (
+        <div style={{ padding: "7px 12px", borderRadius: "8px", background: "#f59e0b18", border: "1px solid #f59e0b44", marginBottom: "10px" }}>
+          <p style={{ margin: 0, fontSize: "11px", color: "#92400e" }}>⚡ {convertNotice}</p>
+        </div>
+      )}
+
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {images.map((img, i) => (
           <div key={i} style={{ position: "relative", width: "78px", height: "78px", borderRadius: "10px", overflow: "hidden", border: `1px solid ${p?.border}` }}>
@@ -100,6 +123,7 @@ function ImageUploader({ images, onChange, p, sellerId }) {
           </button>
         )}
       </div>
+      {/* Accept all image types — server auto-converts to JPEG */}
       <input ref={ref} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => handleFiles(e.target.files)} />
     </div>
   );
