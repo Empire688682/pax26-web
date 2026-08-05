@@ -6,15 +6,15 @@ export const metadata = {
   title: "Contact Pax26 – Support, Partnerships & Business Inquiries",
 
   description:
-    "Contact Pax26 for support, partnerships, or business inquiries. Our team is ready to help you with AI automation, digital services, and platform assistance.",
+    "Contact Pax26 for support, partnerships, or business inquiries. Our team is ready to help you build your WhatsApp store and automate your customer conversations.",
 
   keywords: [
     "contact pax26",
     "pax26 support",
-    "ai automation support",
+    "whatsapp store support",
     "pax26 customer support",
-    "whatsapp automation support",
-    "digital services nigeria support",
+    "whatsapp commerce help",
+    "sell on whatsapp support",
   ],
 
   alternates: {
@@ -22,9 +22,9 @@ export const metadata = {
   },
 
   openGraph: {
-    title: "Contact Pax26 – AI Automation & Digital Services Support",
+    title: "Contact Pax26 – WhatsApp Commerce Support",
     description:
-      "Need help or want to partner with Pax26? Contact our team for support with AI automation and digital services.",
+      "Need help or want to partner with Pax26? Contact our team for support with your WhatsApp store and AI automation.",
     url: "https://pax26.com/contact",
     siteName: "Pax26",
     images: [
@@ -42,7 +42,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Contact Pax26",
     description:
-      "Reach out to Pax26 for support, partnerships, or questions about our AI automation platform.",
+      "Reach out to Pax26 for support, partnerships, or questions about building your WhatsApp store.",
     images: ["/Pax26_single_logo.png"],
   },
 };
@@ -63,7 +63,7 @@ const Page = () => {
                 name: "Contact Pax26",
                 url: "https://pax26.com/contact",
                 description:
-                  "Contact Pax26 for support, partnerships, and inquiries about AI automation and digital services.",
+                  "Contact Pax26 for support, partnerships, and inquiries about building your WhatsApp store and AI automation.",
               },
               {
                 "@type": "Organization",

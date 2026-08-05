@@ -2,18 +2,19 @@ import About from "@/components/About/About";
 import React from "react";
 
 export const metadata = {
-  title: "About Pax26 – AI Automation Platform & Digital Services",
+  title: "About Pax26 – WhatsApp Commerce Platform for Small Businesses",
 
   description:
-    "Learn about Pax26, an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and streamline workflows while also providing digital services like airtime, data, and bill payments.",
+    "Learn about Pax26 — the platform that helps businesses create an online storefront, automate WhatsApp conversations using AI, and convert chats into real sales.",
 
   keywords: [
     "about pax26",
     "pax26 company",
-    "ai automation platform",
-    "whatsapp automation",
-    "business automation tools",
-    "digital services nigeria",
+    "whatsapp commerce platform",
+    "whatsapp store builder",
+    "ai sales assistant",
+    "sell on whatsapp",
+    "small business automation",
   ],
 
   alternates: {
@@ -21,9 +22,9 @@ export const metadata = {
   },
 
   openGraph: {
-    title: "About Pax26 – AI Automation Platform",
+    title: "About Pax26 – WhatsApp Commerce Platform",
     description:
-      "Discover Pax26, the platform combining AI automation with digital services to help businesses and individuals operate smarter.",
+      "Discover Pax26 — the platform that lets you build an online store, automate customer conversations, and sell on WhatsApp with AI.",
     url: "https://pax26.com/about",
     siteName: "Pax26",
     images: [
@@ -41,7 +42,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "About Pax26",
     description:
-      "Learn how Pax26 helps businesses automate operations with AI while offering fast digital services.",
+      "Learn how Pax26 helps businesses build online stores and sell more through WhatsApp using AI automation.",
     images: ["/Pax26_single_logo.png"],
   },
 };

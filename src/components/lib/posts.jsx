@@ -98,9 +98,9 @@ export const posts = [
       <h2>Mapping Your Current Workflow</h2>
       <p>Before automating, document your current processes. Identify tasks that are repetitive, rule-based, and time-consuming. These are your prime automation candidates.</p>
       <h2>Choosing the Right Automation Tools</h2>
-      <p>Pax26 offers end-to-end automation for WhatsApp, lead management, notifications, and data services. For broader integrations, tools like Zapier complement Pax26 perfectly.</p>
+      <p>Pax26 offers end-to-end automation for WhatsApp, lead management, sales notifications, and customer engagement. For broader integrations, tools like Zapier complement Pax26 perfectly.</p>
       <h2>Building Your First Automated Workflow</h2>
-      <p>Start simple: automate one high-frequency task. For example, automatically send a WhatsApp confirmation when a customer funds their wallet. Measure the time saved, then expand.</p>
+      <p>Start simple: automate one high-frequency task. For example, automatically send a WhatsApp confirmation when a customer places an order. Measure the time saved, then expand.</p>
       <h2>Avoiding Over-Automation</h2>
       <p>Not everything should be automated. Customer complaints, high-stakes negotiations, and relationship-building require a human touch. Automation should enhance — not replace — your personality.</p>
       <h2>Conclusion</h2>
@@ -108,29 +108,31 @@ export const posts = [
     `,
   },
   {
-    slug: "digital-services-nigeria",
-    title: "Top Digital Services in Nigeria You Should Know",
-    excerpt: "Explore the best digital services in Nigeria — airtime, data, bill payments, and more — and how to offer them to your customers profitably.",
-    image: "https://picsum.photos/seed/nigeria-digital/1200/630",
+    slug: "whatsapp-commerce-nigeria",
+    title: "Why WhatsApp Is the Best Sales Channel for Nigerian Businesses",
+    excerpt: "Over 90 million Nigerians use WhatsApp daily. Here's why the smartest businesses are building their entire sales process on WhatsApp — and how you can too.",
+    image: "https://picsum.photos/seed/wa-commerce-ng/1200/630",
     date: "April 5, 2026",
     author: "Chidi Okonkwo",
     authorAvatar: "https://picsum.photos/seed/author1/80/80",
     readTime: "5 min read",
-    category: "Digital Services",
-    tags: ["nigeria", "digital-services", "vtu", "airtime", "data"],
-    keywords: ["digital services nigeria", "airtime", "data", "bill payment"],
+    category: "WhatsApp Commerce",
+    tags: ["nigeria", "whatsapp-commerce", "sell-on-whatsapp", "small-business", "ai-sales"],
+    keywords: ["whatsapp commerce nigeria", "sell on whatsapp", "whatsapp store nigeria", "whatsapp business tips"],
     content: `
-      <p>Nigeria's digital economy is booming. From VTU (Virtual Top-Up) businesses to fintech platforms, digital services represent one of the fastest-growing sectors in the country.</p>
-      <h2>Airtime & Data Reselling</h2>
-      <p>Buying airtime and data at wholesale rates and reselling to customers is one of Nigeria's most accessible side businesses. Pax26 connects you directly to network APIs at the best rates.</p>
-      <h2>Bill Payment Services</h2>
-      <p>Electricity, DSTV, GOTV, Startimes, water, and more — millions of Nigerians need to pay bills monthly. Offering these services positions your business as a one-stop digital shop.</p>
-      <h2>Education & Exam Services</h2>
-      <p>WAEC, NECO, JAMB result checking, and scratch card generation are high-demand digital products. Pax26 offers these through its reseller platform.</p>
-      <h2>Building a Sustainable VTU Business</h2>
-      <p>Success in digital services requires tight margins management, reliable APIs, and excellent customer service. Pax26's platform handles the tech; you focus on building your customer base.</p>
+      <p>Nigeria has over 90 million active WhatsApp users — and most of them use it every single day. For businesses, this isn't just a messaging platform. It's the most direct line you have to your customers.</p>
+      <h2>Why WhatsApp Beats Every Other Sales Channel</h2>
+      <p>Email open rates hover around 20%. Instagram reach is declining. But WhatsApp messages? They get opened over 95% of the time. When you message a customer on WhatsApp, they see it.</p>
+      <h2>The Problem With Manual WhatsApp Selling</h2>
+      <p>Most businesses are stuck replying to customers manually — one message at a time. This means missed messages at night, slow replies that lose sales, and hours of your day spent on repetitive conversations.</p>
+      <h2>The WhatsApp Commerce Model</h2>
+      <p>The solution is building a proper WhatsApp Commerce setup: an online storefront where customers can browse your products, connected to WhatsApp so they can order instantly, automated by AI so no message goes unanswered.</p>
+      <h2>How Pax26 Powers WhatsApp Commerce</h2>
+      <p>Pax26 gives you everything you need: a beautiful storefront, product catalog management, AI-powered auto-replies, smart lead follow-up, and sales analytics — all in one platform built specifically for this.</p>
+      <h2>Getting Started in Under 5 Minutes</h2>
+      <p>Sign up at pax26.com, create your store, add your products, connect your WhatsApp Business number, and activate your AI agent. Your store is live and your AI is ready to sell — day and night.</p>
       <h2>Conclusion</h2>
-      <p>Digital services are a billion-naira opportunity in Nigeria. Whether you're starting fresh or scaling an existing business, Pax26 gives you the tools to compete and win.</p>
+      <p>WhatsApp Commerce is the future of selling for Nigerian businesses. The businesses that set this up today will have a massive advantage tomorrow. Pax26 makes it simple.</p>
     `,
   },
   {
@@ -205,8 +207,8 @@ export const posts = [
       <p>This fashion brand was manually responding to 200+ WhatsApp messages daily. After deploying Pax26, response time dropped from 4 hours to under 30 seconds. Monthly revenue increased 40% in 90 days.</p>
       <h2>Case 2: Abuja Real Estate Agency</h2>
       <p>The agency automated their property inquiry process. Prospects could browse available properties, schedule viewings, and get financing information — all via WhatsApp. Lead conversion improved by 65%.</p>
-      <h2>Case 3: Port Harcourt VTU Reseller</h2>
-      <p>A data reseller integrated Pax26 to handle orders automatically. Customers could buy airtime and data 24/7 without human involvement. Transaction volume tripled within 60 days.</p>
+      <h2>Case 3: Port Harcourt Fashion Brand</h2>
+      <p>A fashion brand integrated Pax26 to handle product enquiries automatically. Customers could browse items, check sizes, and place orders through WhatsApp 24/7 without human involvement. Revenue doubled within 60 days.</p>
       <h2>Common Success Factors</h2>
       <p>All three businesses shared the same formula: clear automation goals, well-crafted response templates, proper lead qualification, and consistent follow-up sequences.</p>
       <h2>Conclusion</h2>
@@ -214,31 +216,33 @@ export const posts = [
     `,
   },
   {
-    slug: "saving-data-tips",
-    title: "How to Save Mobile Data in Nigeria Effectively",
-    excerpt: "Practical, tested tips to help you and your customers stretch every megabyte of mobile data further on any Nigerian network.",
-    image: "https://picsum.photos/seed/save-data-ng/1200/630",
+    slug: "build-whatsapp-storefront",
+    title: "How to Build a WhatsApp Storefront for Your Business in 2026",
+    excerpt: "A step-by-step guide to creating your online store, connecting WhatsApp, and letting AI sell your products for you — even while you sleep.",
+    image: "https://picsum.photos/seed/wa-storefront/1200/630",
     date: "March 8, 2026",
     author: "Chidi Okonkwo",
     authorAvatar: "https://picsum.photos/seed/author1/80/80",
-    readTime: "4 min read",
-    category: "Digital Services",
-    tags: ["data", "mobile", "nigeria", "tips", "savings"],
-    keywords: ["data saving tips", "mobile data nigeria", "pax26 tips"],
+    readTime: "5 min read",
+    category: "WhatsApp Commerce",
+    tags: ["whatsapp", "storefront", "online-store", "sell-on-whatsapp", "ai"],
+    keywords: ["whatsapp storefront", "build whatsapp store", "sell on whatsapp", "online store nigeria"],
     content: `
-      <p>With data prices still a significant expense for many Nigerians, knowing how to stretch your data goes a long way. Here are practical tips that actually work.</p>
-      <h2>Use Data-Light App Versions</h2>
-      <p>Facebook Lite, Twitter Lite, and YouTube Go consume significantly less data than their full versions. Switching these apps alone can cut your data usage by 40%.</p>
-      <h2>Enable Data Compression</h2>
-      <p>Browsers like Opera Mini and Chrome's data saver mode compress web pages before they reach your phone. This is especially useful on slow connections.</p>
-      <h2>Download for Offline Use</h2>
-      <p>Streaming video and music consumes enormous data. Download content over WiFi and consume it offline. Spotify, Netflix, and YouTube all support offline downloads.</p>
-      <h2>Monitor Your Usage by App</h2>
-      <p>Use your phone's built-in data monitor to identify which apps are consuming the most data. You may be surprised — background sync is often the biggest culprit.</p>
-      <h2>Buy Smarter with Pax26</h2>
-      <p>Pax26 offers data plans at rates lower than buying directly from network operators. Our reseller model passes savings directly to customers.</p>
+      <p>Over 90 million Nigerians use WhatsApp daily. If your business isn't selling on WhatsApp, you're leaving money on the table. Here's how to set up a complete WhatsApp storefront in under 30 minutes.</p>
+      <h2>Step 1: Create Your Pax26 Account</h2>
+      <p>Go to pax26.com and sign up for free. No credit card needed. You'll be inside your dashboard in under two minutes.</p>
+      <h2>Step 2: Add Your Products</h2>
+      <p>Navigate to Product Manager and start adding your products — name, price, description, and images. You can add as many as you need. Each product gets its own detail page customers can browse.</p>
+      <h2>Step 3: Connect Your WhatsApp</h2>
+      <p>Go to Automations → Connect WhatsApp. Use the Official Meta API option for the most reliable setup. Sign in with the Facebook account linked to your WhatsApp Business number and follow the on-screen prompts. Takes about two minutes.</p>
+      <h2>Step 4: Train Your AI Agent</h2>
+      <p>Go to Automations → AI Agent Setup. Tell the agent about your business — what you sell, your prices, your policies, and your tone. The agent learns this and uses it in every customer conversation.</p>
+      <h2>Step 5: Activate and Go Live</h2>
+      <p>Turn on your automation from the dashboard. From this point, every customer who messages your WhatsApp number gets an instant, intelligent reply — even at 3am.</p>
+      <h2>What Happens Next</h2>
+      <p>Customers browse your products, ask questions, and place orders — all through WhatsApp. You get notified for every order. Your AI handles the selling. You handle the fulfilment.</p>
       <h2>Conclusion</h2>
-      <p>A combination of smart app choices and buying from the right reseller can significantly reduce your monthly data spend. Share these tips with your customers and build loyalty.</p>
+      <p>A WhatsApp storefront is one of the highest-ROI investments a Nigerian business can make in 2026. Pax26 makes the whole setup take less than 30 minutes.</p>
     `,
   },
   {

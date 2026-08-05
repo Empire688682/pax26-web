@@ -132,7 +132,7 @@ const FundWallet = () => {
               Fund Your Wallet
             </h1>
             <p className="text-sm mt-2" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-              Top up instantly via card — buy airtime, data, bills and more.
+              Top up instantly via card — pay for your Pax26 subscription and services.
             </p>
           </div>
 
@@ -314,13 +314,13 @@ const FundWallet = () => {
                   style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
                   What you can do
                 </p>
-                <Feature icon={<Zap size={16} />} title="Automation Subscription"        desc="Instantly payment for any automation services" pax26={pax26} />
+                <Feature icon={<Zap size={16} />} title="Automation Subscription"        desc="Pay for your Pax26 WhatsApp Commerce subscription." pax26={pax26} />
                 <div className="h-px" style={{ background: pax26?.border }} />
-                <Feature icon={<Zap size={16} />}         title="Airtime & Data"        desc="Instantly recharge any network — MTN, Airtel, Glo, 9mobile." pax26={pax26} />
+                <Feature icon={<Zap size={16} />}         title="AI Plan Upgrades"        desc="Unlock more conversations, products and features instantly." pax26={pax26} />
                 <div className="h-px" style={{ background: pax26?.border }} />
-                <Feature icon={<Zap size={16} />}         title="Electricity Bills"      desc="Pay EKEDC, IKEDC, AEDC and more in seconds."                pax26={pax26} />
+                <Feature icon={<Zap size={16} />}         title="Storefront Services"      desc="Fund your account to activate premium store features."      pax26={pax26} />
                 <div className="h-px" style={{ background: pax26?.border }} />
-                <Feature icon={<Zap size={16} />}         title="TV Subscription"        desc="Renew DSTV, GOtv, Startimes subscriptions instantly."        pax26={pax26} />
+                <Feature icon={<Zap size={16} />}         title="Broadcast Credits"        desc="Top up to run WhatsApp broadcast campaigns to your contacts." pax26={pax26} />
               </div>
 
               {/* security notice */}

@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Wifi, DollarSign, LayoutDashboard, FileCode, Wallet,
+  Wifi, LayoutDashboard, FileCode,
   Phone, LogOut, Info, History, Settings, Bell, X,
-  ChevronRight, Zap, Tv, Database, Lightbulb, Gift,
-  ChevronDown, Home, Shield, Users, ShieldAlert,
+  ChevronRight, Zap,
+  Home, Shield, Users, ShieldAlert,
   MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2,
   Radio, Send, Store, Package
 } from 'lucide-react';
@@ -33,15 +33,6 @@ const CSS = `
   .sb-panel { height: 100vh; height: 100dvh; }
   .sb-backdrop { height: 100vh; height: 100dvh; }
 `;
-
-/* ── VTU services config ──────────────────────────────────────── */
-const VTU_SERVICES = [
-  { href: "/dashboard/services/buy-airtime", icon: Phone, label: "Airtime", color: "#f97316" },
-  { href: "/dashboard/services/buy-data", icon: Database, label: "Data", color: "#38bdf8" },
-  { href: "/dashboard/services/buy-tv-subscription", icon: Tv, label: "TV Sub", color: "#a78bfa" },
-  { href: "/dashboard/services/buy-electricity", icon: Lightbulb, label: "Electricity", color: "#fbbf24" },
-  // { href: "/dashboard#VTU", icon: Gift, label: "Gift Cards", color: "#f472b6" },
-];
 
 /* ── Plain nav item ───────────────────────────────────────────── */
 const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNew = false }) => {
@@ -106,79 +97,6 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
         <ChevronRight size={13} className={`transition-all duration-300 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
       </Link>
     </motion.div>
-  );
-};
-
-/* ── VTU nav item with expandable submenu ─────────────────────── */
-const VtuNavItem = ({ pax26, onClose }) => {
-  const [open, setOpen] = useState(false);
-  const primary = pax26?.primary;
-
-  return (
-    <div>
-      {/* trigger row */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200"
-        style={{
-          color: open ? primary : pax26?.textSecondary,
-          background: open ? `${primary}08` : 'transparent'
-        }}
-        onMouseEnter={e => {
-          if (!open) { e.currentTarget.style.background = pax26?.secondaryBg; e.currentTarget.style.color = primary; }
-        }}
-        onMouseLeave={e => {
-          if (!open) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = pax26?.textSecondary; }
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: open ? `${primary}18` : pax26?.secondaryBg, color: open ? primary : 'inherit' }}>
-            <DollarSign size={15} />
-          </div>
-          <span className="text-sm font-medium">VTU Services</span>
-        </div>
-        <ChevronDown size={13}
-          style={{
-            color: pax26?.textSecondary,
-            opacity: 0.5,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-          }}
-        />
-      </button>
-
-      {/* submenu */}
-      {open && (
-        <div className="sb-submenu-open ml-4 mt-1 pl-3 space-y-0.5"
-          style={{ borderLeft: `2px solid ${primary}25` }}>
-          {VTU_SERVICES.map(({ href, icon: Icon, label, color }) => (
-            <Link
-              key={label}
-              href={href}
-              onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group"
-              style={{ color: pax26?.textSecondary }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = `${color}0D`;
-                e.currentTarget.style.color = color;
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = pax26?.textSecondary;
-              }}
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: `${color}15`, color }}>
-                <Icon size={13} />
-              </div>
-              <span className="text-sm font-medium">{label}</span>
-              <ChevronRight size={11} className="ml-auto opacity-0 group-hover:opacity-40 transition-opacity" />
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
   );
 };
 
@@ -286,7 +204,6 @@ export default function Sidebar() {
                 <NavItem href="/fund-wallet" icon={CreditCard} label="Fund Wallet" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referral Program" onClick={close} pax26={pax26} />
                 <NavItem href="/transactions" icon={History} label="Transaction History" onClick={close} pax26={pax26} />
-                <VtuNavItem pax26={pax26} onClose={close} />
 
                 <SectionLabel label="Preferences" pax26={pax26} />
                 <NavItem href="/profile" icon={Settings} label="Account Settings" onClick={close} pax26={pax26} />

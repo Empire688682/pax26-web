@@ -1,8 +1,8 @@
 import ApiDocs from '@/components/ApiDocs/ApiDocs'
 import React from 'react'
 export const metadata = {
-  title: "API Documentation - Pax26",
-  description: "Explore Pax26 API documentation for integrating airtime, data, electricity, TV subscriptions, gift cards, and more into your applications.",
+  title: "API Documentation – Pax26 WhatsApp Commerce",
+  description: "Pax26 developer API documentation for integrating WhatsApp automation, storefront management, AI conversations, and sales analytics into your applications.",
   alternates: {
     canonical: "https://pax26.com/api-docs",
   },

@@ -5,13 +5,13 @@ export function mockVisitorReply(userText, userName) {
 Right now, full AI chat is available only inside our app.
 
 🚀 With Pax26 you get:
+• Your own online storefront
 • AI-powered WhatsApp automation
-• Auto replies & follow-ups
-• Utility payments (airtime, data, bills)
-• Business tools in one dashboard
+• Auto replies & follow-ups 24/7
+• Smart lead follow-up & sales tools
 
 👉 Create a free account to continue chatting:
 https://pax26.com
 
-Reply *START* after signup and we’ll take it from there 😊`;
+Reply *START* after signup and we'll take it from there 😊`;
 }

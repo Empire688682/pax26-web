@@ -133,9 +133,9 @@ export default function CTA() {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
             <h2 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
               style={{ color: pax26?.textPrimary }}>
-              Let Pax26 handle your{" "}
+              Your store is ready.{" "}
               <span className="ct-serif block" style={{ color: primary }}>
-                customer conversations
+                Let AI do the selling.
               </span>
             </h2>
           </motion.div>
@@ -147,8 +147,8 @@ export default function CTA() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto"
             style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-            Join 2,000+ Nigerian businesses that automated their WhatsApp with Pax26.
-            Set up in under 5 minutes. No code required.
+            Join thousands of Nigerian businesses selling on WhatsApp with Pax26.
+            Set up your store in under 5 minutes. No code. No stress.
           </motion.p>
 
           {/* CTAs */}
@@ -164,7 +164,7 @@ export default function CTA() {
                 background: `linear-gradient(135deg, ${primary}, ${pax26?.btn || primary})`,
                 boxShadow: `0 16px 48px ${primary}45`,
               }}>
-              Create Free Account <ArrowRight size={17} />
+              Create My Store Free <ArrowRight size={17} />
             </button>
 
             <button

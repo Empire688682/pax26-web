@@ -171,8 +171,8 @@ function Badge({ children, className = "", bg, border }) {
 
 /* ─── Marquee items ───────────────────────────────────────────────────── */
 const TICKER = [
-  "Pax26 × Meta", "·", "Official WhatsApp API", "·", "Airtime & Data", "·",
-  "Electricity Bills", "·", "TV Subscriptions", "·", "Meta Business Partners", "·",
+  "Pax26 × Meta", "·", "Official WhatsApp API", "·", "Online Store Builder", "·",
+  "AI Sales Agent", "·", "WhatsApp Commerce", "·", "Meta Business Partners", "·",
   "Most Affordable in NG 🇳🇬", "·", "24/7 Auto-Replies", "·",
 ];
 
@@ -190,7 +190,7 @@ export default function Hero() {
   const chips = [
     { icon: Bot,        label: "Official WhatsApp Business API", color: WA, border: `${WA}40` },
     { icon: CreditCard, label: "Meta Business Partner",          color: p,  border: `${p}40`  },
-    { icon: Smartphone, label: "Airtime & Data",                 color: "#a855f7", border: "#a855f740" },
+    { icon: Smartphone, label: "Online Store Builder",           color: "#a855f7", border: "#a855f740" },
   ];
 
   const stats = [
@@ -263,8 +263,8 @@ export default function Hero() {
                 transition={{ duration: .65, delay: .08, ease: [.22, 1, .36, 1] }}>
                 <h1 style={{ color: tp, lineHeight: 1.08 }}
                   className="text-[clamp(30px,6.5vw,58px)] font-black tracking-tight">
-                  Nigeria&apos;s #1 Official<br />
-                  <span className="hr-serif" style={{ color: p }}>WhatsApp Platform.</span>
+                  Sell More on WhatsApp<br />
+                  <span className="hr-serif" style={{ color: p }}>with Your Own AI-Powered Store.</span>
                 </h1>
               </motion.div>
 
@@ -274,10 +274,9 @@ export default function Hero() {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }}
                 className="text-[13.5px] sm:text-[15px] leading-relaxed"
                 style={{ color: ts, opacity: .78 }}>
-                Pax26 Technologies is powered by the{" "}
-                <strong style={{ color: tp }}>Official WhatsApp Business API</strong>{" "}and is a verified{" "}
-                <strong style={{ color: tp }}>Meta Business Partner</strong> — giving Nigerian businesses
-                the most affordable way to automate sales, support and VTU services on WhatsApp.
+                Create a beautiful storefront, showcase your products, let customers order through{" "}
+                <strong style={{ color: tp }}>WhatsApp</strong>, and automate every conversation{" "}
+                <strong style={{ color: tp }}>24/7 using AI</strong> — even while you sleep.
               </motion.p>
 
 
@@ -288,19 +287,19 @@ export default function Hero() {
               >
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
-                  <span>Official WhatsApp Business API</span>
+                  <span>Beautiful Online Storefront</span>
                 </div>
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
-                  <span>VTU Payments, Airtime & Bills</span>
+                  <span>Product Catalog & Order Management</span>
                 </div>
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
-                  <span>No-Code Chatbot Flow Builder</span>
+                  <span>No-Code AI Chatbot Flow Builder</span>
                 </div>
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
-                  <span>24/7 Automated Support & Sales</span>
+                  <span>24/7 Automated Sales & Support</span>
                 </div>
               </motion.div>
 
@@ -317,14 +316,14 @@ export default function Hero() {
                     boxShadow: `0 12px 30px ${p}40`,
                   }}>
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M11.999 2.003C6.476 2.003 2 6.479 2 12.003c0 1.843.484 3.57 1.33 5.065L2.004 22l5.074-1.329A9.935 9.935 0 0012 22.003c5.523 0 9.999-4.476 9.999-10s-4.476-9.997-10-9.997z" fillOpacity=".25" /></svg>
-                  Get Started Free
+                  Start Selling Free
                   <ArrowRight size={15} />
                 </button>
 
                 <Link href="#pricing"
                   className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold"
                   style={{ color: tp, border: `1px solid ${bdr}`, background: "transparent" }}>
-                  View Plans
+                  View Demo
                 </Link>
               </motion.div>
 

@@ -29,12 +29,12 @@ const CSS = `
 `;
 
 const WHY = [
-  "AI automation for WhatsApp and business messaging",
-  "Automatic lead capture and smart follow-up workflows",
-  "Fast and reliable digital utility payments",
-  "Secure wallet for seamless transactions",
-  "Affordable plans with cashback opportunities",
-  "Built for businesses and individuals across Africa",
+  "Build a beautiful online storefront in minutes",
+  "Connect WhatsApp and start receiving orders immediately",
+  "AI agent that replies to customers around the clock",
+  "Smart follow-ups that turn cold leads into buyers",
+  "Affordable plans with no technical setup required",
+  "Built for small businesses and entrepreneurs across Africa",
 ];
 
 /* ── Section label ────────────────────────────────────────────── */
@@ -91,19 +91,18 @@ const About = () => {
               <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-5"
                 style={{ color: pax26?.textPrimary }}>
                 We're building{" "}
-                <span className="ab-serif" style={{ color: primary }}>Africa's AI future</span>
+                <span className="ab-serif" style={{ color: primary }}>Africa's commerce future</span>
               </h1>
 
               <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
                 Pax26 is a product of PAX26 TECHNOLOGIES,
-                a technology company born in Africa, built for Africa.
+                a technology company born in Africa, built for African businesses.
               </p>
-              <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
+              <p className="text-base md:text-lg leading-relaxed max-w-2xl mx-auto mt-3"
                 style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-                PAX26 TECHNOLOGIES is an AI automation platform that helps businesses across the continent
-                automate customer interactions, capture leads, and streamline digital operations —
-                alongside seamless VTU services for everyday needs.
+                We help businesses create online storefronts, automate customer conversations on WhatsApp
+                using AI, and convert every chat into a real sale — 24/7.
               </p>
             </div>
           </div>
@@ -113,15 +112,15 @@ const About = () => {
             style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}` }}>
             <SectionLabel text="What We Do" primary={primary} />
             <h2 className="text-2xl font-extrabold mb-4" style={{ color: pax26?.textPrimary }}>
-              AI automation{" "}
-              <span className="ab-serif" style={{ color: primary }}>meets digital services</span>
+              Your online store,{" "}
+              <span className="ab-serif" style={{ color: primary }}>powered by WhatsApp AI</span>
             </h2>
             <p className="text-sm leading-relaxed max-w-3xl"
               style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-              PAX26 TECHNOLOGIES combines artificial intelligence with digital utility services to help businesses
-              across Africa operate smarter. Our AI tools automatically respond to customers, capture leads, and
-              manage conversations on WhatsApp — while our digital services give instant access to airtime, data,
-              electricity payments, TV subscriptions and more.
+              PAX26 TECHNOLOGIES builds tools that make it effortless for African businesses to sell online.
+              Create a beautiful storefront, showcase your products, connect WhatsApp, and let your AI agent
+              handle every customer conversation — from the first message to the final order — without you
+              lifting a finger.
             </p>
           </div>
 
@@ -132,13 +131,13 @@ const About = () => {
                 icon: Target, color: primary,
                 label: "Mission",
                 title: "Our Mission",
-                text: "To empower businesses and individuals across Africa with intelligent automation tools that simplify communication, improve efficiency, and make digital services more accessible — from Lagos to Nairobi, Accra to Cairo.",
+                text: "To empower every African business owner to build their online store, connect WhatsApp, and let AI sell for them 24/7 — without needing technical skills, a large team, or a big budget.",
               },
               {
                 icon: Eye, color: AMBER,
                 label: "Vision",
                 title: "Our Vision",
-                text: "To become Africa's leading AI automation platform — helping businesses on the continent automate operations, engage customers smarter, and scale faster without needing technical expertise.",
+                text: "To become Africa's leading WhatsApp Commerce platform — the go-to tool for businesses that want to sell more, respond faster, and grow consistently using the power of AI.",
               },
             ].map(({ icon: Icon, color, label, title, text }, i) => (
               <div key={i} className="ab-card rounded-2xl p-7 overflow-hidden relative"
@@ -212,10 +211,10 @@ const About = () => {
                 </p>
                 <p className="text-sm leading-relaxed max-w-lg"
                   style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
-                  Juwon founded Pax26 with a clear mission: build a platform where AI automation
-                  and digital services come together to simplify business operations and everyday
-                  transactions for businesses and individuals across Africa — starting from the
-                  ground up, with integrity and long-term reputation at the core.
+                  Juwon founded Pax26 with one clear goal: make it possible for any African business to build
+                  an online store, connect WhatsApp, and let AI handle the selling — without needing a developer,
+                  a big team, or a complicated setup. Starting from the ground up, with integrity and long-term
+                  impact at the core.
                 </p>
               </div>
             </div>

@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import {
-  Phone, Database, Zap, Tv, Gift, Plus,
-  ArrowRight, CheckCircle2,
+  Store, Bot, MessageSquare, Package,
+  Users, BarChart2, Bell, Zap, ArrowRight, CheckCircle2,
 } from "lucide-react";
 
 /* ── Keyframes + font ─────────────────────────────────────────── */
@@ -28,104 +28,88 @@ const CSS = `
   .ut-card:hover .ut-arrow { transform: translateX(4px); }
 `;
 
-/* ── Service config ───────────────────────────────────────────── */
-const SERVICES = [
+/* ── Feature config ───────────────────────────────────────────── */
+const FEATURES = [
   {
-    icon: Phone,
-    color: "#f97316",
-    name: "Airtime",
-    desc: "Recharge any network instantly",
-    detail: "MTN · Glo · Airtel · 9mobile",
-    href: "/dashboard/services/buy-airtime",
-  },
-  {
-    icon: Database,
-    color: "#38bdf8",
-    name: "Data",
-    desc: "Buy data for any number",
-    detail: "All networks supported",
-    href: "/dashboard/services/buy-data",
-  },
-  {
-    icon: Zap,
-    color: "#fbbf24",
-    name: "Electricity",
-    desc: "Pay bills & buy tokens",
-    detail: "Prepaid & Postpaid meters",
-    href: "/dashboard",
-  },
-  {
-    icon: Tv,
-    color: "#a78bfa",
-    name: "TV Subscription",
-    desc: "Renew your decoder",
-    detail: "DSTV · GOtv · Startimes",
-    href: "/dashboard/services/buy-tv-subscription",
-  },
-  {
-    icon: Gift,
-    color: "#f472b6",
-    name: "Gift Cards",
-    desc: "Buy & redeem gift cards",
-    detail: "iTunes · Amazon · Steam",
-    href: "/dashboard#VTU",
-  },
-  {
-    icon: Plus,
+    icon: Store,
     color: "#22c55e",
-    name: "More Coming",
-    desc: "New services launching soon",
-    detail: "Stay tuned for updates",
-    href: "#",
-    soon: true,
+    name: "Online Storefront",
+    desc: "Display your products beautifully and let customers order on WhatsApp.",
+    detail: "No code required",
+  },
+  {
+    icon: Bot,
+    color: "#38bdf8",
+    name: "AI Sales Agent",
+    desc: "Reply to customers instantly — even while you sleep.",
+    detail: "Powered by PaxAI",
+  },
+  {
+    icon: MessageSquare,
+    color: "#a78bfa",
+    name: "WhatsApp Automation",
+    desc: "Smart conversation flows that guide customers from first message to order.",
+    detail: "Official Meta API",
+  },
+  {
+    icon: Package,
+    color: "#f59e0b",
+    name: "Product Catalog",
+    desc: "Add unlimited products with images, prices and descriptions in minutes.",
+    detail: "Unlimited products",
+  },
+  {
+    icon: Users,
+    color: "#f472b6",
+    name: "Lead Follow-up",
+    desc: "Automatically re-engage cold leads so no sale slips through.",
+    detail: "Auto-sequences",
+  },
+  {
+    icon: BarChart2,
+    color: "#fb923c",
+    name: "Sales Analytics",
+    desc: "See conversations, orders and revenue — all in one clean dashboard.",
+    detail: "Real-time insights",
   },
 ];
 
-/* ── Service card ─────────────────────────────────────────────── */
-function ServiceCard({ service, index, pax26, inView }) {
-  const Icon = service.icon;
+/* ── Feature card ─────────────────────────────────────────────── */
+function FeatureCard({ feature, index, pax26, inView }) {
+  const Icon = feature.icon;
 
   return (
-    <motion.a
-      href={service.soon ? undefined : service.href}
+    <motion.div
       initial={{ opacity: 0, y: 22 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
-      className={`ut-card relative rounded-2xl p-5 flex flex-col gap-3 overflow-hidden ${service.soon ? "cursor-default" : "cursor-pointer"}`}
+      className="ut-card relative rounded-2xl p-5 flex flex-col gap-3 overflow-hidden"
       style={{
         background: pax26?.bg,
         border: `1px solid ${pax26?.border}`,
-        textDecoration: "none",
-        opacity: service.soon ? 0.65 : 1,
       }}>
 
       {/* corner glow */}
       <div className="ut-glow absolute -top-5 -right-5 w-20 h-20 rounded-full pointer-events-none"
-        style={{ background: service.color, filter: "blur(24px)" }} />
+        style={{ background: feature.color, filter: "blur(24px)" }} />
 
       {/* top strip */}
       <div className="absolute top-0 left-0 right-0 h-0.5"
-        style={{ background: `linear-gradient(90deg, ${service.color}, ${service.color}44, transparent)` }} />
+        style={{ background: `linear-gradient(90deg, ${feature.color}, ${feature.color}44, transparent)` }} />
 
       {/* icon */}
       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: `${service.color}18`, color: service.color }}>
+        style={{ background: `${feature.color}18`, color: feature.color }}>
         <Icon size={20} />
       </div>
 
       {/* text */}
       <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-extrabold" style={{ color: pax26?.textPrimary }}>{service.name}</p>
-          {service.soon && (
-            <span className="ut-mono text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-              style={{ background: `${service.color}15`, color: service.color, border: `1px solid ${service.color}28` }}>
-              SOON
-            </span>
-          )}
-        </div>
+        <p className="text-sm font-extrabold mb-1" style={{ color: pax26?.textPrimary }}>
+          {feature.name}
+        </p>
         <p className="text-xs leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-          {service.desc}
+          {feature.desc}
         </p>
       </div>
 
@@ -133,17 +117,15 @@ function ServiceCard({ service, index, pax26, inView }) {
       <div className="h-px" style={{ background: pax26?.border }} />
       <div className="flex items-center justify-between">
         <span className="ut-mono text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
-          {service.detail}
+          {feature.detail}
         </span>
-        {!service.soon && (
-          <ArrowRight size={13} className="ut-arrow" style={{ color: service.color }} />
-        )}
+        <ArrowRight size={13} className="ut-arrow" style={{ color: feature.color }} />
       </div>
-    </motion.a>
+    </motion.div>
   );
 }
 
-/* ── Main Utilities section ───────────────────────────────────── */
+/* ── Main section ─────────────────────────────────────────────── */
 export default function Utilities() {
   const { pax26 } = useGlobalContext();
   const ref = useRef(null);
@@ -173,7 +155,7 @@ export default function Utilities() {
               style={{ background: `${primary}12`, border: `1px solid ${primary}28` }}>
               <Zap size={12} style={{ color: primary }} />
               <span className="text-xs font-bold tracking-widest uppercase" style={{ color: primary }}>
-                Digital Services
+                All the tools you need
               </span>
             </motion.div>
 
@@ -183,8 +165,8 @@ export default function Utilities() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-3xl md:text-5xl font-extrabold leading-tight mb-4"
               style={{ color: pax26?.textPrimary }}>
-              Everything else your{" "}
-              <span className="ut-serif" style={{ color: primary }}>business needs</span>
+              Everything you need to{" "}
+              <span className="ut-serif" style={{ color: primary }}>sell on WhatsApp</span>
             </motion.h2>
 
             <motion.p
@@ -193,17 +175,17 @@ export default function Utilities() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base max-w-xl mx-auto"
               style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-              Beyond AI automation — Pax26 handles all your everyday digital utility payments
-              in one place, instantly, from your wallet.
+              From storefront to sale — Pax26 gives you every tool to build,
+              automate and grow your WhatsApp business.
             </motion.p>
           </div>
 
-          {/* ── Services grid ───────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-            {SERVICES.map((s, i) => (
-              <ServiceCard
+          {/* ── Features grid ───────────────────────────── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-10">
+            {FEATURES.map((f, i) => (
+              <FeatureCard
                 key={i}
-                service={s}
+                feature={f}
                 index={i}
                 pax26={pax26}
                 inView={inView}
@@ -218,10 +200,10 @@ export default function Utilities() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="flex flex-wrap items-center justify-center gap-4">
             {[
-              { text: "Instant delivery", color: "#22c55e" },
-              { text: "Wallet-powered", color: primary },
-              { text: "All Nigerian networks", color: "#f97316" },
-              { text: "24/7 availability", color: "#38bdf8" },
+              { text: "No code required", color: "#22c55e" },
+              { text: "Live in 5 minutes", color: primary },
+              { text: "Official WhatsApp API", color: "#25D366" },
+              { text: "24/7 automation", color: "#38bdf8" },
             ].map(({ text, color }) => (
               <div key={text} className="flex items-center gap-2">
                 <CheckCircle2 size={13} style={{ color }} />

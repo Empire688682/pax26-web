@@ -1,18 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-  Bot, Phone, Wifi, Zap, Tv, ArrowRightLeft,
+  Bot, Wifi, Zap,
   Bell, ArrowRight, Eye, EyeOff, TrendingUp,
   MessageSquare, Users, Layers, Crown, Sparkles,
-  Database, BookOpen, Gift, MessageCircle, Brain, Repeat,
-  Activity, ChevronRight, BarChart2, Shield, MapPin,
-  Radio, Send
+  MessageCircle, Brain, Repeat,
+  Activity, ChevronRight, BarChart2, Shield,
+  Radio, Send, Store, Package
 } from "lucide-react";
-
-const ICON_MAP = {
-  Phone, Database, Zap, Tv, BookOpen, Gift,
-  MessageCircle, Brain, Repeat, ArrowRightLeft, Wifi
-};
 
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
@@ -320,24 +315,10 @@ export default function Dashboard() {
   const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser, aiPlans } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
-  const [vtuServices, setVtuServices] = useState([]);
 
   useEffect(() => {
     getUserRealTimeData();
     fetchUser();
-    const fetchServices = async () => {
-      try {
-        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-        if (!adminUrl) return;
-        const res = await fetch(`${adminUrl}/misc/services`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.success && data.data) {
-          setVtuServices(data.data.filter(s => s.category === "vtu" && s.active !== false));
-        }
-      } catch (err) { console.error(err); }
-    };
-    fetchServices();
   }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
@@ -456,7 +437,7 @@ export default function Dashboard() {
                 fontSize: 13.5, color: textSec, margin: "8px 0 0",
                 fontWeight: 400, maxWidth: 360, lineHeight: 1.6,
               }}>
-                Your automations, wallet & services — all in one place.
+                Your store, automations and sales — all in one place.
               </p>
             </div>
             <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
@@ -652,93 +633,17 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* ── QUICK SERVICES ── */}
+              {/* ── QUICK ACTIONS ── */}
               <div className={`px-s4 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "24px" }}>
-                <Label text="Quick Services" isDark={isDark} />
+                <Label text="Quick Actions" isDark={isDark} />
 
-                {userData?.country === "Nigeria" ? (
-                  /* ── Nigeria: show VTU grid ── */
-                  <div className="px-svc-grid">
-                    {vtuServices.length > 0 ? vtuServices.map((svc) => {
-                      const IconComponent = ICON_MAP[svc.iconName] || Zap;
-                      const linkUrl = svc.key === "transfer"
-                        ? "/dashboard/services/transfer"
-                        : `/dashboard/services/buy-${svc.key.replace("buy-", "")}`;
-                      return (
-                        <SvcCard key={svc.key}
-                          title={svc.name.replace(" Bundles", "").replace(" Pins", "").replace(" Cards", "")}
-                          link={linkUrl}
-                          icon={<IconComponent size={19} strokeWidth={2.2} />}
-                          color={svc.color || C.emerald}
-                          isDark={isDark} router={router}
-                        />
-                      );
-                    }) : (
-                      <>
-                        <SvcCard title="Airtime" link="/dashboard/services/buy-airtime" icon={<Phone size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
-                        <SvcCard title="Data" link="/dashboard/services/buy-data" icon={<Wifi size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
-                        <SvcCard title="Electricity" link="/dashboard/services/buy-electricity" icon={<Zap size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
-                        <SvcCard title="TV" link="/dashboard/services/buy-tv-subscription" icon={<Tv size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
-                        <SvcCard title="Transfer" link="/dashboard/services/transfer" icon={<ArrowRightLeft size={19} strokeWidth={2.2} />} color={C.orange} isDark={isDark} router={router} />
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  /* ── Non-Nigerian: friendly notice card ── */
-                  <div style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 16,
-                    padding: "20px 22px",
-                    borderRadius: 18,
-                    background: isDark ? "rgba(251,191,36,0.05)" : "rgba(251,191,36,0.06)",
-                    border: `1px solid ${isDark ? "rgba(251,191,36,0.18)" : "rgba(251,191,36,0.25)"}`,
-                  }}>
-                    {/* globe icon badge */}
-                    <div style={{
-                      flexShrink: 0,
-                      width: 44, height: 44, borderRadius: 13,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: "rgba(251,191,36,0.12)",
-                      border: "1px solid rgba(251,191,36,0.22)",
-                      color: C.amber,
-                    }}>
-                      <MapPin size={19} strokeWidth={2.2} />
-                    </div>
-
-                    {/* text content */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 6 }}>
-                        <span style={{
-                          fontSize: 13.5, fontWeight: 700,
-                          color: isDark ? "rgba(226,232,240,0.92)" : "rgba(15,23,42,0.9)",
-                          fontFamily: "'Outfit', sans-serif",
-                        }}>
-                          🌍 Utility Services
-                        </span>
-                        {/* Coming Soon badge */}
-                        <span style={{
-                          fontSize: 9, fontWeight: 800, letterSpacing: "0.1em",
-                          textTransform: "uppercase", padding: "3px 10px", borderRadius: 999,
-                          background: "rgba(251,191,36,0.15)",
-                          color: C.amber,
-                          border: "1px solid rgba(251,191,36,0.3)",
-                          fontFamily: "'DM Mono', monospace",
-                        }}>
-                          Coming Soon
-                        </span>
-                      </div>
-                      <p style={{
-                        fontSize: 12.5, lineHeight: 1.65, margin: 0, fontWeight: 400,
-                        color: isDark ? "rgba(148,163,184,0.75)" : "rgba(71,85,105,0.8)",
-                        fontFamily: "'Outfit', sans-serif",
-                      }}>
-                        Utility services (Airtime, Data, Electricity, TV &amp; Transfers) are currently available in{" "}
-                        <strong style={{ color: C.amber, fontWeight: 700 }}>Nigeria</strong>{" "}only — more countries coming soon.
-                      </p>
-                    </div>
-                  </div>
-                )}
+                <div className="px-svc-grid">
+                  <SvcCard title="My Store" link="/dashboard/my-store" icon={<Store size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
+                  <SvcCard title="Products" link="/dashboard/automations/products" icon={<Package size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
+                  <SvcCard title="AI Agent" link="/dashboard/automations/ai-business-dashboard" icon={<Bot size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
+                  <SvcCard title="Inbox" link="/dashboard/automations/whatsapp-inbox" icon={<MessageSquare size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
+                  <SvcCard title="Analytics" link="/dashboard/automations/sales" icon={<BarChart2 size={19} strokeWidth={2.2} />} color={C.coral} isDark={isDark} router={router} />
+                </div>
               </div>
             </div>
 

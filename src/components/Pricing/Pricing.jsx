@@ -152,7 +152,7 @@ function PlanCard({ plan, index, pax26, inView }) {
               ? { background: accent, color: "#fff", boxShadow: `0 10px 28px ${accent}40` }
               : { background: pax26?.secondaryBg, color: pax26?.textPrimary, border: `1px solid ${pax26?.border}` }
           }>
-          {plan.isActive ? (plan.key === 'free' ? 'Get Started' : 'Upgrade Now') : 'Coming Soon'} <ArrowRight size={14} />
+          {plan.isActive ? (plan.key === 'free' ? 'Start Selling Free' : 'Upgrade My Store') : 'Coming Soon'} <ArrowRight size={14} />
         </button>
       </div>
     </motion.div>
@@ -255,8 +255,8 @@ export default function Pricing() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base max-w-xl mx-auto"
               style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-              No hidden fees. No surprises. Pick a plan and start automating today —
-              upgrade or downgrade any time.
+              Start free and grow at your own pace. Every plan includes your online store,
+              WhatsApp connection, and AI sales agent. Upgrade anytime.
             </motion.p>
           </div>
 

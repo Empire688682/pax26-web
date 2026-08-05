@@ -13,7 +13,7 @@ const DownloadOurApp = () => {
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-4xl font-bold text-blue-600 mb-4">Get the Pax26 App</h1>
         <p className="text-gray-700 mb-8 text-lg">
-          Download our mobile app for the fastest way to buy data, airtime, recharge PINs and more!
+          Download our mobile app and manage your WhatsApp store, track orders, and chat with customers — all from your phone.
         </p>
 
         <div className="flex justify-center items-center gap-4 mb-10 flex-wrap">

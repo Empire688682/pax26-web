@@ -11,35 +11,37 @@ export const metadata = {
   metadataBase: new URL("https://pax26.com"),
 
   title: {
-    default: "Pax26 Technologies – AI Automation Platform for WhatsApp & Business Workflows",
+    default: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
     template: "%s | Pax26",
   },
 
   description:
-    "Pax26 Technologies is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows. It also supports airtime, data, electricity payments and digital services.",
+    "Create your online storefront, showcase products, automate customer conversations and convert WhatsApp chats into sales using AI. Pax26 is the WhatsApp Commerce platform for small businesses.",
 
   keywords: [
-    "ai automation platform",
-    "whatsapp ai automation",
-    "ai chatbot for business",
-    "business automation tools",
-    "workflow automation",
-    "ai agents",
-    "saas automation platform",
-    "buy airtime nigeria",
-    "buy data online nigeria",
-    "pay electricity bills nigeria",
-    "tv subscription nigeria",
-    "digital payments nigeria",
+    "whatsapp business",
+    "whatsapp store",
+    "ai sales assistant",
+    "whatsapp commerce",
+    "online store builder",
+    "whatsapp storefront",
+    "ai customer support",
+    "small business automation",
+    "whatsapp shopping",
+    "social commerce",
+    "local business store",
+    "ai whatsapp agent",
+    "sell on whatsapp",
+    "whatsapp chatbot",
     "pax26",
   ],
 
-  authors: [{ name: "Jayempire" }],
+  authors: [{ name: "Pax26 Team" }],
   creator: "Pax26 Team",
   publisher: "Pax26",
 
-  applicationName: "Pax26 Technologies",
-  category: "AI Automation Platform",
+  applicationName: "Pax26",
+  category: "WhatsApp Commerce Platform",
 
   icons: {
     icon: "/icon.ico",
@@ -63,9 +65,9 @@ export const metadata = {
   },
 
   openGraph: {
-    title: "Pax26 Technologies – AI Automation for WhatsApp & Business Workflows",
+    title: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
     description:
-      "Automate your business with AI. Pax26 enables WhatsApp automation, lead capture, and workflow automation while supporting digital payments.",
+      "Create your online storefront, showcase products, automate customer conversations and convert WhatsApp chats into sales using AI.",
     url: "https://pax26.com",
     siteName: "Pax26",
     locale: "en_US",
@@ -76,16 +78,16 @@ export const metadata = {
         url: "/Pax26_single_logo.png",
         width: 1200,
         height: 630,
-        alt: "Pax26 AI Automation Platform",
+        alt: "Pax26 — WhatsApp Commerce Platform",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Pax26 Pax26 Technologies – AI Automation Platform",
+    title: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
     description:
-      "Automate WhatsApp replies, capture leads and run workflows with AI. Pax26 also supports digital payments and utilities.",
+      "Create your storefront, automate WhatsApp conversations, and let AI sell for you 24/7. Built for small businesses.",
     images: ["/Pax26_single_logo.png"],
   },
 };
@@ -107,7 +109,7 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "Organization",
-                  name: "Pax26 Technologies",
+                  name: "Pax26",
                   url: "https://pax26.com",
                   logo: "https://pax26.com/icon.ico",
                   sameAs: [
@@ -119,12 +121,12 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "SoftwareApplication",
-                  name: "Pax26 Technologies",
+                  name: "Pax26",
                   url: "https://pax26.com",
                   applicationCategory: "BusinessApplication",
                   operatingSystem: "Web",
                   description:
-                    "Pax26 is an AI automation platform that helps businesses automate WhatsApp replies, capture leads, and manage workflows.",
+                    "Pax26 is a WhatsApp Commerce platform that helps businesses create an online storefront, automate customer conversations using AI, and convert WhatsApp chats into sales.",
                   creator: {
                     "@type": "Organization",
                     name: "Pax26",
@@ -138,12 +140,12 @@ export default function RootLayout({ children }) {
 
                 {
                   "@type": "Service",
-                  name: "Pax26 Technologies AI Automation",
+                  name: "Pax26 WhatsApp Commerce Platform",
                   description:
-                    "AI powered automation services including WhatsApp messaging automation, AI agents, workflow automation and lead capture.",
+                    "Build your online store, connect WhatsApp, and let AI sell for you 24/7. Pax26 provides AI-powered WhatsApp automation, product catalog management, and smart lead follow-up for small businesses.",
                   provider: {
                     "@type": "Organization",
-                    name: "Pax26 Technologies",
+                    name: "Pax26",
                   },
                 },
 

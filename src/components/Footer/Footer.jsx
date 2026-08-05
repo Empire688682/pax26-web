@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SocialIcons from "../SocialIcons/SocialIcons";
 import { useGlobalContext } from "../Context";
-import { ArrowUp, Bot, Zap, Wifi, Tv, CreditCard, Phone, Database } from "lucide-react";
+import { ArrowUp, Bot, Zap, Wifi } from "lucide-react";
 import { usePathname } from "next/navigation";
 import ChatbotWidget from "../Chatbot/ChatbotWidget";
 
@@ -176,13 +176,13 @@ const Footer = () => {
               </div>
 
               <p className="text-sm leading-relaxed mb-5" style={{ color: mutedColor }}>
-                AI-powered WhatsApp automation and digital services for African businesses.
-                Smart follow-ups, chatbots, and instant VTU — all in one place.
+                AI-powered WhatsApp Commerce for businesses. Build your online store, automate
+                customer conversations, and convert WhatsApp chats into sales — 24/7.
               </p>
 
               {/* tag chips */}
               <div className="flex flex-wrap gap-2">
-                {["AI Automation", "Digital Services", "WhatsApp API"].map(t => (
+                {["WhatsApp Commerce", "AI Automation", "Online Store"].map(t => (
                   <span key={t}
                     className="ft-mono text-[10px] font-medium px-2.5 py-1 rounded-lg"
                     style={{ background: inputBg, border: `1px solid ${pax26.border}`, color: mutedColor }}>
@@ -203,15 +203,14 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* ── Digital Services col ──────────────────── */}
+            {/* ── Store & Sell col ──────────────────────── */}
             <div>
-              <ColHead textColor={headingColor}>Digital Services</ColHead>
+              <ColHead textColor={headingColor}>Sell on WhatsApp</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/dashboard/services/buy-data" icon={<Database size={13} />} textColor={linkColor}>Buy Data</FootLink>
-                <FootLink href="/dashboard/services/buy-airtime" icon={<Phone size={13} />} textColor={linkColor}>Airtime Recharge</FootLink>
-                <FootLink href="/dashboard" icon={<Zap size={13} />} textColor={linkColor}>Electricity Bills</FootLink>
-                <FootLink href="/dashboard/services/buy-tv-subscription" icon={<Tv size={13} />} textColor={linkColor}>TV Subscription</FootLink>
-                <FootLink href="/dashboard#VTU" icon={<CreditCard size={13} />} textColor={linkColor}>Gift Cards</FootLink>
+                <FootLink href="/dashboard/my-store" icon={<Wifi size={13} />} textColor={linkColor}>My Storefront</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Bot size={13} />} textColor={linkColor}>AI Sales Agent</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
+                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Lead Follow-ups</FootLink>
               </ul>
             </div>
 

@@ -8,7 +8,11 @@
 export const PAX26_KNOWLEDGE = `
 ## About Pax26
 
-Pax26 is an AI automation and business growth platform built for businesses and individuals. It provides WhatsApp automation, AI chatbot tools, and customer engagement systems — plus utility payment services (airtime, data, electricity, TV subscriptions) as additional support features.
+Pax26 is a WhatsApp Commerce platform built for small businesses and entrepreneurs.
+It helps you create a beautiful online storefront, display your products, receive orders directly
+on WhatsApp, and automate customer conversations using AI — 24/7.
+
+Core promise: Create your online store. Connect WhatsApp. Let AI sell for you 24/7.
 
 Website: https://pax26.com
 Contact page: https://pax26.com/contact
@@ -16,208 +20,177 @@ Support email: info@pax26.com
 
 ---
 
-## AI Automation Features
+## What Pax26 Does
 
-Pax26's core offering is a suite of AI-powered automation tools that help businesses automate customer communication, boost engagement, and grow faster.
-
-### WhatsApp Auto-Reply Bot
-Connect your WhatsApp Business number to Pax26 via Meta Embedded Signup and set up an AI-powered auto-reply bot that:
-- Responds to customer messages 24/7 without manual intervention
-- Handles FAQs, product inquiries, and order status questions automatically
-- Escalates complex queries to a human agent when needed
-- Supports custom reply rules and keyword triggers
-
-### AI Chatbot Builder
-Build a custom AI chatbot for your business using Pax26's no-code chatbot builder:
-- Train the chatbot on your own business knowledge base
-- Deploy the chatbot on your website or WhatsApp
-- Customize the chatbot's tone, persona, and response style
-- View conversation analytics and performance metrics
-
-### Smart Follow-Up Tools
-Automate follow-up messages to leads and customers:
-- Schedule follow-up messages after a customer inquiry
-- Set up drip campaigns via WhatsApp
-- Track open rates and response rates
-- Integrate with your existing CRM workflow
-
-### Customer Support Automation
-Reduce support workload with AI-driven automation:
-- Auto-categorize and route incoming support messages
-- Generate AI-suggested replies for your support team
-- Maintain a full conversation history and audit trail
-- Handoff to live agents seamlessly when the AI cannot resolve an issue
+Pax26 is NOT a utility payment or VTU platform.
+Pax26 is a platform that enables businesses to:
+- Create an online storefront and display products beautifully
+- Receive orders directly on WhatsApp
+- Automate customer conversations using AI
+- Convert WhatsApp conversations into sales
 
 ---
 
-## Utility Payment Services
+## Core Features
 
-Pax26 also provides fast, reliable utility payment services for Nigerian users.
+### Online Storefront
+Build a beautiful product storefront in minutes — no code, no developer needed.
+- Upload unlimited products with images, prices, and descriptions
+- Customers can browse your store and place orders through WhatsApp
+- Your store is live 24/7, even when you're offline
 
-### Airtime
-Buy airtime instantly for all major Nigerian networks:
-- MTN
-- Airtel
-- Glo
-- 9mobile (Etisalat)
+### AI Sales Agent (PaxAI)
+Train a custom AI agent once with your business info, products, prices, FAQs and tone.
+Your agent then:
+- Replies to every customer message instantly — 24/7, no manual effort
+- Answers product questions, shares prices, and guides customers to order
+- Escalates complex queries to you when needed
+- Learns your brand voice and stays on-brand every time
 
-Airtime purchases are processed in real time and delivered directly to the recipient's phone number.
+### WhatsApp Automation
+Connect your WhatsApp Business number via Meta's official Cloud API:
+- Automatic replies to every incoming message
+- Keyword triggers and custom conversation flows
+- Handles thousands of chats simultaneously
+- No message goes unanswered — nights, weekends, holidays
 
-### Data Bundles
-Purchase data bundles for all major networks:
-- MTN data plans (daily, weekly, monthly, SME data)
-- Airtel data plans (daily, weekly, monthly)
-- Glo data plans (daily, weekly, monthly)
-- 9mobile data plans (daily, weekly, monthly)
+### Smart Lead Follow-up
+Never lose a warm lead again:
+- Automatically re-engages leads who went silent
+- Multi-step follow-up sequences run while you sleep
+- Timed to optimal engagement windows
+- Recovers cold leads automatically
 
-Data bundles are activated immediately after payment.
+### Lead Qualification
+AI pre-qualifies leads before routing them to you:
+- Asks the right questions automatically
+- Scores and ranks leads by intent
+- Only sends hot, ready-to-buy leads to your inbox
 
-### Electricity Bills
-Pay prepaid and postpaid electricity bills for all major Nigerian electricity distribution companies (DISCOs):
-- AEDC — Abuja Electricity Distribution Company
-- IKEDC — Ikeja Electric (Lagos)
-- EKEDC — Eko Electricity Distribution Company (Lagos)
-- IBEDC — Ibadan Electricity Distribution Company
-- JED — Jos Electricity Distribution
-- Kaduna Electric — Kaduna Electricity Distribution Company
-- KEDCO — Kano Electricity Distribution Company
-- BEDC — Benin Electricity Distribution Company
-- EEDC — Enugu Electricity Distribution Company
-- PHED — Port Harcourt Electricity Distribution Company
-- YEDC — Yola Electricity Distribution Company
+### Product Catalog Management
+- Add, edit, and organise your products easily
+- Set prices, descriptions, and product images
+- Manage inventory and product availability
 
-For prepaid meters, a token is generated and delivered instantly. For postpaid, the bill is paid directly to the DISCO.
+### Customer Management (Leads & Contacts)
+- Keep track of every customer conversation in one inbox
+- See full conversation history with every contact
+- Tag and organise leads for follow-up
 
-### TV Subscriptions
-Renew or subscribe to cable TV packages:
-- DSTV — all bouquets (Padi, Yanga, Confam, Compact, Compact Plus, Premium)
-- GOtv — all packages (Lite, Jinja, Jolli, Max, Supa, Supa Plus)
-- Startimes — all packages (Nova, Basic, Smart, Classic, Super)
+### Sales Analytics
+- Track conversations, orders, and revenue
+- See your best-performing products
+- Monitor response rates and conversion metrics
 
-Subscriptions are activated within minutes of payment.
+### Order Notifications
+- Get instant alerts when a customer places an order
+- Fulfilment-ready notifications straight to your dashboard
 
-### Gift Cards
-Buy digital gift cards for popular platforms and retailers. Gift cards are delivered electronically to your email or Pax26 wallet.
+### Broadcast Messaging
+- Send WhatsApp broadcasts to your contact list
+- Schedule campaigns and track delivery reports
 
 ---
 
 ## Pricing
 
-Pax26 offers flexible pricing to suit individuals and businesses of all sizes.
+Pax26 offers flexible plans to suit businesses of every size.
 
-### Free Tier
-- Access to all utility payment services (airtime, data, electricity, TV, gift cards)
-- Basic account features
-- No monthly fee
+### Free Plan
+- Online storefront (limited products)
+- WhatsApp connection
+- Basic AI agent replies
+- No monthly fee — start immediately
 
-### Starter Plan (AI Automation)
-- Includes WhatsApp auto-reply bot
-- Limited number of automated conversations per month
-- Basic analytics dashboard
-- Suitable for small businesses and freelancers
+### Starter Plan
+- More products and higher conversation limits
+- Full AI agent with custom training
+- Smart follow-up automation
+- Basic analytics
 
-### Business Plan (AI Automation)
+### Business Plan
 - Everything in Starter
 - Higher conversation limits
-- AI chatbot builder with custom training
-- Smart follow-up tools
+- Advanced lead qualification flows
 - Priority support
+- Full sales analytics
 
-### Enterprise Plan (AI Automation)
+### Enterprise Plan
 - Everything in Business
 - Unlimited conversations
 - Dedicated account manager
 - Custom integrations and API access
 - SLA-backed uptime guarantee
 
-For the latest pricing details and to compare plans, visit https://pax26.com or contact the sales team at info@pax26.com.
+For the latest pricing, visit https://pax26.com/#pricing or contact info@pax26.com.
 
 ---
 
 ## How to Get Started
 
-1. Visit https://pax26.com and click "Sign Up" to create a free account.
-2. Verify your email address using the link sent to your inbox.
-3. Fund your Pax26 wallet using bank transfer, card payment, or USSD.
-4. Navigate to the service you need and complete your transaction.
-5. For AI automation features, go to the Automations section in your dashboard and follow the setup wizard.
-
----
-
-## How to Fund Your Wallet
-
-- Log in to your Pax26 account.
-- Go to "Wallet" in the dashboard.
-- Click "Fund Wallet" and choose your preferred payment method: bank transfer, debit/credit card, or USSD.
-- Enter the amount and complete the payment.
-- Your wallet balance is updated instantly.
+1. Visit https://pax26.com and click "Start Selling Free" to create your account.
+2. Verify your email using the link sent to your inbox.
+3. Go to your dashboard and set up your storefront.
+4. Add your products to your catalog.
+5. Connect your WhatsApp Business number under Automations → Connect WhatsApp.
+6. Train your AI agent with your business info under Automations → AI Agent Setup.
+7. Activate automation and start receiving orders on WhatsApp.
 
 ---
 
 ## How to Connect WhatsApp
 
-Pax26 supports two methods to connect your WhatsApp number. Both are available in the dashboard under Automations → Connect WhatsApp.
+Both methods are available in your dashboard under Automations → Connect WhatsApp.
 
 ### Method 1: Official Meta API (Recommended)
-Uses Meta Embedded Signup — a secure Facebook/Meta login flow. Best for businesses that want full WhatsApp Business API features.
-
-1. Go to Automations → Connect WhatsApp in your Pax26 dashboard.
+Uses Meta Embedded Signup — the safest and most reliable method.
+1. Go to Automations → Connect WhatsApp in your dashboard.
 2. Select the "Official Meta API" tab.
 3. Click "Continue with Meta."
-4. A Meta/Facebook login popup will appear — sign in with the Facebook account linked to your WhatsApp Business account.
-5. Follow the on-screen steps to select or create a WhatsApp Business number and grant Pax26 the required permissions.
-6. Once complete, your number is connected and AI replies activate instantly.
-
-Note: Requires a WhatsApp Business account registered through Meta. Personal WhatsApp numbers are not supported on this method.
+4. Sign in with the Facebook account linked to your WhatsApp Business account.
+5. Follow the steps to select your WhatsApp Business number and grant permissions.
+6. Your number is connected and AI replies activate instantly.
 
 ### Method 2: Direct QR Scan
-Uses a direct WhatsApp session via QR code. Works for both personal and business WhatsApp numbers.
-
-1. Go to Automations → Connect WhatsApp in your Pax26 dashboard.
+Works for both personal and business WhatsApp numbers.
+1. Go to Automations → Connect WhatsApp in your dashboard.
 2. Select the "Direct QR Scan" tab.
-3. A QR code will appear on screen.
-4. Open WhatsApp on your phone → tap Menu (Android) or Settings (iOS) → select "Linked Devices" → "Link a Device."
-5. Point your phone's camera at the QR code.
-6. Your WhatsApp is connected once the scan is confirmed.
-
-Note: For best results with QR scan, use a dedicated business SIM that has never been on personal WhatsApp.
+3. Scan the QR code using WhatsApp → Linked Devices → Link a Device.
+4. Your WhatsApp is connected once the scan is confirmed.
 
 ---
 
 ## Frequently Asked Questions (FAQs)
 
-**Q: What is Pax26 primarily used for?**
-A: Pax26 is primarily an AI automation platform — it helps businesses automate WhatsApp customer support, build AI chatbots, and manage customer engagement. It also offers utility payment services like airtime, data, electricity, and TV subscriptions.
+**Q: What is Pax26?**
+A: Pax26 is a WhatsApp Commerce platform that helps businesses create an online storefront, display products, receive orders on WhatsApp, and automate customer conversations using AI.
+
+**Q: Is Pax26 a VTU or utility payment platform?**
+A: No. Pax26 is not a VTU platform. It does not offer airtime, data, electricity or TV subscription services. Pax26 is exclusively a WhatsApp Commerce and AI sales automation platform.
 
 **Q: How do I connect my WhatsApp to Pax26?**
-A: Pax26 supports two methods. The recommended option is Official Meta API — go to Automations → Connect WhatsApp, click "Continue with Meta," and sign in with your Facebook account linked to your WhatsApp Business number. The second option is Direct QR Scan — select the QR tab, scan the code with your phone's WhatsApp under Linked Devices, and you're connected. Both methods are available in the dashboard.
+A: Go to Automations → Connect WhatsApp in your dashboard. You can use Official Meta API (recommended) or Direct QR Scan. Both options are guided step-by-step.
 
-**Q: What networks are supported for airtime and data?**
-A: MTN, Airtel, Glo, and 9mobile.
+**Q: How does the AI agent work?**
+A: You train your AI agent once with your business info, products, prices, and FAQs. It then automatically replies to every customer message on WhatsApp — 24/7 — handling enquiries, sharing product details, and guiding customers to place orders.
 
-**Q: How long does an airtime or data purchase take?**
-A: Real time — usually within seconds.
+**Q: Do I need technical skills to use Pax26?**
+A: No. Pax26 is built for non-technical business owners. Everything is point-and-click. No code, no developer needed.
 
-**Q: How long does an electricity token take to arrive?**
-A: Instantly after payment. If not received within 5 minutes, contact info@pax26.com.
+**Q: How long does setup take?**
+A: Most businesses are live in under 5 minutes. Connect WhatsApp, add your products, and activate your AI agent.
 
-**Q: Can I pay electricity bills for any state in Nigeria?**
-A: Yes. Pax26 supports all major DISCOs across Nigeria.
+**Q: Is my WhatsApp account safe?**
+A: Yes. Pax26 uses the official Meta WhatsApp Business Cloud API — the same infrastructure Meta uses. Your messages are encrypted and your account is protected.
 
-**Q: Is my payment information secure?**
-A: Yes. Pax26 uses industry-standard encryption and PCI-compliant payment gateways. Card details are never stored.
-
-**Q: How do I reset my password?**
-A: Click "Forgot Password" on the login page, enter your email, and follow the reset link.
+**Q: Can I cancel my subscription?**
+A: Yes, at any time from the Billing section of your dashboard. Access continues until the end of the billing period.
 
 **Q: Does Pax26 have a mobile app?**
 A: Yes. Search "Pax26" on the Google Play Store or Apple App Store.
 
 **Q: How do I contact Pax26 support?**
-A: Email info@pax26.com or visit https://pax26.com/contact.
-
-**Q: Can I cancel my AI automation subscription?**
-A: Yes, at any time from the Billing section of your dashboard. Access continues until the end of the billing period.
+A: Email info@pax26.com or visit https://pax26.com/contact. Support is available Monday–Friday, 9 AM–6 PM WAT.
 
 ---
 
@@ -227,5 +200,6 @@ A: Yes, at any time from the Billing section of your dashboard. Access continues
 - **Contact page**: https://pax26.com/contact
 - **In-app support**: Available from the dashboard help section
 
-Support is available Monday–Friday, 9 AM–6 PM WAT. For urgent issues, email info@pax26.com with "URGENT" in the subject line.
+Support is available Monday–Friday, 9 AM–6 PM WAT.
+For urgent issues, email info@pax26.com with "URGENT" in the subject line.
 `;

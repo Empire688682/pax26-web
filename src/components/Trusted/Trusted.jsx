@@ -204,8 +204,8 @@ export default function Trusted() {
 
             <p className={`text-base max-w-xl mx-auto ${inView ? "tr-s3" : "opacity-0"}`}
               style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
-              Thousands of Nigerian businesses use Pax26 to automate customer
-              conversations, manage payments, and grow revenue around the clock.
+              Thousands of Nigerian businesses use Pax26 to build their online store, automate WhatsApp
+              conversations, and grow sales around the clock.
             </p>
           </div>
 

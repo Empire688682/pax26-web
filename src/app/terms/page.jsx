@@ -22,7 +22,7 @@ const SECTIONS = [
   {
     num: "04",
     title: "Wallet, Payments & Transactions",
-    body: "PAX26 TECHNOLOGIES provides a digital wallet system that allows users to fund their accounts and pay for services such as airtime, data, electricity, subscriptions, and digital products. Wallet balances are not bank deposits and do not earn interest. All payments are processed using third-party providers such as Flutterwave, Monnify, or similar gateways.\n\nYou authorize PAX26 TECHNOLOGIES to debit your wallet or chosen payment method for all transactions initiated by your account. Once a transaction is completed, it cannot be reversed except where required by law or explicitly stated.",
+    body: "PAX26 TECHNOLOGIES provides a digital wallet system that allows users to fund their accounts and pay for platform subscriptions and digital services. Wallet balances are not bank deposits and do not earn interest. All payments are processed using third-party providers such as Flutterwave, Monnify, or similar gateways.\n\nYou authorize PAX26 TECHNOLOGIES to debit your wallet or chosen payment method for all transactions initiated by your account. Once a transaction is completed, it cannot be reversed except where required by law or explicitly stated.",
   },
   {
     num: "05",
@@ -32,7 +32,7 @@ const SECTIONS = [
   {
     num: "06",
     title: "Refunds & Failed Transactions",
-    body: "Digital services such as airtime, data, electricity, and subscriptions are non-refundable once successfully delivered. If a transaction fails or is duplicated, PAX26 TECHNOLOGIES may reverse or credit the wallet at its discretion after verification.",
+    body: "Subscription payments and digital services are non-refundable once successfully activated. If a transaction fails or is duplicated, PAX26 TECHNOLOGIES may reverse or credit the wallet at its discretion after verification.",
   },
   {
     num: "07",

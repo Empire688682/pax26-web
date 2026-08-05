@@ -2,24 +2,26 @@ import Blog from '@/components/Blog/Blog'
 import React from 'react'
 
 export const metadata = {
-  title: "Pax26 Blog – AI Automation & Digital Services Insights",
+  title: "Pax26 Blog – WhatsApp Commerce, AI Automation & Selling Tips",
   description:
-    "Read the Pax26 blog for the latest tips and guides on AI automation, WhatsApp auto-replies, lead follow-ups, chatbots, and digital services like airtime, data, and bill payments.",
+    "Read the Pax26 blog for practical guides on selling through WhatsApp, building your online storefront, automating customer conversations with AI, and growing your business.",
   keywords: [
     "pax26 blog",
-    "ai automation tips",
-    "whatsapp automation",
-    "lead follow-up",
-    "digital services nigeria",
-    "chatbots",
+    "whatsapp commerce tips",
+    "sell on whatsapp",
+    "whatsapp store guide",
+    "ai sales automation",
+    "small business whatsapp",
+    "online store tips",
+    "whatsapp chatbot guide",
   ],
   alternates: {
     canonical: "https://pax26.com/blog",
   },
   openGraph: {
-    title: "Pax26 Blog – AI Automation & Digital Services",
+    title: "Pax26 Blog – WhatsApp Commerce & AI Selling Tips",
     description:
-      "Stay updated with Pax26 blog posts on AI automation, WhatsApp automation, chatbots, and other digital services for businesses in Nigeria.",
+      "Practical guides and insights on selling through WhatsApp, building your online store, and automating customer conversations with AI.",
     url: "https://pax26.com/blog",
     siteName: "Pax26",
     images: [
@@ -36,7 +38,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Pax26 Blog",
     description:
-      "Get insights from Pax26 on AI automation, WhatsApp bots, lead follow-ups, and digital services in Nigeria.",
+      "Learn how to sell more on WhatsApp, automate customer conversations with AI, and grow your business with Pax26.",
     images: ["/Pax26_single_logo.png"],
   },
 };

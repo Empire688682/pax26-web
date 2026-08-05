@@ -1,7 +1,6 @@
 "use client";
 
 import CTA from '@/components/CTA/CTA';
-import DownloadOurApp from '@/components/DownloadOurApp/DownloadOurApp';
 import Hero from '@/components/Hero/Hero';
 import Pricing from '@/components/Pricing/Pricing';
 import Services from '@/components/Services/Services';
@@ -15,7 +14,6 @@ import Problem from '@/components/Problem/Problem';
 import AutomationFeatures from '@/components/AutomationFeatures/AutomationFeatures';
 import HowItWorks from '@/components/HowItWorks/HowItWorks';
 import Demo from '@/components/Demo/Demo';
-import Utilities from '@/components/Utilities/Utilities';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
@@ -97,7 +95,29 @@ const Page = () => {
         </motion.div>
       </div>
 
-      {/* HowItWorks */}
+      {/* Services */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.35 }}
+        variants={fadeInUp}
+      >
+        <Services />
+      </motion.div>
+
+      {/* Demo / Storefront Showcase */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        variants={fadeInUp}
+      >
+        <Demo />
+      </motion.div>
+
+      {/* How It Works */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -108,15 +128,26 @@ const Page = () => {
         <HowItWorks />
       </motion.div>
 
-      {/* Demo */}
+      {/* Why Choose Us */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
+        transition={{ duration: 0.6, delay: 0.45 }}
         variants={fadeInUp}
       >
-        <Demo />
+        <WhyChooseUs />
+      </motion.div>
+
+      {/* Testimonials */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        variants={fadeInUp}
+      >
+        <Testimonials />
       </motion.div>
 
       {/* Pricing */}
@@ -130,27 +161,8 @@ const Page = () => {
         <Pricing />
       </motion.div>
 
-      {/* Utilities */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-        variants={fadeInUp}
-      >
-        <Utilities />
-      </motion.div>
-
-      {/* Testimonials */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-        variants={fadeInUp}
-      >
-        <Testimonials />
-      </motion.div>
+      {/* Utilities section intentionally hidden — not part of core WhatsApp Commerce positioning */}
+      {/* <motion.div ... ><Utilities /></motion.div> */}
 
       {/* CTA */}
       <motion.div

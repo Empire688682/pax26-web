@@ -172,7 +172,7 @@ export default function ChatbotWidget() {
             {
               id: makeId(),
               role: "assistant",
-              text: "👋 Hi! I'm the Pax26 assistant. Ask me anything about our services — airtime, data, electricity, TV subscriptions, AI automation, and more.",
+              text: "👋 Hi! I'm the Pax26 assistant. Ask me anything about building your online store, connecting WhatsApp, AI automation, or selling more with Pax26.",
               createdAt: Date.now(),
             },
           ]);
