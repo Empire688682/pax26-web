@@ -926,6 +926,7 @@ export default function AiBusinessDashboard() {
     slug: "",
     logoUrl: "",
     storeTheme: "classic",
+    emailSalesAlerts: true,
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -972,6 +973,7 @@ export default function AiBusinessDashboard() {
           slug: profile.slug || "",
           logoUrl: profile.logoUrl || "",
           storeTheme: profile.storeTheme || "classic",
+          emailSalesAlerts: profile.emailSalesAlerts !== false,
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -1065,6 +1067,7 @@ export default function AiBusinessDashboard() {
             slug: data.profile.slug ?? f.slug,
             logoUrl: data.profile.logoUrl ?? f.logoUrl,
             storeTheme: data.profile.storeTheme ?? f.storeTheme,
+            emailSalesAlerts: data.profile.emailSalesAlerts !== false,
             products: data.profile.products || f.products,
             services: data.profile.services || f.services,
             faqs: data.profile.faqs || f.faqs,
@@ -1390,6 +1393,9 @@ export default function AiBusinessDashboard() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
                     <Toggle label="Auto-Reply" hint="AI responds instantly to inquiries" value={form.autoReplyEnabled} onChange={v => setForm(f => ({ ...f, autoReplyEnabled: v }))} pax26={p} />
                     <Toggle label="Smart Follow-up" hint="AI follows up with leads after a delay" value={form.followUpEnabled} onChange={v => setForm(f => ({ ...f, followUpEnabled: v }))} pax26={p} />
+                    {isSeller && (
+                      <Toggle label="Payment Email Alerts" hint="Get an email when a customer sends payment proof" value={form.emailSalesAlerts !== false} onChange={v => setForm(f => ({ ...f, emailSalesAlerts: v }))} pax26={p} />
+                    )}
                   </div>
                 </div>
               </section>
