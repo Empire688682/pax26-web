@@ -139,13 +139,21 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
     if (imageUrls.length > 0) {
         const firstUrl = imageUrls[0];
         console.log("🖼️ Sending image URL (full):", firstUrl);
-        // First image carries the text as a caption — keeps the conversation coherent
+        // Strip markdown from caption before sending — WhatsApp doesn't render it
+        const cleanCaption = (cleanText || "")
+          .replace(/\*\*(.*?)\*\*/g, "$1")   // **bold**
+          .replace(/\*(.*?)\*/g, "$1")         // *italic*
+          .replace(/__(.*?)__/g, "$1")         // __underline__
+          .replace(/~~(.*?)~~/g, "$1")         // ~~strikethrough~~
+          .replace(/`(.*?)`/g, "$1")           // `code`
+          .trim();
+
         try {
             const result = await sendWhatsAppImageReply({
                 phoneNumberId,
                 to,
                 imageUrl: firstUrl,
-                caption: cleanText || "",   // caption can be empty — that's fine
+                caption: cleanCaption,
             });
             console.log("🖼️  Image send result:", JSON.stringify(result));
             // Send remaining images (2nd, 3rd) without caption
@@ -371,10 +379,16 @@ export const triggerAIResponse = async ({
         const fallback = "Sorry, I'm having trouble right now. Please try again later.";
         const rawAiText = aiResponse?.text || fallback;
 
+        // Strip markdown — WhatsApp renders it as literal characters
+        const strippedText = rawAiText
+          .replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/\*(.*?)\*/g, "$1")
+          .replace(/__(.*?)__/g, "$1")
+          .replace(/~~(.*?)~~/g, "$1")
+          .replace(/`(.*?)`/g, "$1");
+
         // ── Parse image tags out of the AI reply ──────────────────
-        // Seller AI may embed [SEND_IMAGE: url] tags — strip them
-        // and send them as actual WhatsApp image messages first
-        const { imageUrls, cleanText } = extractImageTags(rawAiText);
+        const { imageUrls, cleanText } = extractImageTags(strippedText);
 
         if (imageUrls.length > 0) {
             console.log(`🖼️  AI included ${imageUrls.length} image(s) — sending before text`);
