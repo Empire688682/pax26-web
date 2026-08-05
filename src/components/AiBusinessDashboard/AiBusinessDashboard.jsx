@@ -927,6 +927,8 @@ export default function AiBusinessDashboard() {
     logoUrl: "",
     storeTheme: "classic",
     emailSalesAlerts: true,
+    spamAutoHandoff: true,
+    spamThreshold: 10,
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -974,6 +976,8 @@ export default function AiBusinessDashboard() {
           logoUrl: profile.logoUrl || "",
           storeTheme: profile.storeTheme || "classic",
           emailSalesAlerts: profile.emailSalesAlerts !== false,
+          spamAutoHandoff: profile.spamAutoHandoff !== false,
+          spamThreshold: profile.spamThreshold || 10,
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -1396,7 +1400,29 @@ export default function AiBusinessDashboard() {
                     {isSeller && (
                       <Toggle label="Payment Email Alerts" hint="Get an email when a customer sends payment proof" value={form.emailSalesAlerts !== false} onChange={v => setForm(f => ({ ...f, emailSalesAlerts: v }))} pax26={p} />
                     )}
+                    {isSeller && (
+                      <Toggle label="Spam Auto-Handoff" hint="Auto-pause AI for 24h if a contact sends too many messages with no intent to buy" value={form.spamAutoHandoff !== false} onChange={v => setForm(f => ({ ...f, spamAutoHandoff: v }))} pax26={p} />
+                    )}
                   </div>
+                  {isSeller && form.spamAutoHandoff !== false && (
+                    <div style={{ paddingTop: "4px" }}>
+                      <ThemedSelect
+                        label="Spam handoff threshold"
+                        pax26={p}
+                        value={String(form.spamThreshold || 10)}
+                        onChange={v => setForm(f => ({ ...f, spamThreshold: parseInt(v) }))}
+                        options={[
+                          { value: "5",  label: "5 messages — Very strict" },
+                          { value: "10", label: "10 messages — Recommended" },
+                          { value: "15", label: "15 messages — Lenient" },
+                          { value: "20", label: "20 messages — Very lenient" },
+                        ]}
+                      />
+                      <p style={{ margin: "6px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.45 }}>
+                        If a contact sends this many messages with no buying intent, AI pauses for 24 hours.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </section>
 

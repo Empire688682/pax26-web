@@ -483,9 +483,6 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 9.5: Semantic product search (seller + text only) ───────────
-  // If the message looks like a product enquiry, run a real search and
-  // inject the matched products as grounded context for the AI.
-  // Mirrors the image search flow — AI gets facts, not guesses.
   let enrichedText = inboundText;
 
   if (sellerProfile && isTextMessage && shouldSearch(inboundText)) {
@@ -501,16 +498,78 @@ export const handleIncomingWhatsApp = async (payload) => {
           inboundText,
           sellerProfile.currency || "NGN"
         );
-        // searchContext is a [SYSTEM: ...] block — pass it as the user turn
-        // so the AI responds based on real matched data (same as image search)
         if (searchContext) enrichedText = searchContext;
         console.log(`✅ Step 9.5 — Product search: ${results.length} match(es) injected into AI context`);
       } else {
         console.log("⚠️  Step 9.5 — Product search: no matches, AI falls back to system prompt catalogue");
       }
     } catch (err) {
-      // Non-fatal — AI still has the full catalogue in its system prompt
       console.warn("⚠️  Step 9.5 — Product search failed (non-fatal):", err.message);
+    }
+  }
+
+  // ── Step 9.8: Spam auto-handoff check ─────────────────────
+  // Only runs for sellers who have it enabled and for text messages.
+  // Checks if this customer has sent too many messages with no buying intent.
+  if (
+    sellerProfile &&
+    isTextMessage &&
+    sellerProfile.spamAutoHandoff !== false &&
+    !session.handoff?.isHandedOff
+  ) {
+    const threshold = sellerProfile.spamThreshold || 10;
+    const sessionInboundCount = session.context?.inboundCount || 0;
+
+    if (sessionInboundCount >= threshold) {
+      // Check if any message in this session shows buying intent
+      const BUYING_INTENT = /buy|order|price|cost|how much|delivery|pay|purchase|want|interested|available|stock|send me|i need|i want/i;
+
+      const recentForSpam = await AIMessageModel.find({
+        sessionId: session.sessionId,
+        direction: "inbound",
+      }).select("text").lean();
+
+      const hasBuyingIntent = recentForSpam.some(m => BUYING_INTENT.test(m.text || ""));
+
+      if (!hasBuyingIntent) {
+        console.log(`🚫 Step 9.8 — Spam detected for ${visitorPhone} (${sessionInboundCount} msgs, no buying intent). Auto-handing off.`);
+
+        // Send one polite farewell message
+        const farewellText = `Thanks for reaching out! Our team has noted your messages and will follow up if needed. Have a great day! 😊`;
+        await sendWhatsAppAutomationReply({
+          phoneNumberId,
+          to: visitorPhone,
+          text: farewellText,
+        });
+
+        // Save the outbound farewell to the inbox
+        await AIMessageModel.create({
+          messageId: `spam_handoff_${Date.now()}`,
+          userId: user._id,
+          sessionId: session.sessionId,
+          platform: "whatsapp",
+          phoneNumberId,
+          from: displayPhone,
+          to: visitorPhone,
+          text: farewellText,
+          direction: "outbound",
+          senderType: "system",
+          status: "sent",
+          automation: { isAutoReply: true, workflowId: "spam_handoff" },
+        });
+
+        // Hand off the session — AI will skip this contact until restored
+        const autoResumeAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+        await SessionModel.findByIdAndUpdate(session._id, {
+          "handoff.isHandedOff": true,
+          "handoff.handedOffAt": new Date(),
+          "handoff.reason": "keyword_trigger",
+          "handoff.autoResumeAt": autoResumeAt,
+        });
+
+        console.log(`✅ Step 9.8 — ${visitorPhone} handed off until ${autoResumeAt.toISOString()}`);
+        return { ok: true };
+      }
     }
   }
 

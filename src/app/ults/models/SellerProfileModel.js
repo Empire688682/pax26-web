@@ -44,6 +44,13 @@ const SellerProfileSchema = new mongoose.Schema({
     // Sends the seller an email whenever the AI sends payment details to a customer
     emailSalesAlerts: { type: Boolean, default: true },
 
+    // ── Spam auto-handoff ─────────────────────────────────────
+    // When a contact sends too many messages with no buying intent,
+    // the AI hands them off automatically for 24 hours.
+    spamAutoHandoff: { type: Boolean, default: true },
+    // How many inbound messages in one session before triggering handoff (default 10)
+    spamThreshold: { type: Number, default: 10 },
+
     // Online presence
     onlineStoreUrl: { type: String, default: '', trim: true },
     liveLocation: { type: String, default: '', trim: true },
