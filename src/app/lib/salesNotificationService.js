@@ -15,8 +15,6 @@ export const sendSalesNotification = async (userId, orderData) => {
         console.log(`[salesNotification] ✅ User found: ${user.email} | plan=${user.paxAI?.plan}`);
 
         // ── Plan gate: salesAlertsEnabled ─────────────────────────
-        // If the plan explicitly disables sales alerts, skip silently.
-        // Default true so legacy users (pre-flag) still receive notifications.
         const salesAlertsEnabled = user.paxAI?.salesAlertsEnabled ?? true;
         if (!salesAlertsEnabled) {
             console.log(`[salesNotification] 🚫 Sales alerts disabled for plan '${user.paxAI?.plan}' — skipping`);
@@ -29,16 +27,11 @@ export const sendSalesNotification = async (userId, orderData) => {
         const sellerProfile = await SellerProfileModel.findOne({ userId });
         if (!sellerProfile) {
             console.warn(`[salesNotification] ❌ No seller profile found for userId=${userId}`);
-            return { success: false, message: "Notifications disabled" };
+            return { success: false, message: "No seller profile" };
         }
-        if (!sellerProfile.salesNotificationsEnabled) {
-            console.warn(`[salesNotification] 🚫 salesNotificationsEnabled=false on seller profile (userId=${userId}). Set it to true in seller settings to receive alerts.`);
-            return { success: false, message: "Notifications disabled" };
-        }
-        console.log(`[salesNotification] ✅ Seller profile OK | salesNotificationsEnabled=${sellerProfile.salesNotificationsEnabled} | emailSalesAlerts=${sellerProfile.emailSalesAlerts} | channel=${sellerProfile.salesNotificationChannel}`);
+        console.log(`[salesNotification] ✅ Seller profile OK | emailSalesAlerts=${sellerProfile.emailSalesAlerts} | channel=${sellerProfile.salesNotificationChannel}`);
 
         // Determine allowed channels based on plan
-        // business+ get WhatsApp + email. starter gets in-app + email. free gets in-app only.
         let allowedChannels = ["in-app"];
         if (plan === "business" || plan === "enterprise") {
             allowedChannels = ["in-app", "whatsapp", "email", "both"];
@@ -50,7 +43,9 @@ export const sendSalesNotification = async (userId, orderData) => {
         const actualChannel = allowedChannels.includes(preferredChannel) ? preferredChannel : "in-app";
         console.log(`[salesNotification] 📢 plan=${plan} | preferredChannel=${preferredChannel} | allowedChannels=${allowedChannels.join(",")} | actualChannel=${actualChannel}`);
 
-        // Save in-app notification
+        let messageSent = false;
+
+        // ── In-app notification ──────────────────────────────────────
         const notification = new SellerNotificationModel({
             userId,
             orderId: orderData.orderId || "",
@@ -60,22 +55,20 @@ export const sendSalesNotification = async (userId, orderData) => {
             channel: actualChannel,
             status: "pending",
         });
-
         await notification.save();
         console.log(`[salesNotification] ✅ In-app notification saved (id=${notification._id})`);
 
-        let messageSent = false;
         const msgText = `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Product:* ${notification.productName}\n*Amount:* ₦${notification.amountPaid.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`;
 
+        // ── WhatsApp channel ─────────────────────────────────────────
         if (actualChannel === "whatsapp" || actualChannel === "both") {
             console.log(`[salesNotification] 📱 Attempting WhatsApp notification to seller phone...`);
-            // Send WhatsApp notification to seller's own phone number
             if (user.whatsapp?.connected && user.whatsapp?.displayPhone) {
                 try {
-                    await sendWhatsAppAutomationReply({ 
-                        phoneNumberId: user.whatsapp.phoneNumberId, 
-                        to: user.whatsapp.displayPhone, 
-                        text: msgText 
+                    await sendWhatsAppAutomationReply({
+                        phoneNumberId: user.whatsapp.phoneNumberId,
+                        to: user.whatsapp.displayPhone,
+                        text: msgText,
                     });
                     messageSent = true;
                     console.log(`[salesNotification] ✅ WhatsApp notification sent to ${user.whatsapp.displayPhone}`);
@@ -87,17 +80,21 @@ export const sendSalesNotification = async (userId, orderData) => {
             }
         }
 
-        // ── Send Email sales notification ────────────────────────
-        // Fires for potential sales (to notify seller to log in & confirm) or confirmed sales
-        const shouldEmail = actualChannel === "email" || actualChannel === "both" || sellerProfile.emailSalesAlerts !== false;
-        console.log(`[salesNotification] 📧 Email check: shouldEmail=${shouldEmail} | actualChannel=${actualChannel} | emailSalesAlerts=${sellerProfile.emailSalesAlerts}`);
+        notification.status = messageSent ? "sent" : (actualChannel === "in-app" ? "sent" : "failed");
+        await notification.save();
+
+        // ── Email alert — gated ONLY by emailSalesAlerts field ──────
+        // This fires regardless of salesNotificationsEnabled because it is
+        // controlled by a separate toggle: AI Business Dashboard → "Payment Email Alerts".
+        const shouldEmail = sellerProfile.emailSalesAlerts !== false;
+        console.log(`[salesNotification] 📧 Email check: shouldEmail=${shouldEmail} | emailSalesAlerts=${sellerProfile.emailSalesAlerts}`);
         if (shouldEmail) {
             try {
                 await sendSalesAlertEmail(userId, {
-                    customerPhone: notification.customerName,
-                    productName: notification.productName,
-                    amountPaid: notification.amountPaid,
-                    orderId: notification.orderId,
+                    customerPhone: orderData.customerName,
+                    productName: orderData.productName,
+                    amountPaid: orderData.amountPaid,
+                    orderId: orderData.orderId,
                     isConfirmed: orderData.isConfirmed ?? false,
                 });
                 messageSent = true;
@@ -106,13 +103,10 @@ export const sendSalesNotification = async (userId, orderData) => {
                 console.error(`[salesNotification] ❌ Email sales notification threw:`, err.message);
             }
         } else {
-            console.log(`[salesNotification] ⏭️ Email skipped (shouldEmail=false)`);
+            console.log(`[salesNotification] ⏭️ Email skipped (emailSalesAlerts=false)`);
         }
 
-        notification.status = messageSent ? "sent" : (actualChannel === "in-app" ? "sent" : "failed");
-        await notification.save();
-        console.log(`[salesNotification] 🏁 Done — notification.status=${notification.status}`);
-
+        console.log(`[salesNotification] 🏁 Done — messageSent=${messageSent}`);
         return { success: true, message: "Notification processed" };
     } catch (error) {
         console.error("[salesNotification] 💥 Unexpected error:", error);

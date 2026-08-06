@@ -146,7 +146,7 @@ const SellerProfileSchema = new mongoose.Schema({
     // Sales Notifications & Tracking
     salesNotificationsEnabled: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     salesNotificationChannel: {
         type: String,
