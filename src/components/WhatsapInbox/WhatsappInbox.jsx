@@ -128,6 +128,9 @@ function LeadPanel({
   phone,
   onUpdate,
 }) {
+  const [stage, setStage] = useState(contact?.leadStage || "new");
+  const [notes, setNotes] = useState(contact?.notes || "");
+  const [tags, setTags] = useState(contact?.tags || []);
   const [assignedTo, setAssignedTo] = useState(
     contact?.assignedTo || ""
   );
