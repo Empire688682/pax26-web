@@ -161,17 +161,26 @@ function buildEmail({ businessName, customerPhone, productName, amountPaid, orde
  * @param {{ customerPhone?: string, productName?: string, amountPaid?: number, orderId?: string, isConfirmed?: boolean }} options
  */
 export async function sendSalesAlertEmail(userId, { customerPhone, productName, amountPaid, orderId, isConfirmed = false } = {}) {
+  console.log(`[salesAlert] 📧 sendSalesAlertEmail called | userId=${userId} | isConfirmed=${isConfirmed} | orderId=${orderId}`);
   try {
     const [user, profile] = await Promise.all([
       UserModel.findById(userId).select("email name").lean(),
       SellerProfileModel.findOne({ userId }).select("businessName emailSalesAlerts slug").lean(),
     ]);
 
-    if (!user?.email || !profile) return;
+    if (!user?.email) {
+      console.warn(`[salesAlert] ❌ No email address on user record (userId=${userId}). Cannot send email.`);
+      return;
+    }
+    if (!profile) {
+      console.warn(`[salesAlert] ❌ No seller profile found (userId=${userId}). Cannot send email.`);
+      return;
+    }
+    console.log(`[salesAlert] ✅ User=${user.email} | businessName=${profile.businessName} | emailSalesAlerts=${profile.emailSalesAlerts}`);
 
     // Respect the seller toggle — defaults to true (on)
     if (profile.emailSalesAlerts === false) {
-      console.log(`[salesAlert] Alerts disabled for ${userId}`);
+      console.log(`[salesAlert] 🚫 emailSalesAlerts=false for userId=${userId} — email suppressed.`);
       return;
     }
 
@@ -196,18 +205,21 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName, 
       html,
     };
 
+    console.log(`[salesAlert] 🚀 Calling SendPulse.smtpSendMail to=${user.email} | subject="${subject}"`);
+
     await new Promise((resolve) => {
       sendpulse.smtpSendMail((result) => {
+        console.log(`[salesAlert] 📨 SendPulse callback result:`, JSON.stringify(result));
         if (result?.result === true) {
           console.log(`[salesAlert] ✅ Email sent to ${user.email} (Confirmed: ${isConfirmed})`);
         } else {
-          console.warn("[salesAlert] ⚠️ SendPulse failed:", result);
+          console.warn(`[salesAlert] ⚠️ SendPulse did NOT confirm success. result.result=${result?.result} | message=${result?.message || result?.error || "(no message)"}`);
         }
         resolve();
       }, emailPayload);
     });
   } catch (err) {
     // Non-fatal — never block AI response or order confirmation for a notification
-    console.warn("[salesAlert] Error:", err.message);
+    console.warn(`[salesAlert] 💥 Caught error in sendSalesAlertEmail:`, err.message, err.stack);
   }
 }

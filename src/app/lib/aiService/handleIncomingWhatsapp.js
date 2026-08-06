@@ -389,9 +389,80 @@ export const handleIncomingWhatsApp = async (payload) => {
   if (isImageMessage) {
     console.log("🖼️  Step 8 — Image message detected");
 
+    const caption = message.image?.caption || "";
+
+    // ── Step 8a: EARLY payment-stage check (before fetching media URL) ──
+    // If the caption or recent conversation clearly signals a payment receipt,
+    // handle it immediately — no media URL required. This prevents the case
+    // where Meta's Unauthorized error causes us to skip payment detection.
+    if (sellerProfile) {
+      const earlyMessages = await AIMessageModel.find({
+        sessionId: session.sessionId,
+        userId: user._id,
+      })
+        .sort({ createdAt: -1 })
+        .limit(15)
+        .lean();
+
+      const earlyContext = earlyMessages.reverse().map((m) => ({
+        role: m.direction === "inbound" ? "user" : "assistant",
+        content: m.text,
+      }));
+
+      const { handlePaymentReceipt: _hpr, buildPaymentReceiptContext: _bprc, ..._ } = { handlePaymentReceipt, buildPaymentReceiptContext };
+
+      // Import the detection helpers directly from the module logic:
+      // Re-use the same PAYMENT_KEYWORDS + PAYMENT_STAGE_KEYWORDS checks
+      const PAYMENT_KEYWORDS_EARLY = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
+      const PAYMENT_STAGE_KEYWORDS_EARLY = /account number|bank name|account name|transfer|make payment|pay to|payment details|screenshot of your payment|payment confirmation|once you.?ve transferred|send.*receipt|send.*proof|payment proof|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity|acct|acc\/num|bank:/i;
+
+      const captionSignalsPayment = caption && PAYMENT_KEYWORDS_EARLY.test(caption);
+      const recentText = earlyContext.map(m => m.content || "").join(" ");
+      const stageSignalsPayment =
+        PAYMENT_STAGE_KEYWORDS_EARLY.test(recentText) ||
+        /\b\d{10}\b/.test(recentText) ||
+        (/bank|account|transfer|payment|receipt|proof|pay|naira|₦/i.test(recentText) && earlyContext.length > 0);
+
+      if (captionSignalsPayment || stageSignalsPayment) {
+        console.log("💳 Step 8a — Payment stage/caption detected BEFORE media resolve. Treating image as receipt.");
+        const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
+        const customerName = contactInfo?.name || "WhatsApp Customer";
+
+        // Try to get media URL but don't fail if it's unavailable
+        let earlyMediaUrl = null;
+        try {
+          earlyMediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
+        } catch (mediaErr) {
+          console.warn("⚠️ Step 8a — Media URL resolve failed (continuing without image URL):", mediaErr.message);
+        }
+
+        const receiptResult = await handlePaymentReceipt({
+          sellerId: sellerProfile._id,
+          sellerUserId: user._id,
+          mediaUrl: earlyMediaUrl,
+          customerPhone: visitorPhone,
+          customerName,
+          caption,
+          recentMessages: earlyContext,
+          imageUrl: null,
+          imagePublicId: null,
+        });
+
+        if (receiptResult.handled) {
+          console.log("💳 Step 8a — Payment receipt handled early. Order:", receiptResult.order._id);
+          await triggerAIResponse({
+            session,
+            user,
+            inboundText: buildPaymentReceiptContext(),
+            imageSearchContext: true,
+          });
+          return { ok: true };
+        }
+      }
+    }
+
     try {
       const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id);
-      const caption = message.image?.caption || "";
 
       const recentMessages = await AIMessageModel.find({
         sessionId: session.sessionId,
@@ -432,7 +503,7 @@ export const handleIncomingWhatsApp = async (payload) => {
         console.warn("⚠️ Inbox image upload failed:", uploadErr.message);
       }
 
-      // ── Payment receipt check — keep this, it's separate from product search
+      // ── Payment receipt check (full flow with resolved media URL) ────
       if (sellerProfile) {
         const receiptResult = await handlePaymentReceipt({
           sellerId: sellerProfile._id,
@@ -459,8 +530,6 @@ export const handleIncomingWhatsApp = async (payload) => {
       }
 
       // ── Instead of visual search, send storefront link ────
-      // Build a context block telling the AI to acknowledge the image
-      // and direct the customer to browse the storefront visually
       const storefrontUrl = sellerProfile?.slug
         ? await buildStorefrontUrl({
             sellerProfile,
@@ -484,10 +553,12 @@ export const handleIncomingWhatsApp = async (payload) => {
 
     } catch (err) {
       console.error("❌ Step 8 — Image handling error:", err.message);
+      // Final fallback — send a generic image acknowledgement instead of a
+      // product-search "no match" message (which confuses payment customers)
       await triggerAIResponse({
         session,
         user,
-        inboundText: buildImageNoMatchContext(),
+        inboundText: `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""} but we could not download it. Politely acknowledge you received their message and ask them to describe what they need or resend if it was a payment receipt.]`,
         imageSearchContext: true,
       });
     }
