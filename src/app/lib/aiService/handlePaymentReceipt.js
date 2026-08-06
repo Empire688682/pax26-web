@@ -44,22 +44,69 @@ function isPaymentStage(recentMessages = []) {
     return has10DigitNum || hasPaymentKeyword || (hasGeneralPaymentWord && recentMessages.length > 0);
 }
 
-async function findProductFromConversation(sellerId, recentMessages) {
-    const products = await SellerProductModel.find({ sellerId }).lean();
-    if (!products.length) return null;
+async function resolveProductsFromConversation(sellerId, recentMessages) {
+    const [products, profile] = await Promise.all([
+        SellerProductModel.find({ sellerId }).lean(),
+        SellerProfileModel.findById(sellerId).lean(),
+    ]);
 
-    const conversationText = recentMessages.map((m) => m.content || m.text || "").join(" ").toLowerCase();
+    if (!products.length) return { items: [], subtotal: 0, deliveryFee: 0, total: 0 };
+
+    const conversationText = recentMessages
+        .map((m) => m.content || m.text || "")
+        .join(" ")
+        .toLowerCase();
+
+    const matchedItems = [];
+    let subtotal = 0;
+    let extraDeliverySum = 0;
 
     for (const prod of products) {
         if (prod.name && conversationText.includes(prod.name.toLowerCase())) {
-            return prod;
+            // Check for quantity hints near product name e.g. "2 shirts", "3x shoes"
+            let qty = 1;
+            const nameEscaped = prod.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const qtyRegex = new RegExp(`(\\d+)\\s*(?:x\\s*)?${nameEscaped}|${nameEscaped}\\s*(?:x\\s*)?(\\d+)`, 'i');
+            const match = conversationText.match(qtyRegex);
+            if (match) {
+                const parsed = parseInt(match[1] || match[2], 10);
+                if (!isNaN(parsed) && parsed > 0) qty = parsed;
+            }
+
+            const itemPrice = prod.discountPrice || prod.price || 0;
+            subtotal += itemPrice * qty;
+            extraDeliverySum += (prod.extraShippingFee || 0) * qty;
+
+            matchedItems.push({
+                productId: prod._id,
+                name: prod.name,
+                price: itemPrice,
+                quantity: qty,
+                extraShippingFee: prod.extraShippingFee || 0,
+            });
         }
     }
-    return products[0];
-}
 
-async function resolveProduct(sellerId, recentMessages) {
-    return findProductFromConversation(sellerId, recentMessages);
+    // Fallback if no specific product name matched
+    if (!matchedItems.length && products.length > 0) {
+        const fallback = products[0];
+        const price = fallback.discountPrice || fallback.price || 0;
+        matchedItems.push({
+            productId: fallback._id,
+            name: fallback.name,
+            price: price,
+            quantity: 1,
+            extraShippingFee: fallback.extraShippingFee || 0,
+        });
+        subtotal = price;
+        extraDeliverySum = fallback.extraShippingFee || 0;
+    }
+
+    const baseDeliveryFee = profile?.defaultDeliveryFee || 0;
+    const deliveryFee = matchedItems.length > 0 ? baseDeliveryFee + extraDeliverySum : 0;
+    const total = subtotal + deliveryFee;
+
+    return { items: matchedItems, subtotal, deliveryFee, total };
 }
 
 async function verifyReceiptWithGroq({ imageUrl, mediaUrl }) {
@@ -67,7 +114,7 @@ async function verifyReceiptWithGroq({ imageUrl, mediaUrl }) {
         const apiKey = process.env.GROQ_API_KEY;
         if (!apiKey) {
             console.warn("⚠️ GROQ_API_KEY is not set, falling back to text heuristics");
-            return true; // Fallback to true to preserve existing behavior if API key is missing
+            return true;
         }
 
         let buffer;
@@ -132,7 +179,6 @@ Return ONLY the raw JSON object, without any markdown formatting blocks (like \`
         return json.isPaymentReceipt === true && json.confidence > 0.65;
     } catch (err) {
         console.error("❌ Error verifying payment receipt with Groq:", err);
-        // Fallback: in case of API/parsing failure, we default to true to avoid blocking payment receipt processing
         return true;
     }
 }
@@ -162,7 +208,6 @@ export async function handlePaymentReceipt({
     const likelyReceipt = isLikelyPaymentReceipt(caption, recentMessages);
     const paymentStage = isPaymentStage(recentMessages);
 
-    // Treat inbound images as payment proof when in payment stage, keywords match, or pending order exists
     if (!pendingOrder && !likelyReceipt && !paymentStage) {
         return { handled: false };
     }
@@ -186,9 +231,6 @@ export async function handlePaymentReceipt({
         }
     }
 
-    // Verify using Groq vision model that the image is actually a payment receipt
-    // BUT: if there's a pending order OR we're clearly in payment stage, trust the context
-    // and skip AI verification — the conversation already told us payment was expected.
     const skipVerification = !!pendingOrder || paymentStage;
     if (!skipVerification) {
         const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
@@ -200,11 +242,9 @@ export async function handlePaymentReceipt({
         console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
-    const matchedProduct = await resolveProduct(sellerId, recentMessages);
+    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
 
-    // If we're in payment stage (AI already asked for proof), handle it regardless
-    // of whether we can identify a specific product — the payment context is enough.
-    if (!pendingOrder && !matchedProduct?._id && !paymentStage) {
+    if (!pendingOrder && items.length === 0 && !paymentStage) {
         console.warn("Payment receipt received but no seller products found and not in payment stage");
         return { handled: false };
     }
@@ -214,11 +254,14 @@ export async function handlePaymentReceipt({
     if (!order) {
         order = await SellerOrderModel.create({
             sellerId,
-            productId: matchedProduct?._id || null,
+            productId: items[0]?.productId || null,
+            items,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
-            quantity: 1,
-            totalPrice: matchedProduct?.price || 0,
+            quantity: items.reduce((acc, i) => acc + i.quantity, 0) || 1,
+            subtotalPrice: subtotal,
+            deliveryFee,
+            totalPrice: total,
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
@@ -231,11 +274,15 @@ export async function handlePaymentReceipt({
         await order.save();
     }
 
+    const itemSummaryStr = items.length > 1
+        ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
+        : (items[0]?.name || "Payment receipt received");
+
     try {
         await sendSalesNotification(sellerUserId, {
             orderId: order._id.toString(),
             customerName: order.customerName || order.customerPhone,
-            productName: matchedProduct?.name || "Payment receipt received",
+            productName: itemSummaryStr,
             amountPaid: order.totalPrice,
             isConfirmed: false,
         });
@@ -268,24 +315,31 @@ export async function createPendingOrderFromText({
     const paidViaText = inboundText && PAYMENT_KEYWORDS.test(inboundText);
     if (!isPaymentStage(recentMessages) && !paidViaText) return { created: false };
 
-    const matchedProduct = await resolveProduct(sellerId, recentMessages);
-    if (!matchedProduct?._id) return { created: false };
+    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
+    if (items.length === 0) return { created: false };
 
     const order = await SellerOrderModel.create({
         sellerId,
-        productId: matchedProduct._id,
+        productId: items[0]?.productId || null,
+        items,
         customerPhone: normalizedPhone,
         customerName: customerName || "WhatsApp Customer",
-        quantity: 1,
-        totalPrice: matchedProduct.price || 0,
+        quantity: items.reduce((acc, i) => acc + i.quantity, 0) || 1,
+        subtotalPrice: subtotal,
+        deliveryFee,
+        totalPrice: total,
         status: "pending",
     });
+
+    const itemSummaryStr = items.length > 1
+        ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
+        : (items[0]?.name || "Pending order — awaiting payment proof");
 
     try {
         await sendSalesNotification(sellerUserId, {
             orderId: order._id.toString(),
             customerName: order.customerName || order.customerPhone,
-            productName: matchedProduct?.name || "Pending order — awaiting payment proof",
+            productName: itemSummaryStr,
             amountPaid: order.totalPrice,
             isConfirmed: false,
         });

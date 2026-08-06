@@ -153,6 +153,10 @@ const SellerProfileSchema = new mongoose.Schema({
         enum: ["in-app", "whatsapp", "email", "both"],
         default: "in-app",
     },
+    defaultDeliveryFee: {
+        type: Number,
+        default: 0,
+    },
     totalSalesCount: {
         type: Number,
         default: 0,

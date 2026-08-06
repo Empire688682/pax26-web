@@ -10,8 +10,27 @@ const SellerOrderSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SellerProduct",
-        required: true,
+        required: false,
     },
+
+    items: [
+        {
+            productId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "SellerProduct",
+            },
+            name: String,
+            price: Number,
+            quantity: {
+                type: Number,
+                default: 1,
+            },
+            extraShippingFee: {
+                type: Number,
+                default: 0,
+            },
+        },
+    ],
 
     customerPhone: {
         type: String,
@@ -23,6 +42,13 @@ const SellerOrderSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         default: 1,
+    },
+
+    subtotalPrice: Number,
+
+    deliveryFee: {
+        type: Number,
+        default: 0,
     },
 
     totalPrice: Number,

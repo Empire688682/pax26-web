@@ -74,6 +74,11 @@ const SellerProductSchema = new mongoose.Schema({
         type: Number,
     },
 
+    extraShippingFee: {
+        type: Number,
+        default: 0,
+    },
+
     deliveryTimeFrame: {
         type: String, // "2-3 days", "Within 24 hours", etc
     },

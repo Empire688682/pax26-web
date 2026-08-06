@@ -141,7 +141,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
 }
 
 /* ── Product Card ───────────────────────────────────────── */
-function ProductCard({ product, store, slug, sessionToken, theme, highlighted }) {
+function ProductCard({ product, store, slug, sessionToken, theme, highlighted, onAddToCart }) {
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(false);
   const t = theme;
@@ -151,11 +151,11 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
   const productHref = `/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
 
   return (
-    <Link href={productHref} style={{ textDecoration: "none" }} onClick={() => setLoading(true)}>
-      <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", cursor: "pointer", display: "flex", flexDirection: "column", position: "relative" }}
-        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.12)`; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : "none"; }}>
+    <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", display: "flex", flexDirection: "column", position: "relative" }}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.12)`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : "none"; }}>
 
+      <Link href={productHref} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", flex: 1 }} onClick={() => setLoading(true)}>
         {/* Loading overlay */}
         {loading && (
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "16px" }}>
@@ -174,8 +174,9 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
           {highlighted && <div style={{ position: "absolute", top: "10px", left: "10px", background: t.accent, color: t.accentText, padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, display: "flex", alignItems: "center", gap: "4px" }}>🤖 AI Pick</div>}
           {hasDiscount && !highlighted && product.stock > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800 }}>SALE</div>}
         </div>
+
         {/* Info */}
-        <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ padding: "14px 16px 8px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
           {product.category && <span style={{ fontSize: "10px", fontWeight: 700, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>{product.category}</span>}
           <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: t.textPrimary, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{product.name}</h3>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
@@ -183,8 +184,112 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
             {hasDiscount && <span style={{ fontSize: "12px", color: t.textSecondary, textDecoration: "line-through" }}>{formatPrice(product.price, currency)}</span>}
           </div>
         </div>
-      </article>
-    </Link>
+      </Link>
+
+      {/* Add to cart action button */}
+      <div style={{ padding: "0 16px 14px" }}>
+        <button onClick={() => onAddToCart(product)} disabled={product.stock === 0} style={{ width: "100%", padding: "9px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.accent, color: t.accentText, fontWeight: 700, fontSize: "12px", cursor: product.stock === 0 ? "not-allowed" : "pointer", opacity: product.stock === 0 ? 0.5 : 1 }}>
+          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+const CartIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>);
+
+/* ── Cart Drawer ────────────────────────────────────────── */
+function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, store, theme }) {
+  const t = theme;
+  if (!open) return null;
+
+  const currency = store.currency || "NGN";
+  const subtotal = cart.reduce((sum, item) => sum + (item.product.discountPrice || item.product.price) * item.quantity, 0);
+  const baseDelivery = store.defaultDeliveryFee || 0;
+  const extraDeliverySum = cart.reduce((sum, item) => sum + (item.product.extraShippingFee || 0) * item.quantity, 0);
+  const totalDelivery = cart.length > 0 ? baseDelivery + extraDeliverySum : 0;
+  const grandTotal = subtotal + totalDelivery;
+
+  const handleWhatsAppCheckout = () => {
+    if (cart.length === 0 || !store.whatsappHref) return;
+
+    let itemsText = cart.map(i => `- ${i.quantity}x ${i.product.name} (${formatPrice((i.product.discountPrice || i.product.price) * i.quantity, currency)})`).join("\n");
+    let msg = `Hi! I would like to place an order from *${store.businessName}*:\n\n${itemsText}\n\n*Subtotal:* ${formatPrice(subtotal, currency)}`;
+    if (totalDelivery > 0) {
+      msg += `\n*Delivery Fee:* ${formatPrice(totalDelivery, currency)}`;
+    }
+    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease send your payment details to confirm.`;
+
+    const waNum = store.whatsappHref.replace(/.*wa\.me\//, "");
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200, backdropFilter: "blur(2px)" }} />
+      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "380px", maxWidth: "90vw", background: t.navBg, zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-4px 0 40px rgba(0,0,0,0.25)" }}>
+        {/* Header */}
+        <div style={{ padding: "20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, fontSize: "16px", color: t.textPrimary }}>
+            <CartIcon /> Your Cart ({cart.reduce((a, b) => a + b.quantity, 0)})
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: t.textSecondary, cursor: "pointer" }}><XIcon /></button>
+        </div>
+
+        {/* Cart Items */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          {cart.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 0", color: t.textSecondary }}>
+              <CartIcon />
+              <p style={{ marginTop: "10px", fontSize: "14px" }}>Your cart is empty</p>
+            </div>
+          ) : (
+            cart.map(item => {
+              const price = item.product.discountPrice || item.product.price;
+              return (
+                <div key={item.product._id} style={{ display: "flex", gap: "12px", background: t.card, padding: "12px", borderRadius: "12px", border: `1px solid ${t.border}` }}>
+                  <img src={item.product.images?.[0]?.url} alt={item.product.name} style={{ width: "50px", height: "50px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: t.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.product.name}</p>
+                    <p style={{ margin: "2px 0 6px", fontSize: "12px", fontWeight: 800, color: t.accent }}>{formatPrice(price * item.quantity, currency)}</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button onClick={() => onUpdateQty(item.product._id, item.quantity - 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>-</button>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: t.textPrimary }}>{item.quantity}</span>
+                      <button onClick={() => onUpdateQty(item.product._id, item.quantity + 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>+</button>
+                    </div>
+                  </div>
+                  <button onClick={() => onRemove(item.product._id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "16px" }}>×</button>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Summary & Checkout */}
+        {cart.length > 0 && (
+          <div style={{ padding: "20px", borderTop: `1px solid ${t.border}`, background: t.card, display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: t.textSecondary }}>
+              <span>Subtotal</span>
+              <span style={{ fontWeight: 700, color: t.textPrimary }}>{formatPrice(subtotal, currency)}</span>
+            </div>
+            {totalDelivery > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: t.textSecondary }}>
+                <span>Estimated Delivery</span>
+                <span style={{ fontWeight: 700, color: t.textPrimary }}>{formatPrice(totalDelivery, currency)}</span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: 900, color: t.textPrimary, paddingTop: "6px", borderTop: `1px dashed ${t.border}` }}>
+              <span>Total</span>
+              <span>{formatPrice(grandTotal, currency)}</span>
+            </div>
+
+            <button onClick={handleWhatsAppCheckout} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", width: "100%", padding: "14px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "14px", border: "none", cursor: "pointer", marginTop: "6px", boxShadow: "0 4px 14px #25d36640" }}>
+              <WhatsAppIcon /> Order via WhatsApp
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -198,9 +303,34 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cart, setCart] = useState([]);
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
+
+  const addToCart = (product) => {
+    setCart(prev => {
+      const existing = prev.find(i => i.product._id === product._id);
+      if (existing) {
+        return prev.map(i => i.product._id === product._id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
+    setCartOpen(true);
+  };
+
+  const updateCartQty = (productId, qty) => {
+    if (qty <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart(prev => prev.map(i => i.product._id === productId ? { ...i, quantity: qty } : i));
+  };
+
+  const removeFromCart = (productId) => {
+    setCart(prev => prev.filter(i => i.product._id !== productId));
+  };
 
   // Validate session + resolve referredProductId
   useEffect(() => {
@@ -262,18 +392,29 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
               </Link>
             </div>
 
-            {/* Right: WhatsApp button */}
-            {store.whatsappHref && (
-              <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 2px 10px #25d36640" }}>
-                <WhatsAppIcon /> Chat
-              </a>
-            )}
+            {/* Right: Cart + WhatsApp button */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <button onClick={() => setCartOpen(true)} style={{ position: "relative", width: "38px", height: "38px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.card, color: t.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <CartIcon />
+                {cart.length > 0 && (
+                  <span style={{ position: "absolute", top: "-5px", right: "-5px", background: "#ef4444", color: "#fff", borderRadius: "999px", padding: "1px 6px", fontSize: "10px", fontWeight: 800 }}>
+                    {cart.reduce((a, b) => a + b.quantity, 0)}
+                  </span>
+                )}
+              </button>
+              {store.whatsappHref && (
+                <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 2px 10px #25d36640" }}>
+                  <WhatsAppIcon /> Chat
+                </a>
+              )}
+            </div>
           </div>
         </nav>
 
-        {/* ── SIDE MENU ────────────────────────────────── */}
+        {/* ── SIDE MENU & CART DRAWER ──────────────────── */}
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} theme={t} search={search} onSearchChange={setSearch} slug={slug} />
+        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} store={store} theme={t} />
 
         {/* ── MAIN CONTENT ─────────────────────────────── */}
         <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px" }}>
@@ -307,7 +448,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
           {filtered.length > 0 ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px" }}>
               {filtered.map(product => (
-                <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
+                <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} onAddToCart={addToCart} />
               ))}
             </div>
           ) : (

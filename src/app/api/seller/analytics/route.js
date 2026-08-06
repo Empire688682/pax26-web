@@ -154,18 +154,34 @@ export async function GET(req) {
         // Top Selling Products
         const productSales = {};
         successfulOrders.forEach(o => {
-            const product = o.productId;
-            const key = product?._id?.toString() || product?.toString() || "Unknown";
-            if (!productSales[key]) {
-                productSales[key] = {
-                    id: key,
-                    name: product?.name || "Product",
-                    count: 0,
-                    revenue: 0,
-                };
+            if (o.items && o.items.length > 0) {
+                o.items.forEach(item => {
+                    const key = item.productId?.toString() || item.name || "Unknown";
+                    if (!productSales[key]) {
+                        productSales[key] = {
+                            id: key,
+                            name: item.name || "Product",
+                            count: 0,
+                            revenue: 0,
+                        };
+                    }
+                    productSales[key].count += item.quantity || 1;
+                    productSales[key].revenue += (item.price || 0) * (item.quantity || 1);
+                });
+            } else {
+                const product = o.productId;
+                const key = product?._id?.toString() || product?.toString() || "Unknown";
+                if (!productSales[key]) {
+                    productSales[key] = {
+                        id: key,
+                        name: product?.name || "Product",
+                        count: 0,
+                        revenue: 0,
+                    };
+                }
+                productSales[key].count += o.quantity || 1;
+                productSales[key].revenue += o.totalPrice || 0;
             }
-            productSales[key].count += o.quantity || 1;
-            productSales[key].revenue += o.totalPrice || 0;
         });
 
         // Fetch names for top products
