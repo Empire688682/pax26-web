@@ -1,5 +1,6 @@
 import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
+import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import { uploadCustomerImageToCloudinary } from "./customerImageSearch.js";
 import { sendSalesNotification } from "../salesNotificationService.js";
 import Groq from "groq-sdk";
