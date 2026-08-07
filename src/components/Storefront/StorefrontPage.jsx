@@ -212,20 +212,22 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
   const t = theme;
   if (!open) return null;
 
+  const validCart = (cart || []).filter(i => i && i.product && i.product._id);
+
   const currency = store.currency || "NGN";
-  const subtotal = cart.reduce((sum, item) => sum + (item.product.discountPrice || item.product.price) * item.quantity, 0);
+  const subtotal = validCart.reduce((sum, item) => sum + ((item.product?.discountPrice || item.product?.price || 0) * (item.quantity || 1)), 0);
   const baseDelivery = store.defaultDeliveryFee || 0;
-  const extraDeliverySum = cart.reduce((sum, item) => sum + (item.product.extraShippingFee || 0) * item.quantity, 0);
-  const totalDelivery = cart.length > 0 ? baseDelivery + extraDeliverySum : 0;
+  const extraDeliverySum = validCart.reduce((sum, item) => sum + ((item.product?.extraShippingFee || 0) * (item.quantity || 1)), 0);
+  const totalDelivery = validCart.length > 0 ? baseDelivery + extraDeliverySum : 0;
   const grandTotal = subtotal + totalDelivery;
 
   const handleWhatsAppCheckout = () => {
-    if (cart.length === 0 || !store.whatsappHref) return;
+    if (validCart.length === 0 || !store.whatsappHref) return;
 
-    let itemsText = cart.map(i => {
-      const itemPrice = (i.product.discountPrice || i.product.price) * i.quantity;
+    let itemsText = validCart.map(i => {
+      const itemPrice = (i.product.discountPrice || i.product.price || 0) * (i.quantity || 1);
       const imgLink = i.product.images?.[0]?.url || `https://www.pax26.com/store/${store.slug}/${i.product.slug || i.product._id}`;
-      return `- ${i.quantity}x *${i.product.name}* (${formatPrice(itemPrice, currency)})\n  🖼️ ${imgLink}`;
+      return `- ${i.quantity || 1}x *${i.product.name}* (${formatPrice(itemPrice, currency)})\n  🖼️ ${imgLink}`;
     }).join("\n\n");
 
     let msg = `Hi! I would like to place an order from *${store.businessName}*:\n\n${itemsText}\n\n*Subtotal:* ${formatPrice(subtotal, currency)}`;
@@ -249,31 +251,31 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
         {/* Header */}
         <div style={{ padding: "20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 800, fontSize: "16px", color: t.textPrimary }}>
-            <CartIcon /> Your Cart ({cart.reduce((a, b) => a + b.quantity, 0)})
+            <CartIcon /> Your Cart ({validCart.reduce((a, b) => a + (b.quantity || 1), 0)})
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.textSecondary, cursor: "pointer" }}><XIcon /></button>
         </div>
 
         {/* Cart Items */}
         <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          {cart.length === 0 ? (
+          {validCart.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0", color: t.textSecondary }}>
               <CartIcon />
               <p style={{ marginTop: "10px", fontSize: "14px" }}>Your cart is empty</p>
             </div>
           ) : (
-            cart.map(item => {
-              const price = item.product.discountPrice || item.product.price;
+            validCart.map(item => {
+              const price = item.product.discountPrice || item.product.price || 0;
               return (
                 <div key={item.product._id} style={{ display: "flex", gap: "12px", background: t.card, padding: "12px", borderRadius: "12px", border: `1px solid ${t.border}` }}>
                   <img src={item.product.images?.[0]?.url} alt={item.product.name} style={{ width: "50px", height: "50px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: t.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.product.name}</p>
-                    <p style={{ margin: "2px 0 6px", fontSize: "12px", fontWeight: 800, color: t.accent }}>{formatPrice(price * item.quantity, currency)}</p>
+                    <p style={{ margin: "2px 0 6px", fontSize: "12px", fontWeight: 800, color: t.accent }}>{formatPrice(price * (item.quantity || 1), currency)}</p>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <button onClick={() => onUpdateQty(item.product._id, item.quantity - 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>-</button>
-                      <span style={{ fontSize: "12px", fontWeight: 700, color: t.textPrimary }}>{item.quantity}</span>
-                      <button onClick={() => onUpdateQty(item.product._id, item.quantity + 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>+</button>
+                      <button onClick={() => onUpdateQty(item.product._id, (item.quantity || 1) - 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>-</button>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: t.textPrimary }}>{item.quantity || 1}</span>
+                      <button onClick={() => onUpdateQty(item.product._id, (item.quantity || 1) + 1)} style={{ width: "22px", height: "22px", borderRadius: "4px", border: `1px solid ${t.border}`, background: t.bg, color: t.textPrimary, cursor: "pointer", fontWeight: 800 }}>+</button>
                     </div>
                   </div>
                   <button onClick={() => onRemove(item.product._id)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "16px" }}>×</button>
@@ -284,7 +286,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
         </div>
 
         {/* Summary & Checkout */}
-        {cart.length > 0 && (
+        {validCart.length > 0 && (
           <div style={{ padding: "20px", borderTop: `1px solid ${t.border}`, background: t.card, display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: t.textSecondary }}>
               <span>Subtotal</span>
@@ -318,32 +320,33 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
   const theme = getTheme(store.storeTheme);
   const t = theme;
 
-  const storageKey = `pax26_cart_${store.slug || slug}`;
+  const storageKey = `pax26_cart_${store?.slug || slug}`;
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem(`pax26_cart_${store.slug || slug}`);
-        return saved ? JSON.parse(saved) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [cart, setCart] = useState([]);
+  const [cartLoaded, setCartLoaded] = useState(false);
 
-  // Save cart to localStorage on state changes
+  // Load from localStorage ONLY after client mount to prevent Next.js SSR hydration mismatch
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(cart));
-      } catch (e) {}
-    }
-  }, [cart, storageKey]);
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setCart(JSON.parse(saved));
+      }
+    } catch (e) {}
+    setCartLoaded(true);
+  }, [storageKey]);
+
+  // Save cart to localStorage on state changes (only after initial client load)
+  useEffect(() => {
+    if (!cartLoaded) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(cart));
+    } catch (e) {}
+  }, [cart, storageKey, cartLoaded]);
 
   const clearCart = useCallback(() => {
     setCart([]);
