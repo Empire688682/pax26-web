@@ -224,17 +224,22 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
   const handleWhatsAppCheckout = () => {
     if (validCart.length === 0 || !store.whatsappHref) return;
 
+    const firstItem = validCart[0];
+    const BASE = typeof window !== "undefined" ? window.location.origin : "https://www.pax26.com";
+    const firstProductUrl = `${BASE}/store/${store.slug}/${firstItem.product.slug || firstItem.product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
+
     let itemsText = validCart.map(i => {
       const itemPrice = (i.product.discountPrice || i.product.price || 0) * (i.quantity || 1);
-      const imgLink = i.product.images?.[0]?.url || `https://www.pax26.com/store/${store.slug}/${i.product.slug || i.product._id}`;
-      return `- ${i.quantity || 1}x *${i.product.name}* (${formatPrice(itemPrice, currency)})\n  🖼️ ${imgLink}`;
-    }).join("\n\n");
+      return `• ${i.quantity || 1}x *${i.product.name}* (${formatPrice(itemPrice, currency)})`;
+    }).join("\n");
 
     let msg = `Hi! I would like to place an order from *${store.businessName}*:\n\n${itemsText}\n\n*Subtotal:* ${formatPrice(subtotal, currency)}`;
     if (totalDelivery > 0) {
       msg += `\n*Delivery Fee:* ${formatPrice(totalDelivery, currency)}`;
     }
-    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease confirm availability and delivery process.`;
+    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}`;
+    msg += `\n\nProduct page:\n${firstProductUrl}`;
+    msg += `\n\nPlease confirm availability and delivery process.`;
 
     const waNum = store.whatsappHref.replace(/.*wa\.me\//, "");
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, "_blank");
