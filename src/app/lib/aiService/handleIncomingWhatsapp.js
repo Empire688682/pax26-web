@@ -590,6 +590,14 @@ export const handleIncomingWhatsApp = async (payload) => {
       recentMessages: conversationContext,
       inboundText,
     });
+
+    const isStorefrontOrder = /order from|like to order|place an order/i.test(inboundText);
+    if (isStorefrontOrder) {
+      enrichedText = `${inboundText}\n\n[SYSTEM INSTRUCTION: The customer is placing a storefront order.
+1. Politely acknowledge their order and confirm the ordered products and subtotal.
+2. CRITICAL FOR PICTURES: You MUST include the IMAGE_URL: [url] tags for all ordered products from your product catalogue so WhatsApp delivers the actual picture attachments to the customer!
+3. ADDRESS FIRST RULE: Ask for their full delivery address and location so you can confirm their delivery fee BEFORE sharing any bank payment details.]`;
+    }
   }
 
   // ── Step 9.5: Semantic product search (seller + text only) ───────────
@@ -608,7 +616,7 @@ export const handleIncomingWhatsApp = async (payload) => {
           inboundText,
           sellerProfile.currency || "NGN"
         );
-        if (searchContext) enrichedText = searchContext;
+        if (searchContext) enrichedText = `${searchContext}\n\n${enrichedText}`;
         console.log(`✅ Step 9.5 — Product search: ${results.length} match(es) injected into AI context`);
       } else {
         console.log("⚠️  Step 9.5 — Product search: no matches, AI falls back to system prompt catalogue");

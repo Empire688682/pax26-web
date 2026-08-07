@@ -377,13 +377,12 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
     if (!validCart.length || !store.whatsappHref) return;
     const itemsText = validCart.map(i => {
       const itemTotal = (i.product.discountPrice || i.product.price || 0) * (i.quantity || 1);
-      const imgLink = i.product.images?.[0]?.url || `https://www.pax26.com/store/${store.slug}/${i.product.slug || i.product._id}`;
-      return `- ${i.quantity || 1}x *${i.product.name}* (${formatPrice(itemTotal, currency)})\n  🖼️ ${imgLink}`;
-    }).join("\n\n");
+      return `• ${i.quantity || 1}x *${i.product.name}* (${formatPrice(itemTotal, currency)})`;
+    }).join("\n");
 
     let msg = `Hi! I'd like to order from *${store.businessName}*:\n\n${itemsText}\n\n*Subtotal:* ${formatPrice(subtotal, currency)}`;
-    if (totalDelivery > 0) msg += `\n*Delivery:* ${formatPrice(totalDelivery, currency)}`;
-    msg += `\n*Total:* ${formatPrice(grandTotal, currency)}\n\nPlease confirm my order and share payment details.`;
+    if (totalDelivery > 0) msg += `\n*Estimated Delivery:* ${formatPrice(totalDelivery, currency)}`;
+    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease confirm my order and share payment details.`;
 
     const waNum = store.whatsappHref.replace(/.*wa\.me\//, "");
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, "_blank");
