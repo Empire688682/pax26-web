@@ -234,7 +234,7 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, s
     if (totalDelivery > 0) {
       msg += `\n*Delivery Fee:* ${formatPrice(totalDelivery, currency)}`;
     }
-    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease let me know your delivery time and payment details.`;
+    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease confirm availability and delivery process.`;
 
     const waNum = store.whatsappHref.replace(/.*wa\.me\//, "");
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, "_blank");

@@ -65,6 +65,15 @@ const SellerOrderSchema = new mongoose.Schema({
     paymentReceiptPublicId: String,
     paymentReceiptSubmittedAt: Date,
 
+    textAlertSent: {
+        type: Boolean,
+        default: false,
+    },
+    paymentProofAlertSent: {
+        type: Boolean,
+        default: false,
+    },
+
     confirmedAt: Date,
     confirmedBy: {
         type: mongoose.Schema.Types.ObjectId,

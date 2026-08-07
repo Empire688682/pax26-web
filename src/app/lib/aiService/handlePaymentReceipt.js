@@ -270,20 +270,20 @@ export async function handlePaymentReceipt({
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
             paymentReceiptSubmittedAt: url ? new Date() : undefined,
+            paymentProofAlertSent: !!url,
         });
     } else if (url) {
         order.paymentReceiptUrl = url;
         order.paymentReceiptPublicId = publicId;
         order.paymentReceiptSubmittedAt = new Date();
-        await order.save();
     }
 
     const itemSummaryStr = items.length > 1
         ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
         : (items[0]?.name || "Payment receipt received");
 
-    // Only notify seller if a brand new order is created OR if this is the first time a payment proof image is attached
-    if (isNewOrder || isFirstTimeReceiptImage) {
+    // Only notify seller if a payment proof image is attached AND alert hasn't been sent for payment proof yet
+    if (url && !order.paymentProofAlertSent) {
         try {
             await sendSalesNotification(sellerUserId, {
                 orderId: order._id.toString(),
@@ -292,9 +292,13 @@ export async function handlePaymentReceipt({
                 amountPaid: order.totalPrice,
                 isConfirmed: false,
             });
+            order.paymentProofAlertSent = true;
+            await order.save();
         } catch (err) {
             console.warn("Sales notification failed:", err.message);
         }
+    } else if (order.isModified()) {
+        await order.save();
     } else {
         console.log(`[handlePaymentReceipt] ⏭️ Sales alert already sent for order ${order._id} — suppressing duplicate.`);
     }
@@ -319,12 +323,44 @@ export async function createPendingOrderFromText({
         status: "pending",
     });
 
-    if (existing) return { created: false, order: existing };
+    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
+
+    if (existing) {
+        // If customer updated their cart or items, update existing pending order
+        if (items.length > 0) {
+            existing.items = items;
+            existing.subtotalPrice = subtotal;
+            existing.deliveryFee = deliveryFee;
+            existing.totalPrice = total;
+            existing.quantity = items.reduce((acc, i) => acc + i.quantity, 0) || 1;
+        }
+
+        // Send text alert ONLY IF text alert hasn't been sent for this order yet
+        if (!existing.textAlertSent && items.length > 0) {
+            const itemSummaryStr = items.length > 1
+                ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
+                : (items[0]?.name || "Pending order");
+
+            try {
+                await sendSalesNotification(sellerUserId, {
+                    orderId: existing._id.toString(),
+                    customerName: existing.customerName || existing.customerPhone,
+                    productName: itemSummaryStr,
+                    amountPaid: existing.totalPrice,
+                    isConfirmed: false,
+                });
+                existing.textAlertSent = true;
+            } catch (err) {
+                console.warn("Sales notification failed:", err.message);
+            }
+        }
+        await existing.save();
+        return { created: false, order: existing };
+    }
 
     const paidViaText = inboundText && PAYMENT_KEYWORDS.test(inboundText);
     if (!isPaymentStage(recentMessages) && !paidViaText) return { created: false };
 
-    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
     if (items.length === 0) return { created: false };
 
     const order = await SellerOrderModel.create({
@@ -338,6 +374,7 @@ export async function createPendingOrderFromText({
         deliveryFee,
         totalPrice: total,
         status: "pending",
+        textAlertSent: true,
     });
 
     const itemSummaryStr = items.length > 1
