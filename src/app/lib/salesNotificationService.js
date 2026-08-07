@@ -31,10 +31,17 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
         console.log(`[salesNotification] ✅ Seller profile OK | emailSalesAlerts=${sellerProfile.emailSalesAlerts} | channel=${sellerProfile.salesNotificationChannel}`);
 
-        // Determine allowed channels based on seller preference
-        const preferredChannel = sellerProfile.salesNotificationChannel || "both";
-        const actualChannel = preferredChannel;
-        console.log(`[salesNotification] 📢 plan=${plan} | preferredChannel=${preferredChannel} | actualChannel=${actualChannel}`);
+        // Determine allowed channels based on plan
+        let allowedChannels = ["in-app"];
+        if (plan === "business" || plan === "enterprise") {
+            allowedChannels = ["in-app", "whatsapp", "email", "both"];
+        } else if (plan === "starter") {
+            allowedChannels = ["in-app", "email"];
+        }
+
+        const preferredChannel = sellerProfile.salesNotificationChannel || "in-app";
+        const actualChannel = allowedChannels.includes(preferredChannel) ? preferredChannel : "in-app";
+        console.log(`[salesNotification] 📢 plan=${plan} | preferredChannel=${preferredChannel} | allowedChannels=${allowedChannels.join(",")} | actualChannel=${actualChannel}`);
 
         let messageSent = false;
 
@@ -55,22 +62,21 @@ export const sendSalesNotification = async (userId, orderData) => {
 
         // ── WhatsApp channel ─────────────────────────────────────────
         if (actualChannel === "whatsapp" || actualChannel === "both") {
-            const recipientPhone = sellerProfile?.phone || sellerProfile?.whatsappNumber || user.number || user.whatsapp?.displayPhone;
-            console.log(`[salesNotification] 📱 Attempting WhatsApp notification to: ${recipientPhone}...`);
-            if (user.whatsapp?.connected && user.whatsapp?.phoneNumberId && recipientPhone) {
+            console.log(`[salesNotification] 📱 Attempting WhatsApp notification to seller phone...`);
+            if (user.whatsapp?.connected && user.whatsapp?.displayPhone) {
                 try {
                     await sendWhatsAppAutomationReply({
                         phoneNumberId: user.whatsapp.phoneNumberId,
-                        to: recipientPhone,
+                        to: user.whatsapp.displayPhone,
                         text: msgText,
                     });
                     messageSent = true;
-                    console.log(`[salesNotification] ✅ WhatsApp notification sent to ${recipientPhone}`);
+                    console.log(`[salesNotification] ✅ WhatsApp notification sent to ${user.whatsapp.displayPhone}`);
                 } catch (err) {
                     console.error(`[salesNotification] ❌ WhatsApp notification failed:`, err.message);
                 }
             } else {
-                console.warn(`[salesNotification] ⚠️ WhatsApp not connected or recipientPhone missing (connected=${user.whatsapp?.connected}, recipientPhone=${recipientPhone})`);
+                console.warn(`[salesNotification] ⚠️ WhatsApp not connected or displayPhone missing (connected=${user.whatsapp?.connected}, displayPhone=${user.whatsapp?.displayPhone})`);
             }
         }
 

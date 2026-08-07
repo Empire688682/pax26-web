@@ -322,11 +322,9 @@ export async function createPendingOrderFromText({
     if (existing) return { created: false, order: existing };
 
     const paidViaText = inboundText && PAYMENT_KEYWORDS.test(inboundText);
-    const isStorefrontOrder = inboundText && /order from|like to order|place an order/i.test(inboundText);
-    if (!isPaymentStage(recentMessages) && !paidViaText && !isStorefrontOrder) return { created: false };
+    if (!isPaymentStage(recentMessages) && !paidViaText) return { created: false };
 
-    const allMessagesForResolution = [...recentMessages, { content: inboundText, text: inboundText }];
-    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, allMessagesForResolution);
+    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
     if (items.length === 0) return { created: false };
 
     const order = await SellerOrderModel.create({
