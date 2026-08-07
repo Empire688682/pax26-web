@@ -76,7 +76,7 @@ const SellerOrderSchema = new mongoose.Schema({
 
     confirmedAt: Date,
     confirmedBy: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.Mixed,
         ref: "User",
     },
 

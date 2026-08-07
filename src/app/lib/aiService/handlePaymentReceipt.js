@@ -333,28 +333,8 @@ export async function createPendingOrderFromText({
             existing.deliveryFee = deliveryFee;
             existing.totalPrice = total;
             existing.quantity = items.reduce((acc, i) => acc + i.quantity, 0) || 1;
+            await existing.save();
         }
-
-        // Send text alert ONLY IF text alert hasn't been sent for this order yet
-        if (!existing.textAlertSent && items.length > 0) {
-            const itemSummaryStr = items.length > 1
-                ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
-                : (items[0]?.name || "Pending order");
-
-            try {
-                await sendSalesNotification(sellerUserId, {
-                    orderId: existing._id.toString(),
-                    customerName: existing.customerName || existing.customerPhone,
-                    productName: itemSummaryStr,
-                    amountPaid: existing.totalPrice,
-                    isConfirmed: false,
-                });
-                existing.textAlertSent = true;
-            } catch (err) {
-                console.warn("Sales notification failed:", err.message);
-            }
-        }
-        await existing.save();
         return { created: false, order: existing };
     }
 
@@ -374,24 +354,10 @@ export async function createPendingOrderFromText({
         deliveryFee,
         totalPrice: total,
         status: "pending",
-        textAlertSent: true,
     });
 
-    const itemSummaryStr = items.length > 1
-        ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
-        : (items[0]?.name || "Pending order — awaiting payment proof");
-
-    try {
-        await sendSalesNotification(sellerUserId, {
-            orderId: order._id.toString(),
-            customerName: order.customerName || order.customerPhone,
-            productName: itemSummaryStr,
-            amountPaid: order.totalPrice,
-            isConfirmed: false,
-        });
-    } catch (err) {
-        console.warn("Sales notification failed:", err.message);
-    }
+    console.log(`[createPendingOrderFromText] 📝 Created pending order draft ${order._id} — awaiting payment proof before sending sales alert.`);
+    return { created: true, order };
 
     return { created: true, order };
 }
