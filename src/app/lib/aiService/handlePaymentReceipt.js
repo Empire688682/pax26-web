@@ -199,6 +199,7 @@ export async function handlePaymentReceipt({
     imagePublicId = null,
 }) {
     const normalizedPhone = normalizePhone(customerPhone);
+    console.log(`[handlePaymentReceipt] 📥 Called for customer=${normalizedPhone} | sellerId=${sellerId} | sellerUserId=${sellerUserId} | imageUrl=${imageUrl} | mediaUrl=${mediaUrl ? "YES" : "NO"}`);
 
     const pendingOrder = await SellerOrderModel.findOne({
         sellerId,
@@ -206,10 +207,14 @@ export async function handlePaymentReceipt({
         status: "pending",
     }).sort({ createdAt: -1 });
 
+    console.log(`[handlePaymentReceipt] 🔎 Pending order search: ${pendingOrder ? `FOUND (id=${pendingOrder._id}, receiptUrl=${pendingOrder.paymentReceiptUrl || "NONE"}, proofAlertSent=${pendingOrder.paymentProofAlertSent})` : "NOT FOUND"}`);
+
     const likelyReceipt = isLikelyPaymentReceipt(caption, recentMessages);
     const paymentStage = isPaymentStage(recentMessages);
+    console.log(`[handlePaymentReceipt] 📊 Detection scores: likelyReceipt=${likelyReceipt} | paymentStage=${paymentStage}`);
 
     if (!pendingOrder && !likelyReceipt && !paymentStage) {
+        console.log("[handlePaymentReceipt] ⏭️ No pending order and conversation/caption not in payment stage — ignoring.");
         return { handled: false };
     }
 
@@ -218,6 +223,7 @@ export async function handlePaymentReceipt({
 
     if (!url && mediaUrl) {
         try {
+            console.log("[handlePaymentReceipt] ☁️ Uploading customer payment receipt image to Cloudinary...");
             const uploaded = await uploadCustomerImageToCloudinary(
                 mediaUrl,
                 sellerId,
@@ -226,14 +232,16 @@ export async function handlePaymentReceipt({
             );
             url = uploaded.url;
             publicId = uploaded.publicId;
+            console.log(`[handlePaymentReceipt] ✅ Cloudinary upload success: url=${url}`);
         } catch (err) {
-            console.error("Payment receipt upload failed:", err.message);
+            console.error("❌ Payment receipt upload failed:", err.message);
             if (!pendingOrder) return { handled: false };
         }
     }
 
     const skipVerification = !!pendingOrder || paymentStage;
     if (!skipVerification) {
+        console.log("[handlePaymentReceipt] 🔍 Verifying receipt image with Groq...");
         const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
         if (!isVerifiedReceipt) {
             console.log("🤖 Groq verified image is NOT a payment receipt. Proceeding to product/conversation handling.");
@@ -244,18 +252,17 @@ export async function handlePaymentReceipt({
     }
 
     const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
+    console.log(`[handlePaymentReceipt] 🛒 Resolved cart items: count=${items.length} | total=₦${total} | items=${items.map(i => `${i.quantity}x ${i.name}`).join(", ")}`);
 
     if (!pendingOrder && items.length === 0 && !paymentStage) {
-        console.warn("Payment receipt received but no seller products found and not in payment stage");
+        console.warn("⚠️ Payment receipt received but no seller products found and not in payment stage");
         return { handled: false };
     }
-
-    const isNewOrder = !pendingOrder;
-    const isFirstTimeReceiptImage = url && (!pendingOrder || !pendingOrder.paymentReceiptUrl);
 
     let order = pendingOrder;
 
     if (!order) {
+        console.log("[handlePaymentReceipt] 🆕 Creating new pending order for payment receipt...");
         order = await SellerOrderModel.create({
             sellerId,
             productId: items[0]?.productId || null,
@@ -270,35 +277,50 @@ export async function handlePaymentReceipt({
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
             paymentReceiptSubmittedAt: url ? new Date() : undefined,
-            paymentProofAlertSent: !!url,
+            paymentProofAlertSent: false, // Must be false so notification trigger below can evaluate and fire!
         });
-    } else if (url) {
-        order.paymentReceiptUrl = url;
-        order.paymentReceiptPublicId = publicId;
-        order.paymentReceiptSubmittedAt = new Date();
+        console.log(`[handlePaymentReceipt] ✅ Created new order: id=${order._id}`);
+    } else {
+        console.log(`[handlePaymentReceipt] 📝 Updating existing pending order: id=${order._id}`);
+        if (url) {
+            order.paymentReceiptUrl = url;
+            order.paymentReceiptPublicId = publicId;
+            order.paymentReceiptSubmittedAt = new Date();
+        }
+        if (items.length > 0 && (!order.items || order.items.length === 0)) {
+            order.items = items;
+            order.subtotalPrice = subtotal;
+            order.deliveryFee = deliveryFee;
+            order.totalPrice = total;
+        }
     }
 
     const itemSummaryStr = items.length > 1
         ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
         : (items[0]?.name || "Payment receipt received");
 
+    console.log(`[handlePaymentReceipt] 🔔 Notification Evaluation: url=${url ? "YES" : "NO"} | paymentProofAlertSent=${order.paymentProofAlertSent}`);
+
     // Only notify seller if a payment proof image is attached AND alert hasn't been sent for payment proof yet
     if (url && !order.paymentProofAlertSent) {
+        console.log(`[handlePaymentReceipt] 🚀 DISPATCHING sales notification to sellerUserId=${sellerUserId} for orderId=${order._id}...`);
         try {
-            await sendSalesNotification(sellerUserId, {
+            const notifResult = await sendSalesNotification(sellerUserId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
                 productName: itemSummaryStr,
                 amountPaid: order.totalPrice,
                 isConfirmed: false,
             });
+            console.log(`[handlePaymentReceipt] ✅ sendSalesNotification returned:`, JSON.stringify(notifResult));
             order.paymentProofAlertSent = true;
             await order.save();
         } catch (err) {
-            console.warn("Sales notification failed:", err.message);
+            console.error("[handlePaymentReceipt] ❌ Sales notification failed:", err.message);
         }
     } else if (order.isModified()) {
         await order.save();
+        console.log(`[handlePaymentReceipt] 💾 Order updated and saved: id=${order._id}`);
     } else {
         console.log(`[handlePaymentReceipt] ⏭️ Sales alert already sent for order ${order._id} — suppressing duplicate.`);
     }
