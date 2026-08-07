@@ -84,15 +84,13 @@ function buildWhatsAppMessage(product, selectedVariants, currency, slug, session
   const price = product.discountPrice || product.price;
   const BASE = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
   const productUrl = `${BASE}/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
-  const imgUrl = product.images?.[0]?.url || "";
 
   let text = `Hi! I'm interested in *${product.name}*`;
   const variantParts = Object.entries(selectedVariants).map(([label, value]) => `${label}: ${value}`).filter(Boolean);
   if (variantParts.length > 0) text += ` (${variantParts.join(", ")})`;
   text += ` — priced at ${formatPrice(price, currency)}.`;
-  if (imgUrl) text += `\n🖼️ Picture: ${imgUrl}`;
-  text += `\nProduct page: ${productUrl}`;
-  text += "\n\nPlease confirm availability and delivery process.";
+  text += `\n\nProduct page: ${productUrl}`;
+  text += "\n\nCould you assist me with this?";
   return encodeURIComponent(text);
 }
 

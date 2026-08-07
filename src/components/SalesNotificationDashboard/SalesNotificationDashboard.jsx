@@ -237,28 +237,6 @@ export default function SalesNotificationDashboard() {
                               </span>
                             </div>
 
-                            {/* Itemized breakdown */}
-                            {order.items && order.items.length > 0 ? (
-                              <div className="mt-2 text-xs space-y-1" style={{ color: pax26?.textSecondary }}>
-                                {order.items.map((i, idx) => (
-                                  <div key={idx} className="flex justify-between">
-                                    <span>• {i.quantity}x {i.name}</span>
-                                    <span className="font-semibold" style={{ color: pax26?.textPrimary }}>₦{(i.price * i.quantity).toLocaleString()}</span>
-                                  </div>
-                                ))}
-                                {order.deliveryFee > 0 && (
-                                  <div className="flex justify-between text-[11px] opacity-75">
-                                    <span>• Delivery Fee</span>
-                                    <span>₦{order.deliveryFee.toLocaleString()}</span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : order.productId?.name && (
-                              <p className="text-xs mt-1" style={{ color: pax26?.textSecondary }}>
-                                • 1x {order.productId.name}
-                              </p>
-                            )}
-
                             {/* Receipt + actions */}
                             {order.paymentReceiptUrl && (
                               <div className="flex items-center gap-3 mt-2">

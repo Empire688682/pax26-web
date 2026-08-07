@@ -40,26 +40,9 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
         const businessName = sellerProfile.businessName || "Our Store";
         const proofCode = order._id.toString().slice(-8).toUpperCase();
-
-        // Build itemized items list
-        let orderItemsListText = "";
-        if (order.items && order.items.length > 0) {
-            orderItemsListText = order.items
-                .map(i => `• ${i.quantity}x ${i.name} (₦${(i.price * i.quantity).toLocaleString()})`)
-                .join("\n");
-            if (order.deliveryFee && order.deliveryFee > 0) {
-                orderItemsListText += `\n• Delivery Fee: ₦${order.deliveryFee.toLocaleString()}`;
-            }
-        } else {
-            const productName = order.productId?.name || "Ordered Item";
-            const quantity = order.quantity || 1;
-            orderItemsListText = `• Item: ${productName} (x${quantity})`;
-            if (order.deliveryFee && order.deliveryFee > 0) {
-                orderItemsListText += `\n• Delivery Fee: ₦${order.deliveryFee.toLocaleString()}`;
-            }
-        }
-
+        const productName = order.productId?.name || "Ordered Item";
         const totalPaid = (order.totalPrice || 0).toLocaleString();
+        const quantity = order.quantity || 1;
         const customerName = order.customerName || "Customer";
         const dateStr = new Date().toLocaleDateString("en-US", {
             year: "numeric",
@@ -80,7 +63,7 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 • Phone: ${order.customerPhone}
 ${order.deliveryAddress ? `• Delivery Address: ${order.deliveryAddress}\n` : ""}
 🛍️ *Order Details:*
-${orderItemsListText}
+• Item: ${productName} (x${quantity})
 • Total Amount Paid: ₦${totalPaid}
 
 🚚 *DELIVERY INSTRUCTIONS:*

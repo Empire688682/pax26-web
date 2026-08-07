@@ -409,6 +409,8 @@ export const handleIncomingWhatsApp = async (payload) => {
         content: m.text,
       }));
 
+      const { handlePaymentReceipt: _hpr, buildPaymentReceiptContext: _bprc, ..._ } = { handlePaymentReceipt, buildPaymentReceiptContext };
+
       // Import the detection helpers directly from the module logic:
       // Re-use the same PAYMENT_KEYWORDS + PAYMENT_STAGE_KEYWORDS checks
       const PAYMENT_KEYWORDS_EARLY = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;

@@ -10,27 +10,8 @@ const SellerOrderSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SellerProduct",
-        required: false,
+        required: true,
     },
-
-    items: [
-        {
-            productId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "SellerProduct",
-            },
-            name: String,
-            price: Number,
-            quantity: {
-                type: Number,
-                default: 1,
-            },
-            extraShippingFee: {
-                type: Number,
-                default: 0,
-            },
-        },
-    ],
 
     customerPhone: {
         type: String,
@@ -42,13 +23,6 @@ const SellerOrderSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         default: 1,
-    },
-
-    subtotalPrice: Number,
-
-    deliveryFee: {
-        type: Number,
-        default: 0,
     },
 
     totalPrice: Number,
@@ -65,18 +39,9 @@ const SellerOrderSchema = new mongoose.Schema({
     paymentReceiptPublicId: String,
     paymentReceiptSubmittedAt: Date,
 
-    textAlertSent: {
-        type: Boolean,
-        default: false,
-    },
-    paymentProofAlertSent: {
-        type: Boolean,
-        default: false,
-    },
-
     confirmedAt: Date,
     confirmedBy: {
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
 

@@ -1,6 +1,5 @@
 import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
-import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import { uploadCustomerImageToCloudinary } from "./customerImageSearch.js";
 import { sendSalesNotification } from "../salesNotificationService.js";
 import Groq from "groq-sdk";
@@ -45,69 +44,22 @@ function isPaymentStage(recentMessages = []) {
     return has10DigitNum || hasPaymentKeyword || (hasGeneralPaymentWord && recentMessages.length > 0);
 }
 
-async function resolveProductsFromConversation(sellerId, recentMessages) {
-    const [products, profile] = await Promise.all([
-        SellerProductModel.find({ sellerId }).lean(),
-        SellerProfileModel.findById(sellerId).lean(),
-    ]);
+async function findProductFromConversation(sellerId, recentMessages) {
+    const products = await SellerProductModel.find({ sellerId }).lean();
+    if (!products.length) return null;
 
-    if (!products.length) return { items: [], subtotal: 0, deliveryFee: 0, total: 0 };
-
-    const conversationText = recentMessages
-        .map((m) => m.content || m.text || "")
-        .join(" ")
-        .toLowerCase();
-
-    const matchedItems = [];
-    let subtotal = 0;
-    let extraDeliverySum = 0;
+    const conversationText = recentMessages.map((m) => m.content || m.text || "").join(" ").toLowerCase();
 
     for (const prod of products) {
         if (prod.name && conversationText.includes(prod.name.toLowerCase())) {
-            // Check for quantity hints near product name e.g. "2 shirts", "3x shoes"
-            let qty = 1;
-            const nameEscaped = prod.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const qtyRegex = new RegExp(`(\\d+)\\s*(?:x\\s*)?${nameEscaped}|${nameEscaped}\\s*(?:x\\s*)?(\\d+)`, 'i');
-            const match = conversationText.match(qtyRegex);
-            if (match) {
-                const parsed = parseInt(match[1] || match[2], 10);
-                if (!isNaN(parsed) && parsed > 0) qty = parsed;
-            }
-
-            const itemPrice = prod.discountPrice || prod.price || 0;
-            subtotal += itemPrice * qty;
-            extraDeliverySum += (prod.extraShippingFee || 0) * qty;
-
-            matchedItems.push({
-                productId: prod._id,
-                name: prod.name,
-                price: itemPrice,
-                quantity: qty,
-                extraShippingFee: prod.extraShippingFee || 0,
-            });
+            return prod;
         }
     }
+    return products[0];
+}
 
-    // Fallback if no specific product name matched
-    if (!matchedItems.length && products.length > 0) {
-        const fallback = products[0];
-        const price = fallback.discountPrice || fallback.price || 0;
-        matchedItems.push({
-            productId: fallback._id,
-            name: fallback.name,
-            price: price,
-            quantity: 1,
-            extraShippingFee: fallback.extraShippingFee || 0,
-        });
-        subtotal = price;
-        extraDeliverySum = fallback.extraShippingFee || 0;
-    }
-
-    const baseDeliveryFee = profile?.defaultDeliveryFee || 0;
-    const deliveryFee = matchedItems.length > 0 ? baseDeliveryFee + extraDeliverySum : 0;
-    const total = subtotal + deliveryFee;
-
-    return { items: matchedItems, subtotal, deliveryFee, total };
+async function resolveProduct(sellerId, recentMessages) {
+    return findProductFromConversation(sellerId, recentMessages);
 }
 
 async function verifyReceiptWithGroq({ imageUrl, mediaUrl }) {
@@ -115,7 +67,7 @@ async function verifyReceiptWithGroq({ imageUrl, mediaUrl }) {
         const apiKey = process.env.GROQ_API_KEY;
         if (!apiKey) {
             console.warn("⚠️ GROQ_API_KEY is not set, falling back to text heuristics");
-            return true;
+            return true; // Fallback to true to preserve existing behavior if API key is missing
         }
 
         let buffer;
@@ -180,6 +132,7 @@ Return ONLY the raw JSON object, without any markdown formatting blocks (like \`
         return json.isPaymentReceipt === true && json.confidence > 0.65;
     } catch (err) {
         console.error("❌ Error verifying payment receipt with Groq:", err);
+        // Fallback: in case of API/parsing failure, we default to true to avoid blocking payment receipt processing
         return true;
     }
 }
@@ -199,7 +152,6 @@ export async function handlePaymentReceipt({
     imagePublicId = null,
 }) {
     const normalizedPhone = normalizePhone(customerPhone);
-    console.log(`[handlePaymentReceipt] 📥 Called for customer=${normalizedPhone} | sellerId=${sellerId} | sellerUserId=${sellerUserId} | imageUrl=${imageUrl} | mediaUrl=${mediaUrl ? "YES" : "NO"}`);
 
     const pendingOrder = await SellerOrderModel.findOne({
         sellerId,
@@ -207,14 +159,11 @@ export async function handlePaymentReceipt({
         status: "pending",
     }).sort({ createdAt: -1 });
 
-    console.log(`[handlePaymentReceipt] 🔎 Pending order search: ${pendingOrder ? `FOUND (id=${pendingOrder._id}, receiptUrl=${pendingOrder.paymentReceiptUrl || "NONE"}, proofAlertSent=${pendingOrder.paymentProofAlertSent})` : "NOT FOUND"}`);
-
     const likelyReceipt = isLikelyPaymentReceipt(caption, recentMessages);
     const paymentStage = isPaymentStage(recentMessages);
-    console.log(`[handlePaymentReceipt] 📊 Detection scores: likelyReceipt=${likelyReceipt} | paymentStage=${paymentStage}`);
 
+    // Treat inbound images as payment proof when in payment stage, keywords match, or pending order exists
     if (!pendingOrder && !likelyReceipt && !paymentStage) {
-        console.log("[handlePaymentReceipt] ⏭️ No pending order and conversation/caption not in payment stage — ignoring.");
         return { handled: false };
     }
 
@@ -223,7 +172,6 @@ export async function handlePaymentReceipt({
 
     if (!url && mediaUrl) {
         try {
-            console.log("[handlePaymentReceipt] ☁️ Uploading customer payment receipt image to Cloudinary...");
             const uploaded = await uploadCustomerImageToCloudinary(
                 mediaUrl,
                 sellerId,
@@ -232,16 +180,17 @@ export async function handlePaymentReceipt({
             );
             url = uploaded.url;
             publicId = uploaded.publicId;
-            console.log(`[handlePaymentReceipt] ✅ Cloudinary upload success: url=${url}`);
         } catch (err) {
-            console.error("❌ Payment receipt upload failed:", err.message);
+            console.error("Payment receipt upload failed:", err.message);
             if (!pendingOrder) return { handled: false };
         }
     }
 
+    // Verify using Groq vision model that the image is actually a payment receipt
+    // BUT: if there's a pending order OR we're clearly in payment stage, trust the context
+    // and skip AI verification — the conversation already told us payment was expected.
     const skipVerification = !!pendingOrder || paymentStage;
     if (!skipVerification) {
-        console.log("[handlePaymentReceipt] 🔍 Verifying receipt image with Groq...");
         const isVerifiedReceipt = await verifyReceiptWithGroq({ imageUrl: url, mediaUrl });
         if (!isVerifiedReceipt) {
             console.log("🤖 Groq verified image is NOT a payment receipt. Proceeding to product/conversation handling.");
@@ -251,78 +200,47 @@ export async function handlePaymentReceipt({
         console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
-    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
-    console.log(`[handlePaymentReceipt] 🛒 Resolved cart items: count=${items.length} | total=₦${total} | items=${items.map(i => `${i.quantity}x ${i.name}`).join(", ")}`);
+    const matchedProduct = await resolveProduct(sellerId, recentMessages);
 
-    if (!pendingOrder && items.length === 0 && !paymentStage) {
-        console.warn("⚠️ Payment receipt received but no seller products found and not in payment stage");
+    // If we're in payment stage (AI already asked for proof), handle it regardless
+    // of whether we can identify a specific product — the payment context is enough.
+    if (!pendingOrder && !matchedProduct?._id && !paymentStage) {
+        console.warn("Payment receipt received but no seller products found and not in payment stage");
         return { handled: false };
     }
 
     let order = pendingOrder;
 
     if (!order) {
-        console.log("[handlePaymentReceipt] 🆕 Creating new pending order for payment receipt...");
         order = await SellerOrderModel.create({
             sellerId,
-            productId: items[0]?.productId || null,
-            items,
+            productId: matchedProduct?._id || null,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
-            quantity: items.reduce((acc, i) => acc + i.quantity, 0) || 1,
-            subtotalPrice: subtotal,
-            deliveryFee,
-            totalPrice: total,
+            quantity: 1,
+            totalPrice: matchedProduct?.price || 0,
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
             paymentReceiptSubmittedAt: url ? new Date() : undefined,
-            paymentProofAlertSent: false, // Must be false so notification trigger below can evaluate and fire!
         });
-        console.log(`[handlePaymentReceipt] ✅ Created new order: id=${order._id}`);
-    } else {
-        console.log(`[handlePaymentReceipt] 📝 Updating existing pending order: id=${order._id}`);
-        if (url) {
-            order.paymentReceiptUrl = url;
-            order.paymentReceiptPublicId = publicId;
-            order.paymentReceiptSubmittedAt = new Date();
-        }
-        if (items.length > 0 && (!order.items || order.items.length === 0)) {
-            order.items = items;
-            order.subtotalPrice = subtotal;
-            order.deliveryFee = deliveryFee;
-            order.totalPrice = total;
-        }
+    } else if (url) {
+        order.paymentReceiptUrl = url;
+        order.paymentReceiptPublicId = publicId;
+        order.paymentReceiptSubmittedAt = new Date();
+        await order.save();
     }
 
-    const itemSummaryStr = items.length > 1
-        ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
-        : (items[0]?.name || "Payment receipt received");
-
-    console.log(`[handlePaymentReceipt] 🔔 Notification Evaluation: url=${url ? "YES" : "NO"} | paymentProofAlertSent=${order.paymentProofAlertSent}`);
-
-    // Only notify seller if a payment proof image is attached AND alert hasn't been sent for payment proof yet
-    if (url && !order.paymentProofAlertSent) {
-        console.log(`[handlePaymentReceipt] 🚀 DISPATCHING sales notification to sellerUserId=${sellerUserId} for orderId=${order._id}...`);
-        try {
-            const notifResult = await sendSalesNotification(sellerUserId, {
-                orderId: order._id.toString(),
-                customerName: order.customerName || order.customerPhone,
-                productName: itemSummaryStr,
-                amountPaid: order.totalPrice,
-                isConfirmed: false,
-            });
-            console.log(`[handlePaymentReceipt] ✅ sendSalesNotification returned:`, JSON.stringify(notifResult));
-            order.paymentProofAlertSent = true;
-            await order.save();
-        } catch (err) {
-            console.error("[handlePaymentReceipt] ❌ Sales notification failed:", err.message);
-        }
-    } else if (order.isModified()) {
-        await order.save();
-        console.log(`[handlePaymentReceipt] 💾 Order updated and saved: id=${order._id}`);
-    } else {
-        console.log(`[handlePaymentReceipt] ⏭️ Sales alert already sent for order ${order._id} — suppressing duplicate.`);
+    try {
+        await sendSalesNotification(sellerUserId, {
+            orderId: order._id.toString(),
+            customerName: order.customerName || order.customerPhone,
+            productName: matchedProduct?.name || "Payment receipt received",
+            amountPaid: order.totalPrice,
+            isConfirmed: false,
+        });
+    } catch (err) {
+        console.warn("Sales notification failed:", err.message);
     }
 
     return { handled: true, order };
@@ -345,41 +263,35 @@ export async function createPendingOrderFromText({
         status: "pending",
     });
 
-    const { items, subtotal, deliveryFee, total } = await resolveProductsFromConversation(sellerId, recentMessages);
-
-    if (existing) {
-        // If customer updated their cart or items, update existing pending order
-        if (items.length > 0) {
-            existing.items = items;
-            existing.subtotalPrice = subtotal;
-            existing.deliveryFee = deliveryFee;
-            existing.totalPrice = total;
-            existing.quantity = items.reduce((acc, i) => acc + i.quantity, 0) || 1;
-            await existing.save();
-        }
-        return { created: false, order: existing };
-    }
+    if (existing) return { created: false, order: existing };
 
     const paidViaText = inboundText && PAYMENT_KEYWORDS.test(inboundText);
     if (!isPaymentStage(recentMessages) && !paidViaText) return { created: false };
 
-    if (items.length === 0) return { created: false };
+    const matchedProduct = await resolveProduct(sellerId, recentMessages);
+    if (!matchedProduct?._id) return { created: false };
 
     const order = await SellerOrderModel.create({
         sellerId,
-        productId: items[0]?.productId || null,
-        items,
+        productId: matchedProduct._id,
         customerPhone: normalizedPhone,
         customerName: customerName || "WhatsApp Customer",
-        quantity: items.reduce((acc, i) => acc + i.quantity, 0) || 1,
-        subtotalPrice: subtotal,
-        deliveryFee,
-        totalPrice: total,
+        quantity: 1,
+        totalPrice: matchedProduct.price || 0,
         status: "pending",
     });
 
-    console.log(`[createPendingOrderFromText] 📝 Created pending order draft ${order._id} — awaiting payment proof before sending sales alert.`);
-    return { created: true, order };
+    try {
+        await sendSalesNotification(sellerUserId, {
+            orderId: order._id.toString(),
+            customerName: order.customerName || order.customerPhone,
+            productName: matchedProduct?.name || "Pending order — awaiting payment proof",
+            amountPaid: order.totalPrice,
+            isConfirmed: false,
+        });
+    } catch (err) {
+        console.warn("Sales notification failed:", err.message);
+    }
 
     return { created: true, order };
 }
