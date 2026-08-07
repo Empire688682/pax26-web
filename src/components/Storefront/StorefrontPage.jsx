@@ -141,7 +141,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
 }
 
 /* ── Product Card ───────────────────────────────────────── */
-function ProductCard({ product, store, slug, sessionToken, theme, highlighted, onAddToCart }) {
+function ProductCard({ product, store, slug, sessionToken, theme, highlighted, cartQuantity, onAddToCart, onUpdateQty }) {
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(false);
   const t = theme;
@@ -151,9 +151,9 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, o
   const productHref = `/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
 
   return (
-    <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", display: "flex", flexDirection: "column", position: "relative" }}
+    <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : cartQuantity > 0 ? `2px solid #22c55e` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : cartQuantity > 0 ? "0 4px 14px rgba(34,197,94,0.15)" : "none", transition: "transform 0.18s, box-shadow 0.18s", display: "flex", flexDirection: "column", position: "relative" }}
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.12)`; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : "none"; }}>
+      onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : cartQuantity > 0 ? "0 4px 14px rgba(34,197,94,0.15)" : "none"; }}>
 
       <Link href={productHref} style={{ textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", flex: 1 }} onClick={() => setLoading(true)}>
         {/* Loading overlay */}
@@ -172,7 +172,8 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, o
           )}
           {product.stock === 0 && <div style={{ position: "absolute", top: "10px", left: "10px", background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, letterSpacing: "0.06em" }}>SOLD OUT</div>}
           {highlighted && <div style={{ position: "absolute", top: "10px", left: "10px", background: t.accent, color: t.accentText, padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, display: "flex", alignItems: "center", gap: "4px" }}>🤖 AI Pick</div>}
-          {hasDiscount && !highlighted && product.stock > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800 }}>SALE</div>}
+          {cartQuantity > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#22c55e", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, boxShadow: "0 2px 8px rgba(34,197,94,0.4)", zIndex: 4 }}>✓ {cartQuantity} IN CART</div>}
+          {hasDiscount && !highlighted && cartQuantity === 0 && product.stock > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800 }}>SALE</div>}
         </div>
 
         {/* Info */}
@@ -186,11 +187,19 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, o
         </div>
       </Link>
 
-      {/* Add to cart action button */}
+      {/* Add to cart action button / Quantity Controls */}
       <div style={{ padding: "0 16px 14px" }}>
-        <button onClick={() => onAddToCart(product)} disabled={product.stock === 0} style={{ width: "100%", padding: "9px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.accent, color: t.accentText, fontWeight: 700, fontSize: "12px", cursor: product.stock === 0 ? "not-allowed" : "pointer", opacity: product.stock === 0 ? 0.5 : 1 }}>
-          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-        </button>
+        {cartQuantity > 0 ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: t.pageBg, border: `1.5px solid #22c55e`, borderRadius: "10px", padding: "3px 6px" }}>
+            <button onClick={(e) => { e.stopPropagation(); onUpdateQty(product._id, cartQuantity - 1); }} style={{ width: "28px", height: "28px", borderRadius: "6px", border: `1px solid ${t.border}`, background: t.card, color: t.textPrimary, fontWeight: 900, cursor: "pointer", fontSize: "14px" }}>-</button>
+            <span style={{ fontSize: "12px", fontWeight: 800, color: "#22c55e" }}>{cartQuantity} in Cart</span>
+            <button onClick={(e) => { e.stopPropagation(); onAddToCart(product); }} style={{ width: "28px", height: "28px", borderRadius: "6px", border: "none", background: "#22c55e", color: "#fff", fontWeight: 900, cursor: "pointer", fontSize: "14px" }}>+</button>
+          </div>
+        ) : (
+          <button onClick={() => onAddToCart(product)} disabled={product.stock === 0} style={{ width: "100%", padding: "9px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.accent, color: t.accentText, fontWeight: 700, fontSize: "12px", cursor: product.stock === 0 ? "not-allowed" : "pointer", opacity: product.stock === 0 ? 0.5 : 1 }}>
+            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+          </button>
+        )}
       </div>
     </article>
   );
@@ -199,7 +208,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, o
 const CartIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>);
 
 /* ── Cart Drawer ────────────────────────────────────────── */
-function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, store, theme }) {
+function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClearCart, store, theme }) {
   const t = theme;
   if (!open) return null;
 
@@ -213,15 +222,24 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, store, theme }
   const handleWhatsAppCheckout = () => {
     if (cart.length === 0 || !store.whatsappHref) return;
 
-    let itemsText = cart.map(i => `- ${i.quantity}x ${i.product.name} (${formatPrice((i.product.discountPrice || i.product.price) * i.quantity, currency)})`).join("\n");
+    let itemsText = cart.map(i => {
+      const itemPrice = (i.product.discountPrice || i.product.price) * i.quantity;
+      const imgLink = i.product.images?.[0]?.url || `https://www.pax26.com/store/${store.slug}/${i.product.slug || i.product._id}`;
+      return `- ${i.quantity}x *${i.product.name}* (${formatPrice(itemPrice, currency)})\n  🖼️ ${imgLink}`;
+    }).join("\n\n");
+
     let msg = `Hi! I would like to place an order from *${store.businessName}*:\n\n${itemsText}\n\n*Subtotal:* ${formatPrice(subtotal, currency)}`;
     if (totalDelivery > 0) {
       msg += `\n*Delivery Fee:* ${formatPrice(totalDelivery, currency)}`;
     }
-    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease send your payment details to confirm.`;
+    msg += `\n*Grand Total:* ${formatPrice(grandTotal, currency)}\n\nPlease let me know your delivery time and payment details.`;
 
     const waNum = store.whatsappHref.replace(/.*wa\.me\//, "");
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, "_blank");
+
+    // Clear cart state + localStorage behind the scenes
+    if (onClearCart) onClearCart();
+    onClose();
   };
 
   return (
@@ -300,11 +318,42 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
   const theme = getTheme(store.storeTheme);
   const t = theme;
 
+  const storageKey = `pax26_cart_${store.slug || slug}`;
+
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(`pax26_cart_${store.slug || slug}`);
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Save cart to localStorage on state changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(cart));
+      } catch (e) {}
+    }
+  }, [cart, storageKey]);
+
+  const clearCart = useCallback(() => {
+    setCart([]);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (e) {}
+    }
+  }, [storageKey]);
+
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
@@ -331,6 +380,15 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
   const removeFromCart = (productId) => {
     setCart(prev => prev.filter(i => i.product._id !== productId));
   };
+
+  // Map product ID to quantity in cart
+  const cartQtyMap = useMemo(() => {
+    const map = {};
+    for (const item of cart) {
+      map[item.product._id] = item.quantity;
+    }
+    return map;
+  }, [cart]);
 
   // Validate session + resolve referredProductId
   useEffect(() => {
@@ -414,7 +472,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
 
         {/* ── SIDE MENU & CART DRAWER ──────────────────── */}
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} theme={t} search={search} onSearchChange={setSearch} slug={slug} />
-        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} store={store} theme={t} />
+        <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onClearCart={clearCart} store={store} theme={t} />
 
         {/* ── MAIN CONTENT ─────────────────────────────── */}
         <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px" }}>
@@ -448,7 +506,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
           {filtered.length > 0 ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px" }}>
               {filtered.map(product => (
-                <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} onAddToCart={addToCart} />
+                <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} cartQuantity={cartQtyMap[product._id] || 0} onAddToCart={addToCart} onUpdateQty={updateCartQty} />
               ))}
             </div>
           ) : (

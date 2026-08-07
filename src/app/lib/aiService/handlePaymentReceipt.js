@@ -250,6 +250,9 @@ export async function handlePaymentReceipt({
         return { handled: false };
     }
 
+    const isNewOrder = !pendingOrder;
+    const isFirstTimeReceiptImage = url && (!pendingOrder || !pendingOrder.paymentReceiptUrl);
+
     let order = pendingOrder;
 
     if (!order) {
@@ -279,16 +282,21 @@ export async function handlePaymentReceipt({
         ? items.map(i => `${i.quantity}x ${i.name}`).join(", ")
         : (items[0]?.name || "Payment receipt received");
 
-    try {
-        await sendSalesNotification(sellerUserId, {
-            orderId: order._id.toString(),
-            customerName: order.customerName || order.customerPhone,
-            productName: itemSummaryStr,
-            amountPaid: order.totalPrice,
-            isConfirmed: false,
-        });
-    } catch (err) {
-        console.warn("Sales notification failed:", err.message);
+    // Only notify seller if a brand new order is created OR if this is the first time a payment proof image is attached
+    if (isNewOrder || isFirstTimeReceiptImage) {
+        try {
+            await sendSalesNotification(sellerUserId, {
+                orderId: order._id.toString(),
+                customerName: order.customerName || order.customerPhone,
+                productName: itemSummaryStr,
+                amountPaid: order.totalPrice,
+                isConfirmed: false,
+            });
+        } catch (err) {
+            console.warn("Sales notification failed:", err.message);
+        }
+    } else {
+        console.log(`[handlePaymentReceipt] ⏭️ Sales alert already sent for order ${order._id} — suppressing duplicate.`);
     }
 
     return { handled: true, order };
