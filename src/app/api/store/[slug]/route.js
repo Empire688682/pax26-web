@@ -58,13 +58,45 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Fetch available products for this seller
-    const products = await SellerProductModel.find({
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+    const category = searchParams.get("category");
+    const q = searchParams.get("q");
+
+    const filter = {
       sellerId: profile._id,
       isAvailable: true,
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    };
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    if (q && q.trim()) {
+      const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      filter.$or = [
+        { name: regex },
+        { category: regex },
+        { tags: { $elemMatch: regex } },
+        { description: regex },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Run query, total count, and category list in parallel for speed
+    const [products, totalProducts, rawCategories] = await Promise.all([
+      SellerProductModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      SellerProductModel.countDocuments(filter),
+      SellerProductModel.distinct("category", { sellerId: profile._id, isAvailable: true }),
+    ]);
+
+    const categories = rawCategories.filter(Boolean).sort();
 
     // ── Strip private fields before responding ─────────────────
     const publicProfile = {
@@ -76,15 +108,13 @@ export async function GET(req, { params }) {
       liveLocation: profile.liveLocation || null,
       workingHours: profile.workingHours || null,
       currency: profile.currency || "NGN",
-      // wa.me link so the storefront "Chat" button works without exposing the raw number
       whatsappHref: profile.whatsappNumber
         ? `https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}`
         : null,
     };
 
-    // Strip internal fields from each product
     const publicProducts = products.map((p) => ({
-      _id: p._id,
+      _id: p._id.toString(),
       slug: p.slug || null,
       name: p.name,
       description: p.description || null,
@@ -100,11 +130,23 @@ export async function GET(req, { params }) {
       locationNotes: p.locationNotes || null,
       images: p.images || [],
       variants: p.variants || [],
-      // sku intentionally excluded from public response
     }));
 
+    const totalPages = Math.ceil(totalProducts / limit);
+
     return NextResponse.json(
-      { success: true, store: publicProfile, products: publicProducts },
+      {
+        success: true,
+        store: publicProfile,
+        products: publicProducts,
+        categories,
+        pagination: {
+          total: totalProducts,
+          page,
+          limit,
+          totalPages,
+        },
+      },
       { status: 200, headers: publicHeaders() }
     );
   } catch (error) {

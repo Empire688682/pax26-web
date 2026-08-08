@@ -12,7 +12,7 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import UserModel from "@/app/ults/models/UserModel";
 
-async function getStoreData(slug) {
+async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = "" } = {}) {
   try {
     await connectDb();
 
@@ -22,18 +22,40 @@ async function getStoreData(slug) {
 
     if (!profile) return null;
 
-    // Get user's plan flags (removeBranding, etc.)
-    const user = await UserModel.findById(profile.userId).select("paxAI").lean();
-
-    const products = await SellerProductModel.find({
+    const filter = {
       sellerId: profile._id,
       isAvailable: true,
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    };
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    if (q && q.trim()) {
+      const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      filter.$or = [
+        { name: regex },
+        { category: regex },
+        { tags: { $elemMatch: regex } },
+        { description: regex },
+      ];
+    }
+
+    const skip = (Math.max(1, page) - 1) * limit;
+
+    const [products, totalProducts, rawCategories] = await Promise.all([
+      SellerProductModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      SellerProductModel.countDocuments(filter),
+      SellerProductModel.distinct("category", { sellerId: profile._id, isAvailable: true }),
+    ]);
+
+    const categories = rawCategories.filter(Boolean).sort();
 
     // Serialize through JSON to strip all BSON ObjectId / Buffer types
-    // so Next.js can safely pass the data from Server → Client components
     const serialize = (obj) => JSON.parse(JSON.stringify(obj));
 
     const store = serialize({
@@ -80,7 +102,17 @@ async function getStoreData(slug) {
       })),
     })));
 
-    return { store, products: publicProducts };
+    return {
+      store,
+      products: publicProducts,
+      categories,
+      pagination: {
+        total: totalProducts,
+        page,
+        limit,
+        totalPages: Math.ceil(totalProducts / limit),
+      },
+    };
   } catch (err) {
     console.error("getStoreData error:", err);
     return null;
@@ -107,13 +139,20 @@ export async function generateMetadata({ params }) {
 export default async function StoreSlugPage({ params, searchParams }) {
   const { slug } = await params;
   const resolvedSearch = await searchParams;
-  const data = await getStoreData(slug);
+  const page = parseInt(resolvedSearch?.page || "1", 10);
+  const limit = parseInt(resolvedSearch?.limit || "20", 10);
+  const category = resolvedSearch?.category || "all";
+  const q = resolvedSearch?.q || "";
+
+  const data = await getStoreData(slug, { page, limit, category, q });
   if (!data) notFound();
 
   return (
     <StorefrontPage
       store={data.store}
-      products={data.products}
+      initialProducts={data.products}
+      initialCategories={data.categories}
+      initialPagination={data.pagination}
       slug={slug}
       isPreview={resolvedSearch?.preview === "1"}
       sessionToken={resolvedSearch?.session || null}

@@ -141,9 +141,10 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
 }
 
 /* ── Product Card ───────────────────────────────────────── */
-function ProductCard({ product, store, slug, sessionToken, theme, highlighted }) {
+function ProductCard({ product, store, slug, sessionToken, theme, highlighted, index = 0 }) {
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const t = theme;
   const currency = store.currency || "NGN";
   const displayPrice = product.discountPrice || product.price;
@@ -152,32 +153,91 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
 
   return (
     <Link href={productHref} style={{ textDecoration: "none" }} onClick={() => setLoading(true)}>
-      <article style={{ background: t.card, borderRadius: "16px", overflow: "hidden", border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`, boxShadow: highlighted ? `0 0 0 4px ${t.accent}22` : "none", transition: "transform 0.18s, box-shadow 0.18s", cursor: "pointer", display: "flex", flexDirection: "column", position: "relative" }}
-        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 32px rgba(0,0,0,0.12)`; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = highlighted ? `0 0 0 4px ${t.accent}22` : "none"; }}>
-
+      <article
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          background: t.card,
+          borderRadius: "16px",
+          overflow: "hidden",
+          border: highlighted ? `2px solid ${t.accent}` : `1px solid ${t.border}`,
+          boxShadow: hovered
+            ? `0 16px 36px rgba(0,0,0,0.16)`
+            : highlighted
+            ? `0 0 0 4px ${t.accent}22`
+            : "0 2px 8px rgba(0,0,0,0.04)",
+          transform: hovered ? "translateY(-6px)" : "none",
+          transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          animation: `sf-card-entry 0.45s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(index * 0.03, 0.3)}s both`,
+        }}
+      >
         {/* Loading overlay */}
         {loading && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "16px" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "16px", backdropFilter: "blur(2px)" }}>
             <div style={{ width: "32px", height: "32px", border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
           </div>
         )}
 
-        {/* Image */}
+        {/* Image container */}
         <div style={{ position: "relative", paddingTop: "80%", background: t.pageBg, overflow: "hidden" }}>
           {product.images?.[0]?.url && !imgError ? (
-            <img src={product.images[0].url} alt={product.name} onError={() => setImgError(true)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <img
+              src={product.images[0].url}
+              alt={product.name}
+              onError={() => setImgError(true)}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: hovered ? "scale(1.08)" : "scale(1)",
+                transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            />
           ) : (
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: t.textSecondary, opacity: 0.3 }}><PackageIcon /></div>
           )}
+
+          {/* Hover overlay pill */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "12px",
+              left: "50%",
+              transform: hovered ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(12px)",
+              opacity: hovered ? 1 : 0,
+              transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s",
+              background: "rgba(0,0,0,0.75)",
+              color: "#fff",
+              padding: "6px 14px",
+              borderRadius: "999px",
+              fontSize: "11px",
+              fontWeight: 700,
+              backdropFilter: "blur(4px)",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            View Details →
+          </div>
+
           {product.stock === 0 && <div style={{ position: "absolute", top: "10px", left: "10px", background: "rgba(0,0,0,0.75)", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, letterSpacing: "0.06em" }}>SOLD OUT</div>}
-          {highlighted && <div style={{ position: "absolute", top: "10px", left: "10px", background: t.accent, color: t.accentText, padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, display: "flex", alignItems: "center", gap: "4px" }}>🤖 AI Pick</div>}
-          {hasDiscount && !highlighted && product.stock > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800 }}>SALE</div>}
+          {highlighted && <div style={{ position: "absolute", top: "10px", left: "10px", background: t.accent, color: t.accentText, padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, display: "flex", alignItems: "center", gap: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>🤖 AI Pick</div>}
+          {hasDiscount && !highlighted && product.stock > 0 && <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ef4444", color: "#fff", padding: "3px 10px", borderRadius: "6px", fontSize: "10px", fontWeight: 800, boxShadow: "0 2px 8px rgba(239,68,68,0.3)" }}>SALE</div>}
         </div>
+
         {/* Info */}
         <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
           {product.category && <span style={{ fontSize: "10px", fontWeight: 700, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>{product.category}</span>}
-          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: t.textPrimary, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{product.name}</h3>
+          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: hovered ? t.accent : t.textPrimary, transition: "color 0.2s", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{product.name}</h3>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
             <span style={{ fontSize: "16px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(displayPrice, currency)}</span>
             {hasDiscount && <span style={{ fontSize: "12px", color: t.textSecondary, textDecoration: "line-through" }}>{formatPrice(product.price, currency)}</span>}
@@ -191,19 +251,42 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted })
 /* ══════════════════════════════════════════════════════════
    MAIN: StorefrontPage
 ══════════════════════════════════════════════════════════ */
-export default function StorefrontPage({ store, products, slug, isPreview, sessionToken, referredProductId }) {
+export default function StorefrontPage({
+  store,
+  initialProducts = [],
+  initialCategories = [],
+  initialPagination = null,
+  products = [],
+  slug,
+  isPreview,
+  sessionToken,
+  referredProductId,
+}) {
   const theme = getTheme(store.storeTheme);
   const t = theme;
 
+  const [productsList, setProductsList] = useState(initialProducts.length ? initialProducts : products);
+  const [categoriesList, setCategoriesList] = useState(
+    initialCategories.length
+      ? initialCategories
+      : [...new Set(products.map(p => p.category).filter(Boolean))].sort()
+  );
+  const [pagination, setPagination] = useState(
+    initialPagination || {
+      total: productsList.length,
+      page: 1,
+      limit: 20,
+      totalPages: Math.ceil(productsList.length / 20) || 1,
+    }
+  );
+
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
-  const [searchResults, setSearchResults] = useState(null);
-  const [searching, setSearching] = useState(false);
-
-  const PRODUCTS_PER_PAGE = 20;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [isInitialMount, setIsInitialMount] = useState(true);
 
   // Validate session + resolve referredProductId
   useEffect(() => {
@@ -214,47 +297,60 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
       .catch(() => {});
   }, [sessionToken]);
 
-  // Debounced API search
-  useEffect(() => {
-    if (!search.trim()) { setSearchResults(null); return; }
-    const timer = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const res = await fetch(`/api/store/${slug}/search?q=${encodeURIComponent(search.trim())}`);
-        const data = await res.json();
-        setSearchResults(data.success ? data.results : []);
-      } catch { setSearchResults([]); }
-      finally { setSearching(false); }
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [search, slug]);
-
-  // Reset pagination when category, search, or searchResults change
-  useEffect(() => {
+  // Reset page to 1 when search or category changes
+  const handleCategoryChange = (newCat) => {
+    setActiveCategory(newCat);
     setCurrentPage(1);
-  }, [search, activeCategory, searchResults]);
+  };
 
-  const categories = useMemo(() => [...new Set(products.map(p => p.category).filter(Boolean))].sort(), [products]);
+  const handleSearchChange = (val) => {
+    setSearch(val);
+    setCurrentPage(1);
+  };
 
-  const filtered = useMemo(() => {
-    if (search.trim() && searchResults !== null) {
-      return activeCategory === "all" ? searchResults : searchResults.filter(p => p.category === activeCategory);
+  // Fetch paginated products from DB API whenever page, category, or search changes
+  useEffect(() => {
+    // Skip initial fetch since initial data was SSR-rendered
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
     }
-    if (activeCategory === "all") return products;
-    return products.filter(p => p.category === activeCategory);
-  }, [products, searchResults, search, activeCategory]);
 
-  const totalPages = Math.ceil(filtered.length / PRODUCTS_PER_PAGE);
+    const timer = setTimeout(async () => {
+      setLoadingPage(true);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: "20",
+        });
+        if (activeCategory && activeCategory !== "all") params.set("category", activeCategory);
+        if (search.trim()) params.set("q", search.trim());
 
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return filtered.slice(start, start + PRODUCTS_PER_PAGE);
-  }, [filtered, currentPage]);
+        const res = await fetch(`/api/store/${slug}?${params.toString()}`);
+        const data = await res.json();
+
+        if (data.success) {
+          setProductsList(data.products || []);
+          if (data.categories) setCategoriesList(data.categories);
+          if (data.pagination) setPagination(data.pagination);
+        }
+      } catch (err) {
+        console.error("Fetch store products error:", err);
+      } finally {
+        setLoadingPage(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [currentPage, activeCategory, search, slug]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const totalPages = pagination?.totalPages || 1;
+  const totalProducts = pagination?.total || productsList.length;
 
   return (
     <>
@@ -293,27 +389,27 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
         </nav>
 
         {/* ── SIDE MENU ────────────────────────────────── */}
-        <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} theme={t} search={search} onSearchChange={setSearch} slug={slug} />
+        <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} />
 
         {/* ── MAIN CONTENT ─────────────────────────────── */}
-        <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px" }}>
+        <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px", position: "relative" }}>
 
           {/* Search bar + category pills */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "24px", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", background: t.card, borderRadius: "10px", padding: "9px 14px", border: `1px solid ${t.border}`, flex: "1 1 200px", maxWidth: "380px" }}>
               <span style={{ color: t.textSecondary, flexShrink: 0 }}>
-                {searching ? <div style={{ width: "16px", height: "16px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} /> : <SearchIcon />}
+                {loadingPage ? <div style={{ width: "16px", height: "16px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} /> : <SearchIcon />}
               </span>
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "14px", color: t.textPrimary, fontFamily: "inherit" }} />
-              {search && <button onClick={() => { setSearch(""); setSearchResults(null); }} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "18px", lineHeight: 1, padding: 0 }}>×</button>}
+              <input value={search} onChange={e => handleSearchChange(e.target.value)} placeholder="Search products…" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "14px", color: t.textPrimary, fontFamily: "inherit" }} />
+              {search && <button onClick={() => handleSearchChange("")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "18px", lineHeight: 1, padding: 0 }}>×</button>}
             </div>
 
-            {categories.length > 0 && (
+            {categoriesList.length > 0 && (
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                {["all", ...categories].map(cat => (
-                  <button key={cat} onClick={() => setActiveCategory(cat)}
+                {["all", ...categoriesList].map(cat => (
+                  <button key={cat} onClick={() => handleCategoryChange(cat)}
                     style={{ padding: "7px 14px", borderRadius: "999px", border: "none", background: activeCategory === cat ? t.accent : t.card, color: activeCategory === cat ? t.accentText : t.textSecondary, fontSize: "12px", fontWeight: 600, cursor: "pointer", border: activeCategory === cat ? "none" : `1px solid ${t.border}`, transition: "all 0.12s" }}>
-                    {cat === "all" ? `All (${products.length})` : cat}
+                    {cat === "all" ? `All (${totalProducts})` : cat}
                   </button>
                 ))}
               </div>
@@ -321,14 +417,22 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
           </div>
 
           {/* Search results label */}
-          {search && <p style={{ fontSize: "13px", color: t.textSecondary, marginBottom: "16px" }}>{filtered.length === 0 ? `No results for "${search}"` : `${filtered.length} result${filtered.length !== 1 ? "s" : ""} for "${search}"`}</p>}
+          {search && <p style={{ fontSize: "13px", color: t.textSecondary, marginBottom: "16px" }}>{productsList.length === 0 ? `No results for "${search}"` : `${totalProducts} result${totalProducts !== 1 ? "s" : ""} for "${search}"`}</p>}
+
+          {/* Loading Indicator */}
+          {loadingPage && (
+            <div style={{ padding: "12px 0", textAlign: "center", fontSize: "13px", color: t.textSecondary, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <div style={{ width: "16px", height: "16px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
+              Loading products…
+            </div>
+          )}
 
           {/* Product grid */}
-          {paginatedProducts.length > 0 ? (
+          {productsList.length > 0 ? (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px" }}>
-                {paginatedProducts.map(product => (
-                  <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px", opacity: loadingPage ? 0.6 : 1, transition: "opacity 0.15s" }}>
+                {productsList.map((product, idx) => (
+                  <ProductCard key={product._id} index={idx} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
                 ))}
               </div>
 
@@ -336,12 +440,12 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
               {totalPages > 1 && (
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "16px", marginTop: "36px", paddingTop: "24px", borderTop: `1px solid ${t.border}` }}>
                   <p style={{ margin: 0, fontSize: "13px", color: t.textSecondary }}>
-                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * PRODUCTS_PER_PAGE + 1}</strong>–<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * PRODUCTS_PER_PAGE, filtered.length)}</strong> of <strong style={{ color: t.textPrimary }}>{filtered.length}</strong> products
+                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * 20 + 1}</strong>–<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * 20, totalProducts)}</strong> of <strong style={{ color: t.textPrimary }}>{totalProducts}</strong> products
                   </p>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                     <button
-                      disabled={currentPage === 1}
+                      disabled={currentPage === 1 || loadingPage}
                       onClick={() => handlePageChange(currentPage - 1)}
                       style={{
                         padding: "8px 14px",
@@ -361,6 +465,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                       <button
                         key={page}
+                        disabled={loadingPage}
                         onClick={() => handlePageChange(page)}
                         style={{
                           minWidth: "36px",
@@ -381,7 +486,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
                     ))}
 
                     <button
-                      disabled={currentPage === totalPages}
+                      disabled={currentPage === totalPages || loadingPage}
                       onClick={() => handlePageChange(currentPage + 1)}
                       style={{
                         padding: "8px 14px",
@@ -406,7 +511,7 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
               <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
               <h3 style={{ fontSize: "18px", fontWeight: 800, color: t.textPrimary, margin: "0 0 8px" }}>{search ? "No products match your search" : "No products yet"}</h3>
               <p style={{ fontSize: "14px", color: t.textSecondary, margin: "0 0 24px" }}>{search ? "Try a different search or browse all categories." : "This store hasn't added any products yet."}</p>
-              {search && <button onClick={() => { setSearch(""); setSearchResults(null); setActiveCategory("all"); }} style={{ padding: "10px 24px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 700, border: "none", cursor: "pointer", fontSize: "14px" }}>Clear search</button>}
+              {search && <button onClick={() => { handleSearchChange(""); handleCategoryChange("all"); }} style={{ padding: "10px 24px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 700, border: "none", cursor: "pointer", fontSize: "14px" }}>Clear search</button>}
               {!search && store.whatsappHref && <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 24px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: "14px" }}><WhatsAppIcon /> Ask about availability</a>}
             </div>
           )}
@@ -417,7 +522,13 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
         <Pax26Footer />
 
       </div>
-      <style>{`@keyframes sf-spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes sf-spin { to { transform: rotate(360deg); } }
+        @keyframes sf-card-entry {
+          0% { opacity: 0; transform: translateY(18px) scale(0.96); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
     </>
   );
 }
