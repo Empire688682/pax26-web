@@ -61,32 +61,17 @@ function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefr
   const productsSection = products?.length
     ? `
 ## Product Catalogue:
-CRITICAL: When a customer asks to see pictures of any product listed below, you MUST output the image tag [SEND_IMAGE: url] on its own line. This is the ONLY way to send images. Do not describe images in words — output the tag.
+CRITICAL: When a customer asks to see pictures of any product listed below, you MUST output the image tag IMAGE_URL: <url> on its own line. Do not describe images in words — output the tag.
 
 ${products
+      .slice(0, 35)
       .map((p, i) => {
         const isAvailable = p.isAvailable !== false && p.stock > 0;
+        const mainImg = p.images?.[0]?.url;
+        const imgText = mainImg ? `IMAGE_URL: ${mainImg}` : "No image available";
+        const desc = p.description ? p.description.slice(0, 100).replace(/\s+/g, " ") : "";
 
-        const imageLines = p.images?.length
-          ? p.images.map((img, idx) => `IMAGE_URL: ${img.url}`).join("\n")
-          : "    No images available — tell the customer you don't have a picture right now";
-
-        return `[Product ${i + 1}]
-  ID: ${p._id}
-  Name: ${p.name}
-  Price: ${currencySymbol}${Number(p.price).toLocaleString()}
-  Type: ${p.isPhysical ? "Physical Product" : "Digital Service/Link"}
-  ${p.isPhysical && p.discountPrice ? `Discount Price: ${currencySymbol}${Number(p.discountPrice).toLocaleString()}` : ""}
-  ${p.isPhysical && p.deliveryFee ? `Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
-  ${p.isPhysical && p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
-  ${p.isPhysical && p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
-  Category: ${p.category || "General"}
-  Tags: ${p.tags?.join(", ") || "none"}
-  Stock: ${p.stock > 0 ? `${p.stock} units available` : "Out of stock"}
-  Available: ${isAvailable ? "Yes" : "No"}
-  Description: ${p.description || "No description"}
-  TO SEND IMAGES — copy these lines exactly into your reply:
-${imageLines}`;
+        return `[Product ${i + 1}] ID: ${p._id} | Name: ${p.name} | Price: ${currencySymbol}${Number(p.price).toLocaleString()}${p.discountPrice ? ` (Discount: ${currencySymbol}${Number(p.discountPrice).toLocaleString()})` : ""}${p.deliveryFee ? ` | Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""} | Cat: ${p.category || "General"} | Stock: ${isAvailable ? "Available" : "Out of stock"}${desc ? ` | ${desc}` : ""}\n${imgText}`;
       })
       .join("\n\n")}`
     : "\n## Product Catalogue:\nNo products have been added yet. Let customers know you will update them shortly.";

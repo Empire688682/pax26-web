@@ -329,9 +329,13 @@ export const triggerAIResponse = async ({
         // When imageSearchContext is true, inboundText already contains the
         // [SYSTEM: ...] block from buildImageMatchContext / buildImageNoMatchContext.
         // We pass it as the user turn so the AI has the real match data.
+        
+        // Clean up excessively long session tokens in user URL parameters to save tokens
+        const cleanedInboundText = (inboundText || "").replace(/(\?|&)session=[A-Za-z0-9._\-\+]+=*/g, "$1session=[token]");
+
         const messages = [
             ...trimmedMessages,
-            { role: "user", content: inboundText },
+            { role: "user", content: cleanedInboundText },
         ];
 
         // ── Call AI providers with fallback chain ─────────────────
@@ -340,24 +344,32 @@ export const triggerAIResponse = async ({
                 const result = await callGroqAI({ systemPrompt, messages });
                 if (result) { console.log("✅ Groq responded"); return result; }
             } catch (err) {
-                if (err?.status === 429) console.warn("⚠️ Groq rate limit — trying Gemini...");
-                else throw err;
+                const isRateOrTokenLimit =
+                    err?.status === 429 ||
+                    err?.status === 413 ||
+                    err?.code === "rate_limit_exceeded" ||
+                    err?.error?.code === "rate_limit_exceeded" ||
+                    err?.message?.includes("tokens");
+
+                if (isRateOrTokenLimit) {
+                    console.warn("⚠️ Groq rate/token limit (413/429) — falling back to Gemini...");
+                } else {
+                    console.warn("⚠️ Groq error — falling back to Gemini:", err?.message || err);
+                }
             }
 
             try {
                 const result = await callGeminiAI({ systemPrompt, messages });
                 if (result) { console.log("✅ Gemini responded"); return result; }
             } catch (err) {
-                if (err?.status === 429) console.warn("⚠️ Gemini rate limit — trying Mistral...");
-                else throw err;
+                console.warn("⚠️ Gemini error — falling back to Mistral:", err?.message || err);
             }
 
             try {
                 const result = await callMistralAI({ systemPrompt, messages });
                 if (result) { console.log("✅ Mistral responded"); return result; }
             } catch (err) {
-                if (err?.status === 429) console.warn("⚠️ Mistral rate limit — all providers exhausted");
-                else throw err;
+                console.warn("⚠️ Mistral error:", err?.message || err);
             }
 
             return null;
