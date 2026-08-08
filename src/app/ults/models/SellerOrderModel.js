@@ -10,7 +10,6 @@ const SellerOrderSchema = new mongoose.Schema({
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SellerProduct",
-        required: true,
     },
 
     customerPhone: {
@@ -41,11 +40,13 @@ const SellerOrderSchema = new mongoose.Schema({
 
     confirmedAt: Date,
     confirmedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        type: mongoose.Schema.Types.Mixed,
     },
 
 }, { timestamps: true });
 
-export default mongoose.models.SellerOrder ||
-    mongoose.model("SellerOrder", SellerOrderSchema);
+if (mongoose.models.SellerOrder) {
+    delete mongoose.models.SellerOrder;
+}
+
+export default mongoose.model("SellerOrder", SellerOrderSchema);
