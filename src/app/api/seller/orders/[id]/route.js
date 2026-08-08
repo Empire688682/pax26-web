@@ -58,8 +58,8 @@ export async function PATCH(req, { params }) {
             ["confirmed", "paid", "delivered"].includes(status) &&
             !["confirmed", "paid", "delivered"].includes(previousStatus)
         ) {
-            sellerProfile.totalSalesCount += 1;
-            sellerProfile.totalSalesAmount += order.totalPrice || 0;
+            sellerProfile.totalSalesCount = (sellerProfile.totalSalesCount || 0) + 1;
+            sellerProfile.totalSalesAmount = (sellerProfile.totalSalesAmount || 0) + (order.totalPrice || 0);
             await sellerProfile.save();
 
             // 1. Notify seller (in-app, WhatsApp, and email)

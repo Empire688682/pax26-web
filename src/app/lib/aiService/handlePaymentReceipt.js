@@ -44,17 +44,67 @@ function isPaymentStage(recentMessages = []) {
     return has10DigitNum || hasPaymentKeyword || (hasGeneralPaymentWord && recentMessages.length > 0);
 }
 
-async function findProductFromConversation(sellerId, recentMessages) {
+function extractOrderTotalFromConversation(recentMessages = []) {
+    const conversationText = recentMessages
+        .map((m) => m.content || m.text || "")
+        .join("\n");
+
+    const grandTotalPatterns = [
+        /(?:grand\s+total|total\s+amount|total|grandtotal)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /once\s+you(?:'|’)?ve\s+transferred\s+the\s*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /transferred\s+the\s*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /pay\s+the\s+(?:sum\s+of\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
+    ];
+
+    for (const pattern of grandTotalPatterns) {
+        const match = conversationText.match(pattern);
+        if (match && match[1]) {
+            const cleanNum = parseInt(match[1].replace(/,/g, ""), 10);
+            if (!isNaN(cleanNum) && cleanNum > 0) {
+                return cleanNum;
+            }
+        }
+    }
+    return null;
+}
+
+async function findProductFromConversation(sellerId, recentMessages = []) {
     const products = await SellerProductModel.find({ sellerId }).lean();
     if (!products.length) return null;
 
-    const conversationText = recentMessages.map((m) => m.content || m.text || "").join(" ").toLowerCase();
+    const conversationText = recentMessages
+        .map((m) => m.content || m.text || "")
+        .join(" ")
+        .toLowerCase();
 
+    // 1. Line pattern matching (e.g. "1x Shoe", "• Shoe", "- Shoe")
     for (const prod of products) {
-        if (prod.name && conversationText.includes(prod.name.toLowerCase())) {
+        if (!prod.name) continue;
+        const escaped = prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const itemLineRegex = new RegExp(`(?:\\d+x|•|·|-|\\*)\\s*${escaped}`, 'i');
+        if (itemLineRegex.test(conversationText)) {
             return prod;
         }
     }
+
+    // 2. Sort by name length descending so longer/more specific names match first
+    const sortedProducts = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+    for (const prod of sortedProducts) {
+        if (!prod.name) continue;
+        const nameLower = prod.name.toLowerCase();
+        const wordRegex = new RegExp(`\\b${prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        if (wordRegex.test(conversationText) || conversationText.includes(nameLower)) {
+            return prod;
+        }
+    }
+
+    // 3. Price matching in text
+    for (const prod of products) {
+        if (prod.price && conversationText.includes(prod.price.toString())) {
+            return prod;
+        }
+    }
+
     return products[0];
 }
 
@@ -201,6 +251,8 @@ export async function handlePaymentReceipt({
     }
 
     const matchedProduct = await resolveProduct(sellerId, recentMessages);
+    const parsedTotal = extractOrderTotalFromConversation(recentMessages);
+    const orderTotalPrice = parsedTotal || matchedProduct?.price || 0;
 
     // If we're in payment stage (AI already asked for proof), handle it regardless
     // of whether we can identify a specific product — the payment context is enough.
@@ -218,17 +270,27 @@ export async function handlePaymentReceipt({
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
             quantity: 1,
-            totalPrice: matchedProduct?.price || 0,
+            totalPrice: orderTotalPrice,
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
             paymentReceiptSubmittedAt: url ? new Date() : undefined,
         });
-    } else if (url) {
-        order.paymentReceiptUrl = url;
-        order.paymentReceiptPublicId = publicId;
-        order.paymentReceiptSubmittedAt = new Date();
-        await order.save();
+    } else {
+        let orderChanged = false;
+        if (url) {
+            order.paymentReceiptUrl = url;
+            order.paymentReceiptPublicId = publicId;
+            order.paymentReceiptSubmittedAt = new Date();
+            orderChanged = true;
+        }
+        if (parsedTotal && parsedTotal !== order.totalPrice) {
+            order.totalPrice = parsedTotal;
+            orderChanged = true;
+        }
+        if (orderChanged) {
+            await order.save();
+        }
     }
 
     try {
@@ -271,13 +333,16 @@ export async function createPendingOrderFromText({
     const matchedProduct = await resolveProduct(sellerId, recentMessages);
     if (!matchedProduct?._id) return { created: false };
 
+    const parsedTotal = extractOrderTotalFromConversation(recentMessages);
+    const orderTotalPrice = parsedTotal || matchedProduct.price || 0;
+
     const order = await SellerOrderModel.create({
         sellerId,
         productId: matchedProduct._id,
         customerPhone: normalizedPhone,
         customerName: customerName || "WhatsApp Customer",
         quantity: 1,
-        totalPrice: matchedProduct.price || 0,
+        totalPrice: orderTotalPrice,
         status: "pending",
     });
 

@@ -42,8 +42,8 @@ export async function POST(req) {
 
         // Update total sales metrics if the order is confirmed/paid
         if (["confirmed", "paid", "delivered"].includes(newOrder.status)) {
-            sellerProfile.totalSalesCount += 1;
-            sellerProfile.totalSalesAmount += newOrder.totalPrice;
+            sellerProfile.totalSalesCount = (sellerProfile.totalSalesCount || 0) + 1;
+            sellerProfile.totalSalesAmount = (sellerProfile.totalSalesAmount || 0) + (newOrder.totalPrice || 0);
             await sellerProfile.save();
 
             // Trigger confirmed sale notification
