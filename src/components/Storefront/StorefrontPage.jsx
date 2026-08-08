@@ -235,12 +235,17 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
         </div>
 
         {/* Info */}
-        <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-          {product.category && <span style={{ fontSize: "10px", fontWeight: 700, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>{product.category}</span>}
-          <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: hovered ? t.accent : t.textPrimary, transition: "color 0.2s", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{product.name}</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
-            <span style={{ fontSize: "16px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(displayPrice, currency)}</span>
-            {hasDiscount && <span style={{ fontSize: "12px", color: t.textSecondary, textDecoration: "line-through" }}>{formatPrice(product.price, currency)}</span>}
+        <div style={{ padding: "10px 12px", flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+          {product.category && <span style={{ fontSize: "10px", fontWeight: 700, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.category}</span>}
+          <h3 style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: hovered ? t.accent : t.textPrimary, transition: "color 0.2s", lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</h3>
+          {product.description && (
+            <p style={{ margin: 0, fontSize: "11px", color: t.textSecondary, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {product.description}
+            </p>
+          )}
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginTop: "auto", paddingTop: "6px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "15px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(displayPrice, currency)}</span>
+            {hasDiscount && <span style={{ fontSize: "11px", color: t.textSecondary, textDecoration: "line-through" }}>{formatPrice(product.price, currency)}</span>}
           </div>
         </div>
       </article>
@@ -430,7 +435,7 @@ export default function StorefrontPage({
           {/* Product grid */}
           {productsList.length > 0 ? (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px", opacity: loadingPage ? 0.6 : 1, transition: "opacity 0.15s" }}>
+              <div className="sf-product-grid" style={{ opacity: loadingPage ? 0.6 : 1, transition: "opacity 0.15s" }}>
                 {productsList.map((product, idx) => (
                   <ProductCard key={product._id} index={idx} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
                 ))}
@@ -527,6 +532,17 @@ export default function StorefrontPage({
         @keyframes sf-card-entry {
           0% { opacity: 0; transform: translateY(18px) scale(0.96); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .sf-product-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        @media (min-width: 580px) {
+          .sf-product-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 18px;
+          }
         }
       `}</style>
     </>
