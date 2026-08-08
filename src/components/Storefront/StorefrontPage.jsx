@@ -202,6 +202,9 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
 
+  const PRODUCTS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Validate session + resolve referredProductId
   useEffect(() => {
     if (!sessionToken) return;
@@ -226,6 +229,11 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
     return () => clearTimeout(timer);
   }, [search, slug]);
 
+  // Reset pagination when category, search, or searchResults change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeCategory, searchResults]);
+
   const categories = useMemo(() => [...new Set(products.map(p => p.category).filter(Boolean))].sort(), [products]);
 
   const filtered = useMemo(() => {
@@ -235,6 +243,18 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
     if (activeCategory === "all") return products;
     return products.filter(p => p.category === activeCategory);
   }, [products, searchResults, search, activeCategory]);
+
+  const totalPages = Math.ceil(filtered.length / PRODUCTS_PER_PAGE);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filtered.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -304,12 +324,83 @@ export default function StorefrontPage({ store, products, slug, isPreview, sessi
           {search && <p style={{ fontSize: "13px", color: t.textSecondary, marginBottom: "16px" }}>{filtered.length === 0 ? `No results for "${search}"` : `${filtered.length} result${filtered.length !== 1 ? "s" : ""} for "${search}"`}</p>}
 
           {/* Product grid */}
-          {filtered.length > 0 ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px" }}>
-              {filtered.map(product => (
-                <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
-              ))}
-            </div>
+          {paginatedProducts.length > 0 ? (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "18px" }}>
+                {paginatedProducts.map(product => (
+                  <ProductCard key={product._id} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
+                ))}
+              </div>
+
+              {/* ── PAGINATION CONTROLS ──────────────────────── */}
+              {totalPages > 1 && (
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "16px", marginTop: "36px", paddingTop: "24px", borderTop: `1px solid ${t.border}` }}>
+                  <p style={{ margin: 0, fontSize: "13px", color: t.textSecondary }}>
+                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * PRODUCTS_PER_PAGE + 1}</strong>–<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * PRODUCTS_PER_PAGE, filtered.length)}</strong> of <strong style={{ color: t.textPrimary }}>{filtered.length}</strong> products
+                  </p>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      style={{
+                        padding: "8px 14px",
+                        borderRadius: "8px",
+                        border: `1px solid ${t.border}`,
+                        background: t.card,
+                        color: currentPage === 1 ? t.textSecondary : t.textPrimary,
+                        opacity: currentPage === 1 ? 0.4 : 1,
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Previous
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        style={{
+                          minWidth: "36px",
+                          height: "36px",
+                          padding: "0 8px",
+                          borderRadius: "8px",
+                          border: page === currentPage ? "none" : `1px solid ${t.border}`,
+                          background: page === currentPage ? t.accent : t.card,
+                          color: page === currentPage ? t.accentText : t.textPrimary,
+                          cursor: "pointer",
+                          fontSize: "13px",
+                          fontWeight: page === currentPage ? 800 : 600,
+                          transition: "all 0.12s",
+                        }}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      style={{
+                        padding: "8px 14px",
+                        borderRadius: "8px",
+                        border: `1px solid ${t.border}`,
+                        background: t.card,
+                        color: currentPage === totalPages ? t.textSecondary : t.textPrimary,
+                        opacity: currentPage === totalPages ? 0.4 : 1,
+                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div style={{ textAlign: "center", padding: "72px 20px", background: t.card, borderRadius: "20px", border: `1px dashed ${t.border}` }}>
               <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
