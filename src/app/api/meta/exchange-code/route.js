@@ -15,8 +15,8 @@ import crypto from "crypto";
  */
 function generateAndEncryptPin() {
   const pin = String(Math.floor(100000 + Math.random() * 900000)); // always 6 digits
-  const key  = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
-  const iv   = crypto.randomBytes(16);
+  const key = crypto.scryptSync(process.env.SECRET_KEY || "pax26", "pax26salt", 32);
+  const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
   const encrypted = Buffer.concat([cipher.update(pin, "utf8"), cipher.final()]);
   const stored = `${iv.toString("hex")}:${encrypted.toString("hex")}`;
@@ -29,7 +29,7 @@ function generateAndEncryptPin() {
  */
 async function subscribeToWaba(wabaId, accessToken) {
   try {
-    const res  = await fetch(`https://graph.facebook.com/v22.0/${wabaId}/subscribed_apps`, {
+    const res = await fetch(`https://graph.facebook.com/v22.0/${wabaId}/subscribed_apps`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     });
@@ -80,7 +80,7 @@ async function registerPhoneNumber(phoneNumberId, accessToken, existingEncrypted
   }
 
   try {
-    const res  = await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}/register`, {
+    const res = await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}/register`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({ messaging_product: "whatsapp", pin }),
@@ -112,8 +112,10 @@ async function registerPhoneNumber(phoneNumberId, accessToken, existingEncrypted
 
   } catch (err) {
     console.error(`❌ register exception for phone ${phoneNumberId}:`, err.message);
-    return { success: false, encryptedPin: stored, error: err.message, isPinConflict: false,
-      userMessage: "Registration failed due to a network error. Please try again." };
+    return {
+      success: false, encryptedPin: stored, error: err.message, isPinConflict: false,
+      userMessage: "Registration failed due to a network error. Please try again."
+    };
   }
 }
 
@@ -135,7 +137,7 @@ async function shareCreditLine(wabaId, accessToken) {
   }
 
   try {
-    const res  = await fetch(`https://graph.facebook.com/v22.0/${creditLineId}/whatsapp_credit_sharing_and_attach`, {
+    const res = await fetch(`https://graph.facebook.com/v22.0/${creditLineId}/whatsapp_credit_sharing_and_attach`, {
       method: "POST",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({ waba_id: wabaId, waba_currency: "USD" }),
