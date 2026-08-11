@@ -161,19 +161,31 @@ export async function POST(req) {
   try {
     await connectDb();
 
+    console.log("📥 [Meta API exchange-code] Received exchange-code request");
+    console.log("ℹ️ [Meta API exchange-code] ENV Check - META_APP_ID:", process.env.META_APP_ID ? "Set" : "MISSING ❌", "META_APP_SECRET:", process.env.META_APP_SECRET ? "Set" : "MISSING ❌", "META_CREDIT_LINE_ID:", process.env.META_CREDIT_LINE_ID ? "Set" : "MISSING ⚠️");
+
     // ── Step 1: Verify logged-in user ─────────────────────────
     const userId = await verifyToken(req);
     if (!userId) {
+      console.warn("⚠️ [Meta API exchange-code] Unauthorized request (invalid or missing token)");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401, headers: corsHeaders() }
       );
     }
+    console.log(`👤 [Meta API exchange-code] Verified user ID: ${userId}`);
 
     // ── Step 2: Get code + optional session info from body ────
     // wabaId + phoneNumberId come from Meta's postMessage (sessionInfoVersion: 3)
     const { code, wabaId: hintWabaId, phoneNumberId: hintPhoneId } = await req.json();
+    console.log("📦 [Meta API exchange-code] Request Body:", {
+      code: code ? `${code.substring(0, 8)}...` : null,
+      hintWabaId,
+      hintPhoneId,
+    });
+
     if (!code) {
+      console.error("❌ [Meta API exchange-code] No code provided in request body");
       return NextResponse.json(
         { success: false, message: "No code provided" },
         { status: 400, headers: corsHeaders() }
@@ -189,15 +201,16 @@ export async function POST(req) {
       code,
     });
 
+    console.log("🔄 [Meta API exchange-code] Exchanging code for access token via Graph API...");
     const tokenRes = await fetch(
       `https://graph.facebook.com/v22.0/oauth/access_token?${params}`
     );
     const tokenData = await tokenRes.json();
 
-    console.log("🔄 tokenData:", tokenData);
+    console.log("🔄 [Meta API exchange-code] tokenData response status:", tokenRes.status);
 
     if (tokenData.error) {
-      console.error("Token exchange error:", tokenData.error);
+      console.error("❌ [Meta API exchange-code] Token exchange error:", JSON.stringify(tokenData.error));
       return NextResponse.json(
         { success: false, message: tokenData.error.message },
         { status: 400, headers: corsHeaders() }
@@ -205,7 +218,7 @@ export async function POST(req) {
     }
 
     const accessToken = tokenData.access_token;
-    console.log("✅ Access token received");
+    console.log("✅ [Meta API exchange-code] Access token received successfully (length:", accessToken?.length, ")");
 
     // ── Step 4: Build phone list ───────────────────────────────
     // PATH A: Use WABA + phone IDs from Meta's postMessage (fastest, most reliable)
@@ -215,7 +228,7 @@ export async function POST(req) {
 
     if (hintWabaId && hintPhoneId) {
       // ✅ PATH A — session info from postMessage
-      console.log("📨 Using session info from postMessage:", { hintWabaId, hintPhoneId });
+      console.log("📨 [Meta API exchange-code] PATH A — using session info from postMessage:", { hintWabaId, hintPhoneId });
 
       const phoneRes = await fetch(
         `https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status&access_token=${accessToken}`
@@ -223,18 +236,22 @@ export async function POST(req) {
       const phoneData = await phoneRes.json();
 
       if (phoneData.error) {
-        console.error("Phone fetch error:", phoneData.error);
+        console.error("❌ [Meta API exchange-code] Phone fetch error (PATH A):", JSON.stringify(phoneData.error));
         return NextResponse.json(
           { success: false, message: `Phone lookup failed: ${phoneData.error.message}` },
           { status: 400, headers: corsHeaders() }
         );
       }
 
+      console.log("📞 [Meta API exchange-code] Phone details fetched (PATH A):", phoneData);
+
       // Get WABA name for display
       const wabaRes = await fetch(
         `https://graph.facebook.com/v22.0/${hintWabaId}?fields=id,name&access_token=${accessToken}`
       );
       const wabaData = await wabaRes.json();
+
+      console.log("📦 [Meta API exchange-code] WABA details fetched (PATH A):", wabaData);
 
       phones.push({
         id: phoneData.id,
@@ -248,17 +265,17 @@ export async function POST(req) {
 
     } else {
       // ✅ PATH B — Fallback: discover WABAs via business portfolios
-      console.log("🔍 No session info — falling back to business-based WABA discovery");
+      console.log("🔍 [Meta API exchange-code] PATH B — No postMessage hints; falling back to business discovery");
 
       const bizRes = await fetch(
         `https://graph.facebook.com/v22.0/me/businesses?access_token=${accessToken}`
       );
       const bizData = await bizRes.json();
 
-      console.log("🏢 Businesses response:", JSON.stringify(bizData));
+      console.log("🏢 [Meta API exchange-code] Businesses response:", JSON.stringify(bizData));
 
       if (bizData.error) {
-        console.error("Businesses fetch error:", bizData.error);
+        console.error("❌ [Meta API exchange-code] Businesses fetch error:", JSON.stringify(bizData.error));
         return NextResponse.json(
           {
             success: false,
@@ -270,6 +287,7 @@ export async function POST(req) {
 
       const businesses = bizData?.data || [];
       if (businesses.length === 0) {
+        console.warn("⚠️ [Meta API exchange-code] No business portfolios found on Meta account");
         return NextResponse.json(
           { success: false, message: "No business portfolios found on this Meta account." },
           { status: 400, headers: corsHeaders() }
@@ -282,10 +300,10 @@ export async function POST(req) {
         );
         const wabaData = await wabaRes.json();
 
-        console.log(`📦 WABAs for business ${biz.id}:`, JSON.stringify(wabaData));
+        console.log(`📦 [Meta API exchange-code] WABAs for business ${biz.id}:`, JSON.stringify(wabaData));
 
         if (wabaData.error) {
-          console.error(`WABA list error for business ${biz.id}:`, wabaData.error);
+          console.error(`❌ [Meta API exchange-code] WABA list error for business ${biz.id}:`, wabaData.error);
           continue;
         }
 
@@ -295,10 +313,10 @@ export async function POST(req) {
           );
           const phoneData = await phoneRes.json();
 
-          console.log(`📞 Phones for WABA ${waba.id}:`, JSON.stringify(phoneData));
+          console.log(`📞 [Meta API exchange-code] Phones for WABA ${waba.id}:`, JSON.stringify(phoneData));
 
           if (phoneData.error) {
-            console.error(`Phone list error for WABA ${waba.id}:`, phoneData.error);
+            console.error(`❌ [Meta API exchange-code] Phone list error for WABA ${waba.id}:`, phoneData.error);
             continue;
           }
 
@@ -318,17 +336,16 @@ export async function POST(req) {
     }
 
     if (phones.length === 0) {
+      console.error("❌ [Meta API exchange-code] No WhatsApp phone numbers found on account");
       return NextResponse.json(
         { success: false, message: "No WhatsApp phone numbers found on this account." },
         { status: 404, headers: corsHeaders() }
       );
     }
 
-    console.log(`✅ Found ${phones.length} phone(s)`);
+    console.log(`✅ [Meta API exchange-code] Found ${phones.length} phone(s):`, phones.map(p => ({ id: p.id, display: p.display })));
 
     // ── Step 4.5: Duplicate check — block before showing select-phone UI ─
-    // If any phone in this list is already connected to a DIFFERENT user's account,
-    // stop here with a clear error.
     for (const phone of phones) {
       const existingOwner = await UserModel.findOne({
         "whatsapp.phoneNumberId": phone.id,
@@ -337,7 +354,7 @@ export async function POST(req) {
       }).select("_id").lean();
 
       if (existingOwner) {
-        console.warn(`🚫 Duplicate number blocked: ${phone.id} already connected to another account`);
+        console.warn(`🚫 [Meta API exchange-code] Duplicate number blocked: ${phone.id} (${phone.display}) already connected to another user (${existingOwner._id})`);
         return NextResponse.json(
           {
             success: false,
@@ -349,20 +366,19 @@ export async function POST(req) {
     }
 
     // ── Step 4.6: WhatsApp numbers limit check ─────────────────
-    // Count how many distinct phone numbers this user already has connected.
-    // The plan's whatsappNumbersLimit caps this.
     const currentUser = await UserModel.findById(userId).select("paxAI whatsapp").lean();
     const userPlan = currentUser?.paxAI?.plan || "free";
 
-    // Derive limit from plan tier (Business=3, Enterprise=10, others=1)
     const whatsappLimits = { free: 1, starter: 1, business: 3, enterprise: 10 };
     const whatsappNumbersLimit = whatsappLimits[userPlan] ?? 1;
 
     const alreadyConnected = currentUser?.whatsapp?.connected ? 1 : 0;
-    // Count newly incoming phones that are NOT already the user's number
     const newNumbers = phones.filter(p => p.id !== currentUser?.whatsapp?.phoneNumberId).length;
 
+    console.log(`📊 [Meta API exchange-code] Plan limit check: user plan="${userPlan}", limit=${whatsappNumbersLimit}, alreadyConnected=${alreadyConnected}, newNumbers=${newNumbers}`);
+
     if (alreadyConnected + newNumbers > whatsappNumbersLimit) {
+      console.warn(`🚫 [Meta API exchange-code] Plan limit exceeded for user ${userId}`);
       return NextResponse.json(
         {
           success: false,
@@ -373,49 +389,37 @@ export async function POST(req) {
     }
 
     // ── Step 5: Subscribe to WABA webhooks + register each phone ─
-    // Collect unique WABA IDs and subscribe once per WABA.
     const subscribedWabas = new Set();
     for (const phone of phones) {
-      // 5a — Subscribe our app to this WABA (idempotent, safe to repeat)
       if (!subscribedWabas.has(phone.wabaId)) {
+        console.log(`⚡ [Meta API exchange-code] Subscribing WABA ${phone.wabaId}...`);
         await subscribeToWaba(phone.wabaId, accessToken);
-
-        // 5b — Share our credit line to this client WABA (Tech Provider model requirement).
-        // Do this once per WABA right after subscribing. Non-blocking — log only on failure.
+        console.log(`⚡ [Meta API exchange-code] Sharing credit line to WABA ${phone.wabaId}...`);
         await shareCreditLine(phone.wabaId, accessToken);
-
         subscribedWabas.add(phone.wabaId);
       }
 
-      // 5c — Register the phone number on Cloud API.
-      // Safe order: generate PIN + store on phone object FIRST, then call Meta.
-      // This ensures the encrypted PIN is in TempSession (persisted next step)
-      // even if a network blip hits between the Graph API response and our DB write.
       if (phone.verificationStatus !== "VERIFIED") {
-        // Pre-generate and attach encrypted PIN to the phone record BEFORE calling Meta.
-        // The TempSession.create below will persist this regardless of register outcome.
         const { pin: prePin, stored: preStored } = generateAndEncryptPin();
-        phone.registrationPin = preStored; // persisted in TempSession below
+        phone.registrationPin = preStored;
 
+        console.log(`📲 [Meta API exchange-code] Registering phone ${phone.id} (${phone.display})...`);
         const regResult = await registerPhoneNumber(phone.id, accessToken, preStored);
 
         if (regResult.success) {
-          phone.verificationStatus = "REGISTERED"; // optimistic — confirmed in select-phone
+          console.log(`✅ [Meta API exchange-code] Phone ${phone.id} registered successfully`);
+          phone.verificationStatus = "REGISTERED";
         } else if (regResult.isPinConflict) {
-          // Number already registered with another BSP's PIN — must surface to user.
-          // Return a clear error now rather than silently proceeding to a broken state.
-          console.error(`🚫 PIN conflict for phone ${phone.id} — number previously registered with another provider`);
+          console.error(`🚫 [Meta API exchange-code] PIN conflict for phone ${phone.id}`);
           return NextResponse.json(
             { success: false, message: regResult.userMessage },
             { status: 409, headers: corsHeaders() }
           );
         } else {
-          // Non-conflict register failure — log, don't block. Number may still work
-          // if it was already registered previously (e.g., a reconnect scenario).
-          console.warn(`⚠️  register did not succeed for ${phone.id}: ${JSON.stringify(regResult.error)} — proceeding`);
+          console.warn(`⚠️ [Meta API exchange-code] Register did not succeed for ${phone.id}: ${JSON.stringify(regResult.error)} — proceeding`);
         }
       } else {
-        console.log(`ℹ️  Phone ${phone.id} already VERIFIED — skipping register`);
+        console.log(`ℹ️ [Meta API exchange-code] Phone ${phone.id} already VERIFIED — skipping register`);
         phone.registrationPin = null;
       }
     }
@@ -427,22 +431,21 @@ export async function POST(req) {
     await TempSessionModel.create({
       sessionId,
       userId,
-      accessToken,  // stored server-side only — never sent to browser
+      accessToken,
       phones,
       expiresAt,
     });
 
-    console.log(`✅ TempSession created: ${sessionId}`);
+    console.log(`💾 [Meta API exchange-code] TempSession created: ${sessionId} (expires at: ${expiresAt.toISOString()})`);
 
     // ── Step 7: Return sessionId + phones to frontend ─────────
-    // accessToken is NOT returned to the browser
     return NextResponse.json(
       { success: true, sessionId, phones },
       { status: 200, headers: corsHeaders() }
     );
 
   } catch (error) {
-    console.error("exchange-code error:", error.message);
+    console.error("❌ [Meta API exchange-code] Unhandled exception:", error);
     return NextResponse.json(
       { success: false, message: `Server error: ${error.message}` },
       { status: 500, headers: corsHeaders() }

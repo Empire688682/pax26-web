@@ -327,8 +327,10 @@ const SelectPhone = () => {
 
     useEffect(() => {
         const session = searchParams.get("session");
+        console.log("📱 [Select Phone Page] Initializing component. Query session ID:", session);
 
         if (!session) {
+            console.error("❌ [Select Phone Page] Missing session query parameter in URL");
             setError("Missing session. Please try connecting again.");
             setLoading(false);
             return;
@@ -337,20 +339,27 @@ const SelectPhone = () => {
         setSessionId(session);
 
         const fetchPhones = async () => {
+            console.log("📡 [Select Phone Page] Fetching session phones from /api/meta/session-phones?session=" + session);
             try {
                 const res = await fetch(`/api/meta/session-phones?session=${session}`);
                 const data = await res.json();
+                console.log("📥 [Select Phone Page] /api/meta/session-phones response:", data);
 
                 if (!data.success) {
+                    console.error("❌ [Select Phone Page] Failed to fetch session phones:", data.message);
                     setError(data.message || "Session expired. Please try again.");
                     setLoading(false);
                     return;
                 }
 
+                console.log(`✅ [Select Phone Page] Loaded ${data.phones?.length || 0} phone(s)`);
                 setPhones(data.phones);
                 const recommended = data.phones.find((p) => p.quality === "GREEN");
-                setSelectedId(recommended?.id || data.phones[0]?.id || null);
-            } catch {
+                const selected = recommended?.id || data.phones[0]?.id || null;
+                console.log("👉 [Select Phone Page] Auto-selected phone ID:", selected);
+                setSelectedId(selected);
+            } catch (err) {
+                console.error("❌ [Select Phone Page] Network error fetching session phones:", err);
                 setError("Failed to load phone numbers. Please try again.");
             } finally {
                 setLoading(false);
@@ -361,14 +370,16 @@ const SelectPhone = () => {
     }, [searchParams]);
 
     const handleConnect = async () => {
-        if (!selectedId || !sessionId) return;
-        // Always connect directly — verification message sending is skipped
-        // for unverified numbers since the app is now fully Meta-approved.
-        // Unverified/unrated numbers will be verified by Meta in the background.
+        console.log("🔘 [Select Phone Page] handleConnect triggered with selectedId:", selectedId, "sessionId:", sessionId);
+        if (!selectedId || !sessionId) {
+            console.warn("⚠️ [Select Phone Page] Cannot connect — missing selectedId or sessionId");
+            return;
+        }
         await finishConnect();
     };
 
     const finishConnect = async () => {
+        console.log("🚀 [Select Phone Page] Sending POST /api/meta/select-phone for phone ID:", selectedId);
         setConnecting(true);
         setError(null);
 
@@ -380,15 +391,19 @@ const SelectPhone = () => {
             });
 
             const data = await res.json();
+            console.log("📥 [Select Phone Page] /api/meta/select-phone response:", data);
 
             if (data.success) {
+                console.log("✅ [Select Phone Page] Connection successful! Redirecting to marketplace...");
                 router.push("/dashboard/automations/market-place?whatsapp=connected");
             } else {
+                console.error("❌ [Select Phone Page] select-phone failed:", data.message);
                 setError(data.message || "Something went wrong.");
                 setConnecting(false);
                 setStep("select");
             }
-        } catch {
+        } catch (err) {
+            console.error("❌ [Select Phone Page] Network error connecting phone:", err);
             setError("Network error. Please try again.");
             setConnecting(false);
             setStep("select");

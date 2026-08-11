@@ -23,7 +23,7 @@ import { createSessionToken, verifySessionToken, sessionExpiresAt } from "@/app/
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://pax26.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
 
 /* ── shared headers ───────────────────────────────────────── */
 function headers() {

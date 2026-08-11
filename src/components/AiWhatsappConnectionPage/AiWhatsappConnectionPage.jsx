@@ -91,7 +91,12 @@ export default function AiWhatsappConnectionPage() {
   }, []);
 
   useEffect(() => {
+    console.log("🌐 [Meta Embedded Signup] Initializing Meta SDK setup...");
+    console.log("ℹ️ [Meta Embedded Signup] NEXT_PUBLIC_META_APP_ID:", process.env.NEXT_PUBLIC_META_APP_ID ? "Configured" : "MISSING ❌");
+    console.log("ℹ️ [Meta Embedded Signup] NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID:", process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID ? "Configured" : "MISSING ❌");
+
     window.fbAsyncInit = function () {
+      console.log("✅ [Meta Embedded Signup] window.fbAsyncInit triggered. Initializing FB SDK...");
       window.FB.init({
         appId: process.env.NEXT_PUBLIC_META_APP_ID,
         cookie: true,
@@ -99,10 +104,15 @@ export default function AiWhatsappConnectionPage() {
         version: "v22.0",
       });
       setSdkReady(true);
+      console.log("✅ [Meta Embedded Signup] FB SDK ready state set to true.");
     };
 
     (function (d, s, id) {
-      if (d.getElementById(id)) return;
+      if (d.getElementById(id)) {
+        console.log("ℹ️ [Meta Embedded Signup] FB SDK script tag already exists in DOM.");
+        return;
+      }
+      console.log("📥 [Meta Embedded Signup] Injecting FB SDK script tag...");
       const js = d.createElement(s);
       js.id = id;
       js.src = "https://connect.facebook.net/en_US/sdk.js";
@@ -111,7 +121,10 @@ export default function AiWhatsappConnectionPage() {
   }, []);
 
   const handleWithCode = async (code) => {
+    console.log("🚀 [Meta Embedded Signup] handleWithCode starting with code:", code ? `${code.substring(0, 8)}...` : "NONE");
+    console.log("📦 [Meta Embedded Signup] sessionInfoRef payload:", sessionInfoRef.current);
     try {
+      console.log("📡 [Meta Embedded Signup] Sending POST /api/meta/exchange-code...");
       const res = await fetch("/api/meta/exchange-code", {
         method: "POST",
         credentials: "include",
@@ -124,16 +137,19 @@ export default function AiWhatsappConnectionPage() {
       });
 
       const data = await res.json();
+      console.log("📥 [Meta Embedded Signup] /api/meta/exchange-code response:", data);
 
       if (!data.success) {
+        console.error("❌ [Meta Embedded Signup] exchange-code failed:", data.message);
         alert(data.message || "Failed to connect");
         return;
       }
 
+      console.log("✅ [Meta Embedded Signup] Code exchange successful. Redirecting to session:", data.sessionId);
       router.push(`/dashboard/automations/select-phone?session=${data.sessionId}`);
 
     } catch (err) {
-      console.error("exchange-code fetch error:", err);
+      console.error("❌ [Meta Embedded Signup] exchange-code fetch error:", err);
       alert("Connection failed. Please try again.");
     } finally {
       setMetaLoading(false);
@@ -142,7 +158,9 @@ export default function AiWhatsappConnectionPage() {
   };
 
   const launchWhatsAppSignup = () => {
+    console.log("🔘 [Meta Embedded Signup] launchWhatsAppSignup clicked");
     if (!window.FB || !sdkReady) {
+      console.warn("⚠️ [Meta Embedded Signup] Facebook SDK not ready yet. window.FB:", !!window.FB, "sdkReady:", sdkReady);
       alert("Please wait, Facebook SDK is loading...");
       return;
     }
@@ -150,18 +168,24 @@ export default function AiWhatsappConnectionPage() {
     sessionInfoRef.current = null;
 
     const handleSessionMessage = (event) => {
+      console.log("📩 [Meta Embedded Signup] Window message received from origin:", event.origin, "data:", event.data);
       try {
         const raw = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
         if (raw && typeof raw === "object") {
+          console.log("📦 [Meta Embedded Signup] Parsed message object:", raw);
           if (
             raw?.type === "WA_EMBEDDED_SIGNUP" &&
             raw?.event === "FINISH" &&
             raw?.data
           ) {
+            console.log("✅ [Meta Embedded Signup] WA_EMBEDDED_SIGNUP FINISH event captured:", raw.data);
             sessionInfoRef.current = {
               wabaId: raw.data.waba_id,
               phoneNumberId: raw.data.phone_number_id,
             };
+            console.log("💾 [Meta Embedded Signup] Stored sessionInfoRef:", sessionInfoRef.current);
+          } else if (raw?.type === "WA_EMBEDDED_SIGNUP") {
+            console.log("ℹ️ [Meta Embedded Signup] WA_EMBEDDED_SIGNUP event status:", raw?.event, raw);
           }
         }
       } catch {
@@ -173,12 +197,15 @@ export default function AiWhatsappConnectionPage() {
     let popupWindow = null;
     const originalWindowOpen = window.open;
     window.open = function (...args) {
+      console.log("🪟 [Meta Embedded Signup] window.open called with args:", args[0]);
       popupWindow = originalWindowOpen.apply(this, args);
       return popupWindow;
     };
 
+    console.log("🔑 [Meta Embedded Signup] Calling FB.login with config_id:", process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID);
     window.FB.login(
       function (response) {
+        console.log("📥 [Meta Embedded Signup] FB.login response callback returned:", response);
         window.removeEventListener("message", handleSessionMessage);
         window.open = originalWindowOpen;
         if (popupTimerRef.current) {
@@ -187,13 +214,16 @@ export default function AiWhatsappConnectionPage() {
         }
         if (response.authResponse) {
           const code = response.authResponse.code;
+          console.log("✅ [Meta Embedded Signup] authResponse received. Code present:", !!code);
           if (!code) {
             setMetaLoading(false);
+            console.error("❌ [Meta Embedded Signup] No authorization code returned in authResponse:", response.authResponse);
             alert("No authorization code returned. Check your app config.");
             return;
           }
           handleWithCode(code);
         } else {
+          console.warn("⚠️ [Meta Embedded Signup] No authResponse returned from FB.login. User may have canceled or closed window. Response:", response);
           setMetaLoading(false);
         }
       },
@@ -210,9 +240,11 @@ export default function AiWhatsappConnectionPage() {
     );
 
     if (popupWindow) {
+      console.log("👁️ [Meta Embedded Signup] Monitoring popup window status...");
       if (popupTimerRef.current) clearInterval(popupTimerRef.current);
       popupTimerRef.current = setInterval(() => {
         if (popupWindow.closed) {
+          console.log("🔒 [Meta Embedded Signup] Popup window closed by user");
           clearInterval(popupTimerRef.current);
           popupTimerRef.current = null;
           window.removeEventListener("message", handleSessionMessage);
@@ -220,6 +252,8 @@ export default function AiWhatsappConnectionPage() {
           setMetaLoading(false);
         }
       }, 1000);
+    } else {
+      console.warn("⚠️ [Meta Embedded Signup] Popup window reference not captured immediately");
     }
   };
 

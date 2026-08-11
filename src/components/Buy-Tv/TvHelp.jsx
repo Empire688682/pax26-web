@@ -10,17 +10,17 @@ import {
 /* ── No extra CSS needed — uses same Syne/DM Mono from parent ── */
 
 const PROVIDERS = {
-  DSTV:      { color: "#0077C8", label: "DSTV",      hint: "Your DSTV smartcard number is printed on the card itself or found in Settings → My Account." },
-  GOTV:      { color: "#E87722", label: "GOtv",      hint: "Your GOtv IUC number is on the decoder sticker or in the GOtv app under My Account." },
+  DSTV: { color: "#0077C8", label: "DSTV", hint: "Your DSTV smartcard number is printed on the card itself or found in Settings → My Account." },
+  GOTV: { color: "#E87722", label: "GOtv", hint: "Your GOtv IUC number is on the decoder sticker or in the GOtv app under My Account." },
   STARTIMES: { color: "#D91C2A", label: "Startimes", hint: "Find your Startimes smartcard number on the decoder sticker or box." },
-  SHOWMAX:   { color: "#E30613", label: "Showmax",   hint: "Your Showmax subscriber ID is in your account settings on the Showmax app or website." },
+  SHOWMAX: { color: "#E30613", label: "Showmax", hint: "Your Showmax subscriber ID is in your account settings on the Showmax app or website." },
 };
 
 const STEPS = [
-  { icon: <Tv size={14} />,         text: "Select your TV provider" },
+  { icon: <Tv size={14} />, text: "Select your TV provider" },
   { icon: <CreditCard size={14} />, text: "Enter your smartcard / IUC number" },
-  { icon: <Wifi size={14} />,       text: "Choose your preferred package" },
-  { icon: <CheckCircle2 size={14} />,text: "Enter phone & PIN, then subscribe" },
+  { icon: <Wifi size={14} />, text: "Choose your preferred package" },
+  { icon: <CheckCircle2 size={14} />, text: "Enter phone & PIN, then subscribe" },
 ];
 
 const FAQS = [
@@ -75,10 +75,10 @@ const TvHelp = ({ data }) => {
   const { pax26 } = useGlobalContext();
   const [openFaq, setOpenFaq] = React.useState(null);
 
-  const primary     = pax26?.primary;
-  const GREEN       = "#22c55e";
+  const primary = pax26?.primary;
+  const GREEN = "#22c55e";
   const providerKey = data?.provider?.toUpperCase();
-  const provider    = PROVIDERS[providerKey];
+  const provider = PROVIDERS[providerKey];
 
   return (
     <div className="space-y-4" style={{ fontFamily: "'Syne', sans-serif" }}>
@@ -98,8 +98,8 @@ const TvHelp = ({ data }) => {
             </div>
             <div>
               <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>{provider.label} Selected</p>
-              <p style={{ fontFamily: "'DM Mono', monospace" }}
-                className="text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
+              <p style={{ fontFamily: "'DM Mono', monospace", color: pax26?.textSecondary, opacity: 0.45 }}
+                className="text-[10px]">
                 Provider active
               </p>
             </div>

@@ -18,8 +18,10 @@ export async function POST(req) {
         await connectDb();
 
         const { sessionId, phoneId } = await req.json();
+        console.log("📥 [Meta API select-phone] Received select-phone POST request for sessionId:", sessionId, "phoneId:", phoneId);
 
         if (!sessionId || !phoneId) {
+            console.error("❌ [Meta API select-phone] Missing sessionId or phoneId");
             return NextResponse.json(
                 { success: false, message: "Missing sessionId or phoneId" },
                 { status: 400, headers: corsHeaders() }
@@ -29,8 +31,8 @@ export async function POST(req) {
         // 🔍 Look up session — must exist (expiry is handled by MongoDB TTL index)
         const session = await TempSessionModel.findOne({ sessionId });
 
-
         if (!session) {
+            console.error(`❌ [Meta API select-phone] TempSession not found or expired for sessionId: ${sessionId}`);
             return NextResponse.json(
                 { success: false, message: "Session expired. Please reconnect WhatsApp." },
                 { status: 401, headers: corsHeaders() }
@@ -41,11 +43,14 @@ export async function POST(req) {
         const phone = session.phones.find((p) => p.id === phoneId);
 
         if (!phone) {
+            console.error(`❌ [Meta API select-phone] Phone ID ${phoneId} not found in session ${sessionId}`);
             return NextResponse.json(
                 { success: false, message: "Invalid phone selection." },
                 { status: 400, headers: corsHeaders() }
             );
         }
+
+        console.log(`📱 [Meta API select-phone] Selected phone found: ${phone.display} (${phone.id})`);
 
         // 🔒 Uniqueness check — prevent two accounts from sharing the same number
         const existingOwner = await UserModel.findOne({
@@ -55,6 +60,7 @@ export async function POST(req) {
         }).select("_id email").lean();
 
         if (existingOwner) {
+            console.warn(`🚫 [Meta API select-phone] Duplicate number error: ${phone.id} is connected to user ${existingOwner._id}`);
             return NextResponse.json(
                 {
                     success: false,

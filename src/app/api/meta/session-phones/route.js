@@ -17,8 +17,10 @@ export async function GET(req) {
 
         const { searchParams } = new URL(req.url);
         const sessionId = searchParams.get("session");
+        console.log("📥 [Meta API session-phones] GET request for sessionId:", sessionId);
 
         if (!sessionId) {
+            console.error("❌ [Meta API session-phones] Missing session ID parameter");
             return NextResponse.json(
                 { success: false, message: "Missing session ID" },
                 { status: 400, headers: corsHeaders() }
@@ -30,11 +32,14 @@ export async function GET(req) {
         });
 
         if (!session) {
+            console.error(`❌ [Meta API session-phones] Session ${sessionId} not found or expired`);
             return NextResponse.json(
                 { success: false, message: "Session expired. Please reconnect WhatsApp." },
                 { status: 401, headers: corsHeaders() }
             );
         }
+
+        console.log(`✅ [Meta API session-phones] Session found! Returning ${session.phones?.length || 0} phone(s)`);
 
         // ✅ Only return phone list — never return accessToken
         return NextResponse.json(
