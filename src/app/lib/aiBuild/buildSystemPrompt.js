@@ -42,7 +42,7 @@ async function getUrlContent(profile) {
    Understands: products (with images), payment details,
    lead stages, order flow, and media sending.
 ───────────────────────────────────────────────────────────── */
-function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl }) {
+function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl, sessionContext = null }) {
   const toneMap = {
     friendly:
       "You are warm, approachable, and easy to talk to. You build genuine rapport before nudging towards a purchase.",
@@ -56,6 +56,23 @@ function buildSellerPrompt({ profile, products, businessUrl, urlContent, storefr
     NGN: "₦", USD: "$", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R", CAD: "CA$", AUD: "A$", INR: "₹", AED: "AED"
   };
   const currencySymbol = currencyMap[profile.currency?.toUpperCase()] || "₦";
+
+  // ── Payment stage context ────────────────────────────────
+  const isExpectingPayment = sessionContext?.payment?.expectingPayment === true && sessionContext?.payment?.paymentProofReceived !== true;
+  const paymentStageContext = isExpectingPayment
+    ? `
+━━━━━━━━━━━━━━━━━━━━━━━━
+CURRENT PAYMENT STAGE — MANDATORY INSTRUCTION
+━━━━━━━━━━━━━━━━━━━━━━━━
+PAYMENT IS PENDING: You have already shared bank/payment details with this customer.
+Do NOT send payment account details again.
+Your strict priorities right now:
+1. Remind the customer politely that you are waiting for their payment proof screenshot/image.
+2. If the customer tries to ask about other products, change the subject, or abandon the payment step, acknowledge their question briefly (1 sentence) and then immediately redirect back to completing the payment:
+   Example: "I'd love to help you with that! But first, let's complete your pending payment — please send over the payment receipt screenshot once done so we can process your order."
+3. Do NOT accept text claims of payment (e.g. "I have paid", "transfer done"). Politely insist on receiving an image/screenshot of the receipt as proof.
+`
+    : "";
 
   // ── Products catalogue (with image metadata) ──────────────
   const productsSection = products?.length
@@ -124,6 +141,22 @@ RULES:
   - If a customer clicks the link and comes back asking about a specific product, continue the conversation normally`
     : "";
 
+  // ── Active promo announcement context ───────────────────
+  const promoSection = (profile.promoAnnouncement?.enabled && profile.promoAnnouncement?.text)
+    ? `
+━━━━━━━━━━━━━━━━━━━━━━━━
+ACTIVE STORE PROMOTION — HIGHLIGHT THIS TO CUSTOMERS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Badge / Tag: ${profile.promoAnnouncement.badgeText || "PROMO"}
+Offer Details: ${profile.promoAnnouncement.text}
+
+RULES FOR PROMOTIONS:
+- Inform customers about this active promotion naturally when pitching products or answering customer inquiries.
+- Use this offer to encourage customers to complete their purchase or add items to qualify for the promo.
+- Answer any questions about the promotion accurately based on the offer details above.
+`
+    : "";
+
   // ── URL knowledge ─────────────────────────────────────────
   const urlSection = urlContent
     ? `
@@ -169,6 +202,8 @@ ${productsSection}
 ${paymentSection}
 
 ${storefrontSection}
+
+${promoSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 HOW TO SEND PRODUCT IMAGES — MANDATORY FORMAT
@@ -254,6 +289,8 @@ STRICT RULES
 -- Make the conversation interactive and engaging
 -- ask questions to understand the customer needs better
 
+
+${paymentStageContext}
 
 ${urlSection}
 `.trim();
@@ -372,8 +409,9 @@ ${urlSection}
    @param profileType    "seller" | "service" | "general"
    @param products       Array of SellerProduct docs (seller only).
    @param storefrontUrl  Full /store/{slug}?session=TOKEN URL (seller only, optional)
+   @param sessionContext SessionModel document or { payment: { expectingPayment, paymentProofReceived } }
 ───────────────────────────────────────────────────────────── */
-export const buildSystemPrompt = async (profile, businessUrl, profileType, products = [], storefrontUrl = null) => {
+export const buildSystemPrompt = async (profile, businessUrl, profileType, products = [], storefrontUrl = null, sessionContext = null) => {
   if (!profile) {
     return "You are a helpful business assistant on WhatsApp. Be concise, friendly, and professional.";
   }
@@ -381,7 +419,7 @@ export const buildSystemPrompt = async (profile, businessUrl, profileType, produ
   const urlContent = await getUrlContent(profile);
 
   if (profileType === "seller") {
-    return buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl });
+    return buildSellerPrompt({ profile, products, businessUrl, urlContent, storefrontUrl, sessionContext });
   }
 
   return buildGeneralPrompt({ profile, businessUrl, urlContent });

@@ -66,6 +66,22 @@ function stripRedundantImageOffers(text) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Check if text contains payment / bank details
+// ─────────────────────────────────────────────────────────────
+function containsPaymentDetails(text, businessProfile) {
+    if (!text) return false;
+    const has10Digits = /\b\d{10}\b/.test(text);
+    const hasBankTerms = /bank|account|acc\s*no|acc\s*num|transfer|pay to|payment details|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity/i.test(text);
+    
+    const activePayments = businessProfile?.paymentDetails?.filter((pay) => pay.active !== false) || [];
+    const hasConfiguredAccount = activePayments.some(
+        (pay) => pay.accountNumber && text.includes(pay.accountNumber)
+    );
+
+    return (has10Digits && hasBankTerms) || hasConfiguredAccount;
+}
+
+// ─────────────────────────────────────────────────────────────
 // Load the right profile depending on whether the user is a
 // seller or a service provider.
 //
@@ -309,7 +325,8 @@ export const triggerAIResponse = async ({
             businessUrl,
             profileType,    // "seller" | "general"
             products,       // [] for general profiles
-            storefrontUrl   // null for service profiles or sellers without a slug
+            storefrontUrl,  // null for service profiles or sellers without a slug
+            session         // session context for payment tracking
         );
 
         if (!systemPrompt) {
@@ -471,7 +488,8 @@ export const triggerAIResponse = async ({
             }
         );
 
-        const sessionUpdate = SessionModel.findByIdAndUpdate(session._id, {
+        const isPaymentShared = containsPaymentDetails(cleanText || rawAiText, businessProfile);
+        const sessionUpdateData = {
             lastMessageAt: new Date(),
             $inc: {
                 "context.messageCount": 1,
@@ -480,7 +498,25 @@ export const triggerAIResponse = async ({
             },
             isProcessingAI: false,
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        });
+        };
+
+        if (isPaymentShared) {
+            console.log("💳 AI shared payment details — setting expectingPayment = true for session:", session.sessionId);
+            sessionUpdateData.$set = {
+                "payment.expectingPayment": true,
+                "payment.paymentProofReceived": false,
+                "payment.paymentDetailsSharedAt": new Date(),
+                "payment.deflectionCount": 0,
+            };
+            if (session.payment) {
+                session.payment.expectingPayment = true;
+                session.payment.paymentProofReceived = false;
+                session.payment.paymentDetailsSharedAt = new Date();
+                session.payment.deflectionCount = 0;
+            }
+        }
+
+        const sessionUpdate = SessionModel.findByIdAndUpdate(session._id, sessionUpdateData);
 
         const [updateResult] = await Promise.all([contactUpdate, sessionUpdate]);
 

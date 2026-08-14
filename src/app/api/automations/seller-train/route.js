@@ -67,25 +67,8 @@ export async function PUT(req) {
       );
     }
 
-    const isValidProducts =
-      products.length > 0 &&
-      products.some(
-        (p) =>
-          typeof p.name === "string" &&
-          p.name.trim() !== "" &&
-          typeof p.price === "number" &&
-          isFinite(p.price)
-      );
-
-    if (!isValidProducts) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "At least one product with name and price is required",
-        },
-        { status: 400, headers: corsHeaders() }
-      );
-    }
+    // Products are optional during setup — they can be added any time via the Products page.
+    // Still sanitize any products that WERE supplied so they don't break the build pipeline.
 
     // Sanitize payment details so empty/invalid rows don't fail validators
     const paymentDetails = Array.isArray(data.paymentDetails)
@@ -129,101 +112,106 @@ export async function PUT(req) {
 
     const sellerId = profile._id;
 
-    // Persist products into SellerProduct (+ media) — not embedded on profile
-    const incomingIds = products
-      .filter((p) => p._id)
-      .map((p) => p._id.toString());
+    // Persist products into SellerProduct (+ media) — not embedded on profile.
+    // Only sync when the wizard actually supplied products; an empty array means
+    // "skip products for now" — do NOT wipe products added via the Products page.
+    if (products.length > 0) {
+      const incomingIds = products
+        .filter((p) => p._id)
+        .map((p) => p._id.toString());
 
-    await SellerProductModel.deleteMany({
-      sellerId,
-      ...(incomingIds.length > 0 && { _id: { $nin: incomingIds } }),
-    });
+      await SellerProductModel.deleteMany({
+        sellerId,
+        ...(incomingIds.length > 0 && { _id: { $nin: incomingIds } }),
+      });
 
-    const existingProducts = products.filter((p) => p._id);
-    const newProducts = products.filter((p) => !p._id);
+      const existingProducts = products.filter((p) => p._id);
+      const newProducts = products.filter((p) => !p._id);
 
-    const buildProductData = (prod) => ({
-      sellerId,
-      name: prod.name,
-      price: prod.price,
-      description: prod.description || "",
-      category: prod.category || "",
-      tags: Array.isArray(prod.tags) ? prod.tags : [],
-      stock: prod.stock ?? 0,
-      images: Array.isArray(prod.images)
-        ? prod.images.filter((img) => img?.url && img?.publicId)
-        : [],
-      isAvailable: prod.isAvailable ?? true,
-      discountPrice: prod.discountPrice,
-      deliveryFee: prod.deliveryFee,
-      deliveryTimeFrame: prod.deliveryTimeFrame,
-      locationNotes: prod.locationNotes,
-      isPhysical: prod.isPhysical ?? true,
-    });
+      const buildProductData = (prod) => ({
+        sellerId,
+        name: prod.name,
+        price: prod.price,
+        description: prod.description || "",
+        category: prod.category || "",
+        tags: Array.isArray(prod.tags) ? prod.tags : [],
+        stock: prod.stock ?? 0,
+        images: Array.isArray(prod.images)
+          ? prod.images.filter((img) => img?.url && img?.publicId)
+          : [],
+        isAvailable: prod.isAvailable ?? true,
+        discountPrice: prod.discountPrice,
+        deliveryFee: prod.deliveryFee,
+        deliveryTimeFrame: prod.deliveryTimeFrame,
+        locationNotes: prod.locationNotes,
+        isPhysical: prod.isPhysical ?? true,
+      });
 
-    if (existingProducts.length > 0) {
-      await SellerProductModel.bulkWrite(
-        existingProducts.map((prod) => ({
-          updateOne: {
-            filter: { _id: prod._id },
-            update: { $set: buildProductData(prod) },
-            upsert: true,
-          },
-        })),
-        { ordered: false }
-      );
-    }
+      if (existingProducts.length > 0) {
+        await SellerProductModel.bulkWrite(
+          existingProducts.map((prod) => ({
+            updateOne: {
+              filter: { _id: prod._id },
+              update: { $set: buildProductData(prod) },
+              upsert: true,
+            },
+          })),
+          { ordered: false }
+        );
+      }
 
-    let insertedProducts = [];
-    if (newProducts.length > 0) {
-      insertedProducts = await SellerProductModel.insertMany(
-        newProducts.map(buildProductData),
-        { ordered: false }
-      );
-    }
+      let insertedProducts = [];
+      if (newProducts.length > 0) {
+        insertedProducts = await SellerProductModel.insertMany(
+          newProducts.map(buildProductData),
+          { ordered: false }
+        );
+      }
 
-    const allSavedIds = [
-      ...incomingIds,
-      ...insertedProducts.map((p) => p._id.toString()),
-    ];
+      const allSavedIds = [
+        ...incomingIds,
+        ...insertedProducts.map((p) => p._id.toString()),
+      ];
 
-    await SellerMediaModel.deleteMany({ productId: { $in: allSavedIds } });
+      await SellerMediaModel.deleteMany({ productId: { $in: allSavedIds } });
 
-    const mediaDocs = [];
-    for (const prod of existingProducts) {
-      if (!Array.isArray(prod.images) || prod.images.length === 0) continue;
-      prod.images.forEach((img, index) => {
-        if (!img?.url || !img?.publicId) return;
-        mediaDocs.push({
-          sellerId,
-          productId: prod._id,
-          url: img.url,
-          publicId: img.publicId,
-          type: "image",
-          isPrimary: index === 0,
+      const mediaDocs = [];
+      for (const prod of existingProducts) {
+        if (!Array.isArray(prod.images) || prod.images.length === 0) continue;
+        prod.images.forEach((img, index) => {
+          if (!img?.url || !img?.publicId) return;
+          mediaDocs.push({
+            sellerId,
+            productId: prod._id,
+            url: img.url,
+            publicId: img.publicId,
+            type: "image",
+            isPrimary: index === 0,
+          });
+        });
+      }
+      newProducts.forEach((prod, i) => {
+        if (!Array.isArray(prod.images) || prod.images.length === 0) return;
+        const savedDoc = insertedProducts[i];
+        if (!savedDoc) return;
+        prod.images.forEach((img, index) => {
+          if (!img?.url || !img?.publicId) return;
+          mediaDocs.push({
+            sellerId,
+            productId: savedDoc._id,
+            url: img.url,
+            publicId: img.publicId,
+            type: "image",
+            isPrimary: index === 0,
+          });
         });
       });
-    }
-    newProducts.forEach((prod, i) => {
-      if (!Array.isArray(prod.images) || prod.images.length === 0) return;
-      const savedDoc = insertedProducts[i];
-      if (!savedDoc) return;
-      prod.images.forEach((img, index) => {
-        if (!img?.url || !img?.publicId) return;
-        mediaDocs.push({
-          sellerId,
-          productId: savedDoc._id,
-          url: img.url,
-          publicId: img.publicId,
-          type: "image",
-          isPrimary: index === 0,
-        });
-      });
-    });
 
-    if (mediaDocs.length > 0) {
-      await SellerMediaModel.insertMany(mediaDocs, { ordered: false });
-    }
+      if (mediaDocs.length > 0) {
+        await SellerMediaModel.insertMany(mediaDocs, { ordered: false });
+      }
+    } // end if (products.length > 0)
+
 
     // One-type enforcement
     await ServiceProfileModel.updateOne(

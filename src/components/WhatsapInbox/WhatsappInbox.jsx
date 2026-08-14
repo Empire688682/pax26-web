@@ -47,6 +47,42 @@ const DoubleCheckIcon = () => (
   </svg>
 );
 
+/* Status icon for outbound bubbles: sent ✓ | delivered ✓✓ gray | read ✓✓ blue | failed ✕ */
+const MessageStatusIcon = ({ status }) => {
+  if (status === "failed") {
+    return (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="15" y1="9" x2="9" y2="15" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+      </svg>
+    );
+  }
+  if (status === "read") {
+    return (
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+        <polyline points="1,6 4,9 8,4" stroke="#53bdeb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="6,6 9,9 15,2" stroke="#53bdeb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (status === "delivered") {
+    return (
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+        <polyline points="1,6 4,9 8,4" stroke="rgba(255,255,255,0.55)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="6,6 9,9 15,2" stroke="rgba(255,255,255,0.55)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  /* sent (default) — single tick */
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+      <polyline points="1,6 4,9 10,2" stroke="rgba(255,255,255,0.55)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
+
+
 const InfoIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" />
@@ -173,7 +209,7 @@ function LeadPanel({
       .then((data) => {
         if (data.success) setStaffList(data.data || []);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const saveLead = async () => {
@@ -494,10 +530,10 @@ export default function WhatsAppInbox() {
   const [showSidebar, setShowSidebar] =
     useState(true);
 
-  const [showFlowInfo, setShowFlowInfo] = 
+  const [showFlowInfo, setShowFlowInfo] =
     useState(false);
 
-  const [isAlertVisible, setIsAlertVisible] = 
+  const [isAlertVisible, setIsAlertVisible] =
     useState(true);
 
   const [activeTab, setActiveTab] = useState("all");
@@ -923,10 +959,10 @@ export default function WhatsAppInbox() {
           prev.map((c) =>
             c.phone === selected.phone
               ? {
-                  ...c,
-                  isHandedOff:
-                    action === "takeover",
-                }
+                ...c,
+                isHandedOff:
+                  action === "takeover",
+              }
               : c
           )
         );
@@ -972,8 +1008,8 @@ export default function WhatsAppInbox() {
 
   const selectedConv = selected
     ? conversations.find(
-        (c) => c.phone === selected.phone
-      )
+      (c) => c.phone === selected.phone
+    )
     : null;
 
   return (
@@ -992,8 +1028,8 @@ export default function WhatsAppInbox() {
       <AiReadinessBanner className="mx-3 mt-3" />
 
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-      {/* GLOBAL CSS */}
-      <style>{`
+        {/* GLOBAL CSS */}
+        <style>{`
         * {
           box-sizing: border-box;
         }
@@ -1012,384 +1048,608 @@ export default function WhatsAppInbox() {
         }
       `}</style>
 
-      {/* SIDEBAR */}
-      <div
-        style={{
-          width: isMobile ? "100%" : "360px",
-          background: "#111b21",
-          borderRight:
-            "1px solid rgba(255,255,255,0.06)",
-          display: "flex",
-          flexDirection: "column",
-          position: isMobile
-            ? "absolute"
-            : "relative",
-          top: 0,
-          left: 0,
-          zIndex: 20,
-          height: "100%",
-          transform:
-            isMobile && !showSidebar
-              ? "translateX(-100%)"
-              : "translateX(0)",
-          transition: "transform 0.25s ease",
-        }}
-        className="rounded-sm"
-      >
-        {/* HEADER */}
+        {/* SIDEBAR */}
         <div
           style={{
-            height: "60px",
-            background: "#202c33",
-            padding: "0 16px",
+            width: isMobile ? "100%" : "360px",
+            background: "#111b21",
+            borderRight:
+              "1px solid rgba(255,255,255,0.06)",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            color: "#e9edef",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            flexDirection: "column",
+            position: isMobile
+              ? "absolute"
+              : "relative",
+            top: 0,
+            left: 0,
+            zIndex: 20,
+            height: "100%",
+            transform:
+              isMobile && !showSidebar
+                ? "translateX(-100%)"
+                : "translateX(0)",
+            transition: "transform 0.25s ease",
           }}
+          className="rounded-sm"
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={() => router.push("/dashboard")}
-              title="Back to Dashboard"
-              style={{
-                background: "none",
-                border: "none",
-                padding: "8px",
-                margin: "-8px",
-                cursor: "pointer",
-                color: "#8696a0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "50%",
-                transition: "background 0.2s, color 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                e.currentTarget.style.color = "#e9edef";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "none";
-                e.currentTarget.style.color = "#8696a0";
-              }}
-            >
-              <BackIcon />
-            </button>
-            <span style={{ fontWeight: 700, fontSize: "15px" }}>Chats</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <button
-              onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
-              title="Add / Manage Contacts"
-              style={{
-                background: "rgba(0,168,132,0.15)",
-                border: "1px solid rgba(0,168,132,0.3)",
-                color: "#00a884",
-                padding: "6px 10px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
-            >
-              <UserPlusIcon size={14} /> Add Contact
-            </button>
-          </div>
-        </div>
-
-        {/* SEARCH */}
-        <div
-          style={{
-            padding: "10px 10px 6px 10px",
-          }}
-        >
+          {/* HEADER */}
           <div
             style={{
-              position: "relative",
+              height: "60px",
+              background: "#202c33",
+              padding: "0 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              color: "#e9edef",
+              borderBottom: "1px solid rgba(255,255,255,0.05)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button
+                onClick={() => router.push("/dashboard")}
+                title="Back to Dashboard"
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: "8px",
+                  margin: "-8px",
+                  cursor: "pointer",
+                  color: "#8696a0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  transition: "background 0.2s, color 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                  e.currentTarget.style.color = "#e9edef";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "none";
+                  e.currentTarget.style.color = "#8696a0";
+                }}
+              >
+                <BackIcon />
+              </button>
+              <span style={{ fontWeight: 700, fontSize: "15px" }}>Chats</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
+                title="Add / Manage Contacts"
+                style={{
+                  background: "rgba(0,168,132,0.15)",
+                  border: "1px solid rgba(0,168,132,0.3)",
+                  color: "#00a884",
+                  padding: "6px 10px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                }}
+              >
+                <UserPlusIcon size={14} /> Add Contact
+              </button>
+            </div>
+          </div>
+
+          {/* SEARCH */}
+          <div
+            style={{
+              padding: "10px 10px 6px 10px",
             }}
           >
             <div
               style={{
-                position: "absolute",
-                left: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#8696a0",
+                position: "relative",
               }}
             >
-              <SearchIcon />
-            </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#8696a0",
+                }}
+              >
+                <SearchIcon />
+              </div>
 
-            <input
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              placeholder="Search phone, tags, notes…"
-              style={{
-                width: "100%",
-                height: "38px",
-                borderRadius: "8px",
-                border: "none",
-                outline: "none",
-                background: "#202c33",
-                color: "#e9edef",
-                padding: "0 14px 0 38px",
-                fontSize: "13px",
-              }}
-            />
+              <input
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Search phone, tags, notes…"
+                style={{
+                  width: "100%",
+                  height: "38px",
+                  borderRadius: "8px",
+                  border: "none",
+                  outline: "none",
+                  background: "#202c33",
+                  color: "#e9edef",
+                  padding: "0 14px 0 38px",
+                  fontSize: "13px",
+                }}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* WHATSAPP WEB FILTER PILLS */}
-        <div style={{ display: "flex", gap: "6px", padding: "4px 10px 10px", flexWrap: "wrap" }}>
-          {[
-            { id: "all", label: "All" },
-            { id: "unread", label: "Unread" },
-            { id: "whitelisted", label: "Whitelisted" },
-            { id: "blocked", label: "Blocked" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              style={{
-                padding: "4px 12px",
-                borderRadius: "999px",
-                fontSize: "11px",
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-                border: activeTab === t.id ? "1px solid rgba(0,168,132,0.4)" : "1px solid rgba(255,255,255,0.06)",
-                background: activeTab === t.id ? "rgba(0,168,132,0.2)" : "#202c33",
-                color: activeTab === t.id ? "#00a884" : "#8696a0",
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+          {/* WHATSAPP WEB FILTER PILLS */}
+          <div style={{ display: "flex", gap: "6px", padding: "4px 10px 10px", flexWrap: "wrap" }}>
+            {[
+              { id: "all", label: "All" },
+              { id: "unread", label: "Unread" },
+              { id: "whitelisted", label: "Whitelisted" },
+              { id: "blocked", label: "Blocked" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: "999px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  border: activeTab === t.id ? "1px solid rgba(0,168,132,0.4)" : "1px solid rgba(255,255,255,0.06)",
+                  background: activeTab === t.id ? "rgba(0,168,132,0.2)" : "#202c33",
+                  color: activeTab === t.id ? "#00a884" : "#8696a0",
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-        {/* CONVERSATIONS */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: "auto",
-          }}
-        >
-          {loading ? (
-            <div
-              style={{
-                padding: "30px",
-                textAlign: "center",
-                color: "#8696a0",
-              }}
-            >
-              Loading...
-            </div>
-          ) : filteredConversations.length === 0 ? (
-            /* ── NO CONVERSATIONS EMPTY STATE ── */
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "40px 24px",
-              gap: "16px",
+          {/* CONVERSATIONS */}
+          <div
+            style={{
               flex: 1,
-              height: "100%",
-            }}>
-              {/* Animated chat bubble icon */}
+              overflowY: "auto",
+            }}
+          >
+            {loading ? (
+              <div
+                style={{
+                  padding: "30px",
+                  textAlign: "center",
+                  color: "#8696a0",
+                }}
+              >
+                Loading...
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              /* ── NO CONVERSATIONS EMPTY STATE ── */
               <div style={{
-                width: "72px",
-                height: "72px",
-                borderRadius: "50%",
-                background: "rgba(0,168,132,0.1)",
-                border: "1.5px solid rgba(0,168,132,0.2)",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                padding: "40px 24px",
+                gap: "16px",
+                flex: 1,
+                height: "100%",
               }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a884" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  <line x1="9" y1="10" x2="15" y2="10"/>
-                  <line x1="12" y1="7" x2="12" y2="13"/>
-                </svg>
+                {/* Animated chat bubble icon */}
+                <div style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  background: "rgba(0,168,132,0.1)",
+                  border: "1.5px solid rgba(0,168,132,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a884" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    <line x1="9" y1="10" x2="15" y2="10" />
+                    <line x1="12" y1="7" x2="12" y2="13" />
+                  </svg>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ color: "#e9edef", fontSize: "14px", fontWeight: 700, margin: "0 0 6px 0" }}>
+                    No messages yet
+                  </p>
+                  <p style={{ color: "#8696a0", fontSize: "12px", margin: 0, lineHeight: 1.6, maxWidth: "220px" }}>
+                    When customers message your WhatsApp number, their conversations will appear here.
+                  </p>
+                </div>
+                <div style={{
+                  padding: "8px 14px",
+                  borderRadius: "999px",
+                  background: "rgba(0,168,132,0.08)",
+                  border: "1px solid rgba(0,168,132,0.2)",
+                  color: "#00a884",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                }}>
+                  Waiting for incoming messages
+                </div>
               </div>
-              <div style={{ textAlign: "center" }}>
-                <p style={{ color: "#e9edef", fontSize: "14px", fontWeight: 700, margin: "0 0 6px 0" }}>
-                  No messages yet
-                </p>
-                <p style={{ color: "#8696a0", fontSize: "12px", margin: 0, lineHeight: 1.6, maxWidth: "220px" }}>
-                  When customers message your WhatsApp number, their conversations will appear here.
-                </p>
-              </div>
-              <div style={{
-                padding: "8px 14px",
-                borderRadius: "999px",
-                background: "rgba(0,168,132,0.08)",
-                border: "1px solid rgba(0,168,132,0.2)",
-                color: "#00a884",
-                fontSize: "11px",
-                fontWeight: 600,
-              }}>
-                Waiting for incoming messages
-              </div>
-            </div>
-          ) : (
-            filteredConversations.map((conv) => {
-              const isActive =
-                selected?.phone === conv.phone;
+            ) : (
+              filteredConversations.map((conv) => {
+                const isActive =
+                  selected?.phone === conv.phone;
 
-              const leadStyle =
-                LEAD_STAGES[
+                const leadStyle =
+                  LEAD_STAGES[
                   conv.leadStage || "new"
-                ];
+                  ];
 
-              return (
-                <div
-                  key={conv.phone}
-                  onClick={() => {
-                    setSelected(conv);
-
-                    if (isMobile) {
-                      setShowSidebar(false);
-                    }
-                  }}
-                  style={{
-                    padding: "12px 14px",
-                    display: "flex",
-                    gap: "12px",
-                    cursor: "pointer",
-                    background: isActive
-                      ? "#202c33"
-                      : "transparent",
-                    borderBottom:
-                      "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
+                return (
                   <div
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "50%",
-                      background: conv.isHandedOff
-                        ? "rgba(245,158,11,0.15)"
-                        : "#2a3942",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: conv.isHandedOff
-                        ? "#f59e0b"
-                        : "#e9edef",
-                      fontWeight: 700,
-                      flexShrink: 0,
+                    key={conv.phone}
+                    onClick={() => {
+                      setSelected(conv);
+
+                      if (isMobile) {
+                        setShowSidebar(false);
+                      }
                     }}
-                  >
-                    {conv.phone.slice(-2)}
-                  </div>
-
-                  <div
                     style={{
-                      flex: 1,
-                      minWidth: 0,
+                      padding: "12px 14px",
+                      display: "flex",
+                      gap: "12px",
+                      cursor: "pointer",
+                      background: isActive
+                        ? "#202c33"
+                        : "transparent",
+                      borderBottom:
+                        "1px solid rgba(255,255,255,0.04)",
                     }}
                   >
                     <div
                       style={{
+                        width: "48px",
+                        height: "48px",
+                        borderRadius: "50%",
+                        background: conv.isHandedOff
+                          ? "rgba(245,158,11,0.15)"
+                          : "#2a3942",
                         display: "flex",
-                        justifyContent:
-                          "space-between",
-                        marginBottom: "4px",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: conv.isHandedOff
+                          ? "#f59e0b"
+                          : "#e9edef",
+                        fontWeight: 700,
+                        flexShrink: 0,
                       }}
                     >
-                      <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+                      {conv.phone.slice(-2)}
+                    </div>
+
+                    <div
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent:
+                            "space-between",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+                          <div
+                            style={{
+                              color: "#e9edef",
+                              fontSize: "14px",
+                              fontWeight: 600,
+                              textTransform: "capitalize",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {conv.notes || conv.phone}
+                          </div>
+
+                          {conv.notes && (
+                            <div
+                              style={{
+                                color: "#00a884",
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                marginTop: "1px",
+                              }}
+                            >
+                              {conv.phone}
+                            </div>
+                          )}
+                        </div>
+
                         <div
                           style={{
-                            color: "#e9edef",
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            textTransform: "capitalize",
+                            color: "#8696a0",
+                            fontSize: "11px",
+                            flexShrink: 0,
+                            marginLeft: "8px",
+                          }}
+                        >
+                          {formatConversationTime(
+                            conv.lastMessageAt
+                          )}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent:
+                            "space-between",
+                          gap: "10px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: "#8696a0",
+                            fontSize: "12px",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {conv.notes || conv.phone}
+                          {conv.lastMessage}
                         </div>
 
-                        {conv.notes && (
+                        {conv.unreadCount > 0 && (
                           <div
                             style={{
-                              color: "#00a884",
+                              minWidth: "20px",
+                              height: "20px",
+                              borderRadius: "999px",
+                              background: "#00a884",
+                              color: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                               fontSize: "11px",
-                              fontWeight: 600,
-                              marginTop: "1px",
+                              fontWeight: 700,
+                              padding: "0 6px",
+                              flexShrink: 0,
                             }}
                           >
-                            {conv.phone}
+                            {conv.unreadCount}
                           </div>
                         )}
                       </div>
 
                       <div
                         style={{
-                          color: "#8696a0",
-                          fontSize: "11px",
-                          flexShrink: 0,
-                          marginLeft: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "8px",
+                          flexWrap: "wrap",
                         }}
                       >
-                        {formatConversationTime(
-                          conv.lastMessageAt
+                        <span
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "999px",
+                            background: leadStyle.bg,
+                            color: leadStyle.color,
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            textTransform:
+                              "capitalize",
+                          }}
+                        >
+                          {conv.leadStage || "new"}
+                        </span>
+
+                        {conv.tags?.map((t) => (
+                          <span
+                            key={t}
+                            style={{
+                              padding: "2px 7px",
+                              borderRadius: "999px",
+                              background: "rgba(0,168,132,0.12)",
+                              color: "#00a884",
+                              border: "1px solid rgba(0,168,132,0.25)",
+                              fontSize: "10px",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {t}
+                          </span>
+                        ))}
+
+                        {conv.isHandedOff && (
+                          <span
+                            style={{
+                              padding: "3px 8px",
+                              borderRadius: "999px",
+                              background:
+                                "rgba(245,158,11,0.15)",
+                              color: "#f59e0b",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            You
+                          </span>
                         )}
                       </div>
                     </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
 
-                    <div
+        {/* CHAT AREA */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            background: "#0b141a",
+            position: "relative",
+          }}
+        >
+          {!selected ? (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "20px",
+                padding: "40px 24px",
+                background: "#111b21",
+                borderBottom: "6px solid #00a884",
+                position: "relative",
+              }}
+            >
+              <div style={{
+                width: "88px",
+                height: "88px",
+                borderRadius: "50%",
+                background: "rgba(0,168,132,0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <WhatsAppLogoIcon size={56} />
+              </div>
+
+              <div style={{ textAlign: "center", maxWidth: "420px" }}>
+                <h2 style={{
+                  color: "#e9edef",
+                  fontSize: "22px",
+                  fontWeight: 300,
+                  margin: "0 0 10px 0",
+                }}>
+                  Pax26 WhatsApp Web
+                </h2>
+                <p style={{
+                  color: "#8696a0",
+                  fontSize: "13.5px",
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}>
+                  Send and receive messages seamlessly without keeping your phone online. Use AI automations to handle customer chats or take over manually anytime.
+                </p>
+              </div>
+
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#667781",
+                fontSize: "13px",
+                marginTop: "24px",
+              }}>
+                <LockIcon size={13} />
+                <span>End-to-end encrypted</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* CHAT HEADER */}
+              <div
+                style={{
+                  height: "60px",
+                  background: "#202c33",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.05)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 14px",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 10,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  {isMobile && (
+                    <button
+                      onClick={() =>
+                        setShowSidebar(true)
+                      }
                       style={{
+                        width: "34px",
+                        height: "34px",
+                        borderRadius: "50%",
+                        border: "none",
+                        background: "transparent",
+                        color: "#e9edef",
+                        cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent:
-                          "space-between",
-                        gap: "10px",
+                        justifyContent: "center",
                       }}
                     >
-                      <div
-                        style={{
-                          color: "#8696a0",
-                          fontSize: "12px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {conv.lastMessage}
-                      </div>
+                      <BackIcon />
+                    </button>
+                  )}
 
-                      {conv.unreadCount > 0 && (
-                        <div
-                          style={{
-                            minWidth: "20px",
-                            height: "20px",
-                            borderRadius: "999px",
-                            background: "#00a884",
-                            color: "white",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            padding: "0 6px",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {conv.unreadCount}
-                        </div>
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      background:
+                        selectedConv?.isHandedOff
+                          ? "rgba(245,158,11,0.15)"
+                          : "#2a3942",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: selectedConv?.isHandedOff
+                        ? "#f59e0b"
+                        : "#e9edef",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {selected.phone.slice(-2)}
+                  </div>
+
+                  <div>
+                    <div
+                      style={{
+                        color: "#e9edef",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {selectedContact?.notes || selectedConv?.notes ? (
+                        <>
+                          <span>{selectedContact?.notes || selectedConv?.notes}</span>
+                          <span style={{ color: "#00a884", fontSize: "12px", fontWeight: 600 }}>
+                            ({selected.phone})
+                          </span>
+                        </>
+                      ) : (
+                        selected.phone
                       )}
                     </div>
 
@@ -1398,997 +1658,194 @@ export default function WhatsAppInbox() {
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
-                        marginTop: "8px",
-                        flexWrap: "wrap",
+                        marginTop: "2px",
                       }}
                     >
+                      <div
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background:
+                            selectedConv?.isHandedOff
+                              ? "#f59e0b"
+                              : "#00a884",
+                        }}
+                      />
+
                       <span
                         style={{
-                          padding: "3px 8px",
-                          borderRadius: "999px",
-                          background: leadStyle.bg,
-                          color: leadStyle.color,
-                          fontSize: "10px",
-                          fontWeight: 700,
-                          textTransform:
-                            "capitalize",
+                          color: "#8696a0",
+                          fontSize: "11px",
                         }}
                       >
-                        {conv.leadStage || "new"}
+                        {selectedConv?.isHandedOff
+                          ? "Managed by you"
+                          : "Agent Active"}
                       </span>
 
-                      {conv.tags?.map((t) => (
-                        <span
-                          key={t}
-                          style={{
-                            padding: "2px 7px",
-                            borderRadius: "999px",
-                            background: "rgba(0,168,132,0.12)",
-                            color: "#00a884",
-                            border: "1px solid rgba(0,168,132,0.25)",
-                            fontSize: "10px",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {t}
-                        </span>
-                      ))}
+                      <button
+                        onClick={() => setShowFlowInfo(!showFlowInfo)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "#8696a0",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "2px",
+                        }}
+                        title="How it works"
+                      >
+                        <InfoIcon />
+                      </button>
 
-                      {conv.isHandedOff && (
+                      {selectedContact?.leadStage && (
                         <span
                           style={{
-                            padding: "3px 8px",
+                            padding: "2px 8px",
                             borderRadius: "999px",
                             background:
-                              "rgba(245,158,11,0.15)",
-                            color: "#f59e0b",
+                              LEAD_STAGES[
+                                selectedContact
+                                  .leadStage
+                              ]?.bg,
+                            color:
+                              LEAD_STAGES[
+                                selectedContact
+                                  .leadStage
+                              ]?.color,
                             fontSize: "10px",
                             fontWeight: 700,
                           }}
                         >
-                          You
+                          {selectedContact.leadStage}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
-      </div>
 
-      {/* CHAT AREA */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          background: "#0b141a",
-          position: "relative",
-        }}
-      >
-        {!selected ? (
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "20px",
-              padding: "40px 24px",
-              background: "#111b21",
-              borderBottom: "6px solid #00a884",
-              position: "relative",
-            }}
-          >
-            <div style={{
-              width: "88px",
-              height: "88px",
-              borderRadius: "50%",
-              background: "rgba(0,168,132,0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <WhatsAppLogoIcon size={56} />
-            </div>
+                {/* FLOW INFO POPUP */}
+                <AnimatePresence>
+                  {showFlowInfo && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      style={{
+                        position: "absolute",
+                        top: "65px",
+                        left: "14px",
+                        width: "280px",
+                        background: "#2a3942",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "16px",
+                        padding: "20px",
+                        zIndex: 100,
+                        boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+                        color: "#e9edef"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                        <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 800 }}>Conversation Flow</h4>
+                        <button onClick={() => setShowFlowInfo(false)} style={{ background: "transparent", border: "none", color: "#8696a0", cursor: "pointer" }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {[
+                          { step: "1", text: "Smart Agent manages the chat by default." },
+                          { step: "2", text: "Click Take Over to chat manually." },
+                          { step: "3", text: "Smart Agent pauses while you are in control." },
+                          { step: "4", text: "Click Hand Back to resume automation." }
+                        ].map(item => (
+                          <div key={item.step} style={{ display: "flex", gap: "12px" }}>
+                            <span style={{
+                              width: "20px",
+                              height: "20px",
+                              background: "rgba(255,255,255,0.1)",
+                              borderRadius: "50%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "10px",
+                              fontWeight: 900,
+                              flexShrink: 0
+                            }}>
+                              {item.step}
+                            </span>
+                            <p style={{ margin: 0, fontSize: "12px", opacity: 0.8, lineHeight: 1.4 }}>{item.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-            <div style={{ textAlign: "center", maxWidth: "420px" }}>
-              <h2 style={{
-                color: "#e9edef",
-                fontSize: "22px",
-                fontWeight: 300,
-                margin: "0 0 10px 0",
-              }}>
-                Pax26 WhatsApp Web
-              </h2>
-              <p style={{
-                color: "#8696a0",
-                fontSize: "13.5px",
-                margin: 0,
-                lineHeight: 1.6,
-              }}>
-                Send and receive messages seamlessly without keeping your phone online. Use AI automations to handle customer chats or take over manually anytime.
-              </p>
-            </div>
-
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#667781",
-              fontSize: "13px",
-              marginTop: "24px",
-            }}>
-              <LockIcon size={13} />
-              <span>End-to-end encrypted</span>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* CHAT HEADER */}
-            <div
-              style={{
-                height: "60px",
-                background: "#202c33",
-                borderBottom:
-                  "1px solid rgba(255,255,255,0.05)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "10px 14px",
-                position: "sticky",
-                top: 0,
-                zIndex: 10,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                {isMobile && (
+                {selectedConv?.isHandedOff ? (
                   <button
+                    disabled={takingOver}
                     onClick={() =>
-                      setShowSidebar(true)
+                      handleHandoff("handback")
                     }
                     style={{
-                      width: "34px",
-                      height: "34px",
-                      borderRadius: "50%",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
                       border: "none",
-                      background: "transparent",
-                      color: "#e9edef",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <BackIcon />
-                  </button>
-                )}
-
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    background:
-                      selectedConv?.isHandedOff
-                        ? "rgba(245,158,11,0.15)"
-                        : "#2a3942",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: selectedConv?.isHandedOff
-                      ? "#f59e0b"
-                      : "#e9edef",
-                    fontWeight: 700,
-                  }}
-                >
-                  {selected.phone.slice(-2)}
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      color: "#e9edef",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    {selectedContact?.notes || selectedConv?.notes ? (
-                      <>
-                        <span>{selectedContact?.notes || selectedConv?.notes}</span>
-                        <span style={{ color: "#00a884", fontSize: "12px", fontWeight: 600 }}>
-                          ({selected.phone})
-                        </span>
-                      </>
-                    ) : (
-                      selected.phone
-                    )}
-                  </div>
-
-                  <div
-                    style={{
+                      background: "#005c4b",
+                      color: "white",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: takingOver ? "not-allowed" : "pointer",
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      marginTop: "2px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background:
-                          selectedConv?.isHandedOff
-                            ? "#f59e0b"
-                            : "#00a884",
-                      }}
-                    />
-
-                    <span
-                      style={{
-                        color: "#8696a0",
-                        fontSize: "11px",
-                      }}
-                    >
-                      {selectedConv?.isHandedOff
-                        ? "Managed by you"
-                        : "Agent Active"}
-                    </span>
-
-                    <button
-                      onClick={() => setShowFlowInfo(!showFlowInfo)}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color: "#8696a0",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "2px",
-                      }}
-                      title="How it works"
-                    >
-                      <InfoIcon />
-                    </button>
-
-                    {selectedContact?.leadStage && (
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: "999px",
-                          background:
-                            LEAD_STAGES[
-                              selectedContact
-                                .leadStage
-                            ]?.bg,
-                          color:
-                            LEAD_STAGES[
-                              selectedContact
-                                .leadStage
-                            ]?.color,
-                          fontSize: "10px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {selectedContact.leadStage}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* FLOW INFO POPUP */}
-              <AnimatePresence>
-                {showFlowInfo && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    style={{
-                      position: "absolute",
-                      top: "65px",
-                      left: "14px",
-                      width: "280px",
-                      background: "#2a3942",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "16px",
-                      padding: "20px",
-                      zIndex: 100,
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-                      color: "#e9edef"
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                      <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 800 }}>Conversation Flow</h4>
-                      <button onClick={() => setShowFlowInfo(false)} style={{ background: "transparent", border: "none", color: "#8696a0", cursor: "pointer" }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {[
-                        { step: "1", text: "Smart Agent manages the chat by default." },
-                        { step: "2", text: "Click Take Over to chat manually." },
-                        { step: "3", text: "Smart Agent pauses while you are in control." },
-                        { step: "4", text: "Click Hand Back to resume automation." }
-                      ].map(item => (
-                        <div key={item.step} style={{ display: "flex", gap: "12px" }}>
-                          <span style={{ 
-                            width: "20px", 
-                            height: "20px", 
-                            background: "rgba(255,255,255,0.1)", 
-                            borderRadius: "50%", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "center", 
-                            fontSize: "10px", 
-                            fontWeight: 900,
-                            flexShrink: 0
-                          }}>
-                            {item.step}
-                          </span>
-                          <p style={{ margin: 0, fontSize: "12px", opacity: 0.8, lineHeight: 1.4 }}>{item.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {selectedConv?.isHandedOff ? (
-                <button
-                  disabled={takingOver}
-                  onClick={() =>
-                    handleHandoff("handback")
-                  }
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: "#005c4b",
-                    color: "white",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: takingOver ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    opacity: takingOver ? 0.7 : 1,
-                  }}
-                >
-                  {takingOver ? (
-                    <>
-                      <span style={{
-                        width: "12px",
-                        height: "12px",
-                        borderRadius: "50%",
-                        border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#fff",
-                        animation: "inbox-spin 0.65s linear infinite",
-                        display: "inline-block",
-                        flexShrink: 0,
-                      }} />
-                      Handing Back…
-                    </>
-                  ) : "Hand Back"}
-                </button>
-              ) : (
-                <button
-                  disabled={takingOver}
-                  onClick={() =>
-                    handleHandoff("takeover")
-                  }
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: "#f59e0b",
-                    color: "white",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: takingOver ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    opacity: takingOver ? 0.7 : 1,
-                  }}
-                >
-                  {takingOver ? (
-                    <>
-                      <span style={{
-                        width: "12px",
-                        height: "12px",
-                        borderRadius: "50%",
-                        border: "2px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#fff",
-                        animation: "inbox-spin 0.65s linear infinite",
-                        display: "inline-block",
-                        flexShrink: 0,
-                      }} />
-                      Taking Over…
-                    </>
-                  ) : "Take Over"}
-                </button>
-              )}
-            </div>
-
-            {/* MESSAGES */}
-            <div
-              ref={messagesContainerRef}
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "16px",
-                backgroundImage: `
-                  radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2%, transparent 0%),
-                  radial-gradient(circle at 75px 75px, rgba(255,255,255,0.02) 2%, transparent 0%)
-                `,
-                backgroundSize: "100px 100px",
-                backgroundColor: "#0b141a",
-                position: "relative"
-              }}
-            >
-              <AnimatePresence>
-                {messages.map((msg) => {
-                  const isOutbound =
-                    msg.direction === "outbound";
-
-                  const isHuman =
-                    msg.senderType === "human";
-
-                  const imageUrls = msg.mediaUrl
-                    ? [msg.mediaUrl]
-                    : resolvedMediaUrls[msg.messageId]
-                      ? [resolvedMediaUrls[msg.messageId]]
-                      : msg.aiMeta?.imageUrls || [];
-
-                  return (
-                    <motion.div
-                      key={msg._id}
-                      initial={{
-                        opacity: 0,
-                        y: 8,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        duration: 0.18,
-                      }}
-                      style={{
-                        display: "flex",
-                        justifyContent: isOutbound
-                          ? "flex-end"
-                          : "flex-start",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {msg.aiMeta?.isReceipt ? (
-                        /* ── RECEIPT CARD ── */
-                        <div style={{
-                          maxWidth: isMobile ? "88%" : "70%",
-                          borderRadius: "12px",
-                          overflow: "hidden",
-                          boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
-                          border: "1px solid rgba(16,185,129,0.3)",
-                        }}>
-                          <div style={{
-                            background: "linear-gradient(135deg, #005c4b 0%, #065f46 100%)",
-                            padding: "10px 14px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}>
-                            <span style={{ fontSize: "18px" }}>🧾</span>
-                            <div>
-                              <div style={{ color: "#10b981", fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                                Order Receipt Sent
-                              </div>
-                              <div style={{ color: "#e9edef", fontSize: "12px", fontWeight: 700 }}>
-                                Payment Confirmed ✅
-                              </div>
-                            </div>
-                            {msg.aiMeta?.receiptProofCode && (
-                              <div style={{
-                                marginLeft: "auto",
-                                background: "rgba(16,185,129,0.2)",
-                                border: "1px solid rgba(16,185,129,0.4)",
-                                borderRadius: "6px",
-                                padding: "3px 8px",
-                                color: "#10b981",
-                                fontSize: "11px",
-                                fontWeight: 800,
-                                letterSpacing: "0.05em",
-                                whiteSpace: "nowrap",
-                              }}>
-                                #{msg.aiMeta.receiptProofCode}
-                              </div>
-                            )}
-                          </div>
-                          <div style={{
-                            background: "#1a2e27",
-                            padding: "10px 14px",
-                            color: "#b2ccc7",
-                            fontSize: "11.5px",
-                            lineHeight: 1.65,
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
-                            maxHeight: "180px",
-                            overflowY: "auto",
-                          }}>
-                            {msg.text}
-                          </div>
-                          <div style={{
-                            background: "#1a2e27",
-                            padding: "4px 14px 8px",
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.4)",
-                            borderTop: "1px solid rgba(255,255,255,0.04)",
-                          }}>
-                            {formatMessageTime(msg.createdAt)}
-                            <DoubleCheckIcon />
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            maxWidth: isMobile
-                              ? "88%"
-                              : "70%",
-                            padding: "8px 12px",
-                            borderRadius: isOutbound
-                              ? "8px 0 8px 8px"
-                              : "0 8px 8px 8px",
-                            background: isOutbound
-                              ? isHuman
-                                ? "#f59e0b"
-                                : "#005c4b"
-                              : "#202c33",
-                            color: "#e9edef",
-                            fontSize: "13px",
-                            lineHeight: 1.5,
-                            boxShadow:
-                              "0 1px 1px rgba(0,0,0,0.08)",
-                            border: isOutbound
-                              ? "none"
-                              : "1px solid rgba(255,255,255,0.04)",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {/* "You" tag — only shown on human-sent outbound messages */}
-                          {isOutbound && isHuman && (
-                            <div style={{
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              letterSpacing: "0.06em",
-                              textTransform: "uppercase",
-                              color: "rgba(255,255,255,0.75)",
-                              marginBottom: "4px",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}>
-                              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                              </svg>
-                              You
-                            </div>
-                          )}
-                          {imageUrls.length > 0 && (
-                            <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
-                              {imageUrls.map((url, i) => (
-                                <div key={i} style={{ position: "relative", display: "block" }}>
-                                  <a href={msg._uploading ? undefined : url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
-                                    <img
-                                      src={url}
-                                      alt="WhatsApp attachment"
-                                      style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "280px",
-                                        borderRadius: "6px",
-                                        objectFit: "cover",
-                                        cursor: msg._uploading ? "default" : "pointer",
-                                        opacity: msg._uploading ? 0.55 : 1,
-                                        transition: "opacity 0.2s ease",
-                                      }}
-                                    />
-                                  </a>
-
-                                  {msg._uploading && (
-                                    <div style={{
-                                      position: "absolute",
-                                      inset: 0,
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      borderRadius: "6px",
-                                      background: "rgba(0,0,0,0.35)",
-                                      gap: "6px",
-                                    }}>
-                                      <svg width="36" height="36" viewBox="0 0 36 36">
-                                        <circle cx="18" cy="18" r="14"
-                                          fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
-                                        <circle cx="18" cy="18" r="14"
-                                          fill="none" stroke="#fff" strokeWidth="3"
-                                          strokeDasharray="88" strokeDashoffset="22"
-                                          strokeLinecap="round"
-                                          style={{ transformOrigin: "center", animation: "inbox-spin 0.9s linear infinite" }}
-                                        />
-                                      </svg>
-                                      <span style={{ color: "#fff", fontSize: "10px", fontWeight: 600, letterSpacing: "0.03em" }}>
-                                        Uploading…
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {msg._failed && (
-                                    <div style={{
-                                      position: "absolute",
-                                      inset: 0,
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      borderRadius: "6px",
-                                      background: "rgba(0,0,0,0.5)",
-                                    }}>
-                                      <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
-                                        ✕ Failed
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {msg.text &&
-                            msg.text !== "📷 Image" &&
-                            msg.text !== "[Customer sent an image]" && (
-                            <div>{msg.text}</div>
-                          )}
-
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                              gap: "4px",
-                              marginTop: "4px",
-                              fontSize: "10px",
-                              color: "rgba(255,255,255,0.6)",
-                            }}
-                          >
-                            {formatMessageTime(msg.createdAt)}
-                            {isOutbound && (
-                              <DoubleCheckIcon />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-
-            {/* IMAGE PREVIEW PANEL — WhatsApp-style, shown after file is picked */}
-            {imagePreview && selectedConv?.isHandedOff && (
-              <div style={{
-                padding: "12px",
-                background: "#1a2730",
-                borderTop: "1px solid rgba(255,255,255,0.06)",
-              }}>
-                {/* Preview + caption row */}
-                <div style={{ display: "flex", gap: "12px", alignItems: "flex-end" }}>
-                  {/* Thumbnail */}
-                  <div style={{ position: "relative", flexShrink: 0 }}>
-                    <img
-                      src={imagePreview}
-                      alt="preview"
-                      style={{
-                        width: "64px",
-                        height: "64px",
-                        objectFit: "cover",
-                        borderRadius: "10px",
-                        border: "2px solid rgba(255,255,255,0.1)",
-                      }}
-                    />
-                    {/* cancel X on thumbnail */}
-                    <button
-                      onClick={cancelImagePreview}
-                      style={{
-                        position: "absolute", top: "-6px", right: "-6px",
-                        width: "18px", height: "18px", borderRadius: "50%",
-                        background: "#ef4444", border: "none", color: "white",
-                        fontSize: "10px", cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                      }}
-                    >✕</button>
-                  </div>
-
-                  {/* Caption input */}
-                  <input
-                    type="text"
-                    placeholder="Add a caption…"
-                    value={imageCaption}
-                    onChange={e => setImageCaption(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") handleSendImage(); }}
-                    style={{
-                      flex: 1, height: "42px", borderRadius: "12px", border: "none",
-                      outline: "none", padding: "0 14px", background: "#2a3942",
-                      color: "#e9edef", fontSize: "13px",
-                    }}
-                  />
-
-                  {/* Send button */}
-                  <button
-                    onClick={handleSendImage}
-                    disabled={sendingImage}
-                    style={{
-                      width: "46px", height: "46px", borderRadius: "50%", border: "none",
-                      background: sendingImage ? "#2a3942" : "#00a884",
-                      color: "white", cursor: sendingImage ? "not-allowed" : "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {sendingImage ? (
-                      <div style={{
-                        width: "16px", height: "16px", borderRadius: "50%",
-                        border: "2px solid rgba(255,255,255,0.2)",
-                        borderTopColor: "#fff",
-                        animation: "inbox-spin 0.65s linear infinite",
-                      }} />
-                    ) : (
-                      <SendIcon />
-                    )}
-                  </button>
-                </div>
-
-                <p style={{ margin: "8px 0 0 76px", fontSize: "10px", color: "#8696a0", opacity: 0.7 }}>
-                  {imageFile?.name} · Press Enter or click send
-                </p>
-              </div>
-            )}
-
-            {/* Hidden file input — triggers native file picker */}
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handleImageFilePicked}
-            />
-
-            {/* REPLY BAR */}
-            <div
-              style={{
-                padding: "10px",
-                background: "#202c33",
-                borderTop:
-                  "1px solid rgba(255,255,255,0.05)",
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "10px",
-                position: "sticky",
-                bottom: 0,
-                zIndex: 10,
-              }}
-            >
-              {/* Image attach button — only when handed off */}
-              {selectedConv?.isHandedOff && (
-                <button
-                  onClick={() => imageInputRef.current?.click()}
-                  title="Send image"
-                  disabled={sendingImage}
-                  style={{
-                    width: "46px", height: "46px", borderRadius: "50%", border: "none",
-                    background: "#2a3942",
-                    color: sendingImage ? "#444" : "#8696a0",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: sendingImage ? "not-allowed" : "pointer", flexShrink: 0,
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
-                  </svg>
-                </button>
-              )}
-
-              <textarea
-                ref={inputRef}
-                value={replyText}
-                readOnly={
-                  !selectedConv?.isHandedOff
-                }
-                onClick={() => {
-                  if (!selectedConv?.isHandedOff) {
-                    setIsAlertVisible(true);
-                  }
-                }}
-                onChange={(e) =>
-                  setReplyText(e.target.value)
-                }
-                onKeyDown={handleKeyDown}
-                rows={1}
-                placeholder={
-                  selectedConv?.isHandedOff
-                    ? "Type a message"
-                    : "Take over to reply"
-                }
-                onInput={(e) => {
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                style={{
-                  flex: 1,
-                  minHeight: "42px",
-                  maxHeight: "120px",
-                  borderRadius: "12px",
-                  border: "none",
-                  outline: "none",
-                  padding: "10px 14px",
-                  background: "#2a3942",
-                  color: "#e9edef",
-                  fontSize: "14px",
-                  lineHeight: 1.5,
-                  overflowY: "auto",
-                  opacity:
-                    selectedConv?.isHandedOff
-                      ? 1
-                      : 0.5,
-                }}
-              />
-
-              <button
-                onClick={handleSend}
-                disabled={
-                  sending ||
-                  !replyText.trim() ||
-                  !selectedConv?.isHandedOff
-                }
-                style={{
-                  width: "46px",
-                  height: "46px",
-                  borderRadius: "50%",
-                  border: "none",
-                  background: replyText.trim() &&
-                    selectedConv?.isHandedOff
-                    ? "#00a884"
-                    : "#2a3942",
-                  color: "white",
-                  cursor: replyText.trim() &&
-                    selectedConv?.isHandedOff
-                    ? "pointer"
-                    : "not-allowed",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <SendIcon />
-              </button>
-            </div>
-
-            {/* Takeover Notice Overlay - Fixed at center of Chat Area */}
-            <AnimatePresence>
-              {(!selectedConv?.isHandedOff && isAlertVisible) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20, x: "-50%" }}
-                  animate={{ opacity: 1, y: 0, x: "-50%" }}
-                  exit={{ opacity: 0, y: 20, x: "-50%" }}
-                  style={{
-                    position: "absolute",
-                    bottom: "80px", // Just above the reply bar
-                    left: "50%",
-                    width: "90%",
-                    maxWidth: "380px",
-                    background: "rgba(17, 27, 33, 0.7)",
-                    backdropFilter: "blur(20px)",
-                    border: "1px solid rgba(245, 158, 11, 0.4)",
-                    padding: "24px",
-                    borderRadius: "28px",
-                    boxShadow: "0 25px 50px rgba(0,0,0,0.6)",
-                    zIndex: 50,
-                    color: "#fff",
-                    textAlign: "center",
-                  }}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setIsAlertVisible(false)}
-                    style={{
-                      position: "absolute",
-                      top: "16px",
-                      right: "16px",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.05)",
-                      border: "none",
-                      color: "#8696a0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-
-                  <div style={{ 
-                    width: "48px", 
-                    height: "48px", 
-                    background: "#f59e0b", 
-                    borderRadius: "16px", 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center",
-                    margin: "0 auto 16px",
-                    boxShadow: "0 0 25px rgba(245, 158, 11, 0.4)"
-                  }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                      <line x1="12" y1="9" x2="12" y2="13"/>
-                      <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                  </div>
-                  <div style={{ fontWeight: 800, fontSize: "18px", marginBottom: "8px", letterSpacing: "-0.01em" }}>
-                    Smart Agent Active
-                  </div>
-                  <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "24px", lineHeight: 1.6 }}>
-                    Our Smart Agent is currently managing this conversation. To send a manual message, please take over first.
-                  </p>
-                  <button
-                    disabled={takingOver}
-                    onClick={() => handleHandoff("takeover")}
-                    style={{
-                      width: "100%",
-                      background: "#f59e0b",
-                      color: "#fff",
-                      border: "none",
-                      padding: "14px",
-                      borderRadius: "16px",
-                      fontWeight: 800,
-                      fontSize: "14px",
-                      cursor: takingOver ? "not-allowed" : "pointer",
-                      transition: "all 0.2s",
-                      boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
                       opacity: takingOver ? 0.7 : 1,
                     }}
-                    onMouseEnter={e => { if (!takingOver) e.currentTarget.style.transform = "scale(1.02)"; }}
-                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                   >
                     {takingOver ? (
                       <>
                         <span style={{
-                          width: "14px",
-                          height: "14px",
+                          width: "12px",
+                          height: "12px",
+                          borderRadius: "50%",
+                          border: "2px solid rgba(255,255,255,0.3)",
+                          borderTopColor: "#fff",
+                          animation: "inbox-spin 0.65s linear infinite",
+                          display: "inline-block",
+                          flexShrink: 0,
+                        }} />
+                        Handing Back…
+                      </>
+                    ) : "Hand Back"}
+                  </button>
+                ) : (
+                  <button
+                    disabled={takingOver}
+                    onClick={() =>
+                      handleHandoff("takeover")
+                    }
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background: "#f59e0b",
+                      color: "white",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: takingOver ? "not-allowed" : "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      opacity: takingOver ? 0.7 : 1,
+                    }}
+                  >
+                    {takingOver ? (
+                      <>
+                        <span style={{
+                          width: "12px",
+                          height: "12px",
                           borderRadius: "50%",
                           border: "2px solid rgba(255,255,255,0.3)",
                           borderTopColor: "#fff",
@@ -2398,28 +1855,607 @@ export default function WhatsAppInbox() {
                         }} />
                         Taking Over…
                       </>
-                    ) : "Take Over Now"}
+                    ) : "Take Over"}
                   </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-      </div>
+                )}
+              </div>
 
-      {/* LEAD PANEL */}
-      {selected && !isMobile && (
-        <LeadPanel
-          contact={selectedContact}
-          phone={selected.phone}
-          onUpdate={(u) =>
-            setSelectedContact((p) => ({
-              ...p,
-              ...u,
-            }))
-          }
-        />
-      )}
+              {/* MESSAGES */}
+              <div
+                ref={messagesContainerRef}
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "16px",
+                  backgroundImage: `
+                  radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2%, transparent 0%),
+                  radial-gradient(circle at 75px 75px, rgba(255,255,255,0.02) 2%, transparent 0%)
+                `,
+                  backgroundSize: "100px 100px",
+                  backgroundColor: "#0b141a",
+                  position: "relative"
+                }}
+              >
+                <AnimatePresence>
+                  {messages.map((msg) => {
+                    const isOutbound =
+                      msg.direction === "outbound";
+
+                    const isHuman =
+                      msg.senderType === "human";
+
+                    const imageUrls = msg.mediaUrl
+                      ? [msg.mediaUrl]
+                      : resolvedMediaUrls[msg.messageId]
+                        ? [resolvedMediaUrls[msg.messageId]]
+                        : msg.aiMeta?.imageUrls || [];
+
+                    return (
+                      <motion.div
+                        key={msg._id}
+                        initial={{
+                          opacity: 0,
+                          y: 8,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                        }}
+                        transition={{
+                          duration: 0.18,
+                        }}
+                        style={{
+                          display: "flex",
+                          justifyContent: isOutbound
+                            ? "flex-end"
+                            : "flex-start",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        {msg.aiMeta?.isReceipt ? (
+                          /* ── RECEIPT CARD ── */
+                          <div style={{
+                            maxWidth: isMobile ? "88%" : "70%",
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
+                            border: "1px solid rgba(16,185,129,0.3)",
+                          }}>
+                            <div style={{
+                              background: "linear-gradient(135deg, #005c4b 0%, #065f46 100%)",
+                              padding: "10px 14px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}>
+                              <span style={{ fontSize: "18px" }}>🧾</span>
+                              <div>
+                                <div style={{ color: "#10b981", fontSize: "10px", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                  Order Receipt Sent
+                                </div>
+                                <div style={{ color: "#e9edef", fontSize: "12px", fontWeight: 700 }}>
+                                  Payment Confirmed ✅
+                                </div>
+                              </div>
+                              {msg.aiMeta?.receiptProofCode && (
+                                <div style={{
+                                  marginLeft: "auto",
+                                  background: "rgba(16,185,129,0.2)",
+                                  border: "1px solid rgba(16,185,129,0.4)",
+                                  borderRadius: "6px",
+                                  padding: "3px 8px",
+                                  color: "#10b981",
+                                  fontSize: "11px",
+                                  fontWeight: 800,
+                                  letterSpacing: "0.05em",
+                                  whiteSpace: "nowrap",
+                                }}>
+                                  #{msg.aiMeta.receiptProofCode}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{
+                              background: "#1a2e27",
+                              padding: "10px 14px",
+                              color: "#b2ccc7",
+                              fontSize: "11.5px",
+                              lineHeight: 1.65,
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
+                              maxHeight: "180px",
+                              overflowY: "auto",
+                            }}>
+                              {msg.text}
+                            </div>
+                            <div style={{
+                              background: "#1a2e27",
+                              padding: "4px 14px 8px",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              gap: "4px",
+                              fontSize: "10px",
+                              color: "rgba(255,255,255,0.4)",
+                              borderTop: "1px solid rgba(255,255,255,0.04)",
+                            }}>
+                              {formatMessageTime(msg.createdAt)}
+                              <DoubleCheckIcon />
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              maxWidth: isMobile
+                                ? "88%"
+                                : "70%",
+                              padding: "8px 12px",
+                              borderRadius: isOutbound
+                                ? "8px 0 8px 8px"
+                                : "0 8px 8px 8px",
+                              background: isOutbound
+                                ? isHuman
+                                  ? "#f59e0b"
+                                  : "#005c4b"
+                                : "#202c33",
+                              color: "#e9edef",
+                              fontSize: "13px",
+                              lineHeight: 1.5,
+                              boxShadow:
+                                "0 1px 1px rgba(0,0,0,0.08)",
+                              border: isOutbound
+                                ? "none"
+                                : "1px solid rgba(255,255,255,0.04)",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {/* "You" tag — only shown on human-sent outbound messages */}
+                            {isOutbound && isHuman && (
+                              <div style={{
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                letterSpacing: "0.06em",
+                                textTransform: "uppercase",
+                                color: "rgba(255,255,255,0.75)",
+                                marginBottom: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}>
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                                </svg>
+                                You
+                              </div>
+                            )}
+                            {imageUrls.length > 0 && (
+                              <div style={{ marginBottom: msg.text && msg.text !== "📷 Image" && msg.text !== "[Customer sent an image]" ? "6px" : 0 }}>
+                                {imageUrls.map((url, i) => (
+                                  <div key={i} style={{ position: "relative", display: "block" }}>
+                                    <a href={msg._uploading ? undefined : url} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
+                                      <img
+                                        src={url}
+                                        alt="WhatsApp attachment"
+                                        style={{
+                                          maxWidth: "100%",
+                                          maxHeight: "280px",
+                                          borderRadius: "6px",
+                                          objectFit: "cover",
+                                          cursor: msg._uploading ? "default" : "pointer",
+                                          opacity: msg._uploading ? 0.55 : 1,
+                                          transition: "opacity 0.2s ease",
+                                        }}
+                                      />
+                                    </a>
+
+                                    {msg._uploading && (
+                                      <div style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderRadius: "6px",
+                                        background: "rgba(0,0,0,0.35)",
+                                        gap: "6px",
+                                      }}>
+                                        <svg width="36" height="36" viewBox="0 0 36 36">
+                                          <circle cx="18" cy="18" r="14"
+                                            fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+                                          <circle cx="18" cy="18" r="14"
+                                            fill="none" stroke="#fff" strokeWidth="3"
+                                            strokeDasharray="88" strokeDashoffset="22"
+                                            strokeLinecap="round"
+                                            style={{ transformOrigin: "center", animation: "inbox-spin 0.9s linear infinite" }}
+                                          />
+                                        </svg>
+                                        <span style={{ color: "#fff", fontSize: "10px", fontWeight: 600, letterSpacing: "0.03em" }}>
+                                          Uploading…
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {msg._failed && (
+                                      <div style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderRadius: "6px",
+                                        background: "rgba(0,0,0,0.5)",
+                                      }}>
+                                        <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: 700 }}>
+                                          ✕ Failed
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {msg.text &&
+                              msg.text !== "📷 Image" &&
+                              msg.text !== "[Customer sent an image]" && (
+                                <div>{msg.text}</div>
+                              )}
+
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                                gap: "4px",
+                                marginTop: "4px",
+                                fontSize: "10px",
+                                color: "rgba(255,255,255,0.6)",
+                              }}
+                            >
+                              {formatMessageTime(msg.createdAt)}
+                              {isOutbound && (
+                                <DoubleCheckIcon />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+
+              {/* IMAGE PREVIEW PANEL — WhatsApp-style, shown after file is picked */}
+              {imagePreview && selectedConv?.isHandedOff && (
+                <div style={{
+                  padding: "12px",
+                  background: "#1a2730",
+                  borderTop: "1px solid rgba(255,255,255,0.06)",
+                }}>
+                  {/* Preview + caption row */}
+                  <div style={{ display: "flex", gap: "12px", alignItems: "flex-end" }}>
+                    {/* Thumbnail */}
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <img
+                        src={imagePreview}
+                        alt="preview"
+                        style={{
+                          width: "64px",
+                          height: "64px",
+                          objectFit: "cover",
+                          borderRadius: "10px",
+                          border: "2px solid rgba(255,255,255,0.1)",
+                        }}
+                      />
+                      {/* cancel X on thumbnail */}
+                      <button
+                        onClick={cancelImagePreview}
+                        style={{
+                          position: "absolute", top: "-6px", right: "-6px",
+                          width: "18px", height: "18px", borderRadius: "50%",
+                          background: "#ef4444", border: "none", color: "white",
+                          fontSize: "10px", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                      >✕</button>
+                    </div>
+
+                    {/* Caption input */}
+                    <input
+                      type="text"
+                      placeholder="Add a caption…"
+                      value={imageCaption}
+                      onChange={e => setImageCaption(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") handleSendImage(); }}
+                      style={{
+                        flex: 1, height: "42px", borderRadius: "12px", border: "none",
+                        outline: "none", padding: "0 14px", background: "#2a3942",
+                        color: "#e9edef", fontSize: "13px",
+                      }}
+                    />
+
+                    {/* Send button */}
+                    <button
+                      onClick={handleSendImage}
+                      disabled={sendingImage}
+                      style={{
+                        width: "46px", height: "46px", borderRadius: "50%", border: "none",
+                        background: sendingImage ? "#2a3942" : "#00a884",
+                        color: "white", cursor: sendingImage ? "not-allowed" : "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {sendingImage ? (
+                        <div style={{
+                          width: "16px", height: "16px", borderRadius: "50%",
+                          border: "2px solid rgba(255,255,255,0.2)",
+                          borderTopColor: "#fff",
+                          animation: "inbox-spin 0.65s linear infinite",
+                        }} />
+                      ) : (
+                        <SendIcon />
+                      )}
+                    </button>
+                  </div>
+
+                  <p style={{ margin: "8px 0 0 76px", fontSize: "10px", color: "#8696a0", opacity: 0.7 }}>
+                    {imageFile?.name} · Press Enter or click send
+                  </p>
+                </div>
+              )}
+
+              {/* Hidden file input — triggers native file picker */}
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleImageFilePicked}
+              />
+
+              {/* REPLY BAR */}
+              <div
+                style={{
+                  padding: "10px",
+                  background: "#202c33",
+                  borderTop:
+                    "1px solid rgba(255,255,255,0.05)",
+                  display: "flex",
+                  alignItems: "flex-end",
+                  gap: "10px",
+                  position: "sticky",
+                  bottom: 0,
+                  zIndex: 10,
+                }}
+              >
+                {/* Image attach button — only when handed off */}
+                {selectedConv?.isHandedOff && (
+                  <button
+                    onClick={() => imageInputRef.current?.click()}
+                    title="Send image"
+                    disabled={sendingImage}
+                    style={{
+                      width: "46px", height: "46px", borderRadius: "50%", border: "none",
+                      background: "#2a3942",
+                      color: sendingImage ? "#444" : "#8696a0",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: sendingImage ? "not-allowed" : "pointer", flexShrink: 0,
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                    </svg>
+                  </button>
+                )}
+
+                <textarea
+                  ref={inputRef}
+                  value={replyText}
+                  readOnly={
+                    !selectedConv?.isHandedOff
+                  }
+                  onClick={() => {
+                    if (!selectedConv?.isHandedOff) {
+                      setIsAlertVisible(true);
+                    }
+                  }}
+                  onChange={(e) =>
+                    setReplyText(e.target.value)
+                  }
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  placeholder={
+                    selectedConv?.isHandedOff
+                      ? "Type a message"
+                      : "Take over to reply"
+                  }
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  style={{
+                    flex: 1,
+                    minHeight: "42px",
+                    maxHeight: "120px",
+                    borderRadius: "12px",
+                    border: "none",
+                    outline: "none",
+                    padding: "10px 14px",
+                    background: "#2a3942",
+                    color: "#e9edef",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                    overflowY: "auto",
+                    opacity:
+                      selectedConv?.isHandedOff
+                        ? 1
+                        : 0.5,
+                  }}
+                />
+
+                <button
+                  onClick={handleSend}
+                  disabled={
+                    sending ||
+                    !replyText.trim() ||
+                    !selectedConv?.isHandedOff
+                  }
+                  style={{
+                    width: "46px",
+                    height: "46px",
+                    borderRadius: "50%",
+                    border: "none",
+                    background: replyText.trim() &&
+                      selectedConv?.isHandedOff
+                      ? "#00a884"
+                      : "#2a3942",
+                    color: "white",
+                    cursor: replyText.trim() &&
+                      selectedConv?.isHandedOff
+                      ? "pointer"
+                      : "not-allowed",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <SendIcon />
+                </button>
+              </div>
+
+              {/* Takeover Notice Overlay - Fixed at center of Chat Area */}
+              <AnimatePresence>
+                {(!selectedConv?.isHandedOff && isAlertVisible) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20, x: "-50%" }}
+                    animate={{ opacity: 1, y: 0, x: "-50%" }}
+                    exit={{ opacity: 0, y: 20, x: "-50%" }}
+                    style={{
+                      position: "absolute",
+                      bottom: "80px", // Just above the reply bar
+                      left: "50%",
+                      width: "90%",
+                      maxWidth: "380px",
+                      background: "rgba(17, 27, 33, 0.7)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(245, 158, 11, 0.4)",
+                      padding: "24px",
+                      borderRadius: "28px",
+                      boxShadow: "0 25px 50px rgba(0,0,0,0.6)",
+                      zIndex: 50,
+                      color: "#fff",
+                      textAlign: "center",
+                    }}
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setIsAlertVisible(false)}
+                      style={{
+                        position: "absolute",
+                        top: "16px",
+                        right: "16px",
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.05)",
+                        border: "none",
+                        color: "#8696a0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+
+                    <div style={{
+                      width: "48px",
+                      height: "48px",
+                      background: "#f59e0b",
+                      borderRadius: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 16px",
+                      boxShadow: "0 0 25px rgba(245, 158, 11, 0.4)"
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                    </div>
+                    <div style={{ fontWeight: 800, fontSize: "18px", marginBottom: "8px", letterSpacing: "-0.01em" }}>
+                      Smart Agent Active
+                    </div>
+                    <p style={{ fontSize: "14px", opacity: 0.9, marginBottom: "24px", lineHeight: 1.6 }}>
+                      Our Smart Agent is currently managing this conversation. To send a manual message, please take over first.
+                    </p>
+                    <button
+                      disabled={takingOver}
+                      onClick={() => handleHandoff("takeover")}
+                      style={{
+                        width: "100%",
+                        background: "#f59e0b",
+                        color: "#fff",
+                        border: "none",
+                        padding: "14px",
+                        borderRadius: "16px",
+                        fontWeight: 800,
+                        fontSize: "14px",
+                        cursor: takingOver ? "not-allowed" : "pointer",
+                        transition: "all 0.2s",
+                        boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        opacity: takingOver ? 0.7 : 1,
+                      }}
+                      onMouseEnter={e => { if (!takingOver) e.currentTarget.style.transform = "scale(1.02)"; }}
+                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                    >
+                      {takingOver ? (
+                        <>
+                          <span style={{
+                            width: "14px",
+                            height: "14px",
+                            borderRadius: "50%",
+                            border: "2px solid rgba(255,255,255,0.3)",
+                            borderTopColor: "#fff",
+                            animation: "inbox-spin 0.65s linear infinite",
+                            display: "inline-block",
+                            flexShrink: 0,
+                          }} />
+                          Taking Over…
+                        </>
+                      ) : "Take Over Now"}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+        </div>
+
+        {/* LEAD PANEL */}
+        {selected && !isMobile && (
+          <LeadPanel
+            contact={selectedContact}
+            phone={selected.phone}
+            onUpdate={(u) =>
+              setSelectedContact((p) => ({
+                ...p,
+                ...u,
+              }))
+            }
+          />
+        )}
       </div>  {/* closes inner flex row */}
     </div>
   );

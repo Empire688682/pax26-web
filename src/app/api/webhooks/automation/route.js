@@ -27,6 +27,29 @@ export async function POST(req) {
         const entry = await req.json();
 
         const value = entry?.entry?.[0]?.changes?.[0]?.value;
+
+        // ── Message delivery / read status updates from Meta ───────────
+        // Meta sends these when our outbound message reaches the customer's
+        // device ("delivered") or is opened ("read") or fails ("failed").
+        // We only update the status field — the AI / inbound flow is untouched.
+        if (value?.statuses?.length) {
+            const statusEvent = value.statuses[0];
+            const { id: wamid, status } = statusEvent;
+
+            // Only track statuses we care about for the inbox UI
+            const trackable = ["sent", "delivered", "read", "failed"];
+            if (wamid && trackable.includes(status)) {
+                await AIMessageModel.updateOne(
+                    { messageId: wamid },
+                    { $set: { status } }
+                );
+                console.log(`📬 Message ${wamid} → ${status}`);
+            }
+
+            return NextResponse.json({ ok: true, event: "status_update" });
+        }
+
+        // ── Inbound customer message ────────────────────────────────────
         if (!value?.messages) {
             return NextResponse.json({ status: "ignored" });
         }
@@ -58,4 +81,4 @@ export async function POST(req) {
             { status: 500 }
         );
     }
-}
+}

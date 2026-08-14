@@ -88,6 +88,7 @@ export async function GET(req) {
                         emailSalesAlerts: true,
                         spamAutoHandoff: true,
                         spamThreshold: 10,
+                        promoAnnouncement: { enabled: false, text: "", badgeText: "PROMO" },
                         paymentDetails: [],
                         products: [],
                     },
@@ -125,6 +126,7 @@ export async function GET(req) {
                     emailSalesAlerts: profile.emailSalesAlerts !== false,
                     spamAutoHandoff: profile.spamAutoHandoff !== false,
                     spamThreshold: profile.spamThreshold ?? 10,
+                    promoAnnouncement: profile.promoAnnouncement ?? { enabled: false, text: "", badgeText: "PROMO" },
                     products: enrichedProducts,
                 },
             },
@@ -177,7 +179,7 @@ export async function POST(req) {
         const { products, ...profileData } = await req.json();
 
         // Explicitly extract the new presence fields so they're always included in the update
-        const { onlineStoreUrl, liveLocation, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, ...restProfileData } = profileData;
+        const { onlineStoreUrl, liveLocation, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, promoAnnouncement, ...restProfileData } = profileData;
 
         // 1. Upsert profile — use $set to avoid document replacement and bypass runValidators issues.
         const profile = await SellerProfileModel.findOneAndUpdate(
@@ -193,6 +195,7 @@ export async function POST(req) {
                     ...(emailSalesAlerts !== undefined && { emailSalesAlerts }),
                     ...(spamAutoHandoff !== undefined && { spamAutoHandoff }),
                     ...(spamThreshold !== undefined && { spamThreshold: parseInt(spamThreshold) || 10 }),
+                    ...(promoAnnouncement !== undefined && { promoAnnouncement }),
                     whatsappNumber,
                     userId,
                     lastUpdated: new Date(),

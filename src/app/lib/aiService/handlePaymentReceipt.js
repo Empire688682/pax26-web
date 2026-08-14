@@ -262,6 +262,7 @@ export async function handlePaymentReceipt({
     }
 
     let order = pendingOrder;
+    const alreadyHadProof = Boolean(order?.paymentReceiptUrl);
 
     if (!order) {
         order = await SellerOrderModel.create({
@@ -293,19 +294,27 @@ export async function handlePaymentReceipt({
         }
     }
 
-    try {
-        await sendSalesNotification(sellerUserId, {
-            orderId: order._id.toString(),
-            customerName: order.customerName || order.customerPhone,
-            productName: matchedProduct?.name || "Payment receipt received",
-            amountPaid: order.totalPrice,
-            isConfirmed: false,
-        });
-    } catch (err) {
-        console.warn("Sales notification failed:", err.message);
+    // Only send sales alert if proof image is present AND this order has NOT sent a proof alert before
+    const isFirstProofUpload = Boolean(url || order.paymentReceiptUrl) && !alreadyHadProof;
+
+    if (isFirstProofUpload) {
+        try {
+            await sendSalesNotification(sellerUserId, {
+                orderId: order._id.toString(),
+                customerName: order.customerName || order.customerPhone,
+                productName: matchedProduct?.name || "Payment receipt received",
+                amountPaid: order.totalPrice,
+                isConfirmed: false,
+            });
+            console.log("🔔 Sales alert sent for first payment proof upload (Order:", order._id, ")");
+        } catch (err) {
+            console.warn("Sales notification failed:", err.message);
+        }
+    } else if (alreadyHadProof) {
+        console.log("ℹ️ Order already had payment proof attached — skipping duplicate sales alert (Order:", order._id, ")");
     }
 
-    return { handled: true, order };
+    return { handled: true, order, isNewProof: isFirstProofUpload };
 }
 
 /** Create pending order when customer confirms payment via text (no image yet) */
@@ -346,17 +355,7 @@ export async function createPendingOrderFromText({
         status: "pending",
     });
 
-    try {
-        await sendSalesNotification(sellerUserId, {
-            orderId: order._id.toString(),
-            customerName: order.customerName || order.customerPhone,
-            productName: matchedProduct?.name || "Pending order — awaiting payment proof",
-            amountPaid: order.totalPrice,
-            isConfirmed: false,
-        });
-    } catch (err) {
-        console.warn("Sales notification failed:", err.message);
-    }
+
 
     return { created: true, order };
 }

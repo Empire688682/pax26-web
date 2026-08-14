@@ -6,8 +6,8 @@ export const getOrCreateSession = async ({ visitorPhone, userId, phoneNumberId }
   let session = await SessionModel.findOne({
     visitorPhone,
     userId,
-    status: { $in: ["active", "waiting"] }
-  });
+    status: { $in: ["active", "waiting", "handed_off"] }
+  }).sort({ createdAt: -1 });
 
   if (!session) {
     session = await SessionModel.create({

@@ -75,8 +75,8 @@ export async function GET(req) {
         const session = await SessionModel.findOne({
           visitorPhone: conv._id,
           userId,
-          status: { $in: ["active", "waiting"] }
-        }).lean();
+          status: { $in: ["active", "waiting", "handed_off"] }
+        }).sort({ createdAt: -1 }).lean();
 
         const cleanedPartner = conv._id?.replace(/\D/g, "");
         const contact = user?.whatsapp?.contacts?.list?.find(c => {
@@ -121,8 +121,8 @@ export async function GET(req) {
         const session = await SessionModel.findOne({
           visitorPhone: c.phone,
           userId,
-          status: { $in: ["active", "waiting"] }
-        }).lean();
+          status: { $in: ["active", "waiting", "handed_off"] }
+        }).sort({ createdAt: -1 }).lean();
 
         enriched.push({
           phone: c.phone,

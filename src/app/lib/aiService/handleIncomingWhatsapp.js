@@ -391,11 +391,17 @@ export const handleIncomingWhatsApp = async (payload) => {
 
     const caption = message.image?.caption || "";
 
+    // ── Payment expectation gate ──────────────────────────────
+    // An image is processed as an Order Payment Receipt for sales alerts/dashboard
+    // ONLY when expectingPayment === true AND paymentProofReceived !== true.
+    // If paymentProofReceived is ALREADY true (or expectingPayment is false), the image is saved
+    // ONLY as a chat message in AIMessageModel and will NEVER touch the sales dashboard / orders.
+    const isExpectingPaymentProof =
+      session?.payment?.expectingPayment === true &&
+      session?.payment?.paymentProofReceived !== true;
+
     // ── Step 8a: EARLY payment-stage check (before fetching media URL) ──
-    // If the caption or recent conversation clearly signals a payment receipt,
-    // handle it immediately — no media URL required. This prevents the case
-    // where Meta's Unauthorized error causes us to skip payment detection.
-    if (sellerProfile) {
+    if (sellerProfile && isExpectingPaymentProof) {
       const earlyMessages = await AIMessageModel.find({
         sessionId: session.sessionId,
         userId: user._id,
@@ -412,7 +418,6 @@ export const handleIncomingWhatsApp = async (payload) => {
       const { handlePaymentReceipt: _hpr, buildPaymentReceiptContext: _bprc, ..._ } = { handlePaymentReceipt, buildPaymentReceiptContext };
 
       // Import the detection helpers directly from the module logic:
-      // Re-use the same PAYMENT_KEYWORDS + PAYMENT_STAGE_KEYWORDS checks
       const PAYMENT_KEYWORDS_EARLY = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
       const PAYMENT_STAGE_KEYWORDS_EARLY = /account number|bank name|account name|transfer|make payment|pay to|payment details|screenshot of your payment|payment confirmation|once you.?ve transferred|send.*receipt|send.*proof|payment proof|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity|acct|acc\/num|bank:/i;
 
@@ -450,6 +455,21 @@ export const handleIncomingWhatsApp = async (payload) => {
 
         if (receiptResult.handled) {
           console.log("💳 Step 8a — Payment receipt handled early. Order:", receiptResult.order._id);
+          await SessionModel.updateOne(
+            { _id: session._id },
+            {
+              $set: {
+                "payment.expectingPayment": false,
+                "payment.paymentProofReceived": true,
+                "payment.deflectionCount": 0,
+              }
+            }
+          );
+          if (session.payment) {
+            session.payment.expectingPayment = false;
+            session.payment.paymentProofReceived = true;
+            session.payment.deflectionCount = 0;
+          }
           await triggerAIResponse({
             session,
             user,
@@ -480,7 +500,7 @@ export const handleIncomingWhatsApp = async (payload) => {
       const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
       const customerName = contactInfo?.name || "WhatsApp Customer";
 
-      // Still upload the image for inbox display purposes
+      // Still upload the image for inbox display purposes (chat messages thread)
       let uploadedImage = null;
       try {
         uploadedImage = await uploadCustomerImageToCloudinary(
@@ -504,7 +524,8 @@ export const handleIncomingWhatsApp = async (payload) => {
       }
 
       // ── Payment receipt check (full flow with resolved media URL) ────
-      if (sellerProfile) {
+      // ONLY runs when session is expecting payment and proof has NOT been received yet
+      if (sellerProfile && isExpectingPaymentProof) {
         const receiptResult = await handlePaymentReceipt({
           sellerId: sellerProfile._id,
           sellerUserId: user._id,
@@ -519,6 +540,21 @@ export const handleIncomingWhatsApp = async (payload) => {
 
         if (receiptResult.handled) {
           console.log("💳 Payment receipt saved for order:", receiptResult.order._id);
+          await SessionModel.updateOne(
+            { _id: session._id },
+            {
+              $set: {
+                "payment.expectingPayment": false,
+                "payment.paymentProofReceived": true,
+                "payment.deflectionCount": 0,
+              }
+            }
+          );
+          if (session.payment) {
+            session.payment.expectingPayment = false;
+            session.payment.paymentProofReceived = true;
+            session.payment.deflectionCount = 0;
+          }
           await triggerAIResponse({
             session,
             user,
@@ -592,8 +628,44 @@ export const handleIncomingWhatsApp = async (payload) => {
     });
   }
 
-  // ── Step 9.5: Semantic product search (seller + text only) ───────────
+  // ── Step 9.4: Payment stage deflection tracking ─────────────────
   let enrichedText = inboundText;
+
+  if (session.payment?.expectingPayment === true && session.payment?.paymentProofReceived !== true) {
+    const currentDeflection = session.payment?.deflectionCount || 0;
+    const newDeflection = currentDeflection + 1;
+
+    if (newDeflection < 3) {
+      console.log(`⚠️ Customer sent non-payment text during expectingPayment (Deflection ${newDeflection}/3)`);
+      await SessionModel.updateOne(
+        { _id: session._id },
+        { $set: { "payment.deflectionCount": newDeflection } }
+      );
+      if (session.payment) session.payment.deflectionCount = newDeflection;
+
+      const deflectionHint = `[SYSTEM-HINT: Customer sent a message instead of payment proof (Deflection ${newDeflection}/3). Acknowledge their message briefly (1 sentence), then gently remind them to send the payment receipt screenshot.]`;
+      enrichedText = `${deflectionHint}\n\n${enrichedText}`;
+    } else {
+      console.log("🔄 Customer reached 3 deflections without sending payment receipt. Resetting expectingPayment flag.");
+      await SessionModel.updateOne(
+        { _id: session._id },
+        {
+          $set: {
+            "payment.expectingPayment": false,
+            "payment.paymentProofReceived": false,
+            "payment.deflectionCount": 0,
+          }
+        }
+      );
+      if (session.payment) {
+        session.payment.expectingPayment = false;
+        session.payment.paymentProofReceived = false;
+        session.payment.deflectionCount = 0;
+      }
+    }
+  }
+
+  // ── Step 9.5: Semantic product search (seller + text only) ───────────
 
   if (sellerProfile && isTextMessage && shouldSearch(inboundText)) {
     try {
@@ -696,6 +768,7 @@ export const handleIncomingWhatsApp = async (payload) => {
         // Hand off the session — AI will skip this contact until restored
         const autoResumeAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
         await SessionModel.findByIdAndUpdate(session._id, {
+          status: "handed_off",
           "handoff.isHandedOff": true,
           "handoff.handedOffAt": new Date(),
           "handoff.reason": "keyword_trigger",

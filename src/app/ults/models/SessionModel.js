@@ -73,6 +73,14 @@ const SessionSchema = new mongoose.Schema({
         sent: { type: Boolean, default: false },       // true once a follow-up is dispatched for this silence window
         sentAt: { type: Date, default: null },         // timestamp of the dispatched follow-up
         totalSent: { type: Number, default: 0 },       // lifetime follow-up counter for this session
+    },
+
+    // ── Payment stage tracking ─────────────────────────────────
+    payment: {
+        expectingPayment: { type: Boolean, default: false },        // true when AI shares payment details
+        paymentProofReceived: { type: Boolean, default: false },    // true ONLY when customer uploads image proof (controls sales alert)
+        paymentDetailsSharedAt: { type: Date, default: null },
+        deflectionCount: { type: Number, default: 0 },              // count of off-topic messages customer sends while payment is expected
     }
 
 }, { timestamps: true });

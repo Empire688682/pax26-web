@@ -62,6 +62,24 @@ function Pax26Footer() {
   );
 }
 
+export function handleWhatsAppRedirect(e, href) {
+  if (!href) return;
+  e?.preventDefault();
+  const isMobile = typeof window !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const match = href.match(/wa\.me\/(\d+)(?:\?text=(.*))?/);
+  if (isMobile && match) {
+    const phone = match[1];
+    const text = match[2] || "";
+    const deepLink = `whatsapp://send?phone=${phone}${text ? `&text=${text}` : ""}`;
+    window.location.href = deepLink;
+    setTimeout(() => {
+      window.location.href = href;
+    }, 1200);
+  } else {
+    window.open(href, "_blank");
+  }
+}
+
 /* ── Side menu drawer ───────────────────────────────────── */
 function SideMenu({ open, onClose, store, categories, activeCategory, onCategoryChange, theme, search, onSearchChange, slug }) {
   const t = theme;
@@ -130,7 +148,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
         {/* WhatsApp CTA */}
         {store.whatsappHref && (
           <div style={{ padding: "0 16px 20px", marginTop: "auto" }}>
-            <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 14px #25d36640" }}>
+            <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 14px #25d36640" }}>
               <WhatsAppIcon /> Chat with us
             </a>
           </div>
@@ -385,13 +403,45 @@ export default function StorefrontPage({
 
             {/* Right: WhatsApp button */}
             {store.whatsappHref && (
-              <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer"
+              <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 2px 10px #25d36640" }}>
                 <WhatsAppIcon /> Chat
               </a>
             )}
           </div>
         </nav>
+
+        {/* ── PROMO ANNOUNCEMENT BANNER ──────────────── */}
+        {store.promoAnnouncement?.enabled && store.promoAnnouncement?.text && (
+          <div style={{
+            background: "linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
+            color: "#ffffff",
+            padding: "10px 16px",
+            textAlign: "center",
+            fontSize: "13px",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            boxShadow: "0 2px 10px rgba(99, 102, 241, 0.25)",
+          }}>
+            <span style={{
+              background: "rgba(255, 255, 255, 0.25)",
+              color: "#fff",
+              padding: "2px 8px",
+              borderRadius: "6px",
+              fontSize: "10px",
+              fontWeight: 900,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              backdropFilter: "blur(4px)",
+            }}>
+              {store.promoAnnouncement.badgeText || "PROMO"}
+            </span>
+            <span>{store.promoAnnouncement.text}</span>
+          </div>
+        )}
 
         {/* ── SIDE MENU ────────────────────────────────── */}
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} />

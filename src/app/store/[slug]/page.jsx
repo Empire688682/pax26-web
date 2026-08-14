@@ -71,6 +71,7 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
       whatsappHref: profile.whatsappNumber
         ? `https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}`
         : null,
+      promoAnnouncement: profile.promoAnnouncement || null,
     });
 
     const publicProducts = serialize(products.map((p) => ({

@@ -1308,7 +1308,7 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
     switch (step) {
       case 0: return !form.businessName.trim() || !form.businessDescription.trim() || !form.industry.trim();
       case 1: return !whatsappConnected;
-      case 2: return !whatsappConnected || form.products.length === 0;
+      case 2: return !whatsappConnected; // products are optional — can be added anytime
       case 3: return form.paymentDetails.length === 0;
       case 4: return !form.tone || !form.workingHours.trim();
       default: return false;

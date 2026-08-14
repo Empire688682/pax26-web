@@ -40,6 +40,13 @@ const SellerProfileSchema = new mongoose.Schema({
     // Options: "classic" | "midnight" | "forest" | "sunset" | "royal" | "ember"
     storeTheme: { type: String, default: 'classic' },
 
+    // ── Promo Announcement ────────────────────────────────────
+    promoAnnouncement: {
+        enabled: { type: Boolean, default: false },
+        text: { type: String, default: '', trim: true },
+        badgeText: { type: String, default: 'PROMO', trim: true },
+    },
+
     // ── Email sales alert ─────────────────────────────────────
     // Sends the seller an email whenever the AI sends payment details to a customer
     emailSalesAlerts: { type: Boolean, default: true },

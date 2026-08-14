@@ -28,8 +28,8 @@ export async function POST(req) {
     let session = await SessionModel.findOne({
       visitorPhone: phone,
       userId,
-      status: { $in: ["active", "waiting"] },
-    });
+      status: { $in: ["active", "waiting", "handed_off"] },
+    }).sort({ createdAt: -1 });
 
     if (!session) {
       const user = await UserModel.findById(userId).lean();
@@ -46,6 +46,7 @@ export async function POST(req) {
     // ── Takeover — AI stops, human takes over ──────────────
     if (action === "takeover") {
       await SessionModel.findByIdAndUpdate(session._id, {
+        status: "handed_off",
         "handoff.isHandedOff": true,
         "handoff.handedOffAt": new Date(),
         "handoff.reason": "manual_takeover",
@@ -60,8 +61,10 @@ export async function POST(req) {
     // ── Hand back — AI resumes ─────────────────────────────
     if (action === "handback") {
       await SessionModel.findByIdAndUpdate(session._id, {
+        status: "active",
         "handoff.isHandedOff": false,
-        "handoff.handedOffAt": null,
+        "handoff.handedBackAt": new Date(),
+        "handoff.autoResumeAt": null,
         "handoff.reason": null,
       });
 

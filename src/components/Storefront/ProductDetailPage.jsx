@@ -14,6 +14,24 @@ const MapPinIcon = () => (<svg width="15" height="15" viewBox="0 0 24 24" fill="
 const EditIcon = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>);
 const ZapIcon = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>);
 
+function handleWhatsAppRedirect(e, href) {
+  if (!href) return;
+  e?.preventDefault();
+  const isMobile = typeof window !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const match = href.match(/wa\.me\/(\d+)(?:\?text=(.*))?/);
+  if (isMobile && match) {
+    const phone = match[1];
+    const text = match[2] || "";
+    const deepLink = `whatsapp://send?phone=${phone}${text ? `&text=${text}` : ""}`;
+    window.location.href = deepLink;
+    setTimeout(() => {
+      window.location.href = href;
+    }, 1200);
+  } else {
+    window.open(href, "_blank");
+  }
+}
+
 function OwnerBanner() {
   return (
     <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#1a1a1a", color: "#fff", padding: "10px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", fontSize: "13px", fontWeight: 600 }}>
@@ -133,7 +151,7 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                 <span style={{ fontSize: "16px", fontWeight: 800, color: t.textPrimary, letterSpacing: "-0.01em" }}>{store.businessName}</span>
               </Link>
               {store.whatsappHref && (
-                <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer"
+                <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer"
                   style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 700, fontSize: "13px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 2px 10px #25d36640" }}>
                   <WhatsAppIcon /> Chat
                 </a>
@@ -147,6 +165,38 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
             </div>
           </div>
         </nav>
+
+        {/* ── PROMO ANNOUNCEMENT BANNER ──────────────── */}
+        {store.promoAnnouncement?.enabled && store.promoAnnouncement?.text && (
+          <div style={{
+            background: "linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
+            color: "#ffffff",
+            padding: "10px 16px",
+            textAlign: "center",
+            fontSize: "13px",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            boxShadow: "0 2px 10px rgba(99, 102, 241, 0.25)",
+          }}>
+            <span style={{
+              background: "rgba(255, 255, 255, 0.25)",
+              color: "#fff",
+              padding: "2px 8px",
+              borderRadius: "6px",
+              fontSize: "10px",
+              fontWeight: 900,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              backdropFilter: "blur(4px)",
+            }}>
+              {store.promoAnnouncement.badgeText || "PROMO"}
+            </span>
+            <span>{store.promoAnnouncement.text}</span>
+          </div>
+        )}
 
         {/* Content */}
         <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "28px 16px" }}>
@@ -220,7 +270,7 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
 
               {/* CTA */}
               {whatsappHref ? (
-                <a href={isOutOfStock ? undefined : whatsappHref} target={isOutOfStock ? undefined : "_blank"} rel="noopener noreferrer"
+                <a href={isOutOfStock ? undefined : whatsappHref} onClick={(e) => !isOutOfStock && handleWhatsAppRedirect(e, whatsappHref)} target={isOutOfStock ? undefined : "_blank"} rel="noopener noreferrer"
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "16px 24px", borderRadius: "14px", background: isOutOfStock ? t.border : "#25d366", color: isOutOfStock ? t.textSecondary : "#fff", fontWeight: 800, fontSize: "16px", textDecoration: "none", cursor: isOutOfStock ? "not-allowed" : "pointer", boxShadow: isOutOfStock ? "none" : "0 6px 20px #25d36640", pointerEvents: isOutOfStock ? "none" : "auto" }}>
                   <WhatsAppIcon />{isOutOfStock ? "Out of Stock" : "Chat about this product"}
                 </a>

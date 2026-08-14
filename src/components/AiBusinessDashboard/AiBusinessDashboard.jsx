@@ -929,6 +929,7 @@ export default function AiBusinessDashboard() {
     emailSalesAlerts: true,
     spamAutoHandoff: true,
     spamThreshold: 10,
+    promoAnnouncement: { enabled: false, text: "", badgeText: "PROMO" },
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -978,6 +979,7 @@ export default function AiBusinessDashboard() {
           emailSalesAlerts: profile.emailSalesAlerts !== false,
           spamAutoHandoff: profile.spamAutoHandoff !== false,
           spamThreshold: profile.spamThreshold || 10,
+          promoAnnouncement: profile.promoAnnouncement || { enabled: false, text: "", badgeText: "PROMO" },
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -1071,6 +1073,7 @@ export default function AiBusinessDashboard() {
             slug: data.profile.slug ?? f.slug,
             logoUrl: data.profile.logoUrl ?? f.logoUrl,
             storeTheme: data.profile.storeTheme ?? f.storeTheme,
+            promoAnnouncement: data.profile.promoAnnouncement ?? f.promoAnnouncement,
             emailSalesAlerts: data.profile.emailSalesAlerts !== false,
             products: data.profile.products || f.products,
             services: data.profile.services || f.services,
@@ -1376,6 +1379,36 @@ export default function AiBusinessDashboard() {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* ── Promo Announcement settings ── */}
+                    <div style={{ paddingTop: "16px", borderTop: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "16px" }}>
+                      <FieldLabel pax26={p}>Storefront Promo Announcement Banner</FieldLabel>
+                      <Toggle
+                        label="Enable Storefront Promo Banner"
+                        hint="Display a glowing promo announcement banner on your storefront & inform the AI agent"
+                        value={form.promoAnnouncement?.enabled || false}
+                        onChange={v => setForm(f => ({ ...f, promoAnnouncement: { ...(f.promoAnnouncement || {}), enabled: v } }))}
+                        pax26={p}
+                      />
+                      {form.promoAnnouncement?.enabled && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "14px" }}>
+                          <ThemedInput
+                            label="Badge Text"
+                            value={form.promoAnnouncement?.badgeText || "PROMO"}
+                            onChange={e => setForm(f => ({ ...f, promoAnnouncement: { ...(f.promoAnnouncement || {}), badgeText: e.target.value } }))}
+                            pax26={p}
+                            placeholder="e.g. PROMO, SPECIAL DEAL"
+                          />
+                          <ThemedInput
+                            label="Promo Announcement Text"
+                            value={form.promoAnnouncement?.text || ""}
+                            onChange={e => setForm(f => ({ ...f, promoAnnouncement: { ...(f.promoAnnouncement || {}), text: e.target.value } }))}
+                            pax26={p}
+                            placeholder="e.g. Buy 10 items to get 1 free delivery in Lagos!"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </section>
