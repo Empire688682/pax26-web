@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const callGeminiAI = async ({ systemPrompt, messages }) => {
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
     systemInstruction: systemPrompt,
   });
 
@@ -30,6 +30,6 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
   return {
     text,
     tokensUsed: result?.response?.usageMetadata?.totalTokenCount || 0,
-    model: "gemini-2.0-flash",
+    model: "gemini-1.5-flash",
   };
 };

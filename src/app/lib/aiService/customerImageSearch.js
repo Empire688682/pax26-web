@@ -55,11 +55,20 @@ export async function uploadCustomerImageToCloudinary(mediaUrl, sellerId, custom
 
     configureCloudinary();
     // Fetch the image from WhatsApp (requires Bearer token for Meta API media URLs)
-    const response = await fetch(mediaUrl, {
+    let tokenToUse = accessToken || process.env.WHATSAPP_ACCESS_TOKEN;
+    let response = await fetch(mediaUrl, {
         headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${tokenToUse}`,
         },
     });
+
+    if (!response.ok && accessToken && process.env.WHATSAPP_ACCESS_TOKEN && accessToken !== process.env.WHATSAPP_ACCESS_TOKEN) {
+        response = await fetch(mediaUrl, {
+            headers: {
+                Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+            },
+        });
+    }
 
     if (!response.ok) {
         throw new Error(`Failed to fetch WhatsApp media: ${response.statusText}`);

@@ -33,8 +33,8 @@ async function tryGemini(systemPrompt, history, userMessage) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  // Try gemini-2.0-flash first, fall back to gemini-1.5-flash
-  const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  // Try gemini-1.5-flash first, fall back to gemini-1.5-pro
+  const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-pro'];
 
   for (const modelName of modelsToTry) {
     try {

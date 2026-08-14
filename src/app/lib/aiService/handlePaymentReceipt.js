@@ -239,7 +239,8 @@ export async function handlePaymentReceipt({
             publicId = uploaded.publicId;
         } catch (err) {
             console.error("Payment receipt upload failed:", err.message);
-            if (!pendingOrder) return { handled: false };
+            url = "";
+            publicId = "";
         }
     }
 
