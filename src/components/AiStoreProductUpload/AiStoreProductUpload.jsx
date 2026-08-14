@@ -490,7 +490,7 @@ function ProductBuilder({ products, onChange, pax26, currency = "NGN", sellerId,
         <div style={{ padding: "16px", borderRadius: "14px", border: `1px solid ${p?.primary}44`, background: `${p?.primary}06`, display: "flex", flexDirection: "column", gap: "12px" }}>
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{editing === "new" ? "New Product" : "Edit Product"}</p>
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
             <ThemedInput label={`Price (${symbol}) *`} pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
             <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
           </div>
@@ -621,7 +621,7 @@ function BusinessTypeSelector({ onSelect, pax26 }) {
         <h2 style={{ fontSize: "20px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 6px" }}>What type of business are you setting up?</h2>
         <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, margin: 0 }}>Choose the model that matches how you work</p>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", width: "100%" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "14px", width: "100%" }}>
         {cards.map(card => (
           <button
             key={card.type}

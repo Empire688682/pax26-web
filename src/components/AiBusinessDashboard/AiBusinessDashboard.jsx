@@ -322,18 +322,18 @@ function ProductBuilder({ products, onChange, pax26, sellerId, currency = "NGN" 
         <div style={{ padding: "16px", borderRadius: "14px", border: `1px solid ${p?.primary}44`, background: `${p?.primary}06`, display: "flex", flexDirection: "column", gap: "12px" }}>
           <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: p?.textPrimary }}>{editing === "new" ? "New Product" : "Edit Product"}</p>
           <ThemedInput label="Product Name *" pax26={p} value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))} placeholder="e.g. Black Leather Sneakers" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
             <ThemedInput label={`Price (${getCurrencySymbol(currency)}) *`} pax26={p} type="number" value={draft.price} onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} placeholder="5000" />
             <ThemedInput label={`Discount Price (${getCurrencySymbol(currency)})`} pax26={p} type="number" value={draft.discountPrice} onChange={e => setDraft(d => ({ ...d, discountPrice: e.target.value }))} placeholder="4500" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
             <ThemedSelect label="Product Type *" value={draft.isPhysical ? "true" : "false"} onChange={v => setDraft(d => ({ ...d, isPhysical: v === "true" }))} options={[{ value: "true", label: "Physical Product" }, { value: "false", label: "Digital / Link" }]} pax26={p} />
             <ThemedInput label="Category" pax26={p} value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))} placeholder="e.g. Shoes" />
           </div>
           <ThemedInput label="Stock Qty" pax26={p} type="number" value={draft.stock} onChange={e => setDraft(d => ({ ...d, stock: e.target.value }))} placeholder="10" />
           {draft.isPhysical && (
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
                 <ThemedInput label={`Delivery Fee (${getCurrencySymbol(currency)})`} pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
                 <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
               </div>
@@ -1134,7 +1134,7 @@ export default function AiBusinessDashboard() {
   const isInactive = !userData?.paxAI?.trained || !userData?.paxAI?.enabled;
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "32px 20px", minHeight: "100vh", display: "flex", flexDirection: "column", gap: "28px" }}>
+    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "clamp(16px,4vw,32px) clamp(12px,4vw,20px)", minHeight: "100vh", display: "flex", flexDirection: "column", gap: "28px" }}>
 
       {/* ── Inactive banner ─────────────────────────────── */}
       {isInactive && (
@@ -1392,7 +1392,7 @@ export default function AiBusinessDashboard() {
                         pax26={p}
                       />
                       {form.promoAnnouncement?.enabled && (
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "14px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "14px" }}>
                           <ThemedInput
                             label="Badge Text"
                             value={form.promoAnnouncement?.badgeText || "PROMO"}

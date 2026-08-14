@@ -168,6 +168,8 @@ const CSS = `
   @media (max-width: 920px) {
     .px-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── Service grid — 5 col → 3 col on mobile ── */
   .px-svc-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -175,6 +177,58 @@ const CSS = `
   }
   @media (max-width: 500px) {
     .px-svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  /* ── Stat strip — scrollable on very small screens ── */
+  .px-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 380px) {
+    .px-stat-strip {
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      gap: 10px;
+      padding-bottom: 4px;
+    }
+    .px-stat-strip > * {
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+  }
+
+  /* ── Hero card inner padding responsive ── */
+  .px-hero-inner {
+    padding: clamp(20px, 5vw, 36px) clamp(18px, 5vw, 36px) clamp(24px, 5vw, 36px);
+  }
+
+  /* ── CTA button row — wraps on mobile ── */
+  .px-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 400px) {
+    .px-cta-row { flex-direction: column; }
+    .px-cta-row button { width: 100%; justify-content: center; }
+  }
+
+  /* ── Header — prevent icon buttons from wrapping ── */
+  .px-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .px-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 4px;
   }
 
   /* ── Progress bar ── */
@@ -391,7 +445,7 @@ export default function Dashboard() {
 
         <div className="px-root" style={{
           maxWidth: 1180, margin: "0 auto",
-          padding: "28px 20px 100px",
+          padding: "clamp(16px,4vw,28px) clamp(12px,4vw,20px) 100px",
           position: "relative", zIndex: 1,
           display: "flex", flexDirection: "column", gap: 20,
         }}>
@@ -419,8 +473,8 @@ export default function Dashboard() {
           </div>
 
           {/* ── HEADER ── */}
-          <header className="px-s1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-            <div>
+          <header className="px-s1 px-header-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
               <p className="px-mono" style={{
                 fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase",
                 color: textMuted, margin: "0 0 6px",
@@ -441,11 +495,11 @@ export default function Dashboard() {
                 Your store, automations and sales — all in one place.
               </p>
             </div>
-            <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            <div className="px-header-actions">
               <button type="button" className="px-btn"
                 onClick={() => router.push("/notifications")}
                 style={{
-                  width: 46, height: 46, borderRadius: 14,
+                  width: 42, height: 42, borderRadius: 14,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   background: subBg, border: `1px solid ${subBdr}`, cursor: "pointer",
                 }}>
@@ -454,7 +508,7 @@ export default function Dashboard() {
               <button type="button" className="px-btn"
                 onClick={() => router.push("/profile")}
                 style={{
-                  width: 46, height: 46, borderRadius: 14,
+                  width: 42, height: 42, borderRadius: 14,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   background: subBg, border: `1px solid ${subBdr}`, cursor: "pointer",
                 }}>
@@ -464,16 +518,14 @@ export default function Dashboard() {
           </header>
 
           {/* ── STAT STRIP ── */}
-          <div className="px-s2" style={{
-            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14,
-          }}>
+          <div className="px-s2 px-stat-strip">
             {[
               { label: "Automations", val: userData?.workflows || 0, icon: <Layers size={16} />, color: C.emerald },
               { label: "Msgs Handled", val: userData?.messagesHandled || 0, icon: <MessageSquare size={16} />, color: C.cyan },
               { label: "Contacts", val: userData?.contacts || 0, icon: <Users size={16} />, color: C.indigo },
             ].map(({ label, val, icon, color }) => (
               <div key={label} className={isDark ? "px-glass" : "px-glass-light"}
-                style={{ padding: "18px 20px" }}>
+                style={{ padding: "clamp(14px,3vw,18px) clamp(12px,3vw,20px)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 11,
@@ -540,7 +592,7 @@ export default function Dashboard() {
                   position: "relative", zIndex: 1,
                 }} />
 
-                <div style={{ padding: "32px 36px 36px", position: "relative", zIndex: 1 }}>
+                <div className="px-hero-inner" style={{ position: "relative", zIndex: 1 }}>
                   {/* Pills */}
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
                     <div style={{
@@ -600,7 +652,7 @@ export default function Dashboard() {
                   </p>
 
                   {/* CTA buttons */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                  <div className="px-cta-row">
                     <button type="button" className="px-btn"
                       onClick={() => router.push("dashboard/automations")}
                       style={{

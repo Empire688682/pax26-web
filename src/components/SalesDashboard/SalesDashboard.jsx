@@ -343,7 +343,7 @@ export default function SalesDashboard() {
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Receipt</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Status</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Actions</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Date</th>
+                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400">Date & Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ divideColor: pax26?.border }}>
@@ -378,15 +378,20 @@ export default function SalesDashboard() {
                                     setSelectedOrder(order);
                                   }}
                                 />
-                                <a
-                                  href={order.paymentReceiptUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-0.5 text-[10px] font-bold hover:underline"
-                                  style={{ color: primary }}
-                                >
-                                  <ExternalLink size={10} /> Link
-                                </a>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <a
+                                    href={order.paymentReceiptUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-0.5 text-[10px] font-bold hover:underline"
+                                    style={{ color: primary }}
+                                  >
+                                    <ExternalLink size={10} /> Link
+                                  </a>
+                                  <span className="text-[9px] font-semibold opacity-75" style={{ color: pax26?.textSecondary }}>
+                                    🕒 {new Date(order.paymentReceiptSubmittedAt || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
                               </div>
                             ) : (
                               <span className="text-[10px]" style={{ color: pax26?.textSecondary }}>No receipt</span>
@@ -435,7 +440,10 @@ export default function SalesDashboard() {
                             )}
                           </td>
                           <td className="px-6 py-4" style={{ color: pax26?.textSecondary }}>
-                            {new Date(order.createdAt).toLocaleDateString()}
+                            <div className="flex flex-col text-xs">
+                              <span className="font-semibold">{new Date(order.createdAt).toLocaleDateString()}</span>
+                              <span className="text-[10px] opacity-75">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -497,9 +505,19 @@ export default function SalesDashboard() {
               <div>
                 <h3 className="font-bold text-lg" style={{ color: pax26?.textPrimary || "#ffffff" }}>Payment Receipt</h3>
                 {selectedOrder && (
-                  <p className="text-xs" style={{ color: pax26?.textSecondary || "#94a3b8" }}>
-                    Order for {selectedOrder.customerName || "Customer"} ({selectedOrder.customerPhone}) - ₦{selectedOrder.totalPrice?.toLocaleString()}
-                  </p>
+                  <div className="mt-1 flex flex-col gap-0.5">
+                    <p className="text-xs" style={{ color: pax26?.textSecondary || "#94a3b8" }}>
+                      Order for <strong>{selectedOrder.customerName || "Customer"}</strong> ({selectedOrder.customerPhone}) - ₦{selectedOrder.totalPrice?.toLocaleString()}
+                    </p>
+                    <p className="text-[11px] font-medium text-amber-400 flex items-center gap-1.5 mt-0.5">
+                      <span>🕒 Receipt Received:</span>
+                      <span className="font-bold">
+                        {selectedOrder.paymentReceiptSubmittedAt 
+                          ? new Date(selectedOrder.paymentReceiptSubmittedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+                          : new Date(selectedOrder.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                    </p>
+                  </div>
                 )}
               </div>
               <button

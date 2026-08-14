@@ -282,7 +282,7 @@ export default function PreventBan() {
         </div>
 
         {/* ── Quick stat strip ─────────────────────────────────────── */}
-        <div className="pb-s2" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 28 }}>
+        <div className="pb-s2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: 12, marginBottom: 28 }}>
           {[
             { label: "Tips Covered", value: "7", color: P },
             { label: "Risk Level Reduced", value: "High", color: G },

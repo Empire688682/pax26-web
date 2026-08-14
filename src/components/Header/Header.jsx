@@ -30,10 +30,13 @@ const Header = () => {
     return (
         <>
         <div
-            className={`shadow-md w-full sticky px-6 py-4 right-0 top-0 z-10 flex items-center justify-between`}
-            style={{ backgroundColor: pax26.header }}>
+            className={`shadow-md w-full sticky right-0 top-0 z-10 flex items-center justify-between`}
+            style={{ 
+              backgroundColor: pax26.header,
+              padding: "clamp(12px,3vw,16px) clamp(14px,4vw,24px)",
+            }}>
 
-            <Link href={userData ? "/dashboard" : "/"} className="text-2xl md:text-3xl font-bold text-white">
+            <Link href={userData ? "/dashboard" : "/"} className="text-xl md:text-2xl font-bold text-white flex-shrink-0">
                 <h1 style={{ color: pax26.textPrimary }}>Pax26</h1>
             </Link>
 

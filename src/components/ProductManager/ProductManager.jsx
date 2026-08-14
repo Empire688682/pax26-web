@@ -174,7 +174,7 @@ function VariantBuilder({ variants, onChange, p }) {
             <button onClick={() => removeVariant(vi)} style={{ padding: "8px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><TrashIcon /></button>
           </div>
           {v.options.map((o, oi) => (
-            <div key={oi} style={{ display: "grid", gridTemplateColumns: "1fr 100px 80px auto", gap: "6px", alignItems: "center" }}>
+            <div key={oi} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "6px", alignItems: "center" }}>
               <input value={o.value} onChange={e => updateOption(vi, oi, "value", e.target.value)} placeholder="Value (e.g. 42)" style={{ ...fieldBase(p), padding: "8px 12px" }} />
               <input type="number" value={o.priceAdjustment} onChange={e => updateOption(vi, oi, "priceAdjustment", Number(e.target.value))} placeholder="+price" title="Price adjustment" style={{ ...fieldBase(p), padding: "8px 12px" }} />
               <input type="number" value={o.stock} onChange={e => updateOption(vi, oi, "stock", Number(e.target.value))} placeholder="Stock" style={{ ...fieldBase(p), padding: "8px 12px" }} />
@@ -247,7 +247,7 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
           <TInput label={`Compare Price (${sym})`} p={p} type="number" value={form.comparePrice} onChange={e => set("comparePrice", e.target.value)} placeholder="6000" />
           <TInput label="Stock Qty" p={p} type="number" value={form.stock} onChange={e => set("stock", e.target.value)} placeholder="10" />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px" }}>
           <TInput label="Category" p={p} value={form.category} onChange={e => set("category", e.target.value)} placeholder="e.g. Shoes, Bags" />
           <TInput label="SKU (internal code)" p={p} value={form.sku} onChange={e => set("sku", e.target.value)} placeholder="e.g. NK-BLK-42" />
         </div>
@@ -255,7 +255,7 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
       </div>
 
       {/* Toggles */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px" }}>
         {[
           { label: "Physical Product", hint: "Requires delivery", field: "isPhysical" },
           { label: "Available", hint: "Visible in store + AI", field: "isAvailable" },
@@ -577,7 +577,7 @@ export default function ProductManager() {
 
       {/* Product Grid */}
       {filtered.length > 0 ? (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "16px" }}>
           {filtered.map(prod => (
             <ProductCard key={prod._id} product={prod} currency={currency} p={p} storeSlug={storeSlug}
               onEdit={prod => { setEditing(prod); setView("edit"); }}

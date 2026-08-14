@@ -72,7 +72,15 @@ Your strict priorities right now:
    Example: "I'd love to help you with that! But first, let's complete your pending payment — please send over the payment receipt screenshot once done so we can process your order."
 3. Do NOT accept text claims of payment (e.g. "I have paid", "transfer done"). Politely insist on receiving an image/screenshot of the receipt as proof.
 `
-    : "";
+    : `
+━━━━━━━━━━━━━━━━━━━━━━━━
+PAYMENT STAGE POLICY — MANDATORY RULE
+━━━━━━━━━━━━━━━━━━━━━━━━
+NO PAYMENT DETAILS HAVE BEEN SHARED YET for an active order:
+1. If the customer claims to have paid or sends an image/text claiming it is payment proof before you have provided payment details or an account number, politely inform them that no payment details or order instructions have been provided yet, so no payment can be verified.
+2. Ask them which product or item they would like to purchase first so you can give them the correct price and bank details.
+3. Do NOT confirm receipt of any payment or thank the customer for payment proof unless you previously provided payment details for an active order.
+`;
 
   // ── Products catalogue (with image metadata) ──────────────
   const productsSection = products?.length

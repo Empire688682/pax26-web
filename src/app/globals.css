@@ -12,16 +12,28 @@
   }
 }
 
-html{
+/* ── Reset & base ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
   scroll-behavior: smooth;
   background-color: rgb(12, 12, 12);
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
 }
 
 body {
   background-color: rgb(12, 12, 12);
   color: rgba(7, 7, 7, 0.5);
   font-family: Arial, Helvetica, sans-serif;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
+
+/* ── Ticker animation ─────────────────────────────────── */
 @keyframes scroll {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
@@ -31,8 +43,87 @@ body {
   animation: scroll 20s linear infinite;
 }
 
-@media screen and (max-width: 500px) {
-  .animate-scroll {
+/* ── Global mobile responsive utilities ──────────────── */
+
+/* Ensure images never overflow containers */
+img, video, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent tables from overflowing */
+table {
+  width: 100%;
+  table-layout: fixed;
+  word-break: break-word;
+}
+
+/* ── Responsive container ─────────────────────────────── */
+.pax-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: clamp(12px, 4vw, 24px);
+  padding-right: clamp(12px, 4vw, 24px);
+}
+
+/* ── Mobile-safe padding for page content ─────────────── */
+.pax-page-pad {
+  padding: clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) clamp(80px, 12vh, 120px);
+}
+
+/* ── Responsive grid helpers ─────────────────────────── */
+@media (max-width: 480px) {
+  /* Prevent any fixed-width element overflowing viewport */
+  [style*="width: 500px"],
+  [style*="width: 600px"],
+  [style*="width: 700px"],
+  [style*="width: 800px"],
+  [style*="width: 900px"],
+  [style*="width: 1000px"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Stack any flex row that hasn't set flex-wrap */
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+}
+
+/* ── Ticker — works on all sizes ──────────────────────── */
+.animate-scroll-mobile {
+  animation: scroll 15s linear infinite;
+}
+
+@media (min-width: 500px) {
+  .animate-scroll-mobile {
     animation: scroll 20s linear infinite;
+  }
+}
+
+/* ── Fluid text helpers ───────────────────────────────── */
+.text-fluid-xl  { font-size: clamp(1.4rem, 4vw, 2rem); }
+.text-fluid-2xl { font-size: clamp(1.6rem, 5vw, 2.5rem); }
+.text-fluid-3xl { font-size: clamp(1.8rem, 6vw, 3rem); }
+
+/* ── Prevent modals / drawers from overflowing ────────── */
+.pax-modal-inner {
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Touch-friendly tap targets ─────────────────────── */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 40px;
+  }
+}
+
+/* ── Safe area insets for notched phones ─────────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pax-bottom-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
   }
 }

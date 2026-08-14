@@ -87,7 +87,7 @@ export async function GET(req) {
 
         // If export requested
         if (exportFormat === "csv") {
-            let csvContent = "Order ID,Customer Name,Customer Phone,Product,Quantity,Total Price,Status,Date\n";
+            let csvContent = "Order ID,Customer Name,Customer Phone,Product,Quantity,Total Price,Status,Date & Time,Receipt Submitted At\n";
             orders.forEach(order => {
                 const orderId = order._id.toString();
                 const customerName = (order.customerName || "").replace(/,/g, " ");
@@ -96,8 +96,9 @@ export async function GET(req) {
                 const quantity = order.quantity || 1;
                 const totalPrice = order.totalPrice || 0;
                 const status = order.status || "";
-                const date = order.createdAt.toISOString();
-                csvContent += `${orderId},${customerName},${customerPhone},${productName},${quantity},${totalPrice},${status},${date}\n`;
+                const date = order.createdAt ? new Date(order.createdAt).toISOString() : "";
+                const receiptSubmittedAt = order.paymentReceiptSubmittedAt ? new Date(order.paymentReceiptSubmittedAt).toISOString() : "";
+                csvContent += `${orderId},${customerName},${customerPhone},${productName},${quantity},${totalPrice},${status},${date},${receiptSubmittedAt}\n`;
             });
 
             return new NextResponse(csvContent, {

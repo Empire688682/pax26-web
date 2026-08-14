@@ -31,17 +31,23 @@ function isLikelyPaymentReceipt(caption, recentMessages = []) {
     return PAYMENT_KEYWORDS.test(recentText);
 }
 
-function isPaymentStage(recentMessages = []) {
-    const recentText = recentMessages
-        .slice(-15)
+function isPaymentStage(recentMessages = [], session = null) {
+    if (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) {
+        return true;
+    }
+    if (session?.payment?.paymentDetailsSharedAt && session?.payment?.paymentProofReceived !== true) {
+        return true;
+    }
+
+    // Only consider assistant's recent messages as payment stage indicator if assistant explicitly gave bank/payment details
+    const assistantText = recentMessages
+        .filter((m) => m.role === "assistant" || m.direction === "outbound")
+        .slice(-6)
         .map((m) => m.content || m.text || "")
         .join(" ");
 
-    const has10DigitNum = /\b\d{10}\b/.test(recentText);
-    const hasPaymentKeyword = PAYMENT_STAGE_KEYWORDS.test(recentText);
-    const hasGeneralPaymentWord = /bank|account|transfer|payment|receipt|proof|pay|naira|₦/i.test(recentText);
-
-    return has10DigitNum || hasPaymentKeyword || (hasGeneralPaymentWord && recentMessages.length > 0);
+    const assistantSharedBankDetails = PAYMENT_STAGE_KEYWORDS.test(assistantText) || /\b\d{10}\b/.test(assistantText);
+    return assistantSharedBankDetails;
 }
 
 function extractOrderTotalFromConversation(recentMessages = []) {
@@ -198,6 +204,7 @@ export async function handlePaymentReceipt({
     customerName,
     caption = "",
     recentMessages = [],
+    session = null,
     imageUrl = null,
     imagePublicId = null,
 }) {
@@ -209,12 +216,12 @@ export async function handlePaymentReceipt({
         status: "pending",
     }).sort({ createdAt: -1 });
 
-    const likelyReceipt = isLikelyPaymentReceipt(caption, recentMessages);
-    const paymentStage = isPaymentStage(recentMessages);
+    const paymentStage = isPaymentStage(recentMessages, session);
 
-    // Treat inbound images as payment proof when in payment stage, keywords match, or pending order exists
-    if (!pendingOrder && !likelyReceipt && !paymentStage) {
-        return { handled: false };
+    // Treat inbound images as payment proof ONLY when in an active payment stage (expectingPayment / bank details shared)
+    if (!pendingOrder && !paymentStage) {
+        console.log("ℹ️ No active payment stage or pending order expecting payment — ignoring image as payment receipt.");
+        return { handled: false, noActivePaymentStage: true };
     }
 
     let url = imageUrl;
@@ -262,7 +269,8 @@ export async function handlePaymentReceipt({
     }
 
     let order = pendingOrder;
-    const alreadyHadProof = Boolean(order?.paymentReceiptUrl);
+    // Check if this order already had payment proof submitted prior to this message
+    const alreadyHadProof = Boolean(order?.paymentReceiptSubmittedAt || order?.paymentReceiptUrl);
 
     if (!order) {
         order = await SellerOrderModel.create({
@@ -275,13 +283,16 @@ export async function handlePaymentReceipt({
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
-            paymentReceiptSubmittedAt: url ? new Date() : undefined,
+            paymentReceiptSubmittedAt: new Date(),
         });
     } else {
         let orderChanged = false;
         if (url) {
             order.paymentReceiptUrl = url;
             order.paymentReceiptPublicId = publicId;
+            orderChanged = true;
+        }
+        if (!order.paymentReceiptSubmittedAt) {
             order.paymentReceiptSubmittedAt = new Date();
             orderChanged = true;
         }
@@ -294,8 +305,9 @@ export async function handlePaymentReceipt({
         }
     }
 
-    // Only send sales alert if proof image is present AND this order has NOT sent a proof alert before
-    const isFirstProofUpload = Boolean(url || order.paymentReceiptUrl) && !alreadyHadProof;
+    // Since handlePaymentReceipt is executed ONLY when a customer submits an image payment receipt,
+    // if this order has NOT sent a proof alert previously (!alreadyHadProof), trigger the sales alert now!
+    const isFirstProofUpload = !alreadyHadProof;
 
     if (isFirstProofUpload) {
         try {
@@ -306,11 +318,11 @@ export async function handlePaymentReceipt({
                 amountPaid: order.totalPrice,
                 isConfirmed: false,
             });
-            console.log("🔔 Sales alert sent for first payment proof upload (Order:", order._id, ")");
+            console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, ")");
         } catch (err) {
             console.warn("Sales notification failed:", err.message);
         }
-    } else if (alreadyHadProof) {
+    } else {
         console.log("ℹ️ Order already had payment proof attached — skipping duplicate sales alert (Order:", order._id, ")");
     }
 
@@ -325,6 +337,7 @@ export async function createPendingOrderFromText({
     customerName,
     recentMessages = [],
     inboundText = "",
+    session = null,
 }) {
     const normalizedPhone = normalizePhone(customerPhone);
 
@@ -336,8 +349,13 @@ export async function createPendingOrderFromText({
 
     if (existing) return { created: false, order: existing };
 
+    const paymentStage = isPaymentStage(recentMessages, session);
     const paidViaText = inboundText && PAYMENT_KEYWORDS.test(inboundText);
-    if (!isPaymentStage(recentMessages) && !paidViaText) return { created: false };
+
+    // ONLY create pending order from text if an active payment stage exists (expectingPayment === true)
+    if (!paymentStage || !paidViaText) {
+        return { created: false, noActivePaymentStage: !paymentStage };
+    }
 
     const matchedProduct = await resolveProduct(sellerId, recentMessages);
     if (!matchedProduct?._id) return { created: false };
@@ -354,8 +372,6 @@ export async function createPendingOrderFromText({
         totalPrice: orderTotalPrice,
         status: "pending",
     });
-
-
 
     return { created: true, order };
 }
