@@ -329,6 +329,51 @@ export async function handlePaymentReceipt({
     return { handled: true, order, isNewProof: isFirstProofUpload };
 }
 
+function generateOrderCode() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "ORD-";
+    for (let i = 0; i < 5; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
+    const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
+
+    // Extract Delivery Location if present (e.g. 📍 Delivery Location: Ikeja, Lagos)
+    const locationMatch = combinedText.match(/(?:📍\s*Delivery\s*Location|Delivery\s*Address|Address|Location):\s*([^\n]+)/i);
+    const deliveryLocation = locationMatch ? locationMatch[1].trim() : "";
+
+    // Extract items list (e.g., • 2x Jordan 1 Retro High — ₦110,000)
+    const itemLines = [];
+    const lines = combinedText.split("\n");
+
+    const itemRegex = /(?:[•·\-\*]|\d+\.)\s*(\d+)?x?\s*\*?([^\*\n—–\-]+)\*?\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]?\s*(?:₦|N|NGN)?\s*([\d,]+)?/i;
+
+    lines.forEach((line) => {
+        const match = line.match(itemRegex);
+        if (match) {
+            const quantity = parseInt(match[1] || match[3] || "1", 10);
+            const name = match[2]?.trim();
+            const itemTotalPrice = match[4] ? parseInt(match[4].replace(/,/g, ""), 10) : 0;
+            if (name && name.length > 2 && !/total|delivery|product page|hi! i'm interested/i.test(name)) {
+                const qtyVal = isNaN(quantity) || quantity <= 0 ? 1 : quantity;
+                itemLines.push({
+                    name,
+                    quantity: qtyVal,
+                    price: itemTotalPrice > 0 ? Math.round(itemTotalPrice / qtyVal) : 0,
+                });
+            }
+        }
+    });
+
+    return {
+        deliveryLocation,
+        items: itemLines,
+    };
+}
+
 /** Create pending order when customer confirms payment via text (no image yet) */
 export async function createPendingOrderFromText({
     sellerId,
@@ -362,14 +407,25 @@ export async function createPendingOrderFromText({
 
     const parsedTotal = extractOrderTotalFromConversation(recentMessages);
     const orderTotalPrice = parsedTotal || matchedProduct.price || 0;
+    const orderCode = generateOrderCode();
+    const multiOrderData = parseMultiProductOrderFromText(inboundText, recentMessages);
 
     const order = await SellerOrderModel.create({
+        orderCode,
         sellerId,
         productId: matchedProduct._id,
         customerPhone: normalizedPhone,
         customerName: customerName || "WhatsApp Customer",
-        quantity: 1,
+        quantity: multiOrderData.items.reduce((sum, i) => sum + i.quantity, 0) || 1,
         totalPrice: orderTotalPrice,
+        items: multiOrderData.items.length ? multiOrderData.items : [{
+            productId: matchedProduct._id,
+            name: matchedProduct.name,
+            price: matchedProduct.price || orderTotalPrice,
+            quantity: 1,
+            imageUrl: matchedProduct.images?.[0]?.url || "",
+        }],
+        deliveryLocation: multiOrderData.deliveryLocation || "",
         status: "pending",
     });
 

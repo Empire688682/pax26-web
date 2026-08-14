@@ -359,8 +359,20 @@ export default function SalesDashboard() {
                           style={{ "--sd-row-hover": rowHoverBg }}
                         >
                           <td className="px-6 py-4">
-                            <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
+                              {order.orderCode && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                                  #{order.orderCode}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>{order.customerPhone}</p>
+                            {order.items?.length > 0 && (
+                              <p className="text-[9px] font-semibold text-emerald-400 mt-0.5">
+                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} ({order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")})
+                              </p>
+                            )}
                           </td>
                           <td className="px-6 py-4 font-bold sd-mono" style={{ color: pax26?.textPrimary }}>
                             ₦{(order.totalPrice || 0).toLocaleString()}
@@ -505,10 +517,29 @@ export default function SalesDashboard() {
               <div>
                 <h3 className="font-bold text-lg" style={{ color: pax26?.textPrimary || "#ffffff" }}>Payment Receipt</h3>
                 {selectedOrder && (
-                  <div className="mt-1 flex flex-col gap-0.5">
+                  <div className="mt-1 flex flex-col gap-1">
                     <p className="text-xs" style={{ color: pax26?.textSecondary || "#94a3b8" }}>
-                      Order for <strong>{selectedOrder.customerName || "Customer"}</strong> ({selectedOrder.customerPhone}) - ₦{selectedOrder.totalPrice?.toLocaleString()}
+                      Order <strong>#{selectedOrder.orderCode || selectedOrder._id?.toString()?.slice(-6)}</strong> for <strong>{selectedOrder.customerName || "Customer"}</strong> ({selectedOrder.customerPhone}) - ₦{selectedOrder.totalPrice?.toLocaleString()}
                     </p>
+                    {selectedOrder.items?.length > 0 && (
+                      <div className="text-[11px] p-2 rounded-lg bg-black/30 border border-slate-700/50 mt-1">
+                        <p className="font-bold text-slate-300 mb-1">📦 Ordered Products:</p>
+                        <ul className="space-y-0.5 pl-2 text-slate-400">
+                          {selectedOrder.items.map((item, idx) => (
+                            <li key={idx} className="flex items-center justify-between">
+                              <span>• {item.quantity}x {item.name}</span>
+                              <span className="font-mono text-emerald-400 font-bold">₦{(item.price * item.quantity).toLocaleString()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {selectedOrder.deliveryLocation && (
+                      <p className="text-[11px] font-semibold text-sky-400 flex items-center gap-1">
+                        <span>📍 Delivery Address:</span>
+                        <span>{selectedOrder.deliveryLocation}</span>
+                      </p>
+                    )}
                     <p className="text-[11px] font-medium text-amber-400 flex items-center gap-1.5 mt-0.5">
                       <span>🕒 Receipt Received:</span>
                       <span className="font-bold">

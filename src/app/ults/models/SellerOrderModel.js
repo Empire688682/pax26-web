@@ -32,6 +32,24 @@ const SellerOrderSchema = new mongoose.Schema({
         default: "pending",
     },
 
+    orderCode: {
+        type: String,
+        index: true,
+    },
+
+    items: [{
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "SellerProduct",
+        },
+        name: String,
+        price: Number,
+        quantity: { type: Number, default: 1 },
+        imageUrl: String,
+    }],
+
+    deliveryLocation: String,
+
     deliveryAddress: String,
 
     paymentReceiptUrl: String,
