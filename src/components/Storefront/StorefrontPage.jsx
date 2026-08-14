@@ -586,6 +586,22 @@ export default function StorefrontPage({
         {/* ── SIDE MENU ────────────────────────────────── */}
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} />
 
+        {/* ── CART DRAWER ──────────────────────────────── */}
+        <CartDrawer
+          open={cartDrawerOpen}
+          onClose={() => setCartDrawerOpen(false)}
+          cart={cartState.cart}
+          totalQuantity={cartState.totalQuantity}
+          totalPrice={cartState.totalPrice}
+          onUpdateQty={(id, q) => cartState.setItemQuantity(id, q)}
+          onRemoveItem={(id) => cartState.removeItem(id)}
+          onClearCart={() => cartState.clear()}
+          store={store}
+          slug={slug}
+          sessionToken={sessionToken}
+          theme={t}
+        />
+
         {/* ── MAIN CONTENT ─────────────────────────────── */}
         <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px", position: "relative" }}>
 
@@ -627,7 +643,29 @@ export default function StorefrontPage({
             <>
               <div className="sf-product-grid" style={{ opacity: loadingPage ? 0.6 : 1, transition: "opacity 0.15s" }}>
                 {productsList.map((product, idx) => (
-                  <ProductCard key={product._id} index={idx} product={product} store={store} slug={slug} sessionToken={sessionToken} theme={t} highlighted={product._id === highlightedProductId} />
+                  <ProductCard
+                    key={product._id}
+                    index={idx}
+                    product={product}
+                    store={store}
+                    slug={slug}
+                    sessionToken={sessionToken}
+                    theme={t}
+                    highlighted={product._id === highlightedProductId}
+                    cartQuantity={cartState.cart.find(item => item.productId === product._id)?.quantity || 0}
+                    onUpdateQty={(productId, qty) => {
+                      if (qty > 0) {
+                        const itemInCart = cartState.cart.find(i => i.productId === productId);
+                        if (itemInCart) {
+                          cartState.setItemQuantity(productId, qty);
+                        } else {
+                          cartState.addItem(product, qty);
+                        }
+                      } else {
+                        cartState.removeItem(productId);
+                      }
+                    }}
+                  />
                 ))}
               </div>
 
