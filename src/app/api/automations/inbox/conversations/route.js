@@ -78,7 +78,12 @@ export async function GET(req) {
           status: { $in: ["active", "waiting"] }
         }).lean();
 
-        const contact = user?.whatsapp?.contacts?.list?.find(c => c.phone === conv._id);
+        const cleanedPartner = conv._id?.replace(/\D/g, "");
+        const contact = user?.whatsapp?.contacts?.list?.find(c => {
+          if (c.phone === conv._id) return true;
+          const cleanedC = c.phone?.replace(/\D/g, "");
+          return cleanedC && cleanedPartner && (cleanedC === cleanedPartner || cleanedC.endsWith(cleanedPartner) || cleanedPartner.endsWith(cleanedC));
+        });
 
         return {
           phone: conv._id,
@@ -93,9 +98,54 @@ export async function GET(req) {
           isHandedOff: session?.handoff?.isHandedOff || false,
           sessionStatus: session?.status || "expired",
           notes: contact?.notes || "",
+          tags: contact?.tags || [],
+          leadStage: contact?.leadStage || "new",
         };
       })
     );
+
+    // Track existing phone numbers
+    const existingPhones = new Set();
+    enriched.forEach(c => {
+      if (c.phone) existingPhones.add(c.phone);
+      const cleaned = c.phone?.replace(/\D/g, "");
+      if (cleaned) existingPhones.add(cleaned);
+    });
+
+    // Add manually added contacts from user.whatsapp.contacts.list that have no messages yet
+    const contactList = user?.whatsapp?.contacts?.list || [];
+    for (const c of contactList) {
+      if (!c.phone) continue;
+      const cleanedC = c.phone.replace(/\D/g, "");
+      if (!existingPhones.has(c.phone) && (!cleanedC || !existingPhones.has(cleanedC))) {
+        const session = await SessionModel.findOne({
+          visitorPhone: c.phone,
+          userId,
+          status: { $in: ["active", "waiting"] }
+        }).lean();
+
+        enriched.push({
+          phone: c.phone,
+          lastMessage: c.notes ? `Note: ${c.notes}` : "Contact added",
+          lastMessageAt: c.updatedAt || c.createdAt || new Date().toISOString(),
+          lastDirection: "inbound",
+          lastSenderType: "system",
+          unreadCount: 0,
+          totalMessages: 0,
+          sessionId: null,
+          phoneNumberId: null,
+          isHandedOff: session?.handoff?.isHandedOff || false,
+          sessionStatus: session?.status || "expired",
+          notes: c.notes || "",
+          tags: c.tags || [],
+          leadStage: c.leadStage || "new",
+          status: c.status || "whitelist",
+        });
+
+        existingPhones.add(c.phone);
+        if (cleanedC) existingPhones.add(cleanedC);
+      }
+    }
 
     // Filter out self-conversations (where partner is the user's own business or personal number)
     const filtered = enriched.filter(conv => {
@@ -105,6 +155,9 @@ export async function GET(req) {
       if (personalNumber && cleanedPartner.endsWith(personalNumber)) return false;
       return true;
     });
+
+    // Sort by lastMessageAt descending
+    filtered.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
 
     return NextResponse.json(
       { success: true, data: filtered },

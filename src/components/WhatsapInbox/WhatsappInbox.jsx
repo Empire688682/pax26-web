@@ -55,6 +55,29 @@ const InfoIcon = () => (
   </svg>
 );
 
+const WhatsAppLogoIcon = ({ size = 56 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="11" fill="#00a884" />
+    <path d="M17.5 14.38c-.3-.15-1.78-.88-2.06-.98-.28-.1-.48-.15-.68.15-.2.3-.77.98-.95 1.18-.18.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.78-1.68-2.08-.18-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.63-.93-2.24-.25-.6-.5-.52-.68-.53-.18-.01-.38-.01-.58-.01-.2 0-.53.08-.8.38-.28.3-1.06 1.04-1.06 2.53 0 1.5 1.09 2.94 1.24 3.14.15.2 2.14 3.27 5.19 4.59.73.31 1.3.5 1.74.64.73.23 1.39.2 1.92.12.59-.09 1.78-.73 2.03-1.44.25-.7.25-1.3.18-1.43-.07-.13-.27-.21-.57-.36z" fill="#ffffff" />
+  </svg>
+);
+
+const LockIcon = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const UserPlusIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="8.5" cy="7" r="4" />
+    <line x1="20" y1="8" x2="20" y2="14" />
+    <line x1="17" y1="11" x2="23" y2="11" />
+  </svg>
+);
+
 /* ─────────────────────────────────────────────
    LEAD STAGES
 ───────────────────────────────────────────── */
@@ -476,6 +499,12 @@ export default function WhatsAppInbox() {
 
   const [isAlertVisible, setIsAlertVisible] = 
     useState(true);
+
+  const [activeTab, setActiveTab] = useState("all");
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [editNotes, setEditNotes] = useState("");
+  const [editTags, setEditTags] = useState([]);
+  const [savingLead, setSavingLead] = useState(false);
 
   const messagesContainerRef = useRef(null);
 
@@ -922,14 +951,24 @@ export default function WhatsAppInbox() {
   /* ─────────────────────────────────────────────
      FILTER
   ───────────────────────────────────────────── */
-  const filteredConversations =
-    conversations.filter((conv) => {
-      if (!search) return true;
+  const filteredConversations = conversations.filter((conv) => {
+    let matchSearch = true;
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      matchSearch = (
+        conv.phone?.toLowerCase().includes(q) ||
+        conv.notes?.toLowerCase().includes(q) ||
+        conv.tags?.some((t) => t.toLowerCase().includes(q))
+      );
+    }
 
-      return conv.phone
-        .toLowerCase()
-        .includes(search.toLowerCase());
-    });
+    let matchTab = true;
+    if (activeTab === "unread") matchTab = conv.unreadCount > 0;
+    else if (activeTab === "whitelisted") matchTab = conv.status === "whitelist";
+    else if (activeTab === "blocked") matchTab = conv.status === "blacklist";
+
+    return matchSearch && matchTab;
+  });
 
   const selectedConv = selected
     ? conversations.find(
@@ -1038,14 +1077,35 @@ export default function WhatsAppInbox() {
             >
               <BackIcon />
             </button>
-            <span style={{ fontWeight: 700, fontSize: "15px" }}>Inbox</span>
+            <span style={{ fontWeight: 700, fontSize: "15px" }}>Chats</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
+              title="Add / Manage Contacts"
+              style={{
+                background: "rgba(0,168,132,0.15)",
+                border: "1px solid rgba(0,168,132,0.3)",
+                color: "#00a884",
+                padding: "6px 10px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              <UserPlusIcon size={14} /> Add Contact
+            </button>
           </div>
         </div>
 
         {/* SEARCH */}
         <div
           style={{
-            padding: "10px",
+            padding: "10px 10px 6px 10px",
           }}
         >
           <div
@@ -1070,10 +1130,10 @@ export default function WhatsAppInbox() {
               onChange={(e) =>
                 setSearch(e.target.value)
               }
-              placeholder="Search chat"
+              placeholder="Search phone, tags, notes…"
               style={{
                 width: "100%",
-                height: "42px",
+                height: "38px",
                 borderRadius: "8px",
                 border: "none",
                 outline: "none",
@@ -1084,6 +1144,34 @@ export default function WhatsAppInbox() {
               }}
             />
           </div>
+        </div>
+
+        {/* WHATSAPP WEB FILTER PILLS */}
+        <div style={{ display: "flex", gap: "6px", padding: "4px 10px 10px", flexWrap: "wrap" }}>
+          {[
+            { id: "all", label: "All" },
+            { id: "unread", label: "Unread" },
+            { id: "whitelisted", label: "Whitelisted" },
+            { id: "blocked", label: "Blocked" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                padding: "4px 12px",
+                borderRadius: "999px",
+                fontSize: "11px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+                border: activeTab === t.id ? "1px solid rgba(0,168,132,0.4)" : "1px solid rgba(255,255,255,0.06)",
+                background: activeTab === t.id ? "rgba(0,168,132,0.2)" : "#202c33",
+                color: activeTab === t.id ? "#00a884" : "#8696a0",
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* CONVERSATIONS */}
@@ -1219,21 +1307,41 @@ export default function WhatsAppInbox() {
                         marginBottom: "4px",
                       }}
                     >
-                      <div
-                        style={{
-                          color: "#e9edef",
-                          fontSize: "14px",
-                          fontWeight: 600,
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        {conv.notes || conv.phone}
+                      <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+                        <div
+                          style={{
+                            color: "#e9edef",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            textTransform: "capitalize",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {conv.notes || conv.phone}
+                        </div>
+
+                        {conv.notes && (
+                          <div
+                            style={{
+                              color: "#00a884",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              marginTop: "1px",
+                            }}
+                          >
+                            {conv.phone}
+                          </div>
+                        )}
                       </div>
 
                       <div
                         style={{
                           color: "#8696a0",
                           fontSize: "11px",
+                          flexShrink: 0,
+                          marginLeft: "8px",
                         }}
                       >
                         {formatConversationTime(
@@ -1291,6 +1399,7 @@ export default function WhatsAppInbox() {
                         alignItems: "center",
                         gap: "6px",
                         marginTop: "8px",
+                        flexWrap: "wrap",
                       }}
                     >
                       <span
@@ -1307,6 +1416,23 @@ export default function WhatsAppInbox() {
                       >
                         {conv.leadStage || "new"}
                       </span>
+
+                      {conv.tags?.map((t) => (
+                        <span
+                          key={t}
+                          style={{
+                            padding: "2px 7px",
+                            borderRadius: "999px",
+                            background: "rgba(0,168,132,0.12)",
+                            color: "#00a884",
+                            border: "1px solid rgba(0,168,132,0.25)",
+                            fontSize: "10px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))}
 
                       {conv.isHandedOff && (
                         <span
@@ -1352,89 +1478,53 @@ export default function WhatsAppInbox() {
               justifyContent: "center",
               gap: "20px",
               padding: "40px 24px",
+              background: "#111b21",
+              borderBottom: "6px solid #00a884",
+              position: "relative",
             }}
           >
-            {/* WhatsApp-style decorative background pattern */}
-            <div style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: `radial-gradient(circle at 20% 80%, rgba(0,168,132,0.03) 0%, transparent 50%),
-                                radial-gradient(circle at 80% 20%, rgba(0,168,132,0.03) 0%, transparent 50%)`,
-              pointerEvents: "none",
-            }} />
-
-            {/* Icon */}
             <div style={{
               width: "88px",
               height: "88px",
               borderRadius: "50%",
-              background: "rgba(0,168,132,0.08)",
-              border: "1.5px solid rgba(0,168,132,0.15)",
+              background: "rgba(0,168,132,0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              position: "relative",
             }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00a884" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              {/* Pulse ring */}
-              <div style={{
-                position: "absolute",
-                inset: "-8px",
-                borderRadius: "50%",
-                border: "1px solid rgba(0,168,132,0.1)",
-                animation: "pulse-ring 2.5s ease-out infinite",
-              }} />
+              <WhatsAppLogoIcon size={56} />
             </div>
 
-            <div style={{ textAlign: "center", maxWidth: "280px" }}>
-              <p style={{
+            <div style={{ textAlign: "center", maxWidth: "420px" }}>
+              <h2 style={{
                 color: "#e9edef",
-                fontSize: "18px",
-                fontWeight: 700,
-                margin: "0 0 8px 0",
-                letterSpacing: "-0.3px",
+                fontSize: "22px",
+                fontWeight: 300,
+                margin: "0 0 10px 0",
               }}>
-                Your Inbox
-              </p>
+                Pax26 WhatsApp Web
+              </h2>
               <p style={{
                 color: "#8696a0",
-                fontSize: "13px",
+                fontSize: "13.5px",
                 margin: 0,
-                lineHeight: 1.7,
+                lineHeight: 1.6,
               }}>
-                Select a conversation from the left to view messages, reply to customers, and manage lead stages.
+                Send and receive messages seamlessly without keeping your phone online. Use AI automations to handle customer chats or take over manually anytime.
               </p>
             </div>
 
             <div style={{
               display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-              justifyContent: "center",
+              alignItems: "center",
+              gap: "8px",
+              color: "#667781",
+              fontSize: "13px",
+              marginTop: "24px",
             }}>
-              {["AI-Powered", "Lead Tracking", "Live Handoff"].map(tag => (
-                <span key={tag} style={{
-                  padding: "6px 12px",
-                  borderRadius: "999px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  color: "#8696a0",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                }}>
-                  {tag}
-                </span>
-              ))}
+              <LockIcon size={13} />
+              <span>End-to-end encrypted</span>
             </div>
-
-            <style>{`
-              @keyframes pulse-ring {
-                0% { transform: scale(1); opacity: 0.4; }
-                100% { transform: scale(1.4); opacity: 0; }
-              }
-            `}</style>
           </div>
         ) : (
           <>
@@ -1510,9 +1600,21 @@ export default function WhatsAppInbox() {
                       color: "#e9edef",
                       fontSize: "14px",
                       fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
-                    {selected.phone}
+                    {selectedContact?.notes || selectedConv?.notes ? (
+                      <>
+                        <span>{selectedContact?.notes || selectedConv?.notes}</span>
+                        <span style={{ color: "#00a884", fontSize: "12px", fontWeight: 600 }}>
+                          ({selected.phone})
+                        </span>
+                      </>
+                    ) : (
+                      selected.phone
+                    )}
                   </div>
 
                   <div

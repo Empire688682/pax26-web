@@ -25,17 +25,22 @@ export async function POST(req) {
       );
     }
 
-    const session = await SessionModel.findOne({
+    let session = await SessionModel.findOne({
       visitorPhone: phone,
       userId,
       status: { $in: ["active", "waiting"] },
     });
 
     if (!session) {
-      return NextResponse.json(
-        { success: false, message: "No active session found" },
-        { status: 404, headers: corsHeaders() }
-      );
+      const user = await UserModel.findById(userId).lean();
+      session = await SessionModel.create({
+        sessionId: `sess_${Date.now()}_${phone.replace(/\D/g, "")}`,
+        visitorPhone: phone,
+        userId,
+        phoneNumberId: user?.whatsapp?.phoneNumberId || "",
+        status: "active",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
     }
 
     // ── Takeover — AI stops, human takes over ──────────────

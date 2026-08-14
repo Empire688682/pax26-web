@@ -90,6 +90,26 @@ const XIcon = () => (
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
+const AlertTriangleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+const ExternalLinkIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+const CreditCardIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+    <line x1="1" y1="10" x2="23" y2="10" />
+  </svg>
+);
 
 /* ── Spinner ─────────────────────────────────────────────── */
 const Spinner = () => (
@@ -805,6 +825,36 @@ export default function WhatsappContact() {
   const [loadingPhone, setLoadingPhone] = useState(null);
   const [saved, setSaved] = useState(false);
 
+  const [showPrerequisiteModal, setShowPrerequisiteModal] = useState(false);
+  const [showMetaPricingModal, setShowMetaPricingModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState("whitelist");
+
+  const isAiTrained = !!userData?.paxAI?.trained;
+  const isWhatsappConnected = !!userData?.whatsapp?.connected;
+
+  const handleOpenAddForm = () => {
+    if (!isAiTrained || !isWhatsappConnected) {
+      setShowPrerequisiteModal(true);
+      return;
+    }
+    setShowAddForm(v => !v);
+  };
+
+  const initiateAddContact = (status) => {
+    if (!phone.trim()) return;
+    if (!isAiTrained || !isWhatsappConnected) {
+      setShowPrerequisiteModal(true);
+      return;
+    }
+    setPendingStatus(status);
+    setShowMetaPricingModal(true);
+  };
+
+  const confirmAddContact = async () => {
+    setShowMetaPricingModal(false);
+    await handleAddContact(pendingStatus);
+  };
+
   const tabs = [
     { key: "all", label: "All" },
     { key: "whitelist", label: "Whitelisted" },
@@ -1056,20 +1106,36 @@ export default function WhatsappContact() {
               </p>
             </div>
           </div>
-          <button
-            className="w-full sm:w-auto justify-center sm:justify-start"
-            onClick={() => setShowAddForm(v => !v)}
-            style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "10px",
-              fontSize: "12px", fontWeight: 700, cursor: "pointer",
-              border: "1px solid rgba(220,53,53,0.4)",
-              background: showAddForm ? "rgba(220,53,53,0.2)" : "rgba(220,53,53,0.1)",
-              color: "#dc3535", transition: "all 0.2s",
-            }}
-          >
-            <UserXIcon /> Blacklist number
-          </button>
+          <div className="flex flex-col sm:flex-row gap-[8px] w-full sm:w-auto">
+            <button
+              className="w-full sm:w-auto justify-center sm:justify-start"
+              onClick={handleOpenAddForm}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                padding: "8px 14px", borderRadius: "10px",
+                fontSize: "12px", fontWeight: 700, cursor: "pointer",
+                border: `1px solid ${pax26?.primary}44`,
+                background: showAddForm ? `${pax26?.primary}25` : `${pax26?.primary}15`,
+                color: pax26?.primary, transition: "all 0.2s",
+              }}
+            >
+              <PlusIcon /> Add Phone Number
+            </button>
+            <button
+              className="w-full sm:w-auto justify-center sm:justify-start"
+              onClick={handleOpenAddForm}
+              style={{
+                display: "flex", alignItems: "center", gap: "6px",
+                padding: "8px 14px", borderRadius: "10px",
+                fontSize: "12px", fontWeight: 700, cursor: "pointer",
+                border: "1px solid rgba(220,53,53,0.4)",
+                background: showAddForm ? "rgba(220,53,53,0.2)" : "rgba(220,53,53,0.1)",
+                color: "#dc3535", transition: "all 0.2s",
+              }}
+            >
+              <UserXIcon /> Blacklist number
+            </button>
+          </div>
         </div>
 
         {/* ── Add contact form (expandable) ── */}
@@ -1118,22 +1184,38 @@ export default function WhatsappContact() {
                   >
                     Cancel
                   </button>
-                  <div className="flex gap-[8px] w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-[8px] w-full sm:w-auto">
                     <button
                       className="w-full sm:w-auto justify-center"
-                      onClick={() => handleAddContact("blacklist")}
+                      onClick={() => initiateAddContact("whitelist")}
                       disabled={!phone.trim() || addingContact}
                       style={{
                         display: "flex", alignItems: "center", gap: "6px",
-                        padding: "9px 24px", borderRadius: "10px",
+                        padding: "9px 20px", borderRadius: "10px",
+                        fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
+                        border: `1px solid ${pax26?.primary}44`,
+                        background: `${pax26?.primary}18`, color: pax26?.primary,
+                        opacity: phone.trim() ? 1 : 0.5,
+                        minWidth: "150px",
+                      }}
+                    >
+                      {addingContact && pendingStatus === "whitelist" ? <Spinner /> : <><UserCheckIcon /> Whitelist (AI On)</>}
+                    </button>
+                    <button
+                      className="w-full sm:w-auto justify-center"
+                      onClick={() => initiateAddContact("blacklist")}
+                      disabled={!phone.trim() || addingContact}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "6px",
+                        padding: "9px 20px", borderRadius: "10px",
                         fontSize: "13px", fontWeight: 700, cursor: phone.trim() ? "pointer" : "not-allowed",
                         border: "1px solid rgba(220,53,53,0.4)",
                         background: "rgba(220,53,53,0.12)", color: "#dc3535",
                         opacity: phone.trim() ? 1 : 0.5,
-                        minWidth: "140px",
+                        minWidth: "150px",
                       }}
                     >
-                      {addingContact ? <Spinner /> : <><UserXIcon /> Blacklist Number</>}
+                      {addingContact && pendingStatus === "blacklist" ? <Spinner /> : <><UserXIcon /> Blacklist (AI Off)</>}
                     </button>
                   </div>
                 </div>
@@ -1223,27 +1305,258 @@ export default function WhatsappContact() {
         </p>
       </div>
 
-      {/* ── Save Button ── */}
-      <div className="flex sm:justify-end mt-[24px]">
-        <button
-          className="w-full sm:w-auto justify-center"
-          onClick={handleSave}
-          disabled={saving || saved}
-          style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            padding: "12px 28px", borderRadius: "12px",
-            fontSize: "14px", fontWeight: 700, cursor: saving || saved ? "default" : "pointer",
-            background: saved ? "rgba(29,158,117,0.15)" : pax26?.primary,
-            color: saved ? "#1D9E75" : "#fff",
-            border: saved ? "1.5px solid rgba(29,158,117,0.4)" : "none",
-            boxShadow: saved || saving ? "none" : `0 8px 24px ${pax26?.primary}40`,
-            transition: "all 0.2s",
-            opacity: saving ? 0.8 : 1,
-          }}
-        >
-          {saving ? <><Spinner />Saving...</> : saved ? <><CheckIcon />Saved</> : <>Save policy<ArrowRightIcon /></>}
-        </button>
-      </div>
+      {/* ── Prerequisite Gating Modal ── */}
+      <AnimatePresence>
+        {showPrerequisiteModal && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "16px", background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)",
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                width: "100%", maxWidth: "480px",
+                background: pax26?.card || pax26?.bg,
+                border: `1px solid ${pax26?.border}`,
+                borderRadius: "20px",
+                padding: "24px",
+                boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "10px",
+                    background: "rgba(245,158,11,0.15)", color: "#f59e0b",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <AlertTriangleIcon />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: pax26?.textPrimary, margin: 0 }}>
+                      Setup Required
+                    </h3>
+                    <p style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>
+                      Prerequisites before adding manual contacts
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPrerequisiteModal(false)}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    color: pax26?.textPrimary, opacity: 0.5, padding: "4px",
+                  }}
+                >
+                  <XIcon />
+                </button>
+              </div>
+
+              <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.7, lineHeight: 1.5, marginBottom: "20px" }}>
+                To manually add phone numbers and customize contact rules, you must first train your AI agent and connect your WhatsApp Business number.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+                {/* Step 1: AI Agent Training */}
+                <div style={{
+                  padding: "12px 14px", borderRadius: "12px",
+                  background: isAiTrained ? `${pax26?.primary}10` : "rgba(245,158,11,0.08)",
+                  border: `1px solid ${isAiTrained ? `${pax26?.primary}30` : "rgba(245,158,11,0.25)"}`,
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+                }}>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 700, color: pax26?.textPrimary }}>
+                      1. Train AI Agent
+                    </div>
+                    <div style={{ fontSize: "11px", color: isAiTrained ? pax26?.primary : "#f59e0b", fontWeight: 600, marginTop: "2px" }}>
+                      {isAiTrained ? "✓ AI Agent is trained" : "❌ Not trained yet"}
+                    </div>
+                  </div>
+                  {!isAiTrained && (
+                    <a
+                      href="/dashboard/automations/training"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "5px",
+                        padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+                        background: pax26?.primary, color: "#fff", textDecoration: "none",
+                      }}
+                    >
+                      Train Agent <ExternalLinkIcon />
+                    </a>
+                  )}
+                </div>
+
+                {/* Step 2: WhatsApp Number Connection */}
+                <div style={{
+                  padding: "12px 14px", borderRadius: "12px",
+                  background: isWhatsappConnected ? `${pax26?.primary}10` : "rgba(245,158,11,0.08)",
+                  border: `1px solid ${isWhatsappConnected ? `${pax26?.primary}30` : "rgba(245,158,11,0.25)"}`,
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+                }}>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 700, color: pax26?.textPrimary }}>
+                      2. Connect WhatsApp
+                    </div>
+                    <div style={{ fontSize: "11px", color: isWhatsappConnected ? pax26?.primary : "#f59e0b", fontWeight: 600, marginTop: "2px" }}>
+                      {isWhatsappConnected ? "✓ WhatsApp is connected" : "❌ Not connected yet"}
+                    </div>
+                  </div>
+                  {!isWhatsappConnected && (
+                    <a
+                      href="/dashboard/automations/whatsapp#connect"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "5px",
+                        padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+                        background: pax26?.primary, color: "#fff", textDecoration: "none",
+                      }}
+                    >
+                      Connect Number <ExternalLinkIcon />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => setShowPrerequisiteModal(false)}
+                  style={{
+                    padding: "9px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
+                    border: `1px solid ${pax26?.border}`, background: pax26?.secondaryBg,
+                    color: pax26?.textPrimary, cursor: "pointer",
+                  }}
+                >
+                  Got It
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Meta 24-Hour Charges Disclosure Modal ── */}
+      <AnimatePresence>
+        {showMetaPricingModal && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "16px", background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)",
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                width: "100%", maxWidth: "520px",
+                background: pax26?.card || pax26?.bg,
+                border: `1px solid ${pax26?.border}`,
+                borderRadius: "20px",
+                padding: "24px",
+                boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{
+                    width: "38px", height: "38px", borderRadius: "10px",
+                    background: "rgba(234,179,8,0.15)", color: "#eab308",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <AlertTriangleIcon />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: pax26?.textPrimary, margin: 0 }}>
+                      Meta 24-Hour Policy & Charges
+                    </h3>
+                    <p style={{ fontSize: "11px", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>
+                      Important notice regarding user-initiated messages
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowMetaPricingModal(false)}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    color: pax26?.textPrimary, opacity: 0.5, padding: "4px",
+                  }}
+                >
+                  <XIcon />
+                </button>
+              </div>
+
+              <div style={{
+                padding: "14px 16px", borderRadius: "12px",
+                background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)",
+                marginBottom: "16px",
+              }}>
+                <p style={{ fontSize: "12px", color: pax26?.textPrimary, lineHeight: 1.6, margin: 0 }}>
+                  <strong>Meta (WhatsApp Business Platform) Policy:</strong> Any message initiated by you or sent after <strong>24 hours</strong> of a customer&apos;s open message incurs direct conversation charges from Meta.
+                </p>
+              </div>
+
+              <div style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.75, lineHeight: 1.6, marginBottom: "20px" }}>
+                <ul style={{ paddingLeft: "18px", margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <li>
+                    <strong>Pax26 has no power or control over Meta charges:</strong> All charges are governed and executed directly by Meta.
+                  </li>
+                  <li>
+                    <strong>Your Payment Responsibility:</strong> You (the client) are responsible for covering fees for any user-initiated chat or messaging past the 24-hour window.
+                  </li>
+                  <li>
+                    <strong>Connect Payment Method:</strong> Make sure your payment method is connected or wallet balance is maintained for seamless message delivery.
+                  </li>
+                </ul>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <a
+                    href="https://business.facebook.com/latest/billing_hub"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                      padding: "10px 14px", borderRadius: "10px", fontSize: "12px", fontWeight: 700,
+                      border: `1px solid ${pax26?.border}`, background: pax26?.secondaryBg,
+                      color: pax26?.textPrimary, textDecoration: "none",
+                    }}
+                  >
+                    <CreditCardIcon /> Connect Meta Payment Method <ExternalLinkIcon />
+                  </a>
+                </div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "6px" }}>
+                  <button
+                    onClick={() => setShowMetaPricingModal(false)}
+                    style={{
+                      padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
+                      border: `1px solid ${pax26?.border}`, background: "transparent",
+                      color: pax26?.textPrimary, cursor: "pointer", opacity: 0.7,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmAddContact}
+                    disabled={addingContact}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "6px",
+                      padding: "9px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: 700,
+                      background: pax26?.primary, color: "#fff", border: "none", cursor: "pointer",
+                      boxShadow: `0 4px 14px ${pax26?.primary}40`,
+                    }}
+                  >
+                    {addingContact ? <Spinner /> : "I Understand & Add Contact"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
