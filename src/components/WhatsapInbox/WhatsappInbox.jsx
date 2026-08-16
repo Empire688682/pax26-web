@@ -2217,7 +2217,7 @@ export default function WhatsAppInbox() {
               {/* REPLY BAR */}
               <div
                 style={{
-                  padding: isMobile ? "8px 10px 65px 10px" : "10px 14px",
+                  padding: isMobile ? "8px 10px 10px 10px" : "10px 14px",
                   background: "#202c33",
                   borderTop:
                     "1px solid rgba(255,255,255,0.08)",

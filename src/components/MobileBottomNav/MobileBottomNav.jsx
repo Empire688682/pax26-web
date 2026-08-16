@@ -18,8 +18,10 @@ export default function MobileBottomNav() {
     pathname?.startsWith("/transactions") ||
     pathname?.startsWith("/profile");
   const isStoreView = pathname?.startsWith("/store");
+  // Hide nav when on inbox page
+  const isInboxView = (pathname === "/dashboard/automations/whatsapp-inbox");
 
-  if (!isDashboardRoute || isStoreView || !userData) {
+  if (!isDashboardRoute || isStoreView || !userData || isInboxView) {
     return null;
   }
 
@@ -104,8 +106,8 @@ export default function MobileBottomNav() {
                     color: active
                       ? primaryColor
                       : isDark
-                      ? "rgba(148, 163, 184, 0.7)"
-                      : "rgba(100, 116, 139, 0.8)",
+                        ? "rgba(148, 163, 184, 0.7)"
+                        : "rgba(100, 116, 139, 0.8)",
                   }}
                 >
                   <Icon size={18} strokeWidth={active ? 2.5 : 2} />
@@ -116,8 +118,8 @@ export default function MobileBottomNav() {
                     color: active
                       ? primaryColor
                       : isDark
-                      ? "rgba(148, 163, 184, 0.7)"
-                      : "rgba(100, 116, 139, 0.8)",
+                        ? "rgba(148, 163, 184, 0.7)"
+                        : "rgba(100, 116, 139, 0.8)",
                   }}
                 >
                   {tab.label}
