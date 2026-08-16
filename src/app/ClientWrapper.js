@@ -9,6 +9,7 @@ import Header from "@/components/Header/Header";
 import BackgroundFX from "@/components/BackgroundFX";
 import SignupPage from "@/components/SignupPage/SignupPage";
 import LaunchGate from "@/components/LaunchGate/LaunchGate";
+import MobileBottomNav from "@/components/MobileBottomNav/MobileBottomNav";
 
 // Inner component so it can access context for theme/pax26
 const AppShell = ({ children }) => {
@@ -32,6 +33,7 @@ const AppShell = ({ children }) => {
           </div>
         </div>
         {!hideFooter && <Footer />}
+        <MobileBottomNav />
       </div>
     </LaunchGate>
   );

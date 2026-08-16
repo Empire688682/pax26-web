@@ -3,7 +3,7 @@
 /* ================================
    IMPORTS
 ================================ */
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import axios from "axios";

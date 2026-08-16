@@ -196,10 +196,10 @@ const Footer = () => {
             <div>
               <ColHead textColor={headingColor}>AI Automation</ColHead>
               <ul className="space-y-3">
-                <FootLink href="/dashboard/automations" icon={<Wifi size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Bot size={13} />} textColor={linkColor}>AI Business Chatbot</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Automated Follow-ups</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Lead Qualification</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Wifi size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Bot size={13} />} textColor={linkColor}>AI Business Chatbot</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Zap size={13} />} textColor={linkColor}>Automated Follow-ups</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Zap size={13} />} textColor={linkColor}>Lead Qualification</FootLink>
               </ul>
             </div>
 
@@ -208,9 +208,9 @@ const Footer = () => {
               <ColHead textColor={headingColor}>Sell on WhatsApp</ColHead>
               <ul className="space-y-3">
                 <FootLink href="/dashboard/my-store" icon={<Wifi size={13} />} textColor={linkColor}>My Storefront</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Bot size={13} />} textColor={linkColor}>AI Sales Agent</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
-                <FootLink href="/dashboard/automations" icon={<Zap size={13} />} textColor={linkColor}>Lead Follow-ups</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Bot size={13} />} textColor={linkColor}>AI Sales Agent</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Zap size={13} />} textColor={linkColor}>WhatsApp Automation</FootLink>
+                <FootLink href="/dashboard/automations/market-place" icon={<Zap size={13} />} textColor={linkColor}>Lead Follow-ups</FootLink>
               </ul>
             </div>
 
