@@ -279,20 +279,40 @@ function badge(label, color) {
 }
 
 /* ── Service card ── */
-function SvcCard({ title, link, icon, color, isDark, router }) {
+function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
   return (
     <button type="button" className="px-svc px-btn" onClick={() => router.push(link)}
       style={{
         background: isDark ? `rgba(255,255,255,0.04)` : `rgba(0,0,0,0.04)`,
         border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)"}`,
       }}>
-      <div style={{
-        width: 46, height: 46, borderRadius: 14,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: `${color}18`, color,
-        boxShadow: `0 0 20px ${color}20`,
-      }}>
-        {icon}
+      {/* Icon with optional pulsing badge */}
+      <div style={{ position: "relative", display: "inline-flex" }}>
+        <div style={{
+          width: 46, height: 46, borderRadius: 14,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: `${color}18`, color,
+          boxShadow: `0 0 20px ${color}20`,
+        }}>
+          {icon}
+        </div>
+        {badgeCount > 0 && (
+          <span style={{
+            position: "absolute", top: -6, right: -8,
+            minWidth: 18, height: 18, borderRadius: 999,
+            background: "#ef4444",
+            color: "#fff",
+            fontSize: 9.5, fontWeight: 800,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "0 5px",
+            boxShadow: "0 0 0 2px " + (isDark ? "rgba(12,20,40,0.9)" : "rgba(255,255,255,0.95)"),
+            animation: "px-pulse-ring 2.5s ease-out infinite",
+            fontFamily: "'DM Mono', monospace",
+            lineHeight: 1,
+          }}>
+            {badgeCount > 99 ? "99+" : badgeCount}
+          </span>
+        )}
       </div>
       <span style={{
         fontSize: 10, fontWeight: 700, letterSpacing: "0.02em",
@@ -370,10 +390,30 @@ export default function Dashboard() {
   const { userData, pax26, router, transactionHistory, getUserRealTimeData, fetchUser, aiPlans } = useGlobalContext();
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  const fetchUnreadCount = () => {
+    fetch("/api/seller/notifications", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.success) {
+          setUnreadNotifCount(typeof d.pendingOrdersCount === "number" ? d.pendingOrdersCount : (d.unreadCount || 0));
+        }
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
     getUserRealTimeData();
     fetchUser();
+    fetchUnreadCount();
+
+    const interval = setInterval(fetchUnreadCount, 8000);
+    window.addEventListener("focus", fetchUnreadCount);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", fetchUnreadCount);
+    };
   }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
@@ -495,26 +535,7 @@ export default function Dashboard() {
                 Your store, automations and sales — all in one place.
               </p>
             </div>
-            <div className="px-header-actions">
-              <button type="button" className="px-btn"
-                onClick={() => router.push("/notifications")}
-                style={{
-                  width: 42, height: 42, borderRadius: 14,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: subBg, border: `1px solid ${subBdr}`, cursor: "pointer",
-                }}>
-                <Bell size={18} color={textSec} strokeWidth={2} />
-              </button>
-              <button type="button" className="px-btn"
-                onClick={() => router.push("/profile")}
-                style={{
-                  width: 42, height: 42, borderRadius: 14,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: subBg, border: `1px solid ${subBdr}`, cursor: "pointer",
-                }}>
-                <Shield size={18} color={textSec} strokeWidth={2} />
-              </button>
-            </div>
+
           </header>
 
           {/* ── STAT STRIP ── */}
@@ -788,7 +809,7 @@ export default function Dashboard() {
                   <SvcCard title="Products" link="/dashboard/automations/products" icon={<Package size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
                   <SvcCard title="AI Agent" link="/dashboard/automations/ai-business-dashboard" icon={<Bot size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
                   <SvcCard title="Inbox" link="/dashboard/automations/whatsapp-inbox" icon={<MessageSquare size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
-                  <SvcCard title="Analytics" link="/dashboard/automations/sales" icon={<BarChart2 size={19} strokeWidth={2.2} />} color={C.coral} isDark={isDark} router={router} />
+                  <SvcCard title="Analytics" link="/dashboard/automations/sales" icon={<BarChart2 size={19} strokeWidth={2.2} />} color={C.coral} isDark={isDark} router={router} badgeCount={unreadNotifCount} />
                 </div>
               </div>
             </div>

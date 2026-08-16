@@ -52,6 +52,12 @@ export async function PATCH(req, { params }) {
 
         await order.save();
 
+        // Mark associated notifications as read when order is processed
+        await SellerNotificationModel.updateMany(
+            { userId, $or: [{ orderId: order._id.toString() }, { read: false }] },
+            { read: true }
+        );
+
         let customerReceiptResult = null;
 
         if (

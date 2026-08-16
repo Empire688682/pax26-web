@@ -24,10 +24,12 @@ export default function MobileBottomNav() {
   }
 
   /* ── Theme Detection ── */
+  const isInbox = pathname?.includes("/whatsapp-inbox");
   const isLightTheme =
-    String(pax26?.card || pax26?.bg || "").toLowerCase().includes("fff") ||
-    String(pax26?.bg || "").toLowerCase() === "#ffffff" ||
-    String(pax26?.bg || "").toLowerCase() === "#f8fafc";
+    !isInbox &&
+    (String(pax26?.card || pax26?.bg || "").toLowerCase().includes("fff") ||
+      String(pax26?.bg || "").toLowerCase() === "#ffffff" ||
+      String(pax26?.bg || "").toLowerCase() === "#f8fafc");
   const isDark = !isLightTheme;
 
   const primaryColor = pax26?.primary || "#34d399";

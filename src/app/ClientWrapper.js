@@ -30,7 +30,7 @@ const AppShell = ({ children }) => {
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="flex items-start shadow-md justify-start w-full">
           {!isStore && <Sidebar />}
-          <div className={`w-full overflow-hidden ${isDashboardRoute ? "pb-28 md:pb-0" : ""}`}>
+          <div className={`w-full overflow-hidden ${isDashboardRoute && !isInbox ? "pb-28 md:pb-0" : ""}`}>
             {!hideHeader && (
               <div className={isDashboardRoute ? "hidden md:block" : ""}>
                 <Header />

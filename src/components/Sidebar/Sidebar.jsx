@@ -33,10 +33,16 @@ const CSS = `
   .sb-nav  { height: 100vh; height: 100dvh; }
   .sb-panel { height: 100vh; height: 100dvh; }
   .sb-backdrop { height: 100vh; height: 100dvh; }
+
+  @keyframes sb-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+    70%  { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
 `;
 
 /* ── Plain nav item ───────────────────────────────────────────── */
-const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNew = false }) => {
+const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNew = false, badgeCount = 0 }) => {
   const pathname = usePathname();
   const isActive = pathname === href;
   const primary = pax26?.primary || '#3b82f6';
@@ -89,15 +95,30 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
           </div>
         </div>
 
-        {isActive && (
-          <motion.div
-            layoutId="active-pill"
-            className="absolute left-0 w-1 h-4 rounded-r-full"
-            style={{ background: primary }}
-          />
-        )}
-
-        <ChevronRight size={11} className={`transition-all duration-300 flex-shrink-0 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
+        {/* Right slot: active indicator OR badge count */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {badgeCount > 0 && (
+            <span style={{
+              minWidth: 18, height: 18, borderRadius: 999,
+              background: '#ef4444', color: '#fff',
+              fontSize: '9.5px', fontWeight: 800,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 5px', lineHeight: 1,
+              animation: 'sb-pulse 2.5s ease-out infinite',
+              boxShadow: '0 0 0 0 rgba(239,68,68,0.5)',
+            }}>
+              {badgeCount > 99 ? '99+' : badgeCount}
+            </span>
+          )}
+          {isActive && (
+            <motion.div
+              layoutId="active-pill"
+              className="absolute left-0 w-1 h-4 rounded-r-full"
+              style={{ background: primary }}
+            />
+          )}
+          <ChevronRight size={11} className={`transition-all duration-300 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
+        </div>
       </Link>
     </motion.div>
   );
@@ -123,6 +144,29 @@ export default function Sidebar() {
   const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
   const limits = usePlanLimits();
   const close = () => setIsOpen(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  const fetchUnreadCount = () => {
+    if (!userData) return;
+    fetch('/api/seller/notifications', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.success) {
+          setUnreadNotifCount(typeof d.pendingOrdersCount === "number" ? d.pendingOrdersCount : (d.unreadCount || 0));
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 8000);
+    window.addEventListener("focus", fetchUnreadCount);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", fetchUnreadCount);
+    };
+  }, [userData]);
 
   return (
     <>
@@ -205,7 +249,7 @@ export default function Sidebar() {
                 <SectionLabel label="Marketing & Growth" pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} badgeCount={unreadNotifCount} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
 
                 {/* ── STAGE 4: ACCOUNT & FINANCIALS ── */}

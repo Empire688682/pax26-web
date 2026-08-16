@@ -3,6 +3,8 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
+import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -22,7 +24,13 @@ export async function GET(req) {
 
         const unreadCount = await SellerNotificationModel.countDocuments({ userId, read: false });
 
-        return NextResponse.json({ success: true, notifications, unreadCount }, { status: 200, headers: corsHeaders() });
+        let pendingOrdersCount = 0;
+        const sellerProfile = await SellerProfileModel.findOne({ userId });
+        if (sellerProfile) {
+            pendingOrdersCount = await SellerOrderModel.countDocuments({ sellerId: sellerProfile._id, status: "pending" });
+        }
+
+        return NextResponse.json({ success: true, notifications, unreadCount, pendingOrdersCount }, { status: 200, headers: corsHeaders() });
 
     } catch (error) {
         console.error("Fetch Notifications Error:", error);

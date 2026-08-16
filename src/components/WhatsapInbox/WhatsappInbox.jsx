@@ -1215,6 +1215,7 @@ export default function WhatsAppInbox() {
             style={{
               flex: 1,
               overflowY: "auto",
+              paddingBottom: isMobile ? "75px" : "10px",
             }}
           >
             {loading ? (
@@ -2216,13 +2217,13 @@ export default function WhatsAppInbox() {
               {/* REPLY BAR */}
               <div
                 style={{
-                  padding: isMobile ? "10px 10px 65px 10px" : "10px",
+                  padding: isMobile ? "8px 10px 65px 10px" : "10px 14px",
                   background: "#202c33",
                   borderTop:
-                    "1px solid rgba(255,255,255,0.05)",
+                    "1px solid rgba(255,255,255,0.08)",
                   display: "flex",
-                  alignItems: "flex-end",
-                  gap: "10px",
+                  alignItems: "center",
+                  gap: "8px",
                   position: "sticky",
                   bottom: 0,
                   zIndex: 10,
@@ -2235,7 +2236,7 @@ export default function WhatsAppInbox() {
                     title="Send image"
                     disabled={sendingImage}
                     style={{
-                      width: "46px", height: "46px", borderRadius: "50%", border: "none",
+                      width: "42px", height: "42px", borderRadius: "50%", border: "none",
                       background: "#2a3942",
                       color: sendingImage ? "#444" : "#8696a0",
                       display: "flex", alignItems: "center", justifyContent: "center",
@@ -2277,19 +2278,20 @@ export default function WhatsAppInbox() {
                     flex: 1,
                     minHeight: "42px",
                     maxHeight: "120px",
-                    borderRadius: "12px",
-                    border: "none",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255,255,255,0.08)",
                     outline: "none",
-                    padding: "10px 14px",
+                    padding: "10px 16px",
                     background: "#2a3942",
                     color: "#e9edef",
                     fontSize: "14px",
-                    lineHeight: 1.5,
+                    lineHeight: 1.4,
                     overflowY: "auto",
+                    resize: "none",
                     opacity:
                       selectedConv?.isHandedOff
                         ? 1
-                        : 0.5,
+                        : 0.65,
                   }}
                 />
 
@@ -2301,15 +2303,15 @@ export default function WhatsAppInbox() {
                     !selectedConv?.isHandedOff
                   }
                   style={{
-                    width: "46px",
-                    height: "46px",
+                    width: "42px",
+                    height: "42px",
                     borderRadius: "50%",
                     border: "none",
                     background: replyText.trim() &&
                       selectedConv?.isHandedOff
                       ? "#00a884"
                       : "#2a3942",
-                    color: "white",
+                    color: replyText.trim() && selectedConv?.isHandedOff ? "#ffffff" : "#8696a0",
                     cursor: replyText.trim() &&
                       selectedConv?.isHandedOff
                       ? "pointer"
@@ -2318,6 +2320,7 @@ export default function WhatsAppInbox() {
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
+                    transition: "all 0.2s ease",
                   }}
                 >
                   <SendIcon />
