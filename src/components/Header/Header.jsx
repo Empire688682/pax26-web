@@ -57,13 +57,6 @@ const Header = () => {
                     )
                 }
 
-                {
-                    userData && !isHomePage && (
-                        <div className='relative overflow-hidden w-10 h-10 items-center rounded-full border-2 border-gray-500 cursor-pointer' onClick={() => router.push("/profile")}>
-                            <Image src={userData?.profileImage} alt="profile" fill style={{ objectFit: "cover" }} />
-                        </div>
-                    )
-                }
 
                 <Menu onClick={toggleMenu} size={28} color={pax26.textPrimary} className='cursor-pointer hover:opacity-80 transition-opacity' />
             </div>

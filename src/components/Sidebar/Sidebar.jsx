@@ -43,13 +43,13 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
 
   return (
     <motion.div
-      whileHover={{ x: 4 }}
+      whileHover={{ x: 3 }}
       whileTap={{ scale: 0.98 }}
     >
       <Link
         href={href || '#'}
         onClick={onClick}
-        className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative"
+        className="flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-xl transition-all duration-300 group relative"
         style={{
           color: isActive ? primary : (danger ? '#f87171' : pax26?.textSecondary),
           background: isActive ? `${primary}12` : 'transparent'
@@ -67,35 +67,37 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
           }
         }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300"
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300"
             style={{
               background: isActive ? `${primary}20` : pax26?.secondaryBg,
               color: isActive ? primary : 'inherit',
-              boxShadow: isActive ? `0 0 15px ${primary}30` : 'none'
+              boxShadow: isActive ? `0 0 12px ${primary}30` : 'none'
             }}>
-            <Icon size={15} strokeWidth={isActive ? 2.5 : 2} />
+            <Icon size={13} strokeWidth={isActive ? 2.5 : 2} />
           </div>
-          <div className="flex flex-col">
-            <span className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
-          </div>
-          {isNew && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider animate-pulse"
-              style={{ background: primary, color: '#fff' }}>
-              New
+          <div className="flex items-center gap-1.5">
+            <span style={{ fontSize: '12.5px', fontWeight: isActive ? 700 : 500, letterSpacing: '-0.01em' }}>
+              {label}
             </span>
-          )}
+            {isNew && (
+              <span className="px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider animate-pulse"
+                style={{ fontSize: '9px', background: primary, color: '#fff' }}>
+                New
+              </span>
+            )}
+          </div>
         </div>
 
         {isActive && (
           <motion.div
             layoutId="active-pill"
-            className="absolute left-0 w-1 h-5 rounded-r-full"
+            className="absolute left-0 w-1 h-4 rounded-r-full"
             style={{ background: primary }}
           />
         )}
 
-        <ChevronRight size={13} className={`transition-all duration-300 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
+        <ChevronRight size={11} className={`transition-all duration-300 flex-shrink-0 ${isActive ? 'opacity-40' : 'opacity-0 group-hover:opacity-40'}`} />
       </Link>
     </motion.div>
   );
@@ -103,9 +105,8 @@ const NavItem = ({ href, icon: Icon, label, onClick, danger = false, pax26, isNe
 
 /* ── Section label ────────────────────────────────────────────── */
 const SectionLabel = ({ label, pax26 }) => (
-  <div className="flex items-center gap-2 px-3 mb-1.5 mt-5 first:mt-1">
-    <p className="text-[10px] font-bold uppercase tracking-[0.15em] whitespace-nowrap"
-      style={{ color: pax26?.textSecondary, opacity: 0.5 }}>
+  <div className="flex items-center gap-2 px-2.5 mb-1 mt-4 first:mt-1">
+    <p style={{ fontSize: '9.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap', color: pax26?.textSecondary, opacity: 0.5 }}>
       {label}
     </p>
     <div className="h-[1px] w-full" style={{ background: pax26?.border, opacity: 0.3 }} />
@@ -114,7 +115,7 @@ const SectionLabel = ({ label, pax26 }) => (
 
 /* ── Divider ──────────────────────────────────────────────────── */
 const Divider = ({ pax26 }) => (
-  <div className="my-3 mx-3" style={{ height: '1px', background: pax26?.border }} />
+  <div className="my-2 mx-2.5" style={{ height: '1px', background: pax26?.border }} />
 );
 
 /* ── Main Sidebar ─────────────────────────────────────────────── */
@@ -141,29 +142,29 @@ export default function Sidebar() {
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-4"
+          <div className="flex items-center justify-between px-4 py-3.5"
             style={{ borderBottom: `1px solid ${pax26?.border}` }}>
             <Link href={userData ? '/dashboard' : '/'} onClick={close}>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center">
-                  <Zap size={15} className="text-white" />
+                <div className="w-7 h-7 rounded-xl bg-blue-500 flex items-center justify-center">
+                  <Zap size={13} className="text-white" />
                 </div>
-                <span className="font-black text-lg" style={{ color: pax26?.textPrimary }}>
+                <span className="font-black text-base" style={{ color: pax26?.textPrimary }}>
                   Pax26
                 </span>
               </div>
             </Link>
             <button
               onClick={close}
-              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+              className="w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-200"
               style={{ background: pax26?.secondaryBg, color: pax26?.textSecondary }}
             >
-              <X size={15} />
+              <X size={13} />
             </button>
           </div>
 
           {/* ── Scrollable nav ─────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-0.5">
+          <div className="flex-1 overflow-y-auto px-2.5 py-2 flex flex-col gap-0.5">
 
             {!userData ? (
               /* Guest menu */
@@ -179,42 +180,46 @@ export default function Sidebar() {
                 <div className="h-4 shrink-0" />
               </>
             ) : (
-              /* Authenticated menu */
+              /* Authenticated menu — Usage Stage Hierarchy */
               <>
-                <SectionLabel label="General" pax26={pax26} />
+                {/* ── STAGE 1: CORE & STOREFRONT ── */}
+                <SectionLabel label="Core & Storefront" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
-
-                <SectionLabel label="Automations" pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Setup" onClick={close} pax26={pax26} />
-                {userData?.paxAI?.businessType === "seller" && (
+                {userData?.paxAI?.businessType === 'seller' && (
                   <NavItem href="/dashboard/my-store" icon={Store} label="My Storefront" onClick={close} pax26={pax26} isNew />
                 )}
-                {userData?.paxAI?.businessType === "seller" && (
+                <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
+
+                {/* ── STAGE 2: DAILY OPERATIONS ── */}
+                <SectionLabel label="Daily Operations" pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Setup" onClick={close} pax26={pax26} />
+                {userData?.paxAI?.businessType === 'seller' && (
                   <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
                 )}
                 <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/staff" icon={Users} label="Team & Staff Inboxes" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/market-place" icon={Cpu} label="Automation Rules" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
+
+                {/* ── STAGE 3: MARKETING & GROWTH ── */}
+                <SectionLabel label="Marketing & Growth" pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
 
-                <SectionLabel label="Financials" pax26={pax26} />
+                {/* ── STAGE 4: ACCOUNT & FINANCIALS ── */}
+                <SectionLabel label="Account & Financials" pax26={pax26} />
+                <NavItem href="/dashboard/billing" icon={Crown} label="Billing & Plans" onClick={close} pax26={pax26} />
                 <NavItem href="/fund-wallet" icon={CreditCard} label="Fund Wallet" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referral Program" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/referral" icon={BadgeDollarSign} label="Referral Earnings" onClick={close} pax26={pax26} />
                 <NavItem href="/transactions" icon={History} label="Transaction History" onClick={close} pax26={pax26} />
-
-                <SectionLabel label="Preferences" pax26={pax26} />
                 <NavItem href="/profile" icon={Settings} label="Account Settings" onClick={close} pax26={pax26} />
                 <NavItem href="/notifications" icon={Bell} label="Notifications" onClick={close} pax26={pax26} />
                 <NavItem href="/contact" icon={Phone} label="Help & Support" onClick={close} pax26={pax26} />
 
                 {/* Plan status widget */}
-                <div className="mx-1 my-3 p-3 rounded-xl border flex flex-col gap-2"
+                <div className="mx-0.5 my-3 p-3 rounded-xl border flex flex-col gap-2"
                   style={{
                     background: pax26?.secondaryBg || 'rgba(255,255,255,0.03)',
                     borderColor: pax26?.border || 'rgba(255,255,255,0.1)',
@@ -222,15 +227,15 @@ export default function Sidebar() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <Crown size={13} className="text-amber-400" />
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider" style={{ color: pax26?.textPrimary }}>
+                      <Crown size={12} className="text-amber-400" />
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: pax26?.textPrimary }}>
                         {limits.plan} Plan
                       </span>
                     </div>
                     {!limits.isEnterprise && (
                       <Link href="/dashboard/billing" onClick={close}
-                        className="text-[10px] font-bold flex items-center gap-0.5"
-                        style={{ color: pax26?.primary || '#3b82f6' }}>
+                        className="flex items-center gap-0.5"
+                        style={{ fontSize: '10px', fontWeight: 700, color: pax26?.primary || '#3b82f6' }}>
                         Upgrade <ArrowUpRight size={10} />
                       </Link>
                     )}
@@ -238,7 +243,7 @@ export default function Sidebar() {
 
                   {/* AI messages progress */}
                   <div>
-                    <div className="flex justify-between items-center text-[9px] mb-1" style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
+                    <div className="flex justify-between items-center mb-1" style={{ fontSize: '9px', color: pax26?.textSecondary, opacity: 0.7 }}>
                       <span>AI Replies</span>
                       <span className="font-mono">
                         {`${limits.messagesUsed.toLocaleString()}/${limits.messagesLimit.toLocaleString()}`}
@@ -256,19 +261,19 @@ export default function Sidebar() {
                   </div>
                 </div>
 
-                <div className="mt-auto pt-2">
+                <div className="mt-auto pt-1">
                   <button
                     onClick={() => { close(); logoutUser(); }}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all duration-200 group"
+                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl w-full transition-all duration-200 group"
                     style={{ color: '#f87171' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
                       style={{ background: 'rgba(248,113,113,0.1)' }}>
-                      <LogOut size={15} className="text-red-400 group-hover:scale-110 transition-transform" />
+                      <LogOut size={13} className="text-red-400 group-hover:scale-110 transition-transform" />
                     </div>
-                    <span className="text-sm font-medium">Logout</span>
+                    <span style={{ fontSize: '12.5px', fontWeight: 500 }}>Logout</span>
                   </button>
                 </div>
 
@@ -278,24 +283,33 @@ export default function Sidebar() {
             )}
           </div>
 
-          {/* ── Footer — pinned at bottom of sidebar ──── */}
-          <div className="shrink-0 px-4 py-4 flex items-center justify-between"
+          {/* ── Footer — pinned at bottom (clickable -> /profile) ── */}
+          <div className="shrink-0 px-4 py-3.5 flex items-center justify-between"
             style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
             {userData ? (
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: pax26?.primary + '33', color: pax26?.primary }}>
+              <Link
+                href="/profile"
+                onClick={close}
+                className="flex items-center gap-2 min-w-0 flex-1 group"
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-200 group-hover:ring-2"
+                  style={{
+                    background: pax26?.primary + '33',
+                    color: pax26?.primary,
+                    ringColor: pax26?.primary,
+                  }}>
                   {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: pax26?.textPrimary }}>
+                <div className="min-w-0 flex-1">
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: pax26?.textPrimary }} className="truncate">
                     {userData?.name || 'User'}
                   </p>
-                  <p className="text-xs truncate" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                  <p style={{ fontSize: '10.5px', color: pax26?.textSecondary, opacity: 0.6 }} className="truncate">
                     {userData?.email || ''}
                   </p>
                 </div>
-              </div>
+                <ChevronRight size={12} style={{ color: pax26?.textSecondary, opacity: 0.4, flexShrink: 0 }} className="group-hover:opacity-80 transition-opacity" />
+              </Link>
             ) : (
               <div onClick={() => { close(); router.push('/?auth=login'); }} className="cursor-pointer">
                 <Button>Sign up</Button>

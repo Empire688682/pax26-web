@@ -15,9 +15,12 @@ import MobileBottomNav from "@/components/MobileBottomNav/MobileBottomNav";
 const AppShell = ({ children }) => {
   const { pax26 } = useGlobalContext();
   const pathname = usePathname();
+  const isDashboardRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/fund-wallet") || pathname.startsWith("/transactions") || pathname.startsWith("/profile") || pathname.startsWith("/notifications");
   const isInbox = pathname === "/dashboard/automations/whatsapp-inbox";
   const isStore = pathname.startsWith("/store");
-  const hideFooter = isInbox || isStore;
+  // Hide global footer on ALL dashboard routes — MobileBottomNav replaces it on mobile,
+  // and dashboard app-pages don't need a marketing footer.
+  const hideFooter = isDashboardRoute || isInbox || isStore;
   const hideHeader = isInbox || isStore;
 
   return (
@@ -27,8 +30,12 @@ const AppShell = ({ children }) => {
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="flex items-start shadow-md justify-start w-full">
           {!isStore && <Sidebar />}
-          <div className="w-full overflow-hidden">
-            {!hideHeader && <Header />}
+          <div className={`w-full overflow-hidden ${isDashboardRoute ? "pb-28 md:pb-0" : ""}`}>
+            {!hideHeader && (
+              <div className={isDashboardRoute ? "hidden md:block" : ""}>
+                <Header />
+              </div>
+            )}
             {children}
           </div>
         </div>

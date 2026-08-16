@@ -1866,7 +1866,7 @@ export default function WhatsAppInbox() {
                 style={{
                   flex: 1,
                   overflowY: "auto",
-                  padding: "16px",
+                  padding: isMobile ? "16px 16px 140px 16px" : "16px",
                   backgroundImage: `
                   radial-gradient(circle at 25px 25px, rgba(255,255,255,0.03) 2%, transparent 0%),
                   radial-gradient(circle at 75px 75px, rgba(255,255,255,0.02) 2%, transparent 0%)
@@ -2216,7 +2216,7 @@ export default function WhatsAppInbox() {
               {/* REPLY BAR */}
               <div
                 style={{
-                  padding: "10px",
+                  padding: isMobile ? "10px 10px 65px 10px" : "10px",
                   background: "#202c33",
                   borderTop:
                     "1px solid rgba(255,255,255,0.05)",

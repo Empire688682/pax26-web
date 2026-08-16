@@ -65,25 +65,23 @@ export default function MobileBottomNav() {
 
   return (
     <div
-      className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[420px]"
+      className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 m-0 p-0"
       style={{
         paddingBottom: "max(0px, env(safe-area-inset-bottom))",
       }}
     >
       <nav
-        className="flex items-center justify-around px-2 py-2.5 rounded-3xl transition-all duration-300 relative overflow-hidden"
+        className="flex items-center justify-around px-2 py-2 rounded-t-2xl transition-all duration-300 relative overflow-hidden w-full border-t"
         style={{
           background: isDark
-            ? "rgba(12, 20, 40, 0.88)"
-            : "rgba(255, 255, 255, 0.92)",
+            ? "rgba(10, 16, 32, 0.96)"
+            : "rgba(255, 255, 255, 0.96)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
-          border: `1px solid ${
-            isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)"
-          }`,
+          borderTopColor: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)",
           boxShadow: isDark
-            ? "0 20px 50px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.1)"
-            : "0 20px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
+            ? "0 -10px 30px rgba(0,0,0,0.5)"
+            : "0 -10px 25px rgba(0,0,0,0.06)",
         }}
       >
         {tabs.map((tab) => {
@@ -96,9 +94,9 @@ export default function MobileBottomNav() {
               href={tab.href}
               className="flex flex-col items-center justify-center flex-1 py-1 relative group"
             >
-              <div className="relative flex flex-col items-center gap-1">
+              <div className="relative flex flex-col items-center gap-0.5">
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
                   style={{
                     background: active ? `${primaryColor}20` : "transparent",
                     color: active
@@ -127,7 +125,7 @@ export default function MobileBottomNav() {
               {active && (
                 <motion.div
                   layoutId="mobile-nav-pill"
-                  className="absolute -top-2 w-5 h-1 rounded-full"
+                  className="absolute -top-2 w-6 h-1 rounded-full"
                   style={{
                     background: primaryColor,
                     boxShadow: `0 0 12px ${primaryColor}`,
@@ -144,9 +142,9 @@ export default function MobileBottomNav() {
           onClick={() => setIsOpen(true)}
           className="flex flex-col items-center justify-center flex-1 py-1 relative group cursor-pointer"
         >
-          <div className="relative flex flex-col items-center gap-1">
+          <div className="relative flex flex-col items-center gap-0.5">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
               style={{
                 color: isDark
                   ? "rgba(148, 163, 184, 0.7)"
