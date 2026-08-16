@@ -26,18 +26,7 @@ export async function GET(req) {
         }
 
         const plan = user.paxAI?.plan || "free";
-        if (plan === "free" || !user.paxAI?.salesAnalyticsEnabled) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: plan === "free"
-                        ? "Sales Analytics is not available on the Free plan. Upgrade to Starter or higher."
-                        : "Sales Analytics is not enabled on your current plan.",
-                    upgradeRequired: true,
-                },
-                { status: 403, headers: corsHeaders() }
-            );
-        }
+        // Allow all users (including Free plan) to fetch recent orders and top products
 
         // Clamp analytics history to what the plan allows
         const maxDays = user.paxAI?.salesAnalyticsDays ?? 7;
@@ -87,6 +76,12 @@ export async function GET(req) {
 
         // If export requested
         if (exportFormat === "csv") {
+            if (plan === "free") {
+                return NextResponse.json(
+                    { success: false, message: "Exporting sales reports requires Starter plan or higher." },
+                    { status: 403, headers: corsHeaders() }
+                );
+            }
             let csvContent = "Order ID,Customer Name,Customer Phone,Product,Quantity,Total Price,Status,Date & Time,Receipt Submitted At\n";
             orders.forEach(order => {
                 const orderId = order._id.toString();

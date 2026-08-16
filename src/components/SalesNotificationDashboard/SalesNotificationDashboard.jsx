@@ -115,17 +115,17 @@ export default function SalesNotificationDashboard() {
   return (
     <>
       <style>{CSS}</style>
-      <div className="sn-root min-h-screen px-5 py-10" style={{ background: pax26?.bg }}>
-        <div className="max-w-5xl mx-auto space-y-6">
+      <div className="sn-root min-h-screen px-3 sm:px-5 py-5 sm:py-10" style={{ background: pax26?.bg }}>
+        <div className="max-w-5xl mx-auto space-y-5 sm:space-y-6">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
             <div>
-              <h1 className="text-3xl font-extrabold" style={{ color: pax26?.textPrimary }}>Sales Alerts</h1>
-              <p className="text-sm mt-1" style={{ color: pax26?.textSecondary }}>Orders awaiting your confirmation + notification settings</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: pax26?.textPrimary }}>Sales Alerts</h1>
+              <p className="text-xs sm:text-sm mt-0.5" style={{ color: pax26?.textSecondary }}>Orders awaiting your confirmation + notification settings</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: `${primary}15`, color: primary }}>
-              <Bell size={18} />
+            <div className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm" style={{ background: `${primary}15`, color: primary }}>
+              <Bell size={16} />
               <span className="font-bold">{pendingOrders.length} Pending</span>
             </div>
           </div>
