@@ -399,7 +399,11 @@ export default function ProductManager() {
     }
   }, []);
 
-  useEffect(() => { if (isSellerUser) fetchAll(); else setLoading(false); }, [isSellerUser, fetchAll]);
+  useEffect(() => {
+    if (userData === undefined) return;
+    if (isSellerUser) fetchAll();
+    else setLoading(false);
+  }, [userData, isSellerUser, fetchAll]);
 
   // Derived category list for filter pills
   const categories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();

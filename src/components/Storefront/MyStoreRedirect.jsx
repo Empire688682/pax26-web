@@ -17,19 +17,26 @@ import { useGlobalContext } from "@/components/Context";
 export default function MyStoreRedirect() {
   const { pax26: p, router, userData } = useGlobalContext();
   const [loading, setLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
   const [slug, setSlug] = useState(null);
 
   useEffect(() => {
+    // Wait until userData context is loaded
+    if (userData === undefined) return;
+
     async function fetchSlug() {
+      setLoading(true);
       try {
         const res = await fetch("/api/seller/profile");
         const data = await res.json();
         if (data?.success && data?.profile?.slug) {
           setSlug(data.profile.slug);
+          setRedirecting(true);
+          router.push(`/store/${data.profile.slug}?preview=1`);
+        } else {
+          setLoading(false);
         }
       } catch {
-        // ignore — handled below
-      } finally {
         setLoading(false);
       }
     }
@@ -39,19 +46,15 @@ export default function MyStoreRedirect() {
     } else {
       setLoading(false);
     }
-  }, [userData]);
+  }, [userData, router]);
 
-  // Auto-redirect once we have the slug
-  useEffect(() => {
-    if (slug) {
-      router.push(`/store/${slug}?preview=1`);
-    }
-  }, [slug, router]);
-
-  if (loading) {
+  if (loading || redirecting || slug) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
-        <div style={{ width: "20px", height: "20px", border: `3px solid ${p?.border}`, borderTopColor: p?.primary, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh", gap: "16px" }}>
+        <div style={{ width: "32px", height: "32px", border: `3px solid ${p?.border || "#eee"}`, borderTopColor: p?.primary || "#6366f1", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+        <span style={{ fontSize: "14px", fontWeight: 600, color: p?.textPrimary || "#333", opacity: 0.7 }}>
+          Loading your storefront…
+        </span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -60,7 +63,7 @@ export default function MyStoreRedirect() {
   // No slug configured yet
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "40px 20px", textAlign: "center" }}>
-      <div style={{ width: "72px", height: "72px", borderRadius: "22px", background: `${p?.primary}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", fontSize: "32px" }}>
+      <div style={{ width: "72px", height: "72px", borderRadius: "22px", background: `${p?.primary || "#6366f1"}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", fontSize: "32px" }}>
         🏪
       </div>
       <h1 style={{ fontSize: "26px", fontWeight: 900, color: p?.textPrimary, margin: "0 0 12px", letterSpacing: "-0.03em" }}>
@@ -71,7 +74,7 @@ export default function MyStoreRedirect() {
       </p>
       <button
         onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
-        style={{ padding: "14px 32px", borderRadius: "16px", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "15px", border: "none", cursor: "pointer", boxShadow: `0 10px 28px ${p?.primary}44` }}
+        style={{ padding: "14px 32px", borderRadius: "16px", background: p?.primary || "#6366f1", color: "#fff", fontWeight: 800, fontSize: "15px", border: "none", cursor: "pointer", boxShadow: `0 10px 28px ${p?.primary || "#6366f1"}44` }}
       >
         Set Up My Store →
       </button>
