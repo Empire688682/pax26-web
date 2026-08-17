@@ -447,31 +447,58 @@ export const triggerAIResponse = async ({
 
         // ── Save outbound message ─────────────────────────────────
         // Store the clean text (no tags) — what the customer actually received
-        await AIMessageModel.create({
-            messageId: response?.messageId || `ai_${Date.now()}`,
-            userId: user._id,
-            sessionId: session.sessionId,
-            platform: "whatsapp",
-            phoneNumberId: user.whatsapp.phoneNumberId,
-            from: user.whatsapp.displayPhone,
-            to: session.visitorPhone,
-            text: cleanText || rawAiText,
-            aiMeta: {
-                model: aiResponse?.model,
-                tokensUsed: aiResponse?.tokensUsed,
-                imagesSent: imageUrls.length,
-                imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
-                wasImageSearch: imageSearchContext,
-            },
-            ...(imageUrls.length > 0 && {
-                mediaType: "image",
-                mediaUrl: imageUrls[0],
-            }),
-            direction: "outbound",
-            senderType: "ai",
-            status,
-            automation: { isAutoReply: true },
-        });
+        // ── Save outbound message ─────────────────────────────────
+        // Store the clean text (no tags) — what the customer actually received.
+        // If multiple images were sent, create a database entry for each image so the seller inbox stays 100% in sync.
+        if (imageUrls.length > 0) {
+            for (let idx = 0; idx < imageUrls.length; idx++) {
+                const imgUrl = imageUrls[idx];
+                await AIMessageModel.create({
+                    messageId: idx === 0 && response?.messageId ? response.messageId : `ai_${Date.now()}_${idx}`,
+                    userId: user._id,
+                    sessionId: session.sessionId,
+                    platform: "whatsapp",
+                    phoneNumberId: user.whatsapp.phoneNumberId,
+                    from: user.whatsapp.displayPhone,
+                    to: session.visitorPhone,
+                    text: idx === 0 ? (cleanText || rawAiText) : "",
+                    aiMeta: {
+                        model: aiResponse?.model,
+                        tokensUsed: aiResponse?.tokensUsed,
+                        imagesSent: imageUrls.length,
+                        imageUrls,
+                        wasImageSearch: imageSearchContext,
+                    },
+                    mediaType: "image",
+                    mediaUrl: imgUrl,
+                    direction: "outbound",
+                    senderType: "ai",
+                    status,
+                    automation: { isAutoReply: true },
+                });
+            }
+        } else {
+            await AIMessageModel.create({
+                messageId: response?.messageId || `ai_${Date.now()}`,
+                userId: user._id,
+                sessionId: session.sessionId,
+                platform: "whatsapp",
+                phoneNumberId: user.whatsapp.phoneNumberId,
+                from: user.whatsapp.displayPhone,
+                to: session.visitorPhone,
+                text: cleanText || rawAiText,
+                aiMeta: {
+                    model: aiResponse?.model,
+                    tokensUsed: aiResponse?.tokensUsed,
+                    imagesSent: 0,
+                    wasImageSearch: imageSearchContext,
+                },
+                direction: "outbound",
+                senderType: "ai",
+                status,
+                automation: { isAutoReply: true },
+            });
+        }
 
         // ── Parallelise all post-send DB writes ───────────────────
         const contactUpdate = UserModel.updateOne(
@@ -502,17 +529,37 @@ export const triggerAIResponse = async ({
 
         if (isPaymentShared) {
             console.log("💳 AI shared payment details — setting expectingPayment = true for session:", session.sessionId);
+            
+            // Extract structured payment & quote data from AI response text to store state
+            const outText = cleanText || rawAiText;
+            const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
+            const parsedGrandTotal = parsedGrandTotalMatch ? parseInt(parsedGrandTotalMatch[1].replace(/,/g, ""), 10) : null;
+
+            // Match products from catalogue that were mentioned in this message
+            const mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
+            const pendingItems = mentionedProducts.map(p => ({
+                productId: p._id,
+                name: p.name,
+                price: p.discountPrice || p.price,
+                quantity: 1,
+                imageUrl: p.images?.[0]?.url || "",
+            }));
+
             sessionUpdateData.$set = {
                 "payment.expectingPayment": true,
                 "payment.paymentProofReceived": false,
                 "payment.paymentDetailsSharedAt": new Date(),
                 "payment.deflectionCount": 0,
+                ...(parsedGrandTotal && parsedGrandTotal > 0 && { "payment.pendingAmount": parsedGrandTotal }),
+                ...(pendingItems.length > 0 && { "payment.pendingItems": pendingItems }),
             };
             if (session.payment) {
                 session.payment.expectingPayment = true;
                 session.payment.paymentProofReceived = false;
                 session.payment.paymentDetailsSharedAt = new Date();
                 session.payment.deflectionCount = 0;
+                if (parsedGrandTotal && parsedGrandTotal > 0) session.payment.pendingAmount = parsedGrandTotal;
+                if (pendingItems.length > 0) session.payment.pendingItems = pendingItems;
             }
         }
 

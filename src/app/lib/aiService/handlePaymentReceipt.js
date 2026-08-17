@@ -51,19 +51,27 @@ function isPaymentStage(recentMessages = [], session = null) {
 }
 
 function extractOrderTotalFromConversation(recentMessages = []) {
-    const conversationText = recentMessages
+    // Scan messages backwards (newest assistant payment messages first)
+    const reversedMessages = [...recentMessages].reverse();
+    const assistantText = reversedMessages
+        .filter((m) => m.role === "assistant" || m.senderType === "ai" || m.direction === "outbound")
         .map((m) => m.content || m.text || "")
         .join("\n");
 
+    const fullConversationText = recentMessages
+        .map((m) => m.content || m.text || "")
+        .join("\n");
+
+    // Highest priority: Explicit grand total phrasing in assistant messages
     const grandTotalPatterns = [
-        /(?:grand\s+total|total\s+amount|total|grandtotal)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
-        /once\s+you(?:'|’)?ve\s+transferred\s+the\s*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /(?:grand\s+total|making\s+your\s+grand\s+total|your\s+total\s+will\s+be|total\s+amount|making\s+it)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /once\s+you(?:'|’)?ve\s+transferred\s+(?:the\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
         /transferred\s+the\s*(?:₦|N|NGN)?\s*([\d,]+)/i,
         /pay\s+the\s+(?:sum\s+of\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
     ];
 
     for (const pattern of grandTotalPatterns) {
-        const match = conversationText.match(pattern);
+        const match = assistantText.match(pattern) || fullConversationText.match(pattern);
         if (match && match[1]) {
             const cleanNum = parseInt(match[1].replace(/,/g, ""), 10);
             if (!isNaN(cleanNum) && cleanNum > 0) {
@@ -71,47 +79,53 @@ function extractOrderTotalFromConversation(recentMessages = []) {
             }
         }
     }
+
+    // Fallback: If multiple ₦ amounts are present in assistant payment quote, pick the highest number (grand total)
+    const allAmounts = [];
+    const amountRegex = /(?:₦|N|NGN)\s*([\d,]+)/gi;
+    let match;
+    while ((match = amountRegex.exec(assistantText)) !== null) {
+        const val = parseInt(match[1].replace(/,/g, ""), 10);
+        if (!isNaN(val) && val > 0) {
+            allAmounts.push(val);
+        }
+    }
+    if (allAmounts.length > 0) {
+        return Math.max(...allAmounts);
+    }
+
     return null;
 }
 
-async function findProductFromConversation(sellerId, recentMessages = []) {
+async function findAllProductsFromConversation(sellerId, recentMessages = []) {
     const products = await SellerProductModel.find({ sellerId }).lean();
-    if (!products.length) return null;
+    if (!products.length) return [];
 
     const conversationText = recentMessages
         .map((m) => m.content || m.text || "")
         .join(" ")
         .toLowerCase();
 
-    // 1. Line pattern matching (e.g. "1x Shoe", "• Shoe", "- Shoe")
-    for (const prod of products) {
-        if (!prod.name) continue;
-        const escaped = prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const itemLineRegex = new RegExp(`(?:\\d+x|•|·|-|\\*)\\s*${escaped}`, 'i');
-        if (itemLineRegex.test(conversationText)) {
-            return prod;
-        }
-    }
-
-    // 2. Sort by name length descending so longer/more specific names match first
+    const matchedProducts = [];
     const sortedProducts = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+
     for (const prod of sortedProducts) {
         if (!prod.name) continue;
         const nameLower = prod.name.toLowerCase();
-        const wordRegex = new RegExp(`\\b${prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        const escaped = prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const wordRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+
         if (wordRegex.test(conversationText) || conversationText.includes(nameLower)) {
-            return prod;
+            matchedProducts.push(prod);
         }
     }
 
-    // 3. Price matching in text
-    for (const prod of products) {
-        if (prod.price && conversationText.includes(prod.price.toString())) {
-            return prod;
-        }
-    }
+    return matchedProducts;
+}
 
-    return products[0];
+async function findProductFromConversation(sellerId, recentMessages = []) {
+    const allMatched = await findAllProductsFromConversation(sellerId, recentMessages);
+    return allMatched.length > 0 ? allMatched[0] : null;
 }
 
 async function resolveProduct(sellerId, recentMessages) {
@@ -258,13 +272,46 @@ export async function handlePaymentReceipt({
         console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
-    const matchedProduct = await resolveProduct(sellerId, recentMessages);
-    const parsedTotal = extractOrderTotalFromConversation(recentMessages);
+    // 🚀 Senior Architecture: Check session.payment state first!
+    const sessionPendingAmount = session?.payment?.pendingAmount;
+    const sessionPendingItems = session?.payment?.pendingItems;
+
+    const matchedProducts = await findAllProductsFromConversation(sellerId, recentMessages);
+    const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
+
+    const parsedTotal = sessionPendingAmount || extractOrderTotalFromConversation(recentMessages);
     const orderTotalPrice = parsedTotal || matchedProduct?.price || 0;
+
+    // Build items array
+    let orderItems = [];
+    if (sessionPendingItems && sessionPendingItems.length > 0) {
+        orderItems = sessionPendingItems;
+    } else if (matchedProducts.length > 0) {
+        orderItems = matchedProducts.map(p => ({
+            productId: p._id,
+            name: p.name,
+            price: p.discountPrice || p.price,
+            quantity: 1,
+            imageUrl: p.images?.[0]?.url || "",
+        }));
+    } else if (matchedProduct) {
+        orderItems = [{
+            productId: matchedProduct._id,
+            name: matchedProduct.name,
+            price: matchedProduct.price || orderTotalPrice,
+            quantity: 1,
+            imageUrl: matchedProduct.images?.[0]?.url || "",
+        }];
+    }
+
+    // Format product summary name for alerts (e.g. "Bag 1 (1x), Bag 2 (1x)")
+    const productSummaryName = orderItems.length > 0
+        ? orderItems.map(i => `${i.name}${i.quantity > 1 ? ` (${i.quantity}x)` : ''}`).join(", ")
+        : (matchedProduct?.name || "Payment receipt received");
 
     // If we're in payment stage (AI already asked for proof), handle it regardless
     // of whether we can identify a specific product — the payment context is enough.
-    if (!pendingOrder && !matchedProduct?._id && !paymentStage) {
+    if (!pendingOrder && !matchedProduct?._id && !paymentStage && orderItems.length === 0) {
         console.warn("Payment receipt received but no seller products found and not in payment stage");
         return { handled: false };
     }
@@ -279,8 +326,9 @@ export async function handlePaymentReceipt({
             productId: matchedProduct?._id || null,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
-            quantity: 1,
+            quantity: orderItems.reduce((sum, i) => sum + i.quantity, 0) || 1,
             totalPrice: orderTotalPrice,
+            items: orderItems,
             status: "pending",
             paymentReceiptUrl: url || "",
             paymentReceiptPublicId: publicId || "",
@@ -297,8 +345,12 @@ export async function handlePaymentReceipt({
             order.paymentReceiptSubmittedAt = new Date();
             orderChanged = true;
         }
-        if (parsedTotal && parsedTotal !== order.totalPrice) {
-            order.totalPrice = parsedTotal;
+        if (orderTotalPrice && orderTotalPrice !== order.totalPrice) {
+            order.totalPrice = orderTotalPrice;
+            orderChanged = true;
+        }
+        if (orderItems.length > 0 && (!order.items || order.items.length === 0)) {
+            order.items = orderItems;
             orderChanged = true;
         }
         if (orderChanged) {
@@ -315,11 +367,11 @@ export async function handlePaymentReceipt({
             await sendSalesNotification(sellerUserId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
-                productName: matchedProduct?.name || "Payment receipt received",
+                productName: productSummaryName,
                 amountPaid: order.totalPrice,
                 isConfirmed: false,
             });
-            console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, ")");
+            console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, "| Product:", productSummaryName, ")");
         } catch (err) {
             console.warn("Sales notification failed:", err.message);
         }

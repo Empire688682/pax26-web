@@ -81,6 +81,16 @@ const SessionSchema = new mongoose.Schema({
         paymentProofReceived: { type: Boolean, default: false },    // true ONLY when customer uploads image proof (controls sales alert)
         paymentDetailsSharedAt: { type: Date, default: null },
         deflectionCount: { type: Number, default: 0 },              // count of off-topic messages customer sends while payment is expected
+        pendingAmount: { type: Number, default: null },
+        pendingItems: [{
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: "SellerProduct" },
+            name: String,
+            price: Number,
+            quantity: { type: Number, default: 1 },
+            imageUrl: String,
+        }],
+        deliveryFee: { type: Number, default: 0 },
+        deliveryLocation: { type: String, default: "" },
     }
 
 }, { timestamps: true });

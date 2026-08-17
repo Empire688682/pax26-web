@@ -5,6 +5,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
 import { sendSalesNotification } from "@/app/lib/salesNotificationService";
 import { sendCustomerOrderReceiptWhatsApp } from "@/app/lib/customerReceiptService";
 

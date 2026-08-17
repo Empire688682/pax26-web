@@ -72,7 +72,8 @@ ${productSummaries}
 
 INSTRUCTIONS:
 - Recommend the best matching product(s) from the results above
-- If the top result has images, include them with [SEND_IMAGE: url] tags
+- Do NOT auto-attach images unless the customer explicitly asked to see pictures, photos, or images in their query ("${originalQuery}")
+- If the customer explicitly asked to see photos/images and the product has images, include them with [SEND_IMAGE: url] tags
 - Mention price, availability, and key details naturally
 - If variants exist (sizes, colours), ask which option they want
 - If something is out of stock, mention it and suggest the next best result
