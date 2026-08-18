@@ -26,6 +26,11 @@ const SellerOrderSchema = new mongoose.Schema({
 
     totalPrice: Number,
 
+    deliveryFee: {
+        type: Number,
+        default: 0,
+    },
+
     status: {
         type: String,
         enum: ["pending", "confirmed", "paid", "delivered", "cancelled"],

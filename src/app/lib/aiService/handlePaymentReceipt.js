@@ -319,6 +319,7 @@ export async function handlePaymentReceipt({
     let order = pendingOrder;
     // Check if this order already had payment proof submitted prior to this message
     const alreadyHadProof = Boolean(order?.paymentReceiptSubmittedAt || order?.paymentReceiptUrl);
+    const calculatedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProducts);
 
     if (!order) {
         order = await SellerOrderModel.create({
@@ -328,6 +329,7 @@ export async function handlePaymentReceipt({
             customerName: customerName || "WhatsApp Customer",
             quantity: orderItems.reduce((sum, i) => sum + i.quantity, 0) || 1,
             totalPrice: orderTotalPrice,
+            deliveryFee: calculatedDeliveryFee,
             items: orderItems,
             status: "pending",
             paymentReceiptUrl: url || "",
@@ -347,6 +349,10 @@ export async function handlePaymentReceipt({
         }
         if (orderTotalPrice && orderTotalPrice !== order.totalPrice) {
             order.totalPrice = orderTotalPrice;
+            orderChanged = true;
+        }
+        if (calculatedDeliveryFee && !order.deliveryFee) {
+            order.deliveryFee = calculatedDeliveryFee;
             orderChanged = true;
         }
         if (orderItems.length > 0 && (!order.items || order.items.length === 0)) {
@@ -369,6 +375,7 @@ export async function handlePaymentReceipt({
                 customerName: order.customerName || order.customerPhone,
                 productName: productSummaryName,
                 amountPaid: order.totalPrice,
+                deliveryFee: order.deliveryFee,
                 isConfirmed: false,
             });
             console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, "| Product:", productSummaryName, ")");
@@ -389,6 +396,23 @@ function generateOrderCode() {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return code;
+}
+
+function extractDeliveryFeeFromConversation(recentMessages = [], matchedProducts = [], inboundText = "") {
+    const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
+
+    const feeMatch = combinedText.match(/(?:Estimated Delivery Fee|delivery fee is|delivery fee|delivery cost|shipping fee|delivery):\s*(?:₦|N|NGN)?\s*([\d,]+)/i);
+    if (feeMatch) {
+        const fee = parseInt(feeMatch[1].replace(/,/g, ""), 10);
+        if (!isNaN(fee) && fee >= 0) return fee;
+    }
+
+    if (matchedProducts && matchedProducts.length > 0) {
+        const fees = matchedProducts.map(p => Number(p.deliveryFee) || 0);
+        return Math.max(0, ...fees);
+    }
+
+    return 0;
 }
 
 function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
@@ -462,6 +486,7 @@ export async function createPendingOrderFromText({
     const orderTotalPrice = parsedTotal || matchedProduct.price || 0;
     const orderCode = generateOrderCode();
     const multiOrderData = parseMultiProductOrderFromText(inboundText, recentMessages);
+    const extractedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProduct ? [matchedProduct] : [], inboundText);
 
     const order = await SellerOrderModel.create({
         orderCode,
@@ -471,6 +496,7 @@ export async function createPendingOrderFromText({
         customerName: customerName || "WhatsApp Customer",
         quantity: multiOrderData.items.reduce((sum, i) => sum + i.quantity, 0) || 1,
         totalPrice: orderTotalPrice,
+        deliveryFee: extractedDeliveryFee,
         items: multiOrderData.items.length ? multiOrderData.items : [{
             productId: matchedProduct._id,
             name: matchedProduct.name,

@@ -67,7 +67,13 @@ export const sendSalesNotification = async (userId, orderData) => {
             await notification.save();
             console.log(`[salesNotification] ✅ In-app notification saved (id=${notification._id})`);
 
-            const msgText = `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Product:* ${notification.productName}\n*Amount:* ₦${notification.amountPaid.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`;
+            const deliveryFeeVal = Number(orderData.deliveryFee) || 0;
+            const amountPaidVal = Number(notification.amountPaid) || 0;
+            const subtotalVal = amountPaidVal > deliveryFeeVal ? amountPaidVal - deliveryFeeVal : amountPaidVal;
+
+            const msgText = deliveryFeeVal > 0
+                ? `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Products:* ${notification.productName}\n*Products Total:* ₦${subtotalVal.toLocaleString()}\n*Delivery Fee:* ₦${deliveryFeeVal.toLocaleString()}\n*Grand Total:* ₦${amountPaidVal.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`
+                : `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Product:* ${notification.productName}\n*Amount:* ₦${amountPaidVal.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`;
 
             // ── WhatsApp channel ─────────────────────────────────────
             if (actualChannel === "whatsapp" || actualChannel === "both") {
@@ -104,6 +110,7 @@ export const sendSalesNotification = async (userId, orderData) => {
                     customerPhone: orderData.customerName,
                     productName: orderData.productName,
                     amountPaid: orderData.amountPaid,
+                    deliveryFee: orderData.deliveryFee,
                     orderId: orderData.orderId,
                     isConfirmed: orderData.isConfirmed ?? false,
                 });

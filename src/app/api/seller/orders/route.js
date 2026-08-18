@@ -18,7 +18,7 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
 
-        const { productId, customerPhone, customerName, quantity, totalPrice, deliveryAddress, status } = await req.json();
+        const { productId, customerPhone, customerName, quantity, totalPrice, deliveryFee, deliveryAddress, status } = await req.json();
 
         if (!productId || !customerPhone) {
             return NextResponse.json({ success: false, message: "Product and Customer Phone are required" }, { status: 400, headers: corsHeaders() });
@@ -36,6 +36,7 @@ export async function POST(req) {
             customerName,
             quantity: quantity || 1,
             totalPrice: totalPrice || 0,
+            deliveryFee: deliveryFee || 0,
             status: status || "pending",
             deliveryAddress: deliveryAddress || "",
         });
@@ -56,6 +57,7 @@ export async function POST(req) {
                 customerName: newOrder.customerName || newOrder.customerPhone,
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
+                deliveryFee: newOrder.deliveryFee,
                 isConfirmed: true,
             });
         } else {
@@ -65,6 +67,7 @@ export async function POST(req) {
                 customerName: newOrder.customerName || newOrder.customerPhone,
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
+                deliveryFee: newOrder.deliveryFee,
                 isConfirmed: false,
             });
         }

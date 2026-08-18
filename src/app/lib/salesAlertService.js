@@ -14,7 +14,7 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import sendpulse from "@/app/lib/sendpulse";
 
 /* ── Build the email HTML ───────────────────────────────────── */
-function buildEmail({ businessName, customerPhone, productName, amountPaid, orderId, storeSlug, isConfirmed }) {
+function buildEmail({ businessName, customerPhone, productName, amountPaid, deliveryFee, orderId, storeSlug, isConfirmed }) {
   const salesAnalyticsLink = "https://www.pax26.com/dashboard/automations/sales";
   const inboxLink          = "https://www.pax26.com/dashboard/automations/whatsapp-inbox";
   const settingsLink       = "https://www.pax26.com/dashboard/automations/ai-business-dashboard";
@@ -35,6 +35,10 @@ function buildEmail({ businessName, customerPhone, productName, amountPaid, orde
   const statusBadge = isConfirmed
     ? `<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Confirmed Sale ✓</span>`
     : `<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Potential Sale — Action Required ⏳</span>`;
+
+  const deliveryFeeVal = Number(deliveryFee) || 0;
+  const grandTotalVal = Number(amountPaid) || 0;
+  const productsSubtotalVal = grandTotalVal > deliveryFeeVal ? grandTotalVal - deliveryFeeVal : grandTotalVal;
 
   return `
 <!DOCTYPE html>
@@ -83,13 +87,22 @@ function buildEmail({ businessName, customerPhone, productName, amountPaid, orde
                 </tr>
                 ${productName ? `
                 <tr>
-                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;vertical-align:top;">Product</td>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;vertical-align:top;">Product(s)</td>
                   <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;line-height:1.5;word-break:break-word;">${productName}</td>
+                </tr>` : ""}
+                ${deliveryFeeVal > 0 ? `
+                <tr>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Products Total</td>
+                  <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">₦${productsSubtotalVal.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Delivery Fee</td>
+                  <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">₦${deliveryFeeVal.toLocaleString()}</td>
                 </tr>` : ""}
                 ${amountPaid ? `
                 <tr>
-                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Amount</td>
-                  <td style="padding:6px 0;font-size:14px;color:#10b981;font-weight:700;">₦${Number(amountPaid).toLocaleString()}</td>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Grand Total</td>
+                  <td style="padding:6px 0;font-size:14px;color:#10b981;font-weight:700;">₦${grandTotalVal.toLocaleString()}</td>
                 </tr>` : ""}
                 ${orderId ? `
                 <tr>
@@ -158,9 +171,9 @@ function buildEmail({ businessName, customerPhone, productName, amountPaid, orde
  * sendSalesAlertEmail
  *
  * @param {string|ObjectId} userId
- * @param {{ customerPhone?: string, productName?: string, amountPaid?: number, orderId?: string, isConfirmed?: boolean }} options
+ * @param {{ customerPhone?: string, productName?: string, amountPaid?: number, deliveryFee?: number, orderId?: string, isConfirmed?: boolean }} options
  */
-export async function sendSalesAlertEmail(userId, { customerPhone, productName, amountPaid, orderId, isConfirmed = false } = {}) {
+export async function sendSalesAlertEmail(userId, { customerPhone, productName, amountPaid, deliveryFee, orderId, isConfirmed = false } = {}) {
   console.log(`[salesAlert] 📧 sendSalesAlertEmail called | userId=${userId} | isConfirmed=${isConfirmed} | orderId=${orderId}`);
   try {
     const [user, profile] = await Promise.all([
@@ -189,6 +202,7 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName, 
       customerPhone: customerPhone || "Customer",
       productName: productName || null,
       amountPaid: amountPaid || null,
+      deliveryFee: deliveryFee || null,
       orderId: orderId || null,
       storeSlug: profile.slug || null,
       isConfirmed,

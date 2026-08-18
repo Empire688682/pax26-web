@@ -40,7 +40,8 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
         const businessName = sellerProfile.businessName || "Our Store";
         const proofCode = order._id.toString().slice(-8).toUpperCase();
-        const totalPaid = (order.totalPrice || 0).toLocaleString();
+        const totalPaidVal = Number(order.totalPrice) || 0;
+        const deliveryFeeVal = Number(order.deliveryFee) || 0;
         const customerName = order.customerName || "Customer";
         const dateStr = new Date().toLocaleDateString("en-US", {
             year: "numeric",
@@ -50,15 +51,25 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
         // ── Format items section for multi-product or single-product ────────
         let itemsSection = "";
+        let calculatedSubtotal = 0;
+
         if (order.items && order.items.length > 0) {
+            calculatedSubtotal = order.items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
             itemsSection = order.items
-                .map((i) => `• Item: ${i.name} (x${i.quantity || 1})`)
+                .map((i) => {
+                    const linePrice = (Number(i.price) || 0) * (Number(i.quantity) || 1);
+                    return `• Item: ${i.name} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
+                })
                 .join("\n");
         } else {
             const productName = order.productId?.name || "Ordered Item";
             const quantity = order.quantity || 1;
-            itemsSection = `• Item: ${productName} (x${quantity})`;
+            const itemUnitPrice = Number(order.productId?.price) || (totalPaidVal > deliveryFeeVal ? totalPaidVal - deliveryFeeVal : totalPaidVal);
+            calculatedSubtotal = itemUnitPrice * quantity;
+            itemsSection = `• Item: ${productName} (x${quantity})${calculatedSubtotal > 0 ? ` — ₦${calculatedSubtotal.toLocaleString()}` : ""}`;
         }
+
+        const subtotalVal = calculatedSubtotal > 0 ? calculatedSubtotal : Math.max(0, totalPaidVal - deliveryFeeVal);
 
         const receiptMessage =
 `🧾 *ORDER CONFIRMATION & OFFICIAL RECEIPT*
@@ -72,9 +83,10 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 • Name: ${customerName}
 • Phone: ${order.customerPhone}
 ${order.deliveryAddress ? `• Delivery Address: ${order.deliveryAddress}\n` : ""}
-🛍️ *Order Details:*
+🛍️ *Order Breakdown:*
 ${itemsSection}
-• Total Amount Paid: ₦${totalPaid}
+${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}
+• Total Amount Paid: ₦${totalPaidVal.toLocaleString()}
 
 🚚 *DELIVERY INSTRUCTIONS:*
 Please present this receipt / Order Proof ID (*#${proofCode}*) to our delivery team upon arrival to confirm package handoff.

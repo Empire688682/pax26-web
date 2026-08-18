@@ -80,6 +80,7 @@ export async function PATCH(req, { params }) {
                 customerName: order.customerName || order.customerPhone,
                 productName: productSummary,
                 amountPaid: order.totalPrice,
+                deliveryFee: order.deliveryFee,
                 isConfirmed: true,
             });
 
