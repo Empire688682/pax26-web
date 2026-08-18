@@ -275,7 +275,12 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
       {/* Delivery (physical only) */}
       {form.isPhysical && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
-          <TInput label={`Delivery Fee (${sym})`} p={p} type="number" value={form.deliveryFee} onChange={e => set("deliveryFee", e.target.value)} placeholder="1000" />
+          <div>
+            <TInput label={`Delivery Fee (${sym})`} p={p} type="number" value={form.deliveryFee} onChange={e => set("deliveryFee", e.target.value)} placeholder="1000" />
+            <p style={{ margin: "4px 0 0", fontSize: "10px", color: p?.textPrimary, opacity: 0.5 }}>
+              📦 Multi-item orders use the single highest fee across items (per package).
+            </p>
+          </div>
           <TInput label="Delivery Time" p={p} value={form.deliveryTimeFrame} onChange={e => set("deliveryTimeFrame", e.target.value)} placeholder="24-48 hours" />
           <TInput label="Delivery Location" p={p} value={form.locationNotes} onChange={e => set("locationNotes", e.target.value)} placeholder="Lagos only" />
         </div>

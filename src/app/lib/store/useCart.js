@@ -72,6 +72,7 @@ export function useCart(slug) {
         price: itemPrice,
         imageUrl,
         quantity,
+        deliveryFee: Number(product.deliveryFee) || 0,
       });
     }
     saveCartItems(slug, updated);

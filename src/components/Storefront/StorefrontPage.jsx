@@ -171,10 +171,10 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         {cart.length > 0 && (
           <div style={{ padding: "16px 20px 20px", borderTop: `1px solid ${t.border}`, background: t.navBg, display: "flex", flexDirection: "column", gap: "12px" }}>
             <div>
-              <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Delivery Location (Optional)</label>
+              <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Delivery Address (Full Address)</label>
               <input
                 type="text"
-                placeholder="e.g. Ikeja, Lagos or Full Address"
+                placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
                 value={deliveryLocation}
                 onChange={(e) => setDeliveryLocation(e.target.value)}
                 style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
