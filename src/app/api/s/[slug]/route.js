@@ -1,20 +1,25 @@
 /**
- * /api/s/[slug]
+ * /api/s/[slug]/route.js
  *
- * Public short-link redirect handler.
- * No authentication required — this is the public redirect endpoint.
+ * Permanent storefront short-link redirect.
+ * URL format: pax26.com/api/s/[store-slug]
  *
- * GET /api/s/x7k2qp
- *   → Looks up the slug in ShortLink collection
- *   → If found & not expired → 307 redirect to targetUrl
- *   → If not found or expired → 302 redirect to home
+ * This is a permanent, seller-scoped redirect — it works as long
+ * as the seller's account exists in the platform.
  *
- * Also increments the click counter for lightweight analytics (fire-and-forget).
+ * NO expiry. NO session tokens in the URL. NO external dependencies.
+ *
+ * Redirect chain:
+ *   pax26.com/api/s/jaystore  →  pax26.com/store/jaystore
+ *
+ * Future gate (when ready):
+ *   Uncomment the subscription check block below to restrict access
+ *   to sellers with an active paid plan.
  */
 
 import { NextResponse } from "next/server";
 import { connectDb } from "../../../ults/db/ConnectDb.js";
-import ShortLinkModel from "../../../ults/models/ShortLinkModel.js";
+import SellerProfileModel from "../../../ults/models/SellerProfileModel.js";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
 
@@ -28,30 +33,39 @@ export async function GET(request, { params }) {
     try {
         await connectDb();
 
-        const link = await ShortLinkModel.findOne({
+        // Look up seller by their store slug — permanent, no expiry
+        const seller = await SellerProfileModel.findOne({
             slug: slug.toLowerCase().trim(),
-            expiresAt: { $gt: new Date() }, // exclude expired links
-        }).lean();
+            isActive: true,
+        })
+        .select("slug isActive userId")  // lean projection — fetch only what we need
+        .lean();
 
-        if (!link) {
-            console.log(`[shortlink] Slug not found or expired: ${slug}`);
+        if (!seller) {
+            console.log(`[shortlink] Store not found or inactive: ${slug}`);
             // Redirect to home — friendly fallback
             return NextResponse.redirect(`${BASE_URL}`, { status: 302 });
         }
 
-        // Fire-and-forget click increment — don't block the redirect
-        ShortLinkModel.updateOne(
-            { _id: link._id },
-            { $inc: { clicks: 1 } }
-        ).catch(err => console.warn("[shortlink] Click increment failed:", err.message));
+        // ── SUBSCRIPTION GATE (enable when ready) ───────────────────────────
+        // Uncomment this block to restrict short links to active paid subscribers:
+        //
+        // const user = await UserModel.findById(seller.userId).select("paxAI.plan paxAI.planStatus").lean();
+        // const isSubscribed = user?.paxAI?.planStatus === "active" && user?.paxAI?.plan !== "free";
+        // if (!isSubscribed) {
+        //     return NextResponse.redirect(`${BASE_URL}/pricing?ref=store-link`, { status: 302 });
+        // }
+        // ────────────────────────────────────────────────────────────────────
 
-        console.log(`[shortlink] ✅ Redirecting ${slug} → ${link.targetUrl.slice(0, 60)}...`);
+        const storeUrl = `${BASE_URL}/store/${seller.slug}`;
 
-        // 307 Temporary Redirect — preserves HTTP method, appropriate for session URLs
-        return NextResponse.redirect(link.targetUrl, { status: 307 });
+        console.log(`[shortlink] ✅ /s/${slug} → ${storeUrl}`);
+
+        // 307 Temporary Redirect — appropriate since the seller slug could theoretically change
+        return NextResponse.redirect(storeUrl, { status: 307 });
 
     } catch (err) {
-        console.error("[shortlink] Error resolving short link:", err.message);
+        console.error("[shortlink] Error resolving store link:", err.message);
         return NextResponse.redirect(`${BASE_URL}`, { status: 302 });
     }
 }
