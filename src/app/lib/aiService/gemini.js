@@ -3,10 +3,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const callGeminiAI = async ({ systemPrompt, messages }) => {
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: systemPrompt,
-  });
+  const modelsToTry = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro",
+  ];
 
   const lastMessage = messages[messages.length - 1].content;
 
@@ -21,15 +23,40 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
     historyMessages.shift();
   }
 
-  const chat = model.startChat({ history: historyMessages });
-  const result = await chat.sendMessage(lastMessage);
-  const text = result.response.text();
+  let lastError = null;
 
-  if (!text) return null;
+  for (const modelName of modelsToTry) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: systemPrompt,
+      });
 
-  return {
-    text,
-    tokensUsed: result?.response?.usageMetadata?.totalTokenCount || 0,
-    model: "gemini-1.5-flash",
-  };
+      const chat = model.startChat({ history: historyMessages });
+      const result = await chat.sendMessage(lastMessage);
+      const text = result.response.text();
+
+      if (!text) continue;
+
+      return {
+        text,
+        tokensUsed: result?.response?.usageMetadata?.totalTokenCount || 0,
+        model: modelName,
+      };
+    } catch (err) {
+      lastError = err;
+      const isNotFound =
+        err?.status === 404 ||
+        err?.message?.includes("not found") ||
+        err?.message?.includes("404") ||
+        err?.message?.includes("not supported");
+
+      console.warn(`⚠️ Gemini model ${modelName} failed: ${err?.message || err}`);
+      if (isNotFound) continue; // Try next model in list
+      throw err;
+    }
+  }
+
+  if (lastError) throw lastError;
+  return null;
 };

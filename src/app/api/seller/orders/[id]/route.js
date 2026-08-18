@@ -69,11 +69,16 @@ export async function PATCH(req, { params }) {
             sellerProfile.totalSalesAmount = (sellerProfile.totalSalesAmount || 0) + (order.totalPrice || 0);
             await sellerProfile.save();
 
+            // Build product summary for notifications (e.g. "Bag 1, Bag 2, Bag 3" or "Bag 1 (2x), Bag 2 (1x)")
+            const productSummary = (order.items && order.items.length > 0)
+                ? order.items.map(i => `${i.name}${i.quantity > 1 ? ` (${i.quantity}x)` : ''}`).join(", ")
+                : (order.productId?.name || "Confirmed Order");
+
             // 1. Notify seller (in-app, WhatsApp, and email)
             await sendSalesNotification(userId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
-                productName: order.productId?.name || "Confirmed Order",
+                productName: productSummary,
                 amountPaid: order.totalPrice,
                 isConfirmed: true,
             });

@@ -83,8 +83,8 @@ function buildEmail({ businessName, customerPhone, productName, amountPaid, orde
                 </tr>
                 ${productName ? `
                 <tr>
-                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Product</td>
-                  <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;">${productName}</td>
+                  <td style="padding:6px 0;font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;vertical-align:top;">Product</td>
+                  <td style="padding:6px 0;font-size:14px;color:#111;font-weight:600;line-height:1.5;word-break:break-word;">${productName}</td>
                 </tr>` : ""}
                 ${amountPaid ? `
                 <tr>

@@ -40,6 +40,10 @@ export async function POST(req) {
             deliveryAddress: deliveryAddress || "",
         });
 
+        const productSummary = (newOrder.items && newOrder.items.length > 0)
+            ? newOrder.items.map(i => `${i.name}${i.quantity > 1 ? ` (${i.quantity}x)` : ''}`).join(", ")
+            : "Product Order";
+
         // Update total sales metrics if the order is confirmed/paid
         if (["confirmed", "paid", "delivered"].includes(newOrder.status)) {
             sellerProfile.totalSalesCount = (sellerProfile.totalSalesCount || 0) + 1;
@@ -50,7 +54,7 @@ export async function POST(req) {
             await sendSalesNotification(userId, {
                 orderId: newOrder._id.toString(),
                 customerName: newOrder.customerName || newOrder.customerPhone,
-                productName: "Product Order",
+                productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 isConfirmed: true,
             });
@@ -59,7 +63,7 @@ export async function POST(req) {
             await sendSalesNotification(userId, {
                 orderId: newOrder._id.toString(),
                 customerName: newOrder.customerName || newOrder.customerPhone,
-                productName: "Pending Order",
+                productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 isConfirmed: false,
             });

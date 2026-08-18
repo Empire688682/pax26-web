@@ -176,8 +176,9 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
                 caption: cleanCaption,
             });
             console.log("🖼️  Image send result:", JSON.stringify(result));
-            // Send remaining images (2nd, 3rd) without caption
-            for (const url of imageUrls.slice(1, 3)) {
+            // Send remaining images — hard cap at 1 total (teaser pattern: 1 image only)
+            // This is a code-level safety net; the prompt already instructs max 1 image
+            for (const url of imageUrls.slice(1, 1)) {
                 try {
                     await sendWhatsAppImageReply({ phoneNumberId, to, imageUrl: url });
                     console.log("🖼️  Image sent:", url.slice(0, 60) + "...");

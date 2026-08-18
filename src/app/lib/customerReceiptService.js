@@ -40,15 +40,25 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
         const businessName = sellerProfile.businessName || "Our Store";
         const proofCode = order._id.toString().slice(-8).toUpperCase();
-        const productName = order.productId?.name || "Ordered Item";
         const totalPaid = (order.totalPrice || 0).toLocaleString();
-        const quantity = order.quantity || 1;
         const customerName = order.customerName || "Customer";
         const dateStr = new Date().toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
             day: "numeric",
         });
+
+        // ── Format items section for multi-product or single-product ────────
+        let itemsSection = "";
+        if (order.items && order.items.length > 0) {
+            itemsSection = order.items
+                .map((i) => `• Item: ${i.name} (x${i.quantity || 1})`)
+                .join("\n");
+        } else {
+            const productName = order.productId?.name || "Ordered Item";
+            const quantity = order.quantity || 1;
+            itemsSection = `• Item: ${productName} (x${quantity})`;
+        }
 
         const receiptMessage =
 `🧾 *ORDER CONFIRMATION & OFFICIAL RECEIPT*
@@ -63,7 +73,7 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 • Phone: ${order.customerPhone}
 ${order.deliveryAddress ? `• Delivery Address: ${order.deliveryAddress}\n` : ""}
 🛍️ *Order Details:*
-• Item: ${productName} (x${quantity})
+${itemsSection}
 • Total Amount Paid: ₦${totalPaid}
 
 🚚 *DELIVERY INSTRUCTIONS:*

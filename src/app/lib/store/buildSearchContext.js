@@ -36,10 +36,6 @@ export function buildSearchMatchContext(products, originalQuery, currency = "NGN
       const effectivePrice = p.discountPrice || p.price;
       const hasDiscount = p.discountPrice && p.discountPrice < p.price;
 
-      const imageList = p.images?.length
-        ? p.images.slice(0, 3).map(img => `IMAGE_URL: ${img.url}`).join("\n")
-        : "    No images available";
-
       const variantSummary = p.variants?.length
         ? p.variants.map(v =>
             `    ${v.label}: ${v.options?.map(o => o.value).join(", ")}`
@@ -56,9 +52,7 @@ export function buildSearchMatchContext(products, originalQuery, currency = "NGN
   ${p.deliveryFee != null ? `Delivery Fee: ${symbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
   ${p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
   ${p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
-  ${variantSummary ? `Available Options:\n${variantSummary}` : ""}
-  Product Images:
-${imageList}`;
+  ${variantSummary ? `Available Options:\n${variantSummary}` : ""}`;
     })
     .join("\n\n");
 
@@ -72,13 +66,13 @@ ${productSummaries}
 
 INSTRUCTIONS:
 - Recommend the best matching product(s) from the results above
-- Do NOT auto-attach images unless the customer explicitly asked to see pictures, photos, or images in their query ("${originalQuery}")
-- If the customer explicitly asked to see photos/images and the product has images, include them with [SEND_IMAGE: url] tags
+- Do NOT send images during general product descriptions or pricing \u2014 only when customer explicitly asked to see pictures/photos
+- If the customer asked to see pictures: output exactly ONE IMAGE_URL for the top result, then share the storefront link
 - Mention price, availability, and key details naturally
 - If variants exist (sizes, colours), ask which option they want
 - If something is out of stock, mention it and suggest the next best result
-- If multiple strong matches exist, briefly mention up to 3 — let the customer choose
-- Keep the response short and conversational — do not list all products robotically
+- If multiple strong matches exist, briefly mention up to 3 \u2014 let the customer choose
+- Keep the response short and conversational \u2014 do not list all products robotically
 - Do NOT mention products outside these search results
 ]`;
 }

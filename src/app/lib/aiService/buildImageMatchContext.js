@@ -67,8 +67,9 @@ ${productSummaries}
 INSTRUCTIONS:
 - Tell the customer you found something that looks like what they sent
 - Describe the top match briefly (name, price, availability)
-- Send the product images using the [SEND_IMAGE: url] tags above
-- If more than one match, mention the alternatives briefly
+- Do NOT send IMAGE_URL tags — instead share the storefront link so they can browse and see full photos
+- Say something like: "Here's what I found! Check out the full details and pictures here: [storefront link from your system prompt]"
+- If more than one match, briefly mention the alternatives
 - If the top match is out of stock, mention it and offer the alternative
 - Ask if this is what they were looking for
 ]`;

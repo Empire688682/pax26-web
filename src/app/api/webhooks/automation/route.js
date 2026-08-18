@@ -1,9 +1,11 @@
 // app/api/webhooks/whatsapp/route.js
 
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { handleIncomingWhatsApp } from "@/app/lib/aiService/handleIncomingWhatsapp";
+
+export const maxDuration = 60; // Allow up to 60s for background execution on Vercel Pro/serverless
 
 // ✅ META WEBHOOK VERIFICATION
 export async function GET(req) {
@@ -68,9 +70,14 @@ export async function POST(req) {
         }
 
         // ✅ Ack Meta immediately — process AI in background to avoid 5s timeout / retries
-        console.log("handleIncomingWhatsApp");
-        await handleIncomingWhatsApp(entry)
-
+        console.log("handleIncomingWhatsApp (triggering background execution)");
+        after(async () => {
+            try {
+                await handleIncomingWhatsApp(entry);
+            } catch (err) {
+                console.error("❌ Background handleIncomingWhatsApp error:", err);
+            }
+        });
 
         return NextResponse.json({ ok: true });
 

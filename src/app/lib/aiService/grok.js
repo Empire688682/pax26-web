@@ -5,22 +5,49 @@ const groq = new Groq({
 });
 
 export const callGroqAI = async ({ systemPrompt, messages }) => {
-  const response = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 300, // WhatsApp replies are 1–3 sentences — no need for 1024
-    messages: [
-      { role: "system", content: systemPrompt },
-      ...messages,
-    ],
-  });
+  const modelsToTry = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "llama3-70b-8192",
+    "llama3-8b-8192",
+    "mixtral-8x7b-32768",
+  ];
 
-  const text = response?.choices?.[0]?.message?.content;
-  if (!text) return null;
+  let lastError = null;
 
-  return {
-    text,
-    tokensUsed: response?.usage?.total_tokens || 0,
-    model: response?.model,
-  };
+  for (const modelName of modelsToTry) {
+    try {
+      const response = await groq.chat.completions.create({
+        model: modelName,
+        max_tokens: 300, // WhatsApp replies are 1–3 sentences — no need for 1024
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+      });
+
+      const text = response?.choices?.[0]?.message?.content;
+      if (!text) continue;
+
+      return {
+        text,
+        tokensUsed: response?.usage?.total_tokens || 0,
+        model: response?.model || modelName,
+      };
+    } catch (err) {
+      lastError = err;
+      const isNotFound =
+        err?.status === 404 ||
+        err?.code === "model_not_found" ||
+        err?.error?.code === "model_not_found" ||
+        err?.message?.includes("does not exist");
+
+      console.warn(`⚠️ Groq model ${modelName} failed: ${err?.message || err}`);
+      if (isNotFound) continue; // Try next model in list
+      throw err; // Other errors (auth, quota) bubble up
+    }
+  }
+
+  if (lastError) throw lastError;
+  return null;
 };
-// No try/catch — let errors bubble up to triggerAIResponse.js

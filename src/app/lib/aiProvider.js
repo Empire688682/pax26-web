@@ -10,7 +10,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Groq from 'groq-sdk';
 import { Mistral } from '@mistralai/mistralai';
 
-const TIMEOUT_MS = 20000; // 20 seconds per provider
+const TIMEOUT_MS = 6000; // 6 seconds per provider limit
 
 /**
  * Wraps a promise with a timeout.
@@ -33,8 +33,12 @@ async function tryGemini(systemPrompt, history, userMessage) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  // Try gemini-1.5-flash first, fall back to gemini-1.5-pro
-  const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-pro'];
+  const modelsToTry = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-pro',
+  ];
 
   for (const modelName of modelsToTry) {
     try {
@@ -81,7 +85,7 @@ async function tryGemini(systemPrompt, history, userMessage) {
 }
 
 /**
- * Try Groq (llama-3.3-70b-versatile — free tier)
+ * Try Groq (llama-3.3-70b-versatile — free tier with fallbacks)
  */
 async function tryGroq(systemPrompt, history, userMessage) {
   const apiKey = process.env.GROQ_API_KEY;
@@ -99,21 +103,44 @@ async function tryGroq(systemPrompt, history, userMessage) {
     { role: 'user', content: userMessage },
   ];
 
-  const completion = await withTimeout(
-    groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
-      messages,
-      max_tokens: 1024,
-      temperature: 0.7,
-    }),
-    TIMEOUT_MS
-  );
+  const modelsToTry = [
+    'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant',
+    'llama3-70b-8192',
+    'mixtral-8x7b-32768',
+  ];
 
-  const text = completion.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Groq returned empty response');
+  for (const modelName of modelsToTry) {
+    try {
+      const completion = await withTimeout(
+        groq.chat.completions.create({
+          model: modelName,
+          messages,
+          max_tokens: 1024,
+          temperature: 0.7,
+        }),
+        TIMEOUT_MS
+      );
 
-  console.log('[aiProvider] Groq success');
-  return { text };
+      const text = completion.choices?.[0]?.message?.content;
+      if (!text) continue;
+
+      console.log(`[aiProvider] Groq success with model: ${modelName}`);
+      return { text };
+    } catch (err) {
+      const isNotFound =
+        err?.status === 404 ||
+        err?.code === 'model_not_found' ||
+        err?.error?.code === 'model_not_found' ||
+        err?.message?.includes('does not exist');
+
+      console.warn(`[aiProvider] Groq ${modelName} failed: ${err.message}`);
+      if (isNotFound) continue;
+      throw err;
+    }
+  }
+
+  throw new Error('All Groq models exhausted');
 }
 
 /**
@@ -134,21 +161,42 @@ async function tryMistral(systemPrompt, history, userMessage) {
     { role: 'user', content: userMessage },
   ];
 
-  const result = await withTimeout(
-    mistral.chat.complete({
-      model: 'mistral-small-latest',
-      messages,
-      maxTokens: 1024,
-      temperature: 0.7,
-    }),
-    TIMEOUT_MS
-  );
+  const modelsToTry = [
+    'mistral-small-latest',
+    'open-mistral-7b',
+    'mistral-medium-latest',
+  ];
 
-  const text = result.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Mistral returned empty response');
+  for (const modelName of modelsToTry) {
+    try {
+      const result = await withTimeout(
+        mistral.chat.complete({
+          model: modelName,
+          messages,
+          maxTokens: 1024,
+          temperature: 0.7,
+        }),
+        TIMEOUT_MS
+      );
 
-  console.log('[aiProvider] Mistral success');
-  return { text };
+      const text = result.choices?.[0]?.message?.content;
+      if (!text) continue;
+
+      console.log(`[aiProvider] Mistral success with model: ${modelName}`);
+      return { text };
+    } catch (err) {
+      const isNotFound =
+        err?.status === 404 ||
+        err?.message?.includes('not found') ||
+        err?.message?.includes('404');
+
+      console.warn(`[aiProvider] Mistral ${modelName} failed: ${err.message}`);
+      if (isNotFound) continue;
+      throw err;
+    }
+  }
+
+  throw new Error('All Mistral models exhausted');
 }
 
 /**

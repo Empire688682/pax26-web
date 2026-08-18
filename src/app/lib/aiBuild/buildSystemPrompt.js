@@ -82,21 +82,21 @@ NO PAYMENT DETAILS HAVE BEEN SHARED YET for an active order:
 3. Do NOT confirm receipt of any payment or thank the customer for payment proof unless you previously provided payment details for an active order.
 `;
 
-  // ── Products catalogue (with image metadata) ──────────────
+  // ── Products catalogue ────────────────────────────────────
   const productsSection = products?.length
     ? `
 ## Product Catalogue:
-CRITICAL: When a customer asks to see pictures of any product listed below, you MUST output the image tag IMAGE_URL: <url> on its own line. Do not describe images in words — output the tag.
+Use the products below to answer customer questions about availability, pricing, and delivery.
+The IMAGE_URL listed per product is for the teaser ONLY — see IMAGE POLICY below for when you may use it.
 
 ${products
       .slice(0, 35)
       .map((p, i) => {
         const isAvailable = p.isAvailable !== false && p.stock > 0;
-        const mainImg = p.images?.[0]?.url;
-        const imgText = mainImg ? `IMAGE_URL: ${mainImg}` : "No image available";
+        const firstImage  = p.images?.[0]?.url || null;
         const desc = p.description ? p.description.slice(0, 100).replace(/\s+/g, " ") : "";
 
-        return `[Product ${i + 1}] ID: ${p._id} | Name: ${p.name} | Price: ${currencySymbol}${Number(p.price).toLocaleString()}${p.discountPrice ? ` (Discount: ${currencySymbol}${Number(p.discountPrice).toLocaleString()})` : ""}${p.deliveryFee ? ` | Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""} | Cat: ${p.category || "General"} | Stock: ${isAvailable ? "Available" : "Out of stock"}${desc ? ` | ${desc}` : ""}\n${imgText}`;
+        return `[Product ${i + 1}] ID: ${p._id} | Name: ${p.name} | Price: ${currencySymbol}${Number(p.price).toLocaleString()}${p.discountPrice ? ` (Discount: ${currencySymbol}${Number(p.discountPrice).toLocaleString()})` : ""}${p.deliveryFee ? ` | Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""} | Cat: ${p.category || "General"} | Stock: ${isAvailable ? "Available" : "Out of stock"}${desc ? ` | ${desc}` : ""}${firstImage ? `\nIMAGE_URL_TEASER: ${firstImage}` : ""}`;
       })
       .join("\n\n")}`
     : "\n## Product Catalogue:\nNo products have been added yet. Let customers know you will update them shortly.";
@@ -127,26 +127,32 @@ ${activePayments
   const storefrontSection = storefrontUrl
     ? `
 ━━━━━━━━━━━━━━━━━━━━━━━━
-STOREFRONT — BROWSE ONLINE
+STOREFRONT — ALWAYS INCLUDE WITH PICTURE REQUESTS
 ━━━━━━━━━━━━━━━━━━━━━━━━
-The seller has a mini online store where the customer can browse all products with images.
 Storefront URL: ${storefrontUrl}
 
-WHEN to share the storefront link:
-  - Customer asks "can I see all your products?" or "do you have more options?"
-  - Customer is comparing multiple items and wants to browse freely
-  - Customer asks "do you have a website?" or "where can I see everything?"
-  - After showing 2–3 products and the customer still hasn't found what they want
+When a customer asks to see pictures, photos, images, or "see more":
+  Step 1: Send ONE image of the most relevant product using IMAGE_URL: <url> (from the Product Catalogue above)
+  Step 2: Then share the storefront link so they can browse everything else
 
-HOW to share it:
-  Keep it natural. Example:
-  "You can browse our full collection here: ${storefrontUrl}
-  Each product has pictures and prices. Tap any item and message us directly to order."
+EXACT format to use:
+  "Here is [Product Name]:"
+  IMAGE_URL: <url from catalogue>
+  "Browse all our products with pictures and prices here: ${storefrontUrl}"
+
+If the product has no image (IMAGE_URL not in catalogue), skip Step 1 and send only the storefront link:
+  "Here is our full store with pictures and prices for all items: ${storefrontUrl}"
+
+ALSO share the storefront link when:
+  - Customer asks "do you have more?", "what else do you have?", "any other options?"
+  - Customer asks "do you have a website?", "where can I see everything?"
+  - Customer is comparing multiple items or hasn't found what they want
 
 RULES:
-  - Only share the storefront URL when it's genuinely useful — do not spam it in every message
-  - Never say the link is "secure" or make security claims — just share it naturally
-  - If a customer clicks the link and comes back asking about a specific product, continue the conversation normally`
+  - Maximum ONE IMAGE_URL per reply — never two or three
+  - Always pair the image with the storefront link (image alone is not enough)
+  - Only share the storefront once per conversation unless the customer asks again
+  - Keep surrounding text short and natural`
     : "";
 
   // ── Active promo announcement context ───────────────────
@@ -214,24 +220,30 @@ ${storefrontSection}
 ${promoSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
-HOW TO SEND PRODUCT IMAGES — MANDATORY FORMAT
+PRODUCT IMAGE POLICY — READ CAREFULLY
 ━━━━━━━━━━━━━━━━━━━━━━━━
-Images are sent by writing IMAGE_URL: followed by the URL on its own line.
-CRITICAL RULE: Do NOT auto-attach product images during general negotiation, pricing, or product descriptions.
-Only include IMAGE_URL: when the customer explicitly asks to see pictures, photos, or images (e.g. "show me the picture", "can I see it?", "send photos").
+${isExpectingPayment
+  ? `PAYMENT IS PENDING — IMAGE SENDING IS DISABLED
+Do NOT send any IMAGE_URL tags right now.
+Your only job is to ask the customer to send a screenshot of their payment proof.
+Do not show products, do not send images, do not share the storefront link.`
+  : `WHEN TO SEND AN IMAGE:
+  Only when the customer explicitly asks to see a picture, photo, or image of a product.
+  Do NOT send images during general product descriptions, pricing discussions, or negotiations.
 
-CORRECT — when customer says "send me the picture":
-Here is the Yellow Men Shoe:
-IMAGE_URL: https://res.cloudinary.com/.../shoe.jpg
+HOW TO SEND IT (exactly this format):
+  "Here is [Product Name]:"
+  IMAGE_URL: <url from the Product Catalogue above>
+  "See all our products here: ${storefrontUrl || "[storefront link]"}"
 
-WRONG — do NOT do this during basic price enquiry:
-"The shoe is ₦15,000. IMAGE_URL: https://..." ← Do NOT include image URL if customer didn't ask for pictures!
-
-RULES:
-  - Write IMAGE_URL: followed by the exact URL from the product catalogue above ONLY when asked for photos/images
-  - Max 3 images per reply
-  - If a product has no images listed, say "I don't have a picture for this one right now"
-  - NEVER invent image URLs — only use URLs from the Product Catalogue above
+STRICT RULES:
+  - Maximum ONE IMAGE_URL per reply — never output two or more IMAGE_URL lines
+  - Always follow the image with the storefront link (see STOREFRONT section)
+  - Only use IMAGE_URL values that are listed in the Product Catalogue above
+  - NEVER invent or guess image URLs
+  - If the product has no IMAGE_URL in the catalogue, skip the image and send only the storefront link
+  - Do NOT output IMAGE_URL during payment discussions, after sharing payment details, or during any other stage`
+}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 SALES CONVERSATION FLOW
