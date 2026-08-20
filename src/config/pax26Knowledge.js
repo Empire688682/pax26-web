@@ -126,6 +126,20 @@ For the latest pricing, visit https://pax26.com/#pricing or contact info@pax26.c
 
 ---
 
+## Official Video Masterclass & Setup Guide
+
+Pax26 has an official 43-minute video masterclass tutorial available on YouTube that covers almost everything in detail:
+- **Title**: How to Use Pax26 — Complete Storefront & WhatsApp AI Automation Masterclass
+- **YouTube Link**: https://youtu.be/4aa5bBJkZ1Y
+- **Duration**: 43 minutes
+- **What it covers**: Complete end-to-end walkthrough of setting up your online storefront, uploading products, connecting WhatsApp via Meta Cloud API / QR code, training your PaxAI sales agent, configuring automation flows, managing leads, tracking sales analytics, and processing orders on WhatsApp.
+
+### When to Recommend the Video:
+- Recommend this video whenever a user asks "Is there a video tutorial?", "How do I use Pax26?", "How does Pax26 work?", "Where can I watch the video guide?", or asks for step-by-step setup visual guidance.
+- Tell users they can watch the 43-minute complete masterclass directly at https://youtu.be/4aa5bBJkZ1Y or embedded inside our support chat window.
+
+---
+
 ## How to Get Started
 
 1. Visit https://pax26.com and click "Start Selling Free" to create your account.
@@ -179,6 +193,9 @@ A: No. Pax26 is built for non-technical business owners. Everything is point-and
 
 **Q: How long does setup take?**
 A: Most businesses are live in under 5 minutes. Connect WhatsApp, add your products, and activate your AI agent.
+
+**Q: Is there a video tutorial on how to use Pax26?**
+A: Yes! We have a complete 43-minute masterclass video tutorial on YouTube that covers almost everything — from creating your storefront and uploading products to connecting WhatsApp and training your PaxAI sales agent. Watch it here: https://youtu.be/4aa5bBJkZ1Y
 
 **Q: Is my WhatsApp account safe?**
 A: Yes. Pax26 uses the official Meta WhatsApp Business Cloud API — the same infrastructure Meta uses. Your messages are encrypted and your account is protected.

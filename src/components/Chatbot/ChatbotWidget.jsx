@@ -60,9 +60,17 @@ const TypingDots = ({ color }) => (
   </div>
 );
 
+const extractYouTubeId = (text) => {
+  if (!text) return null;
+  const match = text.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+};
+
 /* ── Message bubble ──────────────────────────────────────── */
 const MessageBubble = ({ msg, pax26 }) => {
   const isUser = msg.role === "user";
+  const youtubeId = !isUser ? extractYouTubeId(msg.text) : null;
+
   return (
     <div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : "flex-row"} items-end`}>
       {/* Avatar */}
@@ -78,7 +86,7 @@ const MessageBubble = ({ msg, pax26 }) => {
       </div>
 
       {/* Bubble */}
-      <div className="max-w-[75%] sm:max-w-[70%]">
+      <div className="max-w-[85%] sm:max-w-[80%]">
         <div
           className="px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
           style={
@@ -97,6 +105,18 @@ const MessageBubble = ({ msg, pax26 }) => {
           }
         >
           {msg.text}
+
+          {youtubeId && (
+            <div className="mt-3 rounded-xl overflow-hidden shadow-md border border-black/10 dark:border-white/10 relative w-full aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeId}`}
+                title="Pax26 Video Masterclass"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          )}
         </div>
         <p
           className={`text-xs mt-1 opacity-40 ${isUser ? "text-right" : "text-left"}`}
