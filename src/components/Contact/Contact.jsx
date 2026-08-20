@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import axios from "axios";
 import { toast } from "react-toastify";
 import { Mail, Phone, MapPin, Send, ArrowRight, MessageCircle, Info } from "lucide-react";
 import SocialIcons from "../SocialIcons/SocialIcons";
@@ -72,10 +73,20 @@ const Contact = () => {
     if (!form.name || !form.email || !form.message)
       return toast.error("All fields are required!");
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800)); // simulate send
-    toast.success("Message sent successfully!");
-    setForm({ name: "", email: "", message: "" });
-    setLoading(false);
+    try {
+      const res = await axios.post("/api/contact", form);
+      if (res.data?.success) {
+        toast.success(res.data.message || "Message sent successfully!");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        toast.error(res.data?.message || "Failed to send message.");
+      }
+    } catch (error) {
+      console.error("Contact Form error:", error);
+      toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = (field) => ({

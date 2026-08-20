@@ -103,7 +103,7 @@ export const AppProvider = ({ children }) => {
      AUTH FUNCTIONS
   =================================*/
 
-  const openModal = (type) => {
+  const openModal = useCallback((type) => {
     if (userData) {
       router.push("/dashboard");
     } else {
@@ -119,7 +119,7 @@ export const AppProvider = ({ children }) => {
       });
 
     }
-  };
+  }, [userData, router]);
 
   const logoutUser = async () => {
     try {

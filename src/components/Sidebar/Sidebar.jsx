@@ -10,7 +10,7 @@ import {
   ChevronRight, Zap, Crown, ArrowUpRight,
   Home, Shield, Users, ShieldAlert,
   MessageSquare, Cpu, Bot, Sparkles, CreditCard, Layers, BadgeDollarSign, BarChart2,
-  Radio, Send, Store, Package
+  Radio, Send, Store, Package, Youtube
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 import { usePlanLimits } from '@/app/hooks/usePlanLimits';
@@ -215,6 +215,7 @@ export default function Sidebar() {
               <>
                 <SectionLabel label="Menu" pax26={pax26} />
                 <NavItem href="/" icon={Home} label="Home" onClick={close} pax26={pax26} />
+                <NavItem href="/tutorial" icon={Youtube} label="Video Masterclass" onClick={close} pax26={pax26} isNew />
                 <NavItem href="/about" icon={Info} label="About" onClick={close} pax26={pax26} />
                 <NavItem href="/blog" icon={FileCode} label="Blog" onClick={close} pax26={pax26} />
                 <NavItem href="/contact" icon={Phone} label="Contact" onClick={close} pax26={pax26} />
@@ -229,6 +230,7 @@ export default function Sidebar() {
                 {/* ── STAGE 1: CORE & STOREFRONT ── */}
                 <SectionLabel label="Core & Storefront" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/tutorial" icon={Youtube} label="Video Masterclass" onClick={close} pax26={pax26} isNew />
                 {userData?.paxAI?.businessType === 'seller' && (
                   <NavItem href="/dashboard/my-store" icon={Store} label="My Storefront" onClick={close} pax26={pax26} isNew />
                 )}

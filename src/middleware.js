@@ -60,5 +60,6 @@ export const config = {
     "/transaction-receipt",
     "/transactions",
     "/transactions/:path*",
+    "/tutorial",
   ],
 };

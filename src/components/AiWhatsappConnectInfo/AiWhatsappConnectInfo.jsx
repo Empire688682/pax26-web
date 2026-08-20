@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import {
   Facebook, CheckCircle2, ShieldCheck, Phone,
   ArrowRight, Wifi, Lock, Zap, RefreshCw,
-  MessageCircle, AlertCircle, ExternalLink, AlertTriangle,
+  MessageCircle, AlertCircle, ExternalLink, AlertTriangle, Youtube, Play,
 } from "lucide-react";
 import { useGlobalContext } from "../Context";
 
@@ -419,6 +419,70 @@ export default function AiWhatsappConnectInfo() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* ── Video Masterclass card ────────────────── */}
+          <div className="wi-s3 wi-card" style={{
+            background: pax26?.card || "#fff",
+            border: "1px solid rgba(0,0,0,0.07)",
+            borderRadius: "20px",
+            overflow: "hidden",
+            marginBottom: "20px",
+          }}>
+            <div style={{
+              height: "3px",
+              background: `linear-gradient(90deg, #ef4444, rgba(239,68,68,0.3), transparent)`,
+            }} />
+            <div style={{ padding: "24px 24px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{
+                    width: "34px", height: "34px", borderRadius: "10px",
+                    background: "rgba(239,68,68,0.1)", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Youtube size={18} style={{ color: "#ef4444" }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "14px", fontWeight: 700, color: pax26?.textPrimary || "#111827" }}>
+                      Watch Complete Setup Masterclass
+                    </p>
+                    <p style={{ fontSize: "11px", color: pax26?.textSecondary || "rgba(0,0,0,0.4)" }}>
+                      43-minute step-by-step video guide
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href="https://youtu.be/4aa5bBJkZ1Y"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "12px", fontWeight: 700, color: "#ef4444",
+                    display: "flex", alignItems: "center", gap: "4px",
+                    textDecoration: "none",
+                  }}>
+                  Watch on YouTube <ExternalLink size={12} />
+                </a>
+              </div>
+
+              {/* Embedded Player */}
+              <div style={{
+                position: "relative", width: "100%", paddingTop: "56.25%",
+                borderRadius: "14px", overflow: "hidden", background: "#000",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              }}>
+                <iframe
+                  style={{
+                    position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0,
+                  }}
+                  src="https://www.youtube.com/embed/4aa5bBJkZ1Y?rel=0&modestbranding=1"
+                  title="Pax26 WhatsApp Connection & Storefront Masterclass"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
             </div>
           </div>
 

@@ -14,6 +14,7 @@ import Problem from '@/components/Problem/Problem';
 import AutomationFeatures from '@/components/AutomationFeatures/AutomationFeatures';
 import HowItWorks from '@/components/HowItWorks/HowItWorks';
 import Demo from '@/components/Demo/Demo';
+import MasterclassVideo from '@/components/MasterclassVideo/MasterclassVideo';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
@@ -115,6 +116,17 @@ const Page = () => {
         variants={fadeInUp}
       >
         <Demo />
+      </motion.div>
+
+      {/* Official Masterclass Video */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.55 }}
+        variants={fadeInUp}
+      >
+        <MasterclassVideo />
       </motion.div>
 
       {/* How It Works */}

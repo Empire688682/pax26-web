@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SocialIcons from "../SocialIcons/SocialIcons";
 import { useGlobalContext } from "../Context";
-import { ArrowUp, Bot, Zap, Wifi } from "lucide-react";
+import { ArrowUp, Bot, Zap, Wifi, Youtube, Play } from "lucide-react";
 import { usePathname } from "next/navigation";
 import ChatbotWidget from "../Chatbot/ChatbotWidget";
 
@@ -78,8 +78,9 @@ function ColHead({ children, textColor }) {
 
 /* ── Main footer ──────────────────────────────────────────────── */
 const Footer = () => {
-  const { pax26 } = useGlobalContext();
+  const { pax26, userData } = useGlobalContext();
   const pathName = usePathname();
+  const tutorialUrl = userData ? "/dashboard/tutorial" : "/tutorial";
 
   // Derive semi-transparent variants from the theme
   const linkColor = pax26.textSecondary;
@@ -216,11 +217,14 @@ const Footer = () => {
 
             {/* ── Legal & Company col ─────────────────────── */}
             <div>
-              <ColHead textColor={headingColor}>Company</ColHead>
+              <ColHead textColor={headingColor}>Company & Resources</ColHead>
               <ul className="space-y-3">
                 <FootLink href="/about" textColor={linkColor}>About Us</FootLink>
                 <FootLink href="/blog" textColor={linkColor}>Blog</FootLink>
                 <FootLink href="/contact" textColor={linkColor}>Contact</FootLink>
+                <FootLink href={tutorialUrl} icon={<Youtube size={14} className="text-red-500 flex-shrink-0" />} textColor={linkColor}>
+                  <span className="font-bold text-red-400">Video Masterclass (43m)</span>
+                </FootLink>
               </ul>
 
               <ColHead textColor={headingColor}>Legal</ColHead>
