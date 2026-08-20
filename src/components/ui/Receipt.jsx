@@ -293,7 +293,7 @@ export default function Receipt({ amount, status, date, transactionId, receiptTy
 
               {/* footer note */}
               <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#9ca3af", textAlign: "center", marginTop: "20px", letterSpacing: "0.04em" }}>
-                Powered by Pax26 · Reliable Bills, Every Time.
+                Powered by Pax26 · Official WhatsApp Commerce &amp; AI Automation.
               </p>
             </div>
 

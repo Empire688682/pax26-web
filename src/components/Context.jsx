@@ -81,22 +81,7 @@ export const AppProvider = ({ children }) => {
   });
 
 
-  /* ================================
-     STATIC CONFIG
-  =================================*/
-  const [electricityMerchants] = useState([
-    { name: "Abuja Electricity (AEDC)", serviceID: "abuja-electric" },
-    { name: "Ikeja Electricity (IKEDC)", serviceID: "ikeja-electric" },
-    { name: "Eko Electricity (EKEDC)", serviceID: "eko-electric" },
-    { name: "Ibadan Electricity (IBEDC)", serviceID: "ibadan-electric" },
-    { name: "Jos Electricity (JED)", serviceID: "jos-electric" },
-    { name: "Kaduna Electric", serviceID: "kaduna-electric" },
-    { name: "Kano Electricity (KEDCO)", serviceID: "kano-electric" },
-    { name: "Benin Electricity (BEDC)", serviceID: "benin-electric" },
-    { name: "Enugu Electricity (EEDC)", serviceID: "enugu-electric" },
-    { name: "Port Harcourt Electric (PHED)", serviceID: "portharcourt-electric" },
-    { name: "Yola Electricity (YEDC)", serviceID: "yola-electric" },
-  ]);
+
 
 
   /* ================================
@@ -362,8 +347,6 @@ export const AppProvider = ({ children }) => {
         loading,
 
         dataPlan,
-
-        electricityMerchants,
 
         userWallet,
         userCommission,

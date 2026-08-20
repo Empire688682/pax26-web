@@ -54,7 +54,7 @@ const SECTIONS = [
   {
     num: "09",
     title: "Third-Party Providers",
-    body: "PAX26 TECHNOLOGIES relies on telecom companies, electricity providers, and payment gateways to deliver services. We are not responsible for delays, outages, pricing errors, or failures caused by these providers.",
+    body: "PAX26 TECHNOLOGIES relies on Meta (WhatsApp Cloud API), cloud infrastructure providers, and payment gateways to deliver services. We are not responsible for delays, outages, pricing errors, or failures caused by these providers.",
   },
   {
     num: "10",

@@ -9,30 +9,30 @@ import { useGlobalContext } from "../Context";
 const slides = [
   {
     id: 1,
-    title: "One Platform. Payments, Utilities & AI",
-    subtitle: "The Operating System for Digital Services",
-    desc: "Pay bills, buy airtime, data, electricity, TV subscriptions and gift cards — now enhanced with AI-powered automation to save time and reduce stress.",
+    title: "WhatsApp Commerce & AI Sales",
+    subtitle: "Turn WhatsApp Chats into 24/7 Sales",
+    desc: "Create your online store, list products, receive orders on WhatsApp, and automate customer conversations with custom-trained AI sales agents.",
     icon: Zap
   },
   {
     id: 2,
-    title: "Smart Payments",
-    subtitle: "Built for Africa, Ready for the World",
-    desc: "Wallets, transfers, airtime, data, electricity & TV bills — fast and secure.",
+    title: "Online Storefront",
+    subtitle: "No Code, No Technical Skills Needed",
+    desc: "Build a beautiful product catalog, upload images and set prices in minutes. Customers browse and order directly through WhatsApp.",
     icon: Wallet
   },
   {
     id: 3,
-    title: "AI Automation",
-    subtitle: "Let Bots Do the Work",
-    desc: "Auto‑reply, lead follow‑ups, reminders, workflows, and smart triggers.",
+    title: "AI Sales Agent (PaxAI)",
+    subtitle: "Instant Customer Replies 24/7",
+    desc: "Train your AI agent with your business info, FAQs, and product catalog. It answers questions and closes deals while you sleep.",
     icon: Cpu
   },
   {
     id: 4,
-    title: "Omni‑Channel Messaging",
-    subtitle: "WhatsApp • SMS • Email",
-    desc: "Engage users, verify numbers, and send notifications at scale.",
+    title: "Smart Lead Follow-ups",
+    subtitle: "Meta Official Cloud API Integration",
+    desc: "Automatically re-engage cold leads, qualify prospects, send broadcasts, and track revenue from one powerful dashboard.",
     icon: MessageCircle
   },
 ];
