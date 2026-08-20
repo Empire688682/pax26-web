@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import sendpulse from "@/app/lib/sendpulse";
+import { connectDb } from "@/app/ults/db/ConnectDb";
+import ContactMessage from "@/app/ults/models/ContactMessage";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
 export async function OPTIONS() {
@@ -35,6 +37,19 @@ export async function POST(req) {
     const safeEmail = email.trim();
     const safeMessage = message.trim();
     const safePhone = phone ? phone.trim() : "";
+
+    // 0. Save Contact Submission to Database Backup
+    try {
+      await connectDb();
+      await ContactMessage.create({
+        name: safeName,
+        email: safeEmail,
+        phone: safePhone,
+        message: safeMessage,
+      });
+    } catch (dbErr) {
+      console.error("Database save warning for ContactMessage:", dbErr);
+    }
 
     // 1. Send Email Notification to info@pax26.com
     const adminEmailPayload = {
