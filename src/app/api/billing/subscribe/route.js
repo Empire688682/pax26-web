@@ -136,6 +136,7 @@ export async function POST(req) {
     await TransactionModel.create({
       userId,
       type: "ai-automation-subscription",
+      description: `${planMeta.label || planKey.toUpperCase()} Plan Subscription`,
       amount: planMeta.price,
       currency: "NGN",
       status: "success",

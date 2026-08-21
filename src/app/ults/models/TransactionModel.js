@@ -146,6 +146,7 @@ const TransactionSchema = new mongoose.Schema(
 
     reference:         { type: String, unique: true, sparse: true },
     providerReference: { type: String }, // 3rd-party provider's ref
+    description:       { type: String }, // Human-readable transaction title
 
     // Type-specific metadata — only the relevant block is populated
     meta: {

@@ -39,6 +39,7 @@ export async function POST(req) {
     await TransactionModel.create({
       userId,
       type: "wallet-funding",
+      description: "Wallet Top-Up",
       amount,
       currency: "NGN",
       status: "pending",

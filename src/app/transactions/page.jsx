@@ -67,6 +67,80 @@ const getTypeColor = (type, isDebit, pax26) => {
   return pax26?.primary || "#3b82f6";
 };
 
+const getTxDescription = (tx) => {
+  if (tx?.description && tx.description.trim()) return tx.description;
+
+  const type = tx?.type;
+  const meta = tx?.meta || {};
+
+  switch (type) {
+    case "wallet-funding": {
+      const channel = meta.wallet?.channel;
+      if (channel === "card") return "Wallet Top-Up (Card)";
+      if (channel === "bank-transfer") return "Wallet Top-Up (Bank Transfer)";
+      return "Wallet Top-Up";
+    }
+    case "ai-automation-subscription": {
+      const plan = meta.subscription?.plan;
+      const planName = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "AI Automation";
+      return `${planName} Plan Subscription`;
+    }
+    case "platform-subscription":
+      return "Platform Subscription";
+    case "transfer": {
+      const isDebit = meta.transfer?.direction === "debit";
+      if (isDebit) {
+        return `Transfer to ${meta.transfer?.recipientName || meta.transfer?.recipientNumber || "Account"}`;
+      }
+      return `Transfer from ${meta.transfer?.senderName || meta.transfer?.senderNumber || "Account"}`;
+    }
+    case "airtime": {
+      const network = meta.airtimeData?.network || "Mobile";
+      const phone = meta.airtimeData?.phoneNumber;
+      return `${network} Airtime Top-Up ${phone ? `(${phone})` : ""}`;
+    }
+    case "data": {
+      const network = meta.airtimeData?.network || "Mobile";
+      const plan = meta.airtimeData?.dataPlan || "";
+      const phone = meta.airtimeData?.phoneNumber;
+      return `${network} Data ${plan} ${phone ? `(${phone})` : ""}`;
+    }
+    case "electricity": {
+      const provider = meta.utility?.provider || "Electricity";
+      const meter = meta.utility?.accountNumber;
+      return `${provider} Bill ${meter ? `(#${meter})` : ""}`;
+    }
+    case "tv-subscription": {
+      const provider = meta.utility?.provider || "TV";
+      const pkg = meta.utility?.package;
+      return `${provider} ${pkg ? `- ${pkg}` : "Subscription"}`;
+    }
+    case "betting": {
+      const provider = meta.utility?.provider || "Betting";
+      return `${provider} Wallet Funding`;
+    }
+    case "waec":
+      return "WAEC Scratch Card / Result Checker";
+    case "jamb":
+      return "JAMB UTME / PIN Purchase";
+    case "gift-card": {
+      const brand = meta.giftCard?.brand || "Gift Card";
+      return `${brand} Gift Card`;
+    }
+    case "internet": {
+      const provider = meta.internet?.provider || "Internet";
+      return `${provider} Broadband Subscription`;
+    }
+    default: {
+      if (!type) return "Transaction";
+      return type
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+    }
+  }
+};
+
 const FILTERS = ["All", "Success", "Pending", "Failed"];
 
 /* ── Skeleton loader ─────────────────────────────────────── */
@@ -131,7 +205,7 @@ const TxRow = ({ tx, pax26, router, index }) => {
       {/* Description + date */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate" style={{ color: pax26?.textPrimary }}>
-          {tx.description}
+          {getTxDescription(tx)}
         </p>
         <p className="text-xs mt-0.5 opacity-50" style={{ color: pax26?.textSecondary }}>
           {date} · {time}
@@ -170,7 +244,8 @@ const Page = () => {
 
   const filtered = useMemo(() => reversed.filter(tx => {
     const matchesFilter = filter === "All" || tx.status.toLowerCase() === filter.toLowerCase();
-    const matchesSearch = tx.description?.toLowerCase().includes(search.toLowerCase()) ||
+    const title = getTxDescription(tx);
+    const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) ||
       tx.type?.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   }), [reversed, filter, search]);
