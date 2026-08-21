@@ -5,6 +5,7 @@ import UserModel from '../../ults/models/UserModel';
 import { verifyToken } from '../helper/VerifyToken';
 import TransactionModel from '@/app/ults/models/TransactionModel';
 import { corsHeaders } from '@/app/ults/corsHeaders/corsHeaders';
+import { sendWalletTopUpReceipt } from '@/app/lib/transactionalEmailService';
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -88,6 +89,17 @@ export async function POST(req) {
       await existingPayment.save();
 
       await UserModel.findByIdAndUpdate(userId, { $inc: { walletBalance: cleanAmount } });
+
+      if (!existingPayment.meta.wallet.receiptSent) {
+        existingPayment.meta.wallet.receiptSent = true;
+        existingPayment.markModified('meta.wallet');
+        await existingPayment.save();
+        await sendWalletTopUpReceipt(userId, {
+          amount: cleanAmount,
+          balanceAfter,
+          reference: tx_ref,
+        });
+      }
 
       return NextResponse.json(
         { success: true, message: 'Payment verified and wallet updated' },

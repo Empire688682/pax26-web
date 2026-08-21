@@ -214,6 +214,15 @@ A: Yes. Pax26 uses the official Meta WhatsApp Business Cloud API — the same in
 **Q: Can I cancel my subscription?**
 A: Yes, at any time from the Billing section of your dashboard. Access continues until the end of the billing period.
 
+**Q: How do I add money to my Pax26 wallet?**
+A: Go to Dashboard → Fund Wallet. You can top up using Card (instant credit, minimum ₦100) or transfer to your dedicated Virtual Account number shown on the page. You will receive an instant email receipt once credited.
+
+**Q: How do I renew or upgrade my plan?**
+A: First, add money to your wallet via Dashboard → Fund Wallet. Then go to Dashboard → Billing, select your desired plan (Starter, Business, or Enterprise), and click Subscribe. Your plan activates instantly and an email receipt is sent to your inbox.
+
+**Q: What happens when my plan expires?**
+A: You will receive reminder emails and WhatsApp notifications 2 days and 1 day before your plan expires. If your plan is not renewed before the expiry date, your account automatically reverts to the Free plan (20 products limit, 200 messages/month). Your AI agent remains enabled, and your storefront display will automatically adjust to 20 products. You can upgrade back to a paid plan anytime by funding your wallet.
+
 **Q: Does Pax26 have a mobile app?**
 A: Yes. Search "Pax26" on the Google Play Store or Apple App Store.
 

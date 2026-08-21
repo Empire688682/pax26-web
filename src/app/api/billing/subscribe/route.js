@@ -9,6 +9,7 @@ import {
   ensureReferralCode,
   processReferralReward,
 } from "@/app/lib/referralService";
+import { sendPlanActivationReceipt } from "@/app/lib/transactionalEmailService";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -104,6 +105,7 @@ export async function POST(req) {
     user.paxAI.productRecommendations   = planMeta.productRecommendations   ?? false;
     // Billing cycle
     user.paxAI.planStartedAt = now;
+    user.paxAI.planExpiresAt = expiresAt;
     user.paxAI.lastUpdated   = now;
     if (user.whatsapp && user.whatsapp.contacts && Array.isArray(user.whatsapp.contacts.list)) {
       user.whatsapp.contacts.list.forEach(contact => {
@@ -118,6 +120,13 @@ export async function POST(req) {
     user.planAnalytics.planRevenue += planMeta.price;
 
     await user.save();
+
+    /* ── Send Plan Activation Receipt Email ──────────────────── */
+    await sendPlanActivationReceipt(userId, {
+      plan: planKey,
+      price: planMeta.price,
+      expiresAt,
+    });
 
     /* ── Ensure paid user gets a referral code ────────────────── */
     await ensureReferralCode(user);

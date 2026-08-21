@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server';
 import { connectDb } from '@/app/ults/db/ConnectDb';
 import TransactionModel from '@/app/ults/models/TransactionModel';
 import UserModel from '@/app/ults/models/UserModel';
+import { sendWalletTopUpReceipt } from '@/app/lib/transactionalEmailService';
 
 export async function POST(req) {
   try {
@@ -162,6 +163,18 @@ export async function POST(req) {
       `✅ Webhook: wallet credited ${cleanAmount} for userId=${transaction.userId} ` +
       `(tx_ref="${tx_ref}", flwId=${flwTransactionId}, format=${isNewFormat ? 'new' : 'old'})`
     );
+
+    // ── 13. Send receipt email (idempotent) ─────────────────────────────
+    if (!transaction.meta.wallet.receiptSent) {
+      transaction.meta.wallet.receiptSent = true;
+      transaction.markModified('meta.wallet');
+      await transaction.save();
+      await sendWalletTopUpReceipt(transaction.userId, {
+        amount: cleanAmount,
+        balanceAfter,
+        reference: tx_ref,
+      });
+    }
 
     return NextResponse.json({ message: 'Wallet credited successfully' }, { status: 200 });
 

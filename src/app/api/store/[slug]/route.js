@@ -19,6 +19,7 @@
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
+import UserModel from "@/app/ults/models/UserModel";
 import { NextResponse } from "next/server";
 
 // Public — no CORS restriction on this route (it's a customer-facing page)
@@ -85,16 +86,25 @@ export async function GET(req, { params }) {
 
     const skip = (page - 1) * limit;
 
+    // Fetch seller's user record to enforce plan productsLimit
+    const user = await UserModel.findById(profile.userId).select("paxAI.productsLimit").lean();
+    const planProductsLimit = user?.paxAI?.productsLimit ?? 20;
+
     // Run query, total count, and category list in parallel for speed
-    const [products, totalProducts, rawCategories] = await Promise.all([
+    const [rawProducts, dbTotalProducts, rawCategories] = await Promise.all([
       SellerProductModel.find(filter)
         .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
         .lean(),
       SellerProductModel.countDocuments(filter),
       SellerProductModel.distinct("category", { sellerId: profile._id, isAvailable: true }),
     ]);
+
+    // Apply plan productsLimit cap (if productsLimit > 0, e.g. Free plan capped at 20 products)
+    const allowedProducts = planProductsLimit > 0 ? rawProducts.slice(0, planProductsLimit) : rawProducts;
+    const totalProducts = planProductsLimit > 0 ? Math.min(dbTotalProducts, planProductsLimit) : dbTotalProducts;
+
+    // Apply pagination to allowedProducts
+    const products = allowedProducts.slice(skip, skip + limit);
 
     const categories = rawCategories.filter(Boolean).sort();
 
