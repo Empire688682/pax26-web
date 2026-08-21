@@ -102,15 +102,6 @@ const FundWallet = () => {
 
   useEffect(() => { verifyPayment(); }, [paymentId]);
 
-  const copyVirtualAccount = () => {
-    navigator.clipboard.writeText(userData?.virtualAccount)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => toast.error("Failed to copy"));
-  };
-
   const amountValid = amount && Number(amount) >= 100;
 
   return (
@@ -253,32 +244,7 @@ const FundWallet = () => {
                     </div>
                   </div>
 
-                  {/* virtual account */}
-                  {userData?.virtualAccount && (
-                    <div className="rounded-xl p-4"
-                      style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="fw-mono text-[10px] uppercase tracking-widest"
-                          style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
-                          Virtual Account
-                        </p>
-                        <button
-                          className="fw-copy-btn flex items-center gap-1.5 text-[10px] font-semibold px-2 py-1 rounded-lg"
-                          onClick={copyVirtualAccount}
-                          style={{
-                            background: copied ? "rgba(34,197,94,0.1)" : `${primary}10`,
-                            color: copied ? GREEN : primary,
-                          }}>
-                          {copied
-                            ? <><CheckCircle2 size={10} /> Copied</>
-                            : <><Copy size={10} /> Copy</>}
-                        </button>
-                      </div>
-                      <p className="fw-mono text-base font-bold" style={{ color: pax26?.textPrimary }}>
-                        {userData.virtualAccount}
-                      </p>
-                    </div>
-                  )}
+
 
                   {/* pay button */}
                   {amountValid ? (
