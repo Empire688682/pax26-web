@@ -53,9 +53,9 @@ export async function POST(req) {
 
     // 1. Send Email Notification to info@pax26.com
     const adminEmailPayload = {
-      subject: `[Contact Form] Message from ${safeName}`,
+      subject: `📩 [Contact Form] Message from ${safeName}`,
       from: {
-        name: `${safeName} (Pax26 Contact Form)`,
+        name: "Pax26 Contact Form",
         email: "info@pax26.com",
       },
       to: [
@@ -64,6 +64,10 @@ export async function POST(req) {
           email: "info@pax26.com",
         },
       ],
+      reply_to: {
+        name: safeName,
+        email: safeEmail,
+      },
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; color: #111827; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #3b82f6; padding-bottom: 12px;">
@@ -147,7 +151,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        message: "Your message has been sent successfully to info@pax26.com! We will get back to you shortly.",
+        message: "Your message has been sent successfully! We will get back to you shortly.",
       },
       { status: 200, headers: corsHeaders() }
     );
