@@ -236,7 +236,7 @@ export const posts = [
       <h2>Step 3: Connect Your WhatsApp</h2>
       <p>Go to Automations → Connect WhatsApp. Use the Official Meta API option for the most reliable setup. Sign in with the Facebook account linked to your WhatsApp Business number and follow the on-screen prompts. Takes about two minutes.</p>
       <h2>Step 4: Train Your AI Agent</h2>
-      <p>Go to Automations → AI Agent Setup. Tell the agent about your business — what you sell, your prices, your policies, and your tone. The agent learns this and uses it in every customer conversation.</p>
+      <p>Go to Automations → Agent Setup. Tell the agent about your business — what you sell, your prices, your policies, and your tone. The agent learns this and uses it in every customer conversation.</p>
       <h2>Step 5: Activate and Go Live</h2>
       <p>Turn on your automation from the dashboard. From this point, every customer who messages your WhatsApp number gets an instant, intelligent reply — even at 3am.</p>
       <h2>What Happens Next</h2>

@@ -147,7 +147,7 @@ Pax26 has an official 43-minute video masterclass tutorial available on YouTube 
 3. Go to your dashboard and set up your storefront.
 4. Add your products to your catalog.
 5. Connect your WhatsApp Business number under Automations → Connect WhatsApp.
-6. Train your AI agent with your business info under Automations → AI Agent Setup.
+6. Train your AI agent with your business info under Automations → Agent Setup.
 7. Activate automation and start receiving orders on WhatsApp.
 
 ---

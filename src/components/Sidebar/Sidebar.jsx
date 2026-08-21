@@ -155,7 +155,7 @@ export default function Sidebar() {
           setUnreadNotifCount(typeof d.pendingOrdersCount === "number" ? d.pendingOrdersCount : (d.unreadCount || 0));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   useEffect(() => {
@@ -240,7 +240,7 @@ export default function Sidebar() {
                 <SectionLabel label="Daily Operations" pax26={pax26} />
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="AI Agent Setup" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Setup" onClick={close} pax26={pax26} />
                 {userData?.paxAI?.businessType === 'seller' && (
                   <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
                 )}

@@ -105,13 +105,13 @@ const XIcon = () => (
    STEPS CONFIG — Seller (existing flow)
 ══════════════════════════════════════════════════════════ */
 const SELLER_STEPS = [
-  { label: "Store Info",   icon: StoreIcon,        desc: "Your shop identity & logo" },
-  { label: "WhatsApp",     icon: MessageCircleIcon, desc: "Connect your number" },
-  { label: "Products",     icon: PackageIcon,       desc: "What you sell" },
-  { label: "Payment",      icon: CreditCardIcon,    desc: "How customers pay you" },
-  { label: "AI Behaviour", icon: SlidersIcon,       desc: "Tone, hours & auto-reply" },
-  { label: "Review",       icon: ClipboardIcon,     desc: "Confirm your details" },
-  { label: "Train AI",     icon: RocketIcon,        desc: "Launch your sales agent" },
+  { label: "Store Info", icon: StoreIcon, desc: "Your shop identity & logo" },
+  { label: "WhatsApp", icon: MessageCircleIcon, desc: "Connect your number" },
+  { label: "Products", icon: PackageIcon, desc: "What you sell" },
+  { label: "Payment", icon: CreditCardIcon, desc: "How customers pay you" },
+  { label: "AI Behaviour", icon: SlidersIcon, desc: "Tone, hours & auto-reply" },
+  { label: "Review", icon: ClipboardIcon, desc: "Confirm your details" },
+  { label: "Train AI", icon: RocketIcon, desc: "Launch your sales agent" },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -129,13 +129,13 @@ const FaqIcon = () => (
 );
 
 const SERVICE_STEPS = [
-  { label: "Business Info",    icon: StoreIcon,        desc: "Your business identity" },
-  { label: "Services & FAQs",  icon: FaqIcon,           desc: "What you offer" },
-  { label: "Payment",          icon: CreditCardIcon,    desc: "How clients pay you" },
-  { label: "AI Behaviour",     icon: SlidersIcon,       desc: "Tone, hours & auto-reply" },
-  { label: "WhatsApp",         icon: MessageCircleIcon, desc: "Connect your number" },
-  { label: "Review",           icon: ClipboardIcon,     desc: "Confirm your details" },
-  { label: "Train AI",         icon: RocketIcon,        desc: "Launch your service agent" },
+  { label: "Business Info", icon: StoreIcon, desc: "Your business identity" },
+  { label: "Services & FAQs", icon: FaqIcon, desc: "What you offer" },
+  { label: "Payment", icon: CreditCardIcon, desc: "How clients pay you" },
+  { label: "AI Behaviour", icon: SlidersIcon, desc: "Tone, hours & auto-reply" },
+  { label: "WhatsApp", icon: MessageCircleIcon, desc: "Connect your number" },
+  { label: "Review", icon: ClipboardIcon, desc: "Confirm your details" },
+  { label: "Train AI", icon: RocketIcon, desc: "Launch your service agent" },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -883,8 +883,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
             pax26={p}
             value={form.tone}
             options={[
-              { value: "salesy",       label: "Salesy — persuasive & conversion-focused" },
-              { value: "friendly",     label: "Friendly — warm & conversational" },
+              { value: "salesy", label: "Salesy — persuasive & conversion-focused" },
+              { value: "friendly", label: "Friendly — warm & conversational" },
               { value: "professional", label: "Professional — formal & structured" },
             ]}
             onChange={v => set("tone", v)}
@@ -904,10 +904,10 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
               pax26={p}
               value={String(form.followUpDelayMinutes)}
               options={[
-                { value: "15",   label: "15 minutes" },
-                { value: "30",   label: "30 minutes" },
-                { value: "60",   label: "1 hour" },
-                { value: "120",  label: "2 hours" },
+                { value: "15", label: "15 minutes" },
+                { value: "30", label: "30 minutes" },
+                { value: "60", label: "1 hour" },
+                { value: "120", label: "2 hours" },
                 { value: "1440", label: "24 hours" },
               ]}
               onChange={v => set("followUpDelayMinutes", parseInt(v))}
@@ -925,16 +925,16 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
               <img src={form.logo.url} alt="Store logo" style={{ height: "60px", borderRadius: "10px", objectFit: "contain" }} />
             </div>
           )}
-          <ReviewRow label="Store"      value={form.businessName} pax26={p} />
-          <ReviewRow label="Industry"   value={form.industry} pax26={p} />
-          <ReviewRow label="Currency"   value={form.currency} pax26={p} />
-          <ReviewRow label="Products"   value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
-          <ReviewRow label="Payment"    value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
-          <ReviewRow label="Tone"       value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
-          <ReviewRow label="Hours"      value={form.workingHours} pax26={p} />
+          <ReviewRow label="Store" value={form.businessName} pax26={p} />
+          <ReviewRow label="Industry" value={form.industry} pax26={p} />
+          <ReviewRow label="Currency" value={form.currency} pax26={p} />
+          <ReviewRow label="Products" value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
+          <ReviewRow label="Payment" value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
+          <ReviewRow label="Tone" value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
+          <ReviewRow label="Hours" value={form.workingHours} pax26={p} />
           <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
-          <ReviewRow label="Follow-Up"  value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
-          <ReviewRow label="WhatsApp"   value={whatsappPhone || form.whatsappNumber} pax26={p} />
+          <ReviewRow label="Follow-Up" value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
+          <ReviewRow label="WhatsApp" value={whatsappPhone || form.whatsappNumber} pax26={p} />
           <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
             Everything look right? Hit "Launch Agent" to train your AI sales assistant.
           </p>
@@ -1070,8 +1070,8 @@ function ServiceStepRenderer({ step, form, setForm, pax26 }) {
             value={form.tone}
             options={[
               { value: "professional", label: "Professional — formal & structured" },
-              { value: "friendly",     label: "Friendly — warm & conversational" },
-              { value: "salesy",       label: "Salesy — persuasive & conversion-focused" },
+              { value: "friendly", label: "Friendly — warm & conversational" },
+              { value: "salesy", label: "Salesy — persuasive & conversion-focused" },
             ]}
             onChange={v => set("tone", v)}
           />
@@ -1090,10 +1090,10 @@ function ServiceStepRenderer({ step, form, setForm, pax26 }) {
               pax26={p}
               value={String(form.followUpDelayMinutes)}
               options={[
-                { value: "15",   label: "15 minutes" },
-                { value: "30",   label: "30 minutes" },
-                { value: "60",   label: "1 hour" },
-                { value: "120",  label: "2 hours" },
+                { value: "15", label: "15 minutes" },
+                { value: "30", label: "30 minutes" },
+                { value: "60", label: "1 hour" },
+                { value: "120", label: "2 hours" },
                 { value: "1440", label: "24 hours" },
               ]}
               onChange={v => set("followUpDelayMinutes", parseInt(v))}
@@ -1121,15 +1121,15 @@ function ServiceStepRenderer({ step, form, setForm, pax26 }) {
     case 5:
       return (
         <div>
-          <ReviewRow label="Business"   value={form.businessName} pax26={p} />
-          <ReviewRow label="Industry"   value={form.industry} pax26={p} />
-          <ReviewRow label="Services"   value={`${form.services.filter(s => s.trim()).length} service(s)`} pax26={p} />
-          <ReviewRow label="FAQs"       value={`${form.faqs.length} FAQ(s)`} pax26={p} />
-          <ReviewRow label="Payment"    value={`${form.paymentDetails.length} account(s)`} pax26={p} />
-          <ReviewRow label="Tone"       value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
-          <ReviewRow label="Hours"      value={form.workingHours} pax26={p} />
+          <ReviewRow label="Business" value={form.businessName} pax26={p} />
+          <ReviewRow label="Industry" value={form.industry} pax26={p} />
+          <ReviewRow label="Services" value={`${form.services.filter(s => s.trim()).length} service(s)`} pax26={p} />
+          <ReviewRow label="FAQs" value={`${form.faqs.length} FAQ(s)`} pax26={p} />
+          <ReviewRow label="Payment" value={`${form.paymentDetails.length} account(s)`} pax26={p} />
+          <ReviewRow label="Tone" value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
+          <ReviewRow label="Hours" value={form.workingHours} pax26={p} />
           <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
-          <ReviewRow label="WhatsApp"   value={form.whatsappNumber} pax26={p} />
+          <ReviewRow label="WhatsApp" value={form.whatsappNumber} pax26={p} />
           <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
             Everything look right? Hit "Launch Agent" to train your AI service assistant.
           </p>
@@ -1241,20 +1241,20 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
         setAIsPaxAiBusinessTrained?.(p.aiTrained || false);
         setForm(f => ({
           ...f,
-          sellerId:             p._id || "",
-          businessName:         p.businessName || "",
-          businessDescription:  p.businessDescription || "",
-          industry:             p.industry || f.industry || "",
-          whatsappNumber:       p.whatsappNumber || "",
-          logo:                 p.logo || null,
-          tone:                 p.tone || "salesy",
-          autoReplyEnabled:     p.autoReplyEnabled ?? true,
-          followUpEnabled:      p.followUpEnabled ?? true,
+          sellerId: p._id || "",
+          businessName: p.businessName || "",
+          businessDescription: p.businessDescription || "",
+          industry: p.industry || f.industry || "",
+          whatsappNumber: p.whatsappNumber || "",
+          logo: p.logo || null,
+          tone: p.tone || "salesy",
+          autoReplyEnabled: p.autoReplyEnabled ?? true,
+          followUpEnabled: p.followUpEnabled ?? true,
           followUpDelayMinutes: p.followUpDelayMinutes || 30,
-          currency:             p.currency || "NGN",
-          workingHours:         p.workingHours || "",
-          paymentDetails:       p.paymentDetails || [],
-          products:             p.products || [],
+          currency: p.currency || "NGN",
+          workingHours: p.workingHours || "",
+          paymentDetails: p.paymentDetails || [],
+          products: p.products || [],
         }));
       }
     } catch (e) {
@@ -1272,22 +1272,22 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
       businessType,
       currentStep: step,
       formData: {
-        businessName:         form.businessName,
-        businessDescription:  form.businessDescription,
-        industry:             form.industry,
-        description:          form.description,
-        businessUrl:          form.businessUrl,
-        currency:             form.currency,
-        tone:                 form.tone,
-        workingHours:         form.workingHours,
-        autoReplyEnabled:     form.autoReplyEnabled,
-        followUpEnabled:      form.followUpEnabled,
+        businessName: form.businessName,
+        businessDescription: form.businessDescription,
+        industry: form.industry,
+        description: form.description,
+        businessUrl: form.businessUrl,
+        currency: form.currency,
+        tone: form.tone,
+        workingHours: form.workingHours,
+        autoReplyEnabled: form.autoReplyEnabled,
+        followUpEnabled: form.followUpEnabled,
         followUpDelayMinutes: form.followUpDelayMinutes,
-        paymentDetails:       form.paymentDetails,
-        services:             form.services,
-        faqs:                 form.faqs,
-        products:             form.products,
-        whatsappNumber:       form.whatsappNumber,
+        paymentDetails: form.paymentDetails,
+        services: form.services,
+        faqs: form.faqs,
+        products: form.products,
+        whatsappNumber: form.whatsappNumber,
       },
     }),
   }));
@@ -1349,24 +1349,24 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
         : "/api/automations/seller-train";
       const payload = businessType === "seller"
         ? {
-            businessName: form.businessName,
-            businessDescription: form.businessDescription || form.description,
-            industry: form.industry,
-            tone: form.tone,
-            autoReplyEnabled: form.autoReplyEnabled,
-            followUpEnabled: form.followUpEnabled,
-            followUpDelayMinutes: form.followUpDelayMinutes,
-            currency: form.currency,
-            workingHours: form.workingHours,
-            paymentDetails: form.paymentDetails,
-            products: form.products,
-            whatsappNumber: whatsappPhone || form.whatsappNumber,
-          }
+          businessName: form.businessName,
+          businessDescription: form.businessDescription || form.description,
+          industry: form.industry,
+          tone: form.tone,
+          autoReplyEnabled: form.autoReplyEnabled,
+          followUpEnabled: form.followUpEnabled,
+          followUpDelayMinutes: form.followUpDelayMinutes,
+          currency: form.currency,
+          workingHours: form.workingHours,
+          paymentDetails: form.paymentDetails,
+          products: form.products,
+          whatsappNumber: whatsappPhone || form.whatsappNumber,
+        }
         : {
-            ...form,
-            description: form.description || form.businessDescription,
-            whatsappNumber: whatsappPhone || form.whatsappNumber,
-          };
+          ...form,
+          description: form.description || form.businessDescription,
+          whatsappNumber: whatsappPhone || form.whatsappNumber,
+        };
       const res = await fetch(endpoint, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -1406,7 +1406,7 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
               <div style={{ width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: `${pax26?.primary}22`, color: pax26?.textPrimary }}>
                 <BotIcon />
               </div>
-              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>AI Agent Setup</p>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>Agent Setup</p>
             </div>
             <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>Set Up Your AI Agent</h1>
             <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>Choose how your business works to get the right AI setup</p>
@@ -1514,8 +1514,8 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
               borderRadius: "0 0 16px 16px",
               padding: "20px",
               backgroundColor: pax26?.card || pax26?.bg,
-              borderLeft:   `1px solid ${pax26?.border}`,
-              borderRight:  `1px solid ${pax26?.border}`,
+              borderLeft: `1px solid ${pax26?.border}`,
+              borderRight: `1px solid ${pax26?.border}`,
               borderBottom: `1px solid ${pax26?.border}`,
               borderTop: "none",
             }}>

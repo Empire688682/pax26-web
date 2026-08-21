@@ -70,7 +70,7 @@ export default function MyStoreRedirect() {
         You don't have a storefront yet
       </h1>
       <p style={{ fontSize: "15px", color: p?.textPrimary, opacity: 0.6, maxWidth: "400px", lineHeight: 1.7, margin: "0 0 32px" }}>
-        Set up your store URL in the AI Agent Setup page under Business Info. It only takes a few seconds.
+        Set up your store URL in the Agent Setup page under Business Info. It only takes a few seconds.
       </p>
       <button
         onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
