@@ -620,6 +620,8 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 9: Standard text — trigger AI response ───────────
+  let enrichedText = inboundText;
+
   if (sellerProfile && isTextMessage) {
     const isExpectingPaymentProof =
       session?.payment?.expectingPayment === true &&
@@ -660,7 +662,6 @@ export const handleIncomingWhatsApp = async (payload) => {
   }
 
   // ── Step 9.4: Payment stage deflection tracking ─────────────────
-  let enrichedText = inboundText;
 
   if (session.payment?.expectingPayment === true && session.payment?.paymentProofReceived !== true) {
     const currentDeflection = session.payment?.deflectionCount || 0;

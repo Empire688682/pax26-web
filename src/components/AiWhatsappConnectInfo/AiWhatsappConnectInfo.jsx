@@ -55,6 +55,7 @@ const META_BLUE = "#1877f2";
 export default function AiWhatsappConnectInfo() {
   const { pax26, router } = useGlobalContext();
   const [loading, setLoading] = useState(false);
+  const [activePart, setActivePart] = useState("part1");
 
   return (
     <>
@@ -446,25 +447,51 @@ export default function AiWhatsappConnectInfo() {
                   </div>
                   <div>
                     <p style={{ fontSize: "14px", fontWeight: 700, color: pax26?.textPrimary || "#111827" }}>
-                      Watch Complete Setup Masterclass
+                      Watch Setup Video Masterclass
                     </p>
                     <p style={{ fontSize: "11px", color: pax26?.textSecondary || "rgba(0,0,0,0.4)" }}>
-                      43-minute step-by-step video guide
+                      2-Part Step-by-Step Setup Guide
                     </p>
                   </div>
                 </div>
 
                 <a
-                  href="https://youtu.be/4aa5bBJkZ1Y"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/tutorial"
                   style={{
                     fontSize: "12px", fontWeight: 700, color: "#ef4444",
                     display: "flex", alignItems: "center", gap: "4px",
                     textDecoration: "none",
                   }}>
-                  Watch on YouTube <ExternalLink size={12} />
+                  View All Parts <ExternalLink size={12} />
                 </a>
+              </div>
+
+              {/* Part selector pills */}
+              <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+                <button
+                  type="button"
+                  onClick={() => setActivePart("part1")}
+                  style={{
+                    flex: 1, padding: "8px 12px", borderRadius: "10px", fontSize: "12px", fontWeight: 700,
+                    border: activePart === "part1" ? "1px solid #ef4444" : "1px solid rgba(0,0,0,0.08)",
+                    background: activePart === "part1" ? "rgba(239,68,68,0.08)" : (pax26?.secondaryBg || "#f8fafc"),
+                    color: activePart === "part1" ? "#ef4444" : (pax26?.textSecondary || "#666"),
+                    cursor: "pointer", transition: "all 0.2s ease",
+                  }}>
+                  Part 1: Signup & WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActivePart("part2")}
+                  style={{
+                    flex: 1, padding: "8px 12px", borderRadius: "10px", fontSize: "12px", fontWeight: 700,
+                    border: activePart === "part2" ? "1px solid #ef4444" : "1px solid rgba(0,0,0,0.08)",
+                    background: activePart === "part2" ? "rgba(239,68,68,0.08)" : (pax26?.secondaryBg || "#f8fafc"),
+                    color: activePart === "part2" ? "#ef4444" : (pax26?.textSecondary || "#666"),
+                    cursor: "pointer", transition: "all 0.2s ease",
+                  }}>
+                  Part 2: Storefront & Sales Demo
+                </button>
               </div>
 
               {/* Embedded Player */}
@@ -474,11 +501,12 @@ export default function AiWhatsappConnectInfo() {
                 boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
               }}>
                 <iframe
+                  key={activePart}
                   style={{
                     position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0,
                   }}
-                  src="https://www.youtube.com/embed/4aa5bBJkZ1Y?rel=0&modestbranding=1"
-                  title="Pax26 WhatsApp Connection & Storefront Masterclass"
+                  src={`https://www.youtube.com/embed/${activePart === "part1" ? "XWufgjpl2q4" : "C-SO1_9XkX0"}?rel=0&modestbranding=1`}
+                  title={activePart === "part1" ? "Part 1: How to Sign Up & Connect WhatsApp to Pax26" : "Part 2: Setup Seller Business, Storefront & Live Sales Demo"}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />

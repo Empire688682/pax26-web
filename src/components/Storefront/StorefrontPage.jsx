@@ -71,18 +71,19 @@ function Pax26Footer() {
 export function handleWhatsAppRedirect(e, href) {
   if (!href) return;
   e?.preventDefault();
+
+  let targetUrl = href;
+  if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+    targetUrl = `https://${targetUrl}`;
+  }
+
   const isMobile = typeof window !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const match = href.match(/wa\.me\/(\d+)(?:\?text=(.*))?/);
-  if (isMobile && match) {
-    const phone = match[1];
-    const text = match[2] || "";
-    const deepLink = `whatsapp://send?phone=${phone}${text ? `&text=${text}` : ""}`;
-    window.location.href = deepLink;
-    setTimeout(() => {
-      window.location.href = href;
-    }, 1200);
+  if (isMobile) {
+    // Universal Meta HTTPS wa.me link allows iOS/Android to route to the active app
+    // (WhatsApp Business or Consumer WhatsApp) without forcing com.whatsapp
+    window.location.href = targetUrl;
   } else {
-    window.open(href, "_blank");
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
   }
 }
 

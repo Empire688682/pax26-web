@@ -229,6 +229,27 @@ export const triggerAIResponse = async ({
             return;
         }
 
+        // ── Clear stale payment state if customer initiates a new storefront order ──
+        if (inboundText && /NEW ORDER FROM STOREFRONT/i.test(inboundText)) {
+            console.log("🛒 New storefront order detected — resetting stale session payment state for:", session.sessionId);
+            await SessionModel.findByIdAndUpdate(session._id, {
+                $unset: {
+                    "payment.pendingAmount": 1,
+                    "payment.pendingItems": 1,
+                },
+                $set: {
+                    "payment.expectingPayment": false,
+                    "payment.paymentProofReceived": false,
+                }
+            });
+            if (session.payment) {
+                delete session.payment.pendingAmount;
+                delete session.payment.pendingItems;
+                session.payment.expectingPayment = false;
+                session.payment.paymentProofReceived = false;
+            }
+        }
+
         // ── Plan-based conversation limits ───────────────────────
         const plan = user.paxAI?.plan || "free";
         const LIMIT = plan === "free" ? 100 : 5000; 

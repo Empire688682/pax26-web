@@ -320,11 +320,19 @@ export default function Hero() {
                   <ArrowRight size={15} />
                 </button>
 
-                <Link href="#pricing"
+                <a
+                  href="#masterclass-video"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById("masterclass-video");
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
                   className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold"
                   style={{ color: tp, border: `1px solid ${bdr}`, background: "transparent" }}>
                   View Demo
-                </Link>
+                </a>
               </motion.div>
 
               {/* Stats row */}

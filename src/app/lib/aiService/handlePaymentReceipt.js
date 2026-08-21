@@ -272,20 +272,45 @@ export async function handlePaymentReceipt({
         console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
-    // 🚀 Senior Architecture: Check session.payment state first!
-    const sessionPendingAmount = session?.payment?.pendingAmount;
-    const sessionPendingItems = session?.payment?.pendingItems;
+    // 🚀 Senior Architecture: Resolve order items & price dynamically
+    // Check if customer sent a newer storefront order or changed product in recent messages
+    const lastUserMessage = [...recentMessages].reverse().find(m => m.role === "user" || m.direction === "inbound");
+    const lastUserText = lastUserMessage?.content || lastUserMessage?.text || "";
+
+    const hasNewStorefrontOrder = /NEW ORDER FROM STOREFRONT/i.test(lastUserText) || /NEW ORDER FROM STOREFRONT/i.test(caption);
+    const multiOrderFromRecent = parseMultiProductOrderFromText(caption || lastUserText, recentMessages);
 
     const matchedProducts = await findAllProductsFromConversation(sellerId, recentMessages);
     const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
 
-    const parsedTotal = sessionPendingAmount || extractOrderTotalFromConversation(recentMessages);
-    const orderTotalPrice = parsedTotal || matchedProduct?.price || 0;
-
-    // Build items array
     let orderItems = [];
-    if (sessionPendingItems && sessionPendingItems.length > 0) {
-        orderItems = sessionPendingItems;
+    let orderTotalPrice = 0;
+
+    if (hasNewStorefrontOrder && multiOrderFromRecent.items.length > 0) {
+        // Customer sent a new storefront order string — use the fresh storefront items!
+        orderItems = multiOrderFromRecent.items;
+        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+    } else if (matchedProducts.length > 0 && session?.payment?.pendingItems?.length > 0) {
+        // Compare recent conversation product vs session pendingItems
+        const sessionItemIds = new Set(session.payment.pendingItems.map(i => i.productId?.toString()).filter(Boolean));
+        const hasDifferentProductInChat = matchedProducts.some(p => !sessionItemIds.has(p._id?.toString()));
+
+        if (hasDifferentProductInChat) {
+            orderItems = matchedProducts.map(p => ({
+                productId: p._id,
+                name: p.name,
+                price: p.discountPrice || p.price,
+                quantity: 1,
+                imageUrl: p.images?.[0]?.url || "",
+            }));
+            orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + i.price, 0);
+        } else {
+            orderItems = session.payment.pendingItems;
+            orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || matchedProduct?.price || 0;
+        }
+    } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
+        orderItems = session.payment.pendingItems;
+        orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || matchedProduct?.price || 0;
     } else if (matchedProducts.length > 0) {
         orderItems = matchedProducts.map(p => ({
             productId: p._id,
@@ -294,14 +319,16 @@ export async function handlePaymentReceipt({
             quantity: 1,
             imageUrl: p.images?.[0]?.url || "",
         }));
+        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + i.price, 0);
     } else if (matchedProduct) {
         orderItems = [{
             productId: matchedProduct._id,
             name: matchedProduct.name,
-            price: matchedProduct.price || orderTotalPrice,
+            price: matchedProduct.price || 0,
             quantity: 1,
             imageUrl: matchedProduct.images?.[0]?.url || "",
         }];
+        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || matchedProduct.price || 0;
     }
 
     // Format product summary name for alerts (e.g. "Bag 1 (1x), Bag 2 (1x)")

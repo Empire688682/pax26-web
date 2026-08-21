@@ -223,7 +223,7 @@ const Footer = () => {
                 <FootLink href="/blog" textColor={linkColor}>Blog</FootLink>
                 <FootLink href="/contact" textColor={linkColor}>Contact</FootLink>
                 <FootLink href={tutorialUrl} icon={<Youtube size={14} className="text-red-500 flex-shrink-0" />} textColor={linkColor}>
-                  <span className="font-bold text-red-400">Video Masterclass (43m)</span>
+                  <span className="font-bold text-red-400">2-Part Video Masterclass</span>
                 </FootLink>
               </ul>
 
