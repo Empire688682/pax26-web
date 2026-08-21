@@ -22,7 +22,7 @@ const PlanSchema = new mongoose.Schema({
 
   // ── Storefront & Commerce ──────────────────────────────────────
   storefrontEnabled:       { type: Boolean, default: true },   // Can the user create a storefront?
-  productsLimit:           { type: Number, default: 10 },      // Max products allowed (0 = unlimited)
+  productsLimit:           { type: Number, default: 20 },      // Max products allowed (0 = unlimited) — Free:20, Starter:100, Business:500, Enterprise:0
   orderReceiptsEnabled:    { type: Boolean, default: true },   // Auto-generate WhatsApp order receipts
   salesAlertsEnabled:      { type: Boolean, default: true },   // Notify seller on new WhatsApp orders
   salesAnalyticsEnabled:   { type: Boolean, default: false },  // Access to sales analytics dashboard

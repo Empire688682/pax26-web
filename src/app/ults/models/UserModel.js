@@ -167,7 +167,7 @@ const UserSchema = new mongoose.Schema(
 
       // ── Storefront & Commerce ──────────────────────────────
       storefrontEnabled:        { type: Boolean, default: true  },
-      productsLimit:            { type: Number,  default: 10    }, // 0 = unlimited
+      productsLimit:            { type: Number,  default: 20    }, // 0 = unlimited — Free:20 Starter:100 Business:500 Enterprise:0
       orderReceiptsEnabled:     { type: Boolean, default: true  },
       salesAlertsEnabled:       { type: Boolean, default: true  },
       salesAnalyticsEnabled:    { type: Boolean, default: false },

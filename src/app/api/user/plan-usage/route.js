@@ -45,7 +45,7 @@ export async function GET(req) {
     const broadcastLimit = isUnlimitedBroadcast ? null : (rawBroadcastLimit ?? (isBusiness ? 500 : isStarter ? 100 : 0));
     const broadcastUsed = paxAI.broadcastContactsUsedThisMonth || 0;
 
-    const productsLimit = planMeta?.productsLimit ?? paxAI.productsLimit ?? (isEnterprise ? 0 : isBusiness ? 100 : isStarter ? 50 : 10);
+    const productsLimit = planMeta?.productsLimit ?? paxAI.productsLimit ?? (isEnterprise ? 0 : isBusiness ? 500 : isStarter ? 100 : 20);
 
     return NextResponse.json(
       {

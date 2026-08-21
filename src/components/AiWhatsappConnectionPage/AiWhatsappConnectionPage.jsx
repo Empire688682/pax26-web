@@ -74,6 +74,7 @@ export default function AiWhatsappConnectionPage() {
   const [loading, setLoading] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
   const [metaLoading, setMetaLoading] = useState(false);
+  const [showMetaWarning, setShowMetaWarning] = useState(false);
   const popupTimerRef = useRef(null);
   const sessionInfoRef = useRef(null);
 
@@ -426,6 +427,14 @@ export default function AiWhatsappConnectionPage() {
                     <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.75 }}>{tip}</p>
                   </div>
                 ))}
+                {/* Facebook App conflict notice */}
+                <div className="flex items-start gap-2 mt-1 pt-2" style={{ borderTop: "1px dashed rgba(245,158,11,0.25)" }}>
+                  <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#f59e0b" }} />
+                  <p className="text-xs" style={{ color: pax26?.textSecondary, opacity: 0.85 }}>
+                    <strong style={{ color: "#f59e0b" }}>Temporarily uninstall the Facebook app</strong>{" "}
+                    from your phone before clicking "Continue with Meta" — Meta's signup will not work if the regular Facebook app is installed on your device. You can reinstall it after your WhatsApp number is successfully connected.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -448,7 +457,7 @@ export default function AiWhatsappConnectionPage() {
             <div className="space-y-3 pt-1">
               <button
                 className="wa-btn w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold text-white"
-                onClick={launchWhatsAppSignup}
+                onClick={() => { if (sdkReady) setShowMetaWarning(true); }}
                 disabled={!sdkReady}
                 style={{
                   background: "#1877F2",
@@ -532,6 +541,109 @@ export default function AiWhatsappConnectionPage() {
             ))}
           </div>
         </div>
+
+        {/* ── Facebook App Warning Intercept Modal ─────────── */}
+        {showMetaWarning && (
+          <div style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(12px)",
+            zIndex: 9998,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            animation: "wa-slide 0.25s ease-out",
+          }}>
+            <div style={{
+              background: pax26?.bg || "#111827",
+              border: "1.5px solid rgba(245,158,11,0.4)",
+              borderRadius: "20px",
+              padding: "28px 24px",
+              maxWidth: "420px",
+              width: "100%",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+            }}>
+              {/* Icon + Title */}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                <div style={{
+                  width: "44px", height: "44px", borderRadius: "12px", flexShrink: 0,
+                  background: "rgba(245,158,11,0.12)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <AlertTriangle size={22} style={{ color: "#f59e0b" }} />
+                </div>
+                <div>
+                  <p style={{ color: "#f59e0b", fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>
+                    Before You Continue
+                  </p>
+                  <p style={{ color: pax26?.textPrimary || "#fff", fontSize: "16px", fontWeight: 800, lineHeight: 1.3 }}>
+                    Facebook App Conflict
+                  </p>
+                </div>
+              </div>
+
+              {/* Warning body */}
+              <p style={{ color: pax26?.textSecondary || "rgba(255,255,255,0.7)", fontSize: "13px", lineHeight: 1.65, marginBottom: "16px" }}>
+                Meta's Embedded Signup <strong style={{ color: pax26?.textPrimary || "#fff" }}>does not work if the regular Facebook app is installed on your phone</strong>. The signup popup may fail or freeze.
+              </p>
+
+              {/* Steps */}
+              <div style={{
+                background: "rgba(245,158,11,0.07)",
+                border: "1px dashed rgba(245,158,11,0.3)",
+                borderRadius: "12px",
+                padding: "14px 16px",
+                marginBottom: "20px",
+              }}>
+                <p style={{ color: "#f59e0b", fontSize: "11px", fontWeight: 700, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  What to do right now:
+                </p>
+                {[
+                  { num: "1", text: "Go to your phone and uninstall the Facebook app" },
+                  { num: "2", text: "Come back here and click \"I Understand — Proceed\"" },
+                  { num: "3", text: "Complete the Meta onboarding steps in the popup" },
+                  { num: "4", text: "Once connected, reinstall the Facebook app anytime" },
+                ].map(({ num, text }) => (
+                  <div key={num} style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "8px" }}>
+                    <span style={{
+                      width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
+                      background: "rgba(245,158,11,0.2)", color: "#f59e0b",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "11px", fontWeight: 800,
+                    }}>{num}</span>
+                    <p style={{ color: pax26?.textSecondary || "rgba(255,255,255,0.75)", fontSize: "12px", lineHeight: 1.5 }}>{text}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <button
+                  onClick={() => { setShowMetaWarning(false); launchWhatsAppSignup(); }}
+                  style={{
+                    width: "100%", padding: "13px", borderRadius: "12px",
+                    background: "#1877F2", color: "#fff", border: "none",
+                    fontSize: "13px", fontWeight: 700, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    boxShadow: "0 8px 24px rgba(24,119,242,0.35)",
+                  }}>
+                  <IcoMeta /> I Understand — Proceed
+                </button>
+                <button
+                  onClick={() => setShowMetaWarning(false)}
+                  style={{
+                    width: "100%", padding: "11px", borderRadius: "12px",
+                    background: "transparent", color: pax26?.textSecondary || "rgba(255,255,255,0.5)",
+                    border: `1px solid ${pax26?.border || "rgba(255,255,255,0.1)"}`,
+                    fontSize: "12px", fontWeight: 600, cursor: "pointer",
+                  }}>
+                  Go uninstall Facebook app first
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Loading Overlay */}
         {metaLoading && (

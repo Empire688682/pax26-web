@@ -91,7 +91,7 @@ export async function POST(req) {
     user.paxAI.multiStaff     = planMeta.multiStaff;
     // Storefront & Commerce flags
     user.paxAI.storefrontEnabled        = planMeta.storefrontEnabled        ?? true;
-    user.paxAI.productsLimit            = planMeta.productsLimit            ?? 10;
+    user.paxAI.productsLimit            = planMeta.productsLimit            ?? 20;
     user.paxAI.orderReceiptsEnabled     = planMeta.orderReceiptsEnabled     ?? true;
     user.paxAI.salesAlertsEnabled       = planMeta.salesAlertsEnabled       ?? true;
     user.paxAI.salesAnalyticsEnabled    = planMeta.salesAnalyticsEnabled    ?? false;

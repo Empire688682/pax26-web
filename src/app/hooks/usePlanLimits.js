@@ -50,7 +50,7 @@ export function usePlanLimits() {
 
   // ── Storefront & Commerce ──────────────────────────────────
   const storefrontEnabled      = paxAI.storefrontEnabled      ?? true;
-  const productsLimit          = paxAI.productsLimit          ?? (isEnterprise ? 0 : isBusiness ? 100 : isStarter ? 50 : 10);   // 0 = unlimited
+  const productsLimit          = paxAI.productsLimit          ?? (isEnterprise ? 0 : isBusiness ? 500 : isStarter ? 100 : 20);   // 0 = unlimited
   const orderReceiptsEnabled   = paxAI.orderReceiptsEnabled   ?? true;
   const salesAlertsEnabled     = paxAI.salesAlertsEnabled     ?? true;
   const salesAnalyticsEnabled  = paxAI.salesAnalyticsEnabled  ?? (plan !== "free");

@@ -65,7 +65,7 @@ export async function POST(req) {
 
         // ── Plan: enforce product limit ────────────────────────────
         const user = await UserModel.findById(userId).select("paxAI").lean();
-        const productsLimit = user?.paxAI?.productsLimit ?? 10; // 0 = unlimited
+        const productsLimit = user?.paxAI?.productsLimit ?? 20; // 0 = unlimited — Free:20, Starter:100, Business:500, Enterprise:0
 
         if (productsLimit > 0) {
             const currentCount = await SellerProductModel.countDocuments({ sellerId: profile._id });

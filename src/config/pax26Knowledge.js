@@ -167,6 +167,9 @@ Uses Meta Embedded Signup — the safest and most reliable method.
 5. Follow the steps to select your WhatsApp Business number and grant permissions.
 6. Your number is connected and AI replies activate instantly.
 
+**⚠️ IMPORTANT — Facebook App Conflict:**
+Meta's Embedded Signup DOES NOT work if the regular Facebook app is installed on your phone. If the "Continue with Meta" button popup is not working or freezing on your mobile device, uninstall the Facebook app from your phone first, complete the Meta onboarding, and then reinstall the Facebook app afterwards. This is a Meta-side restriction that affects all users with the Facebook app installed during onboarding.
+
 ### Method 2: Direct QR Scan
 Works for both personal and business WhatsApp numbers.
 1. Go to Automations → Connect WhatsApp in your dashboard.
@@ -198,6 +201,12 @@ A: Most businesses are live in under 5 minutes. Connect WhatsApp, add your produ
 
 **Q: Is there a video tutorial on how to use Pax26?**
 A: Yes! We have an official 2-part setup video tutorial series on YouTube: Part 1 (https://youtu.be/XWufgjpl2q4) covers signing up and connecting WhatsApp, and Part 2 (https://youtu.be/C-SO1_9XkX0) covers setting up your business account, creating your storefront, adding products, and a live AI sales demo. You can also watch both parts on our tutorial page.
+
+**Q: The "Continue with Meta" button is not working on my phone. What should I do?**
+A: This is almost always caused by the regular Facebook app being installed on your phone. Meta's Embedded Signup does not work if the Facebook app is present on your device during onboarding. To fix it: (1) Uninstall the regular Facebook app from your phone. (2) Go back to Dashboard → Automations → Connect WhatsApp → "Continue with Meta". (3) Complete the onboarding. (4) Reinstall the Facebook app after your WhatsApp number is successfully connected.
+
+**Q: Why does Meta's signup not work with Facebook app installed?**
+A: This is a restriction imposed by Meta. Their Embedded Signup flow conflicts with the Facebook mobile app during the OAuth authentication step. The fix is always to temporarily uninstall the Facebook app, complete onboarding, then reinstall it.
 
 **Q: Is my WhatsApp account safe?**
 A: Yes. Pax26 uses the official Meta WhatsApp Business Cloud API — the same infrastructure Meta uses. Your messages are encrypted and your account is protected.
