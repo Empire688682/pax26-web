@@ -1,6 +1,5 @@
 // app/layout.js
 import "./globals.css";
-import Script from "next/script";
 import ClientWrapper from "./ClientWrapper";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
@@ -127,11 +126,15 @@ export default function RootLayout({ children }) {
     >
       <head>
 
-        {/* Structured Data for SEO */}
-        <Script
+        {/* ─── Structured Data (JSON-LD) ──────────────────────────────────
+            MUST use a native <script> tag (NOT next/script) so it is
+            server-rendered into the initial HTML that Lighthouse and AI
+            crawlers read. Using next/script with strategy="afterInteractive"
+            deferred it past the crawl window, hiding it from audits.
+        ──────────────────────────────────────────────────────────────────── */}
+        <script
           id="pax26-schema"
           type="application/ld+json"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -141,7 +144,7 @@ export default function RootLayout({ children }) {
                   "@type": "Organization",
                   name: "Pax26",
                   url: "https://pax26.com",
-                  logo: "https://pax26.com/icon.ico",
+                  logo: "https://pax26.com/Pax26_single_logo.png",
                   sameAs: [
                     "https://facebook.com/pax26",
                     "https://twitter.com/pax26",
@@ -183,16 +186,16 @@ export default function RootLayout({ children }) {
                   "@type": "WebSite",
                   name: "Pax26",
                   url: "https://pax26.com",
-                  "potentialAction": [
+                  potentialAction: [
                     {
                       "@type": "SearchAction",
-                      "target": {
+                      target: {
                         "@type": "EntryPoint",
-                        "urlTemplate": "https://pax26.com/store/{search_term_string}"
+                        urlTemplate: "https://pax26.com/store/{search_term_string}",
                       },
-                      "query-input": "required name=search_term_string"
-                    }
-                  ]
+                      "query-input": "required name=search_term_string",
+                    },
+                  ],
                 },
 
               ],
