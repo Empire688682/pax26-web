@@ -10,8 +10,6 @@ import {
 
 /* ── Keyframes + font ─────────────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Syne:wght@400;600;700;800&display=swap');
-
   .af-root  { font-family: 'Syne', sans-serif; }
   .af-serif { font-family: 'Playfair Display', serif; font-style: italic; }
 

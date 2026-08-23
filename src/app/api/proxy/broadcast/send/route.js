@@ -251,6 +251,7 @@ export async function POST(req) {
       $inc: {
         "paxAI.broadcastContactsUsedThisMonth": targetContacts.length,
         "planAnalytics.broadcastSent":          successCount,
+        "planAnalytics.metaCost":               successCount * 10,
       },
     });
 

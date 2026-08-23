@@ -98,6 +98,8 @@ const UserSchema = new mongoose.Schema(
       },
 
       connectedAt: { type: Date, default: null },
+      connectReminderSentAt: { type: Date, default: null },
+      connectReminderCount: { type: Number, default: 0 },
 
       // Registration fields — set during Cloud API activation after Embedded Signup
       registrationPin: { type: String, default: null },          // encrypted 6-digit 2FA PIN

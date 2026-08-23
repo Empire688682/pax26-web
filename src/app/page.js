@@ -1,193 +1,62 @@
-"use client";
-
-import CTA from '@/components/CTA/CTA';
+import dynamic from 'next/dynamic';
 import Hero from '@/components/Hero/Hero';
-import Pricing from '@/components/Pricing/Pricing';
-import Services from '@/components/Services/Services';
-import Testimonials from '@/components/Testimonials/Testimonials';
-import WhyChooseUs from '@/components/WhyChooseUs/WhyChooseUs';
-import React, { useEffect } from 'react';
-import { motion } from "framer-motion";
-import { useGlobalContext } from '@/components/Context';
 import Trusted from '@/components/Trusted/Trusted';
-import Problem from '@/components/Problem/Problem';
-import AutomationFeatures from '@/components/AutomationFeatures/AutomationFeatures';
-import HowItWorks from '@/components/HowItWorks/HowItWorks';
-import Demo from '@/components/Demo/Demo';
-import MasterclassVideo from '@/components/MasterclassVideo/MasterclassVideo';
+import QueryHandler from '@/components/Landing/QueryHandler';
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0 },
-};
+// Dynamic imports for below-the-fold components to reduce initial JS bundle size on mobile
+const Problem = dynamic(() => import('@/components/Problem/Problem'));
+const AutomationFeatures = dynamic(() => import('@/components/AutomationFeatures/AutomationFeatures'));
+const Services = dynamic(() => import('@/components/Services/Services'));
+const Demo = dynamic(() => import('@/components/Demo/Demo'));
+const MasterclassVideo = dynamic(() => import('@/components/MasterclassVideo/MasterclassVideo'));
+const HowItWorks = dynamic(() => import('@/components/HowItWorks/HowItWorks'));
+const WhyChooseUs = dynamic(() => import('@/components/WhyChooseUs/WhyChooseUs'));
+const Testimonials = dynamic(() => import('@/components/Testimonials/Testimonials'));
+const Pricing = dynamic(() => import('@/components/Pricing/Pricing'));
+const CTA = dynamic(() => import('@/components/CTA/CTA'));
 
-const Page = () => {
-  const { openModal } = useGlobalContext();
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (typeof window !== "undefined") {
-      const refCode = searchParams.get("ref");
-
-      if (refCode) {
-        const expireIn = Date.now() + 3 * 24 * 60 * 60 * 1000; // 3 days
-        localStorage.setItem(
-          "ReferralCode",
-          JSON.stringify({ refCode, expireIn })
-        );
-        console.log("Referral Code saved:", refCode); // For debugging
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const authQuery = searchParams.get("auth");
-    if (authQuery === "login") {
-      openModal("login");
-    }
-  }, [openModal]);
-
+export default function Page() {
   return (
-    <div className='overflow-hidden'>
+    <div className="overflow-hidden">
+      <QueryHandler />
 
       {/* Hero Section */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6 }}
-        variants={fadeInUp}
-      >
-        <Hero />
-      </motion.div>
+      <Hero />
 
-      {/* How it Works */}
-      <motion.div
-        initial={{ opacity: 0, x: -100 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        variants={fadeInUp}
-      >
-        <Trusted />
-      </motion.div>
+      {/* Trusted Partners / Social Proof */}
+      <Trusted />
 
-      {/* Problem */}
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        variants={fadeInUp}
-      >
-        <Problem />
-      </motion.div>
+      {/* Problem Section */}
+      <Problem />
 
-      {/* AutomationFeatures */}
-      <div className='border-t-[2px] border-black/80'>
-        <motion.div
-          initial={{ opacity: 0, x: 100 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          variants={fadeInUp}
-        >
-          <AutomationFeatures />
-        </motion.div>
+      {/* Automation Features */}
+      <div className="border-t-[2px] border-black/80">
+        <AutomationFeatures />
       </div>
 
       {/* Services */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.35 }}
-        variants={fadeInUp}
-      >
-        <Services />
-      </motion.div>
+      <Services />
 
       {/* Demo / Storefront Showcase */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        variants={fadeInUp}
-      >
-        <Demo />
-      </motion.div>
+      <Demo />
 
       {/* Official Masterclass Video */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.55 }}
-        variants={fadeInUp}
-      >
-        <MasterclassVideo />
-      </motion.div>
+      <MasterclassVideo />
 
       {/* How It Works */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        variants={fadeInUp}
-      >
-        <HowItWorks />
-      </motion.div>
+      <HowItWorks />
 
       {/* Why Choose Us */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.45 }}
-        variants={fadeInUp}
-      >
-        <WhyChooseUs />
-      </motion.div>
+      <WhyChooseUs />
 
       {/* Testimonials */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-        variants={fadeInUp}
-      >
-        <Testimonials />
-      </motion.div>
+      <Testimonials />
 
       {/* Pricing */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        variants={fadeInUp}
-      >
-        <Pricing />
-      </motion.div>
+      <Pricing />
 
-      {/* Utilities section intentionally hidden — not part of core WhatsApp Commerce positioning */}
-      {/* <motion.div ... ><Utilities /></motion.div> */}
-
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-        variants={fadeInUp}
-      >
-        <CTA />
-      </motion.div>
+      {/* Call to Action */}
+      <CTA />
     </div>
   );
-};
-
-export default Page;
+}

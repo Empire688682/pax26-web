@@ -16,9 +16,35 @@ const nextConfig = {
             {
                 protocol: "https",
                 hostname: "lh3.googleusercontent.com"
+            },
+            {
+                protocol: "https",
+                hostname: "user-images.githubusercontent.com"
             }
         ]
-    }
+    },
+    async headers() {
+        return [
+            {
+                source: "/images/:path*",
+                headers: [
+                    {
+                        key: "Cache-Control",
+                        value: "public, max-age=31536000, immutable",
+                    },
+                ],
+            },
+            {
+                source: "/:all*(svg|jpg|png|webp|avif|ico|woff|woff2)",
+                headers: [
+                    {
+                        key: "Cache-Control",
+                        value: "public, max-age=31536000, immutable",
+                    },
+                ],
+            },
+        ];
+    },
 };
 
 export default nextConfig;

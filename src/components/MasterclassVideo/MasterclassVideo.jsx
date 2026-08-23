@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import { Play, Youtube, Clock, Sparkles, CheckCircle2, Layers } from "lucide-react";
@@ -14,8 +14,6 @@ export const PART2_YOUTUBE_ID = "C-SO1_9XkX0"; // Part 2: Setup Seller Business,
 
 /* ── Keyframes + Styling ───────────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
-
   .mc-root  { font-family: 'Syne', sans-serif; }
   .mc-serif { font-family: 'Playfair Display', serif; font-style: italic; }
   .mc-mono  { font-family: 'DM Mono', monospace; }
@@ -78,6 +76,12 @@ export default function MasterclassVideo() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const primary = pax26?.primary || "#3b82f6";
   const [activePartId, setActivePartId] = useState("part1");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const part = new URLSearchParams(window.location.search).get("part");
+    if (part === "part2" || part === "part1") setActivePartId(part);
+  }, []);
 
   const currentVideo = VIDEO_PARTS.find((v) => v.id === activePartId) || VIDEO_PARTS[0];
 

@@ -7,8 +7,6 @@ import { CheckCircle2, Zap, Crown, Sparkles, ArrowRight, AlertCircle, ShoppingBa
 
 /* ── Keyframes + font ─────────────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
-
   .pr-root  { font-family: 'Syne', sans-serif; }
   .pr-serif { font-family: 'Playfair Display', serif; font-style: italic; }
   .pr-mono  { font-family: 'DM Mono', monospace; }

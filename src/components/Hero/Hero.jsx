@@ -10,8 +10,6 @@ import {
 
 /* ─── Injected styles ─────────────────────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap');
-
   .hr-root { font-family: 'Inter', sans-serif; }
   .hr-serif { font-family: 'Playfair Display', serif; font-style: italic; }
 
@@ -110,7 +108,7 @@ function ChatDemo() {
       </div>
       {/* messages */}
       <div className="p-3 min-h-[200px] flex flex-col gap-2"
-        style={{ backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')", backgroundSize: "contain" }}>
+        style={{ backgroundImage: "url('/images/whatsapp-bg.png')", backgroundSize: "contain" }}>
         {MSGS.slice(0, shown).map((m, i) => (
           <div key={i} className={`hr-pop flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className="max-w-[82%] px-3 py-2 text-[12.5px] leading-snug"
