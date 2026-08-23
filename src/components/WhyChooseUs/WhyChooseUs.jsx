@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import {
   Bot,
   Zap,
@@ -37,7 +37,7 @@ export default function WhyChooseUs() {
           <BenefitCard
             Icon={Bot}
             title="AI That Sells For You"
-            description="Your AI agent answers questions, shares product details, and closes sales — automatically."
+            description="Your Smart Agent answers questions, shares product details, and closes sales — automatically."
           />
           <BenefitCard
             Icon={Zap}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1357,11 +1357,11 @@ export default function WhatsappContact() {
               </div>
 
               <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.7, lineHeight: 1.5, marginBottom: "20px" }}>
-                To manually add phone numbers and customize contact rules, you must first train your AI agent and connect your WhatsApp Business number.
+                To manually add phone numbers and customize contact rules, you must first train your Smart Agent and connect your WhatsApp Business number.
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
-                {/* Step 1: AI Agent Training */}
+                {/* Step 1: Smart Agent Training */}
                 <div style={{
                   padding: "12px 14px", borderRadius: "12px",
                   background: isAiTrained ? `${pax26?.primary}10` : "rgba(245,158,11,0.08)",
@@ -1370,10 +1370,10 @@ export default function WhatsappContact() {
                 }}>
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 700, color: pax26?.textPrimary }}>
-                      1. Train AI Agent
+                      1. Train Smart Agent
                     </div>
                     <div style={{ fontSize: "11px", color: isAiTrained ? pax26?.primary : "#f59e0b", fontWeight: 600, marginTop: "2px" }}>
-                      {isAiTrained ? "✓ AI Agent is trained" : "❌ Not trained yet"}
+                      {isAiTrained ? "✓ Smart Agent is trained" : "❌ Not trained yet"}
                     </div>
                   </div>
                   {!isAiTrained && (

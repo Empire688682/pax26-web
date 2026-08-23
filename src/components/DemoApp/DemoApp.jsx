@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
@@ -25,7 +25,7 @@ const slides = [
     id: 3,
     title: "AI Sales Agent (PaxAI)",
     subtitle: "Instant Customer Replies 24/7",
-    desc: "Train your AI agent with your business info, FAQs, and product catalog. It answers questions and closes deals while you sleep.",
+    desc: "Train your Smart Agent with your business info, FAQs, and product catalog. It answers questions and closes deals while you sleep.",
     icon: Cpu
   },
   {

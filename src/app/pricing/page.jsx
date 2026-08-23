@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import PricingClient from "./PricingClient";
 
 export const metadata = {
@@ -20,7 +20,7 @@ export const metadata = {
   openGraph: {
     title: "Pax26 Pricing – WhatsApp Commerce Plans",
     description:
-      "Simple, transparent plans. Start free — your store, WhatsApp, and AI agent included on every plan.",
+      "Simple, transparent plans. Start free — your store, WhatsApp, and Smart Agent included on every plan.",
     url: "https://pax26.com/pricing",
     siteName: "Pax26",
     images: [

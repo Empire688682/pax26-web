@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { useGlobalContext } from "../Context";
@@ -31,7 +31,7 @@ const CSS = `
 const WHY = [
   "Build a beautiful online storefront in minutes",
   "Connect WhatsApp and start receiving orders immediately",
-  "AI agent that replies to customers around the clock",
+  "Smart Agent that replies to customers around the clock",
   "Smart follow-ups that turn cold leads into buyers",
   "Affordable plans with no technical setup required",
   "Built for small businesses and entrepreneurs across Africa",
@@ -118,7 +118,7 @@ const About = () => {
             <p className="text-sm leading-relaxed max-w-3xl"
               style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
               PAX26 TECHNOLOGIES builds tools that make it effortless for African businesses to sell online.
-              Create a beautiful storefront, showcase your products, connect WhatsApp, and let your AI agent
+              Create a beautiful storefront, showcase your products, connect WhatsApp, and let your Smart Agent
               handle every customer conversation — from the first message to the final order — without you
               lifting a finger.
             </p>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { TagInput } from "@/components/ui/TagInput";
@@ -476,7 +476,7 @@ function TypePicker({ onSelect, selecting, selectedTarget, pax26 }) {
           What type of business are you?
         </h1>
         <p style={{ fontSize: "15px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.7, margin: 0 }}>
-          Choose your model to configure your AI agent. This determines what data your agent uses to respond to customers on WhatsApp.
+          Choose your model to configure your Smart Agent. This determines what data your agent uses to respond to customers on WhatsApp.
         </p>
       </div>
 
@@ -1145,11 +1145,11 @@ export default function AiBusinessDashboard() {
             <span style={{ fontSize: "20px" }}>⚠️</span>
             <div>
               <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>AI Automation Inactive</h4>
-              <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.7 }}>Your AI agent is not trained yet. Complete setup to start responding to customers.</p>
+              <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.7 }}>Your Smart Agent is not trained yet. Complete setup to start responding to customers.</p>
             </div>
           </div>
           <button onClick={() => router.push("/dashboard/automations/training")} style={{ padding: "9px 18px", borderRadius: "10px", background: p?.primary, color: "#fff", border: "none", fontWeight: 700, fontSize: "13px", cursor: "pointer", whiteSpace: "nowrap" }}>
-            Train AI Agent
+            Train Smart Agent
           </button>
         </div>
       )}
@@ -1166,7 +1166,7 @@ export default function AiBusinessDashboard() {
             </span>
           </div>
           <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, margin: "4px 0 0" }}>
-            {isSeller ? "Manage your products, business profile and AI agent." : "Manage your services, FAQs and AI agent."}
+            {isSeller ? "Manage your products, business profile and Smart Agent." : "Manage your services, FAQs and Smart Agent."}
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
@@ -1315,7 +1315,7 @@ export default function AiBusinessDashboard() {
                       placeholder="e.g. 15 Broad Street, Lagos Island, Lagos"
                     />
                   </div>
-                  <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your AI agent when they ask where to buy or find you." />
+                  <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your Smart Agent when they ask where to buy or find you." />
                 </div>
               </section>
 
@@ -1327,7 +1327,7 @@ export default function AiBusinessDashboard() {
                     <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Your Pax26 Storefront</h3>
                   </div>
                   <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "20px" }}>
-                    <InfoBanner pax26={p} text="Your <strong>free storefront</strong> lets customers browse your products online. Your AI agent will share this link on WhatsApp. You can also preview it exactly as your customers see it." />
+                    <InfoBanner pax26={p} text="Your <strong>free storefront</strong> lets customers browse your products online. Your Smart Agent will share this link on WhatsApp. You can also preview it exactly as your customers see it." />
                     <SlugField
                       value={form.slug}
                       onChange={slug => setForm(f => ({ ...f, slug }))}
@@ -1388,7 +1388,7 @@ export default function AiBusinessDashboard() {
                       <FieldLabel pax26={p}>Storefront Promo Announcement Banner</FieldLabel>
                       <Toggle
                         label="Enable Storefront Promo Banner"
-                        hint="Display a glowing promo announcement banner on your storefront & inform the AI agent"
+                        hint="Display a glowing promo announcement banner on your storefront & inform the Smart Agent"
                         value={form.promoAnnouncement?.enabled || false}
                         onChange={v => setForm(f => ({ ...f, promoAnnouncement: { ...(f.promoAnnouncement || {}), enabled: v } }))}
                         pax26={p}
@@ -1420,7 +1420,7 @@ export default function AiBusinessDashboard() {
               <section>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
                   <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: `${p?.primary}15`, color: p?.primary, display: "flex", alignItems: "center", justifyContent: "center" }}><SlidersIcon /></div>
-                  <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>AI Agent Settings</h3>
+                  <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Smart Agent Settings</h3>
                 </div>
                 <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "20px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
@@ -1535,7 +1535,7 @@ export default function AiBusinessDashboard() {
                 {/* Stat: AI Status */}
                 <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}`, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "#22c55e15", display: "flex", alignItems: "center", justifyContent: "center", color: "#22c55e", marginBottom: "14px" }}><BotIcon /></div>
-                  <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, margin: "0 0 4px" }}>AI Agent Status</p>
+                  <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, margin: "0 0 4px" }}>Smart Agent Status</p>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ width: "9px", height: "9px", borderRadius: "50%", background: userData?.paxAI?.trained ? "#22c55e" : "#f59e0b", boxShadow: userData?.paxAI?.trained ? "0 0 8px #22c55e" : "0 0 8px #f59e0b" }} />
                     <h3 style={{ fontSize: "20px", fontWeight: 900, color: p?.textPrimary, margin: 0 }}>{userData?.paxAI?.trained ? "Trained" : "Needs Training"}</h3>
@@ -1558,7 +1558,7 @@ export default function AiBusinessDashboard() {
                   <p style={{ fontSize: "14px", opacity: 0.88, maxWidth: "500px", lineHeight: 1.65 }}>
                     {userData?.paxAI?.trained
                       ? `Responding to inquiries using your ${form.tone} tone. Keep your ${isSeller ? "products" : "services"} updated for accurate AI responses.`
-                      : `Your AI agent is set up as a ${isSeller ? "Seller" : "Service Provider"} but needs training data to start. Go to the training page to complete setup.`
+                      : `Your Smart Agent is set up as a ${isSeller ? "Seller" : "Service Provider"} but needs training data to start. Go to the training page to complete setup.`
                     }
                   </p>
                   {!userData?.paxAI?.trained && (

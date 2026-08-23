@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useState } from "react";
 import {
   Bot, Wifi, Zap,
@@ -807,7 +807,7 @@ export default function Dashboard() {
                 <div className="px-svc-grid">
                   <SvcCard title="My Store" link="/dashboard/my-store" icon={<Store size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
                   <SvcCard title="Products" link="/dashboard/automations/products" icon={<Package size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
-                  <SvcCard title="AI Agent" link="/dashboard/automations/ai-business-dashboard" icon={<Bot size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
+                  <SvcCard title="Smart Agent" link="/dashboard/automations/ai-business-dashboard" icon={<Bot size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
                   <SvcCard title="Inbox" link="/dashboard/automations/whatsapp-inbox" icon={<MessageSquare size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
                   <SvcCard title="Analytics" link="/dashboard/automations/sales" icon={<BarChart2 size={19} strokeWidth={2.2} />} color={C.coral} isDark={isDark} router={router} badgeCount={unreadNotifCount} />
                 </div>

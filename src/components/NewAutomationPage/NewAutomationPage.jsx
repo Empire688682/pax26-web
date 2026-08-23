@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Card, CardContent } from "../ui/Cards";
@@ -56,7 +56,7 @@ export default function NewAutomationPage() {
             className="text-sm"
             style={{ color: pax26.textSecondary }}
           >
-            Build a smart workflow for your AI agent
+            Build a smart workflow for your Smart Agent
           </p>
         </div>
       </div>

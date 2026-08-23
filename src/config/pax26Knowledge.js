@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pax26 Knowledge Base
  *
  * This file is the single source of truth for the Pax26 AI assistant.
@@ -40,7 +40,7 @@ Build a beautiful product storefront in minutes — no code, no developer needed
 - Your store is live 24/7, even when you're offline
 
 ### AI Sales Agent (PaxAI)
-Train a custom AI agent once with your business info, products, prices, FAQs and tone.
+Train a custom Smart Agent once with your business info, products, prices, FAQs and tone.
 Your agent then:
 - Replies to every customer message instantly — 24/7, no manual effort
 - Answers product questions, shares prices, and guides customers to order
@@ -99,12 +99,12 @@ Pax26 offers flexible plans to suit businesses of every size.
 ### Free Plan
 - Online storefront (limited products)
 - WhatsApp connection
-- Basic AI agent replies
+- Basic Smart Agent replies
 - No monthly fee — start immediately
 
 ### Starter Plan
 - More products and higher conversation limits
-- Full AI agent with custom training
+- Full Smart Agent with custom training
 - Smart follow-up automation
 - Basic analytics
 
@@ -149,7 +149,7 @@ Pax26 has an official 2-part setup video tutorial series available on YouTube:
 3. Go to your dashboard and set up your storefront.
 4. Add your products to your catalog.
 5. Connect your WhatsApp Business number under Automations → Connect WhatsApp.
-6. Train your AI agent with your business info under Automations → Agent Setup.
+6. Train your Smart Agent with your business info under Automations → Agent Setup.
 7. Activate automation and start receiving orders on WhatsApp.
 
 ---
@@ -190,14 +190,14 @@ A: No. Pax26 is not a VTU platform. It does not offer airtime, data, electricity
 **Q: How do I connect my WhatsApp to Pax26?**
 A: Go to Automations → Connect WhatsApp in your dashboard. You can use Official Meta API (recommended) or Direct QR Scan. Both options are guided step-by-step.
 
-**Q: How does the AI agent work?**
-A: You train your AI agent once with your business info, products, prices, and FAQs. It then automatically replies to every customer message on WhatsApp — 24/7 — handling enquiries, sharing product details, and guiding customers to place orders.
+**Q: How does the Smart Agent work?**
+A: You train your Smart Agent once with your business info, products, prices, and FAQs. It then automatically replies to every customer message on WhatsApp — 24/7 — handling enquiries, sharing product details, and guiding customers to place orders.
 
 **Q: Do I need technical skills to use Pax26?**
 A: No. Pax26 is built for non-technical business owners. Everything is point-and-click. No code, no developer needed.
 
 **Q: How long does setup take?**
-A: Most businesses are live in under 5 minutes. Connect WhatsApp, add your products, and activate your AI agent.
+A: Most businesses are live in under 5 minutes. Connect WhatsApp, add your products, and activate your Smart Agent.
 
 **Q: Is there a video tutorial on how to use Pax26?**
 A: Yes! We have an official 2-part setup video tutorial series on YouTube: Part 1 (https://youtu.be/XWufgjpl2q4) covers signing up and connecting WhatsApp, and Part 2 (https://youtu.be/C-SO1_9XkX0) covers setting up your business account, creating your storefront, adding products, and a live AI sales demo. You can also watch both parts on our tutorial page.
@@ -221,7 +221,7 @@ A: Go to Dashboard → Fund Wallet. You can top up using Card (instant credit, m
 A: First, add money to your wallet via Dashboard → Fund Wallet. Then go to Dashboard → Billing, select your desired plan (Starter, Business, or Enterprise), and click Subscribe. Your plan activates instantly and an email receipt is sent to your inbox.
 
 **Q: What happens when my plan expires?**
-A: You will receive reminder emails and WhatsApp notifications 2 days and 1 day before your plan expires. If your plan is not renewed before the expiry date, your account automatically reverts to the Free plan (20 products limit, 200 messages/month). Your AI agent remains enabled, and your storefront display will automatically adjust to 20 products. You can upgrade back to a paid plan anytime by funding your wallet.
+A: You will receive reminder emails and WhatsApp notifications 2 days and 1 day before your plan expires. If your plan is not renewed before the expiry date, your account automatically reverts to the Free plan (20 products limit, 200 messages/month). Your Smart Agent remains enabled, and your storefront display will automatically adjust to 20 products. You can upgrade back to a paid plan anytime by funding your wallet.
 
 **Q: Does Pax26 have a mobile app?**
 A: Yes. Search "Pax26" on the Google Play Store or Apple App Store.

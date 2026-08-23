@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Store, Bot, MessageSquare, Package, Users, BarChart2, Bell, Zap } from 'lucide-react';
 import { useGlobalContext } from '../Context';
@@ -31,7 +31,7 @@ export default function Services() {
           <ServiceCard
             Icon={Bot}
             title="AI Customer Replies"
-            description="Reply to customers instantly even while you sleep. Your AI agent handles it all."
+            description="Reply to customers instantly even while you sleep. Your Smart Agent handles it all."
           />
           <ServiceCard
             Icon={MessageSquare}

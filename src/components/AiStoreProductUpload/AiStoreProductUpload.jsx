@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { TagInput } from "@/components/ui/TagInput";
@@ -1408,7 +1408,7 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
               </div>
               <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: pax26?.textPrimary, opacity: 0.5, margin: 0 }}>Agent Setup</p>
             </div>
-            <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>Set Up Your AI Agent</h1>
+            <h1 style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px", color: pax26?.textPrimary, margin: "0 0 4px" }}>Set Up Your Smart Agent</h1>
             <p style={{ fontSize: "13px", color: pax26?.textPrimary, opacity: 0.55, margin: 0 }}>Choose how your business works to get the right AI setup</p>
           </div>
           <BusinessTypeSelector onSelect={setBusinessType} pax26={pax26} />

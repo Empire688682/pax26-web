@@ -1,4 +1,4 @@
-// lib/posts.jsx
+﻿// lib/posts.jsx
 export const posts = [
   {
     slug: "whatsapp-automation-tips",
@@ -130,7 +130,7 @@ export const posts = [
       <h2>How Pax26 Powers WhatsApp Commerce</h2>
       <p>Pax26 gives you everything you need: a beautiful storefront, product catalog management, AI-powered auto-replies, smart lead follow-up, and sales analytics — all in one platform built specifically for this.</p>
       <h2>Getting Started in Under 5 Minutes</h2>
-      <p>Sign up at pax26.com, create your store, add your products, connect your WhatsApp Business number, and activate your AI agent. Your store is live and your AI is ready to sell — day and night.</p>
+      <p>Sign up at pax26.com, create your store, add your products, connect your WhatsApp Business number, and activate your Smart Agent. Your store is live and your AI is ready to sell — day and night.</p>
       <h2>Conclusion</h2>
       <p>WhatsApp Commerce is the future of selling for Nigerian businesses. The businesses that set this up today will have a massive advantage tomorrow. Pax26 makes it simple.</p>
     `,
@@ -235,7 +235,7 @@ export const posts = [
       <p>Navigate to Product Manager and start adding your products — name, price, description, and images. You can add as many as you need. Each product gets its own detail page customers can browse.</p>
       <h2>Step 3: Connect Your WhatsApp</h2>
       <p>Go to Automations → Connect WhatsApp. Use the Official Meta API option for the most reliable setup. Sign in with the Facebook account linked to your WhatsApp Business number and follow the on-screen prompts. Takes about two minutes.</p>
-      <h2>Step 4: Train Your AI Agent</h2>
+      <h2>Step 4: Train Your Smart Agent</h2>
       <p>Go to Automations → Agent Setup. Tell the agent about your business — what you sell, your prices, your policies, and your tone. The agent learns this and uses it in every customer conversation.</p>
       <h2>Step 5: Activate and Go Live</h2>
       <p>Turn on your automation from the dashboard. From this point, every customer who messages your WhatsApp number gets an instant, intelligent reply — even at 3am.</p>
