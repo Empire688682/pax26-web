@@ -1,0 +1,62 @@
+# Pax26 — AI-Powered WhatsApp Commerce Platform
+
+> Pax26 helps African and global businesses sell more on WhatsApp using AI automation, a built-in online storefront, and intelligent chatbots — all managed from one dashboard.
+
+## What is Pax26?
+
+Pax26 is a SaaS platform that combines:
+- **WhatsApp Business Automation** — automated replies, lead follow-ups, bulk messaging
+- **AI Sales Chatbot** — a 24/7 conversational agent that qualifies leads and drives WhatsApp sales
+- **Online Storefront** — a hosted product catalogue page customers can browse and order from
+- **Order & Inventory Management** — track sales, orders, and stock from your dashboard
+- **Payment Integration** — accept payments directly via WhatsApp conversations
+
+## Key Features
+
+- Build an AI-powered WhatsApp store in minutes
+- Automate customer conversations and follow-ups
+- Convert WhatsApp chats into confirmed orders 24/7
+- Manage your product catalogue, inventory, and pricing in one dashboard
+- Accept payments and track orders in real time
+- Broadcast promotions to your WhatsApp contact list
+- Multi-agent inbox to manage customer chats as a team
+
+## Target Audience
+
+Small and medium-sized businesses in Africa and globally who sell products or services and want to use WhatsApp as their primary sales and customer support channel.
+
+## Pricing
+
+Pax26 offers tiered subscription plans:
+- **Starter** — Free plan with basic store and limited automation
+- **Pro** — Full AI automation, unlimited products, priority support
+- **Business** — Team features, advanced analytics, dedicated onboarding
+
+Visit https://www.pax26.com/#pricing for current pricing.
+
+## Platform URLs
+
+- Homepage: https://www.pax26.com/
+- Sign Up: https://www.pax26.com/?auth=signup
+- Login: https://www.pax26.com/?auth=login
+- Dashboard: https://www.pax26.com/dashboard
+- Store: https://www.pax26.com/store
+- Pricing: https://www.pax26.com/#pricing
+- Privacy Policy: https://www.pax26.com/privacy
+- Terms of Service: https://www.pax26.com/terms
+- Contact: https://www.pax26.com/contact
+- AI Specification: https://www.pax26.com/llms.txt
+- Agent Manifest: https://www.pax26.com/.well-known/agent.json
+
+## Technology
+
+Pax26 is built with Next.js 15 App Router (React Server Components), hosted on Vercel, and integrates with the WhatsApp Business API via Meta.
+
+## Company
+
+PAX26 TECHNOLOGIES — Building the commerce infrastructure for WhatsApp-first businesses.
+
+## Contact
+
+- Website: https://www.pax26.com/
+- Support: https://www.pax26.com/contact

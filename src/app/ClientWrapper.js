@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { usePathname } from "next/navigation";
 import { AppProvider, useGlobalContext } from "@/components/Context";
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import BackgroundFX from "@/components/BackgroundFX";
-import SignupPage from "@/components/SignupPage/SignupPage";
 import LaunchGate from "@/components/LaunchGate/LaunchGate";
 import MobileBottomNav from "@/components/MobileBottomNav/MobileBottomNav";
+
+// Lazy-load signup modal — splits its JS into a separate async chunk.
+// This removes ~150 KB from the critical initial mobile JS bundle.
+const SignupPage = dynamic(() => import("@/components/SignupPage/SignupPage"), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Inner component so it can access context for theme/pax26
 const AppShell = ({ children }) => {

@@ -1,0 +1,58 @@
+{
+  "schema_version": "v1",
+  "name": "Pax26 WhatsApp Commerce Platform",
+  "description": "AI-powered WhatsApp commerce platform for SMBs. Build a WhatsApp storefront, automate customer conversations with AI chatbots, accept payments, and manage orders — all in one dashboard.",
+  "url": "https://www.pax26.com/",
+  "logo_url": "https://www.pax26.com/images/logo.png",
+  "contact_email": "support@pax26.com",
+  "legal_info_url": "https://www.pax26.com/privacy",
+  "capabilities": [
+    {
+      "id": "whatsapp-store",
+      "name": "WhatsApp Storefront",
+      "description": "Create and manage an AI-powered product store that customers can browse and order from via WhatsApp."
+    },
+    {
+      "id": "ai-chatbot",
+      "name": "AI Sales Chatbot",
+      "description": "24/7 AI agent that qualifies leads, answers product questions, and drives conversions through WhatsApp conversations."
+    },
+    {
+      "id": "automation",
+      "name": "WhatsApp Automation",
+      "description": "Automate customer follow-ups, broadcast messages, and trigger-based conversations using no-code automation flows."
+    },
+    {
+      "id": "orders",
+      "name": "Order Management",
+      "description": "Track customer orders, manage inventory, and view sales analytics from the Pax26 dashboard."
+    },
+    {
+      "id": "payments",
+      "name": "Payment Collection",
+      "description": "Accept payments directly via WhatsApp conversations with integrated payment processing."
+    }
+  ],
+  "actions": [
+    {
+      "id": "signup",
+      "name": "Create Account",
+      "description": "Sign up for a Pax26 account to start building your WhatsApp store.",
+      "url": "https://www.pax26.com/?auth=signup"
+    },
+    {
+      "id": "login",
+      "name": "Log In",
+      "description": "Log in to the Pax26 dashboard to manage your WhatsApp store and automations.",
+      "url": "https://www.pax26.com/?auth=login"
+    },
+    {
+      "id": "pricing",
+      "name": "View Pricing",
+      "description": "View subscription plans and pricing for Pax26.",
+      "url": "https://www.pax26.com/#pricing"
+    }
+  ],
+  "api_discovery": "https://www.pax26.com/llms.txt",
+  "sitemap": "https://www.pax26.com/sitemap.xml"
+}

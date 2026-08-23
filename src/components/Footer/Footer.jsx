@@ -242,7 +242,11 @@ const Footer = () => {
               <form onSubmit={handleSubscribe} className="space-y-2">
                 <input
                   type="email"
+                  id="newsletter-email"
+                  name="email"
                   required
+                  autoComplete="email"
+                  aria-label="Email address for newsletter subscription"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
