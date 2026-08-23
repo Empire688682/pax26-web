@@ -349,7 +349,7 @@ export default function SignupPage() {
                   </div>
                   <span className="text-xs leading-relaxed" style={{ color: textSecondary }}>
                     I agree to the{" "}
-                    <a href="/terms" target="_blank"
+                    <a href="/terms" target="_blank" rel="noopener noreferrer"
                       className="font-semibold underline" style={{ color: primary }}>
                       Terms & Conditions
                     </a>

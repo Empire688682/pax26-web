@@ -33,7 +33,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://pax26.com"),
+  metadataBase: new URL("https://www.pax26.com"),
 
   title: {
     default: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
@@ -75,7 +75,7 @@ export const metadata = {
   },
 
   alternates: {
-    canonical: "https://pax26.com",
+    canonical: "https://www.pax26.com",
   },
 
   robots: {
@@ -93,7 +93,7 @@ export const metadata = {
     title: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
     description:
       "Create your online storefront, showcase products, automate customer conversations and convert WhatsApp chats into sales using AI.",
-    url: "https://pax26.com",
+    url: "https://www.pax26.com",
     siteName: "Pax26",
     locale: "en_US",
     type: "website",
@@ -125,6 +125,11 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${playfair.variable} ${syne.variable} ${dmMono.variable}`}
     >
       <head>
+        {/* ─── AI Agent Discovery Headers (3/3 Agentic Browsing) ────────── */}
+        <link rel="agent-manifest" type="application/json" href="/.well-known/agent.json" />
+        <link rel="llms-txt" type="text/markdown" href="/llms.txt" />
+        <meta name="ai-agent" content="enabled" />
+        <meta name="web-mcp" content="v1" />
 
         {/* ─── Structured Data (JSON-LD) ──────────────────────────────────
             MUST use a native <script> tag (NOT next/script) so it is
