@@ -104,11 +104,12 @@ export default function AISettingsPage({handleInputChange, setAiData, aiData}) {
             <label className="text-sm">Business Instructions</label>
             <textarea
               name="instructions"
+              id="ai-instructions"
               value={aiData.instructions}
               onChange={(e) => handleInputChange("instructions", e.target.value)}
-            placeholder="eg: Always greet customers by name. Use emojis for friendly tone. Avoid technical jargon..."
-            className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
-              id="" cols="30" rows="4"></textarea>
+              placeholder="eg: Always greet customers by name. Use emojis for friendly tone. Avoid technical jargon..."
+              className="w-full mt-1 p-3 rounded-xl border-gray-400 border bg-transparent"
+              cols="30" rows="4"></textarea>
           </div>
 
           <div style={{ color: pax26.textPrimary }}>

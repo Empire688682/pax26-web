@@ -100,7 +100,7 @@ export const metadata = {
 
     images: [
       {
-        url: "/Pax26_single_logo.png",
+        url: "/Pax26_single_logo.webp",
         width: 1200,
         height: 630,
         alt: "Pax26 — WhatsApp Commerce Platform",
@@ -113,7 +113,7 @@ export const metadata = {
     title: "Pax26 — Build Your Online Store & Sell on WhatsApp with AI",
     description:
       "Create your storefront, automate WhatsApp conversations, and let AI sell for you 24/7. Built for small businesses.",
-    images: ["/Pax26_single_logo.png"],
+    images: ["/Pax26_single_logo.webp"],
   },
 };
 
