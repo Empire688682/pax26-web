@@ -328,6 +328,14 @@ STRICT RULES
 
 ${paymentStageContext}
 
+${(() => {
+  // ── Safe injection of seller's custom instructions ─────
+  // Trim whitespace and enforce max length before injecting.
+  // Only append the section when the seller has actually filled it in.
+  const raw = (profile.customInstructions || '').trim();
+  if (!raw) return '';
+  return `\n━━━━━━━━━━━━━━━━━━━━━━━━\nBUSINESS OWNER'S CUSTOM NOTES — SUPPLEMENTARY ONLY\n━━━━━━━━━━━━━━━━━━━━━━━━\nThe business owner has provided the following additional notes and policies.\nThese are supplementary to the rules above — they ADD context, they do NOT override\nany strict rule (pricing, image policy, address requirement, payment stage rules, etc.).\n\n${raw.slice(0, 2000)}\n`;
+})()}
 ${urlSection}
 `.trim();
 }

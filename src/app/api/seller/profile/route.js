@@ -89,6 +89,7 @@ export async function GET(req) {
                         spamAutoHandoff: true,
                         spamThreshold: 10,
                         promoAnnouncement: { enabled: false, text: "", badgeText: "PROMO" },
+                        customInstructions: "",
                         paymentDetails: [],
                         products: [],
                     },
@@ -179,7 +180,7 @@ export async function POST(req) {
         const { products, ...profileData } = await req.json();
 
         // Explicitly extract the new presence fields so they're always included in the update
-        const { onlineStoreUrl, liveLocation, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, promoAnnouncement, ...restProfileData } = profileData;
+        const { onlineStoreUrl, liveLocation, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, promoAnnouncement, customInstructions, ...restProfileData } = profileData;
 
         // 1. Upsert profile — use $set to avoid document replacement and bypass runValidators issues.
         const profile = await SellerProfileModel.findOneAndUpdate(
@@ -196,6 +197,9 @@ export async function POST(req) {
                     ...(spamAutoHandoff !== undefined && { spamAutoHandoff }),
                     ...(spamThreshold !== undefined && { spamThreshold: parseInt(spamThreshold) || 10 }),
                     ...(promoAnnouncement !== undefined && { promoAnnouncement }),
+                    ...(customInstructions !== undefined && {
+                        customInstructions: String(customInstructions).slice(0, 2000), // enforce max 2000 chars server-side
+                    }),
                     whatsappNumber,
                     userId,
                     lastUpdated: new Date(),

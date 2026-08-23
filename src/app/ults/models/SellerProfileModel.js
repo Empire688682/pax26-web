@@ -150,6 +150,17 @@ const SellerProfileSchema = new mongoose.Schema({
         default: Date.now,
     },
 
+    // ── Custom AI Instructions (optional, seller-written) ────────
+    // Business owner can provide supplementary instructions that are
+    // injected into the AI system prompt in a safe, sandboxed section.
+    // These CANNOT override core security / guardrail rules.
+    customInstructions: {
+        type: String,
+        default: '',
+        trim: true,
+        maxlength: 2000, // ~400 words — enough for policies, greetings, disclaimers
+    },
+
     // Sales Notifications & Tracking
     salesNotificationsEnabled: {
         type: Boolean,

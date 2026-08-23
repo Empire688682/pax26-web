@@ -930,6 +930,7 @@ export default function AiBusinessDashboard() {
     spamAutoHandoff: true,
     spamThreshold: 10,
     promoAnnouncement: { enabled: false, text: "", badgeText: "PROMO" },
+    customInstructions: "",
     paymentDetails: [],
     whatsappNumber: "",
     products: [],
@@ -980,6 +981,7 @@ export default function AiBusinessDashboard() {
           spamAutoHandoff: profile.spamAutoHandoff !== false,
           spamThreshold: profile.spamThreshold || 10,
           promoAnnouncement: profile.promoAnnouncement || { enabled: false, text: "", badgeText: "PROMO" },
+          customInstructions: profile.customInstructions || "",
           paymentDetails: profile.paymentDetails || [],
           products: profile.products || [],
           services: profile.services || [],
@@ -1456,6 +1458,35 @@ export default function AiBusinessDashboard() {
                       </p>
                     </div>
                   )}
+
+                  {/* ── Custom AI Instructions (optional) ── */}
+                  <div style={{ paddingTop: "16px", borderTop: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div>
+                        <FieldLabel pax26={p}>Custom AI Instructions <span style={{ fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "99px", background: `${p?.primary}15`, color: p?.primary, marginLeft: "6px" }}>Optional</span></FieldLabel>
+                        <p style={{ margin: "4px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.5, lineHeight: 1.55 }}>
+                          Add your own policies, greetings, or disclaimers. These are injected after all core rules and <strong>cannot override security or pricing guardrails</strong>. Max 400 words.
+                        </p>
+                      </div>
+                    </div>
+                    <textarea
+                      value={form.customInstructions || ""}
+                      onChange={e => setForm(f => ({ ...f, customInstructions: e.target.value.slice(0, 2000) }))}
+                      rows={5}
+                      placeholder={isSeller
+                        ? 'e.g. Always greet customers with "Welcome to [Store Name] 👑". No refunds after 48 hours. Delivery takes 2–3 working days. Do not accept cash on delivery.'
+                        : 'e.g. Always address clients formally. Our consultation fee starts at ₦20,000. Do not discuss pricing for bespoke packages — direct them to book a call.'}
+                      style={{
+                        ...fieldBase(p),
+                        resize: "vertical",
+                        lineHeight: 1.6,
+                        fontSize: "13px",
+                      }}
+                    />
+                    <p style={{ margin: 0, fontSize: "11px", color: p?.textPrimary, opacity: 0.4 }}>
+                      {(form.customInstructions || "").length}/2000 characters
+                    </p>
+                  </div>
                 </div>
               </section>
 
