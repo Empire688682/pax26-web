@@ -2,11 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import dynamic from "next/dynamic";
 import SocialIcons from "../SocialIcons/SocialIcons";
 import { useGlobalContext } from "../Context";
 import { ArrowUp, Bot, Zap, Wifi, Youtube, Play } from "lucide-react";
 import { usePathname } from "next/navigation";
-import ChatbotWidget from "../Chatbot/ChatbotWidget";
+
+// Lazy-load chatbot widget to eliminate initial JS thread blocking
+const ChatbotWidget = dynamic(() => import("../Chatbot/ChatbotWidget"), {
+  ssr: false,
+  loading: () => null,
+});
 
 /* ── Keyframes + font only ───────────────────────────────────── */
 const CSS = `

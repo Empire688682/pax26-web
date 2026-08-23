@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import {
   ArrowRight, Zap, Bot, CreditCard, Smartphone, CheckCircle, Shield
@@ -50,6 +49,12 @@ const CSS = `
     transition: background .18s, border-color .18s, transform .18s;
   }
   .hr-pill:hover { transform:translateY(-2px); }
+
+  @keyframes hr-fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hr-fade-up { animation: hr-fade-up 0.5s ease both; }
 `;
 
 /* ─── Chat demo messages ──────────────────────────────────────────────── */
@@ -235,10 +240,7 @@ export default function Hero() {
             <div className="flex flex-col gap-4 sm:gap-5">
 
               {/* Eyebrow — Consolidated Premium Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }}
-                className="self-start mb-2"
-              >
+              <div className="self-start mb-2 hr-fade-up">
                 <div
                   className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-md border text-[11px] font-medium"
                   style={{
@@ -255,37 +257,31 @@ export default function Hero() {
                   <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
                   <span style={{ color: ts, opacity: 0.8 }}>Registered Nigerian Tech Company</span>
                 </div>
-              </motion.div>
+              </div>
 
 
               {/* Headline */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: .65, delay: .08, ease: [.22, 1, .36, 1] }}>
+              <div className="hr-fade-up" style={{ animationDelay: "0.08s" }}>
                 <h1 style={{ color: tp, lineHeight: 1.08 }}
                   className="text-[clamp(30px,6.5vw,58px)] font-black tracking-tight">
                   Sell More on WhatsApp<br />
                   <span className="hr-serif" style={{ color: p }}>with Your Own AI-Powered Store.</span>
                 </h1>
-              </motion.div>
+              </div>
 
 
               {/* Sub-text */}
-              <motion.p
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }}
-                className="text-[13.5px] sm:text-[15px] leading-relaxed"
-                style={{ color: ts, opacity: .78 }}>
+              <p className="hr-fade-up text-[13.5px] sm:text-[15px] leading-relaxed"
+                style={{ color: ts, opacity: .78, animationDelay: "0.2s" }}>
                 Create a beautiful storefront, showcase your products, let customers order through{" "}
                 <strong style={{ color: tp }}>WhatsApp</strong>, and automate every conversation{" "}
                 <strong style={{ color: tp }}>24/7 using AI</strong> — even while you sleep.
-              </motion.p>
+              </p>
 
 
               {/* Core capabilities list */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .42 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 mt-2 py-1"
-              >
+              <div className="hr-fade-up grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 mt-2 py-1"
+                style={{ animationDelay: "0.3s" }}>
                 <div className="flex items-center gap-2 text-[13px]" style={{ color: ts }}>
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
                   <span>Beautiful Online Storefront</span>
@@ -302,13 +298,11 @@ export default function Hero() {
                   <CheckCircle size={14} style={{ color: WA }} className="shrink-0" />
                   <span>24/7 Automated Sales & Support</span>
                 </div>
-              </motion.div>
+              </div>
 
 
               {/* CTA row */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .54 }}
-                className="flex flex-wrap gap-3">
+              <div className="hr-fade-up flex flex-wrap gap-3" style={{ animationDelay: "0.4s" }}>
                 <button
                   onClick={() => openModal("register")}
                   className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold text-white"
@@ -334,12 +328,11 @@ export default function Hero() {
                   style={{ color: tp, border: `1px solid ${bdr}`, background: "transparent" }}>
                   View Demo
                 </a>
-              </motion.div>
+              </div>
 
               {/* Stats row */}
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .68 }}
-                className="flex items-center gap-5 sm:gap-7 pt-1" style={{ color: ts }}>
+              <div className="hr-fade-up flex items-center gap-5 sm:gap-7 pt-1"
+                style={{ color: ts, animationDelay: "0.5s" }}>
                 {stats.map((s, i) => (
                   <div key={i} className="flex items-center gap-5 sm:gap-7">
                     {i > 0 && <div className="w-px h-8" style={{ background: bdr }} />}
@@ -350,18 +343,15 @@ export default function Hero() {
                   <Shield size={12} style={{ color: WA }} aria-hidden="true" />
                   <span className="text-[10px] font-semibold opacity-50">Secure &amp; Trusted</span>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* ══ RIGHT — Chat demo ════════════════════════════════ */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: .75, delay: .22, ease: [.22, 1, .36, 1] }}
-              className="flex justify-center lg:justify-end">
+            <div className="hr-fade-up flex justify-center lg:justify-end" style={{ animationDelay: "0.15s" }}>
               <div className="relative">
                 <ChatDemo />
               </div>
-            </motion.div>
+            </div>
 
           </div>{/* /grid */}
         </div>{/* /content */}
