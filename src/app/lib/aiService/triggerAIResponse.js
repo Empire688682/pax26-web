@@ -443,10 +443,26 @@ export const triggerAIResponse = async ({
           .replace(/`(.*?)`/g, "$1");
 
         // ── Parse image tags out of the AI reply ──────────────────
-        const { imageUrls, cleanText } = extractImageTags(strippedText);
+        let { imageUrls, cleanText } = extractImageTags(strippedText);
+
+        // ── Validation Safeguard: Ensure image URL belongs to active seller catalogue ──
+        if (imageUrls.length > 0 && products && products.length > 0) {
+            const validCatalogueImageUrls = new Set(
+                products
+                    .flatMap(p => p.images || [])
+                    .map(img => img?.url)
+                    .filter(Boolean)
+            );
+
+            const filteredImageUrls = imageUrls.filter(url => validCatalogueImageUrls.has(url));
+            if (filteredImageUrls.length < imageUrls.length) {
+                console.warn(`⚠️ Filtered out ${imageUrls.length - filteredImageUrls.length} image URL(s) not belonging to the seller's active product catalogue.`);
+                imageUrls = filteredImageUrls;
+            }
+        }
 
         if (imageUrls.length > 0) {
-            console.log(`🖼️  AI included ${imageUrls.length} image(s) — sending before text`);
+            console.log(`🖼️  AI included ${imageUrls.length} valid catalogue image(s) — sending before text`);
         }
 
         // ── Send: images first, then text ─────────────────────────
