@@ -173,7 +173,7 @@ const Contact = () => {
               {/* image */}
               <div className="relative w-full h-52 rounded-2xl overflow-hidden shadow-lg">
                 <Image
-                  src="/contact-img.png"
+                  src="/contact-img.webp"
                   alt="Contact Illustration"
                   fill
                   style={{ objectFit: "cover" }}

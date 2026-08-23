@@ -144,8 +144,9 @@ export default function RootLayout({ children }) {
                   "@type": "Organization",
                   name: "Pax26",
                   url: "https://pax26.com",
-                  logo: "https://pax26.com/Pax26_single_logo.png",
+                  logo: "https://www.pax26.com/Pax26_single_logo.webp",
                   sameAs: [
+                    "https://www.pax26.com",
                     "https://facebook.com/pax26",
                     "https://twitter.com/pax26",
                     "https://instagram.com/pax26",

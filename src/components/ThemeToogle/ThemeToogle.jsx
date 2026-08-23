@@ -14,7 +14,7 @@ const ThemeToggle = () => {
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className="z-50 w-6 pr-1 rounded dark:text-white"
     >
-      {resolvedTheme === "dark" ? <img src="/sun-3335.png" alt="light-mode" /> : <img src="/moon-6677.png" alt="dark-mode" />}
+      {resolvedTheme === "dark" ? <img src="/sun-3335.png" alt="light-mode" width={20} height={20} /> : <img src="/moon-6677.png" alt="dark-mode" width={20} height={20} />}
     </button>
   );
 };

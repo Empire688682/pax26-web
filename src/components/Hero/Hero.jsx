@@ -111,7 +111,7 @@ function ChatDemo() {
       </div>
       {/* messages */}
       <div className="p-3 min-h-[200px] flex flex-col gap-2"
-        style={{ backgroundImage: "url('/images/whatsapp-bg.png')", backgroundSize: "contain" }}>
+        style={{ backgroundImage: "url('/images/whatsapp-bg.webp')", backgroundSize: "contain" }}>
         {MSGS.slice(0, shown).map((m, i) => (
           <div key={i} className={`hr-pop flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className="max-w-[82%] px-3 py-2 text-[12.5px] leading-snug"

@@ -74,6 +74,8 @@ function AuthInput({ icon: Icon, type = "text", name, value, onChange, placehold
       <Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
         style={{ color: isFocused ? primary : textPrimary, opacity: isFocused ? 0.8 : 0.3 }} />
       <input
+        id={`auth-${name}`}
+        aria-label={placeholder}
         type={type} name={name} value={value}
         onChange={onChange} placeholder={placeholder} required={required}
         className="am-input w-full pl-9 pr-10 py-3 rounded-xl text-sm"

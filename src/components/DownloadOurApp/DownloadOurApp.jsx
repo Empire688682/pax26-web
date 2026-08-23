@@ -29,7 +29,7 @@ const DownloadOurApp = () => {
         </div>
 
         <Image
-          src="/playstore.png"
+          src="/playstore.webp"
           alt="App Preview"
           width={250}
           height={250}
