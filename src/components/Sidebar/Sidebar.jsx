@@ -200,10 +200,11 @@ export default function Sidebar() {
             </Link>
             <button
               onClick={close}
+              aria-label="Close navigation menu"
               className="w-7 h-7 rounded-xl flex items-center justify-center transition-all duration-200"
               style={{ background: pax26?.secondaryBg, color: pax26?.textSecondary }}
             >
-              <X size={13} />
+              <X size={13} aria-hidden="true" />
             </button>
           </div>
 
@@ -367,9 +368,10 @@ export default function Sidebar() {
         </div>
 
         {/* ── Backdrop ──────────────────────────────────── */}
-        <div
+        <button
           onClick={close}
-          className="sb-backdrop flex-1"
+          aria-label="Close navigation menu"
+          className="sb-backdrop flex-1 cursor-default border-0 p-0"
           style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }}
         />
       </nav>
