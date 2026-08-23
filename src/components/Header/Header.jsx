@@ -29,21 +29,24 @@ const Header = () => {
     
     return (
         <>
-        <div
+        <header
+            role="banner"
+            aria-label="Main Navigation Bar"
             className={`shadow-md w-full sticky right-0 top-0 z-10 flex items-center justify-between`}
             style={{ 
               backgroundColor: pax26.header,
               padding: "clamp(12px,3vw,16px) clamp(14px,4vw,24px)",
             }}>
 
-            <Link href={userData ? "/dashboard" : "/"} className="text-xl md:text-2xl font-bold text-white flex-shrink-0">
-                <h1 style={{ color: pax26.textPrimary }}>Pax26</h1>
+            <Link href={userData ? "/dashboard" : "/"} aria-label="Pax26 Home" className="text-xl md:text-2xl font-bold text-white flex-shrink-0">
+                <span className="text-xl md:text-2xl font-bold" style={{ color: pax26.textPrimary }}>Pax26</span>
             </Link>
 
-            <div className='flex items-center gap-4'>
+            <nav role="navigation" aria-label="Header Actions" className='flex items-center gap-4'>
                 {
                     !userData && (
                         <button
+                            aria-label="Sign in to your account"
                             className='cursor-pointer font-semibold px-4 py-1.5 rounded-xl text-sm transition-all duration-200 hover:opacity-90'
                             onClick={handleLoginClick}
                             style={{
@@ -58,9 +61,11 @@ const Header = () => {
                 }
 
 
-                <Menu onClick={toggleMenu} size={28} color={pax26.textPrimary} className='cursor-pointer hover:opacity-80 transition-opacity' />
-            </div>
-        </div>
+                <button aria-label="Toggle navigation menu" onClick={toggleMenu} className="p-1 rounded-lg hover:opacity-80 transition-opacity">
+                    <Menu size={28} color={pax26.textPrimary} />
+                </button>
+            </nav>
+        </header>
         {
             pinModal && (
                 <div className='w-full h-full bg-black/80 flex items-center justify-center fixed top-0 left-0 z-[100]'>

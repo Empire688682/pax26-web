@@ -10,8 +10,6 @@ import ChatbotWidget from "../Chatbot/ChatbotWidget";
 
 /* ── Keyframes + font only ───────────────────────────────────── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap');
-
   .ft-root { font-family: 'Syne', sans-serif; }
   .ft-mono { font-family: 'DM Mono', monospace; }
 
@@ -145,7 +143,7 @@ const Footer = () => {
         </button>
       )}
 
-      <footer className="ft-root relative overflow-hidden" style={{ backgroundColor: pax26.header }}>
+      <footer role="contentinfo" aria-label="Site Footer" className="ft-root relative overflow-hidden" style={{ backgroundColor: pax26.header }}>
 
         {/* ── Subtle grid texture ────────────────────────── */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.025]"

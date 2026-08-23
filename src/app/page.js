@@ -17,7 +17,7 @@ const CTA = dynamic(() => import('@/components/CTA/CTA'));
 
 export default function Page() {
   return (
-    <div className="overflow-hidden">
+    <main id="main-content" role="main" aria-label="Pax26 WhatsApp Commerce Platform" className="overflow-hidden">
       <QueryHandler />
 
       {/* Hero Section */}
@@ -57,6 +57,6 @@ export default function Page() {
 
       {/* Call to Action */}
       <CTA />
-    </div>
+    </main>
   );
 }

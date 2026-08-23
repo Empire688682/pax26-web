@@ -179,6 +179,22 @@ export default function RootLayout({ children }) {
                   },
                 },
 
+                {
+                  "@type": "WebSite",
+                  name: "Pax26",
+                  url: "https://pax26.com",
+                  "potentialAction": [
+                    {
+                      "@type": "SearchAction",
+                      "target": {
+                        "@type": "EntryPoint",
+                        "urlTemplate": "https://pax26.com/store/{search_term_string}"
+                      },
+                      "query-input": "required name=search_term_string"
+                    }
+                  ]
+                },
+
               ],
             }),
           }}
