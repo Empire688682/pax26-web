@@ -87,7 +87,10 @@ function ChatDemo() {
   const nextBot = shown < MSGS.length && MSGS[shown]?.role === "bot";
 
   return (
-    <div className="w-full max-w-[300px] sm:max-w-[320px] rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+    <div
+      role="region"
+      aria-label="Pax26 AI WhatsApp Sales Agent Demo"
+      className="w-full max-w-[300px] sm:max-w-[320px] rounded-3xl overflow-hidden shadow-2xl border border-white/10"
       style={{ background: "#ECE5DD" }}>
       {/* header */}
       <div className="flex items-center gap-2.5 px-4 py-3" style={{ background: "#075E54" }}>
@@ -208,12 +211,12 @@ export default function Hero() {
         style={{ background: bg, minHeight: "100svh", display: "flex", flexDirection: "column" }}
       >
 
-        {/* ── Ambient orbs ──────────────────────────────────────── */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* ── Ambient orbs (radial-gradient, no GPU blur cost) ────── */}
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="hr-orb1 absolute -top-24 -left-24 w-[380px] h-[380px] rounded-full"
-            style={{ background: `radial-gradient(circle,${p}22 0%,transparent 70%)`, filter: "blur(60px)" }} />
+            style={{ background: `radial-gradient(circle at 40% 40%, ${p}28 0%, transparent 70%)` }} />
           <div className="hr-orb2 absolute -bottom-16 -right-16 w-[320px] h-[320px] rounded-full"
-            style={{ background: `radial-gradient(circle,${WA}18 0%,transparent 70%)`, filter: "blur(70px)" }} />
+            style={{ background: `radial-gradient(circle at 60% 60%, ${WA}22 0%, transparent 70%)` }} />
           {/* dot grid */}
           <div className="absolute inset-0"
             style={{
@@ -344,7 +347,7 @@ export default function Hero() {
                   </div>
                 ))}
                 <div className="ml-auto flex items-center gap-1.5">
-                  <Shield size={12} style={{ color: WA }} />
+                  <Shield size={12} style={{ color: WA }} aria-hidden="true" />
                   <span className="text-[10px] font-semibold opacity-50">Secure &amp; Trusted</span>
                 </div>
               </motion.div>
