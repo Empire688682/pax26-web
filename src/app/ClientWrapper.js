@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import Sidebar from "@/components/Sidebar/Sidebar";
 import { usePathname } from "next/navigation";
 import { AppProvider, useGlobalContext } from "@/components/Context";
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import BackgroundFX from "@/components/BackgroundFX";
 import LaunchGate from "@/components/LaunchGate/LaunchGate";
-import MobileBottomNav from "@/components/MobileBottomNav/MobileBottomNav";
 
-// Lazy-load signup modal — splits its JS into a separate async chunk.
-// This removes ~150 KB from the critical initial mobile JS bundle.
+// Lazy-load drawer, modal, and mobile nav to keep initial JS bundle ultra-lean
+const Sidebar = dynamic(() => import("@/components/Sidebar/Sidebar"), { ssr: false });
+const MobileBottomNav = dynamic(() => import("@/components/MobileBottomNav/MobileBottomNav"), { ssr: false });
 const SignupPage = dynamic(() => import("@/components/SignupPage/SignupPage"), {
   ssr: false,
   loading: () => null,

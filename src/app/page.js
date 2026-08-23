@@ -1,9 +1,9 @@
 import dynamic from 'next/dynamic';
 import Hero from '@/components/Hero/Hero';
-import Trusted from '@/components/Trusted/Trusted';
 import QueryHandler from '@/components/Landing/QueryHandler';
 
 // Dynamic imports for below-the-fold components to reduce initial JS bundle size on mobile
+const Trusted = dynamic(() => import('@/components/Trusted/Trusted'));
 const Problem = dynamic(() => import('@/components/Problem/Problem'));
 const AutomationFeatures = dynamic(() => import('@/components/AutomationFeatures/AutomationFeatures'));
 const Services = dynamic(() => import('@/components/Services/Services'));
