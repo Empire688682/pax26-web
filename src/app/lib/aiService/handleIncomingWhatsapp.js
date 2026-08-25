@@ -257,7 +257,20 @@ export const handleIncomingWhatsApp = async (payload) => {
       );
       console.log("✅ Step 5 — New lead added:", visitorPhone);
     } else {
-      console.log("✅ Step 5 — Existing contact updated:", visitorPhone);
+      // Auto-update leadStage from "new" to "contacted" once conversation is active
+      await UserModel.updateOne(
+        {
+          _id: user._id,
+          "whatsapp.contacts.list.phone": visitorPhone,
+          "whatsapp.contacts.list.leadStage": { $in: ["new", null, ""] },
+        },
+        {
+          $set: {
+            "whatsapp.contacts.list.$.leadStage": "contacted",
+          },
+        }
+      );
+      console.log("✅ Step 5 — Existing contact updated (leadStage set to contacted):", visitorPhone);
     }
 
     // ── Special Case: 'ask' policy for first-time contacts ───

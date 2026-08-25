@@ -1,18 +1,12 @@
-"use client"
-import React from 'react';
-import { useGlobalContext } from '@/components/Context';
-import WhatsappContact from '@/components/WhatsappContact/WhatsappContact';
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-const page = () => {
-    const { pax26 } = useGlobalContext();
-  return (
-    <div>
-      <div className="px-6 py-10">
-        <WhatsappContact />
-      </div>
-    </div>
-  )
+export default function WhatsappContactsRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/dashboard/automations/whatsapp-inbox");
+  }, [router]);
+
+  return null;
 }
-
-export default page
-

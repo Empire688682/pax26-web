@@ -68,7 +68,7 @@ export async function POST(req) {
       );
     }
 
-    const { title, message, contacts } = await req.json();
+    const { title, message, contacts, tagFilter } = await req.json();
 
     if (!title?.trim() || !message?.trim()) {
       return NextResponse.json(
@@ -102,7 +102,20 @@ export async function POST(req) {
 
     // 3. Build contact list
     let targetContacts = Array.isArray(contacts) ? contacts : [];
-    if (targetContacts.length === 0 && user.whatsapp?.contacts?.list) {
+
+    // Filter by tag if tagFilter is specified
+    if (tagFilter && tagFilter !== "all" && user.whatsapp?.contacts?.list) {
+      const tagPhones = new Set(
+        user.whatsapp.contacts.list
+          .filter(c => c.status === "whitelist" && Array.isArray(c.tags) && c.tags.includes(tagFilter))
+          .map(c => c.phone)
+      );
+      if (targetContacts.length > 0) {
+        targetContacts = targetContacts.filter(p => tagPhones.has(p));
+      } else {
+        targetContacts = Array.from(tagPhones);
+      }
+    } else if (targetContacts.length === 0 && user.whatsapp?.contacts?.list) {
       targetContacts = user.whatsapp.contacts.list
         .filter(c => c.status === "whitelist")
         .map(c => c.phone);

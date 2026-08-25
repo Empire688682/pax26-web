@@ -69,6 +69,7 @@ export const AppProvider = ({ children }) => {
 
   const [isWhatsappNumberConnected, setIsWhatsappNumberConnected] = useState(false);
   const [aiPlans, setAiPlans] = useState([]);
+  const [unreadInboxCount, setUnreadInboxCount] = useState(0);
 
   /* ================================
      DATA STATES
@@ -192,6 +193,32 @@ export const AppProvider = ({ children }) => {
       console.log("fetchUser: ", error);
     }
   };
+
+  const fetchUnreadInboxCount = useCallback(async () => {
+    if (!userData) return;
+    try {
+      const res = await axios.get("/api/automations/inbox/conversations");
+      if (res.data?.success) {
+        const convs = res.data.data || [];
+        const totalUnread = convs.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+        setUnreadInboxCount(totalUnread);
+      }
+    } catch (error) {
+      // Ignore
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (userData) {
+      fetchUnreadInboxCount();
+      const interval = setInterval(fetchUnreadInboxCount, 8000);
+      window.addEventListener("focus", fetchUnreadInboxCount);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener("focus", fetchUnreadInboxCount);
+      };
+    }
+  }, [userData, fetchUnreadInboxCount]);
 
   /* ================================
      MENU HANDLER
@@ -366,6 +393,8 @@ export const AppProvider = ({ children }) => {
 
         fetchUser,
         aiPlans,
+        unreadInboxCount,
+        fetchUnreadInboxCount,
       }}
     >
       {children}

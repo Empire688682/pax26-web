@@ -137,8 +137,15 @@ export default function BroadcastPage() {
     if (!message.trim()) {
       return toast.warning("Please compose a message.");
     }
-    if (selectedContacts.length === 0) {
-      return toast.warning("Please select at least one contact.");
+
+    // Auto-populate target contacts from tag filter if no individual checkbox is manually checked
+    let contactsToSend = [...selectedContacts];
+    if (contactsToSend.length === 0 && filteredContacts.length > 0) {
+      contactsToSend = filteredContacts.map(c => c.phone);
+    }
+
+    if (contactsToSend.length === 0) {
+      return toast.warning("Please select at least one contact or choose a tag with active contacts.");
     }
     if (isSchedule && !scheduleDate) {
       return toast.warning("Please select a date and time to schedule.");
@@ -155,7 +162,8 @@ export default function BroadcastPage() {
       const payload = {
         title,
         message,
-        contacts: selectedContacts,
+        contacts: contactsToSend,
+        tagFilter,
         ...(isSchedule && { scheduledAt: new Date(scheduleDate).toISOString() })
       };
 

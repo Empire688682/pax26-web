@@ -1,5 +1,6 @@
 import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
+import UserModel from "../../ults/models/UserModel.js";
 import { uploadCustomerImageToCloudinary } from "./customerImageSearch.js";
 import { sendSalesNotification } from "../salesNotificationService.js";
 import Groq from "groq-sdk";
@@ -411,6 +412,17 @@ export async function handlePaymentReceipt({
         }
     } else {
         console.log("ℹ️ Order already had payment proof attached — skipping duplicate sales alert (Order:", order._id, ")");
+    }
+
+    // Automatically update customer's leadStage to 'converted'
+    try {
+        await UserModel.updateOne(
+            { _id: sellerUserId, "whatsapp.contacts.list.phone": normalizedPhone },
+            { $set: { "whatsapp.contacts.list.$.leadStage": "converted" } }
+        );
+        console.log("✅ Customer leadStage automatically updated to 'converted' for:", normalizedPhone);
+    } catch (leadErr) {
+        console.warn("Failed to update leadStage to converted:", leadErr.message);
     }
 
     return { handled: true, order, isNewProof: isFirstProofUpload };

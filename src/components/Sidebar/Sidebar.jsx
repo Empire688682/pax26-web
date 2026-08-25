@@ -141,7 +141,7 @@ const Divider = ({ pax26 }) => (
 
 /* ── Main Sidebar ─────────────────────────────────────────────── */
 export default function Sidebar() {
-  const { isOpen, setIsOpen, logoutUser, pax26, userData, router } = useGlobalContext();
+  const { isOpen, setIsOpen, logoutUser, pax26, userData, router, unreadInboxCount } = useGlobalContext();
   const limits = usePlanLimits();
   const close = () => setIsOpen(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
@@ -239,13 +239,12 @@ export default function Sidebar() {
 
                 {/* ── STAGE 2: DAILY OPERATIONS ── */}
                 <SectionLabel label="Daily Operations" pax26={pax26} />
-                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} badgeCount={unreadInboxCount} />
                 <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Setup" onClick={close} pax26={pax26} />
                 {userData?.paxAI?.businessType === 'seller' && (
                   <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
                 )}
-                <NavItem href="/dashboard/automations/whatsapp-contacts" icon={Users} label="Leads & Contacts" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/staff" icon={Users} label="Team & Staff Inboxes" onClick={close} pax26={pax26} />
 
                 {/* ── STAGE 3: MARKETING & GROWTH ── */}

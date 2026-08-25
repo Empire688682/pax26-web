@@ -248,7 +248,7 @@ function AutoCard({ auto, toggling, onToggle, onView, onTrain, isPaxAiBusinessTr
             className="am-btn am-row-btn flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold"
             onClick={onTrain}
             style={{ background: `${cfg.color}10`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>
-            Improve AI <IcoBrain />
+            Improve Agent <IcoBrain />
           </button>
         </div>
       </div>
@@ -267,9 +267,9 @@ export default function AutomationMarket() {
 
   // Map automation type → plan feature flag + required plan name
   const AUTOMATION_GATES = {
-    whatsapp_follow_up: { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
-    follow_up:          { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
-    sms_follow_up:      { flag: "leadFollowupEnabled",      requiredPlan: "starter"    },
+    whatsapp_follow_up: { flag: "leadFollowupEnabled", requiredPlan: "starter" },
+    follow_up: { flag: "leadFollowupEnabled", requiredPlan: "starter" },
+    sms_follow_up: { flag: "leadFollowupEnabled", requiredPlan: "starter" },
   };
 
   const [automations, setAutomations] = useState([]);
@@ -480,7 +480,7 @@ export default function AutomationMarket() {
               <p className="text-xs md:text-sm" style={{ color: pax26?.textSecondary }}>Control who your Agent responds to — whitelist customers, block personal contacts.</p>
               <button
                 className="am-btn flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white"
-                onClick={() => router.push("/dashboard/automations/whatsapp-contacts")}
+                onClick={() => router.push("/dashboard/automations/whatsapp-inbox")}
                 style={{ background: primary, boxShadow: `0 8px 24px ${primary}35` }}>
                 Contacts Manager <IcoArrow />
               </button>
@@ -510,25 +510,25 @@ export default function AutomationMarket() {
                 </div>
               )
               : automations.map((auto, i) => {
-                  const gate = AUTOMATION_GATES[auto.type];
-                  const isLocked = gate ? !limits[gate.flag] : false;
-                  return (
-                    <div key={auto.automationId} style={{ animationDelay: `${i * 0.07}s` }}>
-                      <AutoCard
-                        auto={auto}
-                        toggling={toggling}
-                        onToggle={toggleAutomationAPI}
-                        onView={() => router.push(`/dashboard/automations/${auto.automationId}`)}
-                        onTrain={() => router.push("/dashboard/automations/ai-business-dashboard")}
-                        onUpgrade={() => router.push("/dashboard/billing")}
-                        isPaxAiBusinessTrained={isPaxAiBusinessTrained}
-                        isLocked={isLocked}
-                        requiredPlan={gate?.requiredPlan}
-                        pax26={pax26}
-                      />
-                    </div>
-                  );
-                })
+                const gate = AUTOMATION_GATES[auto.type];
+                const isLocked = gate ? !limits[gate.flag] : false;
+                return (
+                  <div key={auto.automationId} style={{ animationDelay: `${i * 0.07}s` }}>
+                    <AutoCard
+                      auto={auto}
+                      toggling={toggling}
+                      onToggle={toggleAutomationAPI}
+                      onView={() => router.push(`/dashboard/automations/${auto.automationId}`)}
+                      onTrain={() => router.push("/dashboard/automations/ai-business-dashboard")}
+                      onUpgrade={() => router.push("/dashboard/billing")}
+                      isPaxAiBusinessTrained={isPaxAiBusinessTrained}
+                      isLocked={isLocked}
+                      requiredPlan={gate?.requiredPlan}
+                      pax26={pax26}
+                    />
+                  </div>
+                );
+              })
           }
         </div>
 

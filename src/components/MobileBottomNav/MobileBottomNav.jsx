@@ -9,7 +9,7 @@ import { useGlobalContext } from "../Context";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { pax26, setIsOpen, userData } = useGlobalContext();
+  const { pax26, setIsOpen, userData, unreadInboxCount } = useGlobalContext();
 
   // Show only on dashboard routes and when user is logged in
   const isDashboardRoute =
@@ -100,7 +100,7 @@ export default function MobileBottomNav() {
             >
               <div className="relative flex flex-col items-center gap-0.5">
                 <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 relative"
                   style={{
                     background: active ? `${primaryColor}20` : "transparent",
                     color: active
@@ -111,6 +111,13 @@ export default function MobileBottomNav() {
                   }}
                 >
                   <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                  {tab.id === "inbox" && unreadInboxCount > 0 && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center px-1 animate-pulse border border-slate-900"
+                    >
+                      {unreadInboxCount > 99 ? "99+" : unreadInboxCount}
+                    </span>
+                  )}
                 </div>
                 <span
                   className="text-[10px] font-semibold tracking-tight transition-colors duration-200"
