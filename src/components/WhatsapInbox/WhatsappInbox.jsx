@@ -407,41 +407,46 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
     <div
       style={{
         width: "100%",
-        maxWidth: "360px",
         height: "100%",
+        maxHeight: "100%",
         background: "#111b21",
-        borderLeft: "1px solid rgba(255,255,255,0.06)",
+        borderLeft: onClose ? "none" : "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
       }}
     >
       <div
         style={{
-          padding: "16px",
+          padding: "16px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           color: "#e9edef",
           fontWeight: 700,
-          fontSize: "15px",
+          fontSize: "16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexShrink: 0,
         }}
       >
-        <span>Lead Details</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <UserPlusIcon size={18} style={{ color: "#00a884" }} />
+          <span>Lead Details</span>
+        </div>
         {onClose && (
           <button
             onClick={onClose}
             title="Close"
             style={{
-              background: "rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.08)",
               border: "none",
               borderRadius: "50%",
-              width: "28px",
-              height: "28px",
+              width: "32px",
+              height: "32px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#8696a0",
+              color: "#e9edef",
               cursor: "pointer",
             }}
           >
@@ -452,12 +457,13 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
 
       <div
         style={{
-          padding: "16px",
+          padding: "16px 20px",
           display: "flex",
           flexDirection: "column",
-          gap: "16px",
+          gap: "18px",
           overflowY: "auto",
           flex: 1,
+          minHeight: 0,
         }}
       >
         <div>
@@ -467,6 +473,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               fontSize: "11px",
               marginBottom: "8px",
               textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
             Stage
@@ -486,7 +493,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
                   key={s}
                   onClick={() => setStage(s)}
                   style={{
-                    padding: "6px 10px",
+                    padding: "6px 12px",
                     borderRadius: "999px",
                     border:
                       stage === s
@@ -494,7 +501,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
                         : "1px solid rgba(255,255,255,0.08)",
                     background: stage === s ? item.bg : "transparent",
                     color: stage === s ? item.color : "#8696a0",
-                    fontSize: "11px",
+                    fontSize: "12px",
                     cursor: "pointer",
                     fontWeight: 700,
                     textTransform: "capitalize",
@@ -514,6 +521,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               fontSize: "11px",
               marginBottom: "8px",
               textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
             Assigned Staff
@@ -524,12 +532,12 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
             onChange={(e) => setAssignedTo(e.target.value)}
             style={{
               width: "100%",
-              padding: "8px 10px",
+              padding: "10px 12px",
               borderRadius: "10px",
               background: "#202c33",
               border: "1px solid rgba(255,255,255,0.08)",
               color: "#e9edef",
-              fontSize: "12px",
+              fontSize: "13px",
               outline: "none",
               cursor: "pointer",
             }}
@@ -550,6 +558,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               fontSize: "11px",
               marginBottom: "8px",
               textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
             Tags
@@ -565,7 +574,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               borderRadius: "10px",
               background: "#202c33",
               border: "1px solid rgba(255,255,255,0.08)",
-              minHeight: "40px",
+              minHeight: "42px",
               boxSizing: "border-box",
             }}
           >
@@ -576,7 +585,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "5px",
-                  padding: "3px 8px",
+                  padding: "4px 9px",
                   borderRadius: "999px",
                   fontSize: "11px",
                   fontWeight: 600,
@@ -595,7 +604,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               </span>
             ))}
             <input
-              placeholder={tags.length ? "" : "Add tags..."}
+              placeholder={tags.length ? "" : "Add tags (press Enter)..."}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === ",") {
                   e.preventDefault();
@@ -626,6 +635,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               fontSize: "11px",
               marginBottom: "8px",
               textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
             Notes
@@ -634,8 +644,8 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            rows={6}
-            placeholder="Add note..."
+            rows={5}
+            placeholder="Add internal private note..."
             style={{
               width: "100%",
               borderRadius: "10px",
@@ -645,28 +655,41 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
               padding: "12px",
               outline: "none",
               fontSize: "13px",
+              resize: "vertical",
+              minHeight: "80px",
             }}
           />
         </div>
+      </div>
 
+      {/* STICKY FOOTER WITH SAVE BUTTON */}
+      <div
+        style={{
+          padding: "14px 20px",
+          background: "#111b21",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          flexShrink: 0,
+        }}
+      >
         <button
           disabled={savingLead}
           onClick={saveLead}
           style={{
-            height: "42px",
-            borderRadius: "10px",
+            width: "100%",
+            height: "44px",
+            borderRadius: "12px",
             border: "none",
             background: savedNotice ? "#10b981" : "#00a884",
             color: "white",
             fontWeight: 700,
+            fontSize: "14px",
             cursor: savingLead ? "not-allowed" : "pointer",
-            flexShrink: 0,
-            marginTop: "8px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: "8px",
             opacity: savingLead ? 0.75 : 1,
+            boxShadow: "0 4px 14px rgba(0, 168, 132, 0.3)",
             transition: "all 0.2s ease",
           }}
         >
@@ -674,8 +697,8 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
             <>
               <span
                 style={{
-                  width: "14px",
-                  height: "14px",
+                  width: "16px",
+                  height: "16px",
                   borderRadius: "50%",
                   border: "2px solid rgba(255,255,255,0.3)",
                   borderTopColor: "#ffffff",
@@ -762,6 +785,9 @@ export default function WhatsAppInbox() {
   const inputRef = useRef(null);
   const menuRef = useRef(null);
 
+  const [showChatMenu, setShowChatMenu] = useState(false);
+  const chatMenuRef = useRef(null);
+
   /* ─────────────────────────────────────────────
      RESPONSIVE & CLICK OUTSIDE
   ───────────────────────────────────────────── */
@@ -780,6 +806,9 @@ export default function WhatsAppInbox() {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowMenu(false);
+      }
+      if (chatMenuRef.current && !chatMenuRef.current.contains(e.target)) {
+        setShowChatMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -2162,25 +2191,26 @@ export default function WhatsAppInbox() {
               {/* CHAT HEADER */}
               <div
                 style={{
-                  height: "60px",
+                  height: "56px",
                   background: "#202c33",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  padding: "10px 14px",
+                  padding: "8px 12px",
                   position: "sticky",
                   top: 0,
                   zIndex: 10,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {/* LEFT: BACK ARROW + AVATAR + NAME & STATUS */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                   {isMobile && (
                     <button
                       onClick={() => setShowSidebar(true)}
                       style={{
-                        width: "34px",
-                        height: "34px",
+                        width: "32px",
+                        height: "32px",
                         borderRadius: "50%",
                         border: "none",
                         background: "transparent",
@@ -2189,53 +2219,50 @@ export default function WhatsAppInbox() {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        marginLeft: "-4px",
                       }}
                     >
                       <BackIcon />
                     </button>
                   )}
 
-                  {/* INITIAL AVATAR & CONTACT INFO IN HEADER */}
                   <div
-                    onClick={() => setShowMobileLeadDetails((v) => !v)}
-                    style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}
-                    title="Click to view Lead Details"
+                    onClick={() => setShowMobileLeadDetails(true)}
+                    style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0 }}
+                    title="View Lead Details"
                   >
                     <UserAvatar
                       phone={selected.phone}
                       name={selectedContact?.notes || selectedConv?.notes}
-                      size={40}
-                      fontSize={14}
+                      size={36}
+                      fontSize={13}
                     />
 
-                    <div>
+                    <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      {/* Name / Phone Number */}
                       <div
                         style={{
                           color: "#e9edef",
-                          fontSize: "14px",
+                          fontSize: "13.5px",
                           fontWeight: 600,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
+                          lineHeight: "1.2",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: isMobile ? "150px" : "280px",
                         }}
                       >
-                        {selectedContact?.notes || selectedConv?.notes ? (
-                          <>
-                            <span>{selectedContact?.notes || selectedConv?.notes}</span>
-                            <span style={{ color: "#00a884", fontSize: "12px", fontWeight: 600 }}>
-                              ({selected.phone})
-                            </span>
-                          </>
-                        ) : (
-                          selected.phone
-                        )}
+                        {selectedContact?.notes || selectedConv?.notes
+                          ? `${selectedContact?.notes || selectedConv?.notes} (${selected.phone})`
+                          : selected.phone}
                       </div>
 
+                      {/* Status Under Number: Green/Amber dot + Agent Active / Managed by you */}
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "6px",
+                          gap: "5px",
                           marginTop: "2px",
                         }}
                       >
@@ -2245,61 +2272,75 @@ export default function WhatsAppInbox() {
                             height: "6px",
                             borderRadius: "50%",
                             background: selectedConv?.isHandedOff ? "#f59e0b" : "#00a884",
+                            flexShrink: 0,
                           }}
                         />
-
-                        <span style={{ color: "#8696a0", fontSize: "11px" }}>
+                        <span style={{ color: "#8696a0", fontSize: "10.5px", lineHeight: "1", whiteSpace: "nowrap" }}>
                           {selectedConv?.isHandedOff ? "Managed by you" : "Agent Active"}
                         </span>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowFlowInfo(!showFlowInfo);
-                          }}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: "#8696a0",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "2px",
-                          }}
-                          title="How it works"
-                        >
-                          <InfoIcon />
-                        </button>
-
-                        {selectedContact?.leadStage && (
-                          <span
-                            style={{
-                              padding: "2px 8px",
-                              borderRadius: "999px",
-                              background: LEAD_STAGES[selectedContact.leadStage]?.bg,
-                              color: LEAD_STAGES[selectedContact.leadStage]?.color,
-                              fontSize: "10px",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {selectedContact.leadStage}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  {/* LEAD DETAILS TOGGLE BUTTON */}
+                {/* RIGHT: TAKE OVER BUTTON + THREE-DOT MENU */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative", flexShrink: 0 }} ref={chatMenuRef}>
+                  {/* Take Over / Hand Back Button */}
+                  {selectedConv?.isHandedOff ? (
+                    <button
+                      disabled={takingOver}
+                      onClick={() => handleHandoff("handback")}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "8px",
+                        border: "none",
+                        background: "#005c4b",
+                        color: "white",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        cursor: takingOver ? "not-allowed" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        whiteSpace: "nowrap",
+                        opacity: takingOver ? 0.7 : 1,
+                      }}
+                    >
+                      {takingOver ? "Handing Back…" : "Hand Back"}
+                    </button>
+                  ) : (
+                    <button
+                      disabled={takingOver}
+                      onClick={() => handleHandoff("takeover")}
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "8px",
+                        border: "none",
+                        background: "#f59e0b",
+                        color: "white",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        cursor: takingOver ? "not-allowed" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        whiteSpace: "nowrap",
+                        opacity: takingOver ? 0.7 : 1,
+                      }}
+                    >
+                      {takingOver ? "Taking Over…" : "Take Over"}
+                    </button>
+                  )}
+
+                  {/* Three-Dot Vertical Overflow Button (⋮) */}
                   <button
-                    onClick={() => setShowMobileLeadDetails((v) => !v)}
-                    title="Lead Details"
+                    onClick={() => setShowChatMenu((v) => !v)}
+                    title="Chat Options"
                     style={{
-                      background: showMobileLeadDetails ? "rgba(0,168,132,0.2)" : "none",
+                      background: showChatMenu ? "rgba(255,255,255,0.1)" : "none",
                       border: "none",
-                      color: showMobileLeadDetails ? "#00a884" : "#8696a0",
-                      padding: "8px",
+                      color: "#8696a0",
+                      padding: "6px",
                       borderRadius: "50%",
                       cursor: "pointer",
                       display: "flex",
@@ -2307,104 +2348,134 @@ export default function WhatsAppInbox() {
                       justifyContent: "center",
                     }}
                   >
-                    <UserPlusIcon size={18} />
+                    <MoreVerticalIcon />
                   </button>
 
-                  {/* IN-CHAT SEARCH TOGGLE */}
-                  <button
-                    onClick={() => setShowChatSearch((v) => !v)}
-                    title="Search in conversation"
-                    style={{
-                      background: showChatSearch ? "rgba(0,168,132,0.2)" : "none",
-                      border: "none",
-                      color: showChatSearch ? "#00a884" : "#8696a0",
-                      padding: "8px",
-                      borderRadius: "50%",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <SearchIcon />
-                  </button>
+                  {/* CHAT THREE-DOT DROPDOWN MENU */}
+                  <AnimatePresence>
+                    {showChatMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                        style={{
+                          position: "absolute",
+                          top: "42px",
+                          right: 0,
+                          width: "200px",
+                          background: "#233138",
+                          borderRadius: "10px",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+                          zIndex: 100,
+                          padding: "6px 0",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            setShowMobileLeadDetails(true);
+                            setShowChatMenu(false);
+                          }}
+                          style={{
+                            width: "100%",
+                            textAlign: "left",
+                            padding: "10px 16px",
+                            background: "none",
+                            border: "none",
+                            color: "#e9edef",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        >
+                          <UserPlusIcon size={16} style={{ color: "#00a884" }} /> Lead Details
+                        </button>
 
-                  {selectedConv?.isHandedOff ? (
-                    <button
-                      disabled={takingOver}
-                      onClick={() => handleHandoff("handback")}
-                      style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "none",
-                        background: "#005c4b",
-                        color: "white",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        cursor: takingOver ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        opacity: takingOver ? 0.7 : 1,
-                      }}
-                    >
-                      {takingOver ? (
-                        <>
-                          <span
-                            style={{
-                              width: "12px",
-                              height: "12px",
-                              borderRadius: "50%",
-                              border: "2px solid rgba(255,255,255,0.3)",
-                              borderTopColor: "#fff",
-                              animation: "inbox-spin 0.65s linear infinite",
-                              display: "inline-block",
-                              flexShrink: 0,
-                            }}
-                          />
-                          Handing Back…
-                        </>
-                      ) : (
-                        "Hand Back"
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      disabled={takingOver}
-                      onClick={() => handleHandoff("takeover")}
-                      style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "none",
-                        background: "#f59e0b",
-                        color: "white",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        cursor: takingOver ? "not-allowed" : "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        opacity: takingOver ? 0.7 : 1,
-                      }}
-                    >
-                      {takingOver ? (
-                        <>
-                          <span
-                            style={{
-                              width: "12px",
-                              height: "12px",
-                              borderRadius: "50%",
-                              border: "2px solid rgba(255,255,255,0.3)",
-                              borderTopColor: "#fff",
-                              animation: "inbox-spin 0.65s linear infinite",
-                              display: "inline-block",
-                              flexShrink: 0,
-                            }}
-                          />
-                          Taking Over…
-                        </>
-                      ) : (
-                        "Take Over"
-                      )}
-                    </button>
-                  )}
+                        <button
+                          onClick={() => {
+                            setShowChatSearch((v) => !v);
+                            setShowChatMenu(false);
+                          }}
+                          style={{
+                            width: "100%",
+                            textAlign: "left",
+                            padding: "10px 16px",
+                            background: "none",
+                            border: "none",
+                            color: "#e9edef",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        >
+                          <SearchIcon /> Search in Chat
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setShowFlowInfo((v) => !v);
+                            setShowChatMenu(false);
+                          }}
+                          style={{
+                            width: "100%",
+                            textAlign: "left",
+                            padding: "10px 16px",
+                            background: "none",
+                            border: "none",
+                            color: "#e9edef",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        >
+                          <InfoIcon /> How Agent Works
+                        </button>
+
+                        <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+
+                        <button
+                          onClick={() => {
+                            const isBlack = selectedContact?.status === "blacklist";
+                            toggleContactStatus(selected.phone, isBlack ? "whitelist" : "blacklist");
+                            setShowChatMenu(false);
+                          }}
+                          style={{
+                            width: "100%",
+                            textAlign: "left",
+                            padding: "10px 16px",
+                            background: "none",
+                            border: "none",
+                            color: selectedContact?.status === "blacklist" ? "#00a884" : "#f87171",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                        >
+                          {selectedContact?.status === "blacklist" ? "Unblock Contact" : "Block Contact"}
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -2998,9 +3069,9 @@ export default function WhatsAppInbox() {
               style={{
                 position: "fixed",
                 inset: 0,
-                background: "rgba(0,0,0,0.75)",
-                backdropFilter: "blur(6px)",
-                zIndex: 200,
+                background: "rgba(0,0,0,0.8)",
+                backdropFilter: "blur(8px)",
+                zIndex: 250,
                 display: "flex",
                 alignItems: isMobile ? "flex-end" : "center",
                 justifyContent: "center",
@@ -3011,19 +3082,21 @@ export default function WhatsAppInbox() {
                 initial={{ y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
                 animate={{ y: 0, scale: 1 }}
                 exit={{ y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                transition={{ type: "spring", damping: 26, stiffness: 320 }}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   width: "100%",
-                  maxWidth: "420px",
-                  maxHeight: "85vh",
+                  maxWidth: isMobile ? "100%" : "440px",
+                  height: isMobile ? "85vh" : "auto",
+                  maxHeight: isMobile ? "85dvh" : "85vh",
                   background: "#111b21",
                   borderRadius: isMobile ? "24px 24px 0 0" : "20px",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
-                  boxShadow: "0 -10px 40px rgba(0,0,0,0.6)",
+                  boxShadow: "0 -10px 40px rgba(0,0,0,0.8)",
                   border: "1px solid rgba(255,255,255,0.08)",
+                  paddingBottom: isMobile ? "max(8px, env(safe-area-inset-bottom))" : 0,
                 }}
               >
                 <LeadPanel

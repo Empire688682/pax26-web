@@ -84,10 +84,14 @@ export default function BroadcastPage() {
     fetchContacts();
   }, []);
 
-  // Filter contacts by tag
+  // Filter contacts by tag or lead stage
   const filteredContacts = contacts.filter(c => {
     if (tagFilter === "all") return true;
-    return c.tags && c.tags.includes(tagFilter);
+    if (tagFilter.startsWith("stage:")) {
+      const targetStage = tagFilter.replace("stage:", "").toLowerCase();
+      return (c.leadStage || "new").toLowerCase() === targetStage;
+    }
+    return c.tags && Array.isArray(c.tags) && c.tags.includes(tagFilter);
   });
 
   // Handle template selection
@@ -245,9 +249,22 @@ export default function BroadcastPage() {
                       style={{ borderColor: pax26?.border, color: pax26?.textPrimary }}
                     >
                       <option value="all" className="bg-[#0C1428]">All Whitelisted Contacts</option>
-                      {availableTags.map(tag => (
-                        <option key={tag} value={tag} className="bg-[#0C1428]">{tag}</option>
-                      ))}
+                      
+                      <optgroup label="── Lead Stages ──" className="bg-[#0C1428] text-blue-400 font-bold">
+                        <option value="stage:new" className="bg-[#0C1428]">New Leads</option>
+                        <option value="stage:contacted" className="bg-[#0C1428]">Contacted Leads</option>
+                        <option value="stage:qualified" className="bg-[#0C1428]">Qualified Leads</option>
+                        <option value="stage:converted" className="bg-[#0C1428]">Converted Buyers</option>
+                        <option value="stage:lost" className="bg-[#0C1428]">Lost Leads</option>
+                      </optgroup>
+
+                      {availableTags.length > 0 && (
+                        <optgroup label="── Tags ──" className="bg-[#0C1428] text-emerald-400 font-bold">
+                          {availableTags.map(tag => (
+                            <option key={tag} value={tag} className="bg-[#0C1428]">{tag}</option>
+                          ))}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
                 ) : (

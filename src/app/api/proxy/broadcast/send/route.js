@@ -103,17 +103,27 @@ export async function POST(req) {
     // 3. Build contact list
     let targetContacts = Array.isArray(contacts) ? contacts : [];
 
-    // Filter by tag if tagFilter is specified
+    // Filter by tag or lead stage if tagFilter is specified
     if (tagFilter && tagFilter !== "all" && user.whatsapp?.contacts?.list) {
-      const tagPhones = new Set(
+      const isStageFilter = tagFilter.startsWith("stage:");
+      const targetStage = isStageFilter ? tagFilter.replace("stage:", "").toLowerCase() : null;
+
+      const matchingPhones = new Set(
         user.whatsapp.contacts.list
-          .filter(c => c.status === "whitelist" && Array.isArray(c.tags) && c.tags.includes(tagFilter))
+          .filter(c => {
+            if (c.status !== "whitelist") return false;
+            if (isStageFilter) {
+              return (c.leadStage || "new").toLowerCase() === targetStage;
+            }
+            return Array.isArray(c.tags) && c.tags.includes(tagFilter);
+          })
           .map(c => c.phone)
       );
+
       if (targetContacts.length > 0) {
-        targetContacts = targetContacts.filter(p => tagPhones.has(p));
+        targetContacts = targetContacts.filter(p => matchingPhones.has(p));
       } else {
-        targetContacts = Array.from(tagPhones);
+        targetContacts = Array.from(matchingPhones);
       }
     } else if (targetContacts.length === 0 && user.whatsapp?.contacts?.list) {
       targetContacts = user.whatsapp.contacts.list
