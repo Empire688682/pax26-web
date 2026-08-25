@@ -30,6 +30,7 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
   let lastError = null;
 
   for (const modelName of modelsToTry) {
+    // 1. Try official JS SDK
     try {
       const model = genAI.getGenerativeModel({
         model: modelName,
@@ -40,32 +41,28 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
       const result = await chat.sendMessage(lastMessage);
       const text = result?.response?.text();
 
-      if (!text) continue;
-
-      return {
-        text,
-        tokensUsed: result?.response?.usageMetadata?.totalTokenCount || 0,
-        model: modelName,
-      };
+      if (text) {
+        return {
+          text,
+          tokensUsed: result?.response?.usageMetadata?.totalTokenCount || 0,
+          model: modelName,
+        };
+      }
     } catch (err) {
       lastError = err;
-      const isNotFound =
-        err?.status === 404 ||
-        err?.message?.includes("not found") ||
-        err?.message?.includes("404") ||
-        err?.message?.includes("not supported");
+      console.warn(`⚠️ Gemini SDK failed for ${modelName}: ${err?.message || err}`);
+    }
 
-      console.warn(`⚠️ Gemini model ${modelName} SDK failed: ${err?.message || err}`);
-      if (isNotFound) continue;
-      
-      // If SDK fails, attempt direct v1beta REST API as a fallback
+    // 2. Direct REST API Fallback (tries v1beta and v1)
+    const apiVersions = ["v1beta", "v1"];
+    for (const apiVer of apiVersions) {
       try {
-        const restUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        const restUrl = `https://generativelanguage.googleapis.com/${apiVer}/models/${modelName}:generateContent?key=${apiKey}`;
         const restRes = await fetch(restUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemPrompt }] },
+            systemInstruction: { parts: [{ text: systemPrompt }] },
             contents: [
               ...historyMessages.map((h) => ({
                 role: h.role,
@@ -83,12 +80,15 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
             return {
               text: restText,
               tokensUsed: restData?.usageMetadata?.totalTokenCount || 0,
-              model: `${modelName}-rest`,
+              model: `${modelName}-${apiVer}`,
             };
           }
+        } else {
+          const errJson = await restRes.json().catch(() => ({}));
+          console.warn(`⚠️ Gemini REST (${apiVer}) returned status ${restRes.status} for ${modelName}: ${JSON.stringify(errJson)}`);
         }
       } catch (restErr) {
-        console.warn(`⚠️ Gemini REST fallback failed for ${modelName}:`, restErr.message);
+        console.warn(`⚠️ Gemini REST (${apiVer}) network error for ${modelName}:`, restErr.message);
       }
     }
   }

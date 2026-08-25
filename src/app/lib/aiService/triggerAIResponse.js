@@ -377,31 +377,20 @@ export const triggerAIResponse = async ({
             { role: "user", content: cleanedInboundText },
         ];
 
-        // ── Call AI providers with fallback chain ─────────────────
+        // ── Call AI providers with fallback chain (Gemini Primary) ──────
         const callAI = async () => {
-            try {
-                const result = await callGroqAI({ systemPrompt, messages });
-                if (result) { console.log("✅ Groq responded"); return result; }
-            } catch (err) {
-                const isRateOrTokenLimit =
-                    err?.status === 429 ||
-                    err?.status === 413 ||
-                    err?.code === "rate_limit_exceeded" ||
-                    err?.error?.code === "rate_limit_exceeded" ||
-                    err?.message?.includes("tokens");
-
-                if (isRateOrTokenLimit) {
-                    console.warn("⚠️ Groq rate/token limit (413/429) — falling back to Gemini...");
-                } else {
-                    console.warn("⚠️ Groq error — falling back to Gemini:", err?.message || err);
-                }
-            }
-
             try {
                 const result = await callGeminiAI({ systemPrompt, messages });
                 if (result) { console.log("✅ Gemini responded"); return result; }
             } catch (err) {
-                console.warn("⚠️ Gemini error — falling back to Mistral:", err?.message || err);
+                console.warn("⚠️ Gemini error — falling back to Groq:", err?.message || err);
+            }
+
+            try {
+                const result = await callGroqAI({ systemPrompt, messages });
+                if (result) { console.log("✅ Groq responded"); return result; }
+            } catch (err) {
+                console.warn("⚠️ Groq error — falling back to Mistral:", err?.message || err);
             }
 
             try {
