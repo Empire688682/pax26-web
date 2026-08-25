@@ -406,7 +406,9 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
   return (
     <div
       style={{
-        width: "100%",
+        width: onClose ? "100%" : "360px",
+        minWidth: onClose ? "100%" : "360px",
+        maxWidth: onClose ? "100%" : "360px",
         height: "100%",
         maxHeight: "100%",
         background: "#111b21",
@@ -414,6 +416,7 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        flexShrink: 0,
       }}
     >
       <div
@@ -1866,6 +1869,12 @@ export default function WhatsAppInbox() {
                     return (
                       <div
                         key={c.phone}
+                        onClick={() => {
+                          const conv = conversations.find(x => x.phone === c.phone) || { phone: c.phone, notes: c.notes };
+                          setSelected(conv);
+                          setSidebarView("chats");
+                          if (isMobile) setShowSidebar(false);
+                        }}
                         style={{
                           background: "#202c33",
                           borderRadius: "10px",
@@ -1875,6 +1884,7 @@ export default function WhatsAppInbox() {
                           justifyContent: "space-between",
                           gap: "10px",
                           border: "1px solid rgba(255,255,255,0.04)",
+                          cursor: "pointer",
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
@@ -1883,8 +1893,25 @@ export default function WhatsAppInbox() {
                             <div style={{ color: "#e9edef", fontSize: "13px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {c.notes || c.phone}
                             </div>
-                            <div style={{ color: isWhitelisted ? "#00a884" : isBlocked ? "#ef4444" : "#f59e0b", fontSize: "11px", fontWeight: 600 }}>
-                              {isWhitelisted ? "AI Allowed" : isBlocked ? "Blocked" : "Pending"}
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "2px" }}>
+                              <span style={{ color: isWhitelisted ? "#00a884" : isBlocked ? "#ef4444" : "#f59e0b", fontSize: "11px", fontWeight: 600 }}>
+                                {isWhitelisted ? "AI Allowed" : isBlocked ? "Blocked" : "Pending"}
+                              </span>
+                              {c.tags?.map((t) => (
+                                <span
+                                  key={t}
+                                  style={{
+                                    padding: "1px 6px",
+                                    borderRadius: "999px",
+                                    background: "rgba(0,168,132,0.15)",
+                                    color: "#00a884",
+                                    fontSize: "10px",
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {t}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
@@ -1893,7 +1920,10 @@ export default function WhatsAppInbox() {
                           {isBlocked ? (
                             <button
                               disabled={isBusy}
-                              onClick={() => toggleContactStatus(c.phone, "whitelist")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleContactStatus(c.phone, "whitelist");
+                              }}
                               style={{
                                 padding: "4px 10px",
                                 borderRadius: "6px",
@@ -1910,7 +1940,10 @@ export default function WhatsAppInbox() {
                           ) : (
                             <button
                               disabled={isBusy}
-                              onClick={() => toggleContactStatus(c.phone, "blacklist")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleContactStatus(c.phone, "blacklist");
+                              }}
                               style={{
                                 padding: "4px 10px",
                                 borderRadius: "6px",
@@ -1927,7 +1960,10 @@ export default function WhatsAppInbox() {
                           )}
 
                           <button
-                            onClick={() => handleDeleteContact(c.phone)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteContact(c.phone);
+                            }}
                             title="Delete Contact"
                             style={{
                               background: "none",
@@ -2114,6 +2150,7 @@ export default function WhatsAppInbox() {
         <div
           style={{
             flex: 1,
+            minWidth: 0,
             display: "flex",
             flexDirection: "column",
             background: "#0b141a",
@@ -2228,7 +2265,7 @@ export default function WhatsAppInbox() {
 
                   <div
                     onClick={() => setShowMobileLeadDetails(true)}
-                    style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0 }}
+                    style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", minWidth: 0, flex: 1 }}
                     title="View Lead Details"
                   >
                     <UserAvatar
@@ -2238,8 +2275,8 @@ export default function WhatsAppInbox() {
                       fontSize={13}
                     />
 
-                    <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                      {/* Name / Phone Number */}
+                    <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      {/* Top Line: Contact Name OR Phone Number */}
                       <div
                         style={{
                           color: "#e9edef",
@@ -2249,21 +2286,23 @@ export default function WhatsAppInbox() {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          maxWidth: isMobile ? "150px" : "280px",
                         }}
                       >
-                        {selectedContact?.notes || selectedConv?.notes
-                          ? `${selectedContact?.notes || selectedConv?.notes} (${selected.phone})`
-                          : selected.phone}
+                        {selectedContact?.notes || selectedConv?.notes || selected.phone}
                       </div>
 
-                      {/* Status Under Number: Green/Amber dot + Agent Active / Managed by you */}
+                      {/* Subtitle Under Number: Phone number (if name exists) + Green/Amber dot + Status */}
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "5px",
                           marginTop: "2px",
+                          fontSize: "11px",
+                          color: "#8696a0",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
                         }}
                       >
                         <div
@@ -2275,8 +2314,10 @@ export default function WhatsAppInbox() {
                             flexShrink: 0,
                           }}
                         />
-                        <span style={{ color: "#8696a0", fontSize: "10.5px", lineHeight: "1", whiteSpace: "nowrap" }}>
-                          {selectedConv?.isHandedOff ? "Managed by you" : "Agent Active"}
+                        <span>
+                          {selectedContact?.notes || selectedConv?.notes
+                            ? `${selected.phone} • ${selectedConv?.isHandedOff ? "Managed by you" : "Agent Active"}`
+                            : selectedConv?.isHandedOff ? "Managed by you" : "Agent Active"}
                         </span>
                       </div>
                     </div>
