@@ -58,6 +58,7 @@ export async function POST(req) {
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 deliveryFee: newOrder.deliveryFee,
+                deliveryLocation: newOrder.deliveryLocation || newOrder.deliveryAddress || "",
                 isConfirmed: true,
             });
         } else {
@@ -68,6 +69,7 @@ export async function POST(req) {
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 deliveryFee: newOrder.deliveryFee,
+                deliveryLocation: newOrder.deliveryLocation || newOrder.deliveryAddress || "",
                 isConfirmed: false,
             });
         }

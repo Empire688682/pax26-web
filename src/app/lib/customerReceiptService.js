@@ -71,6 +71,8 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
         const subtotalVal = calculatedSubtotal > 0 ? calculatedSubtotal : Math.max(0, totalPaidVal - deliveryFeeVal);
 
+        const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
+
         const receiptMessage =
 `🧾 *ORDER CONFIRMATION & OFFICIAL RECEIPT*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -82,7 +84,7 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 👤 *Customer Details:*
 • Name: ${customerName}
 • Phone: ${order.customerPhone}
-${order.deliveryAddress ? `• Delivery Address: ${order.deliveryAddress}\n` : ""}
+${deliveryLocStr ? `• Delivery Address: ${deliveryLocStr}\n` : ""}
 🛍️ *Order Breakdown:*
 ${itemsSection}
 ${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}

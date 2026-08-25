@@ -252,3 +252,121 @@ export async function sendPlanExpiryReminder(user, { plan, daysLeft, expiresAt }
     console.warn("[expiryReminder] Non-fatal email error:", err.message);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   4. WHATSAPP CONNECTED NOTIFICATION
+   ═══════════════════════════════════════════════════════════════ */
+function buildWhatsAppConnectedHtml({ userName, displayPhone, phoneNumberId }) {
+  const body = `
+    <p style="color:#555;font-size:14px;margin:0 0 20px;line-height:1.6;">
+      Hi <strong>${userName || "there"}</strong>, your WhatsApp Business number <strong>${displayPhone || "WhatsApp number"}</strong> has been connected to your Pax26 account.
+    </p>
+    <div style="background:#f8f8f6;border-radius:14px;padding:18px 20px;margin-bottom:24px;border:1px solid #e8e8e6;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("Connected Number", `<strong>${displayPhone || "WhatsApp Number"}</strong>`)}
+        ${phoneNumberId ? infoRow("Phone ID", phoneNumberId) : ""}
+        ${infoRow("Connected At", NG_TIME())}
+        ${infoRow("Status", `<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Connected & Active ✓</span>`)}
+      </table>
+    </div>
+    ${ctaButton(DASHBOARD, "Go to Dashboard →", "#10b981")}
+    <p style="color:#aaa;font-size:12px;margin:16px 0 0;text-align:center;line-height:1.6;">
+      Your AI Smart Agent will now respond to customer inquiries sent to this number.<br/>
+      If you did not perform this action, please log in and disconnect this number immediately or contact <a href="mailto:info@pax26.com" style="color:#6366f1;">info@pax26.com</a>.
+    </p>`;
+
+  return shell({
+    headerGradient: "linear-gradient(135deg, #10b981, #059669)",
+    headerIcon: "📱",
+    headerTitle: "WhatsApp Number Connected!",
+    headerSub: "Your WhatsApp Business number is live on Pax26",
+    body,
+    footerNote: "This email was sent automatically following a WhatsApp connection event on your account.",
+  });
+}
+
+/**
+ * sendWhatsAppConnectedNotification
+ * @param {string|Object} userOrId
+ * @param {{ displayPhone?: string, phoneNumberId?: string }} opts
+ */
+export async function sendWhatsAppConnectedNotification(userOrId, { displayPhone, phoneNumberId } = {}) {
+  try {
+    let user = userOrId;
+    if (typeof userOrId === "string" || (userOrId && typeof userOrId === "object" && !userOrId.email)) {
+      user = await UserModel.findById(userOrId).select("email name").lean();
+    }
+    if (!user?.email) return;
+
+    const html    = buildWhatsAppConnectedHtml({ userName: user.name, displayPhone, phoneNumberId });
+    const subject = `📱 WhatsApp Connected — ${displayPhone || "Number"} is now live on Pax26`;
+
+    await new Promise((resolve) => {
+      sendpulse.smtpSendMail((result) => {
+        console.log(`[whatsappConnected] 📧 Sent to ${user.email} | result:`, result?.result);
+        resolve();
+      }, { subject, from: FROM_EMAIL, to: [{ email: user.email }], html });
+    });
+  } catch (err) {
+    console.warn("[whatsappConnected] Non-fatal email error:", err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. WHATSAPP DISCONNECTED NOTIFICATION
+   ═══════════════════════════════════════════════════════════════ */
+function buildWhatsAppDisconnectedHtml({ userName, displayPhone, phoneNumberId }) {
+  const body = `
+    <p style="color:#555;font-size:14px;margin:0 0 20px;line-height:1.6;">
+      Hi <strong>${userName || "there"}</strong>, your WhatsApp Business number <strong>${displayPhone || "WhatsApp number"}</strong> has been disconnected from your Pax26 account.
+    </p>
+    <div style="background:#fff1f2;border-radius:14px;padding:18px 20px;margin-bottom:24px;border:1px solid #fecdd3;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow("Disconnected Number", `<strong>${displayPhone || "N/A"}</strong>`)}
+        ${phoneNumberId ? infoRow("Phone ID", phoneNumberId) : ""}
+        ${infoRow("Disconnected At", NG_TIME())}
+        ${infoRow("AI Agent Status", `<span style="background:#ffe4e6;color:#9f1239;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Paused (No Number)</span>`)}
+      </table>
+    </div>
+    ${ctaButton("https://www.pax26.com/dashboard/automations", "Connect New Number →", "#ef4444")}
+    <p style="color:#aaa;font-size:12px;margin:16px 0 0;text-align:center;line-height:1.6;">
+      Your AI Smart Agent will not respond to customer messages until a number is reconnected.<br/>
+      If you did not initiate this disconnection, please log in immediately to secure your account or contact <a href="mailto:info@pax26.com" style="color:#6366f1;">info@pax26.com</a>.
+    </p>`;
+
+  return shell({
+    headerGradient: "linear-gradient(135deg, #ef4444, #be123c)",
+    headerIcon: "🔌",
+    headerTitle: "WhatsApp Number Disconnected",
+    headerSub: "WhatsApp has been unlinked from your Pax26 account",
+    body,
+    footerNote: "This email was sent automatically following a WhatsApp disconnection event on your account.",
+  });
+}
+
+/**
+ * sendWhatsAppDisconnectedNotification
+ * @param {string|Object} userOrId
+ * @param {{ displayPhone?: string, phoneNumberId?: string }} opts
+ */
+export async function sendWhatsAppDisconnectedNotification(userOrId, { displayPhone, phoneNumberId } = {}) {
+  try {
+    let user = userOrId;
+    if (typeof userOrId === "string" || (userOrId && typeof userOrId === "object" && !userOrId.email)) {
+      user = await UserModel.findById(userOrId).select("email name").lean();
+    }
+    if (!user?.email) return;
+
+    const html    = buildWhatsAppDisconnectedHtml({ userName: user.name, displayPhone, phoneNumberId });
+    const subject = `⚠️ WhatsApp Disconnected — ${displayPhone || "Your number"} has been unlinked`;
+
+    await new Promise((resolve) => {
+      sendpulse.smtpSendMail((result) => {
+        console.log(`[whatsappDisconnected] 📧 Sent to ${user.email} | result:`, result?.result);
+        resolve();
+      }, { subject, from: FROM_EMAIL, to: [{ email: user.email }], html });
+    });
+  } catch (err) {
+    console.warn("[whatsappDisconnected] Non-fatal email error:", err.message);
+  }
+}

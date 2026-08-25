@@ -111,6 +111,7 @@ export const sendSalesNotification = async (userId, orderData) => {
                     productName: orderData.productName,
                     amountPaid: orderData.amountPaid,
                     deliveryFee: orderData.deliveryFee,
+                    deliveryLocation: orderData.deliveryLocation || orderData.deliveryAddress || "",
                     orderId: orderData.orderId,
                     isConfirmed: orderData.isConfirmed ?? false,
                 });

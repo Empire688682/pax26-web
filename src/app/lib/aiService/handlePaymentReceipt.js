@@ -404,6 +404,7 @@ export async function handlePaymentReceipt({
                 productName: productSummaryName,
                 amountPaid: order.totalPrice,
                 deliveryFee: order.deliveryFee,
+                deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
                 isConfirmed: false,
             });
             console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, "| Product:", productSummaryName, ")");

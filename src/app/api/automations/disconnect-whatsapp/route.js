@@ -5,7 +5,7 @@ import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-
+import { sendWhatsAppDisconnectedNotification } from "@/app/lib/transactionalEmailService";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -32,6 +32,9 @@ export async function POST(req) {
                 { status: 404, headers: corsHeaders() }
             );
         }
+
+        const displayPhone = user.whatsapp?.displayPhone || "";
+        const phoneNumberId = user.whatsapp?.phoneNumberId || "";
 
         // ── Run all cleanup in parallel ───────────────────────────
         await Promise.all([
@@ -68,6 +71,9 @@ export async function POST(req) {
         ]);
 
         console.log(`✅ Disconnect cleanup complete for user ${userId}: sessions + messages + contacts cleared`);
+
+        // Send email notification (non-blocking)
+        sendWhatsAppDisconnectedNotification(user, { displayPhone, phoneNumberId }).catch(err => console.warn("Disconnect email notice err:", err.message));
 
         return NextResponse.json(
             { success: true, message: "WhatsApp number disconnected and customer data cleared." },

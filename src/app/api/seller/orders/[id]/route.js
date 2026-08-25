@@ -81,6 +81,7 @@ export async function PATCH(req, { params }) {
                 productName: productSummary,
                 amountPaid: order.totalPrice,
                 deliveryFee: order.deliveryFee,
+                deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
                 isConfirmed: true,
             });
 

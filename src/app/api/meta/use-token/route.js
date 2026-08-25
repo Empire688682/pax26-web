@@ -5,6 +5,7 @@ import TempSessionModel from "@/app/ults/models/TempSessionModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import crypto from "crypto";
 import { verifyToken } from "../../helper/VerifyToken";
+import { sendWhatsAppConnectedNotification } from "@/app/lib/transactionalEmailService";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -123,6 +124,9 @@ export async function POST(req) {
           "paxAI.enabled": true,
         }
       });
+
+      // Send email notification (non-blocking)
+      sendWhatsAppConnectedNotification(userId, { displayPhone: phone.display, phoneNumberId: phone.id }).catch(err => console.warn("Connect email notice err:", err.message));
 
       console.log("✅ Single phone auto-connected");
 
