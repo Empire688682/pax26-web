@@ -199,11 +199,11 @@ export default function BroadcastPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2"
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight"
               style={{ color: pax26?.textPrimary, fontFamily: "Syne, sans-serif" }}>
               Broadcast <span style={{ color: pax26?.primary || "#3b82f6" }}>Automations</span>
             </h1>
-            <p className="text-xs mt-1" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+            <p className="text-xs mt-1 leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.7 }}>
               Send massive or segmented outbound WhatsApp notification alerts directly using interaction history.
             </p>
           </div>
