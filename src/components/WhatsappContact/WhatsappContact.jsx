@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1063,14 +1063,14 @@ export default function WhatsappContact() {
               Unknown contact policy
             </h2>
             <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.5 }}>
-              How should AI handle first-time messages?
+              How should Smart-agent handle first-time messages?
             </p>
           </div>
         </div>
         <div className="flex flex-col md:flex-row gap-[10px]">
-          <PolicyPill value="allow" current={policy} onClick={setPolicy} pax26={pax26} label="Allow all" description="AI replies to every new contact automatically" />
-          <PolicyPill value="ask" current={policy} onClick={setPolicy} pax26={pax26} label="Ask first" description="Send opt-in prompt before AI engages" />
-          <PolicyPill value="block" current={policy} onClick={setPolicy} pax26={pax26} label="Block all" description="AI ignores all unknown numbers silently" />
+          <PolicyPill value="allow" current={policy} onClick={setPolicy} pax26={pax26} label="Allow all" description="Smart-agent replies to every new contact automatically" />
+          <PolicyPill value="ask" current={policy} onClick={setPolicy} pax26={pax26} label="Ask first" description="Send opt-in prompt before Smart-agent engages" />
+          <PolicyPill value="block" current={policy} onClick={setPolicy} pax26={pax26} label="Block all" description="Smart-agent ignores all unknown numbers silently" />
         </div>
       </motion.div>
 
@@ -1301,7 +1301,7 @@ export default function WhatsappContact() {
           <InfoIcon className="md:flex hidden" />
         </div>
         <p style={{ fontSize: "12px", color: pax26?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: 0 }}>
-          Blacklisted contacts will never receive AI replies. When a new unknown contact messages you, the policy above determines how the AI handles them. Changes take effect immediately on your next incoming message.
+          Blacklisted contacts will never receive Smart-agent replies. When a new unknown contact messages you, the policy above determines how the Smart-agent handles them. Changes take effect immediately on your next incoming message.
         </p>
       </div>
 

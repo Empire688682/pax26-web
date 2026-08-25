@@ -30,10 +30,10 @@ export default function AiReadinessBanner({ className = "" }) {
 
   const contentByType = {
     seller: {
-      title: "Your seller AI needs products",
-      body: "WhatsApp is connected and customers can message you — but your seller agent cannot reply without products and store details. Add products or finish training so it can start selling.",
+      title: "Your seller Smart-agent needs products",
+      body: "WhatsApp is connected and customers can message you — but your seller Smart-agent cannot reply without products and store details. Add products or finish training so it can start selling.",
       primary: {
-        label: "Train Seller AI",
+        label: "Train Seller Smart-agent",
         href: "/dashboard/automations/training",
       },
       secondary: {
@@ -42,10 +42,10 @@ export default function AiReadinessBanner({ className = "" }) {
       },
     },
     service: {
-      title: "Your service AI needs setup",
-      body: "WhatsApp is connected and customers can message you — but your service agent cannot reply without services, FAQs, or business details. Complete training so it can start responding.",
+      title: "Your service Smart-agent needs setup",
+      body: "WhatsApp is connected and customers can message you — but your service Smart-agent cannot reply without services, FAQs, or business details. Complete training so it can start responding.",
       primary: {
-        label: "Train Service AI",
+        label: "Train Service Smart-agent",
         href: "/dashboard/automations/training",
       },
       secondary: {
@@ -54,10 +54,10 @@ export default function AiReadinessBanner({ className = "" }) {
       },
     },
     unset: {
-      title: "AI has no knowledge yet",
-      body: "WhatsApp is connected and customers can message you — but the AI cannot reply until you choose a business type and complete training.",
+      title: "Smart-agent has no knowledge yet",
+      body: "WhatsApp is connected and customers can message you — but the Smart-agent cannot reply until you choose a business type and complete training.",
       primary: {
-        label: "Train AI",
+        label: "Train Smart-agent",
         href: "/dashboard/automations/training",
       },
       secondary: {

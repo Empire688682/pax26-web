@@ -723,11 +723,116 @@ function LeadPanel({ contact, phone, onUpdate, onClose }) {
 }
 
 /* ─────────────────────────────────────────────
+   INBOX WHATSAPP GATE (Full-Page Lock)
+───────────────────────────────────────────── */
+function InboxWhatsAppGate({ pax26, router }) {
+  const p = pax26;
+  return (
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "40px 20px",
+      background: p?.bg || "#111b21",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: `radial-gradient(ellipse 70% 50% at 50% 0%, #ef444418 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, ${p?.primary || "#00a884"}12 0%, transparent 55%)`,
+        pointerEvents: "none",
+      }} />
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: "480px",
+          background: p?.secondaryBg || "#202c33",
+          borderRadius: "28px",
+          border: `1px solid ${p?.border || "rgba(255,255,255,0.08)"}`,
+          padding: "36px 28px",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.35)",
+          textAlign: "center",
+        }}
+      >
+        <div style={{
+          width: "72px",
+          height: "72px",
+          borderRadius: "22px",
+          margin: "0 auto 22px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(145deg, #ef4444, #be123c)",
+          color: "#fff",
+          boxShadow: "0 8px 24px rgba(239, 68, 68, 0.35)",
+          fontSize: "32px",
+        }}>
+          🔌
+        </div>
+
+        <h2 style={{ fontSize: "22px", fontWeight: 900, color: p?.textPrimary || "#e9edef", margin: "0 0 10px" }}>
+          WhatsApp Disconnected
+        </h2>
+
+        <p style={{ fontSize: "14px", color: p?.textSecondary || "#8696a0", lineHeight: 1.65, margin: "0 0 24px" }}>
+          Your WhatsApp Business number is unlinked. Connect your WhatsApp number to view customer messages and let your <strong>Smart-agent</strong> automate sales & inquiries.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <button
+            onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "14px",
+              border: "none",
+              background: "#00a884",
+              color: "#ffffff",
+              fontWeight: 800,
+              fontSize: "14px",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(0, 168, 132, 0.35)",
+            }}
+          >
+            Connect WhatsApp Number →
+          </button>
+          <button
+            onClick={() => router.push("/dashboard/automations")}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "14px",
+              border: `1px solid ${p?.border || "rgba(255,255,255,0.08)"}`,
+              background: "transparent",
+              color: p?.textPrimary || "#e9edef",
+              fontWeight: 700,
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            ← Back to Automations
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────── */
 export default function WhatsAppInbox() {
-  const { userData, fetchUser } = useGlobalContext();
+  const { userData, fetchUser, pax26 } = useGlobalContext();
   const router = useRouter();
+
+  const isConnected = !!(userData?.whatsapp?.connected && userData?.whatsapp?.displayPhone);
 
   const [conversations, setConversations] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -1320,6 +1425,10 @@ export default function WhatsAppInbox() {
   const selectedConv = selected
     ? conversations.find((c) => c.phone === selected.phone)
     : null;
+
+  if (userData && !isConnected) {
+    return <InboxWhatsAppGate pax26={pax26} router={router} />;
+  }
 
   return (
     <div
@@ -1991,12 +2100,12 @@ export default function WhatsAppInbox() {
                 Unknown Contact Policy
               </h3>
               <p style={{ color: "#8696a0", fontSize: "12px", margin: "0 0 16px 0", lineHeight: 1.5 }}>
-                Configure how your AI Agent responds when a new, unlisted contact messages your WhatsApp line.
+                Configure how your Smart-agent responds when a new, unlisted contact messages your WhatsApp line.
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {[
-                  { id: "allow", title: "Allow All", desc: "AI automatically responds to all new numbers." },
+                  { id: "allow", title: "Allow All", desc: "Smart-agent automatically responds to all new numbers." },
                   { id: "ask", title: "Ask First", desc: "Sends an opt-in confirmation message before engaging." },
                   { id: "block", title: "Block All", desc: "Ignores unknown numbers and leaves them for manual reply." },
                 ].map((p) => {
@@ -2205,7 +2314,7 @@ export default function WhatsAppInbox() {
                     lineHeight: 1.6,
                   }}
                 >
-                  Send and receive messages seamlessly without keeping your phone online. Use AI automations to handle customer chats or take over manually anytime.
+                  Send and receive messages seamlessly without keeping your phone online. Use Smart-agent automations to handle customer chats or take over manually anytime.
                 </p>
               </div>
 
@@ -3250,7 +3359,7 @@ export default function WhatsAppInbox() {
 
                 <div>
                   <label style={{ fontSize: "11px", fontWeight: 700, color: "#8696a0", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
-                    AI Handling Rule
+                    Smart-agent Handling Rule
                   </label>
                   <div style={{ display: "flex", gap: "10px" }}>
                     <button
