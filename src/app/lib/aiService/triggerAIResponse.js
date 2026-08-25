@@ -499,7 +499,7 @@ export const triggerAIResponse = async ({
                     phoneNumberId: user.whatsapp.phoneNumberId,
                     from: user.whatsapp.displayPhone,
                     to: session.visitorPhone,
-                    text: idx === 0 ? (cleanText || rawAiText) : "",
+                    text: (idx === 0 ? (cleanText || rawAiText) : "") || "[image]",
                     aiMeta: {
                         model: aiResponse?.model,
                         tokensUsed: aiResponse?.tokensUsed,
