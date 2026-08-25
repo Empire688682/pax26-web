@@ -184,6 +184,7 @@ ${urlContent}
 
   const onlineStoreUrl = profile.onlineStoreUrl || businessUrl || null;
   const liveLocation = profile.liveLocation || null;
+  const deliveryCoverage = profile.deliveryCoverage || liveLocation || "Not specified";
 
   return `
 You are an AI sales agent for *${profile.businessName}*, operating on WhatsApp.
@@ -208,6 +209,7 @@ ${profile.businessDescription || ""}
 
 Online Store / Shop Link: ${onlineStoreUrl || "Not provided"}
 Business Location / Address: ${liveLocation || "Not specified"}
+Delivery Coverage Areas: ${deliveryCoverage}
 Working Hours: ${profile.workingHours || "Not specified"}
 Currency: ${profile.currency || "NGN"} (${currencySymbol})
 
@@ -285,8 +287,11 @@ Stage 4 — CLOSE & STRICT LOCATION VERIFICATION
       * STRICT FULL ADDRESS REQUIREMENT (CRITICAL): A general city or state name (e.g. just "Lagos" or "Abuja") is NOT enough!
       * The customer must provide: **State/City + Area + Street Name & House Number** (e.g. "Lagos, Ikeja, No 11 Allen Avenue").
       * If the customer only gives a general city or state (e.g. "Lagos"): Ask for their full address details before providing final payment details: "Thanks! Could you please provide your full address including Area, Street Name, and House Number (e.g. Ikeja, No 11 Allen Avenue) so we can arrange delivery?"
-    - STRICT LOCATION CHECK: Compare their location against the seller's "Delivery Location" notes / Business Location above.
-      * If their location is within coverage: State the delivery fee and total amount (Products Total + Delivery Fee).
+    - STRICT LOCATION COVERAGE CHECK (CRITICAL):
+      * Compare the customer's delivery state/city against the seller's **Delivery Coverage Areas** above (${deliveryCoverage}).
+      * IF the customer's location (e.g. Ibadan) is OUTSIDE the seller's Delivery Coverage Areas (e.g. Lagos), you MUST decline the order politely and DO NOT provide bank payment details or process the order:
+        Example: "I'm sorry, but we currently only deliver to ${deliveryCoverage}! We don't have delivery coverage to [Customer City/State] at the moment."
+      * IF their location IS within coverage: State the delivery fee and total amount (Products Total + Delivery Fee).
       * MULTI-PRODUCT DELIVERY FEE RULE (CRITICAL):
         - Delivery fees are charged PER PACKAGE / ORDER, NOT per product.
         - When a customer orders or inquires about multiple products together:

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { TagInput } from "@/components/ui/TagInput";
@@ -923,6 +923,7 @@ export default function AiBusinessDashboard() {
     workingHours: "",
     onlineStoreUrl: "",
     liveLocation: "",
+    deliveryCoverage: "",
     slug: "",
     logoUrl: "",
     storeTheme: "classic",
@@ -974,6 +975,7 @@ export default function AiBusinessDashboard() {
           workingHours: profile.workingHours || "",
           onlineStoreUrl: profile.onlineStoreUrl || "",
           liveLocation: profile.liveLocation || "",
+          deliveryCoverage: profile.deliveryCoverage || "",
           slug: profile.slug || "",
           logoUrl: profile.logoUrl || "",
           storeTheme: profile.storeTheme || "classic",
@@ -1072,6 +1074,7 @@ export default function AiBusinessDashboard() {
             ...data.profile,
             onlineStoreUrl: data.profile.onlineStoreUrl ?? f.onlineStoreUrl,
             liveLocation: data.profile.liveLocation ?? f.liveLocation,
+            deliveryCoverage: data.profile.deliveryCoverage ?? f.deliveryCoverage,
             slug: data.profile.slug ?? f.slug,
             logoUrl: data.profile.logoUrl ?? f.logoUrl,
             storeTheme: data.profile.storeTheme ?? f.storeTheme,
@@ -1315,6 +1318,13 @@ export default function AiBusinessDashboard() {
                       placeholder="e.g. 15 Broad Street, Lagos Island, Lagos"
                     />
                   </div>
+                  <ThemedInput
+                    label="Delivery Coverage Areas"
+                    value={form.deliveryCoverage}
+                    onChange={e => setForm(f => ({ ...f, deliveryCoverage: e.target.value }))}
+                    pax26={p}
+                    placeholder="e.g. Lagos, Ogun (or Nationwide)"
+                  />
                   <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your Smart Agent when they ask where to buy or find you." />
                 </div>
               </section>

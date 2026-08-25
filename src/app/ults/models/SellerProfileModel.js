@@ -61,6 +61,7 @@ const SellerProfileSchema = new mongoose.Schema({
     // Online presence
     onlineStoreUrl: { type: String, default: '', trim: true },
     liveLocation: { type: String, default: '', trim: true },
+    deliveryCoverage: { type: String, default: '', trim: true },
 
     industry: {
         type: String,

@@ -196,7 +196,7 @@ const emptyProduct = () => ({
   name: "", slug: "", price: "", discountPrice: "", comparePrice: "",
   sku: "", description: "", category: "", tags: [], stock: "",
   isPhysical: true, isAvailable: true,
-  deliveryFee: "", deliveryTimeFrame: "", locationNotes: "",
+  deliveryFee: "", deliveryTimeFrame: "",
   images: [], variants: [],
 });
 
@@ -282,7 +282,6 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
             </p>
           </div>
           <TInput label="Delivery Time" p={p} value={form.deliveryTimeFrame} onChange={e => set("deliveryTimeFrame", e.target.value)} placeholder="24-48 hours" />
-          <TInput label="Delivery Location" p={p} value={form.locationNotes} onChange={e => set("locationNotes", e.target.value)} placeholder="Lagos only" />
         </div>
       )}
 
