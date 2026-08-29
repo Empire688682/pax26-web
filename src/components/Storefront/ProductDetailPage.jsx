@@ -285,18 +285,42 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
                   <ShieldCheckIcon /> Verified Seller Order Protection
                 </div>
-                {product.isPhysical && (product.deliveryFee != null || product.deliveryTimeFrame || product.locationNotes) && (
+
+                {product.fulfillmentType === "pickup_only" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.accent, fontWeight: 700 }}>
+                    <span>🏬</span> Store Pick-up Only — {store.fulfillmentSettings?.pickupAddress || store.liveLocation || "Contact seller"}
+                  </div>
+                ) : (
                   <>
-                    {product.deliveryFee != null && (
+                    {store.fulfillmentSettings?.deliveryModel === "zones" && store.fulfillmentSettings?.deliveryZones?.length > 0 ? (
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
                         <TruckIcon />
-                        {product.deliveryFee === 0 ? "Free delivery" : `Delivery Fee: ${formatPrice(product.deliveryFee, currency)}`}
-                        {product.deliveryTimeFrame && ` · (${product.deliveryTimeFrame})`}
+                        Delivery: From {formatPrice(Math.min(...store.fulfillmentSettings.deliveryZones.map(z => Number(z.fee) || 0)), currency)} · (Location rates apply at checkout)
                       </div>
-                    )}
-                    {product.locationNotes && (
+                    ) : store.fulfillmentSettings?.deliveryModel === "quote" ? (
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
-                        <MapPinIcon /> {product.locationNotes}
+                        <TruckIcon />
+                        Delivery Fee: Calculated upon dispatch / quote
+                      </div>
+                    ) : product.isPhysical && (product.deliveryFee != null || product.deliveryTimeFrame || product.locationNotes) && (
+                      <>
+                        {product.deliveryFee != null && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
+                            <TruckIcon />
+                            {product.deliveryFee === 0 ? "Free delivery" : `Delivery Fee: ${formatPrice(product.deliveryFee, currency)}`}
+                            {product.deliveryTimeFrame && ` · (${product.deliveryTimeFrame})`}
+                          </div>
+                        )}
+                        {product.locationNotes && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
+                            <MapPinIcon /> {product.locationNotes}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {store.fulfillmentSettings?.allowPickup && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
+                        <span>🏬</span> Store Pick-up Available ({store.fulfillmentSettings?.pickupAddress || store.liveLocation || "In store"})
                       </div>
                     )}
                   </>

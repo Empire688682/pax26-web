@@ -122,6 +122,7 @@ export async function GET(req) {
                     onlineStoreUrl: profile.onlineStoreUrl ?? "",
                     liveLocation: profile.liveLocation ?? "",
                     deliveryCoverage: profile.deliveryCoverage ?? "",
+                    fulfillmentSettings: profile.fulfillmentSettings ?? { allowDelivery: true, allowPickup: false, pickupAddress: "", pickupInstructions: "", deliveryModel: "flat", deliveryZones: [] },
                     slug: profile.slug ?? "",
                     logoUrl: profile.logoUrl ?? "",
                     storeTheme: profile.storeTheme ?? "classic",
@@ -181,7 +182,7 @@ export async function POST(req) {
         const { products, ...profileData } = await req.json();
 
         // Explicitly extract the new presence fields so they're always included in the update
-        const { onlineStoreUrl, liveLocation, deliveryCoverage, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, promoAnnouncement, customInstructions, ...restProfileData } = profileData;
+        const { onlineStoreUrl, liveLocation, deliveryCoverage, fulfillmentSettings, slug, logoUrl, storeTheme, emailSalesAlerts, spamAutoHandoff, spamThreshold, promoAnnouncement, customInstructions, ...restProfileData } = profileData;
 
         // 1. Upsert profile — use $set to avoid document replacement and bypass runValidators issues.
         const profile = await SellerProfileModel.findOneAndUpdate(
@@ -192,6 +193,7 @@ export async function POST(req) {
                     ...(onlineStoreUrl !== undefined && { onlineStoreUrl }),
                     ...(liveLocation !== undefined && { liveLocation }),
                     ...(deliveryCoverage !== undefined && { deliveryCoverage }),
+                    ...(fulfillmentSettings !== undefined && { fulfillmentSettings }),
                     ...(slug && typeof slug === "string" && { slug: slug.toLowerCase().trim() }),
                     ...(logoUrl !== undefined && { logoUrl }),
                     ...(storeTheme && typeof storeTheme === "string" && { storeTheme }),
@@ -245,6 +247,7 @@ export async function POST(req) {
                 deliveryTimeFrame: prod.deliveryTimeFrame,
                 locationNotes: prod.locationNotes,
                 isPhysical: prod.isPhysical ?? true,
+                fulfillmentType: prod.fulfillmentType ?? "store_default",
             });
 
             // Bulk update existing products.

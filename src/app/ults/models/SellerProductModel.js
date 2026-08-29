@@ -88,6 +88,12 @@ const SellerProductSchema = new mongoose.Schema({
         required: true,
     },
 
+    fulfillmentType: {
+        type: String,
+        enum: ["store_default", "both", "pickup_only", "delivery_only"],
+        default: "store_default",
+    },
+
     images: [
         {
             url: { type: String, required: true },

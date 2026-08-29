@@ -63,6 +63,24 @@ const SellerProfileSchema = new mongoose.Schema({
     liveLocation: { type: String, default: '', trim: true },
     deliveryCoverage: { type: String, default: '', trim: true },
 
+    // Store Fulfillment Settings
+    fulfillmentSettings: {
+        allowDelivery: { type: Boolean, default: true },
+        allowPickup: { type: Boolean, default: false },
+        pickupAddress: { type: String, default: '', trim: true },
+        pickupInstructions: { type: String, default: '', trim: true },
+        deliveryModel: { type: String, enum: ["flat", "zones", "quote"], default: "flat" },
+        deliveryZones: [
+            {
+                name: { type: String, default: '' },
+                areas: { type: String, default: '' },
+                fee: { type: Number, default: 0 },
+                timeframe: { type: String, default: '' },
+                _id: false,
+            }
+        ],
+    },
+
     industry: {
         type: String,
         required: true,

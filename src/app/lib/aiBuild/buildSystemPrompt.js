@@ -185,6 +185,18 @@ ${urlContent}
   const onlineStoreUrl = profile.onlineStoreUrl || businessUrl || null;
   const liveLocation = profile.liveLocation || null;
   const deliveryCoverage = profile.deliveryCoverage || liveLocation || "Not specified";
+  const fulfillment = profile.fulfillmentSettings || {};
+  const allowPickup = fulfillment.allowPickup === true;
+  const pickupAddr = fulfillment.pickupAddress || liveLocation || "Not specified";
+  const pickupInst = fulfillment.pickupInstructions || "Contact store for hours";
+  const deliveryModel = fulfillment.deliveryModel || "flat";
+  const deliveryZones = fulfillment.deliveryZones || [];
+
+  const deliveryZonesText = (deliveryModel === "zones" && deliveryZones.length > 0)
+    ? `\nLocation Delivery Fee Zones:\n${deliveryZones.map(z => `- ${z.name}${z.areas ? ` (${z.areas})` : ""}: ${currencySymbol}${Number(z.fee).toLocaleString()}${z.timeframe ? ` (${z.timeframe})` : ""}`).join("\n")}`
+    : deliveryModel === "quote"
+      ? "\nDelivery Fee Policy: Fees are calculated upon dispatch based on rider rates."
+      : "";
 
   return `
 You are an AI sales agent for *${profile.businessName}*, operating on WhatsApp.
@@ -210,6 +222,10 @@ ${profile.businessDescription || ""}
 Online Store / Shop Link: ${onlineStoreUrl || "Not provided"}
 Business Location / Address: ${liveLocation || "Not specified"}
 Delivery Coverage Areas: ${deliveryCoverage}
+Delivery Pricing Model: ${deliveryModel === "zones" ? "Location-Based Zones (see rates below)" : deliveryModel === "quote" ? "Quote / On-Dispatch Calculation" : "Flat Rate Fee"}
+${deliveryZonesText}
+Store Pick-up Supported: ${allowPickup ? `YES — Pick-up Address: ${pickupAddr} (${pickupInst})` : "NO — Doorstep / Courier Delivery Only"}
+Home Delivery Supported: ${fulfillment.allowDelivery !== false ? "YES" : "NO — Pick-up Only"}
 Working Hours: ${profile.workingHours || "Not specified"}
 Currency: ${profile.currency || "NGN"} (${currencySymbol})
 

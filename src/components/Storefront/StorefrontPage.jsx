@@ -91,9 +91,24 @@ export function handleWhatsAppRedirect(e, href) {
 function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQty, onRemoveItem, onClearCart, store, slug, sessionToken, theme }) {
   const t = theme;
   const [deliveryLocation, setDeliveryLocation] = useState("");
+  const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
+  const allowPickup = store.fulfillmentSettings?.allowPickup === true;
+  const deliveryModel = store.fulfillmentSettings?.deliveryModel || "flat";
+  const deliveryZones = store.fulfillmentSettings?.deliveryZones || [];
+  const [fulfillmentMethod, setFulfillmentMethod] = useState(allowPickup && !allowDelivery ? "pickup" : "delivery");
+  const [selectedZoneIndex, setSelectedZoneIndex] = useState(0);
   const currency = store.currency || "NGN";
 
   if (!open) return null;
+
+  const selectedZone = deliveryModel === "zones" && deliveryZones.length > 0 ? deliveryZones[selectedZoneIndex] : null;
+  const activeDeliveryFee = fulfillmentMethod === "pickup"
+    ? 0
+    : selectedZone
+      ? Number(selectedZone.fee) || 0
+      : 0;
+
+  const grandTotal = totalPrice + activeDeliveryFee;
 
   const handleCheckoutWhatsApp = (e) => {
     e.preventDefault();
@@ -107,6 +122,9 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
       cartItems: cart,
       currency,
       deliveryLocation,
+      fulfillmentMethod,
+      pickupDetails: store.fulfillmentSettings?.pickupAddress || store.liveLocation || "",
+      selectedZone: fulfillmentMethod === "delivery" ? selectedZone : null,
       slug,
       sessionToken,
     });
@@ -171,20 +189,121 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         {/* Footer Checkout Section */}
         {cart.length > 0 && (
           <div style={{ padding: "16px 20px 20px", borderTop: `1px solid ${t.border}`, background: t.navBg, display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Delivery Address (Full Address)</label>
-              <input
-                type="text"
-                placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
-                value={deliveryLocation}
-                onChange={(e) => setDeliveryLocation(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-              />
-            </div>
+            {/* Fulfillment Choice Segment Toggle */}
+            {allowPickup && (
+              <div style={{ display: "flex", background: t.pageBg, borderRadius: "12px", padding: "3px", border: `1px solid ${t.border}` }}>
+                {allowDelivery && (
+                  <button
+                    onClick={() => setFulfillmentMethod("delivery")}
+                    style={{
+                      flex: 1,
+                      padding: "8px 10px",
+                      borderRadius: "9px",
+                      border: "none",
+                      background: fulfillmentMethod === "delivery" ? t.card : "transparent",
+                      color: fulfillmentMethod === "delivery" ? t.textPrimary : t.textSecondary,
+                      fontWeight: 800,
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      boxShadow: fulfillmentMethod === "delivery" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    🚚 Delivery
+                  </button>
+                )}
+                <button
+                  onClick={() => setFulfillmentMethod("pickup")}
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "9px",
+                    border: "none",
+                    background: fulfillmentMethod === "pickup" ? t.card : "transparent",
+                    color: fulfillmentMethod === "pickup" ? t.textPrimary : t.textSecondary,
+                    fontWeight: 800,
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    boxShadow: fulfillmentMethod === "pickup" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
+                    transition: "all 0.15s"
+                  }}
+                >
+                  🏬 Store Pick-up
+                </button>
+              </div>
+            )}
+
+            {fulfillmentMethod === "delivery" ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {/* Location Zone Dropdown */}
+                {deliveryModel === "zones" && deliveryZones.length > 0 && (
+                  <div>
+                    <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Select Delivery Zone / Area</label>
+                    <select
+                      value={selectedZoneIndex}
+                      onChange={(e) => setSelectedZoneIndex(Number(e.target.value))}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit", fontWeight: 700, cursor: "pointer" }}
+                    >
+                      {deliveryZones.map((zone, i) => (
+                        <option key={i} value={i}>
+                          📍 {zone.name}{zone.areas ? ` (${zone.areas})` : ""} — {formatPrice(zone.fee, currency)} {zone.timeframe ? `· ${zone.timeframe}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {deliveryModel === "quote" && (
+                  <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary }}>
+                    ℹ️ <strong>Dispatch Quote:</strong> Delivery fee will be calculated upon order placement based on rider rates.
+                  </div>
+                )}
+
+                <div>
+                  <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Delivery Address (Full Address)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
+                    value={deliveryLocation}
+                    onChange={(e) => setDeliveryLocation(e.target.value)}
+                    style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary, display: "flex", flexDirection: "column", gap: "4px" }}>
+                <p style={{ margin: 0, fontWeight: 800, color: t.accent }}>🏬 Store Pick-up Selected</p>
+                <p style={{ margin: 0, opacity: 0.85 }}>
+                  <strong>Address:</strong> {store.fulfillmentSettings?.pickupAddress || store.liveLocation || "Contact seller for address"}
+                </p>
+                {store.fulfillmentSettings?.pickupInstructions && (
+                  <p style={{ margin: "2px 0 0", opacity: 0.65, fontSize: "11px" }}>
+                    ℹ️ {store.fulfillmentSettings.pickupInstructions}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "2px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: t.textSecondary }}>Total Order Amount</span>
-              <span style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(totalPrice, currency)}</span>
+              <div>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: t.textSecondary }}>
+                  {fulfillmentMethod === "pickup" ? "Total (Pick-up FREE)" : "Total Order Amount"}
+                </span>
+                {fulfillmentMethod === "delivery" && activeDeliveryFee > 0 && (
+                  <p style={{ margin: 0, fontSize: "11px", color: t.accent, fontWeight: 700 }}>
+                    Products: {formatPrice(totalPrice, currency)} + Delivery: {formatPrice(activeDeliveryFee, currency)}
+                  </p>
+                )}
+              </div>
+              <span style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(grandTotal, currency)}</span>
             </div>
 
             <button

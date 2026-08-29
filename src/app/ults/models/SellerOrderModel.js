@@ -57,6 +57,14 @@ const SellerOrderSchema = new mongoose.Schema({
 
     deliveryAddress: String,
 
+    fulfillmentMethod: {
+        type: String,
+        enum: ["delivery", "pickup"],
+        default: "delivery",
+    },
+
+    pickupDetails: String,
+
     paymentReceiptUrl: String,
     paymentReceiptPublicId: String,
     paymentReceiptSubmittedAt: Date,
