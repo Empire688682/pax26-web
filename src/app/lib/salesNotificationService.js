@@ -2,6 +2,7 @@ import UserModel from "@/app/ults/models/UserModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
+import { sendMobilePush } from "@/app/lib/pushNotificationService";
 import { sendSalesAlertEmail } from "@/app/lib/salesAlertService";
 
 export const sendSalesNotification = async (userId, orderData) => {
@@ -125,6 +126,15 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
 
         console.log(`[salesNotification] 🏁 Done — messageSent=${messageSent}`);
+
+        // ── Mobile push (fires regardless of channel preference) ──
+        await sendMobilePush(userId, {
+            type:  "new_order",
+            title: "🛍️ New Sale!",
+            body:  `${notification.customerName} ordered ${notification.productName} · ₦${notification.amountPaid.toLocaleString()}`,
+            data:  { orderId: notification.orderId },
+        });
+
         return { success: true, message: "Notification processed" };
     } catch (error) {
         console.error("[salesNotification] 💥 Unexpected error:", error);

@@ -13,6 +13,7 @@ import { sendWhatsAppAutomationReply } from "../../api/helper/WhatsAppAutomation
 import { searchProducts, shouldSearch } from "@/app/lib/store/searchProducts.js";
 import { buildSearchMatchContext } from "@/app/lib/store/buildSearchContext.js";
 import { buildStorefrontUrl } from "@/app/lib/store/buildStorefrontUrl.js";
+import { sendMobilePush } from "@/app/lib/pushNotificationService.js";
 
 /**
  * buildImageReceivedContext
@@ -256,6 +257,13 @@ export const handleIncomingWhatsApp = async (payload) => {
         }
       );
       console.log("✅ Step 5 — New lead added:", visitorPhone);
+        // Push: new lead notification
+        await sendMobilePush(user._id, {
+          type:  "new_lead",
+          title: "👤 New Lead",
+          body:  `${visitorPhone} just messaged your store for the first time.`,
+          data:  { phone: visitorPhone },
+        });
     } else {
       // Auto-update leadStage from "new" to "contacted" once conversation is active
       await UserModel.updateOne(
@@ -829,6 +837,14 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText: enrichedText });
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
+
+  // Push: agent-reply notification (non-blocking)
+  sendMobilePush(user._id, {
+    type:  "agent_reply",
+    title: "🤖 AI Agent Replied",
+    body:  `Your agent responded to ${visitorPhone}`,
+    data:  { phone: visitorPhone },
+  }).catch(() => {}); // fire-and-forget, never block response
 
   return { ok: true };
 };

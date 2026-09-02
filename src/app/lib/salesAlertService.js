@@ -12,6 +12,7 @@
 import UserModel from "@/app/ults/models/UserModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import sendpulse from "@/app/lib/sendpulse";
+import { sendMobilePush } from "@/app/lib/pushNotificationService";
 
 /* ── Build the email HTML ───────────────────────────────────── */
 function buildEmail({ businessName, customerPhone, productName, amountPaid, deliveryFee, deliveryLocation, orderId, storeSlug, isConfirmed }) {
@@ -238,6 +239,15 @@ export async function sendSalesAlertEmail(userId, { customerPhone, productName, 
         resolve();
       }, emailPayload);
     });
+
+    // ── Mobile push — real-time alert on seller's phone ────────
+    await sendMobilePush(userId, {
+      type:  "sales_alert",
+      title: "💰 Payment Proof Received",
+      body:  `${customerPhone}${productName ? ` · ${productName}` : ''} — tap to verify.`,
+      data:  { customerPhone, productName: productName ?? '' },
+    });
+
   } catch (err) {
     // Non-fatal — never block AI response or order confirmation for a notification
     console.warn(`[salesAlert] 💥 Caught error in sendSalesAlertEmail:`, err.message, err.stack);

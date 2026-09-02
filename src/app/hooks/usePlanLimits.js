@@ -64,8 +64,7 @@ export function usePlanLimits() {
   const productRecommendations   = paxAI.productRecommendations   ?? isBusiness;
 
   // ── Branding & Team ────────────────────────────────────────
-  const removeBranding = !!paxAI.removeBranding || isStarter;
-  const multiStaff     = paxAI.multiStaff ?? (isEnterprise ? 10 : isBusiness ? 5 : 0);
+  const multiStaff = paxAI.multiStaff ?? (isEnterprise ? 10 : isBusiness ? 5 : 0);
 
   // ── WhatsApp numbers ──────────────────────────────────────
   // Always 1 for all plans for now
@@ -122,7 +121,6 @@ export function usePlanLimits() {
     productRecommendations,
 
     // Branding & Team
-    removeBranding,
     multiStaff,
     hasMultiStaff: multiStaff > 0,
     whatsappNumbersLimit,

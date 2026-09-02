@@ -198,11 +198,16 @@ const UserSchema = new mongoose.Schema(
        PLAN ANALYTICS (Profitability Tracking)
     ====================== */
     planAnalytics: {
-      aiMessagesUsed: { type: Number, default: 0 }, // Total AI messages sent
-      broadcastSent: { type: Number, default: 0 },  // Total broadcasts sent
-      planRevenue: { type: Number, default: 0 },    // Total revenue from this user
-      metaCost: { type: Number, default: 0 },       // Estimated cost from Meta (WhatsApp API)
-    }
+      aiMessagesUsed: { type: Number, default: 0 },
+      broadcastSent: { type: Number, default: 0 },
+      planRevenue: { type: Number, default: 0 },
+      metaCost: { type: Number, default: 0 },
+    },
+
+    /* =====================
+       MOBILE PUSH NOTIFICATIONS
+    ====================== */
+    mobilePushToken: { type: String, default: null },  // Expo push token
   }, { timestamps: true });
 
 const UserModel =
