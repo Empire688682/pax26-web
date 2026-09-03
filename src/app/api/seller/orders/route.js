@@ -10,6 +10,30 @@ export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
+export async function GET(req) {
+    await connectDb();
+    try {
+        const userId = await verifyToken(req);
+        if (!userId) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
+        }
+
+        const sellerProfile = await SellerProfileModel.findOne({ userId });
+        if (!sellerProfile) {
+            return NextResponse.json({ success: true, orders: [] }, { status: 200, headers: corsHeaders() });
+        }
+
+        const orders = await SellerOrderModel.find({ sellerId: sellerProfile._id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return NextResponse.json({ success: true, orders }, { status: 200, headers: corsHeaders() });
+    } catch (error) {
+        console.error("GET Orders Error:", error);
+        return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500, headers: corsHeaders() });
+    }
+}
+
 export async function POST(req) {
     await connectDb();
     try {

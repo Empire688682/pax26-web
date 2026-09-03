@@ -33,7 +33,28 @@ export async function GET(req) {
 
         const sellerProfile = await SellerProfileModel.findOne({ userId });
         if (!sellerProfile) {
-            return NextResponse.json({ success: false, message: "Seller profile not found" }, { status: 404, headers: corsHeaders() });
+            return NextResponse.json({
+                success: true,
+                plan,
+                metrics: {
+                    totalRevenue: 0,
+                    totalOrders: 0,
+                    successfulOrdersCount: 0,
+                    pendingOrdersCount: 0,
+                    failedOrdersCount: 0,
+                    todaySales: 0,
+                    weeklySales: 0,
+                    monthlySales: 0,
+                    totalSales: 0,
+                    conversionRate: 0,
+                    averageOrderValue: 0,
+                    repeatCustomers: 0,
+                },
+                pendingOrders: [],
+                recentOrders: [],
+                topProducts: [],
+                salesTrend: [],
+            }, { status: 200, headers: corsHeaders() });
         }
 
         const { searchParams } = new URL(req.url);

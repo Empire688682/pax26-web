@@ -16,17 +16,22 @@ export async function GET(req) {
   try {
     await connectDb();
     const userId = await verifyToken(req);
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401, headers: corsHeaders() });
+    }
     const user = await UserModel.findById(userId).lean();
     if (!user) {
-      return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+      return NextResponse.json({ success: false, message: "User session invalid" }, { status: 401, headers: corsHeaders() });
     }
 
     const businessNumber = user.whatsapp?.displayPhone?.replace(/\D/g, "");
     const personalNumber = user.number?.replace(/\D/g, "");
 
+    const userIdObj = mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+
     // Get all unique conversations grouped by the conversation partner (the visitor)
     const conversations = await AIMessageModel.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      { $match: { $or: [{ userId: userIdObj }, { userId: String(userId) }] } },
       { $sort: { createdAt: -1 } },
       {
         $project: {

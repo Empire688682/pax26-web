@@ -4,6 +4,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { verifyToken } from "@/app/api/helper/VerifyToken";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
+import mongoose from "mongoose";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -23,8 +24,11 @@ export async function GET(req) {
       );
     }
 
+    const userIdObj = mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+    const userIds = [userIdObj, String(userId)];
+
     const messages = await AIMessageModel.find({
-      userId,
+      userId: { $in: userIds },
       $or: [{ from: phone }, { to: phone }],
     })
       .sort({ createdAt: 1 })
@@ -32,7 +36,7 @@ export async function GET(req) {
 
     // Mark inbound messages as read
     await AIMessageModel.updateMany(
-      { userId, from: phone, direction: "inbound", status: "received" },
+      { userId: { $in: userIds }, from: phone, direction: "inbound", status: "received" },
       { status: "read" }
     );
 

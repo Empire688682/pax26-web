@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { buildFullUserProfile } from "../../helper/buildFullUserProfile";
 
 dotenv.config();
 
@@ -39,35 +40,15 @@ export async function POST(req) {
           );
         } 
 
-    // Prepare safe user object and timestamp for user maxage
-    const userObj = existUser.toObject();
-    delete userObj.password;
-    delete userObj.transactionPin;
-    if(userObj.pin){
-      userObj.pin = true;
-    }else{
-      userObj.pin = null;
-    }
-    userObj.authTimestamp = Date.now();
-    delete userObj.isAdmin;
-    delete userObj.provider;
-    delete userObj.referralHost;
-    delete userObj.walletBalance;
-    delete userObj.__v;
-    delete userObj.commissionBalance;
-    delete userObj.referralHostId;
-    delete userObj.forgottenPasswordToken;
-    delete userObj.bvn;
-    delete userObj.emailVerification;
-    delete userObj.phoneVerification;
-    delete userObj._id;
-    delete userObj.whatsapp;
+// Prepare safe user object and timestamp for user maxage
+    const userObj = (await buildFullUserProfile(existUser._id)) || existUser.toObject();
 
-    // JWT
+    const isMobile = req.headers.get("x-client-type") === "mobile";
+    // JWT — mobile app sessions last 1 year (365d), web cookie sessions last 1 day
     const token = jwt.sign(
       { userId: existUser._id },
       process.env.SECRET_KEY,
-      { expiresIn: "1d" }
+      { expiresIn: isMobile ? "365d" : "1d" }
     );
 
     const response = NextResponse.json(

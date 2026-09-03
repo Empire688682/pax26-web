@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
-import { sendUserVerification } from "../services/sendVerificationService";
+import { buildFullUserProfile } from "../../helper/buildFullUserProfile";
 
 dotenv.config();
 
@@ -152,28 +152,10 @@ const registerUser = async (req) => {
       }
     }
 
-    const userObj = newUser.toObject();
-    delete userObj.password;
-    delete userObj.transactionPin;
-    delete userObj.isAdmin;
-    delete userObj.provider;
-    delete userObj.referralHost;
-    delete userObj.walletBalance;
-    delete userObj.__v;
-    delete userObj.commissionBalance;
-    delete userObj.forgottenPasswordToken;
-    delete userObj.referralHostId;
-    delete userObj.bvn;
-    delete userObj.emailVerification;
-    delete userObj.phoneVerification;
-    delete userObj._id;
-    delete userObj.whatsapp;
-
-    const finalUserData = userObj;
-
     const userId = newUser._id;
+    const finalUserData = (await buildFullUserProfile(userId)) || newUser.toObject();
     const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
-      expiresIn: "1d",
+      expiresIn: isMobile ? "365d" : "1d",
     });
 
     if (isMobile) {

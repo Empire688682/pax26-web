@@ -56,13 +56,7 @@ export async function GET(req) {
             SellerProfileModel.findOne({ userId }).lean(),
         ]);
 
-        const whatsappNumber = user?.whatsapp?.displayPhone;
-        if (!user?.whatsapp?.connected || !whatsappNumber) {
-            return NextResponse.json(
-                { success: false, message: "Seller whatsapp not found" },
-                { status: 404, headers: corsHeaders() }
-            );
-        }
+        const whatsappNumber = user?.whatsapp?.displayPhone || "";
 
         // First-time sellers have no profile yet — return empty shell (not 404)
         if (!existingProfile) {

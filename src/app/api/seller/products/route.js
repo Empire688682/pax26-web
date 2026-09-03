@@ -22,7 +22,7 @@ export async function GET(req) {
 
         const profile = await SellerProfileModel.findOne({ userId }).lean();
         if (!profile) {
-            return NextResponse.json({ success: false, message: "Seller profile not found" }, { status: 404, headers: corsHeaders() });
+            return NextResponse.json({ success: true, products: [] }, { status: 200, headers: corsHeaders() });
         }
 
         const { searchParams } = new URL(req.url);

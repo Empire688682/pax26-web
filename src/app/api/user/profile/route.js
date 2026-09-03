@@ -1,10 +1,8 @@
-import UserModel from "@/app/ults/models/UserModel";
 import { verifyToken } from "../../helper/VerifyToken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
-import UserAutomationModel from "@/app/ults/models/UserAutomationModel";
-import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import { buildFullUserProfile } from "../../helper/buildFullUserProfile";
 
 
 export async function POST() {
@@ -19,45 +17,10 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "No Id found" }, { status: 404, headers: corsHeaders() })
         }
 
-        // Run all 3 DB queries in parallel instead of sequentially
-        const [user, userSellerProfile, doc] = await Promise.all([
-            UserModel.findById(userId),
-            SellerProfileModel.findOne({ userId }),
-            UserAutomationModel.findOne({ userId }),
-        ]);
-
-        if (!user) {
+        const userObj = await buildFullUserProfile(userId);
+        if (!userObj) {
             return NextResponse.json({ success: false, message: "Not authorized" }, { status: 404, headers: corsHeaders() })
         }
-
-        const userMessageList = user.whatsapp?.contacts?.list;
-        const messagesHandled = userMessageList.reduce((total, contact) => total + contact?.messageCount, 0);
-        const workflows = doc?.automations?.filter(auto => auto.enabled).length ?? 0;
-
-        // Prepare safe user object
-        const userObj = user.toObject();
-        userObj.businessProfile = userSellerProfile || {};
-        userObj.messagesHandled = messagesHandled;
-        userObj.workflows = workflows;
-        userObj.contacts = user.whatsapp?.contacts?.list?.length || 0;
-        delete userObj.password;
-        delete userObj.transactionPin
-        userObj.whatsappBusinessNo = user.whatsapp.displayPhone;
-        delete userObj.isAdmin;
-        delete userObj.provider;
-        delete userObj.referralHost;
-        delete userObj.walletBalance;
-        delete userObj.__v;
-        delete userObj.commissionBalance;
-        delete userObj.referralHostId;
-        delete userObj.forgottenPasswordToken;
-        delete userObj.bvn;
-        delete userObj.emailVerification;
-        delete userObj.phoneVerification;
-        delete userObj._id;
-        delete userObj.whatsapp.accessToken;
-        delete userObj.whatsapp.wabaId;
-        delete userObj.whatsapp.phoneNumberId;
 
         return NextResponse.json({ success: true, profile: userObj }, { status: 200, headers: corsHeaders() })
 
