@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { verifyToken } from "../../helper/VerifyToken";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
+import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 
 function isProductUpload(folder = "", tags = "") {
     const folderStr = String(folder).toLowerCase();
@@ -14,11 +15,15 @@ function isProductUpload(folder = "", tags = "") {
     );
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders() });
+}
+
 export async function POST(req) {
     try {
         const userId = await verifyToken(req);
         if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders() });
         }
 
         const formData = await req.formData();
@@ -86,10 +91,10 @@ export async function POST(req) {
         return NextResponse.json({
             url: result.secure_url,
             publicId: result.public_id,
-        });
+        }, { headers: corsHeaders() });
 
     } catch (err) {
         console.error("UPLOAD ERROR:", err);
-        return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+        return NextResponse.json({ error: "Upload failed" }, { status: 500, headers: corsHeaders() });
     }
 }
