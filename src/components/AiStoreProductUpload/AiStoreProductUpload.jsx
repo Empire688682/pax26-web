@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { TagInput } from "@/components/ui/TagInput";
@@ -107,7 +107,6 @@ const XIcon = () => (
 const SELLER_STEPS = [
   { label: "Store Info", icon: StoreIcon, desc: "Your shop identity & logo" },
   { label: "WhatsApp", icon: MessageCircleIcon, desc: "Connect your number" },
-  { label: "Products", icon: PackageIcon, desc: "What you sell" },
   { label: "Payment", icon: CreditCardIcon, desc: "How customers pay you" },
   { label: "AI Behaviour", icon: SlidersIcon, desc: "Tone, hours & auto-reply" },
   { label: "Review", icon: ClipboardIcon, desc: "Confirm your details" },
@@ -793,12 +792,12 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
         </div>
       );
 
-    /* ── 1: WhatsApp (before products) ── */
+    /* ── 1: WhatsApp ── */
     case 1:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <InfoBanner
-            text="WhatsApp must be connected before you can add products. This prevents failed saves and unused image uploads."
+            text="WhatsApp must be connected so your Smart Agent can talk to your customers."
             pax26={p}
           />
           {whatsappConnected ? (
@@ -815,7 +814,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
             <div style={{ padding: "18px", borderRadius: "14px", border: "1px solid #f59e0b44", background: "#f59e0b12", display: "flex", flexDirection: "column", gap: "12px" }}>
               <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>WhatsApp not connected</p>
               <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.65, lineHeight: 1.55 }}>
-                Connect your WhatsApp Business number first. You cannot continue to products until this is done.
+                Connect your WhatsApp Business number first.
               </p>
               <button
                 onClick={onConnectWhatsApp}
@@ -828,41 +827,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
         </div>
       );
 
-    /* ── 2: Products ── */
+    /* ── 2: Payment ── */
     case 2:
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {!whatsappConnected ? (
-            <div style={{ padding: "18px", borderRadius: "14px", border: "1px solid #f59e0b44", background: "#f59e0b12", display: "flex", flexDirection: "column", gap: "12px", marginBottom: "8px" }}>
-              <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>Connect WhatsApp first</p>
-              <p style={{ margin: 0, fontSize: "13px", color: p?.textPrimary, opacity: 0.65, lineHeight: 1.55 }}>
-                Product uploads are locked until WhatsApp is connected.
-              </p>
-              <button
-                onClick={onConnectWhatsApp}
-                style={{ alignSelf: "flex-start", padding: "10px 16px", borderRadius: "10px", border: "none", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
-              >
-                Connect WhatsApp
-              </button>
-            </div>
-          ) : (
-            <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.6, lineHeight: 1.6, margin: "0 0 4px" }}>
-              Add your products with prices, descriptions, and images. Your AI will use these to answer customer questions and take orders.
-            </p>
-          )}
-          <ProductBuilder
-            products={form.products}
-            onChange={v => set("products", v)}
-            pax26={p}
-            currency={form.currency}
-            sellerId={sellerId}
-            locked={!whatsappConnected}
-          />
-        </div>
-      );
-
-    /* ── 3: Payment ── */
-    case 3:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <InfoBanner text="Your AI will automatically share these payment details when customers are ready to pay." pax26={p} />
@@ -874,8 +840,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
         </div>
       );
 
-    /* ── 4: AI Behaviour ── */
-    case 4:
+    /* ── 3: AI Behaviour ── */
+    case 3:
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <ThemedSelect
@@ -916,8 +882,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
         </div>
       );
 
-    /* ── 5: Review ── */
-    case 5:
+    /* ── 4: Review ── */
+    case 4:
       return (
         <div>
           {form.logo?.url && (
@@ -928,7 +894,6 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
           <ReviewRow label="Store" value={form.businessName} pax26={p} />
           <ReviewRow label="Industry" value={form.industry} pax26={p} />
           <ReviewRow label="Currency" value={form.currency} pax26={p} />
-          <ReviewRow label="Products" value={`${form.products.length} product${form.products.length !== 1 ? "s" : ""}`} pax26={p} />
           <ReviewRow label="Payment" value={`${form.paymentDetails.length} account${form.paymentDetails.length !== 1 ? "s" : ""}`} pax26={p} />
           <ReviewRow label="Tone" value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
           <ReviewRow label="Hours" value={form.workingHours} pax26={p} />
@@ -941,8 +906,8 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
         </div>
       );
 
-    /* ── 6: Launch ── */
-    case 6:
+    /* ── 5: Launch ── */
+    case 5:
       return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "28px 0 16px", gap: "20px" }}>
           <div style={{ position: "relative", width: "80px", height: "80px" }}>
@@ -961,12 +926,11 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
               Ready to launch{form.businessName ? ` ${form.businessName}'s` : " your"} Sales Agent
             </h3>
             <p style={{ fontSize: "13px", color: p?.textPrimary, opacity: 0.55, maxWidth: "320px", lineHeight: 1.65, margin: "0 auto" }}>
-              Your AI will know your products, prices, payment details, and selling style — ready to handle customer inquiries and close sales automatically.
+              Your AI will know your store details, prices, payment details, and selling style — ready to handle customer inquiries automatically.
             </p>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
             {[
-              `${form.products.length} products`,
               `${form.paymentDetails.length} payment accounts`,
               form.tone,
               form.workingHours || "hours not set",
@@ -1304,13 +1268,12 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
         default: return false;
       }
     }
-    // seller — WhatsApp is step 1, Products is step 2
+    // seller — 0: Store Info, 1: WhatsApp, 2: Payment, 3: AI Behaviour, 4: Review, 5: Train AI
     switch (step) {
       case 0: return !form.businessName.trim() || !form.businessDescription.trim() || !form.industry.trim();
       case 1: return !whatsappConnected;
-      case 2: return !whatsappConnected; // products are optional — can be added anytime
-      case 3: return form.paymentDetails.length === 0;
-      case 4: return !form.tone || !form.workingHours.trim();
+      case 2: return false; // payment optional
+      case 3: return !form.tone || !form.workingHours.trim();
       default: return false;
     }
   };
@@ -1323,7 +1286,6 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
   const next = () => {
     if (businessType === "seller") {
       if (step === 1 && !whatsappConnected) return;
-      if (step === 2 && !whatsappConnected) return;
     }
     if (step === STEPS.length - 1) { handleTrain(); return; }
     go(1);

@@ -1145,15 +1145,15 @@ export default function AiBusinessDashboard() {
 
       {/* ── Inactive banner ─────────────────────────────── */}
       {isInactive && (
-        <div style={{ padding: "16px 20px", borderRadius: "16px", background: "#f59e0b12", border: "1px solid #f59e0b44", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 auto" }}>
-            <span style={{ fontSize: "20px" }}>⚠️</span>
+        <div style={{ padding: "10px 14px", borderRadius: "12px", background: "#f59e0b12", border: "1px solid #f59e0b44", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: "1 1 auto" }}>
+            <span style={{ fontSize: "14px" }}>⚠️</span>
             <div>
-              <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>AI Automation Inactive</h4>
-              <p style={{ margin: "2px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.7 }}>Your Smart Agent is not trained yet. Complete setup to start responding to customers.</p>
+              <h4 style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: p?.textPrimary }}>AI Automation Inactive</h4>
+              <p style={{ margin: "1px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.75 }}>Complete setup wizard to start responding to customers.</p>
             </div>
           </div>
-          <button onClick={() => router.push("/dashboard/automations/training")} style={{ padding: "9px 18px", borderRadius: "10px", background: p?.primary, color: "#fff", border: "none", fontWeight: 700, fontSize: "13px", cursor: "pointer", whiteSpace: "nowrap" }}>
+          <button onClick={() => router.push("/dashboard/automations/training")} style={{ padding: "7px 14px", borderRadius: "8px", background: p?.primary, color: "#fff", border: "none", fontWeight: 700, fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>
             Train Smart Agent
           </button>
         </div>
@@ -1320,242 +1320,247 @@ export default function AiBusinessDashboard() {
                       placeholder="e.g. 15 Broad Street, Lagos Island, Lagos"
                     />
                   </div>
-                  <ThemedInput
-                    label="Delivery Coverage Areas"
-                    value={form.deliveryCoverage}
-                    onChange={e => setForm(f => ({ ...f, deliveryCoverage: e.target.value }))}
-                    pax26={p}
-                    placeholder="e.g. Lagos, Ogun (or Nationwide)"
-                  />
-
-                  {/* ── Store Fulfillment & Pick-up Settings ── */}
-                  <div style={{ paddingTop: "16px", borderTop: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <FieldLabel pax26={p}>Fulfillment & Pick-up Options</FieldLabel>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
-                      <Toggle
-                        label="Allow Home Delivery"
-                        hint="Customers can enter their delivery address and order for delivery"
-                        value={form.fulfillmentSettings?.allowDelivery ?? true}
-                        onChange={v => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), allowDelivery: v } }))}
+                  {/* ── SELLER ONLY: Delivery Coverage & Fulfillment ── */}
+                  {isSeller && (
+                    <>
+                      <ThemedInput
+                        label="Delivery Coverage Areas"
+                        value={form.deliveryCoverage}
+                        onChange={e => setForm(f => ({ ...f, deliveryCoverage: e.target.value }))}
                         pax26={p}
+                        placeholder="e.g. Lagos, Ogun (or Nationwide)"
                       />
-                      <Toggle
-                        label="Allow Store Pick-up"
-                        hint="Customers can choose to pick up their order from your physical store"
-                        value={form.fulfillmentSettings?.allowPickup ?? false}
-                        onChange={v => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), allowPickup: v } }))}
-                        pax26={p}
-                      />
-                    </div>
 
-                    {form.fulfillmentSettings?.allowPickup && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "14px", padding: "16px", borderRadius: "14px", background: p?.bg, border: `1px solid ${p?.border}` }}>
-                        <ThemedInput
-                          label="Pick-up Address"
-                          value={form.fulfillmentSettings?.pickupAddress || ""}
-                          onChange={e => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), pickupAddress: e.target.value } }))}
-                          pax26={p}
-                          placeholder="e.g. Suite 4, Ikeja Plaza, Allen Avenue, Lagos"
-                        />
-                        <ThemedInput
-                          label="Pick-up Operating Hours / Instructions"
-                          value={form.fulfillmentSettings?.pickupInstructions || ""}
-                          onChange={e => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), pickupInstructions: e.target.value } }))}
-                          pax26={p}
-                          placeholder="e.g. Mon–Sat 9:00 AM – 6:00 PM. Bring your Order ID."
-                        />
-                      </div>
-                    )}
-
-                    {/* ── Delivery Pricing Model Selector ── */}
-                    {form.fulfillmentSettings?.allowDelivery !== false && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "14px", paddingTop: "14px", borderTop: `1px dashed ${p?.border}` }}>
-                        <FieldLabel pax26={p}>Delivery Pricing Model</FieldLabel>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
-                          {[
-                            { id: "flat", title: "Flat Rate Fee", desc: "Same delivery fee for all orders / products" },
-                            { id: "zones", title: "Location-Based Zones", desc: "Delivery fee depends on buyer's area / state" },
-                            { id: "quote", title: "Quote on WhatsApp", desc: "Delivery fee calculated after dispatch" },
-                          ].map(model => {
-                            const isSelected = (form.fulfillmentSettings?.deliveryModel || "flat") === model.id;
-                            return (
-                              <button
-                                key={model.id}
-                                onClick={() => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryModel: model.id } }))}
-                                style={{
-                                  padding: "12px 14px",
-                                  borderRadius: "12px",
-                                  border: isSelected ? `2px solid ${p?.primary}` : `1px solid ${p?.border}`,
-                                  background: isSelected ? `${p?.primary}10` : p?.bg,
-                                  cursor: "pointer",
-                                  textAlign: "left",
-                                  transition: "all 0.15s",
-                                }}
-                              >
-                                <p style={{ margin: 0, fontSize: "13px", fontWeight: 800, color: isSelected ? p?.primary : p?.textPrimary }}>{model.title}</p>
-                                <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.5, lineHeight: 1.3 }}>{model.desc}</p>
-                              </button>
-                            );
-                          })}
+                      {/* ── Store Fulfillment & Pick-up Settings ── */}
+                      <div style={{ paddingTop: "16px", borderTop: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <FieldLabel pax26={p}>Fulfillment & Pick-up Options</FieldLabel>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
+                          <Toggle
+                            label="Allow Home Delivery"
+                            hint="Customers can enter their delivery address and order for delivery"
+                            value={form.fulfillmentSettings?.allowDelivery ?? true}
+                            onChange={v => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), allowDelivery: v } }))}
+                            pax26={p}
+                          />
+                          <Toggle
+                            label="Allow Store Pick-up"
+                            hint="Customers can choose to pick up their order from your physical store"
+                            value={form.fulfillmentSettings?.allowPickup ?? false}
+                            onChange={v => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), allowPickup: v } }))}
+                            pax26={p}
+                          />
                         </div>
 
-                        {/* Location-Based Zones Manager */}
-                        {form.fulfillmentSettings?.deliveryModel === "zones" && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "18px", borderRadius: "16px", background: p?.bg, border: `1px solid ${p?.border}` }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-                              <div>
-                                <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>Delivery Zones & Rates</p>
-                                <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.5 }}>Add delivery zones for your city, state or country. Buyers will select their area at checkout.</p>
-                              </div>
-                              {/* Quick Presets */}
-                              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                                <button
-                                  onClick={() => setForm(f => ({
-                                    ...f,
-                                    fulfillmentSettings: {
-                                      ...(f.fulfillmentSettings || {}),
-                                      deliveryZones: [
-                                        { name: "Lagos Local / Mainland", areas: "Ikeja, Yaba, Maryland, Surulere, Ojota", fee: 1500, timeframe: "Same Day" },
-                                        { name: "Lagos Island / Outskirts", areas: "Lekki, Ajah, Ikoyi, Victoria Island", fee: 3000, timeframe: "1 Day" },
-                                        { name: "Interstate / Other States", areas: "Abuja, Port Harcourt, Ibadan, etc.", fee: 4500, timeframe: "2–3 Days" },
-                                      ]
-                                    }
-                                  }))}
-                                  style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                                >
-                                  📍 Load Lagos Presets
-                                </button>
-                                <button
-                                  onClick={() => setForm(f => ({
-                                    ...f,
-                                    fulfillmentSettings: {
-                                      ...(f.fulfillmentSettings || {}),
-                                      deliveryZones: [
-                                        { name: "Abuja Central", areas: "Wuse, Maitama, Garki, Asokoro", fee: 1500, timeframe: "Same Day" },
-                                        { name: "Abuja Outer Districts", areas: "Gwarinpa, Kubwa, Lugbe, Utako", fee: 2500, timeframe: "1 Day" },
-                                        { name: "Interstate / Other States", areas: "Lagos, Port Harcourt, Kano, etc.", fee: 4500, timeframe: "2–3 Days" },
-                                      ]
-                                    }
-                                  }))}
-                                  style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                                >
-                                  📍 Load Abuja Presets
-                                </button>
-                                <button
-                                  onClick={() => setForm(f => ({
-                                    ...f,
-                                    fulfillmentSettings: {
-                                      ...(f.fulfillmentSettings || {}),
-                                      deliveryZones: [
-                                        { name: "Port Harcourt Central", areas: "GRA, Peter Odili, Trans Amadi", fee: 1500, timeframe: "Same Day" },
-                                        { name: "Port Harcourt Outer", areas: "Rumuokwuta, Choba, Oyigbo", fee: 2500, timeframe: "1 Day" },
-                                        { name: "Interstate / Other States", areas: "Lagos, Abuja, Enugu, etc.", fee: 4500, timeframe: "2–3 Days" },
-                                      ]
-                                    }
-                                  }))}
-                                  style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                                >
-                                  📍 Load PH Presets
-                                </button>
-                              </div>
+                        {form.fulfillmentSettings?.allowPickup && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "14px", padding: "16px", borderRadius: "14px", background: p?.bg, border: `1px solid ${p?.border}` }}>
+                            <ThemedInput
+                              label="Pick-up Address"
+                              value={form.fulfillmentSettings?.pickupAddress || ""}
+                              onChange={e => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), pickupAddress: e.target.value } }))}
+                              pax26={p}
+                              placeholder="e.g. Suite 4, Ikeja Plaza, Allen Avenue, Lagos"
+                            />
+                            <ThemedInput
+                              label="Pick-up Operating Hours / Instructions"
+                              value={form.fulfillmentSettings?.pickupInstructions || ""}
+                              onChange={e => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), pickupInstructions: e.target.value } }))}
+                              pax26={p}
+                              placeholder="e.g. Mon–Sat 9:00 AM – 6:00 PM. Bring your Order ID."
+                            />
+                          </div>
+                        )}
+
+                        {/* ── Delivery Pricing Model Selector ── */}
+                        {form.fulfillmentSettings?.allowDelivery !== false && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "14px", paddingTop: "14px", borderTop: `1px dashed ${p?.border}` }}>
+                            <FieldLabel pax26={p}>Delivery Pricing Model</FieldLabel>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+                              {[
+                                { id: "flat", title: "Flat Rate Fee", desc: "Same delivery fee for all orders / products" },
+                                { id: "zones", title: "Location-Based Zones", desc: "Delivery fee depends on buyer's area / state" },
+                                { id: "quote", title: "Quote on WhatsApp", desc: "Delivery fee calculated after dispatch" },
+                              ].map(model => {
+                                const isSelected = (form.fulfillmentSettings?.deliveryModel || "flat") === model.id;
+                                return (
+                                  <button
+                                    key={model.id}
+                                    onClick={() => setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryModel: model.id } }))}
+                                    style={{
+                                      padding: "12px 14px",
+                                      borderRadius: "12px",
+                                      border: isSelected ? `2px solid ${p?.primary}` : `1px solid ${p?.border}`,
+                                      background: isSelected ? `${p?.primary}10` : p?.bg,
+                                      cursor: "pointer",
+                                      textAlign: "left",
+                                      transition: "all 0.15s",
+                                    }}
+                                  >
+                                    <p style={{ margin: 0, fontSize: "13px", fontWeight: 800, color: isSelected ? p?.primary : p?.textPrimary }}>{model.title}</p>
+                                    <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.5, lineHeight: 1.3 }}>{model.desc}</p>
+                                  </button>
+                                );
+                              })}
                             </div>
 
-                            {/* Zones List */}
-                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                              {(form.fulfillmentSettings?.deliveryZones || []).map((zone, idx) => (
-                                <div key={idx} style={{ padding: "14px", borderRadius: "12px", background: p?.secondaryBg, border: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "10px" }}>
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
-                                    <span style={{ fontSize: "12px", fontWeight: 800, color: p?.primary }}>Zone #{idx + 1}</span>
+                            {/* Location-Based Zones Manager */}
+                            {form.fulfillmentSettings?.deliveryModel === "zones" && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "18px", borderRadius: "16px", background: p?.bg, border: `1px solid ${p?.border}` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                                  <div>
+                                    <p style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: p?.textPrimary }}>Delivery Zones & Rates</p>
+                                    <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.5 }}>Add delivery zones for your city, state or country. Buyers will select their area at checkout.</p>
+                                  </div>
+                                  {/* Quick Presets */}
+                                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                     <button
-                                      onClick={() => {
-                                        const updatedZones = (form.fulfillmentSettings?.deliveryZones || []).filter((_, i) => i !== idx);
-                                        setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
-                                      }}
-                                      style={{ padding: "4px 8px", borderRadius: "6px", border: "none", background: "#ff444415", color: "#ff4444", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                      onClick={() => setForm(f => ({
+                                        ...f,
+                                        fulfillmentSettings: {
+                                          ...(f.fulfillmentSettings || {}),
+                                          deliveryZones: [
+                                            { name: "Lagos Local / Mainland", areas: "Ikeja, Yaba, Maryland, Surulere, Ojota", fee: 1500, timeframe: "Same Day" },
+                                            { name: "Lagos Island / Outskirts", areas: "Lekki, Ajah, Ikoyi, Victoria Island", fee: 3000, timeframe: "1 Day" },
+                                            { name: "Interstate / Other States", areas: "Abuja, Port Harcourt, Ibadan, etc.", fee: 4500, timeframe: "2–3 Days" },
+                                          ]
+                                        }
+                                      }))}
+                                      style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
                                     >
-                                      Remove Zone
+                                      📍 Load Lagos Presets
+                                    </button>
+                                    <button
+                                      onClick={() => setForm(f => ({
+                                        ...f,
+                                        fulfillmentSettings: {
+                                          ...(f.fulfillmentSettings || {}),
+                                          deliveryZones: [
+                                            { name: "Abuja Central", areas: "Wuse, Maitama, Garki, Asokoro", fee: 1500, timeframe: "Same Day" },
+                                            { name: "Abuja Outer Districts", areas: "Gwarinpa, Kubwa, Lugbe, Utako", fee: 2500, timeframe: "1 Day" },
+                                            { name: "Interstate / Other States", areas: "Lagos, Port Harcourt, Kano, etc.", fee: 4500, timeframe: "2–3 Days" },
+                                          ]
+                                        }
+                                      }))}
+                                      style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                    >
+                                      📍 Load Abuja Presets
+                                    </button>
+                                    <button
+                                      onClick={() => setForm(f => ({
+                                        ...f,
+                                        fulfillmentSettings: {
+                                          ...(f.fulfillmentSettings || {}),
+                                          deliveryZones: [
+                                            { name: "Port Harcourt Central", areas: "GRA, Peter Odili, Trans Amadi", fee: 1500, timeframe: "Same Day" },
+                                            { name: "Port Harcourt Outer", areas: "Rumuokwuta, Choba, Oyigbo", fee: 2500, timeframe: "1 Day" },
+                                            { name: "Interstate / Other States", areas: "Lagos, Abuja, Enugu, etc.", fee: 4500, timeframe: "2–3 Days" },
+                                          ]
+                                        }
+                                      }))}
+                                      style={{ padding: "5px 10px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.secondaryBg, color: p?.textPrimary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                    >
+                                      📍 Load PH Presets
                                     </button>
                                   </div>
-
-                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
-                                    <div>
-                                      <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Zone Name</label>
-                                      <input
-                                        value={zone.name || ""}
-                                        onChange={e => {
-                                          const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
-                                          updatedZones[idx] = { ...updatedZones[idx], name: e.target.value };
-                                          setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
-                                        }}
-                                        placeholder="e.g. Lagos Island"
-                                        style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
-                                      />
-                                    </div>
-                                    <div>
-                                      <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Covered Areas / Cities</label>
-                                      <input
-                                        value={zone.areas || ""}
-                                        onChange={e => {
-                                          const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
-                                          updatedZones[idx] = { ...updatedZones[idx], areas: e.target.value };
-                                          setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
-                                        }}
-                                        placeholder="e.g. Lekki, Ajah, Ikoyi"
-                                        style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
-                                      />
-                                    </div>
-                                    <div>
-                                      <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Delivery Fee ({form.currency || "NGN"})</label>
-                                      <input
-                                        type="number"
-                                        value={zone.fee || 0}
-                                        onChange={e => {
-                                          const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
-                                          updatedZones[idx] = { ...updatedZones[idx], fee: Number(e.target.value) || 0 };
-                                          setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
-                                        }}
-                                        placeholder="e.g. 3000"
-                                        style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
-                                      />
-                                    </div>
-                                    <div>
-                                      <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Timeframe</label>
-                                      <input
-                                        value={zone.timeframe || ""}
-                                        onChange={e => {
-                                          const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
-                                          updatedZones[idx] = { ...updatedZones[idx], timeframe: e.target.value };
-                                          setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
-                                        }}
-                                        placeholder="e.g. 1-2 Business Days"
-                                        style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
-                                      />
-                                    </div>
-                                  </div>
                                 </div>
-                              ))}
 
-                              <button
-                                onClick={() => {
-                                  const currentZones = form.fulfillmentSettings?.deliveryZones || [];
-                                  setForm(f => ({
-                                    ...f,
-                                    fulfillmentSettings: {
-                                      ...(f.fulfillmentSettings || {}),
-                                      deliveryZones: [...currentZones, { name: "", areas: "", fee: 0, timeframe: "" }]
-                                    }
-                                  }));
-                                }}
-                                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.primary, fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
-                              >
-                                ➕ Add Custom Zone
-                              </button>
-                            </div>
+                                {/* Zones List */}
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                  {(form.fulfillmentSettings?.deliveryZones || []).map((zone, idx) => (
+                                    <div key={idx} style={{ padding: "14px", borderRadius: "12px", background: p?.secondaryBg, border: `1px solid ${p?.border}`, display: "flex", flexDirection: "column", gap: "10px" }}>
+                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                                        <span style={{ fontSize: "12px", fontWeight: 800, color: p?.primary }}>Zone #{idx + 1}</span>
+                                        <button
+                                          onClick={() => {
+                                            const updatedZones = (form.fulfillmentSettings?.deliveryZones || []).filter((_, i) => i !== idx);
+                                            setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
+                                          }}
+                                          style={{ padding: "4px 8px", borderRadius: "6px", border: "none", background: "#ff444415", color: "#ff4444", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
+                                        >
+                                          Remove Zone
+                                        </button>
+                                      </div>
+
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+                                        <div>
+                                          <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Zone Name</label>
+                                          <input
+                                            value={zone.name || ""}
+                                            onChange={e => {
+                                              const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
+                                              updatedZones[idx] = { ...updatedZones[idx], name: e.target.value };
+                                              setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
+                                            }}
+                                            placeholder="e.g. Lagos Island"
+                                            style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Covered Areas / Cities</label>
+                                          <input
+                                            value={zone.areas || ""}
+                                            onChange={e => {
+                                              const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
+                                              updatedZones[idx] = { ...updatedZones[idx], areas: e.target.value };
+                                              setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
+                                            }}
+                                            placeholder="e.g. Lekki, Ajah, Ikoyi"
+                                            style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Delivery Fee ({form.currency || "NGN"})</label>
+                                          <input
+                                            type="number"
+                                            value={zone.fee || 0}
+                                            onChange={e => {
+                                              const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
+                                              updatedZones[idx] = { ...updatedZones[idx], fee: Number(e.target.value) || 0 };
+                                              setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
+                                            }}
+                                            placeholder="e.g. 3000"
+                                            style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
+                                          />
+                                        </div>
+                                        <div>
+                                          <label style={{ display: "block", fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, marginBottom: "4px" }}>Timeframe</label>
+                                          <input
+                                            value={zone.timeframe || ""}
+                                            onChange={e => {
+                                              const updatedZones = [...(form.fulfillmentSettings?.deliveryZones || [])];
+                                              updatedZones[idx] = { ...updatedZones[idx], timeframe: e.target.value };
+                                              setForm(f => ({ ...f, fulfillmentSettings: { ...(f.fulfillmentSettings || {}), deliveryZones: updatedZones } }));
+                                            }}
+                                            placeholder="e.g. 1-2 Business Days"
+                                            style={{ ...fieldBase(p), padding: "8px 10px", fontSize: "12px" }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+
+                                  <button
+                                    onClick={() => {
+                                      const currentZones = form.fulfillmentSettings?.deliveryZones || [];
+                                      setForm(f => ({
+                                        ...f,
+                                        fulfillmentSettings: {
+                                          ...(f.fulfillmentSettings || {}),
+                                          deliveryZones: [...currentZones, { name: "", areas: "", fee: 0, timeframe: "" }]
+                                        }
+                                      }));
+                                    }}
+                                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.primary, fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
+                                  >
+                                    ➕ Add Custom Zone
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
+                    </>
+                  )}
 
                   <InfoBanner pax26={p} text="Your <strong>online store link</strong> and <strong>location</strong> will be shared with customers by your Smart Agent when they ask where to buy or find you." />
                 </div>
@@ -1732,26 +1737,29 @@ export default function AiBusinessDashboard() {
                 </div>
               </section>
 
-              {/* Payment Methods — SELLER ONLY */}
-              {isSeller && (
-                <section>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-                    <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: `${p?.primary}15`, color: p?.primary, display: "flex", alignItems: "center", justifyContent: "center" }}><CreditCardIcon /></div>
-                    <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Payment Methods</h3>
+              {/* Payment Methods */}
+              <section>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                  <div style={{ width: "30px", height: "30px", borderRadius: "8px", background: `${p?.primary}15`, color: p?.primary, display: "flex", alignItems: "center", justifyContent: "center" }}><CreditCardIcon /></div>
+                  <h3 style={{ fontSize: "18px", fontWeight: 800, color: p?.textPrimary, margin: 0 }}>Payment Methods</h3>
+                </div>
+                <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}` }}>
+                  <InfoBanner pax26={p} text="Add your bank details below. Your AI will share them with customers when they are ready to purchase or pay for services." />
+                  <div style={{ marginTop: "18px" }}>
+                    <PaymentBuilder payments={form.paymentDetails} onChange={v => { const updated = { ...form, paymentDetails: v }; setForm(updated); saveProfile(updated); }} pax26={p} />
                   </div>
-                  <div style={{ background: p?.secondaryBg, padding: "28px", borderRadius: "24px", border: `1px solid ${p?.border}` }}>
-                    <InfoBanner pax26={p} text="Add your bank details below. Your AI will share them with customers when they are ready to purchase." />
-                    <div style={{ marginTop: "18px" }}>
-                      <PaymentBuilder payments={form.paymentDetails} onChange={v => { const updated = { ...form, paymentDetails: v }; setForm(updated); saveProfile(updated); }} pax26={p} />
-                    </div>
-                  </div>
-                </section>
-              )}
+                </div>
+              </section>
 
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <button onClick={() => saveProfile()} disabled={saving} style={{ padding: "14px 44px", borderRadius: "16px", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "15px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", boxShadow: `0 10px 28px ${p?.primary}44` }}>
-                  {saving ? <><Spinner /> Saving…</> : "Update Business Profile"}
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button onClick={() => saveProfile()} disabled={saving} style={{ padding: "14px 36px", borderRadius: "16px", background: p?.secondaryBg, color: p?.textPrimary, fontWeight: 700, fontSize: "14px", border: `1px solid ${p?.border}`, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+                  {saving ? <><Spinner /> Saving…</> : "Save Business Profile"}
                 </button>
+                {isInactive && (
+                  <button onClick={() => router.push("/dashboard/automations/training")} style={{ padding: "14px 36px", borderRadius: "16px", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "14px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: `0 10px 28px ${p?.primary}44` }}>
+                    Train & Launch Agent 🚀
+                  </button>
+                )}
               </div>
             </div>
           )}
