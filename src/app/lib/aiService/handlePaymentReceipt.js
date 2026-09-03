@@ -102,7 +102,15 @@ async function findAllProductsFromConversation(sellerId, recentMessages = []) {
     const products = await SellerProductModel.find({ sellerId }).lean();
     if (!products.length) return [];
 
-    const conversationText = recentMessages
+    // Prioritize scanning customer/user messages only so AI options lists don't trigger false matches
+    const customerMessages = recentMessages.filter(
+        (m) => m.role === "user" || m.direction === "inbound" || m.senderType === "customer"
+    );
+
+    // Fall back to all recent messages if no user messages exist
+    const messagesToScan = customerMessages.length > 0 ? customerMessages : recentMessages;
+
+    const conversationText = messagesToScan
         .map((m) => m.content || m.text || "")
         .join(" ")
         .toLowerCase();
@@ -291,27 +299,10 @@ export async function handlePaymentReceipt({
         // Customer sent a new storefront order string — use the fresh storefront items!
         orderItems = multiOrderFromRecent.items;
         orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-    } else if (matchedProducts.length > 0 && session?.payment?.pendingItems?.length > 0) {
-        // Compare recent conversation product vs session pendingItems
-        const sessionItemIds = new Set(session.payment.pendingItems.map(i => i.productId?.toString()).filter(Boolean));
-        const hasDifferentProductInChat = matchedProducts.some(p => !sessionItemIds.has(p._id?.toString()));
-
-        if (hasDifferentProductInChat) {
-            orderItems = matchedProducts.map(p => ({
-                productId: p._id,
-                name: p.name,
-                price: p.discountPrice || p.price,
-                quantity: 1,
-                imageUrl: p.images?.[0]?.url || "",
-            }));
-            orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + i.price, 0);
-        } else {
-            orderItems = session.payment.pendingItems;
-            orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || matchedProduct?.price || 0;
-        }
     } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
+        // High Priority: Always trust session pendingItems set when payment details were shared for the agreed item!
         orderItems = session.payment.pendingItems;
-        orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || matchedProduct?.price || 0;
+        orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
     } else if (matchedProducts.length > 0) {
         orderItems = matchedProducts.map(p => ({
             productId: p._id,
@@ -332,22 +323,17 @@ export async function handlePaymentReceipt({
         orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || matchedProduct.price || 0;
     }
 
-    // Format product summary name for alerts (e.g. "Bag 1 (1x), Bag 2 (1x)")
-    const productSummaryName = orderItems.length > 0
-        ? orderItems.map(i => `${i.name}${i.quantity > 1 ? ` (${i.quantity}x)` : ''}`).join(", ")
-        : (matchedProduct?.name || "Payment receipt received");
-
-    // If we're in payment stage (AI already asked for proof), handle it regardless
-    // of whether we can identify a specific product — the payment context is enough.
-    if (!pendingOrder && !matchedProduct?._id && !paymentStage && orderItems.length === 0) {
-        console.warn("Payment receipt received but no seller products found and not in payment stage");
-        return { handled: false };
-    }
-
-    let order = pendingOrder;
-    // Check if this order already had payment proof submitted prior to this message
-    const alreadyHadProof = Boolean(order?.paymentReceiptSubmittedAt || order?.paymentReceiptUrl);
+    // Mathematical consistency check: Enforce Subtotal + Delivery Fee === Total Amount
     const calculatedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProducts);
+    const itemsSubtotal = orderItems.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+
+    if (itemsSubtotal > 0) {
+        if (!orderTotalPrice || orderTotalPrice <= 0) {
+            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
+        } else if (orderTotalPrice === itemsSubtotal && calculatedDeliveryFee > 0) {
+            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
+        }
+    }
 
     if (!order) {
         order = await SellerOrderModel.create({

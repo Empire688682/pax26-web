@@ -70,6 +70,15 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
         }
 
         const subtotalVal = calculatedSubtotal > 0 ? calculatedSubtotal : Math.max(0, totalPaidVal - deliveryFeeVal);
+        let finalTotalPaid = totalPaidVal;
+
+        // Mathematical harmony check: Enforce subtotalVal + deliveryFeeVal = finalTotalPaid
+        if (subtotalVal > 0) {
+            const expectedTotal = subtotalVal + deliveryFeeVal;
+            if (finalTotalPaid <= 0 || Math.abs(finalTotalPaid - expectedTotal) > 0) {
+                finalTotalPaid = expectedTotal;
+            }
+        }
 
         const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
 
@@ -88,7 +97,7 @@ ${deliveryLocStr ? `• Delivery Address: ${deliveryLocStr}\n` : ""}
 🛍️ *Order Breakdown:*
 ${itemsSection}
 ${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}
-• Total Amount Paid: ₦${totalPaidVal.toLocaleString()}
+• Total Amount Paid: ₦${finalTotalPaid.toLocaleString()}
 
 🚚 *DELIVERY INSTRUCTIONS:*
 Please present this receipt / Order Proof ID (*#${proofCode}*) to our delivery team upon arrival to confirm package handoff.

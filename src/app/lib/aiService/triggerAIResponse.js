@@ -562,8 +562,18 @@ export const triggerAIResponse = async ({
             const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
             const parsedGrandTotal = parsedGrandTotalMatch ? parseInt(parsedGrandTotalMatch[1].replace(/,/g, ""), 10) : null;
 
-            // Match products from catalogue that were mentioned in this message
-            const mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
+            // Match products from catalogue that were mentioned in this payment message or recent user message
+            let mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
+            if (mentionedProducts.length === 0 && recentMessages?.length > 0) {
+                const userMsgsText = recentMessages
+                    .filter(m => m.role === "user" || m.direction === "inbound" || m.senderType === "customer")
+                    .slice(-4)
+                    .map(m => m.content || m.text || "")
+                    .join(" ")
+                    .toLowerCase();
+                mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(p.name.toLowerCase()));
+            }
+
             const pendingItems = mentionedProducts.map(p => ({
                 productId: p._id,
                 name: p.name,
