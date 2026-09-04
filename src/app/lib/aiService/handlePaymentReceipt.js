@@ -239,6 +239,9 @@ export async function handlePaymentReceipt({
         status: "pending",
     }).sort({ createdAt: -1 });
 
+    const alreadyHadProof = !!(pendingOrder && pendingOrder.paymentReceiptUrl);
+    let order = pendingOrder;
+
     const paymentStage = isPaymentStage(recentMessages, session);
 
     // Treat inbound images as payment proof ONLY when in an active payment stage (expectingPayment / bank details shared)
@@ -378,8 +381,10 @@ export async function handlePaymentReceipt({
         }
     }
 
-    // Since handlePaymentReceipt is executed ONLY when a customer submits an image payment receipt,
-    // if this order has NOT sent a proof alert previously (!alreadyHadProof), trigger the sales alert now!
+    const productSummaryName = (order.items && order.items.length > 0)
+        ? order.items.map(i => `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.name}`).join(", ")
+        : (matchedProduct?.name || "Order Item");
+
     const isFirstProofUpload = !alreadyHadProof;
 
     if (isFirstProofUpload) {
