@@ -279,6 +279,13 @@ export const handleIncomingWhatsApp = async (payload) => {
         }
       );
       console.log("✅ Step 5 — Existing contact updated (leadStage set to contacted):", visitorPhone);
+      // Push: existing lead message notification
+      sendMobilePush(user._id, {
+        type:  "new_lead",
+        title: `💬 Message from ${existingContact?.name || visitorPhone}`,
+        body:  inboundText ? inboundText.slice(0, 80) : "Sent a message",
+        data:  { phone: visitorPhone },
+      }).catch(() => {});
     }
 
     // ── Special Case: 'ask' policy for first-time contacts ───

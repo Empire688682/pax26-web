@@ -11,6 +11,7 @@ import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
 import UserModel from "../../ults/models/UserModel.js";
 import SessionModel from "../../ults/models/SessionModel.js";
+import { sendMobilePush } from "../pushNotificationService.js";
 
 // ─────────────────────────────────────────────────────────────
 // Parse [SEND_IMAGE: url] tags out of the AI reply.
@@ -541,6 +542,16 @@ export const triggerAIResponse = async ({
                 $set: { "whatsapp.contacts.list.$.lastMessageAt": new Date() },
             }
         );
+
+        // Non-blocking mobile push for agent reply
+        if (user._id && session?.visitorPhone && cleanText) {
+            sendMobilePush(user._id, {
+                type: "agent_reply",
+                title: "💬 AI Agent Replied",
+                body: `${session.visitorPhone}: ${cleanText.slice(0, 80)}`,
+                data: { phone: session.visitorPhone },
+            }).catch(() => {});
+        }
 
         const isPaymentShared = containsPaymentDetails(cleanText || rawAiText, businessProfile);
         const sessionUpdateData = {

@@ -128,11 +128,14 @@ export const sendSalesNotification = async (userId, orderData) => {
         console.log(`[salesNotification] 🏁 Done — messageSent=${messageSent}`);
 
         // ── Mobile push (fires regardless of channel preference) ──
+        const custName = orderData.customerName || "Customer";
+        const prodName = orderData.productName || "Item";
+        const amtPaid = Number(orderData.amountPaid) || 0;
         await sendMobilePush(userId, {
             type:  "new_order",
             title: "🛍️ New Sale!",
-            body:  `${notification.customerName} ordered ${notification.productName} · ₦${notification.amountPaid.toLocaleString()}`,
-            data:  { orderId: notification.orderId },
+            body:  `${custName} ordered ${prodName} · ₦${amtPaid.toLocaleString()}`,
+            data:  { orderId: orderData.orderId || "" },
         });
 
         return { success: true, message: "Notification processed" };
