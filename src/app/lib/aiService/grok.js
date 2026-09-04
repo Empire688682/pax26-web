@@ -6,9 +6,10 @@ const groq = new Groq({
 
 export const callGroqAI = async ({ systemPrompt, messages }) => {
   const modelsToTry = [
-    "llama-3.1-8b-instant",
     "llama-3.3-70b-versatile",
-    "mixtral-8x7b-32768",
+    "llama-3.1-8b-instant",
+    "llama3-8b-8192",
+    "llama3-70b-8192",
     "gemma2-9b-it",
   ];
 
@@ -35,15 +36,15 @@ export const callGroqAI = async ({ systemPrompt, messages }) => {
       };
     } catch (err) {
       lastError = err;
-      const isNotFound =
-        err?.status === 404 ||
-        err?.code === "model_not_found" ||
-        err?.error?.code === "model_not_found" ||
-        err?.message?.includes("does not exist");
-
       console.warn(`⚠️ Groq model ${modelName} failed: ${err?.message || err}`);
-      if (isNotFound) continue; // Try next model in list
-      throw err; // Other errors (auth, quota) bubble up
+
+      // Stop trying only on invalid API key / authentication errors (401)
+      if (err?.status === 401 || err?.message?.includes("Invalid API Key")) {
+        throw err;
+      }
+
+      // For all other errors (model_not_found, model_decommissioned, 400, 404, 429, etc.), try next model
+      continue;
     }
   }
 

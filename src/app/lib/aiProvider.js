@@ -35,6 +35,7 @@ async function tryGemini(systemPrompt, history, userMessage) {
 
   const modelsToTry = [
     'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
     'gemini-1.5-flash',
     'gemini-1.5-flash-latest',
     'gemini-1.5-pro',
@@ -60,24 +61,12 @@ async function tryGemini(systemPrompt, history, userMessage) {
       console.log(`[aiProvider] Gemini success with model: ${modelName}`);
       return { text };
     } catch (err) {
-      const isQuotaError =
-        err?.status === 429 ||
-        err?.message?.includes('429') ||
-        err?.message?.includes('quota') ||
-        err?.message?.includes('RESOURCE_EXHAUSTED');
-
-      const isNotFound =
-        err?.message?.includes('not found') ||
-        err?.message?.includes('404') ||
-        err?.status === 404;
-
       console.warn(`[aiProvider] Gemini ${modelName} failed: ${err.message}`);
 
-      // If quota or not-found, try next model in list
-      if (isQuotaError || isNotFound) continue;
-
-      // Other errors (timeout, network) — break out and try next provider
-      throw err;
+      if (err?.status === 401 || err?.message?.includes('API key')) {
+        throw err;
+      }
+      continue;
     }
   }
 
@@ -106,8 +95,9 @@ async function tryGroq(systemPrompt, history, userMessage) {
   const modelsToTry = [
     'llama-3.3-70b-versatile',
     'llama-3.1-8b-instant',
+    'llama3-8b-8192',
     'llama3-70b-8192',
-    'mixtral-8x7b-32768',
+    'gemma2-9b-it',
   ];
 
   for (const modelName of modelsToTry) {
@@ -128,15 +118,11 @@ async function tryGroq(systemPrompt, history, userMessage) {
       console.log(`[aiProvider] Groq success with model: ${modelName}`);
       return { text };
     } catch (err) {
-      const isNotFound =
-        err?.status === 404 ||
-        err?.code === 'model_not_found' ||
-        err?.error?.code === 'model_not_found' ||
-        err?.message?.includes('does not exist');
-
       console.warn(`[aiProvider] Groq ${modelName} failed: ${err.message}`);
-      if (isNotFound) continue;
-      throw err;
+      if (err?.status === 401 || err?.message?.includes('Invalid API Key')) {
+        throw err;
+      }
+      continue;
     }
   }
 
@@ -164,7 +150,9 @@ async function tryMistral(systemPrompt, history, userMessage) {
   const modelsToTry = [
     'mistral-small-latest',
     'open-mistral-7b',
+    'open-mistral-nemo',
     'mistral-medium-latest',
+    'mistral-large-latest',
   ];
 
   for (const modelName of modelsToTry) {
@@ -185,14 +173,11 @@ async function tryMistral(systemPrompt, history, userMessage) {
       console.log(`[aiProvider] Mistral success with model: ${modelName}`);
       return { text };
     } catch (err) {
-      const isNotFound =
-        err?.status === 404 ||
-        err?.message?.includes('not found') ||
-        err?.message?.includes('404');
-
       console.warn(`[aiProvider] Mistral ${modelName} failed: ${err.message}`);
-      if (isNotFound) continue;
-      throw err;
+      if (err?.status === 401 || err?.raw_status_code === 401 || err?.message?.includes('Unauthorized')) {
+        throw err;
+      }
+      continue;
     }
   }
 

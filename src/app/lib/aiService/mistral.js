@@ -8,7 +8,9 @@ export const callMistralAI = async ({ systemPrompt, messages }) => {
   const modelsToTry = [
     "mistral-small-latest",
     "open-mistral-7b",
+    "open-mistral-nemo",
     "mistral-medium-latest",
+    "mistral-large-latest",
   ];
 
   let lastError = null;
@@ -34,14 +36,15 @@ export const callMistralAI = async ({ systemPrompt, messages }) => {
       };
     } catch (err) {
       lastError = err;
-      const isNotFound =
-        err?.status === 404 ||
-        err?.message?.includes("not found") ||
-        err?.message?.includes("404");
-
       console.warn(`⚠️ Mistral model ${modelName} failed: ${err?.message || err}`);
-      if (isNotFound) continue;
-      throw err;
+
+      // Stop trying only on invalid API key / authentication errors (401)
+      if (err?.status === 401 || err?.raw_status_code === 401 || err?.message?.includes("Unauthorized")) {
+        throw err;
+      }
+
+      // For all other errors (429 rate limit, 404, 400, etc.), try next model
+      continue;
     }
   }
 
