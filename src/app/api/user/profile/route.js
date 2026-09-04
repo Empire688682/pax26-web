@@ -32,6 +32,18 @@ export async function GET(req) {
             );
         }
 
+        if (userObj.isBlocked || userObj.isSuspended) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: userObj.suspensionReason
+                        ? `Account suspended: ${userObj.suspensionReason}`
+                        : "Your account has been suspended by an administrator.",
+                },
+                { status: 401, headers: corsHeaders() }
+            );
+        }
+
         return NextResponse.json({ success: true, profile: userObj }, { status: 200, headers: corsHeaders() });
 
     } catch (error) {

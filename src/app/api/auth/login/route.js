@@ -32,6 +32,18 @@ export async function POST(req) {
       );
     }
 
+    if (existUser.isBlocked || existUser.isSuspended) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: existUser.suspensionReason
+            ? `Account suspended: ${existUser.suspensionReason}. Please contact support at info@pax26.com.`
+            : "Your account has been suspended by an administrator. Please contact support at info@pax26.com.",
+        },
+        { status: 403, headers: corsHeaders() }
+      );
+    }
+
    const passwordMatch = await bcrypt.compare(password, existUser.password);
         if (!passwordMatch) {
           return NextResponse.json(
