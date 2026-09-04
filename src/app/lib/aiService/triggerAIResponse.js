@@ -83,6 +83,44 @@ function containsPaymentDetails(text, businessProfile) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Background non-blocking conversation memory summarizer.
+// Condenses older conversation turns into a brief 2-sentence summary
+// so the AI agent retains long-term context while staying within tight token budgets.
+// ─────────────────────────────────────────────────────────────
+async function updateSessionSummary(sessionId, rawHistory) {
+    try {
+        if (!rawHistory || rawHistory.length < 8) return;
+
+        const conversationText = rawHistory
+            .map(m => `${m.senderType === "visitor" ? "Customer" : "AI Agent"}: ${m.text || "[image]"}`)
+            .join("\n");
+
+        const prompt = `Summarize the following customer chat history into a concise 2-sentence summary.
+Include key facts such as: requested products, sizes, colors, delivery location, agreed prices, and current payment or order status.
+Do NOT include conversational greetings. Be extremely brief.
+
+Chat History:
+${conversationText}`;
+
+        const response = await callGroqAI({
+            systemPrompt: "You are a concise conversation memory summarizer.",
+            messages: [{ role: "user", content: prompt }],
+        });
+
+        if (response?.text) {
+            const cleanSummary = response.text.trim().replace(/^Summary:\s*/i, "");
+            await SessionModel.findOneAndUpdate(
+                { sessionId },
+                { $set: { "context.summary": cleanSummary } }
+            );
+            console.log(`🧠 Memory compressed for session ${sessionId}: "${cleanSummary.slice(0, 60)}..."`);
+        }
+    } catch (err) {
+        console.warn("⚠️ Memory summarization failed (non-fatal):", err?.message || err);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
 // Load the right profile depending on whether the user is a
 // seller or a service provider.
 //
@@ -357,6 +395,11 @@ export const triggerAIResponse = async ({
             return;
         }
 
+        // ── Background memory summarization trigger ────────────────
+        if (rawHistory.length >= 8 && (session.context?.inboundCount % 4 === 0)) {
+            updateSessionSummary(session.sessionId, rawHistory).catch(() => {});
+        }
+
         // ── Build conversation history ────────────────────────────
         const historyMessages = rawHistory.reverse().map((m) => ({
             role: m.senderType === "visitor" ? "user" : "assistant",
@@ -364,16 +407,23 @@ export const triggerAIResponse = async ({
             content: m.text || "[image]",
         }));
 
-        const trimmedMessages = historyMessages.slice(-16);
+        // Cap raw messages to 10 (5 visitor messages + 5 assistant replies)
+        const trimmedMessages = historyMessages.slice(-10);
 
-        // When imageSearchContext is true, inboundText already contains the
-        // [SYSTEM: ...] block from buildImageMatchContext / buildImageNoMatchContext.
-        // We pass it as the user turn so the AI has the real match data.
-        
+        // Inject compressed memory summary if available
+        const memorySummary = session.context?.summary;
+        const memorySummaryBlock = memorySummary
+            ? [
+                { role: "user", content: `[PAST CONVERSATION SUMMARY: ${memorySummary}]` },
+                { role: "assistant", content: "Understood. I have noted this conversation summary and will keep these details in mind." }
+              ]
+            : [];
+
         // Clean up excessively long session tokens in user URL parameters to save tokens
         const cleanedInboundText = (inboundText || "").replace(/(\?|&)session=[A-Za-z0-9._\-\+]+=*/g, "$1session=[token]");
 
         const messages = [
+            ...memorySummaryBlock,
             ...trimmedMessages,
             { role: "user", content: cleanedInboundText },
         ];
