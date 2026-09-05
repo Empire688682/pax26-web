@@ -604,17 +604,8 @@ export const triggerAIResponse = async ({
         }
 
         const isPaymentShared = containsPaymentDetails(cleanText || rawAiText, businessProfile);
-        const sessionUpdateData = {
-            lastMessageAt: new Date(),
-            $inc: {
-                "context.messageCount": 1,
-                "context.outboundCount": 1,
-                "context.totalTokens": aiResponse?.tokensUsed || 0,
-            },
-            isProcessingAI: false,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        };
-
+        
+        let paymentSetData = {};
         if (isPaymentShared) {
             console.log("💳 AI shared payment details — setting expectingPayment = true for session:", session.sessionId);
             
@@ -625,11 +616,11 @@ export const triggerAIResponse = async ({
 
             // Match products from catalogue that were mentioned in this payment message or recent user message
             let mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
-            if (mentionedProducts.length === 0 && recentMessages?.length > 0) {
-                const userMsgsText = recentMessages
-                    .filter(m => m.role === "user" || m.direction === "inbound" || m.senderType === "customer")
+            if (mentionedProducts.length === 0 && rawHistory?.length > 0) {
+                const userMsgsText = rawHistory
+                    .filter(m => m.senderType === "visitor" || m.direction === "inbound")
                     .slice(-4)
-                    .map(m => m.content || m.text || "")
+                    .map(m => m.text || "")
                     .join(" ")
                     .toLowerCase();
                 mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(p.name.toLowerCase()));
@@ -643,7 +634,7 @@ export const triggerAIResponse = async ({
                 imageUrl: p.images?.[0]?.url || "",
             }));
 
-            sessionUpdateData.$set = {
+            paymentSetData = {
                 "payment.expectingPayment": true,
                 "payment.paymentProofReceived": false,
                 "payment.paymentDetailsSharedAt": new Date(),
@@ -651,6 +642,7 @@ export const triggerAIResponse = async ({
                 ...(parsedGrandTotal && parsedGrandTotal > 0 && { "payment.pendingAmount": parsedGrandTotal }),
                 ...(pendingItems.length > 0 && { "payment.pendingItems": pendingItems }),
             };
+
             if (session.payment) {
                 session.payment.expectingPayment = true;
                 session.payment.paymentProofReceived = false;
@@ -660,6 +652,20 @@ export const triggerAIResponse = async ({
                 if (pendingItems.length > 0) session.payment.pendingItems = pendingItems;
             }
         }
+
+        const sessionUpdateData = {
+            $set: {
+                lastMessageAt: new Date(),
+                isProcessingAI: false,
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                ...paymentSetData,
+            },
+            $inc: {
+                "context.messageCount": 1,
+                "context.outboundCount": 1,
+                "context.totalTokens": aiResponse?.tokensUsed || 0,
+            },
+        };
 
         const sessionUpdate = SessionModel.findByIdAndUpdate(session._id, sessionUpdateData);
 

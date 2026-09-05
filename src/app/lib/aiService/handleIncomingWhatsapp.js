@@ -5,7 +5,7 @@ import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
 import { getOrCreateSession } from "./session";
 import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch.js";
 import { buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
-import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFromText } from "@/app/lib/aiService/handlePaymentReceipt.js";
+import { handlePaymentReceipt, buildPaymentReceiptContext, createPendingOrderFromText, isPaymentStage } from "@/app/lib/aiService/handlePaymentReceipt.js";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import PlanModel from "@/app/ults/models/PlanModel";
 import ServiceProfileModel from "@/app/ults/models/ServiceProfileModel";
@@ -29,16 +29,14 @@ Do NOT perform visual image search.
 INSTRUCTIONS:
 - Acknowledge receiving their image politely.
 - Offer/provide our storefront URL: ${storefrontUrl}
-- Ask the customer: "Would you like me to share our storefront URL for you to browse our products?" (or provide the link directly: ${storefrontUrl}).
-- Do NOT mention payment receipts, payment verification, or bank details under any circumstances.]`;
+- Ask the customer if they would like to browse our products or describe what product, size, or color they are looking for.]`;
   }
 
   return `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}.
 Do NOT perform visual image search.
 INSTRUCTIONS:
 - Acknowledge receiving their image politely.
-- Ask the customer if they would like to browse our products or describe what product, size, or color they are looking for.
-- Do NOT mention payment receipts, payment verification, or bank details under any circumstances.]`;
+- Ask the customer if they would like to browse our products or describe what product, size, or color they are looking for.]`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -427,33 +425,26 @@ export const handleIncomingWhatsApp = async (payload) => {
 
     const caption = message.image?.caption || "";
 
-    // ── Payment expectation gate ──────────────────────────────
-    // An image is processed as an Order Payment Receipt for sales alerts/dashboard
-    // ONLY when expectingPayment === true AND paymentProofReceived !== true.
-    // If paymentProofReceived is ALREADY true (or expectingPayment is false), the image is saved
-    // ONLY as a chat message in AIMessageModel and will NEVER touch the sales dashboard / orders.
+    // Load recent conversation history to evaluate payment stage accurately
+    const earlyMessages = await AIMessageModel.find({
+      sessionId: session.sessionId,
+      userId: user._id,
+    })
+      .sort({ createdAt: -1 })
+      .limit(15)
+      .lean();
+
+    const earlyContext = earlyMessages.reverse().map((m) => ({
+      role: m.direction === "inbound" ? "user" : "assistant",
+      content: m.text,
+    }));
+
     const isExpectingPaymentProof =
-      session?.payment?.expectingPayment === true &&
-      session?.payment?.paymentProofReceived !== true;
+      (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) ||
+      isPaymentStage(earlyContext, session);
 
     // ── Step 8a: EARLY payment-stage check (before fetching media URL) ──
     if (sellerProfile && isExpectingPaymentProof) {
-      const earlyMessages = await AIMessageModel.find({
-        sessionId: session.sessionId,
-        userId: user._id,
-      })
-        .sort({ createdAt: -1 })
-        .limit(15)
-        .lean();
-
-      const earlyContext = earlyMessages.reverse().map((m) => ({
-        role: m.direction === "inbound" ? "user" : "assistant",
-        content: m.text,
-      }));
-
-      const { handlePaymentReceipt: _hpr, buildPaymentReceiptContext: _bprc, ..._ } = { handlePaymentReceipt, buildPaymentReceiptContext };
-
-      // Import the detection helpers directly from the module logic:
       const PAYMENT_KEYWORDS_EARLY = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
       const PAYMENT_STAGE_KEYWORDS_EARLY = /account number|bank name|account name|transfer|make payment|pay to|payment details|screenshot of your payment|payment confirmation|once you.?ve transferred|send.*receipt|send.*proof|payment proof|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity|acct|acc\/num|bank:/i;
 
@@ -469,7 +460,6 @@ export const handleIncomingWhatsApp = async (payload) => {
         const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
         const customerName = contactInfo?.name || "WhatsApp Customer";
 
-        // Try to get media URL but don't fail if it's unavailable
         let earlyMediaUrl = null;
         try {
           earlyMediaUrl = await resolveWhatsAppMediaUrl(message.image.id, user.whatsapp?.accessToken);
@@ -520,23 +510,11 @@ export const handleIncomingWhatsApp = async (payload) => {
     try {
       const mediaUrl = await resolveWhatsAppMediaUrl(message.image.id, user.whatsapp?.accessToken).catch(() => null);
 
-      const recentMessages = await AIMessageModel.find({
-        sessionId: session.sessionId,
-        userId: user._id,
-      })
-        .sort({ createdAt: -1 })
-        .limit(12)
-        .lean();
-
-      const conversationContext = recentMessages.reverse().map((m) => ({
-        role: m.direction === "inbound" ? "user" : "assistant",
-        content: m.text,
-      }));
+      const conversationContext = earlyContext;
 
       const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
       const customerName = contactInfo?.name || "WhatsApp Customer";
 
-      // Still upload the image for inbox display purposes (chat messages thread)
       let uploadedImage = null;
       try {
         uploadedImage = await uploadCustomerImageToCloudinary(
@@ -560,7 +538,6 @@ export const handleIncomingWhatsApp = async (payload) => {
       }
 
       // ── Payment receipt check (full flow with resolved media URL) ────
-      // ONLY runs when session is expecting payment and proof has NOT been received yet
       if (sellerProfile && isExpectingPaymentProof) {
         const receiptResult = await handlePaymentReceipt({
           sellerId: sellerProfile._id,
@@ -601,7 +578,6 @@ export const handleIncomingWhatsApp = async (payload) => {
         }
       }
 
-      // ── Instead of visual search, send storefront link ────
       const storefrontUrl = sellerProfile?.slug
         ? await buildStorefrontUrl({
             sellerProfile,
@@ -633,8 +609,8 @@ export const handleIncomingWhatsApp = async (payload) => {
         : null;
 
       const fallbackPrompt = storefrontUrl
-        ? `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}. Politely acknowledge receiving their image. Provide our storefront link ${storefrontUrl} and ask: "Would you like me to share our storefront URL for you to browse our products?" Do NOT mention payment receipts, orders, or payment verification under any circumstances.]`
-        : `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}. Politely acknowledge receiving their image and ask if they would like to browse our products or describe what product they are looking for. Do NOT mention payment receipts, orders, or payment verification under any circumstances.]`;
+        ? `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}. Politely acknowledge receiving their image. Provide our storefront link ${storefrontUrl} and ask: "Would you like me to share our storefront URL for you to browse our products?"]`
+        : `[SYSTEM: Customer sent an image${caption ? ` with caption: "${caption}"` : ""}. Politely acknowledge receiving their image and ask if they would like to browse our products or describe what product they are looking for.]`;
 
       await triggerAIResponse({
         session,
@@ -651,27 +627,27 @@ export const handleIncomingWhatsApp = async (payload) => {
   let enrichedText = inboundText;
 
   if (sellerProfile && isTextMessage) {
+    const recentMessages = await AIMessageModel.find({
+      sessionId: session.sessionId,
+      userId: user._id,
+    })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .lean();
+
+    const conversationContext = recentMessages.reverse().map((m) => ({
+      role: m.direction === "inbound" ? "user" : "assistant",
+      content: m.text,
+    }));
+
     const isExpectingPaymentProof =
-      session?.payment?.expectingPayment === true &&
-      session?.payment?.paymentProofReceived !== true;
+      (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) ||
+      isPaymentStage(conversationContext, session);
 
     const PAYMENT_CLAIM_KEYWORDS = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
     const isClaimingPaymentText = inboundText && PAYMENT_CLAIM_KEYWORDS.test(inboundText);
 
     if (isExpectingPaymentProof) {
-      const recentMessages = await AIMessageModel.find({
-        sessionId: session.sessionId,
-        userId: user._id,
-      })
-        .sort({ createdAt: -1 })
-        .limit(12)
-        .lean();
-
-      const conversationContext = recentMessages.reverse().map((m) => ({
-        role: m.direction === "inbound" ? "user" : "assistant",
-        content: m.text,
-      }));
-
       const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
       await createPendingOrderFromText({
         sellerId: sellerProfile._id,
@@ -683,9 +659,16 @@ export const handleIncomingWhatsApp = async (payload) => {
         session,
       });
     } else if (isClaimingPaymentText) {
-      console.log("⚠️ Customer claiming payment via text when expectingPayment is false.");
-      const unaskedPaymentNotice = `[SYSTEM-NOTICE: The customer is stating or claiming they sent payment proof or made a transfer ("${inboundText}"), BUT you (the AI agent) have NOT provided any payment details, bank account numbers, or prices to this customer yet, and no order is awaiting payment. Politely explain to the customer that no payment details or order instructions have been provided for an order yet, so this cannot be processed as a payment receipt. Ask them what product or item they would like to order first so you can give them the correct price and bank details.]`;
-      enrichedText = `${unaskedPaymentNotice}\n\n${enrichedText}`;
+      const inPaymentStage = isPaymentStage(conversationContext, session);
+      if (!inPaymentStage) {
+        console.log("⚠️ Customer claiming payment via text when expectingPayment and inPaymentStage are both false.");
+        const unaskedPaymentNotice = `[SYSTEM-NOTICE: The customer is stating or claiming they sent payment proof or made a transfer ("${inboundText}"), BUT you (the AI agent) have NOT provided any payment details, bank account numbers, or prices to this customer yet, and no order is awaiting payment. Politely explain to the customer that no payment details or order instructions have been provided for an order yet, so this cannot be processed as a payment receipt. Ask them what product or item they would like to order first so you can give them the correct price and bank details.]`;
+        enrichedText = `${unaskedPaymentNotice}\n\n${enrichedText}`;
+      } else {
+        console.log("💳 Customer claiming payment via text in active payment stage. Prompting customer to attach image receipt.");
+        const pendingPaymentHint = `[SYSTEM-NOTICE: The customer states they have completed payment or sent proof ("${inboundText}"). Politely acknowledge their message and ask them to attach or send a screenshot / image of their transfer receipt so our team can confirm their payment.]`;
+        enrichedText = `${pendingPaymentHint}\n\n${enrichedText}`;
+      }
     }
   }
 

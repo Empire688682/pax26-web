@@ -32,7 +32,7 @@ function isLikelyPaymentReceipt(caption, recentMessages = []) {
     return PAYMENT_KEYWORDS.test(recentText);
 }
 
-function isPaymentStage(recentMessages = [], session = null) {
+export function isPaymentStage(recentMessages = [], session = null) {
     if (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) {
         return true;
     }
@@ -98,6 +98,16 @@ function extractOrderTotalFromConversation(recentMessages = []) {
     return null;
 }
 
+function normalizeSearchText(str) {
+    if (!str) return "";
+    return str
+        .toLowerCase()
+        .replace(/[’‘`]/g, "'")
+        .replace(/[^a-z0-9'\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 async function findAllProductsFromConversation(sellerId, recentMessages = []) {
     const products = await SellerProductModel.find({ sellerId }).lean();
     if (!products.length) return [];
@@ -110,22 +120,42 @@ async function findAllProductsFromConversation(sellerId, recentMessages = []) {
     // Fall back to all recent messages if no user messages exist
     const messagesToScan = customerMessages.length > 0 ? customerMessages : recentMessages;
 
-    const conversationText = messagesToScan
+    const rawConversationText = messagesToScan
         .map((m) => m.content || m.text || "")
-        .join(" ")
-        .toLowerCase();
+        .join(" ");
+
+    const normalizedConvText = normalizeSearchText(rawConversationText);
 
     const matchedProducts = [];
     const sortedProducts = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
 
     for (const prod of sortedProducts) {
         if (!prod.name) continue;
-        const nameLower = prod.name.toLowerCase();
-        const escaped = prod.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const wordRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+        const normProdName = normalizeSearchText(prod.name);
+        if (!normProdName) continue;
 
-        if (wordRegex.test(conversationText) || conversationText.includes(nameLower)) {
+        // 1. Direct containment test
+        if (normalizedConvText.includes(normProdName)) {
             matchedProducts.push(prod);
+            continue;
+        }
+
+        // 2. Singular/Plural stem matching (e.g. "mule heel" matching "mule heels")
+        const normProdWithoutS = normProdName.replace(/s\b/g, "");
+        const normConvWithoutS = normalizedConvText.replace(/s\b/g, "");
+
+        if (normConvWithoutS.includes(normProdWithoutS)) {
+            matchedProducts.push(prod);
+            continue;
+        }
+
+        // 3. Multi-word overlap check (matching key product words >= 3 chars)
+        const prodWords = normProdName.split(" ").filter((w) => w.length >= 3);
+        if (prodWords.length >= 2) {
+            const matchCount = prodWords.filter((w) => normConvWithoutS.includes(w.replace(/s$/, ""))).length;
+            if (matchCount >= Math.min(2, prodWords.length)) {
+                matchedProducts.push(prod);
+            }
         }
     }
 
