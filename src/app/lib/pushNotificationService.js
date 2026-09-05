@@ -9,8 +9,11 @@
  * Types:
  *   new_order    — customer placed an order
  *   sales_alert  — payment proof received
- *   new_lead     — new WhatsApp contact messaged
- *   agent_reply  — AI agent responded to a customer
+ *   new_lead     — new WhatsApp contact (first-time) messaged
+ *   escalation   — customer asked for a human or expressed frustration
+ *
+ * Note: agent_reply type is intentionally retired — escalation replaces it
+ *       with smarter, action-required-only alerting.
  */
 
 import UserModel from '@/app/ults/models/UserModel';
@@ -22,7 +25,7 @@ const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
  *
  * @param {string|ObjectId} userId
  * @param {{
- *   type: 'new_order'|'sales_alert'|'new_lead'|'agent_reply',
+ *   type: 'new_order'|'sales_alert'|'new_lead'|'escalation',
  *   title: string,
  *   body: string,
  *   data?: object
@@ -40,10 +43,10 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
 
     // Gate notification against user's mobile notification preferences
     const prefs = user?.mobileNotifPrefs || {};
-    if (type === 'new_order'   && prefs.newOrder === false)   { console.log('[pushNotif] ⏭️ Suppressed (newOrder disabled)'); return; }
-    if (type === 'sales_alert' && prefs.salesAlert === false)  { console.log('[pushNotif] ⏭️ Suppressed (salesAlert disabled)'); return; }
-    if (type === 'agent_reply' && prefs.agentReply === false)  { console.log('[pushNotif] ⏭️ Suppressed (agentReply disabled)'); return; }
-    if (type === 'new_lead'    && prefs.newLead === false)     { console.log('[pushNotif] ⏭️ Suppressed (newLead disabled)'); return; }
+    if (type === 'new_order'   && prefs.newOrder === false)    { console.log('[pushNotif] ⏭️ Suppressed (newOrder disabled)'); return; }
+    if (type === 'sales_alert' && prefs.salesAlert === false)   { console.log('[pushNotif] ⏭️ Suppressed (salesAlert disabled)'); return; }
+    if (type === 'new_lead'    && prefs.newLead === false)      { console.log('[pushNotif] ⏭️ Suppressed (newLead disabled)'); return; }
+    if (type === 'escalation'  && prefs.escalation === false)   { console.log('[pushNotif] ⏭️ Suppressed (escalation disabled)'); return; }
 
     const message = {
       to:    token,
@@ -53,9 +56,10 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
       data:  { type, ...data },
       badge: 1,
       // Android channel (must match channel created on app start)
-      channelId: type === 'new_order' || type === 'sales_alert' ? 'orders' : 'messages',
+      // escalation uses the 'orders' channel so it bypasses DnD like a sale
+      channelId: type === 'new_order' || type === 'sales_alert' || type === 'escalation' ? 'orders' : 'messages',
       // Priority
-      priority: type === 'new_order' ? 'high' : 'normal',
+      priority: type === 'new_order' || type === 'escalation' ? 'high' : 'normal',
     };
 
     const res = await fetch(EXPO_PUSH_URL, {

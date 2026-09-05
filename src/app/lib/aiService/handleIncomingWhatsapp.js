@@ -277,13 +277,8 @@ export const handleIncomingWhatsApp = async (payload) => {
         }
       );
       console.log("✅ Step 5 — Existing contact updated (leadStage set to contacted):", visitorPhone);
-      // Push: existing lead message notification
-      sendMobilePush(user._id, {
-        type:  "new_lead",
-        title: `💬 Message from ${existingContact?.name || visitorPhone}`,
-        body:  inboundText ? inboundText.slice(0, 80) : "Sent a message",
-        data:  { phone: visitorPhone },
-      }).catch(() => {});
+      // Existing contacts are handled silently by AI — no push needed.
+      // The Chats tab badge count already tracks unread messages.
     }
 
     // ── Special Case: 'ask' policy for first-time contacts ───
@@ -833,13 +828,21 @@ export const handleIncomingWhatsApp = async (payload) => {
   await triggerAIResponse({ session, user, inboundText: enrichedText });
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
 
-  // Push: agent-reply notification (non-blocking)
-  sendMobilePush(user._id, {
-    type:  "agent_reply",
-    title: "🤖 AI Agent Replied",
-    body:  `Your agent responded to ${visitorPhone}`,
-    data:  { phone: visitorPhone },
-  }).catch(() => {}); // fire-and-forget, never block response
+  // ── Escalation detection ──────────────────────────────────────────────
+  // Only push if the customer explicitly needs a human or is frustrated.
+  // Routine AI replies are completely silent — sellers are pinged only when
+  // their intervention is actually required.
+  const ESCALATION_RE = /\b(human|agent|person|manager|speak to|call me|real person|not the bot|not a bot|talk to someone|customer service|supervisor|support team|refund|fraud|scam|cheat|angry|nonsense|useless|terrible|horrible|awful|stupid|not working|i am not happy|i'm not happy|cancel my order|this is wrong)\b/i;
+
+  if (ESCALATION_RE.test(inboundText || "")) {
+    const contactName = existingContact?.name || visitorPhone;
+    sendMobilePush(user._id, {
+      type:  "escalation",
+      title: "🚨 Customer Needs You",
+      body:  `${contactName}: ${(inboundText || "").slice(0, 80)}`,
+      data:  { phone: visitorPhone },
+    }).catch(() => {}); // fire-and-forget, never block response
+  }
 
   return { ok: true };
-};
+};

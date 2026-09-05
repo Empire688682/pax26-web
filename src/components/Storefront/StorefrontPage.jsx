@@ -68,7 +68,142 @@ function Pax26Footer() {
   );
 }
 
-export function handleWhatsAppRedirect(e, href) {
+/* ── WhatsApp app chooser (Android multi-app support) ───────── */
+// Android allows both WhatsApp Messenger (com.whatsapp) and
+// WhatsApp Business (com.whatsapp.w4b) to be installed at the same time.
+// Using intent:// links targets each package directly.
+
+export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessUrl, theme }) {
+  const t = theme || { pageBg: '#09090d', navBg: '#111118', card: '#16161f', textPrimary: '#f1f5f9', textSecondary: '#94a3b8', border: '#1e1e2e', accent: '#6366f1' };
+  if (!visible) return null;
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.65)',
+          zIndex: 9998,
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          animation: 'sf-fade-in 0.18s ease',
+        }}
+      />
+      {/* Bottom sheet */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        zIndex: 9999,
+        background: t.navBg,
+        borderRadius: '24px 24px 0 0',
+        borderTop: `1px solid ${t.border}`,
+        padding: '8px 20px 36px',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
+        animation: 'sf-slide-up 0.22s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        {/* Drag handle */}
+        <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: t.border, margin: '10px auto 20px' }} />
+        <p style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 900, color: t.textPrimary, textAlign: 'center' }}>
+          Open in WhatsApp
+        </p>
+        <p style={{ margin: '0 0 20px', fontSize: '12px', color: t.textSecondary, textAlign: 'center' }}>
+          You have multiple WhatsApp apps installed — choose one
+        </p>
+
+        {/* WhatsApp Messenger */}
+        <a
+          href={messengerUrl}
+          onClick={onClose}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '14px',
+            padding: '14px 18px',
+            borderRadius: '16px',
+            background: t.card,
+            border: `1px solid ${t.border}`,
+            textDecoration: 'none',
+            marginBottom: '10px',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#25d366', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Messenger</p>
+            <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Personal WhatsApp account</p>
+          </div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+        </a>
+
+        {/* WhatsApp Business */}
+        <a
+          href={businessUrl}
+          onClick={onClose}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '14px',
+            padding: '14px 18px',
+            borderRadius: '16px',
+            background: t.card,
+            border: `1px solid ${t.border}`,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#128C7E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Business</p>
+            <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Business WhatsApp account</p>
+          </div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+        </a>
+
+        <button
+          onClick={onClose}
+          style={{ width: '100%', marginTop: '14px', padding: '12px', borderRadius: '12px', background: 'transparent', border: `1px solid ${t.border}`, color: t.textSecondary, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+        >
+          Cancel
+        </button>
+      </div>
+      <style>{`
+        @keyframes sf-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes sf-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
+    </>
+  );
+}
+
+/**
+ * buildWhatsAppIntentUrls
+ * Given a wa.me href (with optional ?text=...), returns:
+ *  - messengerUrl: intent:// link targeting com.whatsapp (Messenger)
+ *  - businessUrl:  intent:// link targeting com.whatsapp.w4b (Business)
+ *  - universalUrl: original wa.me https link (iOS fallback / desktop)
+ */
+export function buildWhatsAppIntentUrls(href) {
+  if (!href) return { messengerUrl: href, businessUrl: href, universalUrl: href };
+  let url;
+  try { url = new URL(href.startsWith('http') ? href : `https://${href}`); } catch { return { messengerUrl: href, businessUrl: href, universalUrl: href }; }
+
+  // Extract phone from wa.me path: /15551234567
+  const phone  = url.pathname.replace(/^\//,'').replace(/\D/g,'');
+  const text   = url.searchParams.get('text') || '';
+  const query  = [phone && `phone=${encodeURIComponent(`+${phone}`)}`, text && `text=${encodeURIComponent(text)}`].filter(Boolean).join('&');
+
+  const intentBase = (pkg) => `intent://send?${query}#Intent;scheme=whatsapp;package=${pkg};end`;
+  return {
+    messengerUrl: intentBase('com.whatsapp'),
+    businessUrl:  intentBase('com.whatsapp.w4b'),
+    universalUrl: href,
+  };
+}
+
+export function handleWhatsAppRedirect(e, href, onShowChooser) {
   if (!href) return;
   e?.preventDefault();
 
@@ -77,18 +212,21 @@ export function handleWhatsAppRedirect(e, href) {
     targetUrl = `https://${targetUrl}`;
   }
 
-  const isMobile = typeof window !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile) {
-    // Universal Meta HTTPS wa.me link allows iOS/Android to route to the active app
-    // (WhatsApp Business or Consumer WhatsApp) without forcing com.whatsapp
-    window.location.href = targetUrl;
+  const isAndroid = typeof window !== "undefined" && /Android/i.test(navigator.userAgent);
+  if (isAndroid) {
+    const { messengerUrl, businessUrl } = buildWhatsAppIntentUrls(targetUrl);
+    if (onShowChooser) {
+      onShowChooser(messengerUrl, businessUrl);
+    } else {
+      window.location.href = targetUrl;
+    }
   } else {
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   }
 }
 
 /* ── Cart Drawer Component ───────────────────────────────── */
-function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQty, onRemoveItem, onClearCart, store, slug, sessionToken, theme }) {
+function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQty, onRemoveItem, onClearCart, store, slug, sessionToken, theme, onWhatsAppRedirect }) {
   const t = theme;
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
@@ -134,7 +272,11 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
     onClearCart();
     onClose();
 
-    handleWhatsAppRedirect(e, fullWaUrl);
+    if (onWhatsAppRedirect) {
+      onWhatsAppRedirect(e, fullWaUrl);
+    } else {
+      handleWhatsAppRedirect(e, fullWaUrl);
+    }
   };
 
   return (
@@ -320,7 +462,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
 }
 
 /* ── Side menu drawer ───────────────────────────────────── */
-function SideMenu({ open, onClose, store, categories, activeCategory, onCategoryChange, theme, search, onSearchChange, slug }) {
+function SideMenu({ open, onClose, store, categories, activeCategory, onCategoryChange, theme, search, onSearchChange, slug, onWhatsAppRedirect }) {
   const t = theme;
   if (!open) return null;
   return (
@@ -380,7 +522,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
 
         {store.whatsappHref && (
           <div style={{ padding: "0 16px 20px", marginTop: "auto" }}>
-            <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 16px rgba(37,211,102,0.3)" }}>
+            <a href={store.whatsappHref} onClick={(e) => onWhatsAppRedirect ? onWhatsAppRedirect(e, store.whatsappHref) : handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 16px rgba(37,211,102,0.3)" }}>
               <WhatsAppIcon /> Chat on WhatsApp
             </a>
           </div>
@@ -551,6 +693,13 @@ export default function StorefrontPage({
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [loadingPage, setLoadingPage] = useState(false);
   const [isInitialMount, setIsInitialMount] = useState(true);
+  const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
+
+  const openWhatsApp = (e, href) => {
+    handleWhatsAppRedirect(e, href, (messengerUrl, businessUrl) => {
+      setWaChooserModal({ visible: true, messengerUrl, businessUrl });
+    });
+  };
 
   // Validate session + resolve referredProductId
   useEffect(() => {
@@ -699,7 +848,7 @@ export default function StorefrontPage({
         )} */}
 
         {/* ── SIDE MENU ────────────────────────────────── */}
-        <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} />
+        <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} onWhatsAppRedirect={openWhatsApp} />
 
         {/* ── CART DRAWER ──────────────────────────────── */}
         <CartDrawer
@@ -715,6 +864,7 @@ export default function StorefrontPage({
           slug={slug}
           sessionToken={sessionToken}
           theme={t}
+          onWhatsAppRedirect={openWhatsApp}
         />
 
         {/* ── MAIN CONTENT ─────────────────────────────── */}
@@ -762,7 +912,7 @@ export default function StorefrontPage({
 
             {/* Desktop Hero CTA */}
             {store.whatsappHref && (
-              <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" className="sf-desktop-chat-btn"
+              <a href={store.whatsappHref} onClick={(e) => openWhatsApp(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" className="sf-desktop-chat-btn"
                 style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "12px", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0, boxShadow: "0 2px 10px rgba(37,211,102,0.3)" }}>
                 <WhatsAppIcon /> Order on WhatsApp
               </a>
@@ -1000,7 +1150,7 @@ export default function StorefrontPage({
 
           {/* WhatsApp Chat Tab */}
           {store.whatsappHref && (
-            <a href={store.whatsappHref} onClick={(e) => handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: "#25d366", textDecoration: "none", fontSize: "10px", fontWeight: 800 }}>
+            <a href={store.whatsappHref} onClick={(e) => openWhatsApp(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: "#25d366", textDecoration: "none", fontSize: "10px", fontWeight: 800 }}>
               <WhatsAppIcon />
               <span>Chat</span>
             </a>
@@ -1009,6 +1159,14 @@ export default function StorefrontPage({
 
         {/* ── PAX26 AD FOOTER ──────────────────────────── */}
         <Pax26Footer />
+
+        <WhatsAppChooserModal
+          visible={waChooserModal.visible}
+          onClose={() => setWaChooserModal({ visible: false, messengerUrl: "", businessUrl: "" })}
+          messengerUrl={waChooserModal.messengerUrl}
+          businessUrl={waChooserModal.businessUrl}
+          theme={t}
+        />
 
       </div>
       <style>{`
