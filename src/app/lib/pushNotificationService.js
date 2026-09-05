@@ -30,13 +30,20 @@ const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
  */
 export async function sendMobilePush(userId, { type, title, body, data = {} }) {
   try {
-    const user = await UserModel.findById(userId).select('mobilePushToken').lean();
+    const user = await UserModel.findById(userId).select('mobilePushToken mobileNotifPrefs').lean();
     const token = user?.mobilePushToken;
 
     if (!token) {
       // User hasn't registered a push token — no mobile app installed
       return;
     }
+
+    // Gate notification against user's mobile notification preferences
+    const prefs = user?.mobileNotifPrefs || {};
+    if (type === 'new_order'   && prefs.newOrder === false)   { console.log('[pushNotif] ⏭️ Suppressed (newOrder disabled)'); return; }
+    if (type === 'sales_alert' && prefs.salesAlert === false)  { console.log('[pushNotif] ⏭️ Suppressed (salesAlert disabled)'); return; }
+    if (type === 'agent_reply' && prefs.agentReply === false)  { console.log('[pushNotif] ⏭️ Suppressed (agentReply disabled)'); return; }
+    if (type === 'new_lead'    && prefs.newLead === false)     { console.log('[pushNotif] ⏭️ Suppressed (newLead disabled)'); return; }
 
     const message = {
       to:    token,

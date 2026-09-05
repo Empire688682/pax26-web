@@ -30,6 +30,12 @@ export async function buildFullUserProfile(userId) {
     userObj.contacts = Array.isArray(user.whatsapp?.contacts?.list) ? user.whatsapp.contacts.list.length : 0;
     userObj.whatsappBusinessNo = user.whatsapp?.displayPhone || null;
     userObj.authTimestamp = Date.now();
+    userObj.mobileNotifPrefs = userObj.mobileNotifPrefs || {
+      newOrder: true,
+      salesAlert: true,
+      agentReply: true,
+      newLead: true,
+    };
 
     // Preserve public WhatsApp connection status & phone info; strip secret tokens
     if (userObj.whatsapp) {

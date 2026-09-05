@@ -409,7 +409,12 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
   }
 
-  // Block AI reply if monthly quota is exhausted
+  // Block AI reply if AI Agent toggle is disabled or monthly quota is exhausted
+  if (user.paxAI?.aiAgentEnabled === false || user.paxAI?.enabled === false) {
+    console.log(`🚫 Step 7 — AI Agent disabled for user ${user._id}. Skipping AI reply.`);
+    return { ok: true };
+  }
+
   if (usedMessages >= maxMessages) {
     console.log(`🚫 Step 7 — Monthly quota exhausted (${usedMessages}/${maxMessages}). Skipping AI reply.`);
     return { ok: true };

@@ -366,6 +366,11 @@ export const triggerAIResponse = async ({
             return;
         }
 
+        if (user.paxAI?.aiAgentEnabled === false || user.paxAI?.enabled === false) {
+            console.log(`AI skipped for user ${user._id} — AI Agent toggle disabled`);
+            return;
+        }
+
         // ── Build system prompt (type-aware) ──────────────────────
         // For seller profiles: generate a session-scoped storefront URL
         // so the AI can send customers a browse link during the conversation.

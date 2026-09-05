@@ -208,6 +208,12 @@ const UserSchema = new mongoose.Schema(
        MOBILE PUSH NOTIFICATIONS
     ====================== */
     mobilePushToken: { type: String, default: null },  // Expo push token
+    mobileNotifPrefs: {
+      newOrder:   { type: Boolean, default: true },
+      salesAlert: { type: Boolean, default: true },
+      agentReply: { type: Boolean, default: true },
+      newLead:    { type: Boolean, default: true },
+    },
   }, { timestamps: true });
 
 const UserModel =
