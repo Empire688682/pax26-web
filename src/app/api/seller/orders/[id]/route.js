@@ -6,6 +6,7 @@ import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
+import SessionModel from "@/app/ults/models/SessionModel";
 import { sendSalesNotification } from "@/app/lib/salesNotificationService";
 import { sendCustomerOrderReceiptWhatsApp } from "@/app/lib/customerReceiptService";
 
@@ -52,6 +53,18 @@ export async function PATCH(req, { params }) {
         }
 
         await order.save();
+
+        if (["confirmed", "paid", "delivered"].includes(status)) {
+            await SessionModel.updateOne(
+                { visitorPhone: order.customerPhone, userId: sellerProfile.userId },
+                {
+                    $set: {
+                        "payment.expectingPayment": false,
+                        "payment.paymentProofReceived": false,
+                    }
+                }
+            ).catch(() => {});
+        }
 
         // Mark associated notifications as read when order is processed
         await SellerNotificationModel.updateMany(

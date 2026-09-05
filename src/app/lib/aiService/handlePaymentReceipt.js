@@ -33,22 +33,30 @@ function isLikelyPaymentReceipt(caption, recentMessages = []) {
 }
 
 export function isPaymentStage(recentMessages = [], session = null) {
-    if (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) {
-        return true;
+    if (session?.payment?.paymentProofReceived === true) {
+        return false;
     }
-    if (session?.payment?.paymentDetailsSharedAt && session?.payment?.paymentProofReceived !== true) {
+    if (session?.payment?.expectingPayment === true) {
         return true;
     }
 
-    // Only consider assistant's recent messages as payment stage indicator if assistant explicitly gave bank/payment details
-    const assistantText = recentMessages
-        .filter((m) => m.role === "assistant" || m.direction === "outbound")
-        .slice(-6)
-        .map((m) => m.content || m.text || "")
-        .join(" ");
+    // Scan backwards: if an official receipt or proof acknowledgement was sent after bank details, stage is closed
+    const reversedMessages = [...recentMessages].reverse();
 
-    const assistantSharedBankDetails = PAYMENT_STAGE_KEYWORDS.test(assistantText) || /\b\d{10}\b/.test(assistantText);
-    return assistantSharedBankDetails;
+    for (const msg of reversedMessages) {
+        const text = msg.content || msg.text || "";
+        const isAssistant = msg.role === "assistant" || msg.direction === "outbound" || msg.senderType === "ai";
+
+        if (isAssistant && (text.includes("verifying your payment") || text.includes("OFFICIAL RECEIPT") || text.includes("PAYMENT VERIFIED"))) {
+            return false;
+        }
+
+        if (isAssistant && (PAYMENT_STAGE_KEYWORDS.test(text) || /\b\d{10}\b/.test(text))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function extractOrderTotalFromConversation(recentMessages = []) {
