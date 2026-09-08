@@ -177,8 +177,56 @@ export async function resolveBusinessFacts({
     requiresClarification: false,
   };
 
+  // 0. STOREFRONT MULTI-ITEM CART SHARE PARSER
+  const isStorefrontCartShare = /interested in ordering|Products Total:|Estimated Total:|•\s*\d+x/i.test(inboundText);
+
+  if (isStorefrontCartShare && allSellerProducts.length > 0) {
+    const itemsToAdd = [];
+    for (const prod of allSellerProducts) {
+      const prodNameLower = prod.name.toLowerCase();
+      if (inboundText.toLowerCase().includes(prodNameLower)) {
+        // Extract quantity if specified (e.g. "2x Product")
+        const qtyRegex = new RegExp(`(\\d+)\\s*x\\s*\\*?${prodNameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i");
+        const qtyMatch = inboundText.match(qtyRegex);
+        const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+
+        const priceInfo = getEffectiveProductPrice(prod, currency);
+        itemsToAdd.push({
+          productId: prod._id,
+          name: prod.name,
+          nameSnapshot: prod.name,
+          price: priceInfo.currentPrice,
+          unitPriceSnapshot: priceInfo.currentPrice,
+          quantity: qty,
+          imageUrl: prod.images?.[0]?.url || "",
+          imageSnapshot: prod.images?.[0]?.url || "",
+          selectedVariant: {},
+        });
+      }
+    }
+
+    if (itemsToAdd.length > 0) {
+      const deliveryFeeMatch = inboundText.match(/(?:Delivery Fee|Fulfillment Fee):\s*(?:₦|N|NGN)?\s*([\d,]+)/i);
+      let parsedDeliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(/,/g, "")) : 0;
+
+      const productsTotal = itemsToAdd.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const deliveryFee = calculatePackageDeliveryFee(itemsToAdd, sellerProfile, parsedDeliveryFee || order.deliveryFee);
+      const grandTotal = productsTotal + deliveryFee;
+
+      await transitionOrderState(order._id, ORDER_STAGES.CHECKOUT, {
+        items: itemsToAdd,
+        totalPrice: grandTotal,
+        deliveryFee,
+      });
+
+      approvedAction = "ORDER_ITEM_ADDED";
+      matchedProducts = itemsToAdd.map((i) => ({ _id: i.productId, name: i.name, price: i.price, isAvailable: true }));
+      factFlags.productFound = true;
+    }
+  }
+
   // 1. PRODUCT SEARCH & MATCHING (Strictly scoped by sellerId)
-  if (productQuery || ["PRODUCT_SEARCH", "PRODUCT_PRICE", "PRODUCT_AVAILABILITY", "PRODUCT_DETAILS", "PRODUCT_IMAGE", "SELECT_PRODUCT", "ADD_TO_ORDER"].includes(intent)) {
+  if (!factFlags.productFound && (productQuery || ["PRODUCT_SEARCH", "PRODUCT_PRICE", "PRODUCT_AVAILABILITY", "PRODUCT_DETAILS", "PRODUCT_IMAGE", "SELECT_PRODUCT", "ADD_TO_ORDER"].includes(intent))) {
     if (productQuery) {
       const queryLower = productQuery.toLowerCase();
       matchedProducts = allSellerProducts.filter((p) => {

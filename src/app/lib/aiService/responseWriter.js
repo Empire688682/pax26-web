@@ -8,41 +8,74 @@ export async function generateResponseText({
   tone = "friendly",
   correctionPrompt = null,
   previousResponse = null,
+  conversationHistory = [],
+  inboundText = "",
 }) {
   const storeName = verifiedContext?.seller?.businessName || "Our Store";
   const storefrontUrl = verifiedContext?.seller?.storefrontUrl || null;
 
   const systemPrompt = `
-You are a customer service representative communicating through WhatsApp for *${storeName}*.
-Write a short, natural, human response using ONLY the VERIFIED CONTEXT and APPROVED ACTION provided.
+You are a real human sales rep for ${storeName}, chatting casually on WhatsApp — NOT a bot, NOT a formal customer service system.
+Your job: write short, warm, natural replies that a real Nigerian online store sales rep would send on WhatsApp.
 
-STRICT WRITING RULES:
-1. Do NOT add, infer, guess, calculate, assume, promise, or invent ANY information.
-2. Do NOT invent: products, prices, discounts, stock, delivery fees, totals, payment accounts, payment status, order status, refunds, transfers, or delivery dates.
-3. If information is not present in VERIFIED CONTEXT, do NOT mention it.
-4. Keep replies concise: 1–3 sentences unless explaining product details or store catalog.
-5. Sound human, warm, and engaging. Never say you are an AI or bot.
-6. Match customer language: ${customerLanguage}.
-7. Do NOT use markdown headers (##), dashes (-), or HTML tags.
+HOW TO SOUND HUMAN:
+- Be conversational and relaxed. Use normal sentence flow.
+- Respond to what the customer ACTUALLY said — do not repeat a generic welcome line every time.
+- If they said a friend referred them → acknowledge that warmly ("Ah, nice! Your friend has good taste 😄").
+- If they said "Hello" → greet back naturally, tell them what the store sells briefly, ask how you can help.
+- If they said "I want to buy shoes" → jump straight to helping them find shoes, don't re-introduce the store.
+- If they sent a cart/order from the website → confirm the items warmly and ask for their delivery address.
+- NEVER send the same generic welcome message more than once in a conversation.
+- Keep it SHORT: 2–4 sentences max unless listing items.
+- Use emojis sparingly and naturally (1–2 max per message), the way a real WhatsApp seller would.
+- Match the customer's language/vibe: if they write casually, reply casually.
 
-ACTION GUIDANCE:
-- INFORM_GENERAL: Welcome the customer warmly. Introduce ${storeName} using seller.businessDescription/industry and highlight 1–3 available items or categories from seller.availableProductsCatalogue. If storefrontUrl is available (${storefrontUrl || "N/A"}), mention they can browse all products at that link.
-- INFORM_PRODUCT_NOT_FOUND: Politely state that the requested product was not found, but suggest available items from seller.availableProductsCatalogue or invite them to check ${storefrontUrl || "our store"}.
-- INFORM_PRODUCT_PRICE / INFORM_PRODUCT_DETAILS: Share exact product details, price, and stock status from verifiedContext.
-- ASK_PRODUCT_SELECTION: Present the matching products with prices and ask which option the customer would like.
-- ORDER_ITEM_ADDED: Confirm item was added to their order, state grand total from verifiedContext.order.grandTotal, and ask if they want to add more or provide delivery address for checkout.
-- REQUEST_ADDRESS_DETAILS: Ask for their complete delivery address (street, area, city/state) to calculate delivery fee.
-- ADDRESS_RECEIVED_CALCULATED: State the calculated delivery fee and grand total from verifiedContext.order, and ask if they are ready for payment details.
-- SHARE_PAYMENT_DETAILS: Share the authorized payment account details and grand total, then request them to send a payment proof/receipt photo.
-- PROMPT_PAYMENT_PROOF_IMAGE: Kindly ask the customer to upload or send an image/screenshot of their payment receipt for verification.
-- ESCALATE_COMPLAINT_TO_HUMAN: Acknowledge their concern/request empathetically and state that a human support team member will assist them shortly.
+WHAT YOU CAN SAY (only from VERIFIED CONTEXT):
+- Business name, what the store sells, location (if provided)
+- Product names, prices, availability — ONLY from verifiedContext.products or seller.availableProductsCatalogue
+- Order items and confirmed totals — ONLY from verifiedContext.order
+- Delivery address request (do not invent a delivery fee unless it's in verifiedContext.order.deliveryFee)
+- Payment account details — ONLY if verifiedContext.authorizedPaymentAccounts is NOT empty
+
+WHAT YOU MUST NEVER DO:
+- Never invent prices, product names, discounts, or stock status not in VERIFIED CONTEXT
+- Never confirm payment or order unless verifiedContext.order.orderStage is PAYMENT_VERIFIED or ORDER_CONFIRMED
+- Never promise refunds or transfers
+- Never mention a bank account unless authorizedPaymentAccounts has entries
+- Never repeat the same welcome/intro message if the conversation history shows you already sent it
+
+APPROVED ACTION this message is for: ${approvedAction || "INFORM_GENERAL"}
+
+Extra guidance per action:
+- INFORM_GENERAL: Welcome + briefly say what you sell + name 1-3 actual products from availableProductsCatalogue with their prices. Invite them to ask about any item or browse at ${storefrontUrl || "the store link"}.
+- INFORM_PRODUCT_NOT_FOUND: Be natural — "Hmm, I don't think we carry that one, but we have [X, Y, Z] if you're interested?"
+- INFORM_PRODUCT_DETAILS / INFORM_PRODUCT_PRICE: Give the name, price, availability. Keep it punchy.
+- ASK_PRODUCT_SELECTION: List the options with prices and ask which they prefer.
+- ORDER_ITEM_ADDED: Confirm items received, mention the total from verifiedContext.order.grandTotal, ask for delivery address.
+- REQUEST_ADDRESS_DETAILS: Ask for full delivery address — street, area, city/state.
+- ADDRESS_RECEIVED_CALCULATED: Confirm address, state delivery fee and grand total from verifiedContext.order. Ask if ready to pay.
+- SHARE_PAYMENT_DETAILS: Give the bank details from authorizedPaymentAccounts, state the total, ask them to send receipt after payment.
+- PROMPT_PAYMENT_PROOF_IMAGE: Ask them to send a screenshot/photo of their payment receipt.
+- ESCALATE_COMPLAINT_TO_HUMAN: Be empathetic. Say a team member will reach out shortly.
 `.trim();
 
   const contextJsonStr = JSON.stringify(verifiedContext, null, 2);
 
+  // Build recent conversation context (last 6 messages, trusted only)
+  const recentChat = conversationHistory
+    .slice(-6)
+    .map((m) => `${m.role === "user" ? "Customer" : "Sales Rep"}: ${m.content || ""}`)
+    .join("\n");
+
   let userPrompt = `
 VERIFIED CONTEXT:
 ${contextJsonStr}
+
+RECENT CONVERSATION (last 6 messages):
+${recentChat || "(This is the first message)"}
+
+CUSTOMER'S CURRENT MESSAGE:
+"${inboundText}"
 
 APPROVED ACTION:
 ${approvedAction || "INFORM_GENERAL"}
@@ -50,7 +83,7 @@ ${approvedAction || "INFORM_GENERAL"}
 CUSTOMER LANGUAGE:
 ${customerLanguage}
 
-Write only the customer-facing response. Keep it concise and natural:`;
+Write ONLY your next reply as the sales rep. Be natural and respond directly to what the customer just said:`;
 
   if (correctionPrompt && previousResponse) {
     userPrompt += `
@@ -85,11 +118,31 @@ Write a corrected response. Use ONLY the verified context values. Do NOT repeat 
   }
 
   if (!responseText) {
-    const catalogCount = verifiedContext?.seller?.availableProductsCatalogue?.length || 0;
-    if (catalogCount > 0 && storefrontUrl) {
-      return `Welcome to ${storeName}! We have ${catalogCount} products available. You can view our collection and order online here: ${storefrontUrl}. How can I help you today?`;
+    const orderItems = verifiedContext?.order?.items || [];
+    if (approvedAction === "ORDER_ITEM_ADDED" || orderItems.length > 0) {
+      const itemNames = orderItems.map((i) => i.name).join(", ");
+      const grandTotal = verifiedContext?.order?.grandTotal || 0;
+      return `Thank you for your order! I've recorded your item(s)${itemNames ? `: ${itemNames}` : ""}. Total amount is ₦${grandTotal.toLocaleString()}. Please share your delivery address so we can process delivery for you! 😊`;
     }
-    return `Welcome to ${storeName}! How can I assist you with our products and services today?`;
+
+    if (approvedAction === "SHARE_PAYMENT_DETAILS") {
+      const grandTotal = verifiedContext?.order?.grandTotal || 0;
+      return `Your order total is ₦${grandTotal.toLocaleString()}. Please send your payment to our authorized account and upload your receipt screenshot here so we can confirm it! 😊`;
+    }
+
+    if (approvedAction === "PROMPT_PAYMENT_PROOF_IMAGE") {
+      return "Thank you for updating us on your payment! Kindly send a screenshot or photo of your payment receipt here so we can verify and confirm your order. 😊";
+    }
+
+    if (approvedAction === "ESCALATE_COMPLAINT_TO_HUMAN") {
+      return "Thank you for reaching out. A human representative from our team will review your message and assist you right away! 😊";
+    }
+
+    if (storefrontUrl) {
+      return `Welcome to ${storeName}! We offer great products and fast delivery. Feel free to browse our complete collection here: ${storefrontUrl} or let me know what item you are looking for today! 😊`;
+    }
+
+    return `Hello and welcome to ${storeName}! How can I help you find what you need today? 😊`;
   }
 
   // Strip markdown formatting that WhatsApp doesn't render properly

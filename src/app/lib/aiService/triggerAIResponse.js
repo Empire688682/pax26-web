@@ -157,6 +157,8 @@ export const triggerAIResponse = async ({
             approvedAction: verifiedContext.approvedAction,
             customerLanguage: "English",
             tone: businessProfile.tone || "friendly",
+            conversationHistory: historyContext,
+            inboundText,
         });
 
         // STAGE 4: RESPONSE VALIDATOR
@@ -177,6 +179,8 @@ export const triggerAIResponse = async ({
                 tone: businessProfile.tone || "friendly",
                 correctionPrompt: valResult.reason,
                 previousResponse: responseText,
+                conversationHistory: historyContext,
+                inboundText,
             });
 
             valResult = validateAIResponse(responseText, verifiedContext);
