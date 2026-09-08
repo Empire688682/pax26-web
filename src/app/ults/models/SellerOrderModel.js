@@ -42,15 +42,44 @@ const SellerOrderSchema = new mongoose.Schema({
         index: true,
     },
 
+    orderStage: {
+        type: String,
+        enum: [
+            "DRAFT",
+            "CHECKOUT",
+            "AWAITING_PAYMENT",
+            "PAYMENT_PROOF_RECEIVED",
+            "AWAITING_SELLER_VERIFICATION",
+            "PAYMENT_VERIFIED",
+            "ORDER_CONFIRMED",
+            "CANCELLED",
+            "REFUND_REQUESTED"
+        ],
+        default: "DRAFT",
+    },
+
+    isSnapshotLocked: {
+        type: Boolean,
+        default: false,
+    },
+
     items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "SellerProduct",
         },
         name: String,
+        nameSnapshot: String,
         price: Number,
+        unitPriceSnapshot: Number,
         quantity: { type: Number, default: 1 },
         imageUrl: String,
+        imageSnapshot: String,
+        selectedVariant: {
+            color: String,
+            size: String,
+            other: String,
+        },
     }],
 
     deliveryLocation: String,

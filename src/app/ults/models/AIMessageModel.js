@@ -49,6 +49,12 @@ const MessageSchema = new mongoose.Schema({
     default: "received"
   },
 
+  trustLevel: {
+    type: String,
+    enum: ["CUSTOMER_MESSAGE", "AI_MESSAGE", "SYSTEM_MESSAGE", "BACKEND_EVENT", "ORDER_EVENT", "PAYMENT_EVENT"],
+    default: "CUSTOMER_MESSAGE"
+  },
+
   automation: {
     isAutoReply: Boolean,
     workflowId: String,
