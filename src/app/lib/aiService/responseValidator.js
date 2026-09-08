@@ -63,6 +63,13 @@ export function validateAIResponse(responseText, verifiedContext) {
       });
     }
 
+    if (verifiedContext?.seller?.availableProductsCatalogue && Array.isArray(verifiedContext.seller.availableProductsCatalogue)) {
+      verifiedContext.seller.availableProductsCatalogue.forEach((p) => {
+        if (p.price) allowedAmounts.add(Number(p.price));
+        if (p.regularPrice) allowedAmounts.add(Number(p.regularPrice));
+      });
+    }
+
     if (verifiedContext?.order) {
       if (verifiedContext.order.productsTotal) allowedAmounts.add(Number(verifiedContext.order.productsTotal));
       if (verifiedContext.order.deliveryFee) allowedAmounts.add(Number(verifiedContext.order.deliveryFee));
@@ -154,5 +161,14 @@ export function validateAIResponse(responseText, verifiedContext) {
  * Deterministic Fallback Message Generator
  */
 export function getSafeFallbackMessage(intent = "UNKNOWN") {
-  return "I want to make sure I give you the correct information. Please hold on while our team checks this and gets back to you shortly! 😊";
+  if (["PRODUCT_SEARCH", "PRODUCT_PRICE", "PRODUCT_AVAILABILITY", "PRODUCT_DETAILS"].includes(intent)) {
+    return "Thank you for asking! Let me double check our current catalog and prices with our team so I can give you exact details shortly. 😊";
+  }
+  if (intent === "PAYMENT_CLAIM") {
+    return "Thank you for your payment update! Please send a photo or screenshot of your receipt so our team can verify it. 😊";
+  }
+  if (intent === "COMPLAINT" || intent === "REFUND_REQUEST") {
+    return "Thank you for bringing this to our attention. A team member is reviewing your request and will assist you shortly! 😊";
+  }
+  return "Thanks for reaching out! How can I assist you with our products today? 😊";
 }

@@ -144,6 +144,28 @@ export async function resolveBusinessFacts({
   const intent = intentResult?.intent || "UNKNOWN";
   const productQuery = intentResult?.productQuery;
 
+  // FETCH ALL AVAILABLE PRODUCTS FOR THIS SELLER ONCE (strictly scoped by sellerId)
+  const allSellerProducts = await SellerProductModel.find({
+    sellerId,
+    isAvailable: true,
+  }).lean();
+
+  const availableProductsCatalogue = allSellerProducts.slice(0, 30).map((p) => {
+    const pPriceInfo = getEffectiveProductPrice(p, currency);
+    return {
+      id: p._id.toString(),
+      name: p.name,
+      category: p.category || "General",
+      price: pPriceInfo.currentPrice,
+      regularPrice: pPriceInfo.regularPrice,
+      hasDiscount: pPriceInfo.hasDiscount,
+      currency: pPriceInfo.currency,
+      imageUrl: p.images?.[0]?.url || null,
+      description: p.description || null,
+      stockStatus: p.isAvailable !== false && (p.stock === undefined || p.stock > 0) ? "In Stock" : "Out of Stock",
+    };
+  });
+
   let approvedAction = "INFORM_GENERAL";
   let matchedProducts = [];
   let factFlags = {
@@ -158,12 +180,6 @@ export async function resolveBusinessFacts({
   // 1. PRODUCT SEARCH & MATCHING (Strictly scoped by sellerId)
   if (productQuery || ["PRODUCT_SEARCH", "PRODUCT_PRICE", "PRODUCT_AVAILABILITY", "PRODUCT_DETAILS", "PRODUCT_IMAGE", "SELECT_PRODUCT", "ADD_TO_ORDER"].includes(intent)) {
     if (productQuery) {
-      // DB search strictly by sellerId
-      const allSellerProducts = await SellerProductModel.find({
-        sellerId,
-        isAvailable: true,
-      }).lean();
-
       const queryLower = productQuery.toLowerCase();
       matchedProducts = allSellerProducts.filter((p) => {
         const nameLower = (p.name || "").toLowerCase();
@@ -350,8 +366,17 @@ export async function resolveBusinessFacts({
     seller: {
       id: sellerId.toString(),
       businessName: sellerProfile.businessName,
+      businessDescription: sellerProfile.businessDescription || sellerProfile.description || sellerProfile.bio || null,
+      industry: sellerProfile.industry || sellerProfile.category || null,
+      liveLocation: sellerProfile.liveLocation || sellerProfile.city || null,
+      deliveryCoverage: sellerProfile.deliveryCoverage || null,
+      workingHours: sellerProfile.workingHours || null,
+      services: sellerProfile.services || [],
+      faqs: sellerProfile.faqs || [],
+      knowledgeBase: sellerProfile.knowledgeBase || null,
       currency,
       storefrontUrl,
+      availableProductsCatalogue,
     },
     products: verifiedProducts,
     order: {
