@@ -30,6 +30,7 @@ export async function POST(req) {
     if (typeof prefs.salesAlert === 'boolean')  updateFields['mobileNotifPrefs.salesAlert']  = prefs.salesAlert;
     if (typeof prefs.agentReply === 'boolean')  updateFields['mobileNotifPrefs.agentReply']  = prefs.agentReply;
     if (typeof prefs.newLead === 'boolean')    updateFields['mobileNotifPrefs.newLead']    = prefs.newLead;
+    if (typeof prefs.escalation === 'boolean') updateFields['mobileNotifPrefs.escalation'] = prefs.escalation;
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,

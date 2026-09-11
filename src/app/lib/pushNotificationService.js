@@ -37,7 +37,7 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
     const token = user?.mobilePushToken;
 
     if (!token) {
-      // User hasn't registered a push token — no mobile app installed
+      console.warn(`[pushNotif] ⚠️ Skipped: No mobilePushToken found in DB for user ${userId}. Make sure the seller logs into the mobile app.`);
       return;
     }
 
