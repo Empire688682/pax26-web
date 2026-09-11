@@ -13,7 +13,7 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import UserModel from "@/app/ults/models/UserModel";
-import { sendPlanExpiryReminder } from "@/app/lib/transactionalEmailService";
+import { runExpiryCheckForUser, processPlanExpirationOrRenewal } from "@/app/lib/planExpiryCheck";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 
 async function isAuthorized(req, rawBody) {
@@ -40,102 +40,71 @@ async function runPlanLifecycle() {
 
   const now = new Date();
   let remindersSent = 0;
-  let expiredCount = 0;
+  let autoRenewedCount = 0;
+  let downgradedCount = 0;
 
   try {
-    // ── 1. SEND EXPIRY REMINDERS (1–2 days before expiration) ──────────────────
-    const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+    // ── 1. SEND EXPIRY REMINDERS (Up to 3 days before expiration) ─────────────
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     const usersNeedingReminder = await UserModel.find({
       "paxAI.plan": { $ne: "free" },
-      "paxAI.planExpiresAt": { $gt: now, $lte: twoDaysFromNow },
-    });
+      "paxAI.planExpiresAt": { $gt: now, $lte: threeDaysFromNow },
+    }).select("_id name email number whatsapp paxAI");
 
     for (const user of usersNeedingReminder) {
       try {
-        const expiresAt = new Date(user.paxAI.planExpiresAt);
-        const msDiff = expiresAt.getTime() - now.getTime();
-        const daysLeft = Math.max(1, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+        const result = await runExpiryCheckForUser(user._id);
 
-        // Check if reminder was already sent for this 30-day billing cycle
-        const lastStartedAt = user.paxAI.planStartedAt ? new Date(user.paxAI.planStartedAt).getTime() : 0;
-        const lastReminderAt = user.paxAI.reminderSentAt ? new Date(user.paxAI.reminderSentAt).getTime() : 0;
+        if (result.sent) {
+          remindersSent++;
 
-        if (lastReminderAt > lastStartedAt) {
-          // Already reminded for this current billing cycle
-          continue;
+          // Send WhatsApp Reminder to user's connected WhatsApp number or contact number if available
+          const waPhone = user.whatsapp?.displayPhone || user.whatsapp?.phoneNumberId || user.number;
+          if (user.whatsapp?.connected && user.whatsapp?.phoneNumberId && waPhone) {
+            const expiresAt = new Date(user.paxAI.planExpiresAt);
+            const msDiff = expiresAt.getTime() - now.getTime();
+            const daysLeft = Math.max(1, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+            const waMessage = `⚠️ *Pax26 Plan Expiry Notice*\n\nHi ${user.name || "there"}, your Pax26 *${user.paxAI.plan.toUpperCase()} Plan* expires in *${daysLeft} day(s)* on ${expiresAt.toLocaleDateString("en-NG")}.\n\nPlease fund your wallet and renew your plan to prevent service interruption:\nhttps://www.pax26.com/fund-wallet`;
+
+            await sendWhatsAppAutomationReply({
+              phoneNumberId: user.whatsapp.phoneNumberId,
+              to: waPhone.replace(/\D/g, ""),
+              text: waMessage,
+            }).catch((err) => console.error(`[plan-lifecycle] WA error for ${user.email}:`, err.message));
+          }
         }
-
-        console.log(`[plan-lifecycle] ⚠️ Sending expiry reminder to ${user.email} (${daysLeft} day(s) left)`);
-
-        // Send Email Reminder
-        await sendPlanExpiryReminder(
-          { _id: user._id, email: user.email, name: user.name },
-          { plan: user.paxAI.plan, daysLeft, expiresAt }
-        );
-
-        // Send WhatsApp Reminder to user's connected WhatsApp number or contact number
-        const waPhone = user.whatsapp?.displayPhone || user.whatsapp?.phoneNumberId || user.number;
-        if (user.whatsapp?.connected && user.whatsapp?.phoneNumberId && waPhone) {
-          const waMessage = `⚠️ *Pax26 Plan Expiry Notice*\n\nHi ${user.name || "there"}, your Pax26 *${user.paxAI.plan.toUpperCase()} Plan* expires in *${daysLeft} day(s)* on ${expiresAt.toLocaleDateString("en-NG")}.\n\nPlease fund your wallet and renew your plan to prevent service interruption:\nhttps://www.pax26.com/fund-wallet`;
-
-          await sendWhatsAppAutomationReply({
-            phoneNumberId: user.whatsapp.phoneNumberId,
-            to: waPhone.replace(/\D/g, ""),
-            text: waMessage,
-          });
-        }
-
-        // Record that reminder was sent for this cycle
-        user.paxAI.reminderSentAt = now;
-        await user.save();
-        remindersSent++;
-
       } catch (userErr) {
         console.error(`[plan-lifecycle] Error reminding user ${user._id}:`, userErr.message);
       }
     }
 
-    // ── 2. AUTO-EXPIRY & DOWNGRADE EXPIRED PLANS ──────────────────────────────
+    // ── 2. AUTO-RENEW OR DOWNGRADE EXPIRED PLANS ──────────────────────────────
     const expiredUsers = await UserModel.find({
       "paxAI.plan": { $ne: "free" },
       "paxAI.planExpiresAt": { $lte: now },
-    });
+    }).select("_id email");
 
     for (const user of expiredUsers) {
       try {
-        console.log(`[plan-lifecycle] 📉 Downgrading expired user ${user.email} from ${user.paxAI.plan} to free`);
-
-        user.paxAI.plan = "free";
-        user.paxAI.productsLimit = 20; // Revert to Free plan limit
-        user.paxAI.maxMonthlyMessages = 200;
-        user.paxAI.broadcastContactsLimit = 0;
-        user.paxAI.scheduledBroadcast = false;
-        user.paxAI.segmentation = false;
-        user.paxAI.bulkSequences = false;
-        user.paxAI.salesAnalyticsEnabled = false;
-        user.paxAI.leadFollowupEnabled = false;
-        user.paxAI.leadQualificationEnabled = false;
-        user.paxAI.productRecommendations = false;
-        user.paxAI.removeBranding = false;
-        user.paxAI.multiStaff = 0;
-        user.paxAI.customStorefrontDomain = false;
-        user.paxAI.lastUpdated = now;
-
-        await user.save();
-        expiredCount++;
-
+        const res = await processPlanExpirationOrRenewal(user._id);
+        if (res.action === "renewed") {
+          autoRenewedCount++;
+        } else if (res.action === "downgraded") {
+          downgradedCount++;
+        }
       } catch (err) {
-        console.error(`[plan-lifecycle] Error downgrading user ${user._id}:`, err.message);
+        console.error(`[plan-lifecycle] Error processing expired user ${user._id}:`, err.message);
       }
     }
 
-    console.log(`[plan-lifecycle] ✅ Done. Reminders sent: ${remindersSent}, Expired downgraded: ${expiredCount}`);
+    console.log(`[plan-lifecycle] ✅ Sweep complete. Reminders sent: ${remindersSent}, Auto-renewed: ${autoRenewedCount}, Downgraded: ${downgradedCount}`);
 
     return NextResponse.json({
       success: true,
       remindersSent,
-      expiredCount,
+      autoRenewedCount,
+      downgradedCount,
     });
 
   } catch (err) {

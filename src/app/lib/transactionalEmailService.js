@@ -119,59 +119,72 @@ export async function sendWalletTopUpReceipt(userId, { amount, balanceAfter, ref
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   2. PLAN ACTIVATION RECEIPT
+   2. PLAN ACTIVATION & AUTO-RENEWAL RECEIPT
    ═══════════════════════════════════════════════════════════════ */
-function buildPlanReceiptHtml({ userName, plan, price, expiresAt }) {
+function buildPlanReceiptHtml({ userName, plan, price, expiresAt, isAutoRenew = false }) {
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
   const expiry    = expiresAt ? new Date(expiresAt).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "long" }) : "30 days from now";
 
+  const greetingMessage = isAutoRenew
+    ? `Hi <strong>${userName || "there"}</strong>, your <strong>${planLabel} Plan</strong> has been automatically renewed for another 30 days using your wallet balance. ₦${Number(price || 0).toLocaleString()} was charged from your wallet. 🎉`
+    : `Hi <strong>${userName || "there"}</strong>, your <strong>${planLabel} Plan</strong> has been activated successfully. 🎉 Your AI sales agent and all plan features are now live.`;
+
   const body = `
     <p style="color:#555;font-size:14px;margin:0 0 20px;line-height:1.6;">
-      Hi <strong>${userName || "there"}</strong>, your <strong>${planLabel} Plan</strong> has been activated successfully. 🎉
-      Your AI sales agent and all plan features are now live.
+      ${greetingMessage}
     </p>
     <div style="background:#f8f8f6;border-radius:14px;padding:18px 20px;margin-bottom:24px;border:1px solid #e8e8e6;">
       <table width="100%" cellpadding="0" cellspacing="0">
         ${infoRow("Plan", `<strong>${planLabel} Plan</strong>`)}
         ${price ? infoRow("Amount Paid", `₦${Number(price).toLocaleString()}`) : ""}
+        ${infoRow("Type", isAutoRenew ? `<span style="color:#059669;font-weight:700;">Automatic Renewal</span>` : "New Activation")}
         ${infoRow("Billing Cycle", "Monthly (30 days)")}
         ${infoRow("Expires On", expiry)}
-        ${infoRow("Activated At", NG_TIME())}
+        ${infoRow("Processed At", NG_TIME())}
         ${infoRow("Status", `<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Active ✓</span>`)}
       </table>
     </div>
-    ${ctaButton(DASHBOARD, "Go to Dashboard →", "#6366f1")}
+    ${ctaButton(DASHBOARD, "Go to Dashboard →", isAutoRenew ? "#10b981" : "#6366f1")}
     <p style="color:#aaa;font-size:12px;margin:16px 0 0;text-align:center;line-height:1.6;">
-      Your plan renews every 30 days. Top up your wallet before the expiry date to auto-renew.<br/>
+      Your plan renews every 30 days. Maintain sufficient wallet balance for automatic renewal.<br/>
       Questions? <a href="mailto:info@pax26.com" style="color:#6366f1;">info@pax26.com</a>
     </p>`;
 
   return shell({
-    headerGradient: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-    headerIcon: "🚀",
-    headerTitle: `${planLabel} Plan Activated!`,
-    headerSub: "Your Pax26 AI Commerce plan is now live",
+    headerGradient: isAutoRenew
+      ? "linear-gradient(135deg, #10b981, #059669)"
+      : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    headerIcon: isAutoRenew ? "🔄" : "🚀",
+    headerTitle: isAutoRenew ? `${planLabel} Plan Auto-Renewed!` : `${planLabel} Plan Activated!`,
+    headerSub: isAutoRenew
+      ? "Your plan was renewed automatically using your wallet balance"
+      : "Your Pax26 AI Commerce plan is now live",
     body,
-    footerNote: "This receipt was generated automatically after your plan purchase.",
+    footerNote: isAutoRenew
+      ? "This receipt was generated automatically following an automatic plan renewal."
+      : "This receipt was generated automatically after your plan purchase.",
   });
 }
 
 /**
  * sendPlanActivationReceipt
  * @param {string|ObjectId} userId
- * @param {{ plan: string, price: number, expiresAt?: Date }} opts
+ * @param {{ plan: string, price: number, expiresAt?: Date, isAutoRenew?: boolean }} opts
  */
-export async function sendPlanActivationReceipt(userId, { plan, price, expiresAt } = {}) {
+export async function sendPlanActivationReceipt(userId, { plan, price, expiresAt, isAutoRenew = false } = {}) {
   try {
     const user = await UserModel.findById(userId).select("email name").lean();
     if (!user?.email) return;
 
-    const html    = buildPlanReceiptHtml({ userName: user.name, plan, price, expiresAt });
-    const subject = `🚀 ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan Activated — Welcome to Pax26!`;
+    const html    = buildPlanReceiptHtml({ userName: user.name, plan, price, expiresAt, isAutoRenew });
+    const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+    const subject = isAutoRenew
+      ? `🔄 ${planLabel} Plan Auto-Renewed — Pax26`
+      : `🚀 ${planLabel} Plan Activated — Welcome to Pax26!`;
 
     await new Promise((resolve) => {
       sendpulse.smtpSendMail((result) => {
-        console.log(`[planReceipt] 📧 Sent to ${user.email} | result:`, result?.result);
+        console.log(`[planReceipt] 📧 Sent (${isAutoRenew ? "AutoRenew" : "Manual"}) to ${user.email} | result:`, result?.result);
         resolve();
       }, { subject, from: FROM_EMAIL, to: [{ email: user.email }], html });
     });
@@ -183,12 +196,30 @@ export async function sendPlanActivationReceipt(userId, { plan, price, expiresAt
 /* ═══════════════════════════════════════════════════════════════
    3. PLAN EXPIRY REMINDER EMAIL
    ═══════════════════════════════════════════════════════════════ */
-function buildExpiryReminderHtml({ userName, plan, daysLeft, expiresAt }) {
-  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-  const expiry    = expiresAt ? new Date(expiresAt).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "long" }) : "soon";
-  const urgentColor = daysLeft <= 1 ? "#ef4444" : "#f59e0b";
-  const urgentBg    = daysLeft <= 1 ? "rgba(239,68,68,0.08)" : "rgba(245,158,11,0.08)";
-  const urgentBorder = daysLeft <= 1 ? "rgba(239,68,68,0.25)" : "rgba(245,158,11,0.25)";
+function buildExpiryReminderHtml({ userName, plan, daysLeft, expiresAt, walletBalance, planPrice }) {
+  const planLabel   = plan.charAt(0).toUpperCase() + plan.slice(1);
+  const expiry      = expiresAt
+    ? new Date(expiresAt).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "long" })
+    : "soon";
+
+  // Color tiers: 1-day = red, 2-day = orange-red, 3-day = amber
+  const urgentColor  = daysLeft <= 1 ? "#ef4444" : daysLeft <= 2 ? "#f97316" : "#f59e0b";
+  const urgentBg     = daysLeft <= 1 ? "rgba(239,68,68,0.08)"  : daysLeft <= 2 ? "rgba(249,115,22,0.08)"  : "rgba(245,158,11,0.08)";
+  const urgentBorder = daysLeft <= 1 ? "rgba(239,68,68,0.25)"  : daysLeft <= 2 ? "rgba(249,115,22,0.25)"  : "rgba(245,158,11,0.25)";
+
+  // Wallet balance context row
+  const hasEnough   = planPrice !== null && walletBalance >= planPrice;
+  const fundingGap  = planPrice !== null ? Math.max(0, planPrice - walletBalance) : null;
+
+  let walletRow = "";
+  if (planPrice !== null) {
+    const walletStatus = hasEnough
+      ? `<span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Sufficient ✓</span>`
+      : `<span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700;">Top up ₦${fundingGap.toLocaleString()} needed</span>`;
+    walletRow = `
+      ${infoRow("Renewal Cost", `₦${planPrice.toLocaleString()}`)}
+      ${infoRow("Your Wallet Balance", `₦${walletBalance.toLocaleString()} &nbsp; ${walletStatus}`)}`;
+  }
 
   const body = `
     <p style="color:#555;font-size:14px;margin:0 0 20px;line-height:1.6;">
@@ -196,10 +227,12 @@ function buildExpiryReminderHtml({ userName, plan, daysLeft, expiresAt }) {
       <strong style="color:${urgentColor};">${daysLeft} day${daysLeft !== 1 ? "s" : ""}</strong> on <strong>${expiry}</strong>.
     </p>
     <div style="background:${urgentBg};border:1px solid ${urgentBorder};border-radius:14px;padding:18px 20px;margin-bottom:20px;">
-      <p style="color:${urgentColor};font-size:13px;font-weight:700;margin:0 0 10px;">⚠️ Action Required — Top Up Your Wallet</p>
+      <p style="color:${urgentColor};font-size:13px;font-weight:700;margin:0 0 10px;">⚠️ Action Required — Renew Before It Expires</p>
       <p style="color:#555;font-size:13px;margin:0;line-height:1.6;">
-        To keep your AI agent running and your storefront active, fund your wallet and renew your plan before the expiry date.
-        If your plan expires, your account will revert to the <strong>Free plan</strong> with reduced limits.
+        ${hasEnough
+          ? `Your wallet already has enough to renew. Go to <strong>Dashboard → Billing</strong> and tap <strong>Subscribe</strong> to continue without interruption.`
+          : `Fund your wallet and renew before the expiry date to keep your AI agent and storefront running without interruption.`
+        }
       </p>
     </div>
     <div style="background:#f8f8f6;border-radius:14px;padding:14px 18px;margin-bottom:24px;border:1px solid #e8e8e6;">
@@ -207,21 +240,38 @@ function buildExpiryReminderHtml({ userName, plan, daysLeft, expiresAt }) {
         ${infoRow("Current Plan", `${planLabel} Plan`)}
         ${infoRow("Expires On", expiry)}
         ${infoRow("Days Remaining", `<strong style="color:${urgentColor};">${daysLeft} day${daysLeft !== 1 ? "s" : ""}</strong>`)}
+        ${walletRow}
       </table>
     </div>
-    ${ctaButton(FUND_URL, "Fund My Wallet →", urgentColor)}
-    ${ctaButton(BILLING_URL, "Renew Plan", "#111")}
+    ${hasEnough
+      ? ctaButton(BILLING_URL, "Renew My Plan Now →", urgentColor)
+      : ctaButton(FUND_URL, "Fund My Wallet →", urgentColor)
+    }
+    ${ctaButton(BILLING_URL, "Go to Billing", "#111")}
     <p style="color:#aaa;font-size:12px;margin:16px 0 0;text-align:center;line-height:1.6;">
-      How to renew: Fund your wallet → Dashboard → Billing → Select plan → Subscribe.<br/>
+      How to renew: Fund wallet → Dashboard → Billing → Select plan → Subscribe.<br/>
       Questions? <a href="mailto:info@pax26.com" style="color:#6366f1;">info@pax26.com</a>
-    </p>`;
+    </p>
+    <div style="margin-top:20px;padding:12px 16px;border-radius:10px;background:#f0f0ff;border:1px solid #d0d0ff;">
+      <p style="color:#555;font-size:11px;margin:0;line-height:1.6;">
+        📌 <strong>Heads up:</strong> Pax26 is moving toward a fully paid model as we continue scaling our infrastructure.
+        The free plan is available as a one-time grace period for new accounts. Renewing your plan ensures
+        your business never loses access to AI automation, your storefront, or your customer history.
+      </p>
+    </div>`;
 
   return shell({
     headerGradient: daysLeft <= 1
       ? "linear-gradient(135deg, #ef4444, #dc2626)"
-      : "linear-gradient(135deg, #f59e0b, #d97706)",
-    headerIcon: daysLeft <= 1 ? "🚨" : "⚠️",
-    headerTitle: daysLeft <= 1 ? "Plan Expires Tomorrow!" : "Plan Expiring Soon",
+      : daysLeft <= 2
+        ? "linear-gradient(135deg, #f97316, #ea580c)"
+        : "linear-gradient(135deg, #f59e0b, #d97706)",
+    headerIcon:  daysLeft <= 1 ? "🚨" : daysLeft <= 2 ? "⚠️" : "📅",
+    headerTitle: daysLeft <= 1
+      ? "Plan Expires Tomorrow!"
+      : daysLeft <= 2
+        ? "Plan Expires in 2 Days"
+        : "Plan Expires in 3 Days",
     headerSub: `Your ${planLabel} Plan expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
     body,
     footerNote: "You are receiving this because you have an active paid plan on Pax26.",
@@ -231,16 +281,26 @@ function buildExpiryReminderHtml({ userName, plan, daysLeft, expiresAt }) {
 /**
  * sendPlanExpiryReminder
  * @param {{ _id, email, name }} user
- * @param {{ plan: string, daysLeft: number, expiresAt: Date }} opts
+ * @param {{ plan: string, planKey?: string, daysLeft: number, expiresAt: Date, walletBalance?: number, planPrice?: number|null }} opts
  */
-export async function sendPlanExpiryReminder(user, { plan, daysLeft, expiresAt } = {}) {
+export async function sendPlanExpiryReminder(user, { plan, daysLeft, expiresAt, walletBalance = 0, planPrice = null } = {}) {
   try {
     if (!user?.email) return;
 
-    const html    = buildExpiryReminderHtml({ userName: user.name, plan, daysLeft, expiresAt });
+    const html = buildExpiryReminderHtml({
+      userName: user.name,
+      plan,
+      daysLeft,
+      expiresAt,
+      walletBalance,
+      planPrice,
+    });
+
     const subject = daysLeft <= 1
-      ? `🚨 URGENT: Your Pax26 ${plan} Plan expires TOMORROW — Top up now`
-      : `⚠️ Your Pax26 ${plan} Plan expires in ${daysLeft} days — Action needed`;
+      ? `🚨 URGENT: Your Pax26 ${plan} Plan expires TOMORROW — Renew now`
+      : daysLeft <= 2
+        ? `⚠️ Your Pax26 ${plan} Plan expires in 2 days — Action needed`
+        : `📅 Your Pax26 ${plan} Plan expires in 3 days — Don't forget to renew`;
 
     await new Promise((resolve) => {
       sendpulse.smtpSendMail((result) => {

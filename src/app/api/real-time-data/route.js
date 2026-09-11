@@ -4,6 +4,7 @@ import { connectDb } from "@/app/ults/db/ConnectDb";
 import { verifyToken } from "../helper/VerifyToken";
 import { NextResponse } from "next/server";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
+import { runExpiryCheckForUser, processPlanExpirationOrRenewal } from "@/app/lib/planExpiryCheck";
 
 
 export async function OPTIONS() {
@@ -17,6 +18,14 @@ export async function GET(req) {
         if (!userId) {
             return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
         }
+        
+        // Fire non-blocking plan expiration / auto-renew check followed by reminder check
+        processPlanExpirationOrRenewal(userId)
+          .then(() => runExpiryCheckForUser(userId))
+          .catch((err) =>
+            console.error("[real-time-data] Non-blocking plan lifecycle check failed:", err.message)
+          );
+
         const user = await UserModel.findById({_id:userId});
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 404, headers:corsHeaders() });

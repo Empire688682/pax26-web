@@ -193,6 +193,25 @@ const UserSchema = new mongoose.Schema(
       planExpiresAt: { type: Date, default: null },  // planStartedAt + 30 days
       autoRenew:     { type: Boolean, default: false }, // auto-charge wallet on expiry
       lastUpdated: { type: Date, default: Date.now },
+
+      // ── Expiry Reminder Tracking ──────────────────────────
+      // Tracks which day-windows (["3","2","1"]) have had reminders sent
+      // in the CURRENT billing cycle. Reset to [] on every renewal.
+      reminderWindowSent: { type: [String], default: [] },
+
+      // ── Free-Trial & Paid-Plan History ────────────────────
+      // Set to true the first time the user's free trial month ends
+      // (whether they renew or get downgraded). Used for future paid-only
+      // enforcement — once freeTrialUsed is true, they cannot get another
+      // free period.
+      freeTrialUsed: { type: Boolean, default: false },
+
+      // Set to true permanently the first time a user activates any paid plan.
+      hadPaidPlan: { type: Boolean, default: false },
+
+      // Downgrade audit trail
+      downgradeReason: { type: String, default: null }, // e.g. "expired"
+      downgradeAt:     { type: Date,   default: null },
     },
     /* =====================
        PLAN ANALYTICS (Profitability Tracking)

@@ -106,6 +106,11 @@ export async function POST(req) {
     // Billing cycle
     user.paxAI.planStartedAt = now;
     user.paxAI.planExpiresAt = expiresAt;
+    user.paxAI.reminderWindowSent = []; // Reset sent reminder windows for the new cycle
+    user.paxAI.reminderSentAt = null;
+    if (planKey !== "free") {
+      user.paxAI.hadPaidPlan = true;
+    }
     user.paxAI.lastUpdated   = now;
     if (user.whatsapp && user.whatsapp.contacts && Array.isArray(user.whatsapp.contacts.list)) {
       user.whatsapp.contacts.list.forEach(contact => {
