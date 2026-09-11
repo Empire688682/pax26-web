@@ -9,9 +9,11 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const modelsToTry = [
-    "gemini-3.6-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-pro-preview",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro",
   ];
 
   const lastMessage = messages[messages.length - 1]?.content || "";

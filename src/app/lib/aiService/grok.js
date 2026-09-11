@@ -1,18 +1,16 @@
 import Groq from "groq-sdk";
 
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
 export const callGroqAI = async ({ systemPrompt, messages }) => {
-  const apiKey = (process.env.GROQ_API_KEY || "").trim().replace(/^["']|["']$/g, "");
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is missing or empty");
-  }
-
-  const groq = new Groq({ apiKey });
-
   const modelsToTry = [
-    "groq/compound",
-    "groq/compound-mini",
-    "openai/gpt-oss-120b",
-    "openai/gpt-oss-20b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "llama3-8b-8192",
+    "llama3-70b-8192",
+    "gemma2-9b-it",
   ];
 
   let lastError = null;

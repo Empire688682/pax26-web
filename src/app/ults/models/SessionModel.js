@@ -75,17 +75,6 @@ const SessionSchema = new mongoose.Schema({
         totalSent: { type: Number, default: 0 },       // lifetime follow-up counter for this session
     },
 
-    // ── Active Order & Idempotency Tracking ────────────────────
-    activeOrderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SellerOrder",
-        default: null,
-    },
-    processedMessageIds: {
-        type: [String],
-        default: [],
-    },
-
     // ── Payment stage tracking ─────────────────────────────────
     payment: {
         expectingPayment: { type: Boolean, default: false },        // true when AI shares payment details

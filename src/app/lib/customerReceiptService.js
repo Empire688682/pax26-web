@@ -10,33 +10,17 @@ import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomation
  */
 export async function sendCustomerOrderReceiptWhatsApp(orderId) {
     try {
-        // ── Safeguard 6: Receipts MUST require an explicit Order ID ───────────
-        if (!orderId) {
-            console.error("❌ [customerReceipt] Aborted: Order ID is required for receipt generation.");
-            return { success: false, message: "Missing required orderId parameter" };
-        }
-
-        // ── Part 11 & 12: Order lookup directly from database snapshot ─────────
         const order = await SellerOrderModel.findById(orderId)
             .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
             .lean();
 
-        // Safety Check 1: Order exists
-        if (!order) {
-            console.error(`❌ [customerReceipt] Safety Check Failed: Order ${orderId} does not exist.`);
-            return { success: false, message: "Order not found" };
+        if (!order || !order.customerPhone) {
+            console.warn(`[customerReceipt] Order ${orderId} not found or missing customer phone.`);
+            return { success: false, message: "Order or customer phone missing" };
         }
 
-        // Safety Check 2: Customer phone exists
-        if (!order.customerPhone) {
-            console.error(`❌ [customerReceipt] Safety Check Failed: Order ${orderId} missing customerPhone.`);
-            return { success: false, message: "Customer phone missing" };
-        }
-
-        // Safety Check 3: Seller profile ownership
         const sellerProfile = await SellerProfileModel.findById(order.sellerId).lean();
         if (!sellerProfile) {
-            console.error(`❌ [customerReceipt] Safety Check Failed: Seller profile ${order.sellerId} not found.`);
             return { success: false, message: "Seller profile not found" };
         }
 
@@ -46,24 +30,16 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             return { success: false, message: "WhatsApp not connected for seller" };
         }
 
-        // Plan gate
+        // ── Plan gate: orderReceiptsEnabled ──────────────────────
+        // Default true so legacy users continue to receive receipts.
         const orderReceiptsEnabled = user.paxAI?.orderReceiptsEnabled ?? true;
         if (!orderReceiptsEnabled) {
             console.log(`[customerReceipt] Order receipts disabled on plan '${user.paxAI?.plan}' for seller ${sellerProfile.userId}`);
             return { success: false, message: "Order receipts not available on this plan" };
         }
 
-        // Safety Check 4: Items present in order snapshot
-        const hasSnapshotItems = Array.isArray(order.items) && order.items.length > 0;
-        const hasLegacyProduct = Boolean(order.productId);
-
-        if (!hasSnapshotItems && !hasLegacyProduct) {
-            console.error(`❌ [customerReceipt] Safety Check Failed: Order ${orderId} contains no items.`);
-            return { success: false, message: "Order contains no items" };
-        }
-
         const businessName = sellerProfile.businessName || "Our Store";
-        const proofCode = order.orderCode || order._id.toString().slice(-8).toUpperCase();
+        const proofCode = order._id.toString().slice(-8).toUpperCase();
         const totalPaidVal = Number(order.totalPrice) || 0;
         const deliveryFeeVal = Number(order.deliveryFee) || 0;
         const customerName = order.customerName || "Customer";
@@ -73,24 +49,16 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             day: "numeric",
         });
 
-        // Safety Check 5 & 6: Format items exclusively from locked order snapshot
+        // ── Format items section for multi-product or single-product ────────
         let itemsSection = "";
         let calculatedSubtotal = 0;
 
-        if (hasSnapshotItems) {
-            calculatedSubtotal = order.items.reduce((sum, i) => {
-                const itemPrice = Number(i.unitPriceSnapshot) || Number(i.price) || 0;
-                const itemQty = Number(i.quantity) || 1;
-                return sum + (itemPrice * itemQty);
-            }, 0);
-
+        if (order.items && order.items.length > 0) {
+            calculatedSubtotal = order.items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
             itemsSection = order.items
                 .map((i) => {
-                    const itemName = i.nameSnapshot || i.name || "Item";
-                    const itemQty = Number(i.quantity) || 1;
-                    const itemPrice = Number(i.unitPriceSnapshot) || Number(i.price) || 0;
-                    const linePrice = itemPrice * itemQty;
-                    return `• Item: ${itemName} (x${itemQty})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
+                    const linePrice = (Number(i.price) || 0) * (Number(i.quantity) || 1);
+                    return `• Item: ${i.name} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
                 })
                 .join("\n");
         } else {
@@ -102,13 +70,14 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
         }
 
         const subtotalVal = calculatedSubtotal > 0 ? calculatedSubtotal : Math.max(0, totalPaidVal - deliveryFeeVal);
-
-        // Safety Check 7: Mathematical harmony check: subtotalVal + deliveryFeeVal === finalTotalPaid
-        const expectedTotal = subtotalVal + deliveryFeeVal;
         let finalTotalPaid = totalPaidVal;
 
-        if (finalTotalPaid <= 0 || Math.abs(finalTotalPaid - expectedTotal) > 0) {
-            finalTotalPaid = expectedTotal;
+        // Mathematical harmony check: Enforce subtotalVal + deliveryFeeVal = finalTotalPaid
+        if (subtotalVal > 0) {
+            const expectedTotal = subtotalVal + deliveryFeeVal;
+            if (finalTotalPaid <= 0 || Math.abs(finalTotalPaid - expectedTotal) > 0) {
+                finalTotalPaid = expectedTotal;
+            }
         }
 
         const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
