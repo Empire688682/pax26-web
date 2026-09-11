@@ -6,6 +6,7 @@ import { formatPrice } from "@/app/lib/currency/currencyHelper";
 import { getTheme } from "@/app/lib/store/storeThemes";
 import { useCart } from "@/app/lib/store/useCart";
 import { buildMultiProductWhatsAppMessage } from "@/app/lib/store/buildMultiProductWhatsAppMessage";
+import { validateDeliveryLocation } from "@/app/lib/store/validateDeliveryLocation";
 
 /* ── Icons ──────────────────────────────────────────────── */
 const SearchIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>);
@@ -246,11 +247,15 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
       ? Number(selectedZone.fee) || 0
       : 0;
 
-  const grandTotal = totalPrice + activeDeliveryFee;
+  const locationValidation = fulfillmentMethod === "delivery"
+    ? validateDeliveryLocation(cart, deliveryLocation, store.deliveryCoverage || "Nationwide")
+    : { valid: true };
+
+  const canCheckout = locationValidation.valid;
 
   const handleCheckoutWhatsApp = (e) => {
     e.preventDefault();
-    if (!cart.length) return;
+    if (!cart.length || !canCheckout) return;
 
     const baseWaHref = store.whatsappHref?.split("?")[0] || "";
     if (!baseWaHref) return;
@@ -340,7 +345,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                     style={{
                       flex: 1,
                       padding: "8px 10px",
-                      borderRadius: "9px",
+                      borderRadius: "99px",
                       border: "none",
                       background: fulfillmentMethod === "delivery" ? t.card : "transparent",
                       color: fulfillmentMethod === "delivery" ? t.textPrimary : t.textSecondary,
@@ -363,7 +368,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                   style={{
                     flex: 1,
                     padding: "8px 10px",
-                    borderRadius: "9px",
+                    borderRadius: "99px",
                     border: "none",
                     background: fulfillmentMethod === "pickup" ? t.card : "transparent",
                     color: fulfillmentMethod === "pickup" ? t.textPrimary : t.textSecondary,
@@ -410,7 +415,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                 )}
 
                 <div>
-                  <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Delivery Address (Full Address)</label>
+                  <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Full Delivery Address *</label>
                   <input
                     type="text"
                     placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
@@ -419,6 +424,21 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                     style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
                   />
                 </div>
+
+                {!locationValidation.valid && (
+                  <div style={{
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    background: locationValidation.reason === "empty_address" ? "#fef3c7" : "#fef2f2",
+                    border: `1px solid ${locationValidation.reason === "empty_address" ? "#fde68a" : "#fecaca"}`,
+                    fontSize: "12px",
+                    color: locationValidation.reason === "empty_address" ? "#92400e" : "#ef4444",
+                    fontWeight: 700,
+                    lineHeight: 1.4,
+                  }}>
+                    {locationValidation.message}
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary, display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -450,7 +470,24 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
 
             <button
               onClick={handleCheckoutWhatsApp}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, fontSize: "15px", border: "none", cursor: "pointer", boxShadow: "0 6px 20px rgba(37, 211, 102, 0.35)" }}
+              disabled={!canCheckout}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                padding: "14px",
+                borderRadius: "12px",
+                background: canCheckout ? "#25d366" : t.border,
+                color: canCheckout ? "#fff" : t.textSecondary,
+                fontWeight: 900,
+                fontSize: "15px",
+                border: "none",
+                cursor: canCheckout ? "pointer" : "not-allowed",
+                opacity: canCheckout ? 1 : 0.6,
+                boxShadow: canCheckout ? "0 6px 20px rgba(37, 211, 102, 0.35)" : "none",
+              }}
             >
               <WhatsAppIcon /> Order on WhatsApp ({totalQuantity})
             </button>

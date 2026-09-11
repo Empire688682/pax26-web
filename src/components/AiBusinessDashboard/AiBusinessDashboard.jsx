@@ -282,12 +282,12 @@ function ProductMediaUploader({ images, onChange, pax26, sellerId }) {
    PRODUCT BUILDER  (seller only)
 ══════════════════════════════════════════════════════════ */
 function ProductBuilder({ products, onChange, pax26, sellerId, currency = "NGN" }) {
-  const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", isPhysical: true, description: "", category: "", tags: [], stock: "", images: [] });
+  const emptyProduct = () => ({ name: "", price: "", discountPrice: "", deliveryFee: "", deliveryTimeFrame: "", locationNotes: "", allowedDeliveryLocations: "Nationwide", deliveryPricingModel: "store_default", isPhysical: true, description: "", category: "", tags: [], stock: "", images: [] });
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyProduct());
 
   const startNew = () => { setDraft(emptyProduct()); setEditing("new"); };
-  const startEdit = (i) => { const prod = products[i]; setDraft({ ...prod, images: Array.isArray(prod.images) ? [...prod.images] : [] }); setEditing(i); };
+  const startEdit = (i) => { const prod = products[i]; setDraft({ ...prod, allowedDeliveryLocations: prod.allowedDeliveryLocations || prod.locationNotes || "Nationwide", deliveryPricingModel: prod.deliveryPricingModel || "store_default", images: Array.isArray(prod.images) ? [...prod.images] : [] }); setEditing(i); };
 
   const save = () => {
     if (!draft.name.trim() || !String(draft.price).trim()) return;
@@ -337,7 +337,10 @@ function ProductBuilder({ products, onChange, pax26, sellerId, currency = "NGN" 
                 <ThemedInput label={`Delivery Fee (${getCurrencySymbol(currency)})`} pax26={p} type="number" value={draft.deliveryFee} onChange={e => setDraft(d => ({ ...d, deliveryFee: e.target.value }))} placeholder="1000" />
                 <ThemedInput label="Delivery Time" pax26={p} value={draft.deliveryTimeFrame} onChange={e => setDraft(d => ({ ...d, deliveryTimeFrame: e.target.value }))} placeholder="24-48 hours" />
               </div>
-              <ThemedInput label="Delivery Location" pax26={p} value={draft.locationNotes} onChange={e => setDraft(d => ({ ...d, locationNotes: e.target.value }))} placeholder="e.g. Lagos only" />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
+                <ThemedInput label="Allowed Delivery Locations" pax26={p} value={draft.allowedDeliveryLocations || draft.locationNotes || ""} onChange={e => setDraft(d => ({ ...d, allowedDeliveryLocations: e.target.value, locationNotes: e.target.value }))} placeholder="e.g. Lagos, Ogun or Nationwide" />
+                <ThemedSelect label="Delivery Pricing Model" value={draft.deliveryPricingModel || "store_default"} onChange={v => setDraft(d => ({ ...d, deliveryPricingModel: v }))} options={[{ value: "store_default", label: "Inherit Store Default" }, { value: "flat", label: "Flat Rate Fee" }, { value: "zones", label: "Location-Based Zones" }, { value: "quote", label: "Quote on WhatsApp" }]} pax26={p} />
+              </div>
             </div>
           )}
           <ThemedTextarea label="Description" pax26={p} value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="Describe the product…" rows={2} />

@@ -82,6 +82,17 @@ const SellerProductSchema = new mongoose.Schema({
         type: String, // "Only within Lagos", "Nationwide", etc
     },
 
+    allowedDeliveryLocations: {
+        type: String, // "Lagos, Ogun", "Nationwide", etc.
+        default: "Nationwide",
+    },
+
+    deliveryPricingModel: {
+        type: String,
+        enum: ["flat", "zones", "quote", "store_default"],
+        default: "store_default",
+    },
+
     isPhysical: {
         type: Boolean,
         default: true,

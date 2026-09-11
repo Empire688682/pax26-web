@@ -95,8 +95,10 @@ ${products
         const isAvailable = p.isAvailable !== false && p.stock > 0;
         const firstImage  = p.images?.[0]?.url || null;
         const desc = p.description ? p.description.slice(0, 100).replace(/\s+/g, " ") : "";
+        const allowedLocs = p.allowedDeliveryLocations || p.locationNotes || profile.deliveryCoverage || "Nationwide";
+        const delModel = p.deliveryPricingModel && p.deliveryPricingModel !== "store_default" ? p.deliveryPricingModel : (profile.fulfillmentSettings?.deliveryModel || "flat");
 
-        return `[Product ${i + 1}] ID: ${p._id} | Name: ${p.name} | Price: ${currencySymbol}${Number(p.price).toLocaleString()}${p.discountPrice ? ` (Discount: ${currencySymbol}${Number(p.discountPrice).toLocaleString()})` : ""}${p.deliveryFee ? ` | Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""} | Cat: ${p.category || "General"} | Stock: ${isAvailable ? "Available" : "Out of stock"}${desc ? ` | ${desc}` : ""}${firstImage ? `\nIMAGE_URL_TEASER: ${firstImage}` : ""}`;
+        return `[Product ${i + 1}] ID: ${p._id} | Name: ${p.name} | Price: ${currencySymbol}${Number(p.price).toLocaleString()}${p.discountPrice ? ` (Discount: ${currencySymbol}${Number(p.discountPrice).toLocaleString()})` : ""}${p.deliveryFee ? ` | Delivery Fee: ${currencySymbol}${Number(p.deliveryFee).toLocaleString()}` : ""} | Allowed Delivery Locations: ${allowedLocs} | Delivery Pricing Model: ${delModel} | Cat: ${p.category || "General"} | Stock: ${isAvailable ? "Available" : "Out of stock"}${desc ? ` | ${desc}` : ""}${firstImage ? `\nIMAGE_URL_TEASER: ${firstImage}` : ""}`;
       })
       .join("\n\n")}`
     : "\n## Product Catalogue:\nNo products have been added yet. Let customers know you will update them shortly.";

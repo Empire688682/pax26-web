@@ -51,7 +51,7 @@ export function buildSearchMatchContext(products, originalQuery, currency = "NGN
   Physical Product: ${p.isPhysical ? "Yes" : "No (digital)"}
   ${p.deliveryFee != null ? `Delivery Fee: ${symbol}${Number(p.deliveryFee).toLocaleString()}` : ""}
   ${p.deliveryTimeFrame ? `Delivery Time: ${p.deliveryTimeFrame}` : ""}
-  ${p.locationNotes ? `Delivery Location: ${p.locationNotes}` : ""}
+  ${p.allowedDeliveryLocations || p.locationNotes ? `Allowed Delivery Locations: ${p.allowedDeliveryLocations || p.locationNotes}` : ""}
   ${variantSummary ? `Available Options:\n${variantSummary}` : ""}`;
     })
     .join("\n\n");

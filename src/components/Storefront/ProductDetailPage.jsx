@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatPrice } from "@/app/lib/currency/currencyHelper";
 import { getTheme } from "@/app/lib/store/storeThemes";
 import { useCart } from "@/app/lib/store/useCart";
+import { validateDeliveryLocation } from "@/app/lib/store/validateDeliveryLocation";
 import { handleWhatsAppRedirect, WhatsAppChooserModal } from "./StorefrontPage";
 
 /* ── Icons ──────────────────────────────────────────────── */
@@ -87,7 +88,7 @@ function RelatedProducts({ products, currentId, store, slug, sessionToken, theme
   );
 }
 
-function buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken) {
+function buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken, deliveryLocation, fulfillmentMethod, store) {
   const price = product.discountPrice || product.price;
   const BASE = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
   const productUrl = `${BASE}/store/${slug}/${product.slug || product._id}${sessionToken ? `?session=${sessionToken}` : ""}`;
@@ -96,9 +97,118 @@ function buildWhatsAppMessage(product, selectedVariants, currency, slug, session
   const variantParts = Object.entries(selectedVariants).map(([label, value]) => `${label}: ${value}`).filter(Boolean);
   if (variantParts.length > 0) text += ` (${variantParts.join(", ")})`;
   text += ` — priced at ${formatPrice(price, currency)}.`;
+
+  if (fulfillmentMethod === "pickup") {
+    text += `\n\n🏬 *Fulfillment Method:* Store Pick-up`;
+    if (store?.fulfillmentSettings?.pickupAddress || store?.liveLocation) {
+      text += ` (${store.fulfillmentSettings?.pickupAddress || store.liveLocation})`;
+    }
+  } else if (deliveryLocation?.trim()) {
+    text += `\n\n📍 *Delivery Address:* ${deliveryLocation.trim()}`;
+  }
+
   text += `\n\nProduct page: ${productUrl}`;
   text += "\n\nCould you assist me with this order?";
   return encodeURIComponent(text);
+}
+
+function ProductAddressModal({ open, onClose, product, store, selectedVariants, currency, slug, sessionToken, theme, onConfirm }) {
+  const t = theme;
+  const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
+  const allowPickup = store.fulfillmentSettings?.allowPickup === true;
+  const [fulfillmentMethod, setFulfillmentMethod] = useState(allowPickup && !allowDelivery ? "pickup" : "delivery");
+  const [deliveryLocation, setDeliveryLocation] = useState("");
+
+  if (!open) return null;
+
+  const locationValidation = fulfillmentMethod === "delivery"
+    ? validateDeliveryLocation([product], deliveryLocation, store.deliveryCoverage || "Nationwide")
+    : { valid: true };
+
+  const handleProceed = (e) => {
+    e.preventDefault();
+    if (!locationValidation.valid) return;
+    onConfirm(deliveryLocation, fulfillmentMethod);
+  };
+
+  const allowedLocText = product.allowedDeliveryLocations || product.locationNotes || store.deliveryCoverage || "Nationwide";
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 300, backdropFilter: "blur(4px)" }} />
+      <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "440px", maxWidth: "92vw", background: t.card, zIndex: 301, borderRadius: "20px", border: `1px solid ${t.border}`, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${t.border}`, paddingBottom: "12px" }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 900, color: t.textPrimary }}>Delivery Address</h3>
+            <p style={{ margin: 0, fontSize: "11px", color: t.textSecondary }}>Required to complete order on WhatsApp</p>
+          </div>
+          <button onClick={onClose} style={{ background: t.pageBg, border: `1px solid ${t.border}`, color: t.textSecondary, borderRadius: "8px", width: "30px", height: "30px", cursor: "pointer", fontWeight: 800 }}>✕</button>
+        </div>
+
+        {/* Product snippet */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", background: t.pageBg, padding: "10px", borderRadius: "12px", border: `1px solid ${t.border}` }}>
+          {product.images?.[0]?.url ? (
+            <img src={product.images[0].url} alt={product.name} style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover" }} />
+          ) : (
+            <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: t.card, display: "flex", alignItems: "center", justifyContent: "center", color: t.textSecondary }}><PackageIcon /></div>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: "13px", fontWeight: 800, color: t.textPrimary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</p>
+            <p style={{ margin: 0, fontSize: "13px", fontWeight: 900, color: t.accent }}>{formatPrice(product.discountPrice || product.price, currency)}</p>
+          </div>
+        </div>
+
+        {/* Allowed Delivery Info */}
+        <div style={{ fontSize: "12px", color: t.textSecondary, background: `${t.accent}10`, border: `1px solid ${t.accent}33`, padding: "8px 12px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "6px" }}>
+          <MapPinIcon /> <span><strong>Allowed Delivery:</strong> {allowedLocText}</span>
+        </div>
+
+        {/* Fulfillment toggle */}
+        {allowPickup && allowDelivery && (
+          <div style={{ display: "flex", background: t.pageBg, borderRadius: "12px", padding: "3px", border: `1px solid ${t.border}` }}>
+            <button onClick={() => setFulfillmentMethod("delivery")} style={{ flex: 1, padding: "8px", borderRadius: "99px", border: "none", background: fulfillmentMethod === "delivery" ? t.card : "transparent", color: fulfillmentMethod === "delivery" ? t.textPrimary : t.textSecondary, fontWeight: 800, fontSize: "12px", cursor: "pointer" }}>
+              🚚 Delivery
+            </button>
+            <button onClick={() => setFulfillmentMethod("pickup")} style={{ flex: 1, padding: "8px", borderRadius: "99px", border: "none", background: fulfillmentMethod === "pickup" ? t.card : "transparent", color: fulfillmentMethod === "pickup" ? t.textPrimary : t.textSecondary, fontWeight: 800, fontSize: "12px", cursor: "pointer" }}>
+              🏬 Store Pick-up
+            </button>
+          </div>
+        )}
+
+        {fulfillmentMethod === "delivery" ? (
+          <div>
+            <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase" }}>Full Delivery Address *</label>
+            <input
+              type="text"
+              placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
+              value={deliveryLocation}
+              onChange={(e) => setDeliveryLocation(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
+              autoFocus
+            />
+          </div>
+        ) : (
+          <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary }}>
+            🏬 <strong>Pick-up Address:</strong> {store.fulfillmentSettings?.pickupAddress || store.liveLocation || "Contact seller"}
+          </div>
+        )}
+
+        {!locationValidation.valid && (
+          <div style={{ padding: "10px 12px", borderRadius: "10px", background: locationValidation.reason === "empty_address" ? "#fef3c7" : "#fef2f2", border: `1px solid ${locationValidation.reason === "empty_address" ? "#fde68a" : "#fecaca"}`, fontSize: "12px", color: locationValidation.reason === "empty_address" ? "#92400e" : "#ef4444", fontWeight: 700, lineHeight: 1.4 }}>
+            {locationValidation.message}
+          </div>
+        )}
+
+        <button
+          onClick={handleProceed}
+          disabled={!locationValidation.valid}
+          style={{ width: "100%", padding: "14px", borderRadius: "12px", background: locationValidation.valid ? "#25d366" : t.border, color: locationValidation.valid ? "#fff" : t.textSecondary, fontWeight: 900, fontSize: "14px", border: "none", cursor: locationValidation.valid ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", transition: "all 0.15s" }}
+        >
+          <WhatsAppIcon /> Complete Order on WhatsApp
+        </button>
+      </div>
+    </>
+  );
 }
 
 export default function ProductDetailPage({ store, product, allProducts, slug, isPreview, sessionToken }) {
@@ -109,6 +219,7 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState({});
   const [imgError, setImgError] = useState(false);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const currency = store.currency || "NGN";
   const displayPrice = product.discountPrice || product.price;
@@ -127,7 +238,25 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
     });
   };
 
-  const whatsappMessage = buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken);
+  const handleBuyClick = (e) => {
+    e.preventDefault();
+    if (isOutOfStock) return;
+    setAddressModalOpen(true);
+  };
+
+  const handleConfirmAddress = (deliveryLocation, fulfillmentMethod) => {
+    setAddressModalOpen(false);
+    const msg = buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken, deliveryLocation, fulfillmentMethod, store);
+    const baseWa = store.whatsappHref ? store.whatsappHref.split("?")[0] : "";
+    if (baseWa) {
+      const fullUrl = `${baseWa}?text=${msg}`;
+      handleWhatsAppRedirect(null, fullUrl, (messengerUrl, businessUrl) => {
+        setWaChooserModal({ visible: true, messengerUrl, businessUrl });
+      });
+    }
+  };
+
+  const whatsappMessage = buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken, "", "delivery", store);
   const whatsappHref = store.whatsappHref ? `${store.whatsappHref}?text=${whatsappMessage}` : null;
   const storeHref = `/store/${slug}${sessionToken ? `?session=${sessionToken}` : ""}`;
 
@@ -159,10 +288,10 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                 <span style={{ fontSize: "16px", fontWeight: 800, color: t.textPrimary, letterSpacing: "-0.01em" }}>{store.businessName}</span>
               </Link>
               {store.whatsappHref && (
-                <a href={store.whatsappHref} onClick={(e) => openWhatsApp(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" className="sf-desktop-chat-btn"
-                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "12px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 2px 10px rgba(37,211,102,0.3)" }}>
-                  <WhatsAppIcon /> Chat
-                </a>
+                <button onClick={handleBuyClick} className="sf-desktop-chat-btn"
+                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "12px", border: "none", cursor: "pointer", boxShadow: "0 2px 10px rgba(37,211,102,0.3)" }}>
+                  <WhatsAppIcon /> Chat & Buy
+                </button>
               )}
             </div>
             {/* Compact Breadcrumb CTA */}
@@ -273,9 +402,14 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
 
               {/* Trust & Delivery Card */}
               <div style={{ background: t.card, borderRadius: "16px", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "10px", border: `1px solid ${t.border}` }}>
-                <p style={{ margin: 0, fontSize: "10px", fontWeight: 900, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em" }}>Fulfilment & Guarantee</p>
+                <p style={{ margin: 0, fontSize: "10px", fontWeight: 900, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em" }}>Fulfilment & Delivery Information</p>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
                   <ShieldCheckIcon /> Verified Seller Order Protection
+                </div>
+
+                {/* Per-Product Allowed Delivery Location */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 700 }}>
+                  <MapPinIcon /> <span>Allowed Delivery: <strong style={{ color: t.accent }}>{product.allowedDeliveryLocations || product.locationNotes || store.deliveryCoverage || "Nationwide"}</strong></span>
                 </div>
 
                 {product.fulfillmentType === "pickup_only" ? (
@@ -294,18 +428,13 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                         <TruckIcon />
                         Delivery Fee: Calculated upon dispatch / quote
                       </div>
-                    ) : product.isPhysical && (product.deliveryFee != null || product.deliveryTimeFrame || product.locationNotes) && (
+                    ) : product.isPhysical && (product.deliveryFee != null || product.deliveryTimeFrame) && (
                       <>
                         {product.deliveryFee != null && (
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
                             <TruckIcon />
                             {product.deliveryFee === 0 ? "Free delivery" : `Delivery Fee: ${formatPrice(product.deliveryFee, currency)}`}
                             {product.deliveryTimeFrame && ` · (${product.deliveryTimeFrame})`}
-                          </div>
-                        )}
-                        {product.locationNotes && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textPrimary, fontWeight: 600 }}>
-                            <MapPinIcon /> {product.locationNotes}
                           </div>
                         )}
                       </>
@@ -352,10 +481,10 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                       </div>
                     )}
 
-                    <a href={isOutOfStock ? undefined : whatsappHref} onClick={(e) => !isOutOfStock && openWhatsApp(e, whatsappHref)} target={isOutOfStock ? undefined : "_blank"} rel="noopener noreferrer"
-                      style={{ flex: "1.2 1 180px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "15px 20px", borderRadius: "14px", background: isOutOfStock ? t.border : "#25d366", color: isOutOfStock ? t.textSecondary : "#fff", fontWeight: 900, fontSize: "15px", textDecoration: "none", cursor: isOutOfStock ? "not-allowed" : "pointer", boxShadow: isOutOfStock ? "none" : "0 6px 20px rgba(37,211,102,0.35)", pointerEvents: isOutOfStock ? "none" : "auto" }}>
+                    <button onClick={handleBuyClick} disabled={isOutOfStock}
+                      style={{ flex: "1.2 1 180px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "15px 20px", borderRadius: "14px", background: isOutOfStock ? t.border : "#25d366", color: isOutOfStock ? t.textSecondary : "#fff", fontWeight: 900, fontSize: "15px", border: "none", cursor: isOutOfStock ? "not-allowed" : "pointer", boxShadow: isOutOfStock ? "none" : "0 6px 20px rgba(37,211,102,0.35)" }}>
                       <WhatsAppIcon />{isOutOfStock ? "Out of Stock" : "Buy on WhatsApp"}
-                    </a>
+                    </button>
                   </div>
 
                   {cartState.totalQuantity > 0 && (
@@ -421,14 +550,27 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
 
           {/* WhatsApp Chat Tab */}
           {store.whatsappHref && (
-            <a href={whatsappHref || store.whatsappHref} onClick={(e) => openWhatsApp(e, whatsappHref || store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: "#25d366", textDecoration: "none", fontSize: "10px", fontWeight: 800 }}>
+            <button onClick={handleBuyClick} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: "#25d366", background: "none", border: "none", cursor: "pointer", fontSize: "10px", fontWeight: 800 }}>
               <WhatsAppIcon />
               <span>Chat & Buy</span>
-            </a>
+            </button>
           )}
         </div>
 
         <Pax26Footer />
+
+        <ProductAddressModal
+          open={addressModalOpen}
+          onClose={() => setAddressModalOpen(false)}
+          product={product}
+          store={store}
+          selectedVariants={selectedVariants}
+          currency={currency}
+          slug={slug}
+          sessionToken={sessionToken}
+          theme={t}
+          onConfirm={handleConfirmAddress}
+        />
 
         <WhatsAppChooserModal
           visible={waChooserModal.visible}
@@ -451,3 +593,4 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
     </>
   );
 }
+
