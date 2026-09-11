@@ -191,18 +191,159 @@ function VariantBuilder({ variants, onChange, p }) {
   );
 }
 
+/* ── Store Delivery Pricing Preview Component ─────────── */
+function StoreDeliveryPricingPreview({ fulfillmentSettings, currency = "NGN", p, form, set }) {
+  const sym = getCurrencySymbol(currency);
+  const storeModel = fulfillmentSettings?.deliveryModel || "flat";
+  const deliveryZones = fulfillmentSettings?.deliveryZones || [];
+  const flatFee = fulfillmentSettings?.flatDeliveryFee || 0;
+
+  const zoneAreasStr = deliveryZones.map(z => z.name ? `${z.name}${z.areas ? ` (${z.areas})` : ""}` : z.areas).filter(Boolean).join(", ");
+  const defaultLocations = form.allowedDeliveryLocations || form.locationNotes || zoneAreasStr || fulfillmentSettings?.deliveryCoverage || "Nationwide";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: p?.secondaryBg, padding: "16px", borderRadius: "14px", border: `1px solid ${p?.border}`, marginTop: "6px" }}>
+      
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", paddingBottom: "10px", borderBottom: `1px solid ${p?.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "16px" }}>🏬</span>
+          <div>
+            <p style={{ margin: 0, fontSize: "12px", fontWeight: 800, color: p?.textPrimary }}>
+              Store Delivery Pricing Model: <span style={{ color: p?.primary, textTransform: "uppercase" }}>{storeModel === "flat" ? "Flat Rate Fee" : storeModel === "zones" ? "Location-Based Zones" : "Quote on WhatsApp"}</span>
+            </p>
+            <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.6 }}>
+              Reflected directly from your Seller Profile Settings
+            </p>
+          </div>
+        </div>
+        <a href="/dashboard/automations/ai-business-dashboard" style={{ fontSize: "11px", fontWeight: 700, color: p?.primary, textDecoration: "none" }}>
+          Edit Store Profile Rates →
+        </a>
+      </div>
+
+      {/* Model 1: Flat Rate */}
+      {storeModel === "flat" && (
+        <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${p?.primary}0d`, border: `1px solid ${p?.primary}25`, fontSize: "12px" }}>
+          <p style={{ margin: 0, fontWeight: 700, color: p?.textPrimary }}>
+            Default Store Flat Fee: {formatPrice(flatFee, currency)}
+          </p>
+          <p style={{ margin: "2px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.7 }}>
+            Orders with this product will use this flat delivery fee by default. You can enter a custom fee override below.
+          </p>
+        </div>
+      )}
+
+      {/* Model 2: Location-Based Zones */}
+      {storeModel === "zones" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: p?.textPrimary, opacity: 0.7 }}>
+            Active Store Delivery Zones (Selected by customer at storefront checkout):
+          </p>
+          {deliveryZones.length > 0 ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px" }}>
+              {deliveryZones.map((z, idx) => (
+                <div key={idx} style={{ padding: "8px 10px", borderRadius: "8px", background: p?.bg || `${p?.primary}0d`, border: `1px solid ${p?.border}`, fontSize: "11px" }}>
+                  <div style={{ fontWeight: 800, color: p?.textPrimary, marginBottom: "2px" }}>📍 {z.name || `Zone #${idx + 1}`}</div>
+                  {z.areas && <div style={{ opacity: 0.7, fontSize: "10px", marginBottom: "4px" }}>{z.areas}</div>}
+                  <div style={{ fontWeight: 900, color: p?.primary }}>{formatPrice(z.fee, currency)} {z.timeframe ? `· ${z.timeframe}` : ""}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: "8px 12px", borderRadius: "8px", background: "#fef3c7", color: "#92400e", fontSize: "11px", fontWeight: 700 }}>
+              ⚠️ No delivery zones defined in seller profile yet.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Model 3: Quote on WhatsApp */}
+      {storeModel === "quote" && (
+        <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${p?.primary}0d`, border: `1px solid ${p?.primary}25`, fontSize: "12px", color: p?.textPrimary }}>
+          💬 <strong>Custom Quote on WhatsApp:</strong> Delivery fee for orders containing this item will be calculated after dispatch and negotiated directly with the buyer.
+        </div>
+      )}
+
+      {/* Dynamic Delivery Inputs */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "10px", paddingTop: "6px" }}>
+        <div>
+          <TInput
+            label={storeModel === "zones" ? `Delivery Fee (${sym}) (Flat Override)` : `Delivery Fee (${sym})`}
+            p={p}
+            type="number"
+            value={form.deliveryFee ?? ""}
+            onChange={e => set("deliveryFee", e.target.value)}
+            placeholder={storeModel === "zones" ? "Leave blank for Store Zones" : "1000"}
+          />
+          <p style={{ margin: "4px 0 0", fontSize: "10px", color: p?.textPrimary, opacity: 0.5 }}>
+            📦 Multi-item orders use the single highest fee across items.
+          </p>
+        </div>
+        <TInput label="Delivery Time" p={p} value={form.deliveryTimeFrame || ""} onChange={e => set("deliveryTimeFrame", e.target.value)} placeholder="24-48 hours" />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "10px" }}>
+        <div>
+          <TInput
+            label="Allowed Delivery Locations"
+            p={p}
+            value={form.allowedDeliveryLocations || form.locationNotes || ""}
+            onChange={e => { set("allowedDeliveryLocations", e.target.value); set("locationNotes", e.target.value); }}
+            placeholder="e.g. Lagos, Ogun or Nationwide"
+          />
+          {/* Quick presets */}
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "6px" }}>
+            {["Nationwide", "Lagos Only", "Lagos & Abuja", zoneAreasStr].filter(Boolean).map(preset => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => { set("allowedDeliveryLocations", preset); set("locationNotes", preset); }}
+                style={{ padding: "3px 8px", borderRadius: "6px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "10px", fontWeight: 600, cursor: "pointer", opacity: 0.8 }}
+              >
+                + {preset.length > 25 ? preset.slice(0, 25) + "…" : preset}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <TSelect
+          label="Delivery Pricing Strategy"
+          value={form.deliveryPricingModel || "store_default"}
+          onChange={v => set("deliveryPricingModel", v)}
+          options={[
+            { value: "store_default", label: `Inherit Store Default (${storeModel === "flat" ? "Flat Rate" : storeModel === "zones" ? "Zones" : "Quote"})` },
+            { value: "flat", label: "Flat Rate Fee" },
+            { value: "zones", label: "Location-Based Zones" },
+            { value: "quote", label: "Quote on WhatsApp" },
+          ]}
+          p={p}
+        />
+      </div>
+    </div>
+  );
+}
+
 /* ── Empty product form ─────────────────────────────────── */
-const emptyProduct = () => ({
+const emptyProduct = (fulfillmentSettings) => ({
   name: "", slug: "", price: "", discountPrice: "", comparePrice: "",
   sku: "", description: "", category: "", tags: [], stock: "",
   isPhysical: true, isAvailable: true,
-  deliveryFee: "", deliveryTimeFrame: "",
+  deliveryFee: fulfillmentSettings?.deliveryModel === "flat" && fulfillmentSettings?.flatDeliveryFee != null ? String(fulfillmentSettings.flatDeliveryFee) : "",
+  deliveryTimeFrame: "",
+  allowedDeliveryLocations: fulfillmentSettings?.deliveryCoverage || "Nationwide",
+  deliveryPricingModel: "store_default",
   images: [], variants: [],
 });
 
 /* ── Product Form (create + edit) ──────────────────────── */
-function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving }) {
-  const [form, setForm] = useState(initial || emptyProduct());
+function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving, fulfillmentSettings }) {
+  const [form, setForm] = useState(() => initial ? {
+    ...initial,
+    allowedDeliveryLocations: initial.allowedDeliveryLocations || initial.locationNotes || "Nationwide",
+    deliveryPricingModel: initial.deliveryPricingModel || "store_default",
+  } : emptyProduct(fulfillmentSettings));
+
   const sym = getCurrencySymbol(currency);
 
   // Auto-slug when name changes (only if slug is empty / auto-mode)
@@ -224,6 +365,8 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
       discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : undefined,
       comparePrice: form.comparePrice ? parseFloat(form.comparePrice) : undefined,
       deliveryFee: form.deliveryFee ? parseFloat(form.deliveryFee) : undefined,
+      allowedDeliveryLocations: form.allowedDeliveryLocations || "Nationwide",
+      deliveryPricingModel: form.deliveryPricingModel || "store_default",
       stock: parseInt(form.stock) || 0,
     });
   };
@@ -272,17 +415,15 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
         ))}
       </div>
 
-      {/* Delivery (physical only) */}
+      {/* Delivery (physical only) — Dynamic Store Pricing Model Preview */}
       {form.isPhysical && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
-          <div>
-            <TInput label={`Delivery Fee (${sym})`} p={p} type="number" value={form.deliveryFee} onChange={e => set("deliveryFee", e.target.value)} placeholder="1000" />
-            <p style={{ margin: "4px 0 0", fontSize: "10px", color: p?.textPrimary, opacity: 0.5 }}>
-              📦 Multi-item orders use the single highest fee across items (per package).
-            </p>
-          </div>
-          <TInput label="Delivery Time" p={p} value={form.deliveryTimeFrame} onChange={e => set("deliveryTimeFrame", e.target.value)} placeholder="24-48 hours" />
-        </div>
+        <StoreDeliveryPricingPreview
+          fulfillmentSettings={fulfillmentSettings}
+          currency={currency}
+          p={p}
+          form={form}
+          set={set}
+        />
       )}
 
       {/* Tags, images, variants */}
@@ -293,6 +434,14 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving 
       {/* Actions */}
       <div style={{ display: "flex", gap: "10px", paddingTop: "8px" }}>
         <button onClick={onCancel} style={{ flex: 1, padding: "12px", borderRadius: "12px", border: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, fontWeight: 700, fontSize: "14px", cursor: "pointer" }}>Cancel</button>
+        <button onClick={handleSubmit} disabled={!canSave || saving} style={{ flex: 2, padding: "12px", borderRadius: "12px", border: "none", background: canSave && !saving ? p?.primary : p?.border, color: "#fff", fontWeight: 800, fontSize: "14px", cursor: canSave && !saving ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          {saving ? <><Spinner /> Saving…</> : "Save Product"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
         <button onClick={handleSubmit} disabled={!canSave || saving} style={{ flex: 2, padding: "12px", borderRadius: "12px", border: "none", background: canSave && !saving ? p?.primary : p?.border, color: "#fff", fontWeight: 800, fontSize: "14px", cursor: canSave && !saving ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
           {saving ? <><Spinner /> Saving…</> : "Save Product"}
         </button>
@@ -373,6 +522,7 @@ export default function ProductManager() {
   const [sellerId, setSellerId] = useState(null);
   const [storeSlug, setStoreSlug] = useState(null);
   const [currency, setCurrency] = useState("NGN");
+  const [fulfillmentSettings, setFulfillmentSettings] = useState(null);
 
   const isSellerUser = userData?.paxAI?.businessType === "seller";
 
@@ -395,6 +545,7 @@ export default function ProductManager() {
         setSellerId(profileData.profile?._id || null);
         setStoreSlug(profileData.profile?.slug || null);
         setCurrency(profileData.profile?.currency || "NGN");
+        setFulfillmentSettings(profileData.profile?.fulfillmentSettings || null);
       }
     } catch (err) {
       console.error("ProductManager fetch error:", err);
@@ -496,6 +647,7 @@ export default function ProductManager() {
             currency={currency}
             sellerId={sellerId}
             saving={saving}
+            fulfillmentSettings={fulfillmentSettings}
           />
         </div>
         <style>{`@keyframes pm-spin { to { transform: rotate(360deg); } }`}</style>
