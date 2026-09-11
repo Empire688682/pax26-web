@@ -914,6 +914,8 @@ export default function AiBusinessDashboard() {
   const { pax26, router, userData, fetchUser } = useGlobalContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingDelivery, setSavingDelivery] = useState(false);
+  const [deliverySaved, setDeliverySaved] = useState(false);
   const [activeTab, setActiveTab] = useState(null);
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [switchingType, setSwitchingType] = useState(false);
@@ -1073,6 +1075,33 @@ export default function AiBusinessDashboard() {
       alert("An error occurred. Please try again.");
     } finally {
       setSwitchingType(false);
+    }
+  };
+
+  // ── Save delivery model only ────────────────────────────
+  const saveDeliveryModel = async () => {
+    setSavingDelivery(true);
+    try {
+      const res = await fetch("/api/seller/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeliverySaved(true);
+        setTimeout(() => setDeliverySaved(false), 2500);
+        if (data.profile?.fulfillmentSettings) {
+          setForm(f => ({ ...f, fulfillmentSettings: data.profile.fulfillmentSettings }));
+        }
+      } else {
+        alert("Save failed: " + (data.message || "Unknown error"));
+      }
+    } catch (e) {
+      console.error("saveDeliveryModel error:", e);
+      alert("Error saving. Please try again.");
+    } finally {
+      setSavingDelivery(false);
     }
   };
 
@@ -1576,6 +1605,40 @@ export default function AiBusinessDashboard() {
                                 </div>
                               </div>
                             )}
+
+                            {/* ── Independent Save: Delivery Pricing Model ── */}
+                            <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "14px", borderTop: `1px dashed ${p?.border}` }}>
+                              <button
+                                onClick={saveDeliveryModel}
+                                disabled={savingDelivery}
+                                style={{
+                                  padding: "11px 28px",
+                                  borderRadius: "12px",
+                                  border: "none",
+                                  background: deliverySaved
+                                    ? "linear-gradient(135deg, #22c55e, #16a34a)"
+                                    : `linear-gradient(135deg, ${p?.primary}cc, ${p?.primary})`,
+                                  color: "#fff",
+                                  fontWeight: 800,
+                                  fontSize: "13px",
+                                  cursor: savingDelivery ? "not-allowed" : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  transition: "background 0.3s, box-shadow 0.2s",
+                                  boxShadow: savingDelivery || deliverySaved ? "none" : `0 6px 20px ${p?.primary}44`,
+                                  opacity: savingDelivery ? 0.7 : 1,
+                                }}
+                              >
+                                {savingDelivery ? (
+                                  <><div style={{ width: "13px", height: "13px", border: "2px solid #ffffff50", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> Saving…</>
+                                ) : deliverySaved ? (
+                                  <>✓ Delivery Model Saved!</>
+                                ) : (
+                                  <>💾 Save Delivery Model</>
+                                )}
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1772,8 +1835,29 @@ export default function AiBusinessDashboard() {
               </section>
 
               <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                <button onClick={() => saveProfile()} disabled={saving} style={{ padding: "14px 36px", borderRadius: "16px", background: p?.secondaryBg, color: p?.textPrimary, fontWeight: 700, fontSize: "14px", border: `1px solid ${p?.border}`, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                  {saving ? <><Spinner /> Saving…</> : "Save Business Profile"}
+                <button
+                  onClick={() => saveProfile()}
+                  disabled={saving}
+                  style={{
+                    padding: "14px 36px",
+                    borderRadius: "16px",
+                    background: saving
+                      ? p?.secondaryBg
+                      : `linear-gradient(135deg, ${p?.primary}dd, ${p?.primary})`,
+                    color: "#fff",
+                    fontWeight: 800,
+                    fontSize: "14px",
+                    border: "none",
+                    cursor: saving ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: saving ? "none" : `0 10px 30px ${p?.primary}50`,
+                    transition: "box-shadow 0.2s, background 0.2s",
+                    opacity: saving ? 0.7 : 1,
+                  }}
+                >
+                  {saving ? <><Spinner /> Saving…</> : "💾 Save Business Profile"}
                 </button>
                 {isInactive && (
                   <button onClick={() => router.push("/dashboard/automations/training")} style={{ padding: "14px 36px", borderRadius: "16px", background: p?.primary, color: "#fff", fontWeight: 800, fontSize: "14px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: `0 10px 28px ${p?.primary}44` }}>
