@@ -69,16 +69,13 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             itemsSection = `• Item: ${productName} (x${quantity})${calculatedSubtotal > 0 ? ` — ₦${calculatedSubtotal.toLocaleString()}` : ""}`;
         }
 
-        const subtotalVal = calculatedSubtotal > 0 ? calculatedSubtotal : Math.max(0, totalPaidVal - deliveryFeeVal);
-        let finalTotalPaid = totalPaidVal;
+        const subtotalVal = calculatedSubtotal > 0
+            ? calculatedSubtotal
+            : Math.max(0, totalPaidVal - deliveryFeeVal);
 
-        // Mathematical harmony check: Enforce subtotalVal + deliveryFeeVal = finalTotalPaid
-        if (subtotalVal > 0) {
-            const expectedTotal = subtotalVal + deliveryFeeVal;
-            if (finalTotalPaid <= 0 || Math.abs(finalTotalPaid - expectedTotal) > 0) {
-                finalTotalPaid = expectedTotal;
-            }
-        }
+        const finalTotalPaid = totalPaidVal > 0
+            ? totalPaidVal
+            : (subtotalVal + deliveryFeeVal);
 
         const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
 

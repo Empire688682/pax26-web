@@ -91,6 +91,7 @@ const SessionSchema = new mongoose.Schema({
         }],
         deliveryFee: { type: Number, default: 0 },
         deliveryLocation: { type: String, default: "" },
+        stagedOrder: { type: mongoose.Schema.Types.Mixed, default: null },
     }
 
 }, { timestamps: true });

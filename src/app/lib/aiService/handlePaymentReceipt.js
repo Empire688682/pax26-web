@@ -322,64 +322,77 @@ export async function handlePaymentReceipt({
         console.log("✅ Payment stage detected — skipping Groq verification, treating as payment receipt.");
     }
 
-    // 🚀 Senior Architecture: Resolve order items & price dynamically
-    // Check if customer sent a newer storefront order or changed product in recent messages
+    // 🚀 Senior Architecture: Staged Order Snapshot Priority
+    const stagedOrder = session?.payment?.stagedOrder;
     const lastUserMessage = [...recentMessages].reverse().find(m => m.role === "user" || m.direction === "inbound");
     const lastUserText = lastUserMessage?.content || lastUserMessage?.text || "";
 
     const hasNewStorefrontOrder = /NEW ORDER FROM STOREFRONT/i.test(lastUserText) || /NEW ORDER FROM STOREFRONT/i.test(caption);
-    const multiOrderFromRecent = parseMultiProductOrderFromText(caption || lastUserText, recentMessages);
-
-    const matchedProducts = await findAllProductsFromConversation(sellerId, recentMessages);
-    const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
+    const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(caption || lastUserText, [lastUserMessage].filter(Boolean));
 
     let orderItems = [];
+    let calculatedDeliveryFee = 0;
     let orderTotalPrice = 0;
 
-    if (hasNewStorefrontOrder && multiOrderFromRecent.items.length > 0) {
-        // Customer sent a new storefront order string — use the fresh storefront items!
-        orderItems = multiOrderFromRecent.items;
-        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+    if (stagedOrder && stagedOrder.items && stagedOrder.items.length > 0) {
+        // High Priority #1: Staged Order Snapshot locked during negotiation/payment agreement
+        console.log("🔒 Consuming locked stagedOrder snapshot from session for order receipt.");
+        orderItems = stagedOrder.items;
+        calculatedDeliveryFee = Number(stagedOrder.deliveryFee) || 0;
+        orderTotalPrice = Number(stagedOrder.totalPrice) || (stagedOrder.subtotal + calculatedDeliveryFee);
+    } else if (hasNewStorefrontOrder && multiOrderFromCurrentMsg.items.length > 0) {
+        // High Priority #2: Direct Storefront template payload in current incoming message
+        console.log("🛒 Consuming storefront template payload from current message for order receipt.");
+        orderItems = multiOrderFromCurrentMsg.items;
+        calculatedDeliveryFee = extractDeliveryFeeFromConversation([lastUserMessage].filter(Boolean), [], caption || lastUserText);
+        orderTotalPrice = extractOrderTotalFromConversation([lastUserMessage].filter(Boolean)) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
-        // High Priority: Always trust session pendingItems set when payment details were shared for the agreed item!
+        // High Priority #3: Session pendingItems fallback
+        console.log("📋 Consuming session pendingItems for order receipt.");
         orderItems = session.payment.pendingItems;
-        orderTotalPrice = session?.payment?.pendingAmount || extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-    } else if (matchedProducts.length > 0) {
-        orderItems = matchedProducts.map(p => ({
-            productId: p._id,
-            name: p.name,
-            price: p.discountPrice || p.price,
-            quantity: 1,
-            imageUrl: p.images?.[0]?.url || "",
-        }));
-        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || orderItems.reduce((sum, i) => sum + i.price, 0);
-    } else if (matchedProduct) {
-        orderItems = [{
-            productId: matchedProduct._id,
-            name: matchedProduct.name,
-            price: matchedProduct.price || 0,
-            quantity: 1,
-            imageUrl: matchedProduct.images?.[0]?.url || "",
-        }];
-        orderTotalPrice = extractOrderTotalFromConversation(recentMessages) || matchedProduct.price || 0;
+        calculatedDeliveryFee = Number(session.payment.deliveryFee) || extractDeliveryFeeFromConversation(recentMessages);
+        orderTotalPrice = Number(session.payment.pendingAmount) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
+    } else {
+        // Scoped fallback: Filter recentMessages to ONLY messages since the last completed receipt/order message
+        const lastReceiptIndex = [...recentMessages].reverse().findIndex(m => {
+            const txt = m.content || m.text || "";
+            return txt.includes("OFFICIAL RECEIPT") || txt.includes("PAYMENT VERIFIED") || txt.includes("verifying your payment");
+        });
+        const currentOrderWindowMsgs = lastReceiptIndex >= 0 ? recentMessages.slice(-lastReceiptIndex) : recentMessages;
+        const matchedProducts = await findAllProductsFromConversation(sellerId, currentOrderWindowMsgs);
+        const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
+
+        if (matchedProducts.length > 0) {
+            orderItems = matchedProducts.map(p => ({
+                productId: p._id,
+                name: p.name,
+                price: p.discountPrice || p.price,
+                quantity: 1,
+                imageUrl: p.images?.[0]?.url || "",
+            }));
+        } else if (matchedProduct) {
+            orderItems = [{
+                productId: matchedProduct._id,
+                name: matchedProduct.name,
+                price: matchedProduct.price || 0,
+                quantity: 1,
+                imageUrl: matchedProduct.images?.[0]?.url || "",
+            }];
+        }
+        calculatedDeliveryFee = extractDeliveryFeeFromConversation(currentOrderWindowMsgs, matchedProducts);
+        orderTotalPrice = extractOrderTotalFromConversation(currentOrderWindowMsgs) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     }
 
-    // Mathematical consistency check: Enforce Subtotal + Delivery Fee === Total Amount
-    const calculatedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProducts);
     const itemsSubtotal = orderItems.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
 
-    if (itemsSubtotal > 0) {
-        if (!orderTotalPrice || orderTotalPrice <= 0) {
-            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
-        } else if (orderTotalPrice === itemsSubtotal && calculatedDeliveryFee > 0) {
-            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
-        }
+    if (itemsSubtotal > 0 && (!orderTotalPrice || orderTotalPrice <= 0)) {
+        orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
     }
 
     if (!order) {
         order = await SellerOrderModel.create({
             sellerId,
-            productId: matchedProduct?._id || null,
+            productId: orderItems[0]?.productId || null,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
             quantity: orderItems.reduce((sum, i) => sum + i.quantity, 0) || 1,

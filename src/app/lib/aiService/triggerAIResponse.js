@@ -601,12 +601,16 @@ export const triggerAIResponse = async ({
         
         let paymentSetData = {};
         if (isPaymentShared) {
-            console.log("💳 AI shared payment details — setting expectingPayment = true for session:", session.sessionId);
+            console.log("💳 AI shared payment details — setting expectingPayment = true & locking stagedOrder snapshot for session:", session.sessionId);
             
             // Extract structured payment & quote data from AI response text to store state
             const outText = cleanText || rawAiText;
             const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
             const parsedGrandTotal = parsedGrandTotalMatch ? parseInt(parsedGrandTotalMatch[1].replace(/,/g, ""), 10) : null;
+
+            // Extract delivery fee if mentioned
+            const deliveryFeeMatch = outText.match(/(?:delivery\s+fee|shipping\s+fee|delivery)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
+            const extractedDeliveryFee = deliveryFeeMatch ? parseInt(deliveryFeeMatch[1].replace(/,/g, ""), 10) : 0;
 
             // Match products from catalogue that were mentioned in this payment message or recent user message
             let mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
@@ -628,12 +632,26 @@ export const triggerAIResponse = async ({
                 imageUrl: p.images?.[0]?.url || "",
             }));
 
+            const itemsSubtotal = pendingItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+            const stagedTotalPrice = parsedGrandTotal && parsedGrandTotal > 0
+                ? parsedGrandTotal
+                : itemsSubtotal > 0 ? itemsSubtotal + extractedDeliveryFee : 0;
+
+            const stagedOrder = pendingItems.length > 0 ? {
+                items: pendingItems,
+                subtotal: itemsSubtotal,
+                deliveryFee: extractedDeliveryFee,
+                totalPrice: stagedTotalPrice,
+                stagedAt: new Date(),
+            } : null;
+
             paymentSetData = {
                 "payment.expectingPayment": true,
                 "payment.paymentProofReceived": false,
                 "payment.paymentDetailsSharedAt": new Date(),
                 "payment.deflectionCount": 0,
-                ...(parsedGrandTotal && parsedGrandTotal > 0 && { "payment.pendingAmount": parsedGrandTotal }),
+                ...(stagedOrder && { "payment.stagedOrder": stagedOrder }),
+                ...(stagedTotalPrice > 0 && { "payment.pendingAmount": stagedTotalPrice }),
                 ...(pendingItems.length > 0 && { "payment.pendingItems": pendingItems }),
             };
 
@@ -642,7 +660,8 @@ export const triggerAIResponse = async ({
                 session.payment.paymentProofReceived = false;
                 session.payment.paymentDetailsSharedAt = new Date();
                 session.payment.deflectionCount = 0;
-                if (parsedGrandTotal && parsedGrandTotal > 0) session.payment.pendingAmount = parsedGrandTotal;
+                if (stagedOrder) session.payment.stagedOrder = stagedOrder;
+                if (stagedTotalPrice > 0) session.payment.pendingAmount = stagedTotalPrice;
                 if (pendingItems.length > 0) session.payment.pendingItems = pendingItems;
             }
         }
