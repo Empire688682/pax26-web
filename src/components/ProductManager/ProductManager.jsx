@@ -442,14 +442,6 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving,
   );
 }
 
-        <button onClick={handleSubmit} disabled={!canSave || saving} style={{ flex: 2, padding: "12px", borderRadius: "12px", border: "none", background: canSave && !saving ? p?.primary : p?.border, color: "#fff", fontWeight: 800, fontSize: "14px", cursor: canSave && !saving ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-          {saving ? <><Spinner /> Saving…</> : "Save Product"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 /* ── Product Card (list view) ───────────────────────────── */
 function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSlug }) {
   const [deleting, setDeleting] = useState(false);
