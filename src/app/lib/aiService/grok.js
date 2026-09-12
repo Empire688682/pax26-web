@@ -17,7 +17,7 @@ export const callGroqAI = async ({ systemPrompt, messages }) => {
     try {
       const response = await groq.chat.completions.create({
         model: modelName,
-        max_tokens: 300, // WhatsApp replies are 1–3 sentences — no need for 1024
+        max_tokens: 150, // WhatsApp replies are 1–3 sentences
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,

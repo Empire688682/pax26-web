@@ -19,7 +19,7 @@ export const callMistralAI = async ({ systemPrompt, messages }) => {
     try {
       const response = await mistral.chat.complete({
         model: modelName,
-        maxTokens: 1024,
+        maxTokens: 150,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,

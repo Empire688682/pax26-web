@@ -35,6 +35,7 @@ export const callGeminiAI = async ({ systemPrompt, messages }) => {
       const model = genAI.getGenerativeModel({
         model: modelName,
         systemInstruction: systemPrompt,
+        generationConfig: { maxOutputTokens: 150 },
       });
 
       const chat = model.startChat({ history: historyMessages });

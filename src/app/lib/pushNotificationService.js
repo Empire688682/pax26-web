@@ -56,8 +56,7 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
       data:      { type, ...data },
       badge:     1,
       priority:  'high',
-      ttl:       2419200, // keep alive if device is briefly offline
-      channelId: 'default', // guarantees display on Android fallback channel
+      channelId: type === 'new_lead' ? 'messages' : 'orders', // matches Android notification channels in AppContext.tsx
     };
 
     const res = await fetch(EXPO_PUSH_URL, {
