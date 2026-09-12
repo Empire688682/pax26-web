@@ -110,7 +110,8 @@ function normalizeSearchText(str) {
     if (!str) return "";
     return str
         .toLowerCase()
-        .replace(/[’‘`]/g, "'")
+        .replace(/[’‘`´]/g, "'")
+        .replace(/[—–]/g, "-")
         .replace(/[^a-z0-9'\s]/g, " ")
         .replace(/\s+/g, " ")
         .trim();
@@ -120,12 +121,28 @@ async function findAllProductsFromConversation(sellerId, recentMessages = []) {
     const products = await SellerProductModel.find({ sellerId }).lean();
     if (!products.length) return [];
 
-    // Prioritize scanning customer/user messages only so AI options lists don't trigger false matches
+    const sortedProducts = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+
+    // Priority 1: Check newest AI (assistant) payment messages first to get the exact product quoted to customer
+    const assistantMessages = [...recentMessages]
+        .reverse()
+        .filter((m) => m.role === "assistant" || m.direction === "outbound" || m.senderType === "ai");
+
+    for (const msg of assistantMessages) {
+        const normMsgText = normalizeSearchText(msg.content || msg.text || "");
+        for (const prod of sortedProducts) {
+            if (!prod.name) continue;
+            const normProdName = normalizeSearchText(prod.name);
+            if (normProdName && normMsgText.includes(normProdName)) {
+                return [prod];
+            }
+        }
+    }
+
+    // Priority 2: Fall back to customer messages or full conversation
     const customerMessages = recentMessages.filter(
         (m) => m.role === "user" || m.direction === "inbound" || m.senderType === "customer"
     );
-
-    // Fall back to all recent messages if no user messages exist
     const messagesToScan = customerMessages.length > 0 ? customerMessages : recentMessages;
 
     const rawConversationText = messagesToScan
@@ -133,9 +150,7 @@ async function findAllProductsFromConversation(sellerId, recentMessages = []) {
         .join(" ");
 
     const normalizedConvText = normalizeSearchText(rawConversationText);
-
     const matchedProducts = [];
-    const sortedProducts = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
 
     for (const prod of sortedProducts) {
         if (!prod.name) continue;

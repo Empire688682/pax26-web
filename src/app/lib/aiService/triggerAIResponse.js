@@ -633,15 +633,19 @@ export const triggerAIResponse = async ({
             const extractedDeliveryFee = deliveryFeeMatch ? parseInt(deliveryFeeMatch[1].replace(/,/g, ""), 10) : 0;
 
             // Match products from catalogue that were mentioned in this payment message or recent user message
-            let mentionedProducts = (products || []).filter(p => p.name && outText.toLowerCase().includes(p.name.toLowerCase()));
+            const normText = (str) => (str || "").toLowerCase().replace(/[’‘`´]/g, "'").replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
+            const normalizedOutText = normText(outText);
+
+            let mentionedProducts = (products || []).filter(p => p.name && normalizedOutText.includes(normText(p.name)));
             if (mentionedProducts.length === 0 && rawHistory?.length > 0) {
-                const userMsgsText = rawHistory
-                    .filter(m => m.senderType === "visitor" || m.direction === "inbound")
-                    .slice(-4)
-                    .map(m => m.text || "")
-                    .join(" ")
-                    .toLowerCase();
-                mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(p.name.toLowerCase()));
+                const userMsgsText = normText(
+                    rawHistory
+                        .filter(m => m.senderType === "visitor" || m.direction === "inbound")
+                        .slice(-4)
+                        .map(m => m.text || "")
+                        .join(" ")
+                );
+                mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(normText(p.name)));
             }
 
             const pendingItems = mentionedProducts.map(p => ({
