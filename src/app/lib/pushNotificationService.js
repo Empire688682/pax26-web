@@ -41,12 +41,12 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
       return;
     }
 
-    // Gate notification against user's mobile notification preferences
+    // Gate notification against user's mobile notification preferences (default true if undefined)
     const prefs = user?.mobileNotifPrefs || {};
-    if (type === 'new_order'   && prefs.newOrder === false)    { console.log('[pushNotif] ⏭️ Suppressed (newOrder disabled)'); return; }
-    if (type === 'sales_alert' && prefs.salesAlert === false)   { console.log('[pushNotif] ⏭️ Suppressed (salesAlert disabled)'); return; }
-    if (type === 'new_lead'    && prefs.newLead === false)      { console.log('[pushNotif] ⏭️ Suppressed (newLead disabled)'); return; }
-    if (type === 'escalation'  && prefs.escalation === false)   { console.log('[pushNotif] ⏭️ Suppressed (escalation disabled)'); return; }
+    if (type === 'new_order'   && prefs.newOrder === false)   { console.log('[pushNotif] ⏭️ Suppressed (newOrder disabled)'); return; }
+    if (type === 'sales_alert' && prefs.salesAlert === false)  { console.log('[pushNotif] ⏭️ Suppressed (salesAlert disabled)'); return; }
+    if (type === 'new_lead'    && prefs.newLead === false)     { console.log('[pushNotif] ⏭️ Suppressed (newLead disabled)'); return; }
+    if (type === 'escalation'  && prefs.escalation === false)  { console.log('[pushNotif] ⏭️ Suppressed (escalation disabled)'); return; }
 
     const message = {
       to:    token,
@@ -56,10 +56,10 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
       data:  { type, ...data },
       badge: 1,
       // Android channel (must match channel created on app start)
-      // escalation uses the 'orders' channel so it bypasses DnD like a sale
       channelId: type === 'new_order' || type === 'sales_alert' || type === 'escalation' ? 'orders' : 'messages',
-      // Priority
-      priority: type === 'new_order' || type === 'escalation' ? 'high' : 'normal',
+      // High priority ensures real-time delivery across all alert types
+      priority: 'high',
+      _displayInForeground: true,
     };
 
     const res = await fetch(EXPO_PUSH_URL, {
@@ -69,9 +69,10 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
     });
 
     const result = await res.json();
+    const statusObj = Array.isArray(result?.data) ? result.data[0] : result?.data;
 
-    if (result?.data?.status === 'error') {
-      console.warn('[pushNotif] Expo push error:', result.data.message);
+    if (statusObj?.status === 'error') {
+      console.warn('[pushNotif] ❌ Expo push error:', statusObj.message || statusObj.details || result);
     } else {
       console.log(`[pushNotif] ✅ Sent ${type} to ${token.slice(0, 20)}…`);
     }

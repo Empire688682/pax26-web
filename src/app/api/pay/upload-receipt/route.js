@@ -4,6 +4,9 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import mongoose from "mongoose";
 
+import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import { sendSalesNotification } from "@/app/lib/salesNotificationService";
+
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
@@ -43,6 +46,26 @@ export async function POST(req) {
                 { success: false, message: "Order not found" },
                 { status: 404, headers: corsHeaders() }
             );
+        }
+
+        // Trigger notification to seller mobile app & channels
+        if (order.sellerId) {
+            const sellerProfile = await SellerProfileModel.findById(order.sellerId).lean();
+            if (sellerProfile?.userId) {
+                const prodSummary = order.items?.length
+                    ? order.items.map(i => `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.name}`).join(", ")
+                    : "Order Item";
+
+                sendSalesNotification(sellerProfile.userId, {
+                    orderId: order._id.toString(),
+                    customerName: order.customerName || order.customerPhone,
+                    productName: prodSummary,
+                    amountPaid: order.totalPrice,
+                    deliveryFee: order.deliveryFee,
+                    deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
+                    isConfirmed: false,
+                }).catch(err => console.warn("Receipt push notification error:", err?.message));
+            }
         }
 
         return NextResponse.json(

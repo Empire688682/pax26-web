@@ -15,11 +15,25 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
         console.log(`[salesNotification] ✅ User found: ${user.email} | plan=${user.paxAI?.plan}`);
 
-        // ── Plan gate: salesAlertsEnabled ─────────────────────────
+        // ── Mobile push notification (fires regardless of channel preference or plan gate) ──
+        const custName = orderData.customerName || "Customer";
+        const prodName = orderData.productName || "Item";
+        const amtPaid = Number(orderData.amountPaid) || 0;
+        const pushType = orderData.isConfirmed ? "new_order" : "sales_alert";
+        const pushTitle = orderData.isConfirmed ? "🛍️ Order Confirmed!" : "💰 Payment Receipt Received!";
+
+        await sendMobilePush(userId, {
+            type:  pushType,
+            title: pushTitle,
+            body:  `${custName} · ${prodName} · ₦${amtPaid.toLocaleString()}`,
+            data:  { orderId: orderData.orderId || "" },
+        });
+
+        // ── Plan gate: salesAlertsEnabled (controls in-app / email / WA automation) ──
         const salesAlertsEnabled = user.paxAI?.salesAlertsEnabled ?? true;
         if (!salesAlertsEnabled) {
-            console.log(`[salesNotification] 🚫 Sales alerts disabled for plan '${user.paxAI?.plan}' — skipping`);
-            return { success: false, message: "Sales alerts not available on this plan" };
+            console.log(`[salesNotification] 🚫 Sales alerts disabled for plan '${user.paxAI?.plan}' — skipping in-app/email`);
+            return { success: true, message: "Mobile push sent; in-app/email disabled on plan" };
         }
         console.log(`[salesNotification] ✅ Plan gate passed (salesAlertsEnabled=${salesAlertsEnabled})`);
 
@@ -101,8 +115,6 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
 
         // ── Email alert — gated ONLY by emailSalesAlerts field ──────
-        // This fires regardless of salesNotificationsEnabled because it is
-        // controlled by a separate toggle: AI Business Dashboard → "Payment Email Alerts".
         const shouldEmail = sellerProfile.emailSalesAlerts !== false;
         console.log(`[salesNotification] 📧 Email check: shouldEmail=${shouldEmail} | emailSalesAlerts=${sellerProfile.emailSalesAlerts}`);
         if (shouldEmail) {
@@ -126,18 +138,6 @@ export const sendSalesNotification = async (userId, orderData) => {
         }
 
         console.log(`[salesNotification] 🏁 Done — messageSent=${messageSent}`);
-
-        // ── Mobile push (fires regardless of channel preference) ──
-        const custName = orderData.customerName || "Customer";
-        const prodName = orderData.productName || "Item";
-        const amtPaid = Number(orderData.amountPaid) || 0;
-        await sendMobilePush(userId, {
-            type:  "new_order",
-            title: "🛍️ New Sale!",
-            body:  `${custName} ordered ${prodName} · ₦${amtPaid.toLocaleString()}`,
-            data:  { orderId: orderData.orderId || "" },
-        });
-
         return { success: true, message: "Notification processed" };
     } catch (error) {
         console.error("[salesNotification] 💥 Unexpected error:", error);

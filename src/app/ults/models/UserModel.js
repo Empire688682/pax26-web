@@ -232,6 +232,7 @@ const UserSchema = new mongoose.Schema(
       salesAlert: { type: Boolean, default: true },
       agentReply: { type: Boolean, default: true },
       newLead:    { type: Boolean, default: true },
+      escalation: { type: Boolean, default: true },
     },
   }, { timestamps: true });
 

@@ -3,6 +3,7 @@ import SellerProductModel from "../../ults/models/SellerProductModel.js";
 import UserModel from "../../ults/models/UserModel.js";
 import { uploadCustomerImageToCloudinary } from "./customerImageSearch.js";
 import { sendSalesNotification } from "../salesNotificationService.js";
+import { sendMobilePush } from "../pushNotificationService.js";
 import Groq from "groq-sdk";
 
 const groq = new Groq({
@@ -630,6 +631,17 @@ export async function createPendingOrderFromText({
         deliveryLocation: multiOrderData.deliveryLocation || "",
         status: "pending",
     });
+
+    const prodSummaryName = order.items?.length
+        ? order.items.map(i => `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.name}`).join(", ")
+        : (matchedProduct?.name || "Product");
+
+    sendMobilePush(sellerUserId, {
+        type:  "new_order",
+        title: "🛍️ New Order Placed!",
+        body:  `${order.customerName}: ${prodSummaryName} · ₦${(order.totalPrice || 0).toLocaleString()}`,
+        data:  { orderId: order._id.toString(), phone: normalizedPhone },
+    }).catch(err => console.warn("Pending order push error:", err?.message));
 
     return { created: true, order };
 }

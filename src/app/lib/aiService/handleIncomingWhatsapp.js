@@ -219,6 +219,18 @@ export const handleIncomingWhatsApp = async (payload) => {
     throw err;
   }
 
+  // ── Step 4.5: Early escalation check (fires before any early returns) ──
+  const ESCALATION_RE = /\b(human|agent|person|manager|speak to|call me|real person|not the bot|not a bot|talk to someone|customer service|supervisor|support team|refund|fraud|scam|cheat|angry|nonsense|useless|terrible|horrible|awful|stupid|not working|i am not happy|i'm not happy|cancel my order|this is wrong|help|issue|problem|damaged|wrong item|bad service|fake|stolen|police|court|lawyer|report|owner|boss|seller|rep|contact person)\b/i;
+  if (ESCALATION_RE.test(inboundText || "")) {
+    const contactName = existingContact?.name || visitorPhone;
+    sendMobilePush(user._id, {
+      type:  "escalation",
+      title: "🚨 Customer Needs You",
+      body:  `${contactName}: ${(inboundText || "").slice(0, 80)}`,
+      data:  { phone: visitorPhone },
+    }).catch(err => console.warn("[pushNotif] Escalation push error:", err?.message));
+  }
+
   // ── Steps 5 & 6 (parallel): Update contact + session ──────
   try {
     const contactUpdateResult = await UserModel.updateOne(
@@ -827,22 +839,6 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("🤖 Step 9 — Triggering AI response...");
   await triggerAIResponse({ session, user, inboundText: enrichedText });
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
-
-  // ── Escalation detection ──────────────────────────────────────────────
-  // Only push if the customer explicitly needs a human or is frustrated.
-  // Routine AI replies are completely silent — sellers are pinged only when
-  // their intervention is actually required.
-  const ESCALATION_RE = /\b(human|agent|person|manager|speak to|call me|real person|not the bot|not a bot|talk to someone|customer service|supervisor|support team|refund|fraud|scam|cheat|angry|nonsense|useless|terrible|horrible|awful|stupid|not working|i am not happy|i'm not happy|cancel my order|this is wrong)\b/i;
-
-  if (ESCALATION_RE.test(inboundText || "")) {
-    const contactName = existingContact?.name || visitorPhone;
-    sendMobilePush(user._id, {
-      type:  "escalation",
-      title: "🚨 Customer Needs You",
-      body:  `${contactName}: ${(inboundText || "").slice(0, 80)}`,
-      data:  { phone: visitorPhone },
-    }).catch(() => {}); // fire-and-forget, never block response
-  }
 
   return { ok: true };
 };

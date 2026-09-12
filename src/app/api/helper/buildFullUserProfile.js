@@ -35,6 +35,7 @@ export async function buildFullUserProfile(userId) {
       salesAlert: true,
       agentReply: true,
       newLead: true,
+      escalation: true,
     };
 
     // Preserve public WhatsApp connection status & phone info; strip secret tokens
