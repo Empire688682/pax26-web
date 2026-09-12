@@ -83,6 +83,10 @@ export function shouldSearch(text) {
   // Non-search patterns take priority
   if (NON_SEARCH_PATTERNS.some(p => p.test(trimmed))) return false;
 
+  // Follow-up pronoun questions (e.g. "how much is it?", "how much for this?", "what is the price?") — skip search so AI uses conversation context
+  const PRONOUN_FOLLOWUP_PATTERN = /^(?:how much(?: is| for)?|what(?:'s| is)? the price(?: of)?|cost(?: of)?)\s*(?:it|this|that|them|those|these)?\??$/i;
+  if (PRONOUN_FOLLOWUP_PATTERN.test(trimmed)) return false;
+
   // Explicit search intent
   if (SEARCH_INTENT_PATTERNS.some(p => p.test(trimmed))) return true;
 
@@ -170,7 +174,7 @@ async function regexSearch(sellerId, queryText, priceFilter, limit) {
   if (!queryText || queryText.length < 2) return [];
 
   // Split into meaningful tokens (min 3 chars, skip stop words)
-  const stopWords = new Set(["the", "and", "for", "with", "that", "this", "from", "are", "was", "have", "has"]);
+  const stopWords = new Set(["the", "and", "for", "with", "that", "this", "from", "are", "was", "have", "has", "it", "them", "those", "these", "one", "ones", "you", "your", "its"]);
   const tokens = queryText
     .toLowerCase()
     .split(/\s+/)

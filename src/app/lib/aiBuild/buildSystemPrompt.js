@@ -142,10 +142,10 @@ ${isExpectingPayment
   ? `PAYMENT IS PENDING — Do NOT send image tags or storefront link. Focus solely on requesting payment proof screenshot.`
   : `1. CATALOGUE ONLY: Only sell items listed above. If item is NOT listed, state clearly that you don't sell it. Never invent products.
 2. IMAGE SENDING: Send ONE image ONLY when customer explicitly asks to see pictures/photos of a listed item:
-   "Here is [Product Name]:"
+   "Here is [Product Name] for [Price] (Delivery: [DelFee])! [1-sentence description/sizes/colors if available]:"
    IMAGE_URL: <exact url from catalogue>
    "Browse all products here: ${storefrontUrl || "[storefront link]"}"
-   (Important: Output IMAGE_URL: https://... on its own line using exact URL from catalogue. Do NOT use brackets [] or parentheses () around the label or URL).
+   (Important: Always include the product's exact price, delivery fee, and key details like sizes/colors/materials alongside the picture. Output IMAGE_URL: https://... on its own line using exact URL from catalogue. Do NOT use brackets [] or parentheses () around the label or URL).
 3. Maximum 1 IMAGE_URL per reply. Never invent/guess image URLs. Do NOT output IMAGE_URL during payment steps.`
 }
 
