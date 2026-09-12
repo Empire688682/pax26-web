@@ -145,6 +145,7 @@ ${isExpectingPayment
    "Here is [Product Name]:"
    IMAGE_URL: <exact url from catalogue>
    "Browse all products here: ${storefrontUrl || "[storefront link]"}"
+   (Important: Output IMAGE_URL: https://... on its own line using exact URL from catalogue. Do NOT use brackets [] or parentheses () around the label or URL).
 3. Maximum 1 IMAGE_URL per reply. Never invent/guess image URLs. Do NOT output IMAGE_URL during payment steps.`
 }
 

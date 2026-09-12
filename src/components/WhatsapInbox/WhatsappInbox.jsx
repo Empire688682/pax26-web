@@ -15,6 +15,11 @@ import AiReadinessBanner from "../AiReadinessBanner/AiReadinessBanner";
 /* ─────────────────────────────────────────────
    AVATAR GRADIENT & INITIAL GENERATOR
 ───────────────────────────────────────────── */
+function cleanMessageTextForDisplay(text) {
+  if (!text) return "";
+  const tagRegex = /(?:!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\((https?:\/\/[^\)\s]+)\)|\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]|IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?)/gi;
+  return text.replace(tagRegex, "").replace(/\s{2,}/g, " ").trim();
+}
 const AVATAR_GRADIENTS = [
   "linear-gradient(135deg, #128c7e 0%, #075e54 100%)",
   "linear-gradient(135deg, #00a884 0%, #005c4b 100%)",
@@ -1824,7 +1829,7 @@ export default function WhatsAppInbox() {
 
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
                             <div style={{ color: "#8696a0", fontSize: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {conv.lastMessage}
+                              {cleanMessageTextForDisplay(conv.lastMessage)}
                             </div>
                             {conv.unreadCount > 0 && (
                               <div
@@ -2692,11 +2697,29 @@ export default function WhatsAppInbox() {
                   {filteredMessages.map((msg) => {
                     const isOutbound = msg.direction === "outbound";
                     const isHuman = msg.senderType === "human";
-                    const imageUrls = msg.mediaUrl
+                    let imageUrls = msg.mediaUrl
                       ? [msg.mediaUrl]
                       : resolvedMediaUrls[msg.messageId]
                       ? [resolvedMediaUrls[msg.messageId]]
-                      : msg.aiMeta?.imageUrls || [];
+                      : msg.aiMeta?.imageUrls ? [...msg.aiMeta.imageUrls] : [];
+
+                    let displayText = msg.text || "";
+
+                    if (displayText) {
+                      const extractedFromText = [];
+                      const tagRegex = /(?:!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\((https?:\/\/[^\)\s]+)\)|\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]|IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?)/gi;
+                      displayText = displayText.replace(tagRegex, (match, m1, m2, m3) => {
+                        const foundUrl = (m1 || m2 || m3 || "").trim().replace(/[.,;:!?]+$/, "");
+                        if (foundUrl && !imageUrls.includes(foundUrl)) {
+                          extractedFromText.push(foundUrl);
+                        }
+                        return "";
+                      }).replace(/\s{2,}/g, " ").trim();
+
+                      if (extractedFromText.length > 0) {
+                        imageUrls = [...imageUrls, ...extractedFromText];
+                      }
+                    }
 
                     return (
                       <motion.div
@@ -2835,9 +2858,9 @@ export default function WhatsAppInbox() {
                               <div
                                 style={{
                                   marginBottom:
-                                    msg.text &&
-                                    msg.text !== "📷 Image" &&
-                                    msg.text !== "[Customer sent an image]"
+                                    displayText &&
+                                    displayText !== "📷 Image" &&
+                                    displayText !== "[Customer sent an image]"
                                       ? "6px"
                                       : 0,
                                 }}
@@ -2869,9 +2892,9 @@ export default function WhatsAppInbox() {
                               </div>
                             )}
 
-                            {msg.text &&
-                              msg.text !== "📷 Image" &&
-                              msg.text !== "[Customer sent an image]" && <div>{msg.text}</div>}
+                            {displayText &&
+                              displayText !== "📷 Image" &&
+                              displayText !== "[Customer sent an image]" && <div>{displayText}</div>}
 
                             <div
                               style={{

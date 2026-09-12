@@ -17,20 +17,39 @@ import SessionModel from "../../ults/models/SessionModel.js";
 // Returns the image URLs and the clean text separately.
 // ─────────────────────────────────────────────────────────────
 function extractImageTags(text) {
-    // Match both formats:
-    // [SEND_IMAGE: https://...]  — legacy bracket format
-    // IMAGE_URL: https://...     — plain format models output more reliably
-    // Both can appear anywhere in the text, mid-line or at line start
-    const bracketRegex = /\[SEND_IMAGE:\s*(https?:\/\/[^\]\s]+)\]/gi;
-    const plainRegex   = /IMAGE_URL:\s*(https?:\/\/\S+)/gi;
+    if (!text) return { imageUrls: [], cleanText: text };
+
+    // Match all common AI image tag output patterns:
+    // 1. Markdown link/image format: [IMAGE_URL](https://...) or ![IMAGE_URL](https://...) or [image](https://...)
+    // 2. Bracket tag format: [SEND_IMAGE: https://...] or [IMAGE_URL: https://...]
+    // 3. Plain tag format: IMAGE_URL: https://... or IMAGE_URL: (https://...)
+    const markdownRegex = /!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\((https?:\/\/[^\)\s]+)\)/gi;
+    const bracketRegex  = /\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]/gi;
+    const plainRegex    = /IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?/gi;
+
     const imageUrls = [];
 
     let cleanText = text
-        .replace(bracketRegex, (_, url) => { imageUrls.push(url.trim()); return ""; })
-        .replace(plainRegex,   (_, url) => { imageUrls.push(url.trim()); return ""; })
-        // Clean up any orphaned IMAGE_URL: prefix without a URL
+        .replace(markdownRegex, (_, url) => {
+            const cleanUrl = url.trim().replace(/[.,;:!?]+$/, "");
+            if (cleanUrl) imageUrls.push(cleanUrl);
+            return "";
+        })
+        .replace(bracketRegex, (_, url) => {
+            const cleanUrl = url.trim().replace(/[.,;:!?]+$/, "");
+            if (cleanUrl) imageUrls.push(cleanUrl);
+            return "";
+        })
+        .replace(plainRegex, (_, url) => {
+            const cleanUrl = url.trim().replace(/[.,;:!?]+$/, "");
+            if (cleanUrl) imageUrls.push(cleanUrl);
+            return "";
+        })
+        // Clean up any remaining/orphaned image tag headers or placeholders
+        .replace(/!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\s*\(\s*\)/gi, "")
+        .replace(/\[(?:SEND_IMAGE|IMAGE_URL):\s*\]/gi, "")
         .replace(/IMAGE_URL:\s*/gi, "")
-        .replace(/\[SEND_IMAGE:\s*\]/gi, "")
+        .replace(/\s{2,}/g, " ")
         .replace(/\n{3,}/g, "\n\n")
         .trim();
 
@@ -478,16 +497,17 @@ export const triggerAIResponse = async ({
         const fallback = "Sorry, I'm having trouble right now. Please try again later.";
         const rawAiText = aiResponse?.text || fallback;
 
+        // ── Parse image tags out of raw AI reply ──────────────────
+        let { imageUrls, cleanText } = extractImageTags(rawAiText);
+
         // Strip markdown — WhatsApp renders it as literal characters
-        const strippedText = rawAiText
+        cleanText = (cleanText || "")
           .replace(/\*\*(.*?)\*\*/g, "$1")
           .replace(/\*(.*?)\*/g, "$1")
           .replace(/__(.*?)__/g, "$1")
           .replace(/~~(.*?)~~/g, "$1")
-          .replace(/`(.*?)`/g, "$1");
-
-        // ── Parse image tags out of the AI reply ──────────────────
-        let { imageUrls, cleanText } = extractImageTags(strippedText);
+          .replace(/`(.*?)`/g, "$1")
+          .trim();
 
         // ── Validation Safeguard: Ensure image URL belongs to active seller catalogue ──
         if (imageUrls.length > 0 && products && products.length > 0) {

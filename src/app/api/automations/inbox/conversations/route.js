@@ -12,6 +12,12 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
 }
 
+function cleanMessageTextForDisplay(text) {
+  if (!text) return "";
+  const tagRegex = /(?:!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\((https?:\/\/[^\)\s]+)\)|\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]|IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?)/gi;
+  return text.replace(tagRegex, "").replace(/\s{2,}/g, " ").trim();
+}
+
 export async function GET(req) {
   try {
     await connectDb();
@@ -92,7 +98,7 @@ export async function GET(req) {
 
         return {
           phone: conv._id,
-          lastMessage: conv.lastMessage,
+          lastMessage: cleanMessageTextForDisplay(conv.lastMessage) || "📷 Photo",
           lastMessageAt: conv.lastMessageAt,
           lastDirection: conv.lastDirection,
           lastSenderType: conv.lastSenderType,
