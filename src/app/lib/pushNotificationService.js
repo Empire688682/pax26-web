@@ -49,17 +49,15 @@ export async function sendMobilePush(userId, { type, title, body, data = {} }) {
     if (type === 'escalation'  && prefs.escalation === false)  { console.log('[pushNotif] ⏭️ Suppressed (escalation disabled)'); return; }
 
     const message = {
-      to:    token,
-      sound: 'default',
+      to:        token,
+      sound:     'default',
       title,
       body,
-      data:  { type, ...data },
-      badge: 1,
-      // Android channel (must match channel created on app start)
-      channelId: type === 'new_order' || type === 'sales_alert' || type === 'escalation' ? 'orders' : 'messages',
-      // High priority ensures real-time delivery across all alert types
-      priority: 'high',
-      _displayInForeground: true,
+      data:      { type, ...data },
+      badge:     1,
+      priority:  'high',
+      ttl:       2419200, // keep alive if device is briefly offline
+      channelId: 'default', // guarantees display on Android fallback channel
     };
 
     const res = await fetch(EXPO_PUSH_URL, {
