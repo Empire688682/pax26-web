@@ -13,39 +13,53 @@ const WHATSAPP_API_BASE = "https://graph.facebook.com";
  * Cloudinary supports on-the-fly format conversion via URL transformation:
  * /image/upload/f_jpg/v123.../file.webp  → delivers as JPEG
  */
+/**
+ * forceJpegUrl
+ * 
+ * Converts image URLs (Cloudinary, Unsplash, etc.) to deliver as JPEG.
+ * WhatsApp only supports JPEG/PNG — WebP and AVIF are silently dropped or rejected by Meta API.
+ */
 function forceJpegUrl(url) {
   if (!url || typeof url !== "string") return url;
-  // Already a JPEG/PNG — no change needed
-  if (url.match(/\.(jpg|jpeg|png)(\?|$)/i)) return url;
-  // Insert Cloudinary transformation f_jpg,q_auto before the version segment
-  return url.replace(
-    /\/image\/upload\//,
-    "/image/upload/f_jpg,q_auto/"
-  );
+
+  // Unsplash: replace auto=format with fm=jpg or append &fm=jpg
+  if (url.includes("images.unsplash.com")) {
+    let cleanUrl = url.replace(/auto=format/g, "fm=jpg");
+    if (!cleanUrl.includes("fm=jpg")) {
+      cleanUrl += (cleanUrl.includes("?") ? "&" : "?") + "fm=jpg&q=80";
+    }
+    return cleanUrl;
+  }
+
+  // Cloudinary: insert f_jpg,q_auto transformation
+  if (url.includes("/image/upload/")) {
+    if (!url.includes("/f_jpg")) {
+      return url.replace(/\/image\/upload\//, "/image/upload/f_jpg,q_auto/");
+    }
+    return url;
+  }
+
+  return url;
 }
 
 /**
  * uploadImageToWhatsApp
  *
- * Downloads the image from Cloudinary, then uploads it to WhatsApp's
+ * Downloads the image as JPEG, then uploads it to WhatsApp's
  * media endpoint to get a stable media_id.
- *
- * Using a media_id is more reliable than a link — Meta doesn't need to
- * fetch an external URL, so images always arrive even if Cloudinary
- * has any transient issues.
  *
  * Returns { mediaId } on success, null on failure.
  */
 async function uploadImageToWhatsApp(imageUrl, phoneNumberId, token) {
   try {
-    // Force JPEG delivery from Cloudinary — WhatsApp rejects WebP silently
+    // Force JPEG delivery from Cloudinary / Unsplash — WhatsApp rejects AVIF / WebP
     const jpegUrl = forceJpegUrl(imageUrl);
     console.log("📥 Fetching image as JPEG:", jpegUrl);
 
     const imgRes = await fetch(jpegUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept": "image/jpeg, image/png;q=0.9",
       },
     });
     if (!imgRes.ok) {
@@ -53,8 +67,12 @@ async function uploadImageToWhatsApp(imageUrl, phoneNumberId, token) {
       return null;
     }
 
-    const contentType = imgRes.headers.get("content-type") || "image/jpeg";
+    const rawContentType = imgRes.headers.get("content-type") || "image/jpeg";
     const buffer = await imgRes.arrayBuffer();
+
+    // Ensure content type is acceptable by WhatsApp (jpeg or png only)
+    const validTypes = ["image/jpeg", "image/png"];
+    const contentType = validTypes.includes(rawContentType.toLowerCase()) ? rawContentType.toLowerCase() : "image/jpeg";
 
     // 2. Upload to WhatsApp media endpoint
     const formData = new FormData();
@@ -114,10 +132,11 @@ export async function sendWhatsAppImageReply({
     }
 
     const messagesUrl = `${WHATSAPP_API_BASE}/${WHATSAPP_API_VERSION}/${phoneNumberId}/messages`;
+    const safeJpegUrl = forceJpegUrl(imageUrl);
 
     // ── Strategy 1: upload to WhatsApp first, send by media_id ──
     // Most reliable — Meta doesn't need to fetch an external URL
-    const mediaId = await uploadImageToWhatsApp(imageUrl, phoneNumberId, token);
+    const mediaId = await uploadImageToWhatsApp(safeJpegUrl, phoneNumberId, token);
 
     let payload;
     if (mediaId) {
@@ -134,18 +153,18 @@ export async function sendWhatsAppImageReply({
       console.log("📤 Sending image by media_id:", mediaId);
     } else {
       // ── Strategy 2: fallback to link if upload failed ──
-      console.warn("⚠️ Media upload failed — falling back to link method");
+      console.warn("⚠️ Media upload failed — falling back to link method with JPEG URL:", safeJpegUrl);
       payload = {
         messaging_product: "whatsapp",
         recipient_type: "individual",
         to,
         type: "image",
         image: {
-          link: imageUrl,
+          link: safeJpegUrl,
           ...(caption ? { caption } : {}),
         },
       };
-      console.log("📤 Sending image by link:", imageUrl.slice(0, 80));
+      console.log("📤 Sending image by link:", safeJpegUrl.slice(0, 80));
     }
 
     const res = await fetch(messagesUrl, {
