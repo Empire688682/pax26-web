@@ -247,6 +247,8 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
       ? Number(selectedZone.fee) || 0
       : 0;
 
+  const grandTotal = (totalPrice || 0) + activeDeliveryFee;
+
   const locationValidation = fulfillmentMethod === "delivery"
     ? validateDeliveryLocation(cart, deliveryLocation, store.deliveryCoverage || "Nationwide")
     : { valid: true };

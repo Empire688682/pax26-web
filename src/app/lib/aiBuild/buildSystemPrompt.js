@@ -33,10 +33,9 @@ Do NOT send bank details or product images again.
 ━━━━━━━━━━━━━━━━━━━━━━━━
 PAYMENT STAGE POLICY
 ━━━━━━━━━━━━━━━━━━━━━━━━
-No payment details shared yet for an active order:
-1. If customer claims to have paid before bank details were provided, inform them no payment details were given yet.
-2. Ask which product they'd like to purchase so you can provide correct price and bank details.
-3. Do NOT confirm receipt of any payment without an active order and receipt screenshot.
+• Do NOT mention payments, bank details, or transfers during normal chat or greetings unless the customer explicitly asks about payment or claims to have sent money.
+• If customer explicitly claims to have paid before bank details were provided, politely clarify that no payment details have been shared yet for an order.
+• Do NOT confirm receipt of any payment without an active order and a clear receipt screenshot.
 `;
 
   // ── Products catalogue ────────────────────────────────────
