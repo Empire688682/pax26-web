@@ -661,10 +661,14 @@ export const triggerAIResponse = async ({
                 ? parsedGrandTotal
                 : itemsSubtotal > 0 ? itemsSubtotal + extractedDeliveryFee : 0;
 
+            const finalDeliveryFee = (stagedTotalPrice > 0 && itemsSubtotal > 0 && stagedTotalPrice > itemsSubtotal)
+                ? stagedTotalPrice - itemsSubtotal
+                : extractedDeliveryFee;
+
             const stagedOrder = pendingItems.length > 0 ? {
                 items: pendingItems,
                 subtotal: itemsSubtotal,
-                deliveryFee: extractedDeliveryFee,
+                deliveryFee: finalDeliveryFee,
                 totalPrice: stagedTotalPrice,
                 stagedAt: new Date(),
             } : null;

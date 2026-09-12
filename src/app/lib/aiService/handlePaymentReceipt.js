@@ -404,6 +404,10 @@ export async function handlePaymentReceipt({
         orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
     }
 
+    if (itemsSubtotal > 0 && orderTotalPrice > itemsSubtotal) {
+        calculatedDeliveryFee = orderTotalPrice - itemsSubtotal;
+    }
+
     if (!order) {
         order = await SellerOrderModel.create({
             sellerId,
@@ -496,12 +500,34 @@ function generateOrderCode() {
 }
 
 function extractDeliveryFeeFromConversation(recentMessages = [], matchedProducts = [], inboundText = "") {
-    const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
+    const reversedAssistantMsgs = [...recentMessages]
+        .reverse()
+        .filter((m) => m.role === "assistant" || m.direction === "outbound" || m.senderType === "ai")
+        .map((m) => m.content || m.text || "");
 
-    const feeMatch = combinedText.match(/(?:Estimated Delivery Fee|delivery fee is|delivery fee|delivery cost|shipping fee|delivery):\s*(?:₦|N|NGN)?\s*([\d,]+)/i);
-    if (feeMatch) {
-        const fee = parseInt(feeMatch[1].replace(/,/g, ""), 10);
-        if (!isNaN(fee) && fee >= 0) return fee;
+    const deliveryPatterns = [
+        /(?:delivery\s+will\s+be|delivery\s+is|delivery\s+fee\s+is|delivery\s+cost\s+is|shipping\s+fee\s+is|delivery|shipping)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /\+\s*(?:₦|N|NGN)?\s*([\d,]+)\s*\((?:delivery|shipping)\)/i,
+        /\((?:delivery|shipping):\s*(?:₦|N|NGN)?\s*([\d,]+)\)/i,
+    ];
+
+    for (const text of reversedAssistantMsgs) {
+        for (const pattern of deliveryPatterns) {
+            const match = text.match(pattern);
+            if (match && match[1]) {
+                const fee = parseInt(match[1].replace(/,/g, ""), 10);
+                if (!isNaN(fee) && fee >= 0) return fee;
+            }
+        }
+    }
+
+    const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
+    for (const pattern of deliveryPatterns) {
+        const match = combinedText.match(pattern);
+        if (match && match[1]) {
+            const fee = parseInt(match[1].replace(/,/g, ""), 10);
+            if (!isNaN(fee) && fee >= 0) return fee;
+        }
     }
 
     if (matchedProducts && matchedProducts.length > 0) {
