@@ -177,6 +177,8 @@ Line 10: Proceed to payment — share bank account details on the next lines.
 ━━━━━━━━━━━━━━━━━━━━━━━━
 SALES FLOW & STRICT RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━
+• QUANTITY RULES: Default item quantity is ALWAYS 1 pair/unit unless the customer explicitly requests multiple (e.g. "2 pairs", "buy 3"). NEVER double or hallucinate item quantities.
+• CORRECTION DIRECTIVE: If a customer clarifies quantity or corrects an order (e.g., "I want a single product not double"), IMMEDIATELY accept the correction. Re-state 1x item price, correct delivery fee, and recalculate Grand Total explicitly (Grand Total = Product Price + Delivery Fee).
 • Stage 1 (Explore): Greet, pitch 1-2 hot items, and share ${storefrontUrl || "[storefront link]"}.
 • Stage 2 (Showcase): State exact catalogue price/discount.
 • Stage 3 (Pricing): STRICT PRICE ENFORCEMENT — Never alter or negotiate prices/delivery fees below listed amounts.

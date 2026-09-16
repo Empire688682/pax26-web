@@ -63,45 +63,49 @@ export function isPaymentStage(recentMessages = [], session = null) {
 function extractOrderTotalFromConversation(recentMessages = []) {
     // Scan messages backwards (newest assistant payment messages first)
     const reversedMessages = [...recentMessages].reverse();
-    const assistantText = reversedMessages
-        .filter((m) => m.role === "assistant" || m.senderType === "ai" || m.direction === "outbound")
-        .map((m) => m.content || m.text || "")
-        .join("\n");
-
-    const fullConversationText = recentMessages
-        .map((m) => m.content || m.text || "")
-        .join("\n");
+    const assistantMessages = reversedMessages.filter(
+        (m) => m.role === "assistant" || m.senderType === "ai" || m.direction === "outbound"
+    );
 
     // Highest priority: Explicit grand total phrasing in assistant messages
     const grandTotalPatterns = [
-        /(?:grand\s+total|making\s+your\s+grand\s+total|your\s+total\s+will\s+be|total\s+amount|making\s+it)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /(?:grand\s+total|making\s+your\s+grand\s+total|your\s+total\s+will\s+be|your\s+total\s+is|total\s+is|total\s+amount|making\s+it|updated\s+total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
         /once\s+you(?:'|’)?ve\s+transferred\s+(?:the\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
         /transferred\s+the\s*(?:₦|N|NGN)?\s*([\d,]+)/i,
+        /transferring\s+(?:the\s+sum\s+of\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
         /pay\s+the\s+(?:sum\s+of\s+)?(?:₦|N|NGN)?\s*([\d,]+)/i,
     ];
 
-    for (const pattern of grandTotalPatterns) {
-        const match = assistantText.match(pattern) || fullConversationText.match(pattern);
-        if (match && match[1]) {
-            const cleanNum = parseInt(match[1].replace(/,/g, ""), 10);
-            if (!isNaN(cleanNum) && cleanNum > 0) {
-                return cleanNum;
+    // Priority 1: Check assistant messages ONE BY ONE in reverse order (newest message first!)
+    for (const msg of assistantMessages) {
+        const text = msg.content || msg.text || "";
+        for (const pattern of grandTotalPatterns) {
+            const match = text.match(pattern);
+            if (match && match[1]) {
+                const cleanNum = parseInt(match[1].replace(/,/g, ""), 10);
+                if (!isNaN(cleanNum) && cleanNum > 0) {
+                    return cleanNum;
+                }
             }
         }
     }
 
-    // Fallback: If multiple ₦ amounts are present in assistant payment quote, pick the highest number (grand total)
-    const allAmounts = [];
-    const amountRegex = /(?:₦|N|NGN)\s*([\d,]+)/gi;
-    let match;
-    while ((match = amountRegex.exec(assistantText)) !== null) {
-        const val = parseInt(match[1].replace(/,/g, ""), 10);
-        if (!isNaN(val) && val > 0) {
-            allAmounts.push(val);
+    // Priority 2: Fallback to amounts in the single NEWEST assistant message ONLY (never across full history)
+    const newestAssistantMsg = assistantMessages[0];
+    if (newestAssistantMsg) {
+        const text = newestAssistantMsg.content || newestAssistantMsg.text || "";
+        const allAmounts = [];
+        const amountRegex = /(?:₦|N|NGN)\s*([\d,]+)/gi;
+        let match;
+        while ((match = amountRegex.exec(text)) !== null) {
+            const val = parseInt(match[1].replace(/,/g, ""), 10);
+            if (!isNaN(val) && val > 0) {
+                allAmounts.push(val);
+            }
         }
-    }
-    if (allAmounts.length > 0) {
-        return Math.max(...allAmounts);
+        if (allAmounts.length > 0) {
+            return Math.max(...allAmounts); // Highest amount within the single newest message
+        }
     }
 
     return null;
@@ -339,9 +343,22 @@ export async function handlePaymentReceipt({
     }
 
     // 🚀 Senior Architecture: Staged Order Snapshot Priority
-    const stagedOrder = session?.payment?.stagedOrder;
+    let stagedOrder = session?.payment?.stagedOrder;
     const lastUserMessage = [...recentMessages].reverse().find(m => m.role === "user" || m.direction === "inbound");
     const lastUserText = lastUserMessage?.content || lastUserMessage?.text || "";
+    const isCorrectionInbound = /(?:single|one|1)\s*(?:product|pair|item|piece)|not\s*double|only\s*one|just\s*one|want\s*1\b|wrong\s*quantity|make\s*it\s*1/i.test(lastUserText);
+
+    if (stagedOrder && isCorrectionInbound) {
+        console.log("🔄 Customer single-item correction detected — adjusting stagedOrder snapshot to 1x quantity.");
+        if (stagedOrder.items && stagedOrder.items.length > 0) {
+            stagedOrder.items = stagedOrder.items.map(item => ({
+                ...item,
+                quantity: 1,
+            }));
+            stagedOrder.subtotal = stagedOrder.items.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+            stagedOrder.totalPrice = stagedOrder.subtotal + (stagedOrder.deliveryFee || 0);
+        }
+    }
 
     const hasNewStorefrontOrder = /NEW ORDER FROM STOREFRONT/i.test(lastUserText) || /NEW ORDER FROM STOREFRONT/i.test(caption);
     const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(caption || lastUserText, [lastUserMessage].filter(Boolean));
@@ -365,7 +382,9 @@ export async function handlePaymentReceipt({
     } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
         // High Priority #3: Session pendingItems fallback
         console.log("📋 Consuming session pendingItems for order receipt.");
-        orderItems = session.payment.pendingItems;
+        orderItems = isCorrectionInbound
+            ? session.payment.pendingItems.map(i => ({ ...i, quantity: 1 }))
+            : session.payment.pendingItems;
         calculatedDeliveryFee = Number(session.payment.deliveryFee) || extractDeliveryFeeFromConversation(recentMessages);
         orderTotalPrice = Number(session.payment.pendingAmount) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     } else {
@@ -400,14 +419,29 @@ export async function handlePaymentReceipt({
     }
 
     const itemsSubtotal = orderItems.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+    const extractedFeeFromText = extractDeliveryFeeFromConversation(recentMessages);
+    if (extractedFeeFromText > 0 && calculatedDeliveryFee === 0) {
+        calculatedDeliveryFee = extractedFeeFromText;
+    }
 
     if (itemsSubtotal > 0 && (!orderTotalPrice || orderTotalPrice <= 0)) {
         orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
     }
 
+    // 🛡️ Deterministic Math Sanity Check: Total Price & Delivery Fee Consistency
     if (itemsSubtotal > 0 && orderTotalPrice > itemsSubtotal) {
-        calculatedDeliveryFee = orderTotalPrice - itemsSubtotal;
+        const inferredDeliveryFee = orderTotalPrice - itemsSubtotal;
+        if (calculatedDeliveryFee > 0 && Math.abs(inferredDeliveryFee - calculatedDeliveryFee) > 1000) {
+            console.warn(`⚠️ Mismatch between inferred fee (₦${inferredDeliveryFee}) and explicit delivery fee (₦${calculatedDeliveryFee}). Correcting total price.`);
+            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
+        } else {
+            calculatedDeliveryFee = inferredDeliveryFee;
+        }
+    } else if (itemsSubtotal > 0) {
+        orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
     }
+
+    const totalQuantity = orderItems.reduce((sum, i) => sum + (i.quantity || 1), 0) || 1;
 
     if (!order) {
         order = await SellerOrderModel.create({
@@ -415,7 +449,7 @@ export async function handlePaymentReceipt({
             productId: orderItems[0]?.productId || null,
             customerPhone: normalizedPhone,
             customerName: customerName || "WhatsApp Customer",
-            quantity: orderItems.reduce((sum, i) => sum + i.quantity, 0) || 1,
+            quantity: totalQuantity,
             totalPrice: orderTotalPrice,
             deliveryFee: calculatedDeliveryFee,
             items: orderItems,
@@ -435,16 +469,17 @@ export async function handlePaymentReceipt({
             order.paymentReceiptSubmittedAt = new Date();
             orderChanged = true;
         }
-        if (orderTotalPrice && orderTotalPrice !== order.totalPrice) {
+        if (orderTotalPrice && order.totalPrice !== orderTotalPrice) {
             order.totalPrice = orderTotalPrice;
             orderChanged = true;
         }
-        if (calculatedDeliveryFee && !order.deliveryFee) {
+        if (order.deliveryFee !== calculatedDeliveryFee) {
             order.deliveryFee = calculatedDeliveryFee;
             orderChanged = true;
         }
-        if (orderItems.length > 0 && (!order.items || order.items.length === 0)) {
+        if (orderItems.length > 0 && JSON.stringify(order.items) !== JSON.stringify(orderItems)) {
             order.items = orderItems;
+            order.quantity = totalQuantity;
             orderChanged = true;
         }
         if (orderChanged) {

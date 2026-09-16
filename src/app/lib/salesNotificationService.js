@@ -84,10 +84,13 @@ export const sendSalesNotification = async (userId, orderData) => {
 
             const deliveryFeeVal = Number(orderData.deliveryFee) || 0;
             const amountPaidVal = Number(notification.amountPaid) || 0;
-            const subtotalVal = amountPaidVal > deliveryFeeVal ? amountPaidVal - deliveryFeeVal : amountPaidVal;
+            const subtotalVal = (amountPaidVal > deliveryFeeVal && deliveryFeeVal > 0)
+                ? amountPaidVal - deliveryFeeVal
+                : amountPaidVal;
+            const grandTotalVal = subtotalVal + deliveryFeeVal;
 
             const msgText = deliveryFeeVal > 0
-                ? `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Products:* ${notification.productName}\n*Products Total:* ₦${subtotalVal.toLocaleString()}\n*Delivery Fee:* ₦${deliveryFeeVal.toLocaleString()}\n*Grand Total:* ₦${amountPaidVal.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`
+                ? `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Products:* ${notification.productName}\n*Products Total:* ₦${subtotalVal.toLocaleString()}\n*Delivery Fee:* ₦${deliveryFeeVal.toLocaleString()}\n*Grand Total:* ₦${grandTotalVal.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`
                 : `🎉 *New Sale Alert!*\n\n*Customer:* ${notification.customerName}\n*Product:* ${notification.productName}\n*Amount:* ₦${amountPaidVal.toLocaleString()}\n*Order ID:* ${notification.orderId}\n*Time:* ${new Date().toLocaleString()}`;
 
             // ── WhatsApp channel ─────────────────────────────────────

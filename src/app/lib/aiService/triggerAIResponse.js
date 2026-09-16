@@ -618,14 +618,16 @@ export const triggerAIResponse = async ({
         );
 
         const isPaymentShared = containsPaymentDetails(cleanText || rawAiText, businessProfile);
-        
+        const isCorrectionMsg = /(?:single|one|1)\s*(?:product|pair|item|piece)|not\s*double|only\s*one|just\s*one|want\s*1\b|wrong\s*quantity|make\s*it\s*1/i.test(inboundText || "");
+        const isExpectingPayment = session.payment?.expectingPayment === true && session.payment?.paymentProofReceived !== true;
+
         let paymentSetData = {};
-        if (isPaymentShared) {
-            console.log("💳 AI shared payment details — setting expectingPayment = true & locking stagedOrder snapshot for session:", session.sessionId);
+        if (isPaymentShared || (isExpectingPayment && isCorrectionMsg)) {
+            console.log(`💳 ${isPaymentShared ? "AI shared payment details" : "Customer order correction detected"} — updating expectingPayment & stagedOrder snapshot for session:`, session.sessionId);
             
             // Extract structured payment & quote data from AI response text to store state
             const outText = cleanText || rawAiText;
-            const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
+            const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|your\s+total\s+is|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
             const parsedGrandTotal = parsedGrandTotalMatch ? parseInt(parsedGrandTotalMatch[1].replace(/,/g, ""), 10) : null;
 
             // Extract delivery fee if mentioned
@@ -648,22 +650,45 @@ export const triggerAIResponse = async ({
                 mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(normText(p.name)));
             }
 
-            const pendingItems = mentionedProducts.map(p => ({
-                productId: p._id,
-                name: p.name,
-                price: p.discountPrice || p.price,
-                quantity: 1,
-                imageUrl: p.images?.[0]?.url || "",
-            }));
+            const parseQuantityFromText = (productName, text) => {
+                if (isCorrectionMsg) return 1; // Explicit user single-product correction
+                if (!productName || !text) return 1;
+                const escaped = productName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const matchX = text.match(new RegExp(`(\\d+)\\s*x\\s*${escaped}`, 'i'));
+                if (matchX && matchX[1]) return parseInt(matchX[1], 10) || 1;
+                return 1;
+            };
+
+            const pendingItems = mentionedProducts.map(p => {
+                const qty = parseQuantityFromText(p.name, outText);
+                return {
+                    productId: p._id,
+                    name: p.name,
+                    price: p.discountPrice || p.price,
+                    quantity: qty,
+                    imageUrl: p.images?.[0]?.url || "",
+                };
+            });
 
             const itemsSubtotal = pendingItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-            const stagedTotalPrice = parsedGrandTotal && parsedGrandTotal > 0
-                ? parsedGrandTotal
-                : itemsSubtotal > 0 ? itemsSubtotal + extractedDeliveryFee : 0;
+            
+            // Determine delivery fee: prioritize explicit extracted fee, otherwise fallback to grand total difference if realistic
+            let finalDeliveryFee = extractedDeliveryFee;
+            let stagedTotalPrice = 0;
 
-            const finalDeliveryFee = (stagedTotalPrice > 0 && itemsSubtotal > 0 && stagedTotalPrice > itemsSubtotal)
-                ? stagedTotalPrice - itemsSubtotal
-                : extractedDeliveryFee;
+            if (parsedGrandTotal && parsedGrandTotal > 0) {
+                stagedTotalPrice = parsedGrandTotal;
+                // Only infer delivery fee from total minus subtotal if extracted delivery fee was 0 and result is non-negative
+                if (finalDeliveryFee === 0 && itemsSubtotal > 0 && stagedTotalPrice > itemsSubtotal) {
+                    const diff = stagedTotalPrice - itemsSubtotal;
+                    // Sanity check: delivery fee shouldn't exceed subtotal unless subtotal is very small
+                    if (diff <= itemsSubtotal * 1.5 || itemsSubtotal < 5000) {
+                        finalDeliveryFee = diff;
+                    }
+                }
+            } else if (itemsSubtotal > 0) {
+                stagedTotalPrice = itemsSubtotal + finalDeliveryFee;
+            }
 
             const stagedOrder = pendingItems.length > 0 ? {
                 items: pendingItems,

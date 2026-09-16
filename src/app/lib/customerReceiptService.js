@@ -73,9 +73,11 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             ? calculatedSubtotal
             : Math.max(0, totalPaidVal - deliveryFeeVal);
 
-        const finalTotalPaid = totalPaidVal > 0
+        // 🛡️ Sanity Check: Guarantee Total Amount Paid strictly equals Subtotal + Delivery Fee
+        const expectedTotal = subtotalVal + deliveryFeeVal;
+        const finalTotalPaid = (totalPaidVal > 0 && Math.abs(totalPaidVal - expectedTotal) <= 100)
             ? totalPaidVal
-            : (subtotalVal + deliveryFeeVal);
+            : expectedTotal > 0 ? expectedTotal : totalPaidVal;
 
         const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
 
