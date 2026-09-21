@@ -442,6 +442,12 @@ export async function handlePaymentReceipt({
     }
 
     const totalQuantity = orderItems.reduce((sum, i) => sum + (i.quantity || 1), 0) || 1;
+    const resolvedDeliveryLocation = (
+        session?.payment?.deliveryLocation ||
+        stagedOrder?.deliveryLocation ||
+        multiOrderFromCurrentMsg?.deliveryLocation ||
+        ""
+    ).trim();
 
     if (!order) {
         order = await SellerOrderModel.create({
@@ -452,6 +458,8 @@ export async function handlePaymentReceipt({
             quantity: totalQuantity,
             totalPrice: orderTotalPrice,
             deliveryFee: calculatedDeliveryFee,
+            deliveryLocation: resolvedDeliveryLocation,
+            deliveryAddress: resolvedDeliveryLocation,
             items: orderItems,
             status: "pending",
             paymentReceiptUrl: url || "",
@@ -463,6 +471,11 @@ export async function handlePaymentReceipt({
         if (url) {
             order.paymentReceiptUrl = url;
             order.paymentReceiptPublicId = publicId;
+            orderChanged = true;
+        }
+        if (resolvedDeliveryLocation && (!order.deliveryLocation || order.deliveryLocation === "")) {
+            order.deliveryLocation = resolvedDeliveryLocation;
+            order.deliveryAddress = resolvedDeliveryLocation;
             orderChanged = true;
         }
         if (!order.paymentReceiptSubmittedAt) {

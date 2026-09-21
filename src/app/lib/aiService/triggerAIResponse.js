@@ -258,6 +258,24 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
     return { success: true, messageId: null };
 }
 
+function extractDeliveryAddressFromText(text) {
+    if (!text || typeof text !== "string") return null;
+    const clean = text.trim();
+    if (clean.length < 8) return null;
+
+    const hasAddressKeywords = /(?:street|st\b|crescent|cres\b|road|rd\b|avenue|ave\b|estate|close|cls\b|way|bus\s*stop|junction|no\.?\s*\d+|\d+\s+[a-z]+)/i.test(clean);
+    const hasMajorCities = /(?:lagos|ibadan|oyo|abuja|kano|port\s*harcourt|enugu|benin|asaba|abeokuta|ilorin|warri|kaduna|calabar|ikeja|ikorodu|lekki|ajah|surulere|yaba|victoria\s*island|vi\b|festac|ojota|gbagada)/i.test(clean);
+
+    if (hasAddressKeywords || (hasMajorCities && clean.split(/\s+/).length >= 3)) {
+        if (/^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|how much|is it available)\b/i.test(clean) && !hasAddressKeywords) {
+            return null;
+        }
+        return clean;
+    }
+
+    return null;
+}
+
 // ─────────────────────────────────────────────────────────────
 // Main trigger
 // ─────────────────────────────────────────────────────────────
@@ -430,8 +448,8 @@ export const triggerAIResponse = async ({
             content: m.text || "[image]",
         }));
 
-        // Cap raw messages to 10 (5 visitor messages + 5 assistant replies)
-        const trimmedMessages = historyMessages.slice(-10);
+        // Cap raw messages to 20 (10 visitor messages + 10 assistant replies)
+        const trimmedMessages = historyMessages.slice(-20);
 
         // Inject compressed memory summary if available
         const memorySummary = session.context?.summary;
@@ -622,6 +640,17 @@ export const triggerAIResponse = async ({
         const isExpectingPayment = session.payment?.expectingPayment === true && session.payment?.paymentProofReceived !== true;
 
         let paymentSetData = {};
+
+        // 📍 Auto-extract & persist delivery address if present in customer message
+        const extractedAddress = extractDeliveryAddressFromText(inboundText);
+        if (extractedAddress) {
+            console.log("📍 Extracted and persisted customer delivery address:", extractedAddress);
+            paymentSetData["payment.deliveryLocation"] = extractedAddress;
+            if (session.payment) {
+                session.payment.deliveryLocation = extractedAddress;
+            }
+        }
+
         if (isPaymentShared || (isExpectingPayment && isCorrectionMsg)) {
             console.log(`💳 ${isPaymentShared ? "AI shared payment details" : "Customer order correction detected"} — updating expectingPayment & stagedOrder snapshot for session:`, session.sessionId);
             

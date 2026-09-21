@@ -24,10 +24,11 @@ function buildSellerPrompt({ profile, products, storefrontUrl, sessionContext = 
 PAYMENT IS PENDING — MANDATORY INSTRUCTION
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Payment details have ALREADY been provided for an active order.
-Do NOT send bank details or product images again.
-1. Remind customer politely to upload their payment proof screenshot/receipt image.
-2. If customer asks about other items, acknowledge in 1 sentence and redirect: "I'd love to help! But first let's complete your pending payment — please send your receipt screenshot."
-3. Do NOT accept text claims ("I have paid"). Insist on receiving an image/screenshot of the receipt.
+Do NOT send bank details again. Do NOT send image tags or storefront link again.
+1. Remind customer politely to transfer and upload their payment proof screenshot/receipt image.
+2. DO NOT pitch, recommend, or present unrelated catalogue items (e.g. Flip Flops, Jordan sneakers, Ballet Flats). Focus solely on concluding the current pending order.
+3. If customer asks a question or makes a comment, reply in 1 short sentence and politely remind them to send their payment screenshot.
+4. Do NOT accept text claims ("I have paid"). Insist on receiving an image/screenshot of the receipt.
 `
     : `
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -37,6 +38,18 @@ PAYMENT STAGE POLICY
 • If customer explicitly claims to have paid before bank details were provided, politely clarify that no payment details have been shared yet for an order.
 • Do NOT confirm receipt of any payment without an active order and a clear receipt screenshot.
 `;
+
+  // ── Saved Delivery Address Context ────────────────────────
+  const savedDeliveryAddress = sessionContext?.payment?.deliveryLocation || sessionContext?.payment?.stagedOrder?.deliveryLocation || null;
+  const deliveryAddressSection = savedDeliveryAddress
+    ? `
+━━━━━━━━━━━━━━━━━━━━━━━━
+CUSTOMER DELIVERY ADDRESS (ALREADY PROVIDED)
+━━━━━━━━━━━━━━━━━━━━━━━━
+Delivery Address: ${savedDeliveryAddress}
+• ADDRESS DIRECTIVE: The customer ALREADY provided their delivery address above ("${savedDeliveryAddress}"). DO NOT ask the customer for their delivery address again! Use this address for delivery fee calculation and order summaries.
+`
+    : "";
 
   // ── Products catalogue ────────────────────────────────────
   const productsSection = products?.length
@@ -126,6 +139,8 @@ Delivery Model: ${deliveryModel}
 ${deliveryZonesText}
 Working Hours: ${profile.workingHours || "Not specified"} | Currency: ${profile.currency || "NGN"} (${currencySymbol})
 
+${deliveryAddressSection}
+
 ${productsSection}
 
 ${paymentSection}
@@ -178,11 +193,12 @@ Line 10: Proceed to payment — share bank account details on the next lines.
 SALES FLOW & STRICT RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━
 • QUANTITY RULES: Default item quantity is ALWAYS 1 pair/unit unless the customer explicitly requests multiple (e.g. "2 pairs", "buy 3"). NEVER double or hallucinate item quantities.
-• CORRECTION DIRECTIVE: If a customer clarifies quantity or corrects an order (e.g., "I want a single product not double"), IMMEDIATELY accept the correction. Re-state 1x item price, correct delivery fee, and recalculate Grand Total explicitly (Grand Total = Product Price + Delivery Fee).
+• CORRECTION & REJECTION DIRECTIVE: Focus strictly on the product the customer is inquiring about in the recent messages. If a customer questions, rejects, or clarifies an item (e.g. "did I say I want X?", "I didn't ask for Y", "I want single not double"), IMMEDIATELY remove item X from the quote and focus ONLY on item Y. Never drag in unrelated items from past conversation summaries.
+• SIZE & COLOR SELECTION DIRECTIVE: When a customer selects a size and color for an item already discussed (e.g. "36, black"), DO NOT output robotic search lines ("Here is Product for Price..."). Proceed directly to confirming the size/color and providing the concise order breakdown.
 • Stage 1 (Explore): Greet, pitch 1-2 hot items, and share ${storefrontUrl || "[storefront link]"}.
 • Stage 2 (Showcase): State exact catalogue price/discount.
 • Stage 3 (Pricing): STRICT PRICE ENFORCEMENT — Never alter or negotiate prices/delivery fees below listed amounts.
-• Stage 4 (Close & Address): Collect FULL ADDRESS (State/City + Area + Street Name & House No). Verify delivery coverage (${deliveryCoverage}); if unsupported, decline order politely. When Delivery Model is "zones", use the specific Delivery Zone fee for customer's location, which OVERRIDES flat product delivery fees. ALWAYS double-check arithmetic before outputting a total: Grand Total = Product Price + Applicable Delivery Fee. Never state one delivery fee (e.g. ₦3,000) and then add a different fee in the calculation!
+• Stage 4 (Close & Address): Collect FULL ADDRESS (State/City + Area + Street Name & House No). If address is already saved above ("${savedDeliveryAddress || ""}"), DO NOT ask for it again! Verify delivery coverage (${deliveryCoverage}); if unsupported, decline order politely. When Delivery Model is "zones", use the specific Delivery Zone fee for customer's location, which OVERRIDES flat product delivery fees. ALWAYS double-check arithmetic before outputting a total: Grand Total = Product Price + Applicable Delivery Fee. Never state one delivery fee (e.g. ₦3,000) and then add a different fee in the calculation!
 • Stage 5 (Payment): Share active payment accounts. Ask for receipt screenshot.
 • Stage 6 (Receipt): Acknowledge only when image/screenshot is sent. If text-only, prompt for screenshot. Never confirm orders yourself (seller confirms manually).
 ${followUpNote}
