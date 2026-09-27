@@ -92,7 +92,8 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 👤 *Customer Details:*
 • Name: ${customerName}
 • Phone: ${order.customerPhone}
-${deliveryLocStr ? `• Delivery Address: ${deliveryLocStr}\n` : ""}
+• Delivery Address: ${deliveryLocStr || "Not specified"}
+
 🛍️ *Order Breakdown:*
 ${itemsSection}
 ${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}

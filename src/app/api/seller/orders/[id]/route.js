@@ -61,6 +61,15 @@ export async function PATCH(req, { params }) {
                     $set: {
                         "payment.expectingPayment": false,
                         "payment.paymentProofReceived": false,
+                        "payment.paymentDetailsSharedAt": null,
+                        "payment.deflectionCount": 0,
+                        "payment.deliveryFee": 0,
+                    },
+                    $unset: {
+                        "payment.pendingAmount": 1,
+                        "payment.pendingItems": 1,
+                        "payment.stagedOrder": 1,
+                        "payment.deliveryLocation": 1,
                     }
                 }
             ).catch(() => {});

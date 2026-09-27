@@ -394,27 +394,45 @@ export async function handlePaymentReceipt({
             return txt.includes("OFFICIAL RECEIPT") || txt.includes("PAYMENT VERIFIED") || txt.includes("verifying your payment");
         });
         const currentOrderWindowMsgs = lastReceiptIndex >= 0 ? recentMessages.slice(-lastReceiptIndex) : recentMessages;
-        const matchedProducts = await findAllProductsFromConversation(sellerId, currentOrderWindowMsgs);
-        const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
 
-        if (matchedProducts.length > 0) {
-            orderItems = matchedProducts.map(p => ({
-                productId: p._id,
-                name: p.name,
-                price: p.discountPrice || p.price,
-                quantity: 1,
-                imageUrl: p.images?.[0]?.url || "",
-            }));
-        } else if (matchedProduct) {
-            orderItems = [{
-                productId: matchedProduct._id,
-                name: matchedProduct.name,
-                price: matchedProduct.price || 0,
-                quantity: 1,
-                imageUrl: matchedProduct.images?.[0]?.url || "",
-            }];
+        const multiFromWindow = parseMultiProductOrderFromText("", currentOrderWindowMsgs);
+        if (multiFromWindow.items && multiFromWindow.items.length > 0) {
+            console.log("📋 Consuming parsed multi-product items from assistant conversation history for order receipt:", multiFromWindow.items.length, "item(s)");
+            const dbProducts = await SellerProductModel.find({ sellerId }).lean();
+            orderItems = multiFromWindow.items.map(item => {
+                const normName = normalizeSearchText(item.name);
+                const matchedDbProd = (dbProducts || []).find(p => p.name && normalizeSearchText(p.name).includes(normName));
+                return {
+                    productId: matchedDbProd?._id || null,
+                    name: item.name,
+                    price: item.price > 0 ? item.price : (matchedDbProd?.discountPrice || matchedDbProd?.price || 0),
+                    quantity: item.quantity || 1,
+                    imageUrl: matchedDbProd?.images?.[0]?.url || "",
+                };
+            });
+        } else {
+            const matchedProducts = await findAllProductsFromConversation(sellerId, currentOrderWindowMsgs);
+            const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
+
+            if (matchedProducts.length > 0) {
+                orderItems = matchedProducts.map(p => ({
+                    productId: p._id,
+                    name: p.name,
+                    price: p.discountPrice || p.price,
+                    quantity: 1,
+                    imageUrl: p.images?.[0]?.url || "",
+                }));
+            } else if (matchedProduct) {
+                orderItems = [{
+                    productId: matchedProduct._id,
+                    name: matchedProduct.name,
+                    price: matchedProduct.price || 0,
+                    quantity: 1,
+                    imageUrl: matchedProduct.images?.[0]?.url || "",
+                }];
+            }
         }
-        calculatedDeliveryFee = extractDeliveryFeeFromConversation(currentOrderWindowMsgs, matchedProducts);
+        calculatedDeliveryFee = extractDeliveryFeeFromConversation(currentOrderWindowMsgs);
         orderTotalPrice = extractOrderTotalFromConversation(currentOrderWindowMsgs) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     }
 
@@ -432,8 +450,14 @@ export async function handlePaymentReceipt({
     if (itemsSubtotal > 0 && orderTotalPrice > itemsSubtotal) {
         const inferredDeliveryFee = orderTotalPrice - itemsSubtotal;
         if (calculatedDeliveryFee > 0 && Math.abs(inferredDeliveryFee - calculatedDeliveryFee) > 1000) {
-            console.warn(`⚠️ Mismatch between inferred fee (₦${inferredDeliveryFee}) and explicit delivery fee (₦${calculatedDeliveryFee}). Correcting total price.`);
-            orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
+            const explicitTotal = Number(stagedOrder?.totalPrice) || extractOrderTotalFromConversation(recentMessages);
+            if (explicitTotal && explicitTotal > itemsSubtotal) {
+                console.warn(`⚠️ Multi-item subtotal gap (subtotal: ₦${itemsSubtotal}, explicit total: ₦${explicitTotal}). Preserving explicit grand total.`);
+                orderTotalPrice = explicitTotal;
+            } else {
+                console.warn(`⚠️ Mismatch between inferred fee (₦${inferredDeliveryFee}) and explicit delivery fee (₦${calculatedDeliveryFee}). Correcting total price.`);
+                orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
+            }
         } else {
             calculatedDeliveryFee = inferredDeliveryFee;
         }
@@ -473,7 +497,7 @@ export async function handlePaymentReceipt({
             order.paymentReceiptPublicId = publicId;
             orderChanged = true;
         }
-        if (resolvedDeliveryLocation && (!order.deliveryLocation || order.deliveryLocation === "")) {
+        if (resolvedDeliveryLocation && (order.deliveryLocation !== resolvedDeliveryLocation || order.deliveryAddress !== resolvedDeliveryLocation)) {
             order.deliveryLocation = resolvedDeliveryLocation;
             order.deliveryAddress = resolvedDeliveryLocation;
             orderChanged = true;
@@ -587,7 +611,7 @@ function extractDeliveryFeeFromConversation(recentMessages = [], matchedProducts
     return 0;
 }
 
-function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
+export function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
     const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
 
     // Extract Delivery Location if present (e.g. 📍 Delivery Location: Ikeja, Lagos)
@@ -659,6 +683,7 @@ export async function createPendingOrderFromText({
     const orderCode = generateOrderCode();
     const multiOrderData = parseMultiProductOrderFromText(inboundText, recentMessages);
     const extractedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProduct ? [matchedProduct] : [], inboundText);
+    const resolvedLoc = session?.payment?.deliveryLocation || session?.payment?.stagedOrder?.deliveryLocation || multiOrderData.deliveryLocation || "";
 
     const order = await SellerOrderModel.create({
         orderCode,
@@ -676,7 +701,8 @@ export async function createPendingOrderFromText({
             quantity: 1,
             imageUrl: matchedProduct.images?.[0]?.url || "",
         }],
-        deliveryLocation: multiOrderData.deliveryLocation || "",
+        deliveryLocation: resolvedLoc,
+        deliveryAddress: resolvedLoc,
         status: "pending",
     });
 

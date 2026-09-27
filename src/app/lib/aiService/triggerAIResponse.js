@@ -11,6 +11,7 @@ import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
 import UserModel from "../../ults/models/UserModel.js";
 import SessionModel from "../../ults/models/SessionModel.js";
+import { parseMultiProductOrderFromText } from "./handlePaymentReceipt.js";
 
 // ─────────────────────────────────────────────────────────────
 // Parse [SEND_IMAGE: url] tags out of the AI reply.
@@ -261,16 +262,31 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
 function extractDeliveryAddressFromText(text) {
     if (!text || typeof text !== "string") return null;
     const clean = text.trim();
+    if (clean.length < 5) return null;
+
+    // Check for explicit label prefix (e.g. Delivery Address: ..., Address: ..., Deliver to: ..., My address is ...)
+    const labelMatch = clean.match(/(?:📍\s*Delivery\s*Location|Delivery\s*Address|Delivery\s*Location|Deliver\s*to|My\s*address\s*is|Address)[\s:]+([^\n]+)/i);
+    if (labelMatch && labelMatch[1] && labelMatch[1].trim().length >= 5) {
+        const addr = labelMatch[1].trim();
+        if (!/^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|none|n\/a)\b/i.test(addr)) {
+            return addr;
+        }
+    }
+
     if (clean.length < 8) return null;
 
-    const hasAddressKeywords = /(?:street|st\b|crescent|cres\b|road|rd\b|avenue|ave\b|estate|close|cls\b|way|bus\s*stop|junction|no\.?\s*\d+|\d+\s+[a-z]+)/i.test(clean);
-    const hasMajorCities = /(?:lagos|ibadan|oyo|abuja|kano|port\s*harcourt|enugu|benin|asaba|abeokuta|ilorin|warri|kaduna|calabar|ikeja|ikorodu|lekki|ajah|surulere|yaba|victoria\s*island|vi\b|festac|ojota|gbagada)/i.test(clean);
+    // Guard against non-address conversational phrases
+    if (/^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|how much|is it available|do you have|i want this|i love this|black oxford|monk strap)\b/i.test(clean) &&
+        !/(?:street|st\b|crescent|cres\b|road|rd\b|avenue|ave\b|estate|close|cls\b|way|bus\s*stop|junction|no\.?\s*\d+|\d+\s+[a-z]+)/i.test(clean)) {
+        return null;
+    }
 
-    if (hasAddressKeywords || (hasMajorCities && clean.split(/\s+/).length >= 3)) {
-        if (/^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|how much|is it available)\b/i.test(clean) && !hasAddressKeywords) {
-            return null;
-        }
-        return clean;
+    const hasAddressKeywords = /(?:street|st\b|crescent|cres\b|road|rd\b|avenue|ave\b|estate|close|cls\b|way|lane|drive|drv\b|bus\s*stop|junction|flat|house|plot|block|no\.?\s*\d+|\d+\s+[a-z]+)/i.test(clean);
+    const hasMajorCities = /(?:lagos|ibadan|oyo|abuja|kano|port\s*harcourt|enugu|benin|asaba|abeokuta|ilorin|warri|kaduna|calabar|ikeja|ikorodu|lekki|ajah|surulere|yaba|victoria\s*island|vi\b|festac|ojota|gbagada|agege|mushin|oshodi|eket|owerri|umuahia|akure|ado\s*ekiti|osogbo)/i.test(clean);
+
+    if (hasAddressKeywords || (hasMajorCities && clean.split(/\s+/).length >= 2)) {
+        const scrubbed = clean.replace(/\[SYSTEM.*\]/gi, "").trim();
+        return scrubbed || clean;
     }
 
     return null;
@@ -307,22 +323,52 @@ export const triggerAIResponse = async ({
         // ── Clear stale payment state if customer initiates a new storefront order ──
         if (inboundText && /NEW ORDER FROM STOREFRONT/i.test(inboundText)) {
             console.log("🛒 New storefront order detected — resetting stale session payment state for:", session.sessionId);
+            const storefrontAddress = extractDeliveryAddressFromText(inboundText);
+            const unsetFields = {
+                "payment.pendingAmount": 1,
+                "payment.pendingItems": 1,
+                "payment.stagedOrder": 1,
+            };
+            const setFields = {
+                "payment.expectingPayment": false,
+                "payment.paymentProofReceived": false,
+                "payment.deflectionCount": 0,
+            };
+            if (storefrontAddress) {
+                setFields["payment.deliveryLocation"] = storefrontAddress;
+            } else {
+                unsetFields["payment.deliveryLocation"] = 1;
+            }
+
             await SessionModel.findByIdAndUpdate(session._id, {
-                $unset: {
-                    "payment.pendingAmount": 1,
-                    "payment.pendingItems": 1,
-                },
-                $set: {
-                    "payment.expectingPayment": false,
-                    "payment.paymentProofReceived": false,
-                }
+                $unset: unsetFields,
+                $set: setFields,
             });
+
             if (session.payment) {
                 delete session.payment.pendingAmount;
                 delete session.payment.pendingItems;
+                delete session.payment.stagedOrder;
+                if (storefrontAddress) {
+                    session.payment.deliveryLocation = storefrontAddress;
+                } else {
+                    delete session.payment.deliveryLocation;
+                }
                 session.payment.expectingPayment = false;
                 session.payment.paymentProofReceived = false;
+                session.payment.deflectionCount = 0;
             }
+        }
+
+        // 📍 Early Auto-extract & persist delivery address from customer message BEFORE building prompt
+        const earlyAddress = extractDeliveryAddressFromText(inboundText);
+        if (earlyAddress) {
+            console.log("📍 Early extracted customer delivery address:", earlyAddress);
+            if (!session.payment) session.payment = {};
+            session.payment.deliveryLocation = earlyAddress;
+            await SessionModel.findByIdAndUpdate(session._id, {
+                $set: { "payment.deliveryLocation": earlyAddress }
+            }).catch(err => console.warn("Failed early address save:", err?.message));
         }
 
         // ── Plan-based conversation limits ───────────────────────
@@ -461,7 +507,13 @@ export const triggerAIResponse = async ({
             : [];
 
         // Clean up excessively long session tokens in user URL parameters to save tokens
-        const cleanedInboundText = (inboundText || "").replace(/(\?|&)session=[A-Za-z0-9._\-\+]+=*/g, "$1session=[token]");
+        let cleanedInboundText = (inboundText || "").replace(/(\?|&)session=[A-Za-z0-9._\-\+]+=*/g, "$1session=[token]");
+
+        const isStorefrontOrder = /(?:NEW ORDER FROM STOREFRONT|Hi!\s*I'm\s*interested\s*in\s*ordering\s*the\s*following\s*items\s*from)/i.test(inboundText || "");
+        if (isStorefrontOrder) {
+            const storefrontDirective = `[SYSTEM-DIRECTIVE: STOREFRONT CART ORDER DETECTED. The customer selected these items directly from your live online storefront. ALL items in this message are 100% AVAILABLE and IN STOCK. Accept and confirm ALL items immediately, DO NOT state or claim that any item is out of stock or unavailable, do NOT alter item prices, and proceed directly to order summary and payment details.]\n\n`;
+            cleanedInboundText = `${storefrontDirective}${cleanedInboundText}`;
+        }
 
         const messages = [
             ...memorySummaryBlock,
@@ -656,6 +708,8 @@ export const triggerAIResponse = async ({
             
             // Extract structured payment & quote data from AI response text to store state
             const outText = cleanText || rawAiText;
+            const normText = (str) => (str || "").toLowerCase().replace(/[’‘`´]/g, "'").replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
+
             const parsedGrandTotalMatch = outText.match(/(?:grand\s+total|total\s+will\s+be|total\s+amount|making\s+your\s+total|your\s+total\s+is|total)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
             const parsedGrandTotal = parsedGrandTotalMatch ? parseInt(parsedGrandTotalMatch[1].replace(/,/g, ""), 10) : null;
 
@@ -663,54 +717,70 @@ export const triggerAIResponse = async ({
             const deliveryFeeMatch = outText.match(/(?:delivery\s+fee|shipping\s+fee|delivery)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i);
             const extractedDeliveryFee = deliveryFeeMatch ? parseInt(deliveryFeeMatch[1].replace(/,/g, ""), 10) : 0;
 
-            // Match products from catalogue that were mentioned in this payment message or recent user message
-            const normText = (str) => (str || "").toLowerCase().replace(/[’‘`´]/g, "'").replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
-            const normalizedOutText = normText(outText);
+            // 1. First Priority: Parse structured bullet points directly from outText using parseMultiProductOrderFromText
+            const parsedOrderFromOutText = parseMultiProductOrderFromText(outText);
+            let pendingItems = [];
 
-            let mentionedProducts = (products || []).filter(p => p.name && normalizedOutText.includes(normText(p.name)));
-            if (mentionedProducts.length === 0 && rawHistory?.length > 0) {
-                const userMsgsText = normText(
-                    rawHistory
-                        .filter(m => m.senderType === "visitor" || m.direction === "inbound")
-                        .slice(-4)
-                        .map(m => m.text || "")
-                        .join(" ")
-                );
-                mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(normText(p.name)));
+            if (parsedOrderFromOutText.items && parsedOrderFromOutText.items.length > 0) {
+                pendingItems = parsedOrderFromOutText.items.map(item => {
+                    const normItemName = normText(item.name);
+                    const matchedProd = (products || []).find(p => p.name && (normItemName.includes(normText(p.name)) || normText(p.name).includes(normItemName)));
+                    return {
+                        productId: matchedProd?._id || null,
+                        name: item.name,
+                        price: item.price > 0 ? item.price : (matchedProd?.discountPrice || matchedProd?.price || 0),
+                        quantity: item.quantity || 1,
+                        imageUrl: matchedProd?.images?.[0]?.url || "",
+                    };
+                });
             }
 
-            const parseQuantityFromText = (productName, text) => {
-                if (isCorrectionMsg) return 1; // Explicit user single-product correction
-                if (!productName || !text) return 1;
-                const escaped = productName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const matchX = text.match(new RegExp(`(\\d+)\\s*x\\s*${escaped}`, 'i'));
-                if (matchX && matchX[1]) return parseInt(matchX[1], 10) || 1;
-                return 1;
-            };
+            // 2. Fallback: Match products from catalogue mentioned in outText or recent user messages
+            if (pendingItems.length === 0) {
+                const normalizedOutText = normText(outText);
+                let mentionedProducts = (products || []).filter(p => p.name && normalizedOutText.includes(normText(p.name)));
+                if (mentionedProducts.length === 0 && rawHistory?.length > 0) {
+                    const userMsgsText = normText(
+                        rawHistory
+                            .filter(m => m.senderType === "visitor" || m.direction === "inbound")
+                            .slice(-4)
+                            .map(m => m.text || "")
+                            .join(" ")
+                    );
+                    mentionedProducts = (products || []).filter(p => p.name && userMsgsText.includes(normText(p.name)));
+                }
 
-            const pendingItems = mentionedProducts.map(p => {
-                const qty = parseQuantityFromText(p.name, outText);
-                return {
-                    productId: p._id,
-                    name: p.name,
-                    price: p.discountPrice || p.price,
-                    quantity: qty,
-                    imageUrl: p.images?.[0]?.url || "",
+                const parseQuantityFromText = (productName, text) => {
+                    if (isCorrectionMsg) return 1;
+                    if (!productName || !text) return 1;
+                    const escaped = productName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const matchX = text.match(new RegExp(`(\\d+)\\s*x\\s*${escaped}`, 'i'));
+                    if (matchX && matchX[1]) return parseInt(matchX[1], 10) || 1;
+                    return 1;
                 };
-            });
+
+                pendingItems = mentionedProducts.map(p => {
+                    const qty = parseQuantityFromText(p.name, outText);
+                    return {
+                        productId: p._id,
+                        name: p.name,
+                        price: p.discountPrice || p.price,
+                        quantity: qty,
+                        imageUrl: p.images?.[0]?.url || "",
+                    };
+                });
+            }
 
             const itemsSubtotal = pendingItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
             
-            // Determine delivery fee: prioritize explicit extracted fee, otherwise fallback to grand total difference if realistic
+            // Determine delivery fee & grand total
             let finalDeliveryFee = extractedDeliveryFee;
             let stagedTotalPrice = 0;
 
             if (parsedGrandTotal && parsedGrandTotal > 0) {
                 stagedTotalPrice = parsedGrandTotal;
-                // Only infer delivery fee from total minus subtotal if extracted delivery fee was 0 and result is non-negative
                 if (finalDeliveryFee === 0 && itemsSubtotal > 0 && stagedTotalPrice > itemsSubtotal) {
                     const diff = stagedTotalPrice - itemsSubtotal;
-                    // Sanity check: delivery fee shouldn't exceed subtotal unless subtotal is very small
                     if (diff <= itemsSubtotal * 1.5 || itemsSubtotal < 5000) {
                         finalDeliveryFee = diff;
                     }

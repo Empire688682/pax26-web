@@ -709,10 +709,20 @@ export const handleIncomingWhatsApp = async (payload) => {
             "payment.expectingPayment": false,
             "payment.paymentProofReceived": false,
             "payment.deflectionCount": 0,
+          },
+          $unset: {
+            "payment.pendingAmount": 1,
+            "payment.pendingItems": 1,
+            "payment.stagedOrder": 1,
+            "payment.deliveryLocation": 1,
           }
         }
       );
       if (session.payment) {
+        delete session.payment.pendingAmount;
+        delete session.payment.pendingItems;
+        delete session.payment.stagedOrder;
+        delete session.payment.deliveryLocation;
         session.payment.expectingPayment = false;
         session.payment.paymentProofReceived = false;
         session.payment.deflectionCount = 0;
