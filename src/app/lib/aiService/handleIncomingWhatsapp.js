@@ -2,6 +2,7 @@ import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
 import { triggerAIResponse } from "@/app/lib/aiService/triggerAIResponse";
+import { runExpiryCheckForUser, processPlanExpirationOrRenewal } from "@/app/lib/planExpiryCheck";
 import { getOrCreateSession } from "./session";
 import { uploadCustomerImageToCloudinary } from "@/app/lib/aiService/customerImageSearch.js";
 import { buildImageNoMatchContext } from "@/app/lib/aiService/buildImageMatchContext.js";
@@ -111,6 +112,19 @@ export const handleIncomingWhatsApp = async (payload) => {
     return { ok: true };
   }
   console.log("✅ Step 1 — User found:", user._id);
+
+  // ── Step 1.1: Blocking Plan Lifecycle Gateway ────────────────
+  try {
+    await processPlanExpirationOrRenewal(user._id);
+    await runExpiryCheckForUser(user._id);
+    // Refresh user document so all downstream quota & feature checks use updated plan state
+    const freshUser = await UserModel.findById(user._id);
+    if (freshUser) {
+      user = freshUser;
+    }
+  } catch (planErr) {
+    console.error("[handleIncomingWhatsApp] Plan gateway check error:", planErr.message);
+  }
 
   // ── Step 1.5: Guard against self-messages & echos ─────────
   const userPersonalPhone = user.number?.replace(/\D/g, "");

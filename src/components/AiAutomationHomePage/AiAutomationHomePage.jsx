@@ -209,14 +209,18 @@ export default function AiAutomationHomePage() {
               plan === "business" ? 10000 :
                 plan === "enterprise" ? 50000 : 200
           );
+          const planExpiresAt = userData?.paxAI?.planExpiresAt;
           const lastUpd = userData?.paxAI?.planStartedAt;
           const usagePct = Math.min((used / (quota || 1)) * 100, 100);
 
           let remainingDays = null;
-          if (plan !== "free" && lastUpd) {
+          if (plan !== "free" && planExpiresAt) {
+            const msDiff = new Date(planExpiresAt).getTime() - Date.now();
+            remainingDays = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+          } else if (plan !== "free" && lastUpd) {
             const start = new Date(lastUpd);
             const now = new Date();
-            const diffTime = now - start;
+            const diffTime = now.getTime() - start.getTime();
             const diffDays = diffTime / (1000 * 60 * 60 * 24);
             remainingDays = Math.max(0, 30 - Math.floor(diffDays));
           }

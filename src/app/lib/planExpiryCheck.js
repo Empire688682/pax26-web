@@ -17,7 +17,7 @@
  */
 
 import UserModel from "@/app/ults/models/UserModel";
-import PlanModel  from "@/app/ults/models/PlanModel";
+import PlanModel from "@/app/ults/models/PlanModel";
 import TransactionModel from "@/app/ults/models/TransactionModel";
 import { sendPlanExpiryReminder, sendPlanActivationReceipt } from "@/app/lib/transactionalEmailService";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
@@ -47,15 +47,15 @@ export async function runExpiryCheckForUser(userId) {
     const planExpiresAt = user.paxAI?.planExpiresAt;
     if (!planExpiresAt) return { sent: false, windowKey: null };
 
-    const now        = new Date();
-    const expiresAt  = new Date(planExpiresAt);
-    const msDiff     = expiresAt.getTime() - now.getTime();
+    const now = new Date();
+    const expiresAt = new Date(planExpiresAt);
+    const msDiff = expiresAt.getTime() - now.getTime();
 
     // Already expired (cron/inline handles auto-renew or downgrade) or more than 3 days away
     if (msDiff <= 0 || msDiff > 3 * MS_PER_DAY) return { sent: false, windowKey: null };
 
     // Determine which day-window this falls into: "3", "2", or "1"
-    const daysLeft  = Math.ceil(msDiff / MS_PER_DAY); // 1, 2, or 3
+    const daysLeft = Math.ceil(msDiff / MS_PER_DAY); // 1, 2, or 3
     const windowKey = String(Math.min(3, Math.max(1, daysLeft))); // clamp to "1"–"3"
 
     // 2. Atomically claim this window for the current billing cycle.
@@ -70,7 +70,7 @@ export async function runExpiryCheckForUser(userId) {
       },
       {
         $addToSet: { "paxAI.reminderWindowSent": windowKey },
-        $set:      { "paxAI.lastUpdated": now },
+        $set: { "paxAI.lastUpdated": now },
       },
       { new: false } // we don't need the updated doc
     );
@@ -87,8 +87,8 @@ export async function runExpiryCheckForUser(userId) {
     await sendPlanExpiryReminder(
       { _id: user._id, email: user.email, name: user.name },
       {
-        plan:          planLabel,
-        planKey:       plan,
+        plan: planLabel,
+        planKey: plan,
         daysLeft,
         expiresAt,
         walletBalance: user.walletBalance ?? 0,
@@ -173,7 +173,7 @@ export async function processPlanExpirationOrRenewal(userId) {
       user.paxAI.removeBranding = planMeta.removeBranding;
       user.paxAI.multiStaff = planMeta.multiStaff;
       user.paxAI.storefrontEnabled = planMeta.storefrontEnabled ?? true;
-      user.paxAI.productsLimit = planMeta.productsLimit ?? 20;
+      user.paxAI.productsLimit = planMeta.productsLimit ?? 50;
       user.paxAI.orderReceiptsEnabled = planMeta.orderReceiptsEnabled ?? true;
       user.paxAI.salesAlertsEnabled = planMeta.salesAlertsEnabled ?? true;
       user.paxAI.salesAnalyticsEnabled = planMeta.salesAnalyticsEnabled ?? false;

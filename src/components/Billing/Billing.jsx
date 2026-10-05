@@ -248,12 +248,18 @@ export default function Billing() {
   const currentPlan = userData?.paxAI?.plan || "free";
   const selectedMeta = plans.find((p) => p.key === selected);
 
+  const planExpiresAt = userData?.paxAI?.planExpiresAt;
   const lastUpd = userData?.paxAI?.planStartedAt;
   let remainingDays = null;
-  if (currentPlan !== "free" && lastUpd) {
+  if (currentPlan !== "free" && planExpiresAt) {
+    const expires = new Date(planExpiresAt);
+    const now = new Date();
+    const msDiff = expires.getTime() - now.getTime();
+    remainingDays = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+  } else if (currentPlan !== "free" && lastUpd) {
     const start = new Date(lastUpd);
     const now = new Date();
-    const diffTime = now - start;
+    const diffTime = now.getTime() - start.getTime();
     const diffDays = diffTime / (1000 * 60 * 60 * 24);
     remainingDays = Math.max(0, 30 - Math.floor(diffDays));
   }

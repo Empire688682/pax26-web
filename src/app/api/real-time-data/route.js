@@ -19,14 +19,15 @@ export async function GET(req) {
             return NextResponse.json({ success: false, message: "User not authorized" }, { status: 401, headers:corsHeaders() });
         }
         
-        // Fire non-blocking plan expiration / auto-renew check followed by reminder check
-        processPlanExpirationOrRenewal(userId)
-          .then(() => runExpiryCheckForUser(userId))
-          .catch((err) =>
-            console.error("[real-time-data] Non-blocking plan lifecycle check failed:", err.message)
-          );
+        // Blocking plan expiration / auto-renew check followed by reminder check
+        try {
+            await processPlanExpirationOrRenewal(userId);
+            await runExpiryCheckForUser(userId);
+        } catch (err) {
+            console.error("[real-time-data] Plan lifecycle check failed:", err.message);
+        }
 
-        const user = await UserModel.findById({_id:userId});
+        const user = await UserModel.findById(userId);
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 404, headers:corsHeaders() });
         }

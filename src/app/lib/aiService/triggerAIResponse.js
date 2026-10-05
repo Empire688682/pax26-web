@@ -25,8 +25,8 @@ function extractImageTags(text) {
     // 2. Bracket tag format: [SEND_IMAGE: https://...] or [IMAGE_URL: https://...]
     // 3. Plain tag format: IMAGE_URL: https://... or IMAGE_URL: (https://...)
     const markdownRegex = /!?\[(?:IMAGE_URL|SEND_IMAGE|image|photo)\]\((https?:\/\/[^\)\s]+)\)/gi;
-    const bracketRegex  = /\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]/gi;
-    const plainRegex    = /IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?/gi;
+    const bracketRegex = /\[(?:SEND_IMAGE|IMAGE_URL):\s*(https?:\/\/[^\]\s]+)\]/gi;
+    const plainRegex = /IMAGE_URL:\s*\(?(https?:\/\/[^\s\)\>\]]+)\)?/gi;
 
     const imageUrls = [];
 
@@ -92,7 +92,7 @@ function containsPaymentDetails(text, businessProfile) {
     if (!text) return false;
     const has10Digits = /\b\d{10}\b/.test(text);
     const hasBankTerms = /bank|account|acc\s*no|acc\s*num|transfer|pay to|payment details|gtbank|zenith|access|kuda|opay|palmpay|moniepoint|firstbank|ubabank|wema|sterling|stanbic|fidelity/i.test(text);
-    
+
     const activePayments = businessProfile?.paymentDetails?.filter((pay) => pay.active !== false) || [];
     const hasConfiguredAccount = activePayments.some(
         (pay) => pay.accountNumber && text.includes(pay.accountNumber)
@@ -219,12 +219,12 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
         console.log("🖼️ Sending image URL (full):", firstUrl);
         // Strip markdown from caption before sending — WhatsApp doesn't render it
         const cleanCaption = (cleanText || "")
-          .replace(/\*\*(.*?)\*\*/g, "$1")   // **bold**
-          .replace(/\*(.*?)\*/g, "$1")         // *italic*
-          .replace(/__(.*?)__/g, "$1")         // __underline__
-          .replace(/~~(.*?)~~/g, "$1")         // ~~strikethrough~~
-          .replace(/`(.*?)`/g, "$1")           // `code`
-          .trim();
+            .replace(/\*\*(.*?)\*\*/g, "$1")   // **bold**
+            .replace(/\*(.*?)\*/g, "$1")         // *italic*
+            .replace(/__(.*?)__/g, "$1")         // __underline__
+            .replace(/~~(.*?)~~/g, "$1")         // ~~strikethrough~~
+            .replace(/`(.*?)`/g, "$1")           // `code`
+            .trim();
 
         try {
             const result = await sendWhatsAppImageReply({
@@ -302,6 +302,20 @@ export const triggerAIResponse = async ({
     imageSearchContext = false, // true when called from the image search branch
 }) => {
     try {
+        // ── Blocking Plan Lifecycle Gateway ────────────────────────
+        if (user?._id) {
+            try {
+                await processPlanExpirationOrRenewal(user._id);
+                await runExpiryCheckForUser(user._id);
+                const freshUser = await UserModel.findById(user._id).lean();
+                if (freshUser) {
+                    user = freshUser;
+                }
+            } catch (planErr) {
+                console.error("[triggerAIResponse] Plan gateway check error:", planErr.message);
+            }
+        }
+
         // ── Guard: handed off to human ────────────────────────────
         if (session.handoff.isHandedOff) {
             console.log("Session handed off — skipping AI for:", session.sessionId);
@@ -373,7 +387,7 @@ export const triggerAIResponse = async ({
 
         // ── Plan-based conversation limits ───────────────────────
         const plan = user.paxAI?.plan || "free";
-        const LIMIT = plan === "free" ? 100 : 5000; 
+        const LIMIT = plan === "free" ? 100 : 5000;
         const WARNING_THRESHOLD = LIMIT - 5;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
@@ -484,7 +498,7 @@ export const triggerAIResponse = async ({
 
         // ── Background memory summarization trigger ────────────────
         if (rawHistory.length >= 8 && (session.context?.inboundCount % 4 === 0)) {
-            updateSessionSummary(session.sessionId, rawHistory).catch(() => {});
+            updateSessionSummary(session.sessionId, rawHistory).catch(() => { });
         }
 
         // ── Build conversation history ────────────────────────────
@@ -503,7 +517,7 @@ export const triggerAIResponse = async ({
             ? [
                 { role: "user", content: `[PAST CONVERSATION SUMMARY: ${memorySummary}]` },
                 { role: "assistant", content: "Understood. I have noted this conversation summary and will keep these details in mind." }
-              ]
+            ]
             : [];
 
         // Clean up excessively long session tokens in user URL parameters to save tokens
@@ -572,12 +586,12 @@ export const triggerAIResponse = async ({
 
         // Strip markdown — WhatsApp renders it as literal characters
         cleanText = (cleanText || "")
-          .replace(/\*\*(.*?)\*\*/g, "$1")
-          .replace(/\*(.*?)\*/g, "$1")
-          .replace(/__(.*?)__/g, "$1")
-          .replace(/~~(.*?)~~/g, "$1")
-          .replace(/`(.*?)`/g, "$1")
-          .trim();
+            .replace(/\*\*(.*?)\*\*/g, "$1")
+            .replace(/\*(.*?)\*/g, "$1")
+            .replace(/__(.*?)__/g, "$1")
+            .replace(/~~(.*?)~~/g, "$1")
+            .replace(/`(.*?)`/g, "$1")
+            .trim();
 
         // ── Validation Safeguard: Ensure image URL belongs to active seller catalogue ──
         if (imageUrls.length > 0 && products && products.length > 0) {
@@ -705,7 +719,7 @@ export const triggerAIResponse = async ({
 
         if (isPaymentShared || (isExpectingPayment && isCorrectionMsg)) {
             console.log(`💳 ${isPaymentShared ? "AI shared payment details" : "Customer order correction detected"} — updating expectingPayment & stagedOrder snapshot for session:`, session.sessionId);
-            
+
             // Extract structured payment & quote data from AI response text to store state
             const outText = cleanText || rawAiText;
             const normText = (str) => (str || "").toLowerCase().replace(/[’‘`´]/g, "'").replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
@@ -772,7 +786,7 @@ export const triggerAIResponse = async ({
             }
 
             const itemsSubtotal = pendingItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-            
+
             // Determine delivery fee & grand total
             let finalDeliveryFee = extractedDeliveryFee;
             let stagedTotalPrice = 0;

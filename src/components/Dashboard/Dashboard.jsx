@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState } from "react";
 import {
   Bot, Wifi, Zap,
@@ -441,10 +441,14 @@ export default function Dashboard() {
   const pctDisplay = pct === 0 ? "0%" : pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
   const planCol = { free: C.blue, starter: C.cyan, business: C.amber, enterprise: C.indigo }[plan] ?? C.blue;
 
+  const planExpiresAt = userData?.paxAI?.planExpiresAt;
   const lastUpd = userData?.paxAI?.planStartedAt;
   let remainingDays = null;
-  if (plan !== "free" && lastUpd) {
-    const diff = (new Date() - new Date(lastUpd)) / (1000 * 60 * 60 * 24);
+  if (plan !== "free" && planExpiresAt) {
+    const msDiff = new Date(planExpiresAt).getTime() - Date.now();
+    remainingDays = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+  } else if (plan !== "free" && lastUpd) {
+    const diff = (Date.now() - new Date(lastUpd).getTime()) / (1000 * 60 * 60 * 24);
     remainingDays = Math.max(0, 30 - Math.floor(diff));
   }
 
