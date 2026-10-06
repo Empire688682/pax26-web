@@ -402,8 +402,8 @@ export const handleIncomingWhatsApp = async (payload) => {
   const maxMessages = planMeta?.messagesLimit || user.paxAI?.maxMonthlyMessages || 200;
   let   usedMessages = user.paxAI?.messagesUsedThisMonth ?? 0;
 
-  // Reset monthly counters if 30 days have passed since the plan period started
-  if (daysSinceStart >= 30) {
+  // Reset monthly counters for FREE tier users if 30 days have passed since planStartedAt
+  if (currentPlan === "free" && daysSinceStart >= 30) {
     await UserModel.updateOne(
       { _id: user._id },
       {
@@ -415,7 +415,7 @@ export const handleIncomingWhatsApp = async (payload) => {
       }
     );
     usedMessages = 0;
-    console.log("🔄 Step 7 — Monthly counters reset for user:", user._id);
+    console.log("🔄 Step 7 — Free tier monthly counters reset for user:", user._id);
   }
 
   // Also sync plan-level feature flags from PlanModel in case admin updated them
