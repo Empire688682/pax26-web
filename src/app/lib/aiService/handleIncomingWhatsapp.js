@@ -105,7 +105,16 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("📩 Type:", messageType, "| From:", visitorPhone, "| Text:", inboundText);
 
   // ── Step 1: Find user ──────────────────────────────────────
-  let user = await UserModel.findOne({ "whatsapp.phoneNumberId": phoneNumberId });
+  let user = await UserModel.findOne({
+    $or: [
+      { "whatsapp.phoneNumberId": phoneNumberId },
+      { "whatsapp.phoneNumberId": String(phoneNumberId) },
+      ...(displayPhone ? [
+        { "whatsapp.displayPhone": displayPhone },
+        { "whatsappBusinessNo": displayPhone.replace(/\D/g, "") },
+      ] : []),
+    ],
+  });
 
   if (!user) {
     console.log("❌ No user found for phoneNumberId:", phoneNumberId);
