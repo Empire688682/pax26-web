@@ -105,19 +105,36 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("📩 Type:", messageType, "| From:", visitorPhone, "| Text:", inboundText);
 
   // ── Step 1: Find user ──────────────────────────────────────
+  const cleanDisplayPhone = displayPhone ? displayPhone.replace(/\D/g, "") : "";
+
   let user = await UserModel.findOne({
     $or: [
       { "whatsapp.phoneNumberId": phoneNumberId },
       { "whatsapp.phoneNumberId": String(phoneNumberId) },
+      { "whatsapp.wabaId": phoneNumberId },
+      { "whatsapp.wabaId": String(phoneNumberId) },
       ...(displayPhone ? [
         { "whatsapp.displayPhone": displayPhone },
-        { "whatsappBusinessNo": displayPhone.replace(/\D/g, "") },
+        { "whatsapp.displayPhone": { $regex: cleanDisplayPhone } },
+        { "whatsappBusinessNo": cleanDisplayPhone },
       ] : []),
     ],
   });
 
   if (!user) {
-    console.log("❌ No user found for phoneNumberId:", phoneNumberId);
+    const connectedUsers = await UserModel.find({
+      $or: [
+        { "whatsapp.connected": true },
+        { "whatsapp.phoneNumberId": { $exists: true, $ne: "" } }
+      ]
+    }).select("email number whatsapp.phoneNumberId whatsapp.displayPhone whatsapp.wabaId whatsapp.connected").lean();
+
+    console.log(`❌ No user found for incoming Meta phoneNumberId "${phoneNumberId}" (displayPhone: "${displayPhone}").`);
+    console.log(`🔍 Total connected/configured users in DB: ${connectedUsers.length}`);
+    connectedUsers.forEach(u => {
+      console.log(`   - User: ${u.email} | PhoneId: "${u.whatsapp?.phoneNumberId}" | WabaId: "${u.whatsapp?.wabaId}" | Display: "${u.whatsapp?.displayPhone}" | Connected: ${u.whatsapp?.connected}`);
+    });
+
     return { ok: true };
   }
   console.log("✅ Step 1 — User found:", user._id);
