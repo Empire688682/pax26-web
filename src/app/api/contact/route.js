@@ -101,6 +101,17 @@ export async function POST(req) {
       replyToName: safeName,
     });
 
+    // Also notify secondary admin
+    sendTransactionalEmail({
+      toEmail: "asehindej@gmail.com",
+      toName: "Pax26 Support",
+      subject: `📩 [Contact Form] Message from ${safeName}`,
+      html: adminHtml,
+      text: `New contact message from ${safeName} (${safeEmail}):\n\n${safeMessage}`,
+      fromEmail: "info@pax26.com",
+      fromName: "Pax26 Contact Form",
+    }).catch(() => {});
+
     // 3. Send User Auto-reply Confirmation Email
     const autoReplyHtml = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #111827; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">

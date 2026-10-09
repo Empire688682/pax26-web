@@ -93,6 +93,17 @@ export async function POST(req) {
       replyToName:  safeName,
     });
 
+    // Also notify secondary admin
+    sendTransactionalEmail({
+      toEmail:      "asehindej@gmail.com",
+      toName:       "Pax26 Admin",
+      subject:      `⚠️ [Delete Account] Request from ${safeName} (${safeEmail})`,
+      html:         adminHtml,
+      text:         `Account deletion request from ${safeName} (${safeEmail}).\nUser ID: ${userId}\nReason: ${safeReason}`,
+      fromEmail:    "info@pax26.com",
+      fromName:     "Pax26 Platform",
+    }).catch(() => {});
+
     // 3. Confirm to the user
     const userHtml = `
       <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;">
