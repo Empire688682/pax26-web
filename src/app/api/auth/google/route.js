@@ -8,6 +8,7 @@ import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
 import { sendUserVerification } from "../services/sendVerificationService";
+import { sendTransactionalEmail } from "@/app/ults/utils/sendpulseMail";
 
 dotenv.config();
 
@@ -56,21 +57,32 @@ export async function POST(req) {
             );
         }
 
+        // Normalize email always
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Normalize phone if provided
+        const normalizedNumber = number
+            ? number.trim().replace(/\s+/g, "").replace(/^\+?234/, "0").replace(/^234/, "0")
+            : null;
+
         let user;
 
-        user = await UserModel.findOne({ email });
+        user = await UserModel.findOne({ email: normalizedEmail });
         if (!user) {
-            //check if User number is not taking
-            if (number != null & number != undefined & number != "") {
-                //check if User number is not taking
-                const userByNumber = await UserModel.findOne({ number });
-                console.log("userByNumber: ", userByNumber)
-                if (userByNumber) {
-                    return NextResponse.json(
-                        { success: false, message: "User phone number as been taken" },
-                        { status: 400, headers: corsHeaders() }
-                    );
-                }
+            // New user — phone is required
+            if (!normalizedNumber) {
+                return NextResponse.json(
+                    { success: false, message: "Phone number is required" },
+                    { status: 400, headers: corsHeaders() }
+                );
+            }
+            // Check phone uniqueness
+            const existingPhone = await UserModel.findOne({ number: normalizedNumber });
+            if (existingPhone) {
+                return NextResponse.json(
+                    { success: false, message: "This phone number is already registered to another account." },
+                    { status: 400, headers: corsHeaders() }
+                );
             }
             //Generate referralCode
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -88,8 +100,8 @@ export async function POST(req) {
             const authTimestamp = Date.now()
             user = await UserModel.create({
                 name,
-                email,
-                number: number ? number : undefined,
+                email: normalizedEmail,
+                number: normalizedNumber || undefined,
                 password: null,
                 pin: null,
                 authTimestamp,
@@ -103,6 +115,18 @@ export async function POST(req) {
                 emailVerification: { isVerified: true },
                 country: country || null,
             });
+
+            // Notify admin of new Google signup (fire-and-forget)
+            const signupAt = new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" });
+            sendTransactionalEmail({
+                toEmail:   "asehindej@gmail.com",
+                toName:    "Pax26 Admin",
+                subject:   `🎉 New Signup (Google) — ${name} (${normalizedEmail})`,
+                html: `<div style="font-family:Arial,sans-serif;padding:24px;max-width:560px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;"><div style="border-bottom:2px solid #22c55e;padding-bottom:12px;margin-bottom:20px;"><h2 style="color:#16a34a;margin:0;font-size:18px;">🎉 New User Signed Up (Google)</h2><span style="font-size:11px;color:#6b7280;font-family:monospace;">Pax26 Platform · ${signupAt}</span></div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-bottom:16px;"><p style="margin:0 0 6px;font-size:14px;"><strong>Name:</strong> ${name}</p><p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong> <a href="mailto:${normalizedEmail}" style="color:#16a34a;">${normalizedEmail}</a></p><p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> ${normalizedNumber || "—"}</p><p style="margin:0;font-size:14px;"><strong>Country:</strong> ${country || "—"}</p></div><a href="https://pax26-admin.vercel.app/users" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">View in Admin Panel</a></div>`,
+                text: `New Google signup: ${name} (${normalizedEmail}) · Phone: ${normalizedNumber || "—"} · ${country || ""} · ${signupAt}`,
+                fromEmail: "info@pax26.com",
+                fromName:  "Pax26 Platform",
+            }).catch(() => {});
         }
 
         /* Patch country on returning user if they didn't have one yet */
@@ -110,7 +134,6 @@ export async function POST(req) {
             await UserModel.findByIdAndUpdate(user._id, { $set: { country } });
             user = await UserModel.findById(user._id);
         }
-
 
         // Handle referral if provided
         if (refHostCode) {

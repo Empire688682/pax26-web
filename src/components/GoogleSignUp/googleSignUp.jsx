@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
 import { useGlobalContext } from "../Context";
 import { useState } from "react";
-import { Globe, ArrowRight, MapPin, Zap, CheckCircle2 } from "lucide-react";
+import { Globe, ArrowRight, MapPin, Zap, CheckCircle2, Phone } from "lucide-react";
 
 /* ── Country list ────────────────────────────────────────────── */
 const COUNTRIES = [
@@ -132,11 +132,23 @@ const COUNTRY_CSS = `
     text-transform: uppercase;
     opacity: 0.5;
   }
+
+  .cp-phone-input {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px 14px 12px 40px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-sizing: border-box;
+  }
 `;
 
 /* ── Full-page Country Picker Overlay ───────────────────────── */
 function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }) {
   const [country, setCountry]       = useState("");
+  const [phone, setPhone]           = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const primary       = pax26?.primary       || "#3b82f6";
@@ -148,9 +160,14 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
 
   const handleConfirm = async () => {
     if (!country || submitting) return;
+    // Validate phone
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) { setPhoneError("Phone number is required."); return; }
+    if (trimmedPhone.replace(/\D/g, "").length < 7) { setPhoneError("Enter a valid phone number."); return; }
+    setPhoneError("");
     setSubmitting(true);
     try {
-      const response = await axios.post("/api/auth/google", { ...googleData, country });
+      const response = await axios.post("/api/auth/google", { ...googleData, country, number: trimmedPhone });
       const { success, message, finalUserData } = response.data;
       if (!success) {
         onError(message || "Authentication failed");
@@ -288,7 +305,7 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
             borderTop: `1px solid ${border}`,
             background: bg,
           }}>
-            {/* selected pill */}
+            {/* selected country pill */}
             {country && (
               <div style={{
                 display: "flex", alignItems: "center", gap: 8,
@@ -296,8 +313,42 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
                 background: `${primary}14`, border: `1px solid ${primary}30`,
                 fontSize: 12, color: primary, fontWeight: 600,
               }}>
-                <MapPin size={13} flexShrink={0} />
+                <MapPin size={13} />
                 <span className="truncate">Selected: {COUNTRIES.find(c => c.value === country)?.label}</span>
+              </div>
+            )}
+
+            {/* phone number input — shown after a country is selected */}
+            {country && (
+              <div style={{ position: "relative", marginBottom: 12 }}>
+                <Phone
+                  size={15}
+                  style={{
+                    position: "absolute", left: 12, top: "50%",
+                    transform: "translateY(-50%)",
+                    color: phone ? primary : textSecondary,
+                    opacity: phone ? 0.8 : 0.4,
+                    pointerEvents: "none",
+                  }}
+                />
+                <input
+                  type="tel"
+                  className="cp-phone-input"
+                  placeholder="Phone number (required)"
+                  value={phone}
+                  onChange={e => { setPhone(e.target.value); setPhoneError(""); }}
+                  style={{
+                    background: secondaryBg,
+                    color: textPrimary,
+                    border: `2px solid ${phoneError ? "#ef4444" : phone ? primary : border}`,
+                    boxShadow: phone && !phoneError ? `0 0 0 3px ${primary}18` : phoneError ? "0 0 0 3px rgba(239,68,68,0.15)" : "none",
+                  }}
+                />
+                {phoneError && (
+                  <p style={{ margin: "4px 0 0 4px", fontSize: 11, color: "#ef4444", fontWeight: 600 }}>
+                    {phoneError}
+                  </p>
+                )}
               </div>
             )}
 
@@ -305,16 +356,16 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
             <button
               type="button"
               className="cp-confirm-btn"
-              disabled={!country || submitting}
+              disabled={!country || !phone.trim() || submitting}
               onClick={handleConfirm}
               style={{
-                background: !country || submitting
+                background: (!country || !phone.trim() || submitting)
                   ? `${primary}55`
                   : `linear-gradient(135deg, ${primary}, ${primary}cc)`,
-                boxShadow: country && !submitting
+                boxShadow: (country && phone.trim() && !submitting)
                   ? `0 10px 28px ${primary}55`
                   : "none",
-                opacity: !country || submitting ? 0.6 : 1,
+                opacity: (!country || !phone.trim() || submitting) ? 0.6 : 1,
               }}
             >
               {submitting ? (
@@ -325,7 +376,7 @@ function CountryPickerStep({ googleData, pax26, googleName, onSuccess, onError }
               ) : (
                 <>
                   <Zap size={16} />
-                  <span>{country ? `Continue with ${country}` : "Select a country above"}</span>
+                  <span>{country && phone.trim() ? `Continue with ${country}` : !country ? "Select a country above" : "Enter your phone number"}</span>
                   <ArrowRight size={16} />
                 </>
               )}
