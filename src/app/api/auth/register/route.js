@@ -9,6 +9,7 @@ import ReferralModel from "@/app/ults/models/ReferralModel";
 import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
 import { buildFullUserProfile } from "../../helper/buildFullUserProfile";
+import { sendTransactionalEmail } from "@/app/ults/utils/sendpulseMail";
 
 dotenv.config();
 
@@ -73,15 +74,23 @@ const registerUser = async (req) => {
       );
     }
 
-    const existingUser = await UserModel.findOne({ 
-      $or:[{email}, {number}]
-     });
-      if (existingUser) {
-        return NextResponse.json(
-          { success: false, message: "Email or Phone number has been taken" },
-          { status: 400, headers: corsHeaders() }
-        );
-      }
+    // Normalize: lowercase email, strip leading country code from phone
+    // so "Pastorfanta42@gmail.com" and "pastorfanta42@gmail.com" are treated as the same,
+    // and "2348140202342" / "08140202342" are treated as the same number.
+    const normalizedEmail  = email.trim().toLowerCase();
+    const normalizedNumber = number
+      ? number.trim().replace(/\s+/g, "").replace(/^\+?234/, "0").replace(/^234/, "0")
+      : number;
+
+    const existingUser = await UserModel.findOne({
+      $or: [{ email: normalizedEmail }, { number: normalizedNumber }]
+    });
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, message: "Email or Phone number has been taken" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
 
     if (password.length < 8) {
         return NextResponse.json(
@@ -114,8 +123,8 @@ const registerUser = async (req) => {
 
     const newUser = await UserModel.create({ 
       name,
-      email,
-      number,
+      email: normalizedEmail,
+      number: normalizedNumber,
       password: hashedPassword,
       pin: null,
       authTimestamp,
@@ -157,6 +166,34 @@ const registerUser = async (req) => {
     const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: isMobile ? "365d" : "1d",
     });
+
+    // ── Notify admin of new signup (fire-and-forget) ──────────────
+    const signupAt = new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" });
+    sendTransactionalEmail({
+      toEmail:   "asehindej@gmail.com",
+      toName:    "Pax26 Admin",
+      subject:   `🎉 New Signup — ${name} (${normalizedEmail})`,
+      html: `
+        <div style="font-family:Arial,sans-serif;padding:24px;max-width:560px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;">
+          <div style="border-bottom:2px solid #22c55e;padding-bottom:12px;margin-bottom:20px;">
+            <h2 style="color:#16a34a;margin:0;font-size:18px;">🎉 New User Signed Up</h2>
+            <span style="font-size:11px;color:#6b7280;font-family:monospace;">Pax26 Platform · ${signupAt}</span>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-bottom:16px;">
+            <p style="margin:0 0 6px;font-size:14px;"><strong>Name:</strong> ${name}</p>
+            <p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong> <a href="mailto:${normalizedEmail}" style="color:#16a34a;">${normalizedEmail}</a></p>
+            <p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> ${normalizedNumber || "—"}</p>
+            <p style="margin:0 0 6px;font-size:14px;"><strong>Country:</strong> ${country || "—"}</p>
+            <p style="margin:0;font-size:14px;"><strong>Channel:</strong> ${isMobile ? "Mobile App" : "Web"}</p>
+          </div>
+          <a href="https://pax26-admin.vercel.app/users" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">View in Admin Panel</a>
+          <p style="font-size:11px;color:#9ca3af;margin-top:20px;">Sent automatically by Pax26 on every new registration.</p>
+        </div>
+      `,
+      text: `New signup: ${name} (${normalizedEmail}) · ${country || ""} · ${isMobile ? "Mobile" : "Web"} · ${signupAt}`,
+      fromEmail: "info@pax26.com",
+      fromName:  "Pax26 Platform",
+    }).catch(() => {});
 
     if (isMobile) {
       return NextResponse.json(
