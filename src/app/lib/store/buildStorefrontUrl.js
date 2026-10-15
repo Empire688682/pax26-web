@@ -33,16 +33,21 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
  * @param {object} options.sellerProfile      - SellerProfile document (lean)
  * @param {string} options.customerPhone      - customer's WhatsApp number "+234..."
  * @param {string} [options.referredProductId] - optional product _id string
+ * @param {string} [options.searchQuery]       - optional pre-filter query appended as ?q=
+ *                                               (e.g. "two piece", "shoes"). When provided,
+ *                                               the storefront opens pre-filtered to that term.
+ *                                               Leave undefined/empty for a plain catalogue link.
  * @returns {Promise<string|null>}             - permanent short URL or null if no slug
  */
-export async function buildStorefrontUrl({ sellerProfile, customerPhone, referredProductId }) {
+export async function buildStorefrontUrl({ sellerProfile, customerPhone, referredProductId, searchQuery }) {
     const slug = sellerProfile?.slug;
 
     // If the seller hasn't set a slug, return null — AI should not send a broken link
     if (!slug) return null;
 
-    const plainUrl  = `${BASE_URL}/store/${slug}`;
-    const shortUrl  = `${BASE_URL}/api/s/${slug}`;
+    // Build the short URL, optionally appending ?q= when a search intent is detected
+    const encodedQuery = searchQuery ? encodeURIComponent(searchQuery.trim()) : "";
+    const shortUrl = `${BASE_URL}/api/s/${slug}${encodedQuery ? `?q=${encodedQuery}` : ""}`;
 
     // Fire-and-forget: create a StorefrontSession so the storefront can
     // optionally track this WhatsApp visitor. NOT embedded in the URL.

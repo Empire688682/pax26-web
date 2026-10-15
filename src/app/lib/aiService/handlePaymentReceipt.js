@@ -360,8 +360,18 @@ export async function handlePaymentReceipt({
         }
     }
 
+    // Detect storefront template message: either explicitly flagged OR the customer message
+    // itself contains structured bullet-point order items with ₦ prices (the standard
+    // WhatsApp storefront order template format). This is Priority #2 after stagedOrder.
     const hasNewStorefrontOrder = /NEW ORDER FROM STOREFRONT/i.test(lastUserText) || /NEW ORDER FROM STOREFRONT/i.test(caption);
-    const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(caption || lastUserText, [lastUserMessage].filter(Boolean));
+    // Parse from ONLY the customer's current message (caption or lastUserText), never full history
+    const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(caption || lastUserText, []);
+    // A customer message qualifies as a storefront template if it has ≥1 priced items AND
+    // contains typical template signals (💰 / 🚚 / Product page / pax26.com store link)
+    const isStorefrontTemplate = multiOrderFromCurrentMsg.items.length > 0 && (
+        hasNewStorefrontOrder ||
+        /💰|🚚|product\s*page|pax26\.com\/store|Could\s*you\s*assist\s*me\s*with\s*this\s*order/i.test(lastUserText + caption)
+    );
 
     let orderItems = [];
     let calculatedDeliveryFee = 0;
@@ -373,9 +383,9 @@ export async function handlePaymentReceipt({
         orderItems = stagedOrder.items;
         calculatedDeliveryFee = Number(stagedOrder.deliveryFee) || 0;
         orderTotalPrice = Number(stagedOrder.totalPrice) || (stagedOrder.subtotal + calculatedDeliveryFee);
-    } else if (hasNewStorefrontOrder && multiOrderFromCurrentMsg.items.length > 0) {
-        // High Priority #2: Direct Storefront template payload in current incoming message
-        console.log("🛒 Consuming storefront template payload from current message for order receipt.");
+    } else if (isStorefrontTemplate) {
+        // High Priority #2: Direct Storefront template payload in current incoming message only
+        console.log("🛒 Consuming storefront template payload from current message for order receipt.", multiOrderFromCurrentMsg.items.length, "item(s)");
         orderItems = multiOrderFromCurrentMsg.items;
         calculatedDeliveryFee = extractDeliveryFeeFromConversation([lastUserMessage].filter(Boolean), [], caption || lastUserText);
         orderTotalPrice = extractOrderTotalFromConversation([lastUserMessage].filter(Boolean)) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
@@ -395,9 +405,23 @@ export async function handlePaymentReceipt({
         });
         const currentOrderWindowMsgs = lastReceiptIndex >= 0 ? recentMessages.slice(-lastReceiptIndex) : recentMessages;
 
-        const multiFromWindow = parseMultiProductOrderFromText("", currentOrderWindowMsgs);
+        // Fallback Priority #4a: Scan ONLY assistant order-summary messages (must contain ₦ amounts).
+        // We deliberately exclude customer messages here to avoid parsing conversational text,
+        // size options ("36-39 or 40-44"), URLs, and AI greetings as order line items.
+        const assistantOrderMsgs = currentOrderWindowMsgs.filter(m => {
+            const isAssistant = m.role === "assistant" || m.direction === "outbound" || m.senderType === "ai";
+            if (!isAssistant) return false;
+            const txt = m.content || m.text || "";
+            // Only include messages that look like actual order summaries
+            return /(?:₦|NGN)\s*[\d,]+/.test(txt) && /grand\s*total|order\s*confirm|delivery\s*fee|products?\s*total/i.test(txt);
+        });
+
+        const multiFromWindow = assistantOrderMsgs.length > 0
+            ? parseMultiProductOrderFromText("", assistantOrderMsgs)
+            : { items: [] };
+
         if (multiFromWindow.items && multiFromWindow.items.length > 0) {
-            console.log("📋 Consuming parsed multi-product items from assistant conversation history for order receipt:", multiFromWindow.items.length, "item(s)");
+            console.log("📋 Consuming parsed multi-product items from assistant order-summary messages:", multiFromWindow.items.length, "item(s)");
             const dbProducts = await SellerProductModel.find({ sellerId }).lean();
             orderItems = multiFromWindow.items.map(item => {
                 const normName = normalizeSearchText(item.name);
@@ -411,8 +435,8 @@ export async function handlePaymentReceipt({
                 };
             });
         } else {
+            // Fallback Priority #4b: catalogue name-matching against assistant messages only
             const matchedProducts = await findAllProductsFromConversation(sellerId, currentOrderWindowMsgs);
-            const matchedProduct = matchedProducts.length > 0 ? matchedProducts[0] : null;
 
             if (matchedProducts.length > 0) {
                 orderItems = matchedProducts.map(p => ({
@@ -422,14 +446,6 @@ export async function handlePaymentReceipt({
                     quantity: 1,
                     imageUrl: p.images?.[0]?.url || "",
                 }));
-            } else if (matchedProduct) {
-                orderItems = [{
-                    productId: matchedProduct._id,
-                    name: matchedProduct.name,
-                    price: matchedProduct.price || 0,
-                    quantity: 1,
-                    imageUrl: matchedProduct.images?.[0]?.url || "",
-                }];
             }
         }
         calculatedDeliveryFee = extractDeliveryFeeFromConversation(currentOrderWindowMsgs);
@@ -619,25 +635,45 @@ export function parseMultiProductOrderFromText(inboundText = "", recentMessages 
     const deliveryLocation = locationMatch ? locationMatch[1].trim() : "";
 
     // Extract items list (e.g., • 2x Jordan 1 Retro High — ₦110,000)
+    // REQUIREMENT: Line MUST contain an explicit ₦/N/NGN price to be treated as an order item.
+    // This prevents conversational lines, URLs, store names, and fulfillment labels from
+    // being misidentified as order line items.
     const itemLines = [];
     const lines = combinedText.split("\n");
 
-    const itemRegex = /(?:[•·\-\*]|\d+\.)\s*(\d+)?x?\s*\*?([^\*\n—–\-]+)\*?\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]?\s*(?:₦|N|NGN)?\s*([\d,]+)?/i;
+    // Strict item regex: bullet/number prefix + optional qty + name + REQUIRED currency amount
+    const itemRegex = /(?:[•·\*]|\d+\.)\s*(\d+)?x?\s*\*?([^\*\n—–\-]+?)\*?\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]\s*(?:₦|N(?=\d)|NGN)\s*([\d,]+)/i;
+
+    // Patterns that identify noise lines that must never be treated as order items
+    const NOISE_LINE_PATTERN = /https?:\/\/|www\.|\.com|\.org|fulfillment|product\s*page|hi[!,]?\s*i'?m\s*interested|could\s*you\s*assist|store\s*name|pax26|jayempire\s*store|estimated|grand\s*total|products?\s*total|delivery\s*fee|subtotal|size\s*(?:36|40|44)|36[\s\-]*39|40[\s\-]*44/i;
 
     lines.forEach((line) => {
-        const match = line.match(itemRegex);
+        const trimmedLine = line.trim();
+
+        // Skip empty lines and lines that are clearly noise
+        if (!trimmedLine || NOISE_LINE_PATTERN.test(trimmedLine)) return;
+
+        const match = trimmedLine.match(itemRegex);
         if (match) {
             const quantity = parseInt(match[1] || match[3] || "1", 10);
             const name = match[2]?.trim();
             const itemTotalPrice = match[4] ? parseInt(match[4].replace(/,/g, ""), 10) : 0;
-            if (name && name.length > 2 && !/total|delivery|product page|hi! i'm interested/i.test(name)) {
-                const qtyVal = isNaN(quantity) || quantity <= 0 ? 1 : quantity;
-                itemLines.push({
-                    name,
-                    quantity: qtyVal,
-                    price: itemTotalPrice > 0 ? Math.round(itemTotalPrice / qtyVal) : 0,
-                });
-            }
+
+            // Additional name-level guards
+            if (!name || name.length < 3) return;
+            if (/total|delivery|shipping|product\s*page|fulfillment|hi[!,]|https?:|\.com/i.test(name)) return;
+            // Reject names that look like URL fragments (contain slash or dots with no spaces)
+            if (/\/|(?:\S+\.\S+)/.test(name)) return;
+
+            const qtyVal = isNaN(quantity) || quantity <= 0 ? 1 : quantity;
+            // Only accept reasonable quantities (1–999) and prices above ₦0
+            if (qtyVal > 999 || itemTotalPrice <= 0) return;
+
+            itemLines.push({
+                name,
+                quantity: qtyVal,
+                price: Math.round(itemTotalPrice / qtyVal),
+            });
         }
     });
 

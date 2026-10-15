@@ -473,9 +473,60 @@ export const triggerAIResponse = async ({
         // This runs in parallel with nothing (fast, non-blocking for service type).
         let storefrontUrl = null;
         if (profileType === "seller" && businessProfile.slug) {
+            // ── Intent-based storefront URL ──────────────────────────────
+            // Detect if the customer has a specific product/category in mind so
+            // the URL can pre-filter the storefront to exactly what they want.
+            // Strategy: match inboundText against the loaded product catalogue first
+            // (exact/partial name or category), then fall back to category keywords.
+            // A plain URL is used when no specific intent is detected.
+            let searchQuery = null;
+
+            if (products && products.length > 0 && inboundText) {
+                const normInbound = inboundText
+                    .toLowerCase()
+                    .replace(/[''`´]/g, "'")
+                    .replace(/[^a-z0-9'\s]/g, " ")
+                    .replace(/\s+/g, " ")
+                    .trim();
+
+                // 1. Try to match a specific product name (longest match wins to avoid false positives)
+                const sortedByLength = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+                for (const prod of sortedByLength) {
+                    if (!prod.name) continue;
+                    const normName = prod.name
+                        .toLowerCase()
+                        .replace(/[''`´]/g, "'")
+                        .replace(/[^a-z0-9'\s]/g, " ")
+                        .replace(/\s+/g, " ")
+                        .trim();
+                    // Require at least 4 chars to avoid single-word noise matches
+                    if (normName.length >= 4 && normInbound.includes(normName)) {
+                        searchQuery = prod.name; // use original casing for display
+                        break;
+                    }
+                }
+
+                // 2. If no product matched, try category match
+                if (!searchQuery) {
+                    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+                    for (const cat of categories) {
+                        const normCat = cat.toLowerCase().trim();
+                        if (normCat.length >= 3 && normInbound.includes(normCat)) {
+                            searchQuery = cat;
+                            break;
+                        }
+                    }
+                }
+
+                if (searchQuery) {
+                    console.log(`🔍 Intent detected — storefront URL pre-filtered: "${searchQuery}"`);
+                }
+            }
+
             storefrontUrl = await buildStorefrontUrl({
                 sellerProfile: businessProfile,
                 customerPhone: session.visitorPhone,
+                searchQuery: searchQuery || undefined,
             }).catch(err => {
                 console.warn("⚠️ Storefront URL generation failed (non-fatal):", err.message);
                 return null;

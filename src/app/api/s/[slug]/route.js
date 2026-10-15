@@ -57,7 +57,11 @@ export async function GET(request, { params }) {
         // }
         // ────────────────────────────────────────────────────────────────────
 
-        const storeUrl = `${BASE_URL}/store/${seller.slug}`;
+        // Forward any query params (e.g. ?q=two+piece, ?category=shoes) so intent-based
+        // storefront links built by the AI arrive pre-filtered for the customer.
+        const incomingUrl = new URL(request.url);
+        const qs = incomingUrl.searchParams.toString();
+        const storeUrl = `${BASE_URL}/store/${seller.slug}${qs ? `?${qs}` : ""}`;
 
         console.log(`[shortlink] ✅ /s/${slug} → ${storeUrl}`);
 

@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { LogOut, Camera, ShieldAlert, ShieldCheck, Bell, SunMoon, Pencil, User, Lock, ChevronRight, Check, X } from 'lucide-react';
+import { LogOut, Camera, ShieldAlert, ShieldCheck, Bell, SunMoon, Pencil, User, Lock, ChevronRight, Check, X, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
 import { useGlobalContext } from '../Context';
@@ -201,6 +201,17 @@ const styles = `
     letter-spacing: 0.01em;
   }
   .action-btn:last-child { margin-bottom: 0; }
+
+  .btn-delete {
+    background: rgba(224,92,92,0.06);
+    border: 1px solid rgba(224,92,92,0.15);
+    color: #E05C5C;
+  }
+  .btn-delete:hover {
+    background: rgba(224,92,92,0.12);
+    border-color: rgba(224,92,92,0.3);
+    transform: translateX(3px);
+  }
 
   .btn-logout {
     background: rgba(224,92,92,0.1);
@@ -549,6 +560,12 @@ const Profile = () => {
               <button className="action-btn btn-pin" onClick={() => setPinModal(true)}>
                 <span className="btn-icon-wrap"><Pencil size={15} color="#E8C97A" /></span>
                 Set Transaction PIN
+                <ChevronRight size={15} className="btn-chevron" />
+              </button>
+
+              <button className="action-btn btn-delete" onClick={() => router.push("/delete-account")}>
+                <span className="btn-icon-wrap"><Trash2 size={15} color="#E05C5C" /></span>
+                Delete Account
                 <ChevronRight size={15} className="btn-chevron" />
               </button>
 
