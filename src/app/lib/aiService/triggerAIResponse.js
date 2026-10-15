@@ -489,30 +489,37 @@ export const triggerAIResponse = async ({
                     .replace(/\s+/g, " ")
                     .trim();
 
-                // 1. Try to match a specific product name (longest match wins to avoid false positives)
-                const sortedByLength = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
-                for (const prod of sortedByLength) {
-                    if (!prod.name) continue;
-                    const normName = prod.name
-                        .toLowerCase()
-                        .replace(/[''`´]/g, "'")
-                        .replace(/[^a-z0-9'\s]/g, " ")
-                        .replace(/\s+/g, " ")
-                        .trim();
-                    // Require at least 4 chars to avoid single-word noise matches
-                    if (normName.length >= 4 && normInbound.includes(normName)) {
-                        searchQuery = prod.name; // use original casing for display
+                // 1. Try to match a product category first — category terms are shorter,
+                //    cleaner, and produce broader (safer) storefront filter results.
+                //    e.g. "boots" matches all boot products, not just one specific SKU.
+                const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+                for (const cat of categories) {
+                    const normCat = cat.toLowerCase().trim();
+                    if (normCat.length >= 3 && normInbound.includes(normCat)) {
+                        searchQuery = cat;
                         break;
                     }
                 }
 
-                // 2. If no product matched, try category match
+                // 2. Only fall back to a specific product name if no category matched.
+                //    Strip parentheses and special chars so the URL stays clean and
+                //    the DB regex search is robust (e.g. "Timberland 6-Inch Boot" not
+                //    "Timberland 6-Inch Boot (Grade A)" which can break URL parsers).
                 if (!searchQuery) {
-                    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-                    for (const cat of categories) {
-                        const normCat = cat.toLowerCase().trim();
-                        if (normCat.length >= 3 && normInbound.includes(normCat)) {
-                            searchQuery = cat;
+                    const sortedByLength = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+                    for (const prod of sortedByLength) {
+                        if (!prod.name) continue;
+                        const normName = prod.name
+                            .toLowerCase()
+                            .replace(/[''`´]/g, "'")
+                            .replace(/[^a-z0-9'\s]/g, " ")
+                            .replace(/\s+/g, " ")
+                            .trim();
+                        // Require at least 4 chars to avoid single-word noise matches
+                        if (normName.length >= 4 && normInbound.includes(normName)) {
+                            // Strip parenthetical suffixes like "(Grade A)", "(Pack of 3)"
+                            // so the URL is clean and DB search still finds the product
+                            searchQuery = prod.name.replace(/\s*\(.*?\)\s*/g, "").trim();
                             break;
                         }
                     }

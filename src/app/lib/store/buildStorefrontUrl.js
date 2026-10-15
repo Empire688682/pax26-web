@@ -45,8 +45,13 @@ export async function buildStorefrontUrl({ sellerProfile, customerPhone, referre
     // If the seller hasn't set a slug, return null — AI should not send a broken link
     if (!slug) return null;
 
-    // Build the short URL, optionally appending ?q= when a search intent is detected
-    const encodedQuery = searchQuery ? encodeURIComponent(searchQuery.trim()) : "";
+    // Build the short URL, optionally appending ?q= when a search intent is detected.
+    // Strip parentheses and special characters before encoding so the URL stays clean
+    // and doesn't get truncated by WhatsApp's link parser or mobile browsers.
+    const cleanQuery = searchQuery
+        ? searchQuery.trim().replace(/\s*\(.*?\)\s*/g, "").replace(/[^a-zA-Z0-9\s\-]/g, "").replace(/\s+/g, " ").trim()
+        : "";
+    const encodedQuery = cleanQuery ? encodeURIComponent(cleanQuery) : "";
     const shortUrl = `${BASE_URL}/api/s/${slug}${encodedQuery ? `?q=${encodedQuery}` : ""}`;
 
     // Fire-and-forget: create a StorefrontSession so the storefront can
