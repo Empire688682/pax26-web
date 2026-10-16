@@ -869,14 +869,35 @@ export const triggerAIResponse = async ({
                 stagedAt: new Date(),
             } : null;
 
+            // 🛡️ Protect the existing stagedOrder if it already has MORE items than what the
+            // AI mentioned in this follow-up message (e.g. AI asked about sock size and only
+            // listed 2 of 4 items in its reply — we must not overwrite the full 4-item snapshot).
+            const existingStagedOrder = session.payment?.stagedOrder;
+            const existingItemCount = existingStagedOrder?.items?.length || 0;
+            const newItemCount = stagedOrder?.items?.length || 0;
+            const shouldPreserveExisting = existingItemCount > newItemCount && existingItemCount > 0;
+
+            if (shouldPreserveExisting) {
+                console.log(`🔒 Preserving existing stagedOrder (${existingItemCount} items) over new partial snapshot (${newItemCount} items) — AI follow-up reply covered fewer items.`);
+            }
+
+            const effectiveStagedOrder = shouldPreserveExisting ? existingStagedOrder : stagedOrder;
+            // Also preserve total if the existing staged total is higher and the new parse is partial
+            const effectiveTotal = (shouldPreserveExisting && existingStagedOrder?.totalPrice > stagedTotalPrice)
+                ? existingStagedOrder.totalPrice
+                : stagedTotalPrice;
+            const effectivePendingItems = shouldPreserveExisting
+                ? existingStagedOrder.items
+                : pendingItems;
+
             paymentSetData = {
                 "payment.expectingPayment": true,
                 "payment.paymentProofReceived": false,
                 "payment.paymentDetailsSharedAt": new Date(),
                 "payment.deflectionCount": 0,
-                ...(stagedOrder && { "payment.stagedOrder": stagedOrder }),
-                ...(stagedTotalPrice > 0 && { "payment.pendingAmount": stagedTotalPrice }),
-                ...(pendingItems.length > 0 && { "payment.pendingItems": pendingItems }),
+                ...(effectiveStagedOrder && { "payment.stagedOrder": effectiveStagedOrder }),
+                ...(effectiveTotal > 0 && { "payment.pendingAmount": effectiveTotal }),
+                ...(effectivePendingItems.length > 0 && { "payment.pendingItems": effectivePendingItems }),
             };
 
             if (session.payment) {
@@ -884,9 +905,9 @@ export const triggerAIResponse = async ({
                 session.payment.paymentProofReceived = false;
                 session.payment.paymentDetailsSharedAt = new Date();
                 session.payment.deflectionCount = 0;
-                if (stagedOrder) session.payment.stagedOrder = stagedOrder;
-                if (stagedTotalPrice > 0) session.payment.pendingAmount = stagedTotalPrice;
-                if (pendingItems.length > 0) session.payment.pendingItems = pendingItems;
+                if (effectiveStagedOrder) session.payment.stagedOrder = effectiveStagedOrder;
+                if (effectiveTotal > 0) session.payment.pendingAmount = effectiveTotal;
+                if (effectivePendingItems.length > 0) session.payment.pendingItems = effectivePendingItems;
             }
         }
 
