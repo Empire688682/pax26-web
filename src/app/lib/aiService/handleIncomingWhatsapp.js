@@ -696,8 +696,8 @@ export const handleIncomingWhatsApp = async (payload) => {
     // Customer returns from storefront with: "Hi! I've confirmed order #ABC123 on [store]."
     // We send a guaranteed system-generated order+payment summary directly to WhatsApp
     // (no AI involvement — always accurate), then skip the AI response for this turn.
-    // Pattern requires explicit "order #CODE" context to avoid matching random hashtags.
-    const ORDER_CONFIRM_PATTERN = /(?:confirmed|placed|completed)\s+(?:my\s+)?order\s+#([A-Z0-9]{6,10})|order\s+#([A-Z0-9]{6,10})\s+(?:is\s+)?confirmed|(?:my\s+)?order(?:\s+(?:code|id|number|ref))?\s*[:#]\s*([A-Z0-9]{6,10})/i;
+    // Pattern handles bold asterisks (*#CODE*) and plain (#CODE) — requires "order" context.
+    const ORDER_CONFIRM_PATTERN = /(?:confirmed|placed|completed)\s+(?:my\s+)?order\s+\*?#([A-Z0-9]{6,10})\*?|order\s+\*?#([A-Z0-9]{6,10})\*?\s+(?:is\s+)?confirmed|(?:my\s+)?order\s+\*?#([A-Z0-9]{6,10})\*?/i;
     const orderConfirmMatch = inboundText && inboundText.match(ORDER_CONFIRM_PATTERN);
     const orderCode = orderConfirmMatch?.[1] || orderConfirmMatch?.[2] || orderConfirmMatch?.[3];
 

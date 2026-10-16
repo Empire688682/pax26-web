@@ -296,14 +296,35 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         return;
       }
 
-      // Build the WhatsApp redirect message — minimal, just order ID and total
+      // Build the WhatsApp redirect message — full order summary so it's visible
+      // in the customer's thread and the system can parse it correctly
       const baseWaHref = store.whatsappHref?.split("?")[0] || "";
       if (baseWaHref) {
-        let waMsg = `Hi! I've confirmed my order *#${data.orderCode}* on ${data.businessName || "your store"}.\n`;
-        waMsg += `Total: ₦${Number(data.totalPrice).toLocaleString()}\n`;
-        if (data.payment) {
-          waMsg += `\nPlease confirm payment details so I can proceed.`;
+        const deliveryFeeVal = Number(data.deliveryFee) || 0;
+        const subtotalVal = Number(data.itemsSubtotal) || (Number(data.totalPrice) - deliveryFeeVal);
+        const totalVal = Number(data.totalPrice) || 0;
+
+        // Build item lines from cart (already validated by server)
+        const itemLines = cart.map(item => {
+          const lineTotal = item.price * item.quantity;
+          const variantStr = (item.selectedVariants || []).length > 0
+            ? ` [${item.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
+            : "";
+          return `• ${item.quantity > 1 ? `${item.quantity}x ` : ""}${item.name}${variantStr} — ₦${lineTotal.toLocaleString()}`;
+        }).join("\n");
+
+        let waMsg = `Hi! I've confirmed my order #${data.orderCode} on ${data.businessName || "your store"}.\n\n`;
+        waMsg += `🛒 *Order #${data.orderCode}*\n`;
+        waMsg += `${itemLines}\n\n`;
+        waMsg += `💰 Products Total: ₦${subtotalVal.toLocaleString()}`;
+        if (deliveryFeeVal > 0) {
+          waMsg += `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}`;
         }
+        waMsg += `\n💳 *Grand Total: ₦${totalVal.toLocaleString()}*`;
+        if (deliveryLocation) {
+          waMsg += `\n📍 ${deliveryLocation.trim()}`;
+        }
+
         const fullWaUrl = `${baseWaHref}?text=${encodeURIComponent(waMsg)}`;
 
         onClearCart();
