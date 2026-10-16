@@ -32,11 +32,12 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
     }
 
     if (q && q.trim()) {
-      const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      const escapedQ = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escapedQ, "i");
       filter.$or = [
         { name: regex },
         { category: regex },
-        { tags: { $elemMatch: regex } },
+        { tags: regex },          // direct regex on [String] array — no $elemMatch needed
         { description: regex },
       ];
     }
@@ -115,7 +116,7 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
       },
     };
   } catch (err) {
-    console.error("getStoreData error:", err);
+    console.error("getStoreData error:", err?.message || err, "| slug:", slug, "| q:", q);
     return null;
   }
 }
