@@ -33,7 +33,13 @@ const SellerOrderSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ["pending", "confirmed", "paid", "delivered", "cancelled"],
+        // awaiting_payment: order confirmed on storefront, payment not yet received
+        // pending:          payment proof received, awaiting seller verification
+        // confirmed:        seller verified payment
+        // paid:             marked as paid
+        // delivered:        order delivered
+        // cancelled:        order cancelled
+        enum: ["awaiting_payment", "pending", "confirmed", "paid", "delivered", "cancelled"],
         default: "pending",
     },
 
@@ -51,6 +57,13 @@ const SellerOrderSchema = new mongoose.Schema({
         price: Number,
         quantity: { type: Number, default: 1 },
         imageUrl: String,
+        // selectedVariants: captures size/color/material choices made on storefront
+        // e.g. [{ label: "Size", value: "42" }, { label: "Color", value: "Black" }]
+        selectedVariants: [{
+            label: { type: String },
+            value: { type: String },
+            _id: false,
+        }],
     }],
 
     deliveryLocation: String,
@@ -72,6 +85,13 @@ const SellerOrderSchema = new mongoose.Schema({
     confirmedAt: Date,
     confirmedBy: {
         type: mongoose.Schema.Types.Mixed,
+    },
+
+    // Source of the order — storefront (reliable) or whatsapp-chat (legacy fallback)
+    orderSource: {
+        type: String,
+        enum: ["storefront", "whatsapp-chat"],
+        default: "whatsapp-chat",
     },
 
 }, { timestamps: true });

@@ -164,27 +164,131 @@ function VariantBuilder({ variants, onChange, p }) {
   const removeOption = (vi, oi) => onChange(variants.map((v, j) => j === vi ? { ...v, options: v.options.filter((_, k) => k !== oi) } : v));
   const updateOption = (vi, oi, field, val) => onChange(variants.map((v, j) => j === vi ? { ...v, options: v.options.map((o, k) => k === oi ? { ...o, [field]: val } : o) } : v));
 
+  // Preset variant templates — each has a label and a starting set of option values
+  const PRESETS = [
+    { label: "Size (Shoes)", icon: "👟", options: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"] },
+    { label: "Size (Clothing)", icon: "👔", options: ["XS", "S", "M", "L", "XL", "XXL", "3XL"] },
+    { label: "Color", icon: "🎨", options: ["Black", "White", "Red", "Blue", "Green", "Brown", "Grey", "Navy"] },
+    { label: "Material", icon: "🧵", options: ["Cotton", "Leather", "Suede", "Canvas", "Polyester", "Wool"] },
+    { label: "Style", icon: "✨", options: ["Classic", "Modern", "Casual", "Formal"] },
+  ];
+
+  const applyPreset = (preset) => {
+    const newVariant = {
+      label: preset.label.includes("(") ? preset.label.split("(")[0].trim() : preset.label,
+      options: preset.options.map(val => ({ value: val, priceAdjustment: 0, stock: 0 })),
+    };
+    onChange([...variants, newVariant]);
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <Label p={p}>Variants (Size, Color, Material…)</Label>
-      {variants.map((v, vi) => (
-        <div key={vi} style={{ padding: "14px", borderRadius: "12px", border: `1px solid ${p?.border}`, background: p?.bg, display: "flex", flexDirection: "column", gap: "10px" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <input value={v.label} onChange={e => updateLabel(vi, e.target.value)} placeholder="Variant label (e.g. Size)" style={{ ...fieldBase(p), flex: 1 }} />
-            <button onClick={() => removeVariant(vi)} style={{ padding: "8px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><TrashIcon /></button>
+    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <Label p={p}>Product Variants (Size, Color, Material…)</Label>
+        <p style={{ margin: 0, fontSize: "11px", color: p?.textPrimary, opacity: 0.5 }}>
+          Optional — only add if the product comes in different options
+        </p>
+      </div>
+
+      {/* Quick-start preset buttons */}
+      {variants.length === 0 && (
+        <div style={{ padding: "12px", borderRadius: "12px", background: `${p?.primary}08`, border: `1px dashed ${p?.primary}33` }}>
+          <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: 700, color: p?.textPrimary, opacity: 0.6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Quick Start</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            {PRESETS.map(preset => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                style={{ padding: "6px 12px", borderRadius: "8px", border: `1px solid ${p?.border}`, background: p?.bg || "transparent", color: p?.textPrimary, fontSize: "12px", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+              >
+                {preset.icon} {preset.label}
+              </button>
+            ))}
           </div>
+        </div>
+      )}
+
+      {variants.map((v, vi) => (
+        <div key={vi} style={{ padding: "14px", borderRadius: "12px", border: `1px solid ${p?.border}`, background: p?.secondaryBg || p?.bg, display: "flex", flexDirection: "column", gap: "10px" }}>
+          {/* Variant label row */}
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <input
+              value={v.label}
+              onChange={e => updateLabel(vi, e.target.value)}
+              placeholder="Variant name (e.g. Size, Color, Material)"
+              style={{ ...fieldBase(p), flex: 1, fontWeight: 700 }}
+            />
+            <button
+              type="button"
+              onClick={() => removeVariant(vi)}
+              style={{ padding: "8px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              <TrashIcon />
+            </button>
+          </div>
+
+          {/* Column headers */}
+          {v.options.length > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 80px 32px", gap: "6px", paddingLeft: "2px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>Option value</span>
+              <span style={{ fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>+/- Price</span>
+              <span style={{ fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.06em" }}>Stock</span>
+              <span />
+            </div>
+          )}
+
+          {/* Options */}
           {v.options.map((o, oi) => (
-            <div key={oi} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))", gap: "6px", alignItems: "center" }}>
-              <input value={o.value} onChange={e => updateOption(vi, oi, "value", e.target.value)} placeholder="Value (e.g. 42)" style={{ ...fieldBase(p), padding: "8px 12px" }} />
-              <input type="number" value={o.priceAdjustment} onChange={e => updateOption(vi, oi, "priceAdjustment", Number(e.target.value))} placeholder="+price" title="Price adjustment" style={{ ...fieldBase(p), padding: "8px 12px" }} />
-              <input type="number" value={o.stock} onChange={e => updateOption(vi, oi, "stock", Number(e.target.value))} placeholder="Stock" style={{ ...fieldBase(p), padding: "8px 12px" }} />
-              <button onClick={() => removeOption(vi, oi)} style={{ padding: "8px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center" }}><XIcon /></button>
+            <div key={oi} style={{ display: "grid", gridTemplateColumns: "1fr 90px 80px 32px", gap: "6px", alignItems: "center" }}>
+              <input
+                value={o.value}
+                onChange={e => updateOption(vi, oi, "value", e.target.value)}
+                placeholder={v.label ? `e.g. ${v.label === "Color" ? "Black" : v.label === "Size" ? "42" : v.label === "Material" ? "Leather" : "Option"}` : "Option value"}
+                style={{ ...fieldBase(p), padding: "8px 12px" }}
+              />
+              <input
+                type="number"
+                value={o.priceAdjustment}
+                onChange={e => updateOption(vi, oi, "priceAdjustment", Number(e.target.value))}
+                placeholder="0"
+                title="Price adjustment for this option (e.g. +500 for premium size)"
+                style={{ ...fieldBase(p), padding: "8px 10px" }}
+              />
+              <input
+                type="number"
+                value={o.stock}
+                onChange={e => updateOption(vi, oi, "stock", Number(e.target.value))}
+                placeholder="0"
+                title="Stock quantity for this option"
+                min="0"
+                style={{ ...fieldBase(p), padding: "8px 10px" }}
+              />
+              <button
+                type="button"
+                onClick={() => removeOption(vi, oi)}
+                style={{ padding: "6px", borderRadius: "8px", border: "none", background: "#ff444415", color: "#ff4444", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <XIcon />
+              </button>
             </div>
           ))}
-          <button onClick={() => addOption(vi)} style={{ fontSize: "12px", fontWeight: 600, color: p?.primary, background: `${p?.primary}10`, border: `1px dashed ${p?.primary}44`, borderRadius: "8px", padding: "7px", cursor: "pointer" }}>+ Add Option</button>
+
+          <button
+            type="button"
+            onClick={() => addOption(vi)}
+            style={{ fontSize: "12px", fontWeight: 600, color: p?.primary, background: `${p?.primary}10`, border: `1px dashed ${p?.primary}44`, borderRadius: "8px", padding: "7px", cursor: "pointer" }}
+          >
+            + Add Option
+          </button>
         </div>
       ))}
-      <button onClick={addVariant} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "13px", fontWeight: 600, cursor: "pointer", opacity: 0.7 }}>
+
+      <button
+        type="button"
+        onClick={addVariant}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px", borderRadius: "10px", border: `2px dashed ${p?.border}`, background: "transparent", color: p?.textPrimary, fontSize: "13px", fontWeight: 600, cursor: "pointer", opacity: 0.7 }}
+      >
         <PlusIcon /> Add Variant Group
       </button>
     </div>

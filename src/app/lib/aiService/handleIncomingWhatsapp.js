@@ -692,6 +692,123 @@ export const handleIncomingWhatsApp = async (payload) => {
       content: m.text,
     }));
 
+    // ── Storefront order confirmation detection ───────────────────────────────
+    // Customer returns from storefront with: "Hi! I've confirmed order #ABC123 on [store]."
+    // We send a guaranteed system-generated order+payment summary directly to WhatsApp
+    // (no AI involvement — always accurate), then skip the AI response for this turn.
+    // Pattern requires explicit "order #CODE" context to avoid matching random hashtags.
+    const ORDER_CONFIRM_PATTERN = /(?:confirmed|placed|completed)\s+(?:my\s+)?order\s+#([A-Z0-9]{6,10})|order\s+#([A-Z0-9]{6,10})\s+(?:is\s+)?confirmed|(?:my\s+)?order(?:\s+(?:code|id|number|ref))?\s*[:#]\s*([A-Z0-9]{6,10})/i;
+    const orderConfirmMatch = inboundText && inboundText.match(ORDER_CONFIRM_PATTERN);
+    const orderCode = orderConfirmMatch?.[1] || orderConfirmMatch?.[2] || orderConfirmMatch?.[3];
+
+    if (orderCode) {
+      try {
+        const { connectDb } = await import("@/app/ults/db/ConnectDb.js");
+        const SellerOrderModel = (await import("@/app/ults/models/SellerOrderModel.js")).default;
+        await connectDb();
+
+        const confirmedOrder = await SellerOrderModel.findOne({
+          sellerId: sellerProfile._id,
+          orderCode: orderCode.toUpperCase(),
+          status: "awaiting_payment",
+        }).lean();
+
+        if (confirmedOrder) {
+          // Mark session as expecting payment so the receipt image is handled correctly
+          await SessionModel.updateOne(
+            { _id: session._id },
+            { $set: { "payment.expectingPayment": true, "payment.paymentProofReceived": false, "payment.deflectionCount": 0 } }
+          );
+          if (session.payment) {
+            session.payment.expectingPayment = true;
+            session.payment.paymentProofReceived = false;
+          }
+
+          // Build item lines with variant selections
+          const deliveryFeeVal = Number(confirmedOrder.deliveryFee) || 0;
+          const totalVal = Number(confirmedOrder.totalPrice) || 0;
+          const subtotalVal = totalVal - deliveryFeeVal;
+          const itemsSubtotal = subtotalVal > 0 ? subtotalVal : totalVal;
+
+          const itemLines = (confirmedOrder.items || [])
+            .map(i => {
+              const lineTotal = (Number(i.price) || 0) * (Number(i.quantity) || 1);
+              const variantStr = (i.selectedVariants || []).length > 0
+                ? ` [${i.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
+                : "";
+              return `• ${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}${variantStr} — ₦${lineTotal.toLocaleString()}`;
+            })
+            .join("\n");
+
+          // Build payment accounts section from seller profile
+          const activePayments = (sellerProfile.paymentDetails || []).filter(p => p.active !== false);
+          const paymentLines = activePayments.length > 0
+            ? activePayments.map(p => `${p.bankName} | ${p.accountNumber}${p.accountName ? ` (${p.accountName})` : ""}${p.label ? ` — ${p.label}` : ""}`).join("\n")
+            : "Contact the seller for payment details.";
+
+          const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
+          const editLink = `${BASE_URL}/store/${sellerProfile.slug}?order=${confirmedOrder.orderCode}`;
+          const deliveryStr = (confirmedOrder.deliveryAddress || confirmedOrder.deliveryLocation || "").trim();
+
+          const orderSummaryMsg =
+`🛒 *Order #${confirmedOrder.orderCode} — Review Before Paying*
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛍️ *Items:*
+${itemLines}
+
+💰 Products Total: ₦${itemsSubtotal.toLocaleString()}${deliveryFeeVal > 0 ? `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}
+💳 *Grand Total: ₦${totalVal.toLocaleString()}*${deliveryStr ? `\n📍 ${deliveryStr}` : ""}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+💳 *Payment Details:*
+${paymentLines}
+
+Send your receipt screenshot here after payment.
+
+✏️ *Wrong item or size?* Edit your order:
+${editLink}`;
+
+          // Send the system-generated order card directly — no AI involvement
+          await sendWhatsAppAutomationReply({
+            phoneNumberId: user.whatsapp.phoneNumberId,
+            to: visitorPhone,
+            text: orderSummaryMsg,
+          });
+
+          // Save the outbound system message to inbox for seller visibility
+          await AIMessageModel.create({
+            messageId: `order_summary_${confirmedOrder._id}_${Date.now()}`,
+            userId: user._id,
+            sessionId: session.sessionId,
+            platform: "whatsapp",
+            phoneNumberId: user.whatsapp.phoneNumberId,
+            from: user.whatsapp.displayPhone,
+            to: visitorPhone,
+            text: orderSummaryMsg,
+            direction: "outbound",
+            senderType: "system",
+            status: "sent",
+            aiMeta: { isOrderSummary: true, orderCode: confirmedOrder.orderCode },
+            automation: { isAutoReply: true },
+          }).catch(err => console.warn("[orderSummary] Inbox save failed (non-fatal):", err.message));
+
+          console.log(`[handleIncoming] ✅ Order summary sent for #${confirmedOrder.orderCode}`);
+
+          // AI response not needed this turn — the system message covers everything
+          // Update session counters and return early
+          await SessionModel.findByIdAndUpdate(session._id, {
+            $set: { lastMessageAt: new Date(), isProcessingAI: false },
+            $inc: { "context.messageCount": 1, "context.outboundCount": 1 },
+          });
+          return { ok: true };
+        }
+      } catch (orderLookupErr) {
+        console.warn("[handleIncoming] Order lookup failed (non-fatal):", orderLookupErr.message);
+        // Fall through to normal AI response if lookup fails
+      }
+    }
+
     const isExpectingPaymentProof =
       (session?.payment?.expectingPayment === true && session?.payment?.paymentProofReceived !== true) ||
       isPaymentStage(conversationContext, session);
@@ -699,27 +816,19 @@ export const handleIncomingWhatsApp = async (payload) => {
     const PAYMENT_CLAIM_KEYWORDS = /payment|paid|transfer|receipt|screenshot|proof|sent|done|completed|txn|transaction|have paid|i paid/i;
     const isClaimingPaymentText = inboundText && PAYMENT_CLAIM_KEYWORDS.test(inboundText);
 
-    if (isExpectingPaymentProof) {
-      const contactInfo = user.whatsapp?.contacts?.list?.find((c) => c.phone === visitorPhone);
-      await createPendingOrderFromText({
-        sellerId: sellerProfile._id,
-        sellerUserId: user._id,
-        customerPhone: visitorPhone,
-        customerName: contactInfo?.name || "WhatsApp Customer",
-        recentMessages: conversationContext,
-        inboundText,
-        session,
-      });
-    } else if (isClaimingPaymentText) {
+    // Skip legacy pending-order-from-text creation — orders now come from storefront only
+    if (isExpectingPaymentProof && isClaimingPaymentText && !orderCode) {
       const inPaymentStage = isPaymentStage(conversationContext, session);
-      if (!inPaymentStage) {
-        console.log("⚠️ Customer claiming payment via text when expectingPayment and inPaymentStage are both false.");
-        const unaskedPaymentNotice = `[SYSTEM-NOTICE: The customer is stating or claiming they sent payment proof or made a transfer ("${inboundText}"), BUT you (the AI agent) have NOT provided any payment details, bank account numbers, or prices to this customer yet, and no order is awaiting payment. Politely explain to the customer that no payment details or order instructions have been provided for an order yet, so this cannot be processed as a payment receipt. Ask them what product or item they would like to order first so you can give them the correct price and bank details.]`;
-        enrichedText = `${unaskedPaymentNotice}\n\n${enrichedText}`;
-      } else {
-        console.log("💳 Customer claiming payment via text in active payment stage. Prompting customer to attach image receipt.");
+      if (inPaymentStage) {
+        console.log("💳 Customer claiming payment via text in active payment stage. Prompting for receipt image.");
         const pendingPaymentHint = `[SYSTEM-NOTICE: The customer states they have completed payment or sent proof ("${inboundText}"). Politely acknowledge their message and ask them to attach or send a screenshot / image of their transfer receipt so our team can confirm their payment.]`;
         enrichedText = `${pendingPaymentHint}\n\n${enrichedText}`;
+      }
+    } else if (isClaimingPaymentText && !orderCode) {
+      const inPaymentStage = isPaymentStage(conversationContext, session);
+      if (!inPaymentStage) {
+        const unaskedPaymentNotice = `[SYSTEM-NOTICE: The customer is claiming they sent payment ("${inboundText}"), BUT no order is awaiting payment. Ask them to first confirm their order on the storefront, then return with their order code.]`;
+        enrichedText = `${unaskedPaymentNotice}\n\n${enrichedText}`;
       }
     }
   }
@@ -891,4 +1000,4 @@ export const handleIncomingWhatsApp = async (payload) => {
   console.log("📊 Step 9 — messagesUsedThisMonth incremented");
 
   return { ok: true };
-};
+};

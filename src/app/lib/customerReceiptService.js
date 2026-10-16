@@ -58,7 +58,10 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             itemsSection = order.items
                 .map((i) => {
                     const linePrice = (Number(i.price) || 0) * (Number(i.quantity) || 1);
-                    return `• Item: ${i.name} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
+                    const variantStr = (i.selectedVariants || []).length > 0
+                        ? ` [${i.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
+                        : "";
+                    return `• Item: ${i.name}${variantStr} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
                 })
                 .join("\n");
         } else {

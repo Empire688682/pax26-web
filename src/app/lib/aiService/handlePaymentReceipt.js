@@ -291,6 +291,68 @@ export async function handlePaymentReceipt({
 }) {
     const normalizedPhone = normalizePhone(customerPhone);
 
+    // ── Priority 1: Find a storefront-confirmed "awaiting_payment" order ──────
+    // This is the clean path — order was created on the storefront with full
+    // structured data (items, variants, delivery address). No parsing needed.
+    const awaitingOrder = await SellerOrderModel.findOne({
+        sellerId,
+        customerPhone: normalizedPhone,
+        status: "awaiting_payment",
+        orderSource: "storefront",
+    }).sort({ createdAt: -1 });
+
+    if (awaitingOrder) {
+        console.log(`✅ Found storefront awaiting_payment order ${awaitingOrder._id} — attaching receipt directly.`);
+
+        let url = imageUrl;
+        let publicId = imagePublicId;
+
+        if (!url && mediaUrl) {
+            try {
+                const uploaded = await uploadCustomerImageToCloudinary(mediaUrl, sellerId, normalizedPhone, "payment-receipts");
+                url = uploaded.url;
+                publicId = uploaded.publicId;
+            } catch (err) {
+                console.error("Payment receipt upload failed:", err.message);
+                url = "";
+                publicId = "";
+            }
+        }
+
+        awaitingOrder.paymentReceiptUrl = url || "";
+        awaitingOrder.paymentReceiptPublicId = publicId || "";
+        awaitingOrder.paymentReceiptSubmittedAt = new Date();
+        awaitingOrder.status = "pending";
+        await awaitingOrder.save();
+
+        const productSummary = (awaitingOrder.items || [])
+            .map(i => `${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}${i.selectedVariants?.length ? ` (${i.selectedVariants.map(v => v.value).join(", ")})` : ""}`)
+            .join(", ") || "Order Item";
+
+        try {
+            await sendSalesNotification(sellerUserId, {
+                orderId: awaitingOrder._id.toString(),
+                customerName: awaitingOrder.customerName || awaitingOrder.customerPhone,
+                productName: productSummary,
+                amountPaid: awaitingOrder.totalPrice,
+                deliveryFee: awaitingOrder.deliveryFee,
+                deliveryLocation: awaitingOrder.deliveryAddress || awaitingOrder.deliveryLocation || "",
+                isConfirmed: false,
+            });
+        } catch (err) {
+            console.warn("Sales notification failed:", err.message);
+        }
+
+        // Update leadStage
+        UserModel.updateOne(
+            { _id: sellerUserId, "whatsapp.contacts.list.phone": normalizedPhone },
+            { $set: { "whatsapp.contacts.list.$.leadStage": "converted" } }
+        ).catch(() => {});
+
+        return { handled: true, order: awaitingOrder, isNewProof: true };
+    }
+
+    // ── Priority 2: Legacy path — existing pending order or WhatsApp-chat order ─
     const pendingOrder = await SellerOrderModel.findOne({
         sellerId,
         customerPhone: normalizedPhone,

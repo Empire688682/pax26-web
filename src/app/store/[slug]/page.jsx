@@ -145,6 +145,7 @@ export default async function StoreSlugPage({ params, searchParams }) {
   const limit = parseInt(resolvedSearch?.limit || "20", 10);
   const category = resolvedSearch?.category || "all";
   const q = resolvedSearch?.q || "";
+  const orderCode = resolvedSearch?.order || "";
 
   const data = await getStoreData(slug, { page, limit, category, q });
   if (!data) notFound();
@@ -160,6 +161,7 @@ export default async function StoreSlugPage({ params, searchParams }) {
       sessionToken={resolvedSearch?.session || null}
       referredProductId={resolvedSearch?.ref || null}
       initialSearch={q || ""}
+      initialOrderCode={orderCode || ""}
     />
   );
 }

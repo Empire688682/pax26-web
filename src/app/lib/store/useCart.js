@@ -56,10 +56,23 @@ export function useCart(slug) {
     };
   }, [slug]);
 
-  const addItem = (product, quantity = 1) => {
+  const addItem = (product, quantity = 1, selectedVariants = []) => {
     const current = getCartItems(slug);
-    const existingIndex = current.findIndex((item) => item.productId === product._id);
-    const itemPrice = product.discountPrice || product.price || 0;
+    // Cart key includes variant selections so same product in different sizes = different line items
+    const variantKey = selectedVariants.length
+      ? selectedVariants.map(v => `${v.label}:${v.value}`).join("|")
+      : "";
+    const cartItemKey = `${product._id}__${variantKey}`;
+    const existingIndex = current.findIndex((item) => item.cartItemKey === cartItemKey);
+
+    // Calculate price with variant adjustments
+    const basePrice = product.discountPrice || product.price || 0;
+    const variantPriceAdj = selectedVariants.reduce((sum, sel) => {
+      const variantDef = (product.variants || []).find(v => v.label === sel.label);
+      const optionDef = variantDef?.options?.find(o => o.value === sel.value);
+      return sum + (optionDef?.priceAdjustment || 0);
+    }, 0);
+    const itemPrice = basePrice + variantPriceAdj;
     const imageUrl = product.images?.[0]?.url || "";
 
     let updated = [...current];
@@ -67,33 +80,35 @@ export function useCart(slug) {
       updated[existingIndex].quantity += quantity;
     } else {
       updated.push({
+        cartItemKey,
         productId: product._id,
         name: product.name,
         price: itemPrice,
         imageUrl,
         quantity,
         deliveryFee: Number(product.deliveryFee) || 0,
+        selectedVariants,   // e.g. [{ label: "Size", value: "42" }, { label: "Color", value: "Black" }]
       });
     }
     saveCartItems(slug, updated);
   };
 
-  const setItemQuantity = (productId, quantity) => {
+  const setItemQuantity = (cartItemKey, quantity) => {
     const current = getCartItems(slug);
     let updated;
     if (quantity <= 0) {
-      updated = current.filter((item) => item.productId !== productId);
+      updated = current.filter((item) => item.cartItemKey !== cartItemKey);
     } else {
       updated = current.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+        item.cartItemKey === cartItemKey ? { ...item, quantity } : item
       );
     }
     saveCartItems(slug, updated);
   };
 
-  const removeItem = (productId) => {
+  const removeItem = (cartItemKey) => {
     const current = getCartItems(slug);
-    const updated = current.filter((item) => item.productId !== productId);
+    const updated = current.filter((item) => item.cartItemKey !== cartItemKey);
     saveCartItems(slug, updated);
   };
 
