@@ -704,6 +704,7 @@ export default function StorefrontPage({
   isPreview,
   sessionToken,
   referredProductId,
+  initialSearch = "",
 }) {
   const theme = getTheme(store.storeTheme);
   const t = theme;
@@ -724,14 +725,16 @@ export default function StorefrontPage({
     }
   );
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch || "");
   const [activeCategory, setActiveCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [loadingPage, setLoadingPage] = useState(false);
-  const [isInitialMount, setIsInitialMount] = useState(true);
+  // Skip the initial-mount guard when a search query was pre-seeded from the URL —
+  // we need the useEffect to fire on first render to fetch the filtered products.
+  const [isInitialMount, setIsInitialMount] = useState(!initialSearch);
   const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
 
   const openWhatsApp = (e, href) => {

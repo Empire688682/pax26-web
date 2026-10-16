@@ -364,13 +364,35 @@ export async function handlePaymentReceipt({
     // itself contains structured bullet-point order items with ₦ prices (the standard
     // WhatsApp storefront order template format). This is Priority #2 after stagedOrder.
     const hasNewStorefrontOrder = /NEW ORDER FROM STOREFRONT/i.test(lastUserText) || /NEW ORDER FROM STOREFRONT/i.test(caption);
-    // Parse from ONLY the customer's current message (caption or lastUserText), never full history
-    const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(caption || lastUserText, []);
-    // A customer message qualifies as a storefront template if it has ≥1 priced items AND
-    // contains typical template signals (💰 / 🚚 / Product page / pax26.com store link)
+
+    // The payment image arrives as a separate message AFTER the storefront template.
+    // So lastUserText is empty (image-only message). We must look back through recent
+    // messages to find the most recent customer message that looks like a storefront order.
+    const STOREFRONT_TEMPLATE_SIGNAL = /💰|🚚|product\s*page|pax26\.com\/store|Could\s*you\s*assist\s*me\s*with\s*this\s*order/i;
+
+    // Scan back through customer messages (newest first) to find the storefront template
+    const recentCustomerMsgs = [...recentMessages]
+        .reverse()
+        .filter(m => m.role === "user" || m.direction === "inbound" || m.senderType === "customer");
+
+    let storefrontTemplateText = null;
+    for (const msg of recentCustomerMsgs) {
+        const txt = msg.content || msg.text || "";
+        if (STOREFRONT_TEMPLATE_SIGNAL.test(txt)) {
+            storefrontTemplateText = txt;
+            break;
+        }
+    }
+
+    // Parse from ONLY the identified storefront template message, never full history
+    const sourceText = caption || lastUserText || storefrontTemplateText || "";
+    const multiOrderFromCurrentMsg = parseMultiProductOrderFromText(sourceText, []);
+
+    // A message qualifies as a storefront template if it has ≥1 priced items AND
+    // contains typical template signals
     const isStorefrontTemplate = multiOrderFromCurrentMsg.items.length > 0 && (
         hasNewStorefrontOrder ||
-        /💰|🚚|product\s*page|pax26\.com\/store|Could\s*you\s*assist\s*me\s*with\s*this\s*order/i.test(lastUserText + caption)
+        STOREFRONT_TEMPLATE_SIGNAL.test(sourceText)
     );
 
     let orderItems = [];
@@ -384,11 +406,25 @@ export async function handlePaymentReceipt({
         calculatedDeliveryFee = Number(stagedOrder.deliveryFee) || 0;
         orderTotalPrice = Number(stagedOrder.totalPrice) || (stagedOrder.subtotal + calculatedDeliveryFee);
     } else if (isStorefrontTemplate) {
-        // High Priority #2: Direct Storefront template payload in current incoming message only
-        console.log("🛒 Consuming storefront template payload from current message for order receipt.", multiOrderFromCurrentMsg.items.length, "item(s)");
+        // High Priority #2: Direct Storefront template payload — use the identified template text
+        // Note: sourceText already points to the storefront template message even if the
+        // current inbound message is a payment image (image-only messages have no text).
+        console.log("🛒 Consuming storefront template payload for order receipt.", multiOrderFromCurrentMsg.items.length, "item(s)");
         orderItems = multiOrderFromCurrentMsg.items;
-        calculatedDeliveryFee = extractDeliveryFeeFromConversation([lastUserMessage].filter(Boolean), [], caption || lastUserText);
-        orderTotalPrice = extractOrderTotalFromConversation([lastUserMessage].filter(Boolean)) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
+
+        // Find the actual message object for the storefront template (for fee/total extraction)
+        const templateMsgObj = storefrontTemplateText
+            ? recentCustomerMsgs.find(m => (m.content || m.text || "") === storefrontTemplateText)
+            : lastUserMessage;
+
+        calculatedDeliveryFee = extractDeliveryFeeFromConversation(
+            templateMsgObj ? [templateMsgObj] : [],
+            [],
+            sourceText
+        );
+        orderTotalPrice =
+            extractOrderTotalFromConversation(templateMsgObj ? [templateMsgObj] : []) ||
+            (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
         // High Priority #3: Session pendingItems fallback
         console.log("📋 Consuming session pendingItems for order receipt.");
@@ -482,10 +518,14 @@ export async function handlePaymentReceipt({
     }
 
     const totalQuantity = orderItems.reduce((sum, i) => sum + (i.quantity || 1), 0) || 1;
+
+    // Delivery location: prefer session/staged, then parse from storefront template text
+    // (the template message contains 📍 Delivery Address: which parseMultiProductOrderFromText extracts)
+    const templateDeliveryLocation = multiOrderFromCurrentMsg?.deliveryLocation || "";
     const resolvedDeliveryLocation = (
         session?.payment?.deliveryLocation ||
         stagedOrder?.deliveryLocation ||
-        multiOrderFromCurrentMsg?.deliveryLocation ||
+        templateDeliveryLocation ||
         ""
     ).trim();
 
@@ -630,51 +670,64 @@ function extractDeliveryFeeFromConversation(recentMessages = [], matchedProducts
 export function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
     const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
 
-    // Extract Delivery Location if present (e.g. 📍 Delivery Location: Ikeja, Lagos)
-    const locationMatch = combinedText.match(/(?:📍\s*Delivery\s*Location|Delivery\s*Address|Address|Location):\s*([^\n]+)/i);
+    // Extract Delivery Location if present (e.g. 📍 Delivery Address: Lagos Ikeja, No 10 Allen Ave)
+    // Also handles bold format: 📍 *Delivery Address:* Lagos Ikeja, No 10 Allen Ave
+    const locationMatch = combinedText.match(/(?:📍\s*\*?\s*Delivery\s*(?:Location|Address)\s*\*?|Delivery\s*Address|Address|Location):\s*\*?\s*([^\n*]+)/i);
     const deliveryLocation = locationMatch ? locationMatch[1].trim() : "";
 
-    // Extract items list (e.g., • 2x Jordan 1 Retro High — ₦110,000)
-    // REQUIREMENT: Line MUST contain an explicit ₦/N/NGN price to be treated as an order item.
-    // This prevents conversational lines, URLs, store names, and fulfillment labels from
-    // being misidentified as order line items.
+    // Extract items list.
+    // REQUIREMENT: Line MUST contain an explicit ₦ price AND a — separator to count as an order item.
+    // This blocks URLs, labels, totals, size-option lines, and free-text conversation.
     const itemLines = [];
     const lines = combinedText.split("\n");
 
-    // Strict item regex: bullet/number prefix + optional qty + name + REQUIRED currency amount
-    const itemRegex = /(?:[•·\*]|\d+\.)\s*(\d+)?x?\s*\*?([^\*\n—–\-]+?)\*?\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]\s*(?:₦|N(?=\d)|NGN)\s*([\d,]+)/i;
+    // Two regex patterns to handle both storefront template format (bold asterisks) and plain format:
+    //
+    // Format A (storefront template): • 1x *Men's Monk Strap Shoes* — ₦43,500
+    //                                  • 1x *Timberland 6-Inch Boot (Grade A)* — ₦62,000
+    // Format B (AI order summary):    • 1x Men's Monk Strap Shoes — ₦43,500
+    //                                  • Men's Monk Strap Shoes (x1) — ₦43,500
+    //
+    // Key design decisions:
+    // - Name is captured GREEDILY between the opening and closing bold marker (or up to —)
+    //   so parenthetical suffixes like "(Grade A)" or "(Pack of 3)" are included in the name
+    // - Price is REQUIRED (₦ followed by digits) — lines without a price are rejected
+    // - Quantity marker (1x, 2x, Qty:3) is optional
 
-    // Patterns that identify noise lines that must never be treated as order items
-    const NOISE_LINE_PATTERN = /https?:\/\/|www\.|\.com|\.org|fulfillment|product\s*page|hi[!,]?\s*i'?m\s*interested|could\s*you\s*assist|store\s*name|pax26|jayempire\s*store|estimated|grand\s*total|products?\s*total|delivery\s*fee|subtotal|size\s*(?:36|40|44)|36[\s\-]*39|40[\s\-]*44/i;
+    // Pattern A: bold-wrapped name  •  [qty x]  *name*  —  ₦price
+    const BOLD_ITEM_RE = /^(?:[•·*]|\d+\.)\s*(?:(\d+)\s*x\s*)?\*([^*\n]+?)\*\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]+\s*(?:₦|NGN)\s*([\d,]+)/i;
+
+    // Pattern B: plain name          •  [qty x]  name  —  ₦price
+    const PLAIN_ITEM_RE = /^(?:[•·]|\d+\.)\s*(?:(\d+)\s*x\s*)?([^\n—–\-]+?)\s*(?:\(Qty:\s*(\d+)\))?\s*[—–\-]+\s*(?:₦|NGN)\s*([\d,]+)/i;
+
+    // Lines that are definitely not order items regardless of format
+    const NOISE_LINE_PATTERN = /https?:\/\/|www\.|\.com|\.org|fulfillment|product\s*page|hi[!,]?\s*i'?m\s*interested|could\s*you\s*assist|estimated|grand\s*total|products?\s*total|delivery\s*fee|subtotal|size\s*(?:36|40|44)|36[\s\-]*39|40[\s\-]*44/i;
 
     lines.forEach((line) => {
         const trimmedLine = line.trim();
-
-        // Skip empty lines and lines that are clearly noise
         if (!trimmedLine || NOISE_LINE_PATTERN.test(trimmedLine)) return;
 
-        const match = trimmedLine.match(itemRegex);
-        if (match) {
-            const quantity = parseInt(match[1] || match[3] || "1", 10);
-            const name = match[2]?.trim();
-            const itemTotalPrice = match[4] ? parseInt(match[4].replace(/,/g, ""), 10) : 0;
+        // Try bold format first (storefront template), then plain format
+        let match = trimmedLine.match(BOLD_ITEM_RE) || trimmedLine.match(PLAIN_ITEM_RE);
+        if (!match) return;
 
-            // Additional name-level guards
-            if (!name || name.length < 3) return;
-            if (/total|delivery|shipping|product\s*page|fulfillment|hi[!,]|https?:|\.com/i.test(name)) return;
-            // Reject names that look like URL fragments (contain slash or dots with no spaces)
-            if (/\/|(?:\S+\.\S+)/.test(name)) return;
+        const quantity = parseInt(match[1] || match[3] || "1", 10);
+        const name = match[2]?.trim();
+        const itemTotalPrice = match[4] ? parseInt(match[4].replace(/,/g, ""), 10) : 0;
 
-            const qtyVal = isNaN(quantity) || quantity <= 0 ? 1 : quantity;
-            // Only accept reasonable quantities (1–999) and prices above ₦0
-            if (qtyVal > 999 || itemTotalPrice <= 0) return;
+        if (!name || name.length < 3) return;
+        // Reject names that are clearly labels or URL fragments
+        if (/total|delivery|shipping|fulfillment|https?:|\.com|\//i.test(name)) return;
 
-            itemLines.push({
-                name,
-                quantity: qtyVal,
-                price: Math.round(itemTotalPrice / qtyVal),
-            });
-        }
+        const qtyVal = isNaN(quantity) || quantity <= 0 ? 1 : quantity;
+        // Reject unreasonable quantities or zero prices
+        if (qtyVal > 999 || itemTotalPrice <= 0) return;
+
+        itemLines.push({
+            name,
+            quantity: qtyVal,
+            price: Math.round(itemTotalPrice / qtyVal),
+        });
     });
 
     return {

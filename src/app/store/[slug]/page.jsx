@@ -158,6 +158,7 @@ export default async function StoreSlugPage({ params, searchParams }) {
       isPreview={resolvedSearch?.preview === "1"}
       sessionToken={resolvedSearch?.session || null}
       referredProductId={resolvedSearch?.ref || null}
+      initialSearch={q || ""}
     />
   );
 }
