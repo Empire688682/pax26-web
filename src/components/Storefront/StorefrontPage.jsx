@@ -230,25 +230,60 @@ export function handleWhatsAppRedirect(e, href, onShowChooser) {
 function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQty, onRemoveItem, onClearCart, store, slug, sessionToken, theme, onWhatsAppRedirect }) {
   const t = theme;
   const [deliveryLocation, setDeliveryLocation] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
   const [checkoutState, setCheckoutState] = useState("idle"); // idle | loading | success | error
   const [checkoutError, setCheckoutError] = useState("");
+  const [detectedZone, setDetectedZone] = useState(null); // { fee, zoneName, timeframe, confidence }
   const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
   const allowPickup = store.fulfillmentSettings?.allowPickup === true;
   const deliveryModel = store.fulfillmentSettings?.deliveryModel || "flat";
   const deliveryZones = store.fulfillmentSettings?.deliveryZones || [];
+  const flatDeliveryFee = Number(store.fulfillmentSettings?.flatDeliveryFee) || 0;
   const [fulfillmentMethod, setFulfillmentMethod] = useState(allowPickup && !allowDelivery ? "pickup" : "delivery");
-  const [selectedZoneIndex, setSelectedZoneIndex] = useState(0);
   const currency = store.currency || "NGN";
 
   if (!open) return null;
 
-  const selectedZone = deliveryModel === "zones" && deliveryZones.length > 0 ? deliveryZones[selectedZoneIndex] : null;
+  // ── Auto-detect zone from address as customer types ──────────────────────
+  // Uses debounced matching against store delivery zones
+  const handleAddressChange = (val) => {
+    setDeliveryLocation(val);
+    if (deliveryModel === "zones" && val.trim().length >= 5) {
+      // Inline detection — import is a module so call inline
+      const normVal = val.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      let best = null;
+      let bestScore = 0;
+      for (const zone of deliveryZones) {
+        const combined = `${zone.name || ""}, ${zone.areas || ""}`;
+        const keywords = combined.split(",").map(k => k.trim().toLowerCase().replace(/[^a-z0-9\s]/g, " ").trim()).filter(k => k.length >= 3);
+        let score = 0;
+        for (const kw of keywords) { if (normVal.includes(kw)) score += kw.length; }
+        if (score > bestScore) { bestScore = score; best = zone; }
+      }
+      if (best && bestScore > 0) {
+        setDetectedZone({ fee: Number(best.fee) || 0, zoneName: best.name || "", timeframe: best.timeframe || "", confidence: "matched" });
+      } else if (deliveryZones.length > 0) {
+        const fb = deliveryZones[deliveryZones.length - 1];
+        setDetectedZone({ fee: Number(fb.fee) || 0, zoneName: fb.name || "", timeframe: fb.timeframe || "", confidence: "fallback" });
+      } else {
+        setDetectedZone(null);
+      }
+    } else if (deliveryModel !== "zones") {
+      setDetectedZone(null);
+    } else {
+      setDetectedZone(null);
+    }
+  };
+
+  // ── Compute the active delivery fee ──────────────────────────────────────
+  const maxProductFee = cart.length > 0 ? Math.max(0, ...cart.map(i => Number(i.deliveryFee) || 0)) : 0;
+
   const activeDeliveryFee = fulfillmentMethod === "pickup"
     ? 0
-    : selectedZone
-      ? Number(selectedZone.fee) || 0
-      : 0;
+    : deliveryModel === "quote"
+      ? 0
+      : deliveryModel === "zones"
+        ? Math.max(detectedZone?.fee || 0, maxProductFee)
+        : Math.max(flatDeliveryFee, maxProductFee); // flat model
 
   const grandTotal = (totalPrice || 0) + activeDeliveryFee;
 
@@ -256,8 +291,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
     ? validateDeliveryLocation(cart, deliveryLocation, store.deliveryCoverage || "Nationwide")
     : { valid: true };
 
-  const phoneValid = customerPhone.replace(/\D/g, "").length >= 10;
-  const canCheckout = locationValidation.valid && phoneValid && checkoutState !== "loading";
+  const canCheckout = locationValidation.valid && checkoutState !== "loading";
 
   const handleConfirmOrder = async (e) => {
     e.preventDefault();
@@ -271,7 +305,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerPhone: customerPhone.trim(),
+          // customerPhone intentionally omitted — extracted from WhatsApp when order arrives
           items: cart.map(item => ({
             productId: item.productId,
             name: item.name,
@@ -285,6 +319,8 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
           fulfillmentMethod,
           pickupDetails: fulfillmentMethod === "pickup" ? (store.fulfillmentSettings?.pickupAddress || store.liveLocation || "") : "",
           deliveryFee: activeDeliveryFee,
+          selectedZoneName: detectedZone?.zoneName || "",
+          deliveryZoneTimeframe: detectedZone?.timeframe || "",
         }),
       });
 
@@ -494,9 +530,32 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                     type="text"
                     placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
                     value={deliveryLocation}
-                    onChange={(e) => setDeliveryLocation(e.target.value)}
+                    onChange={(e) => handleAddressChange(e.target.value)}
                     style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
                   />
+                  {/* Auto-detected zone chip */}
+                  {deliveryModel === "zones" && deliveryLocation.trim().length >= 5 && (
+                    <div style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "8px", background: detectedZone?.confidence === "matched" ? `${t.accent}12` : "#fef3c7", border: `1px solid ${detectedZone?.confidence === "matched" ? `${t.accent}33` : "#fde68a"}` }}>
+                      <span style={{ fontSize: "14px" }}>{detectedZone?.confidence === "matched" ? "📍" : "⚠️"}</span>
+                      <div style={{ flex: 1 }}>
+                        {detectedZone?.confidence === "matched" ? (
+                          <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: t.textPrimary }}>
+                            Zone: <strong>{detectedZone.zoneName}</strong> — {formatPrice(activeDeliveryFee, currency)}
+                            {detectedZone.timeframe ? ` · ${detectedZone.timeframe}` : ""}
+                          </p>
+                        ) : (
+                          <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#92400e" }}>
+                            Area not matched — using: <strong>{detectedZone?.zoneName || "Default Zone"}</strong> ({formatPrice(activeDeliveryFee, currency)})
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {deliveryModel === "flat" && activeDeliveryFee > 0 && deliveryLocation.trim().length > 0 && (
+                    <p style={{ margin: "6px 0 0", fontSize: "11px", color: t.textSecondary, fontWeight: 600 }}>
+                      🚚 Flat delivery fee: {formatPrice(activeDeliveryFee, currency)}
+                    </p>
+                  )}
                 </div>
 
                 {!locationValidation.valid && (
@@ -538,23 +597,13 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
                     Products: {formatPrice(totalPrice, currency)} + Delivery: {formatPrice(activeDeliveryFee, currency)}
                   </p>
                 )}
+                {fulfillmentMethod === "delivery" && deliveryModel === "quote" && (
+                  <p style={{ margin: 0, fontSize: "11px", color: t.textSecondary, fontWeight: 600 }}>
+                    + Delivery fee to be confirmed
+                  </p>
+                )}
               </div>
               <span style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(grandTotal, currency)}</span>
-            </div>
-
-            {/* WhatsApp phone number input */}
-            <div>
-              <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Your WhatsApp Number *</label>
-              <input
-                type="tel"
-                placeholder="e.g. 08012345678 or +2348012345678"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${phoneValid || !customerPhone ? t.border : "#ef4444"}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
-              />
-              {customerPhone && !phoneValid && (
-                <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#ef4444", fontWeight: 700 }}>Enter a valid phone number (at least 10 digits)</p>
-              )}
             </div>
 
             {checkoutError && (

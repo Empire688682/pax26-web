@@ -714,6 +714,15 @@ export const handleIncomingWhatsApp = async (payload) => {
         }).lean();
 
         if (confirmedOrder) {
+          // Link the customer's WhatsApp phone to this order if not already set
+          // (phone was unknown when the order was created on the storefront)
+          if (!confirmedOrder.customerPhone || confirmedOrder.customerPhone === "") {
+            await SellerOrderModel.findByIdAndUpdate(confirmedOrder._id, {
+              $set: { customerPhone: visitorPhone }
+            });
+            confirmedOrder.customerPhone = visitorPhone;
+          }
+
           // Mark session as expecting payment so the receipt image is handled correctly
           await SessionModel.updateOne(
             { _id: session._id },

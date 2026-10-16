@@ -1451,6 +1451,35 @@ export default function AiBusinessDashboard() {
                               })}
                             </div>
 
+                            {/* Flat Rate Fee input — shown when model is "flat" */}
+                            {form.fulfillmentSettings?.deliveryModel === "flat" && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "16px", borderRadius: "14px", background: p?.bg, border: `1px solid ${p?.border}` }}>
+                                <p style={{ margin: 0, fontSize: "13px", fontWeight: 800, color: p?.textPrimary }}>Flat Delivery Fee</p>
+                                <p style={{ margin: "2px 0 8px", fontSize: "11px", color: p?.textPrimary, opacity: 0.55 }}>
+                                  This fee is applied to every order regardless of location.
+                                </p>
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", background: p?.secondaryBg, border: `1px solid ${p?.border}`, borderRadius: "10px", padding: "0 12px", flex: 1 }}>
+                                    <span style={{ fontSize: "13px", fontWeight: 700, color: p?.textSecondary, marginRight: "6px" }}>₦</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={form.fulfillmentSettings?.flatDeliveryFee ?? ""}
+                                      onChange={e => setForm(f => ({
+                                        ...f,
+                                        fulfillmentSettings: {
+                                          ...(f.fulfillmentSettings || {}),
+                                          flatDeliveryFee: Number(e.target.value) || 0,
+                                        }
+                                      }))}
+                                      placeholder="e.g. 1500"
+                                      style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "14px", fontWeight: 800, color: p?.textPrimary, padding: "10px 0", fontFamily: "inherit" }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
                             {/* Location-Based Zones Manager */}
                             {form.fulfillmentSettings?.deliveryModel === "zones" && (
                               <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "18px", borderRadius: "16px", background: p?.bg, border: `1px solid ${p?.border}` }}>

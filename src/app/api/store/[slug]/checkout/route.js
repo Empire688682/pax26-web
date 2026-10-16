@@ -85,7 +85,7 @@ export async function POST(req, { params }) {
 
     const body = await req.json();
     const {
-      customerPhone,    // required — customer's WhatsApp number
+      customerPhone,    // optional — extracted from WhatsApp when order arrives
       customerName,
       items,            // array of cart items with selectedVariants
       deliveryAddress,  // full delivery address string
@@ -93,12 +93,11 @@ export async function POST(req, { params }) {
       fulfillmentMethod = "delivery",
       pickupDetails,
       deliveryFee = 0,
+      selectedZoneName = "",
+      deliveryZoneTimeframe = "",
     } = body;
 
     // ── Basic validation ──────────────────────────────────────────────────────
-    if (!customerPhone) {
-      return NextResponse.json({ success: false, message: "customerPhone is required" }, { status: 400, headers: publicHeaders() });
-    }
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ success: false, message: "Cart is empty" }, { status: 400, headers: publicHeaders() });
     }
@@ -158,9 +157,11 @@ export async function POST(req, { params }) {
     const deliveryFeeNum = Number(deliveryFee) || 0;
     const totalPrice = itemsSubtotal + deliveryFeeNum;
 
-    // ── Normalise phone ───────────────────────────────────────────────────────
-    const normPhone = customerPhone.replace(/\D/g, "");
-    const formattedPhone = normPhone.startsWith("+") ? normPhone : `+${normPhone}`;
+    // ── Normalise phone (optional — will be set when WhatsApp message arrives) ─
+    const normPhone = customerPhone ? customerPhone.replace(/\D/g, "") : "";
+    const formattedPhone = normPhone
+      ? (normPhone.startsWith("+") ? normPhone : `+${normPhone}`)
+      : ""; // empty until linked from WhatsApp
 
     // ── Generate order code ───────────────────────────────────────────────────
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -168,15 +169,17 @@ export async function POST(req, { params }) {
     for (let i = 0; i < 8; i++) orderCode += chars.charAt(Math.floor(Math.random() * chars.length));
 
     // ── Cancel any existing awaiting_payment order for this phone+seller ─────
-    // This handles: edit order, abandon & restart, duplicate submission
-    await SellerOrderModel.updateMany(
-      {
-        sellerId: profile._id,
-        customerPhone: formattedPhone,
-        status: "awaiting_payment",
-      },
-      { $set: { status: "cancelled" } }
-    );
+    // Only cancel if we have a phone — otherwise we can't safely match
+    if (formattedPhone) {
+      await SellerOrderModel.updateMany(
+        {
+          sellerId: profile._id,
+          customerPhone: formattedPhone,
+          status: "awaiting_payment",
+        },
+        { $set: { status: "cancelled" } }
+      );
+    }
 
     // ── Create the new order ──────────────────────────────────────────────────
     const order = await SellerOrderModel.create({
@@ -190,6 +193,7 @@ export async function POST(req, { params }) {
       deliveryFee: deliveryFeeNum,
       deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress.trim() : "",
       deliveryLocation: fulfillmentMethod === "delivery" ? (deliveryLocation || deliveryAddress).trim() : "",
+      selectedZoneName: selectedZoneName || "",
       fulfillmentMethod,
       pickupDetails: fulfillmentMethod === "pickup" ? (pickupDetails || "") : "",
       status: "awaiting_payment",

@@ -70,6 +70,7 @@ const SellerProfileSchema = new mongoose.Schema({
         pickupAddress: { type: String, default: '', trim: true },
         pickupInstructions: { type: String, default: '', trim: true },
         deliveryModel: { type: String, enum: ["flat", "zones", "quote"], default: "flat" },
+        flatDeliveryFee: { type: Number, default: 0 }, // used when deliveryModel === "flat"
         deliveryZones: [
             {
                 name: { type: String, default: '' },

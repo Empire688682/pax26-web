@@ -294,11 +294,11 @@ export async function handlePaymentReceipt({
     // ── Priority 1: Find a storefront-confirmed "awaiting_payment" order ──────
     // This is the clean path — order was created on the storefront with full
     // structured data (items, variants, delivery address). No parsing needed.
+    // Match by phone OR by empty phone (order not yet linked — phone set in handleIncomingWhatsapp)
     const awaitingOrder = await SellerOrderModel.findOne({
         sellerId,
         customerPhone: normalizedPhone,
         status: "awaiting_payment",
-        orderSource: "storefront",
     }).sort({ createdAt: -1 });
 
     if (awaitingOrder) {
@@ -452,7 +452,13 @@ export async function handlePaymentReceipt({
 
     // A message qualifies as a storefront template if it has ≥1 priced items AND
     // contains typical template signals
-    const isStorefrontTemplate = multiOrderFromCurrentMsg.items.length > 0 && (
+    // The new storefront checkout sends: "Hi! I've confirmed my order #CODE on [store]..."
+    // This message contains 💰 which would falsely trigger STOREFRONT_TEMPLATE_SIGNAL.
+    // Explicitly exclude it — if it contains "confirmed my order #" it's already handled
+    // by the awaiting_payment priority above, or falls through to AI response.
+    const isNewOrderConfirmationMessage = /confirmed\s+my\s+order\s+#[A-Z0-9]{6,10}/i.test(sourceText);
+
+    const isStorefrontTemplate = !isNewOrderConfirmationMessage && multiOrderFromCurrentMsg.items.length > 0 && (
         hasNewStorefrontOrder ||
         STOREFRONT_TEMPLATE_SIGNAL.test(sourceText)
     );

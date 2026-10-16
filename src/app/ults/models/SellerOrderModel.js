@@ -67,8 +67,8 @@ const SellerOrderSchema = new mongoose.Schema({
     }],
 
     deliveryLocation: String,
-
     deliveryAddress: String,
+    selectedZoneName: String,   // name of the auto-detected delivery zone (zones model)
 
     fulfillmentMethod: {
         type: String,
