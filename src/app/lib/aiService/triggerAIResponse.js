@@ -224,6 +224,7 @@ async function sendReply({ phoneNumberId, to, imageUrls, cleanText }) {
             .replace(/__(.*?)__/g, "$1")         // __underline__
             .replace(/~~(.*?)~~/g, "$1")         // ~~strikethrough~~
             .replace(/`(.*?)`/g, "$1")           // `code`
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$2") // [text](url) → url
             .trim();
 
         try {
@@ -645,10 +646,14 @@ export const triggerAIResponse = async ({
         // Strip markdown — WhatsApp renders it as literal characters
         cleanText = (cleanText || "")
             .replace(/\*\*(.*?)\*\*/g, "$1")
-            .replace(/\*(.*?)\*/g, "$1")
             .replace(/__(.*?)__/g, "$1")
             .replace(/~~(.*?)~~/g, "$1")
             .replace(/`(.*?)`/g, "$1")
+            // Convert Markdown links [text](url) → just the URL
+            // WhatsApp auto-previews plain URLs; the [text] label is noise
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$2")
+            // Remove any remaining orphaned [text] fragments after link extraction
+            .replace(/\[([^\]]+)\]\s*$/gm, "$1")
             .trim();
 
         // ── Validation Safeguard: Ensure image URL belongs to active seller catalogue ──
