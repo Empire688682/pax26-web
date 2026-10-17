@@ -419,10 +419,16 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
 
               {product.description && <p style={{ margin: 0, fontSize: "14px", color: t.textSecondary, lineHeight: 1.65 }}>{product.description}</p>}
 
-              {/* Variants */}
               {product.variants?.length > 0 && (
                 <div id="product-variants" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  {product.variants.map((variant, vi) => (
+                  {product.variants.map((variant, vi) => {
+                    // Only treat individual options as out-of-stock if the variant group
+                    // actually uses per-option stock tracking (i.e. at least one option has stock > 0).
+                    // If ALL options have stock === 0 (default), it means stock isn't tracked per-option
+                    // and all options should be selectable.
+                    const variantTracksStock = (variant.options || []).some(o => o.stock > 0);
+
+                    return (
                     <div key={vi}>
                       <p style={{ margin: "0 0 8px", fontSize: "13px", fontWeight: 800, color: t.textPrimary }}>
                         {variant.label}
@@ -432,21 +438,38 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                         {variant.options?.map((opt, oi) => {
                           const isSelected = selectedVariants[variant.label] === opt.value;
+                          // Only disable if the variant group tracks per-option stock AND this option is out
+                          const isUnavailable = variantTracksStock && opt.stock === 0;
                           return (
-                            <button key={oi} onClick={() => {
-                              if (opt.stock === 0) return;
-                              setSelectedVariants(v => ({ ...v, [variant.label]: opt.value }));
-                              setVariantError(""); // clear error when user makes a selection
-                            }} disabled={opt.stock === 0}
-                              style={{ padding: "8px 16px", borderRadius: "8px", border: isSelected ? `2px solid ${t.accent}` : `1px solid ${t.border}`, background: isSelected ? t.accent : t.card, color: isSelected ? t.accentText : opt.stock === 0 ? t.textSecondary : t.textPrimary, fontSize: "12px", fontWeight: 800, cursor: opt.stock === 0 ? "not-allowed" : "pointer", textDecoration: opt.stock === 0 ? "line-through" : "none", transition: "all 0.15s" }}>
-                              {opt.value}{opt.priceAdjustment > 0 && <span style={{ fontSize: "10px", marginLeft: "4px", opacity: 0.8 }}>+{formatPrice(opt.priceAdjustment, currency)}</span>}
+                            <button key={oi}
+                              onClick={() => {
+                                if (isUnavailable) return;
+                                setSelectedVariants(v => ({ ...v, [variant.label]: opt.value }));
+                                setVariantError("");
+                              }}
+                              disabled={isUnavailable}
+                              style={{
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                                border: isSelected ? `2px solid ${t.accent}` : `1px solid ${t.border}`,
+                                background: isSelected ? t.accent : t.card,
+                                color: isSelected ? t.accentText : isUnavailable ? t.textSecondary : t.textPrimary,
+                                fontSize: "12px",
+                                fontWeight: 800,
+                                cursor: isUnavailable ? "not-allowed" : "pointer",
+                                textDecoration: isUnavailable ? "line-through" : "none",
+                                transition: "all 0.15s",
+                              }}>
+                              {opt.value}
+                              {opt.priceAdjustment > 0 && <span style={{ fontSize: "10px", marginLeft: "4px", opacity: 0.8 }}>+{formatPrice(opt.priceAdjustment, currency)}</span>}
+                              {isUnavailable && <span style={{ fontSize: "9px", marginLeft: "4px", opacity: 0.7 }}>Out</span>}
                             </button>
                           );
                         })}
                       </div>
                     </div>
-                  ))}
-                  {/* Variant error message */}
+                    );
+                  })}
                   {variantError && (
                     <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#ef4444", padding: "8px 12px", background: "#fef2f2", borderRadius: "8px", border: "1px solid #fecaca" }}>
                       ⚠️ {variantError}
@@ -535,20 +558,11 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                         )}
                       </div>
                     )}
-
-                    {!isOutOfStock && (
-                      <Link
-                        href={`/store/${slug}`}
-                        style={{ flex: "1.2 1 180px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "15px 20px", borderRadius: "14px", background: t.accent, color: t.accentText, fontWeight: 900, fontSize: "15px", textDecoration: "none", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}
-                      >
-                        🛒 {cartState.totalQuantity > 0 ? `View Cart & Order (${cartState.totalQuantity})` : "Add to Cart & Order"}
-                      </Link>
-                    )}
                   </div>
 
                   {cartState.totalQuantity > 0 && (
                     <Link href={`/store/${slug}`} style={{ fontSize: "13px", fontWeight: 800, color: t.accent, textAlign: "center", textDecoration: "none", padding: "6px" }}>
-                      🛒 View Storefront Cart ({cartState.totalQuantity} items — {formatPrice(cartState.totalPrice, currency)}) →
+                      🛒 View Cart ({cartState.totalQuantity} items — {formatPrice(cartState.totalPrice, currency)}) →
                     </Link>
                   )}
                 </div>

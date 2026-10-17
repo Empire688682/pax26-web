@@ -780,41 +780,46 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
               <button onClick={() => setShowVariantPicker(false)} style={{ background: t.pageBg, border: `1px solid ${t.border}`, borderRadius: "8px", width: "32px", height: "32px", cursor: "pointer", color: t.textSecondary, display: "flex", alignItems: "center", justifyContent: "center" }}><XIcon /></button>
             </div>
 
-            {product.variants.map(variant => (
+            {product.variants.map(variant => {
+              // Only disable options when the variant group actually tracks per-option stock
+              const variantTracksStock = (variant.options || []).some(o => o.stock > 0);
+
+              return (
               <div key={variant.label} style={{ marginBottom: "16px" }}>
                 <p style={{ margin: "0 0 8px", fontSize: "11px", fontWeight: 800, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>{variant.label}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                   {variant.options.map(opt => {
                     const isSelected = selectedVariants[variant.label] === opt.value;
-                    const isOutOfStock = opt.stock === 0;
+                    const isUnavailable = variantTracksStock && opt.stock === 0;
                     return (
                       <button
                         key={opt.value}
-                        disabled={isOutOfStock}
+                        disabled={isUnavailable}
                         onClick={() => setSelectedVariants(prev => ({ ...prev, [variant.label]: opt.value }))}
                         style={{
                           padding: "7px 14px",
                           borderRadius: "8px",
                           border: isSelected ? `2px solid ${t.accent}` : `1px solid ${t.border}`,
                           background: isSelected ? `${t.accent}18` : t.pageBg,
-                          color: isOutOfStock ? t.textSecondary : t.textPrimary,
+                          color: isUnavailable ? t.textSecondary : t.textPrimary,
                           fontWeight: isSelected ? 800 : 600,
                           fontSize: "13px",
-                          cursor: isOutOfStock ? "not-allowed" : "pointer",
-                          opacity: isOutOfStock ? 0.4 : 1,
+                          cursor: isUnavailable ? "not-allowed" : "pointer",
+                          opacity: isUnavailable ? 0.4 : 1,
                           transition: "all 0.15s",
                         }}
                       >
                         {opt.value}
                         {opt.priceAdjustment > 0 && <span style={{ fontSize: "10px", color: t.accent, marginLeft: "4px" }}>+{formatPrice(opt.priceAdjustment, currency)}</span>}
                         {opt.priceAdjustment < 0 && <span style={{ fontSize: "10px", color: "#22c55e", marginLeft: "4px" }}>{formatPrice(opt.priceAdjustment, currency)}</span>}
-                        {isOutOfStock && <span style={{ fontSize: "9px", color: t.textSecondary, marginLeft: "4px" }}>Out</span>}
+                        {isUnavailable && <span style={{ fontSize: "9px", color: t.textSecondary, marginLeft: "4px" }}>Out</span>}
                       </button>
                     );
                   })}
                 </div>
               </div>
-            ))}
+              );
+            })}
 
             <button
               onClick={handleVariantConfirm}
@@ -1047,18 +1052,16 @@ export default function StorefrontPage({
     setCurrentPage(1);
   };
 
-  // Fetch paginated products from DB API whenever page, category, or search changes
+  // Fetch products from DB API whenever search, category, or page changes.
+  // Standard ecommerce pattern: skip the initial mount when server already provided
+  // products and no filter is active. Trigger immediately on any user interaction.
   useEffect(() => {
-    // Skip the very first render only if we already have server-rendered products
-    // AND the user hasn't changed any filter yet. This prevents a redundant API call
-    // on mount but allows the first user-triggered search/filter to fire immediately.
-    if (isInitialMount) {
-      const userHasInteracted = search.trim() !== (initialSearch || "") || activeCategory !== "all" || currentPage !== 1;
-      if (!userHasInteracted) {
-        setIsInitialMount(false);
-        return;
-      }
-      setIsInitialMount(false);
+    const hasActiveFilter = search.trim() !== "" || activeCategory !== "all" || currentPage !== 1;
+
+    // If no filter is active and we already have server-rendered products, skip —
+    // avoids a redundant network call on page load.
+    if (!hasActiveFilter && initialProducts.length > 0 && !initialSearch) {
+      return;
     }
 
     const timer = setTimeout(async () => {
@@ -1087,7 +1090,8 @@ export default function StorefrontPage({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [currentPage, activeCategory, search, slug, isInitialMount]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, activeCategory, search, slug]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);

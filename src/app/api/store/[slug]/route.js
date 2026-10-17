@@ -75,11 +75,12 @@ export async function GET(req, { params }) {
     }
 
     if (q && q.trim()) {
-      const regex = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      const escapedQ = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(escapedQ, "i");
       filter.$or = [
         { name: regex },
         { category: regex },
-        { tags: { $elemMatch: regex } },
+        { tags: regex },          // direct regex on [String] array
         { description: regex },
       ];
     }
