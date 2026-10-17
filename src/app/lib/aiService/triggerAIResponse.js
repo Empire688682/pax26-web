@@ -475,37 +475,38 @@ export const triggerAIResponse = async ({
         let storefrontUrl = null;
         if (profileType === "seller" && businessProfile.slug) {
             // ── Intent-based storefront URL ──────────────────────────────
-            // Detect if the customer has a specific product/category in mind so
-            // the URL can pre-filter the storefront to exactly what they want.
-            // Strategy: match inboundText against the loaded product catalogue first
-            // (exact/partial name or category), then fall back to category keywords.
-            // A plain URL is used when no specific intent is detected.
+            // Scan both the current inbound message AND recent conversation history
+            // so the URL stays filtered even when the customer is replying to a
+            // follow-up question (e.g. "size 36" after already saying "timberland").
             let searchQuery = null;
 
-            if (products && products.length > 0 && inboundText) {
-                const normInbound = inboundText
+            if (products && products.length > 0) {
+                // Build a combined text from: current message + last 6 messages (customer + AI)
+                // This captures product intent even when the current message is just "size 36"
+                const historyText = (rawHistory || [])
+                    .slice(-6)
+                    .map(m => m.text || "")
+                    .join(" ");
+                const fullContextText = `${inboundText || ""} ${historyText}`;
+
+                const normContext = fullContextText
                     .toLowerCase()
                     .replace(/[''`´]/g, "'")
                     .replace(/[^a-z0-9'\s]/g, " ")
                     .replace(/\s+/g, " ")
                     .trim();
 
-                // 1. Try to match a product category first — category terms are shorter,
-                //    cleaner, and produce broader (safer) storefront filter results.
-                //    e.g. "boots" matches all boot products, not just one specific SKU.
+                // 1. Try to match a product category first — shorter, cleaner, broader results
                 const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
                 for (const cat of categories) {
                     const normCat = cat.toLowerCase().trim();
-                    if (normCat.length >= 3 && normInbound.includes(normCat)) {
+                    if (normCat.length >= 3 && normContext.includes(normCat)) {
                         searchQuery = cat;
                         break;
                     }
                 }
 
-                // 2. Only fall back to a specific product name if no category matched.
-                //    Strip parentheses and special chars so the URL stays clean and
-                //    the DB regex search is robust (e.g. "Timberland 6-Inch Boot" not
-                //    "Timberland 6-Inch Boot (Grade A)" which can break URL parsers).
+                // 2. Fall back to specific product name match from conversation history
                 if (!searchQuery) {
                     const sortedByLength = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
                     for (const prod of sortedByLength) {
@@ -516,10 +517,8 @@ export const triggerAIResponse = async ({
                             .replace(/[^a-z0-9'\s]/g, " ")
                             .replace(/\s+/g, " ")
                             .trim();
-                        // Require at least 4 chars to avoid single-word noise matches
-                        if (normName.length >= 4 && normInbound.includes(normName)) {
-                            // Strip parenthetical suffixes like "(Grade A)", "(Pack of 3)"
-                            // so the URL is clean and DB search still finds the product
+                        if (normName.length >= 4 && normContext.includes(normName)) {
+                            // Strip parenthetical suffixes like "(Grade A)" for a clean URL
                             searchQuery = prod.name.replace(/\s*\(.*?\)\s*/g, "").trim();
                             break;
                         }
@@ -528,6 +527,8 @@ export const triggerAIResponse = async ({
 
                 if (searchQuery) {
                     console.log(`🔍 Intent detected — storefront URL pre-filtered: "${searchQuery}"`);
+                } else {
+                    console.log(`🔍 No product intent detected — using plain storefront URL`);
                 }
             }
 

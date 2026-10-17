@@ -87,23 +87,22 @@ export async function POST(req, { params }) {
 
     const body = await req.json();
     const {
-      customerPhone,    // optional — extracted from WhatsApp when order arrives
+      customerPhone,
       customerName,
-      items,            // array of cart items with selectedVariants
-      deliveryAddress,  // full delivery address string
-      deliveryLocation, // city/area for fee calculation
+      items,
+      deliveryAddress,
+      deliveryLocation,
       fulfillmentMethod = "delivery",
       pickupDetails,
       deliveryFee = 0,
       selectedZoneName = "",
       deliveryZoneTimeframe = "",
-      sessionToken,     // optional — storefront session token to resolve customer phone
+      sessionToken,
     } = body;
 
-    // ── Resolve customer phone from session token if available ───────────────
-    // The storefront link sent to the customer includes ?session=TOKEN which
-    // encodes their WhatsApp phone. We verify and extract it here so the
-    // customer never has to type their phone number manually.
+    console.log(`[checkout] 📦 New checkout request | store=${slug} | items=${items?.length ?? 0} | fulfillment=${fulfillmentMethod} | deliveryFee=${deliveryFee} | sessionToken=${sessionToken ? "present" : "none"}`);
+
+    // ── Resolve customer phone from session token ─────────────────────────────
     let resolvedPhone = customerPhone || "";
     if (!resolvedPhone && sessionToken) {
       try {
@@ -111,13 +110,14 @@ export async function POST(req, { params }) {
         if (sessionPayload?.customerPhone) {
           resolvedPhone = sessionPayload.customerPhone;
           console.log(`[checkout] ✅ Phone resolved from session token: ${resolvedPhone}`);
+        } else {
+          console.log(`[checkout] ⚠️ Session token verified but no customerPhone in payload`);
         }
       } catch (tokenErr) {
-        console.warn("[checkout] Session token verification failed (non-fatal):", tokenErr.message);
+        console.warn(`[checkout] ⚠️ Session token verification failed: ${tokenErr.message}`);
       }
     }
 
-    // If still no phone from token, try to look up by DB session record
     if (!resolvedPhone && sessionToken) {
       try {
         const dbSession = await StorefrontSessionModel.findOne({
@@ -127,25 +127,35 @@ export async function POST(req, { params }) {
         if (dbSession?.customerPhone) {
           resolvedPhone = dbSession.customerPhone;
           console.log(`[checkout] ✅ Phone resolved from DB session: ${resolvedPhone}`);
+        } else {
+          console.log(`[checkout] ⚠️ DB session found but no customerPhone stored`);
         }
       } catch (dbErr) {
-        console.warn("[checkout] DB session lookup failed (non-fatal):", dbErr.message);
+        console.warn(`[checkout] ⚠️ DB session lookup failed: ${dbErr.message}`);
       }
+    }
+
+    if (!resolvedPhone) {
+      console.log(`[checkout] ℹ️ No phone resolved — order will be linked when WhatsApp message arrives`);
     }
 
     // ── Basic validation ──────────────────────────────────────────────────────
     if (!items || !Array.isArray(items) || items.length === 0) {
+      console.warn(`[checkout] ❌ Validation failed: cart is empty`);
       return NextResponse.json({ success: false, message: "Cart is empty" }, { status: 400, headers: publicHeaders() });
     }
     if (fulfillmentMethod === "delivery" && !deliveryAddress?.trim()) {
+      console.warn(`[checkout] ❌ Validation failed: delivery address missing`);
       return NextResponse.json({ success: false, message: "Delivery address is required" }, { status: 400, headers: publicHeaders() });
     }
 
     // ── Load seller profile ───────────────────────────────────────────────────
     const profile = await SellerProfileModel.findOne({ slug: slug.toLowerCase().trim() }).lean();
     if (!profile) {
+      console.warn(`[checkout] ❌ Store not found: slug=${slug}`);
       return NextResponse.json({ success: false, message: "Store not found" }, { status: 404, headers: publicHeaders() });
     }
+    console.log(`[checkout] ✅ Store loaded: ${profile.businessName} (${profile._id})`);
 
     // ── Validate & enrich each cart item against the live product catalogue ───
     const productIds = items.map(i => i.productId).filter(Boolean);
@@ -155,19 +165,20 @@ export async function POST(req, { params }) {
       isAvailable: true,
     }).lean();
 
+    console.log(`[checkout] 🔍 Product lookup: requested=${productIds.length} | found=${dbProducts.length}`);
     const productMap = Object.fromEntries(dbProducts.map(p => [p._id.toString(), p]));
 
     const validatedItems = [];
     for (const item of items) {
       const dbProd = productMap[item.productId];
       if (!dbProd) {
+        console.warn(`[checkout] ❌ Product unavailable: "${item.name || item.productId}"`);
         return NextResponse.json({
           success: false,
           message: `Product "${item.name || item.productId}" is no longer available`,
         }, { status: 400, headers: publicHeaders() });
       }
 
-      // Calculate authoritative price from DB (not client-submitted price)
       const basePrice = dbProd.discountPrice || dbProd.price;
       const selectedVariants = Array.isArray(item.selectedVariants) ? item.selectedVariants : [];
       const variantPriceAdj = selectedVariants.reduce((sum, sel) => {
@@ -177,6 +188,11 @@ export async function POST(req, { params }) {
       }, 0);
       const unitPrice = basePrice + variantPriceAdj;
       const quantity = Math.max(1, parseInt(item.quantity) || 1);
+
+      const variantSummary = selectedVariants.length > 0
+        ? ` [${selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
+        : "";
+      console.log(`[checkout]   ✔ Item: "${dbProd.name}"${variantSummary} | qty=${quantity} | unitPrice=₦${unitPrice.toLocaleString()}`);
 
       validatedItems.push({
         productId: dbProd._id,
@@ -188,16 +204,20 @@ export async function POST(req, { params }) {
       });
     }
 
-    // ── Calculate total from validated items ──────────────────────────────────
+    // ── Calculate totals ──────────────────────────────────────────────────────
     const itemsSubtotal = validatedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const deliveryFeeNum = Number(deliveryFee) || 0;
     const totalPrice = itemsSubtotal + deliveryFeeNum;
 
-    // ── Normalise phone (optional — will be set when WhatsApp message arrives) ─
+    console.log(`[checkout] 💰 Totals | subtotal=₦${itemsSubtotal.toLocaleString()} | deliveryFee=₦${deliveryFeeNum.toLocaleString()} | total=₦${totalPrice.toLocaleString()} | zone="${selectedZoneName || "none"}"`);
+
+    // ── Normalise phone ───────────────────────────────────────────────────────
     const normPhone = resolvedPhone ? resolvedPhone.replace(/\D/g, "") : "";
     const formattedPhone = normPhone
       ? (normPhone.startsWith("+") ? normPhone : `+${normPhone}`)
-      : ""; // empty until linked from WhatsApp
+      : "";
+
+    console.log(`[checkout] 📱 Customer phone: "${formattedPhone || "(not resolved yet)"}" | address="${deliveryAddress || "(pickup)"}"`);
 
     // ── Generate order code ───────────────────────────────────────────────────
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -205,19 +225,19 @@ export async function POST(req, { params }) {
     for (let i = 0; i < 8; i++) orderCode += chars.charAt(Math.floor(Math.random() * chars.length));
 
     // ── Cancel any existing awaiting_payment order for this phone+seller ─────
-    // Only cancel if we have a phone — otherwise we can't safely match
     if (formattedPhone) {
-      await SellerOrderModel.updateMany(
-        {
-          sellerId: profile._id,
-          customerPhone: formattedPhone,
-          status: "awaiting_payment",
-        },
+      const cancelResult = await SellerOrderModel.updateMany(
+        { sellerId: profile._id, customerPhone: formattedPhone, status: "awaiting_payment" },
         { $set: { status: "cancelled" } }
       );
+      if (cancelResult.modifiedCount > 0) {
+        console.log(`[checkout] 🗑️ Cancelled ${cancelResult.modifiedCount} existing awaiting_payment order(s) for ${formattedPhone}`);
+      }
     }
 
-    // ── Create the new order ──────────────────────────────────────────────────
+    // ── Create the order ──────────────────────────────────────────────────────
+    console.log(`[checkout] 💾 Creating order #${orderCode} in DB...`);
+
     const order = await SellerOrderModel.create({
       sellerId: profile._id,
       productId: validatedItems[0]?.productId || null,
@@ -237,16 +257,15 @@ export async function POST(req, { params }) {
       orderSource: "storefront",
     });
 
-    // ── Load payment details to return to storefront ──────────────────────────
-    // We load the user record to get payment account details
-    const user = await UserModel.findById(profile.userId)
-      .select("paxAI.plan")
-      .lean();
+    console.log(`[checkout] ✅ Order created | orderCode=${order.orderCode} | _id=${order._id} | phone="${formattedPhone || "pending"}" | items=${validatedItems.length} | total=₦${totalPrice.toLocaleString()} | store=${profile.businessName}`);
 
+    // ── Load payment details ──────────────────────────────────────────────────
     const activePayments = (profile.paymentDetails || []).filter(p => p.active !== false);
     const primaryPayment = activePayments[0] || null;
 
-    console.log(`[checkout] ✅ Order ${orderCode} created for ${formattedPhone} | ${validatedItems.length} items | ₦${totalPrice.toLocaleString()} | seller=${profile._id}`);
+    if (!primaryPayment) {
+      console.warn(`[checkout] ⚠️ No active payment accounts configured for seller ${profile._id}`);
+    }
 
     return NextResponse.json({
       success: true,
@@ -266,7 +285,7 @@ export async function POST(req, { params }) {
     }, { status: 201, headers: publicHeaders() });
 
   } catch (err) {
-    console.error("POST /checkout error:", err.message, err.stack);
+    console.error(`[checkout] 💥 POST /checkout error: ${err.message}`, err.stack);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500, headers: publicHeaders() });
   }
 }
