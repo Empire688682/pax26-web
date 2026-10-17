@@ -1244,13 +1244,7 @@ export default function StorefrontPage({
               </div>
             </div>
 
-            {/* Desktop Hero CTA */}
-            {store.whatsappHref && (
-              <a href={store.whatsappHref} onClick={(e) => openWhatsApp(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" className="sf-desktop-chat-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "12px", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0, boxShadow: "0 2px 10px rgba(37,211,102,0.3)" }}>
-                <WhatsAppIcon /> Order on WhatsApp
-              </a>
-            )}
+            {/* Desktop Hero CTA — removed direct WhatsApp order button, cart is the order path */}
           </div>
 
           {/* Search bar + category selector */}
@@ -1432,7 +1426,6 @@ export default function StorefrontPage({
               <h3 style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary, margin: "0 0 8px" }}>{search ? "No products match your search" : "No products yet"}</h3>
               <p style={{ fontSize: "13px", color: t.textSecondary, margin: "0 0 24px" }}>{search ? "Try searching for a different item or select another category." : "This store hasn't published any products yet."}</p>
               {search && <button onClick={() => { handleSearchChange(""); handleCategoryChange("all"); }} style={{ padding: "10px 24px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 800, border: "none", cursor: "pointer", fontSize: "13px" }}>Clear search</button>}
-              {!search && store.whatsappHref && <a href={store.whatsappHref} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 24px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, textDecoration: "none", fontSize: "13px" }}><WhatsAppIcon /> Ask on WhatsApp</a>}
             </div>
           )}
         </main>

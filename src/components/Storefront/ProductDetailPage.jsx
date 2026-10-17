@@ -288,10 +288,9 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                 <span style={{ fontSize: "16px", fontWeight: 800, color: t.textPrimary, letterSpacing: "-0.01em" }}>{store.businessName}</span>
               </Link>
               {store.whatsappHref && (
-                <button onClick={handleBuyClick} className="sf-desktop-chat-btn"
-                  style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "#25d366", color: "#fff", fontWeight: 800, fontSize: "12px", border: "none", cursor: "pointer", boxShadow: "0 2px 10px rgba(37,211,102,0.3)" }}>
-                  <WhatsAppIcon /> Chat & Buy
-                </button>
+                <Link href={storeHref} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 800, fontSize: "12px", textDecoration: "none", boxShadow: "0 2px 10px rgba(0,0,0,0.15)" }}>
+                  🛒 Cart & Order
+                </Link>
               )}
             </div>
             {/* Compact Breadcrumb CTA */}
@@ -481,10 +480,14 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                       </div>
                     )}
 
-                    <button onClick={handleBuyClick} disabled={isOutOfStock}
-                      style={{ flex: "1.2 1 180px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "15px 20px", borderRadius: "14px", background: isOutOfStock ? t.border : "#25d366", color: isOutOfStock ? t.textSecondary : "#fff", fontWeight: 900, fontSize: "15px", border: "none", cursor: isOutOfStock ? "not-allowed" : "pointer", boxShadow: isOutOfStock ? "none" : "0 6px 20px rgba(37,211,102,0.35)" }}>
-                      <WhatsAppIcon />{isOutOfStock ? "Out of Stock" : "Buy on WhatsApp"}
-                    </button>
+                    {!isOutOfStock && (
+                      <Link
+                        href={`/store/${slug}`}
+                        style={{ flex: "1.2 1 180px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "15px 20px", borderRadius: "14px", background: t.accent, color: t.accentText, fontWeight: 900, fontSize: "15px", textDecoration: "none", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}
+                      >
+                        🛒 {cartState.totalQuantity > 0 ? `View Cart & Order (${cartState.totalQuantity})` : "Add to Cart & Order"}
+                      </Link>
+                    )}
                   </div>
 
                   {cartState.totalQuantity > 0 && (
@@ -548,12 +551,12 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
             )}
           </Link>
 
-          {/* WhatsApp Chat Tab */}
+          {/* Cart Tab — links back to storefront to checkout */}
           {store.whatsappHref && (
-            <button onClick={handleBuyClick} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: "#25d366", background: "none", border: "none", cursor: "pointer", fontSize: "10px", fontWeight: 800 }}>
-              <WhatsAppIcon />
-              <span>Chat & Buy</span>
-            </button>
+            <Link href={storeHref} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: t.accent, textDecoration: "none", fontSize: "10px", fontWeight: 800 }}>
+              🛒
+              <span>Cart & Order</span>
+            </Link>
           )}
         </div>
 
