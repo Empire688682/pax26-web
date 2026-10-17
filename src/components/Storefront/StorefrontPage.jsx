@@ -305,7 +305,8 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // customerPhone intentionally omitted — extracted from WhatsApp when order arrives
+          // customerPhone intentionally omitted — resolved from session token
+          sessionToken: sessionToken || null,  // used to look up customer phone
           items: cart.map(item => ({
             productId: item.productId,
             name: item.name,

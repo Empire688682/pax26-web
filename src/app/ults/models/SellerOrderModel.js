@@ -14,7 +14,9 @@ const SellerOrderSchema = new mongoose.Schema({
 
     customerPhone: {
         type: String,
-        required: true,
+        // Not required at creation — populated when customer sends WhatsApp confirmation
+        // or resolved from StorefrontSession token at checkout time
+        default: "",
     },
 
     customerName: String,

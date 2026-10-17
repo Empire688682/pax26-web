@@ -21,6 +21,8 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
 import SellerOrderModel from "@/app/ults/models/SellerOrderModel";
 import UserModel from "@/app/ults/models/UserModel";
+import StorefrontSessionModel from "@/app/ults/models/StorefrontSessionModel";
+import { verifySessionToken } from "@/app/lib/store/signSession";
 
 const publicHeaders = () => ({
   "Access-Control-Allow-Origin": "*",
@@ -95,7 +97,41 @@ export async function POST(req, { params }) {
       deliveryFee = 0,
       selectedZoneName = "",
       deliveryZoneTimeframe = "",
+      sessionToken,     // optional — storefront session token to resolve customer phone
     } = body;
+
+    // ── Resolve customer phone from session token if available ───────────────
+    // The storefront link sent to the customer includes ?session=TOKEN which
+    // encodes their WhatsApp phone. We verify and extract it here so the
+    // customer never has to type their phone number manually.
+    let resolvedPhone = customerPhone || "";
+    if (!resolvedPhone && sessionToken) {
+      try {
+        const sessionPayload = verifySessionToken(sessionToken);
+        if (sessionPayload?.customerPhone) {
+          resolvedPhone = sessionPayload.customerPhone;
+          console.log(`[checkout] ✅ Phone resolved from session token: ${resolvedPhone}`);
+        }
+      } catch (tokenErr) {
+        console.warn("[checkout] Session token verification failed (non-fatal):", tokenErr.message);
+      }
+    }
+
+    // If still no phone from token, try to look up by DB session record
+    if (!resolvedPhone && sessionToken) {
+      try {
+        const dbSession = await StorefrontSessionModel.findOne({
+          token: sessionToken,
+          storeSlug: slug.toLowerCase().trim(),
+        }).lean();
+        if (dbSession?.customerPhone) {
+          resolvedPhone = dbSession.customerPhone;
+          console.log(`[checkout] ✅ Phone resolved from DB session: ${resolvedPhone}`);
+        }
+      } catch (dbErr) {
+        console.warn("[checkout] DB session lookup failed (non-fatal):", dbErr.message);
+      }
+    }
 
     // ── Basic validation ──────────────────────────────────────────────────────
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -158,7 +194,7 @@ export async function POST(req, { params }) {
     const totalPrice = itemsSubtotal + deliveryFeeNum;
 
     // ── Normalise phone (optional — will be set when WhatsApp message arrives) ─
-    const normPhone = customerPhone ? customerPhone.replace(/\D/g, "") : "";
+    const normPhone = resolvedPhone ? resolvedPhone.replace(/\D/g, "") : "";
     const formattedPhone = normPhone
       ? (normPhone.startsWith("+") ? normPhone : `+${normPhone}`)
       : ""; // empty until linked from WhatsApp
