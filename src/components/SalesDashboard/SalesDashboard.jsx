@@ -529,13 +529,19 @@ export default function SalesDashboard() {
                         <td colSpan="6" className="text-center py-8" style={{ color: pax26?.textSecondary }}>No sales orders recorded</td>
                       </tr>
                     ) : (
-                      recentOrders.map(order => (
+                      recentOrders.map(order => {
+                        const isExpanded = selectedOrder?._id === order._id && selectedOrder?._expandedSummary;
+                        const deliveryFeeVal = Number(order.deliveryFee) || 0;
+                        const totalVal = Number(order.totalPrice) || 0;
+                        const subtotalVal = deliveryFeeVal > 0 ? totalVal - deliveryFeeVal : totalVal;
+
+                        return (
+                        <React.Fragment key={order._id}>
                         <tr
-                          key={order._id}
                           className="sd-table-row"
                           style={{ "--sd-row-hover": rowHoverBg }}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-2 mb-0.5">
                               <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
                               {order.orderCode && (
@@ -543,12 +549,31 @@ export default function SalesDashboard() {
                                   #{order.orderCode}
                                 </span>
                               )}
+                              {order.orderSource === "storefront" && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
+                              )}
                             </div>
-                            <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>{order.customerPhone}</p>
+                            {/* Clickable phone → opens inbox for this customer */}
+                            {order.customerPhone ? (
+                              <button
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                className="text-[10px] font-semibold hover:underline text-left"
+                                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                                title="Open WhatsApp conversation"
+                              >
+                                💬 {order.customerPhone}
+                              </button>
+                            ) : (
+                              <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>No phone yet</p>
+                            )}
                             {order.items?.length > 0 && (
-                              <p className="text-[9px] font-semibold text-emerald-400 mt-0.5 truncate max-w-xs">
-                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} ({order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")})
-                              </p>
+                              <button
+                                onClick={() => setSelectedOrder(isExpanded ? null : { ...order, _expandedSummary: true })}
+                                className="text-[9px] font-semibold text-emerald-400 mt-0.5 flex items-center gap-1 hover:text-emerald-300 transition-colors"
+                                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                              >
+                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} — {isExpanded ? "▲ Hide" : "▼ View order"}
+                              </button>
                             )}
                           </td>
                           <td className="px-6 py-4 font-bold sd-mono whitespace-nowrap" style={{ color: pax26?.textPrimary }}>
@@ -635,7 +660,95 @@ export default function SalesDashboard() {
                             </div>
                           </td>
                         </tr>
-                      ))
+
+                        {/* ── Expandable Order Summary Row ── */}
+                        {isExpanded && (
+                          <tr style={{ background: pax26?.bg === "#0f172a" ? "rgba(99,102,241,0.04)" : "rgba(99,102,241,0.03)" }}>
+                            <td colSpan="6" className="px-6 pb-5 pt-0">
+                              <div style={{ border: `1px solid rgba(99,102,241,0.2)`, borderRadius: "14px", padding: "16px", marginTop: "4px" }}>
+
+                                {/* Inbox warning banner */}
+                                <div style={{ background: "rgba(234,179,8,0.1)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: "10px", padding: "10px 14px", marginBottom: "14px", display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                                  <AlertCircle size={14} style={{ color: "#eab308", flexShrink: 0, marginTop: "1px" }} />
+                                  <div>
+                                    <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, color: "#eab308" }}>Always verify in WhatsApp Inbox</p>
+                                    <p style={{ margin: "2px 0 0", fontSize: "10px", color: pax26?.textSecondary, lineHeight: 1.5 }}>
+                                      The order summary below comes from the storefront database. While highly accurate, always cross-check with the customer&apos;s original message in the WhatsApp Inbox — it is the 100% source of truth.{" "}
+                                      {order.customerPhone && (
+                                        <button
+                                          onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                          style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1", fontWeight: 700, fontSize: "10px", padding: 0, textDecoration: "underline" }}
+                                        >
+                                          Open inbox for {order.customerPhone} →
+                                        </button>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                                  {/* Items */}
+                                  <div>
+                                    <p style={{ margin: "0 0 8px", fontSize: "10px", fontWeight: 800, color: pax26?.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>Items Ordered</p>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                      {(order.items || []).map((item, idx) => {
+                                        const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+                                        const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(", ");
+                                        return (
+                                          <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "8px", padding: "8px 10px", borderRadius: "8px", background: pax26?.bg === "#0f172a" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)" }}>
+                                            {item.imageUrl && (
+                                              <img src={item.imageUrl} alt={item.name} style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }} />
+                                            )}
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                              <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: pax26?.textPrimary }}>{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</p>
+                                              {variantStr && <p style={{ margin: "1px 0 0", fontSize: "9px", color: "#6366f1", fontWeight: 600 }}>{variantStr}</p>}
+                                            </div>
+                                            <span style={{ fontSize: "11px", fontWeight: 700, color: pax26?.textPrimary, whiteSpace: "nowrap" }}>₦{lineTotal.toLocaleString()}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  {/* Order details */}
+                                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                    <div>
+                                      <p style={{ margin: "0 0 8px", fontSize: "10px", fontWeight: 800, color: pax26?.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>Order Details</p>
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                                        {[
+                                          { label: "Products Subtotal", value: `₦${subtotalVal.toLocaleString()}` },
+                                          deliveryFeeVal > 0 && { label: "Delivery Fee", value: `₦${deliveryFeeVal.toLocaleString()}` },
+                                          order.selectedZoneName && { label: "Delivery Zone", value: order.selectedZoneName },
+                                          { label: "Grand Total", value: `₦${totalVal.toLocaleString()}`, bold: true },
+                                          order.deliveryAddress && { label: "Address", value: order.deliveryAddress || order.deliveryLocation },
+                                          order.fulfillmentMethod && { label: "Fulfillment", value: order.fulfillmentMethod === "pickup" ? "Store Pick-up" : "Home Delivery" },
+                                          order.orderSource && { label: "Order Source", value: order.orderSource === "storefront" ? "🛒 Storefront" : "💬 WhatsApp Chat" },
+                                        ].filter(Boolean).map((row, i) => (
+                                          <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "3px 0", borderBottom: `1px solid rgba(255,255,255,0.05)` }}>
+                                            <span style={{ color: pax26?.textSecondary }}>{row.label}</span>
+                                            <span style={{ fontWeight: row.bold ? 800 : 600, color: row.bold ? "#22c55e" : pax26?.textPrimary }}>{row.value}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {order.customerPhone && (
+                                      <button
+                                        onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", borderRadius: "8px", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", color: "#818cf8", fontSize: "11px", fontWeight: 700, cursor: "pointer", border: "none" }}
+                                      >
+                                        💬 Open WhatsApp conversation →
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        </React.Fragment>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

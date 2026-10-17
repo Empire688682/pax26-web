@@ -7,6 +7,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useGlobalContext } from "../Context";
@@ -836,6 +837,7 @@ function InboxWhatsAppGate({ pax26, router }) {
 export default function WhatsAppInbox() {
   const { userData, fetchUser, pax26 } = useGlobalContext();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const isConnected = !!(userData?.whatsapp?.connected && userData?.whatsapp?.displayPhone);
 
@@ -1132,6 +1134,33 @@ export default function WhatsAppInbox() {
   }, [fetchConversations, fetchContacts, fetchMessages, selected, userData]);
 
   /* ─────────────────────────────────────────────
+     AUTO-OPEN CONVERSATION FROM URL PARAM
+     Triggered when navigating from Sales Analytics:
+     /dashboard/automations/whatsapp-inbox?phone=+234...
+  ───────────────────────────────────────────── */
+  useEffect(() => {
+    const phoneParam = searchParams?.get("phone");
+    if (!phoneParam || conversations.length === 0) return;
+
+    // Normalise the param phone for comparison
+    const normParam = phoneParam.replace(/\s/g, "").toLowerCase();
+
+    const match = conversations.find(c => {
+      const normConv = (c.phone || "").replace(/\s/g, "").toLowerCase();
+      return normConv === normParam;
+    });
+
+    if (match && (!selected || selected.phone !== match.phone)) {
+      setSelected(match);
+      setSidebarView("chats");
+      // On mobile, hide sidebar so the message thread is visible immediately
+      if (isMobile) setShowSidebar(false);
+    }
+  // Only re-run when conversations load or the URL param changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations, searchParams]);
+
+  /* ─────────────────────────────────────────────
      SELECT CHAT
   ───────────────────────────────────────────── */
   useEffect(() => {
@@ -1139,10 +1168,6 @@ export default function WhatsAppInbox() {
       fetchMessages(selected.phone);
       fetchContact(selected.phone);
       setIsAlertVisible(true);
-      requestAnimationFrame(() => {
-        const container = messagesContainerRef.current;
-        if (container) container.scrollTop = container.scrollHeight;
-      });
     }
   }, [selected, fetchMessages, fetchContact]);
 
@@ -1151,10 +1176,9 @@ export default function WhatsAppInbox() {
       requestAnimationFrame(() => {
         const container = messagesContainerRef.current;
         if (!container) return;
-        const wasEmpty =
-          container.scrollTop === 0 &&
-          container.scrollHeight > container.clientHeight;
-        scrollToBottom(wasEmpty, wasEmpty);
+        // Always scroll to bottom when a conversation is first opened or
+        // when new messages arrive — the user expects to see the latest message
+        container.scrollTop = container.scrollHeight;
       });
     }
   }, [messages]);

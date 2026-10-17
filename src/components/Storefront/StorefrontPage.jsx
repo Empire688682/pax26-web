@@ -1049,9 +1049,16 @@ export default function StorefrontPage({
 
   // Fetch paginated products from DB API whenever page, category, or search changes
   useEffect(() => {
+    // Skip the very first render only if we already have server-rendered products
+    // AND the user hasn't changed any filter yet. This prevents a redundant API call
+    // on mount but allows the first user-triggered search/filter to fire immediately.
     if (isInitialMount) {
+      const userHasInteracted = search.trim() !== (initialSearch || "") || activeCategory !== "all" || currentPage !== 1;
+      if (!userHasInteracted) {
+        setIsInitialMount(false);
+        return;
+      }
       setIsInitialMount(false);
-      return;
     }
 
     const timer = setTimeout(async () => {
