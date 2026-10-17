@@ -220,15 +220,42 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
   const [selectedVariants, setSelectedVariants] = useState({});
   const [imgError, setImgError] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [variantError, setVariantError] = useState(""); // shown when user tries to add without selecting all variants
 
   const currency = store.currency || "NGN";
-  const displayPrice = product.discountPrice || product.price;
+  const hasVariants = product.variants && product.variants.length > 0;
+
+  // Calculate effective price with variant adjustments
+  const baseDisplayPrice = product.discountPrice || product.price;
+  const variantPriceAdj = Object.entries(selectedVariants).reduce((sum, [label, value]) => {
+    const variantDef = (product.variants || []).find(v => v.label === label);
+    const optionDef = variantDef?.options?.find(o => o.value === value);
+    return sum + (optionDef?.priceAdjustment || 0);
+  }, 0);
+  const displayPrice = baseDisplayPrice + variantPriceAdj;
+
   const hasDiscount = !!(product.discountPrice && product.discountPrice < product.price);
   const discountPercent = hasDiscount ? Math.round(((product.price - product.discountPrice) / product.price) * 100) : 0;
   const isOutOfStock = product.stock === 0;
   const images = product.images || [];
 
-  const cartQuantity = cartState.cart.find(item => item.productId === product._id)?.quantity || 0;
+  // All variants must be selected before adding to cart
+  const allVariantsSelected = !hasVariants || product.variants.every(v => selectedVariants[v.label]);
+
+  // Build cartItemKey matching useCart logic so +/- operates the right line item
+  const variantKey = Object.entries(selectedVariants).length > 0
+    ? Object.entries(selectedVariants).map(([label, value]) => `${label}:${value}`).join("|")
+    : "";
+  const cartItemKey = `${product._id}__${variantKey}`;
+
+  // Find the specific cart line item for this product+variant combo
+  const cartItem = cartState.cart.find(item => item.cartItemKey === cartItemKey);
+  const cartQuantity = cartItem?.quantity || 0;
+
+  // Total quantity of this product in cart (across all variant combos) — for badge display
+  const totalProductQtyInCart = cartState.cart
+    .filter(item => item.productId === product._id)
+    .reduce((sum, item) => sum + item.quantity, 0);
 
   const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
 
@@ -254,6 +281,21 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
         setWaChooserModal({ visible: true, messengerUrl, businessUrl });
       });
     }
+  };
+
+  // Add to cart — validates variants first
+  const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    if (!allVariantsSelected) {
+      const missing = product.variants.find(v => !selectedVariants[v.label]);
+      setVariantError(`Please select a ${missing?.label || "variant"} to continue`);
+      // Scroll variant section into view
+      document.getElementById("product-variants")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setVariantError("");
+    const variantsArray = Object.entries(selectedVariants).map(([label, value]) => ({ label, value }));
+    cartState.addItem(product, 1, variantsArray);
   };
 
   const whatsappMessage = buildWhatsAppMessage(product, selectedVariants, currency, slug, sessionToken, "", "delivery", store);
@@ -379,15 +421,23 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
 
               {/* Variants */}
               {product.variants?.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div id="product-variants" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                   {product.variants.map((variant, vi) => (
                     <div key={vi}>
-                      <p style={{ margin: "0 0 8px", fontSize: "13px", fontWeight: 800, color: t.textPrimary }}>{variant.label}{selectedVariants[variant.label] && <span style={{ fontWeight: 600, color: t.textSecondary, marginLeft: "6px" }}>— {selectedVariants[variant.label]}</span>}</p>
+                      <p style={{ margin: "0 0 8px", fontSize: "13px", fontWeight: 800, color: t.textPrimary }}>
+                        {variant.label}
+                        {selectedVariants[variant.label] && <span style={{ fontWeight: 600, color: t.textSecondary, marginLeft: "6px" }}>— {selectedVariants[variant.label]}</span>}
+                        {!selectedVariants[variant.label] && <span style={{ fontWeight: 600, color: "#ef4444", marginLeft: "6px", fontSize: "11px" }}>* Required</span>}
+                      </p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                         {variant.options?.map((opt, oi) => {
                           const isSelected = selectedVariants[variant.label] === opt.value;
                           return (
-                            <button key={oi} onClick={() => opt.stock !== 0 && setSelectedVariants(v => ({ ...v, [variant.label]: opt.value }))} disabled={opt.stock === 0}
+                            <button key={oi} onClick={() => {
+                              if (opt.stock === 0) return;
+                              setSelectedVariants(v => ({ ...v, [variant.label]: opt.value }));
+                              setVariantError(""); // clear error when user makes a selection
+                            }} disabled={opt.stock === 0}
                               style={{ padding: "8px 16px", borderRadius: "8px", border: isSelected ? `2px solid ${t.accent}` : `1px solid ${t.border}`, background: isSelected ? t.accent : t.card, color: isSelected ? t.accentText : opt.stock === 0 ? t.textSecondary : t.textPrimary, fontSize: "12px", fontWeight: 800, cursor: opt.stock === 0 ? "not-allowed" : "pointer", textDecoration: opt.stock === 0 ? "line-through" : "none", transition: "all 0.15s" }}>
                               {opt.value}{opt.priceAdjustment > 0 && <span style={{ fontSize: "10px", marginLeft: "4px", opacity: 0.8 }}>+{formatPrice(opt.priceAdjustment, currency)}</span>}
                             </button>
@@ -396,6 +446,12 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                       </div>
                     </div>
                   ))}
+                  {/* Variant error message */}
+                  {variantError && (
+                    <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#ef4444", padding: "8px 12px", background: "#fef2f2", borderRadius: "8px", border: "1px solid #fecaca" }}>
+                      ⚠️ {variantError}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -464,17 +520,17 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: "14px", background: t.card, border: `2px solid ${t.accent}` }}>
                             <span style={{ fontSize: "13px", fontWeight: 800, color: t.textPrimary }}>In Cart:</span>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <button onClick={() => cartState.setItemQuantity(product._id, cartQuantity - 1)} style={{ width: "28px", height: "28px", borderRadius: "6px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textPrimary, cursor: "pointer", fontWeight: 900 }}>-</button>
+                              <button onClick={() => cartState.setItemQuantity(cartItemKey, cartQuantity - 1)} style={{ width: "28px", height: "28px", borderRadius: "6px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textPrimary, cursor: "pointer", fontWeight: 900 }}>-</button>
                               <span style={{ fontSize: "15px", fontWeight: 900, color: t.textPrimary }}>{cartQuantity}</span>
-                              <button onClick={() => cartState.setItemQuantity(product._id, cartQuantity + 1)} style={{ width: "28px", height: "28px", borderRadius: "6px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textPrimary, cursor: "pointer", fontWeight: 900 }}>+</button>
+                              <button onClick={() => cartState.setItemQuantity(cartItemKey, cartQuantity + 1)} style={{ width: "28px", height: "28px", borderRadius: "6px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textPrimary, cursor: "pointer", fontWeight: 900 }}>+</button>
                             </div>
                           </div>
                         ) : (
                           <button
-                            onClick={() => cartState.addItem(product, 1)}
-                            style={{ width: "100%", padding: "15px", borderRadius: "14px", background: t.accent, color: t.accentText, fontWeight: 900, fontSize: "15px", border: "none", cursor: "pointer", boxShadow: "0 4px 14px rgba(0,0,0,0.12)" }}
+                            onClick={handleAddToCart}
+                            style={{ width: "100%", padding: "15px", borderRadius: "14px", background: allVariantsSelected ? t.accent : t.pageBg, color: allVariantsSelected ? t.accentText : t.textSecondary, fontWeight: 900, fontSize: "15px", border: allVariantsSelected ? "none" : `2px dashed ${t.border}`, cursor: "pointer", boxShadow: allVariantsSelected ? "0 4px 14px rgba(0,0,0,0.12)" : "none", transition: "all 0.15s" }}
                           >
-                            + Add to Cart
+                            {hasVariants && !allVariantsSelected ? "Select options first" : "+ Add to Cart"}
                           </button>
                         )}
                       </div>
@@ -548,8 +604,7 @@ export default function ProductDetailPage({ store, product, allProducts, slug, i
               <span style={{ position: "absolute", top: "-4px", right: "6px", background: "#ef4444", color: "#fff", padding: "1px 5px", borderRadius: "999px", fontSize: "9px", fontWeight: 900 }}>
                 {cartState.totalQuantity}
               </span>
-            )}
-          </Link>
+            )}          </Link>
 
           {/* Cart Tab — links back to storefront to checkout */}
           {store.whatsappHref && (
