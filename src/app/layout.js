@@ -212,7 +212,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light">
           <ClientWrapper>
 
             {children}

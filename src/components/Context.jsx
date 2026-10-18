@@ -323,8 +323,8 @@ export const AppProvider = ({ children }) => {
      THEME / CSS VARIABLES
   =================================*/
 
-  // Initialize with a safe default so SSR doesn't mismatch
-  const [pax26, setPax26] = useState(() => buildPax26Theme("dark"));
+  // Initialize with 'light' so SSR matches the new defaultTheme and avoids a dark flash on hydration
+  const [pax26, setPax26] = useState(() => buildPax26Theme("light"));
 
   useEffect(() => {
     if (!theme) return; // wait for next-themes to resolve
