@@ -418,6 +418,11 @@ export default function SalesDashboard() {
                 ) : (
                   recentOrders.map(order => {
                     const statusBadge = getStatusBadgeStyle(order.status);
+                    const isMobileExpanded = selectedOrder?._id === order._id && selectedOrder?._expandedSummary;
+                    const deliveryFeeVal = Number(order.deliveryFee) || 0;
+                    const totalVal = Number(order.totalPrice) || 0;
+                    const subtotalVal = deliveryFeeVal > 0 ? totalVal - deliveryFeeVal : totalVal;
+
                     return (
                       <div key={order._id} className="p-4 space-y-3" style={{ background: pax26?.secondaryBg }}>
                         {/* Header Row: Customer & Status */}
@@ -432,8 +437,22 @@ export default function SalesDashboard() {
                                   #{order.orderCode}
                                 </span>
                               )}
+                              {order.orderSource === "storefront" && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
+                              )}
                             </div>
-                            <p className="text-xs mt-0.5" style={{ color: pax26?.textSecondary }}>{order.customerPhone}</p>
+                            {/* Clickable phone */}
+                            {order.customerPhone ? (
+                              <button
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                className="text-xs font-semibold mt-0.5 block"
+                                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+                              >
+                                💬 {order.customerPhone}
+                              </button>
+                            ) : (
+                              <p className="text-xs mt-0.5" style={{ color: pax26?.textSecondary }}>No phone yet</p>
+                            )}
                           </div>
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0"
                             style={{ background: statusBadge.bg, color: statusBadge.color }}>
@@ -441,21 +460,91 @@ export default function SalesDashboard() {
                           </span>
                         </div>
 
-                        {/* Items preview */}
+                        {/* Items preview + expand toggle */}
                         {order.items?.length > 0 && (
-                          <div className="text-xs p-2.5 rounded-xl border flex items-start gap-2" style={{ background: pax26?.bg, borderColor: pax26?.border }}>
-                            <Package size={14} className="mt-0.5 shrink-0 text-emerald-400" />
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-emerald-400 text-[11px]">
-                                {order.items.length} {order.items.length === 1 ? "item" : "items"}
-                              </p>
-                              <p className="text-[11px] truncate opacity-90" style={{ color: pax26?.textSecondary }}>
-                                {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
-                              </p>
-                            </div>
+                          <div>
+                            <button
+                              onClick={() => setSelectedOrder(isMobileExpanded ? null : { ...order, _expandedSummary: true })}
+                              className="w-full text-xs p-2.5 rounded-xl border flex items-center justify-between gap-2"
+                              style={{ background: pax26?.bg, borderColor: pax26?.border, cursor: "pointer" }}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Package size={14} className="shrink-0 text-emerald-400" />
+                                <div className="min-w-0 text-left">
+                                  <p className="font-semibold text-emerald-400 text-[11px]">
+                                    {order.items.length} {order.items.length === 1 ? "item" : "items"}
+                                  </p>
+                                  <p className="text-[10px] truncate" style={{ color: pax26?.textSecondary }}>
+                                    {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="text-emerald-400 text-[10px] font-bold shrink-0">{isMobileExpanded ? "▲ Hide" : "▼ Details"}</span>
+                            </button>
+
+                            {/* Expanded order summary */}
+                            {isMobileExpanded && (
+                              <div className="mt-2 rounded-xl overflow-hidden border" style={{ borderColor: "rgba(99,102,241,0.2)" }}>
+                                {/* Inbox warning */}
+                                <div className="flex items-start gap-2 p-3" style={{ background: "rgba(234,179,8,0.08)", borderBottom: "1px solid rgba(234,179,8,0.2)" }}>
+                                  <AlertCircle size={13} style={{ color: "#eab308", flexShrink: 0, marginTop: "1px" }} />
+                                  <p className="text-[10px] leading-relaxed" style={{ color: pax26?.textSecondary }}>
+                                    Always verify with the customer&apos;s original WhatsApp message — it&apos;s the 100% source of truth.{" "}
+                                    {order.customerPhone && (
+                                      <button
+                                        onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                        style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1", fontWeight: 700, fontSize: "10px", padding: 0 }}
+                                      >
+                                        Open inbox →
+                                      </button>
+                                    )}
+                                  </p>
+                                </div>
+
+                                {/* Item breakdown */}
+                                <div className="p-3 space-y-2" style={{ background: "rgba(99,102,241,0.03)" }}>
+                                  {order.items.map((item, idx) => {
+                                    const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+                                    const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(", ");
+                                    return (
+                                      <div key={idx} className="flex items-start gap-2 text-[11px]">
+                                        {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-8 h-8 rounded object-cover shrink-0" />}
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-700 truncate" style={{ color: pax26?.textPrimary }}>{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</p>
+                                          {variantStr && <p className="text-[9px]" style={{ color: "#6366f1" }}>{variantStr}</p>}
+                                        </div>
+                                        <span className="font-bold shrink-0" style={{ color: pax26?.textPrimary }}>₦{lineTotal.toLocaleString()}</span>
+                                      </div>
+                                    );
+                                  })}
+
+                                  <div className="pt-2 mt-1 border-t space-y-1" style={{ borderColor: pax26?.border }}>
+                                    <div className="flex justify-between text-[11px]">
+                                      <span style={{ color: pax26?.textSecondary }}>Subtotal</span>
+                                      <span style={{ color: pax26?.textPrimary }}>₦{subtotalVal.toLocaleString()}</span>
+                                    </div>
+                                    {deliveryFeeVal > 0 && (
+                                      <div className="flex justify-between text-[11px]">
+                                        <span style={{ color: pax26?.textSecondary }}>Delivery</span>
+                                        <span style={{ color: pax26?.textPrimary }}>₦{deliveryFeeVal.toLocaleString()}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between text-[11px] font-bold">
+                                      <span style={{ color: pax26?.textSecondary }}>Total</span>
+                                      <span style={{ color: "#22c55e" }}>₦{totalVal.toLocaleString()}</span>
+                                    </div>
+                                    {order.deliveryAddress && (
+                                      <div className="flex justify-between text-[10px]">
+                                        <span style={{ color: pax26?.textSecondary }}>Address</span>
+                                        <span className="text-right max-w-[55%]" style={{ color: pax26?.textPrimary }}>{order.deliveryAddress}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
-
                         {/* Price & Receipt Details */}
                         <div className="flex items-center justify-between gap-3 pt-1">
                           <div>
@@ -512,10 +601,10 @@ export default function SalesDashboard() {
 
               {/* DESKTOP TABLE VIEW (>= md) */}
               <div className="hidden md:block overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left text-xs border-collapse min-w-[700px]">
+                <table className="w-full text-left text-xs border-collapse min-w-[860px]">
                   <thead>
                     <tr style={{ background: pax26?.bg, borderBottom: `1px solid ${pax26?.border}` }}>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Customer</th>
+                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ minWidth: "220px" }}>Customer</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Total Price</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Receipt</th>
                       <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Status</th>
@@ -541,7 +630,7 @@ export default function SalesDashboard() {
                           className="sd-table-row"
                           style={{ "--sd-row-hover": rowHoverBg }}
                         >
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4" style={{ minWidth: "220px", verticalAlign: "top" }}>
                             <div className="flex items-center gap-2 mb-0.5">
                               <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
                               {order.orderCode && (

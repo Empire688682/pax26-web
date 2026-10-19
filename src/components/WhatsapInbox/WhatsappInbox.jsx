@@ -1137,10 +1137,15 @@ export default function WhatsAppInbox() {
      AUTO-OPEN CONVERSATION FROM URL PARAM
      Triggered when navigating from Sales Analytics:
      /dashboard/automations/whatsapp-inbox?phone=+234...
+     Runs ONCE when conversations load, then clears the URL param
+     so subsequent sidebar clicks are not overridden.
   ───────────────────────────────────────────── */
+  const autoOpenHandledRef = useRef(false);
+
   useEffect(() => {
     const phoneParam = searchParams?.get("phone");
-    if (!phoneParam || conversations.length === 0) return;
+    // Only run once per navigation — once handled, the param is removed from URL
+    if (!phoneParam || conversations.length === 0 || autoOpenHandledRef.current) return;
 
     // Normalise the param phone for comparison
     const normParam = phoneParam.replace(/\s/g, "").toLowerCase();
@@ -1150,15 +1155,20 @@ export default function WhatsAppInbox() {
       return normConv === normParam;
     });
 
-    if (match && (!selected || selected.phone !== match.phone)) {
+    if (match) {
+      autoOpenHandledRef.current = true; // mark as handled before state updates
       setSelected(match);
       setSidebarView("chats");
-      // On mobile, hide sidebar so the message thread is visible immediately
       if (isMobile) setShowSidebar(false);
+
+      // Remove the ?phone= param from the URL so it doesn't block future sidebar clicks.
+      // We use history.replaceState directly to avoid a full router navigation.
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
     }
-  // Only re-run when conversations load or the URL param changes
+  // Only re-run when conversations first load
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversations, searchParams]);
+  }, [conversations]);
 
   /* ─────────────────────────────────────────────
      SELECT CHAT
