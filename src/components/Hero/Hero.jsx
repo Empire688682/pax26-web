@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
 import { useGlobalContext } from "../Context";
 import {
-  ArrowRight, Zap, Bot, CreditCard, Smartphone, Shield
+  ArrowRight, Bot, Shield
 } from "lucide-react";
 
 /* ─── Injected styles ─────────────────────────────────────────────────── */
@@ -45,16 +44,53 @@ const CSS = `
   }
   .hr-cta:hover::after { transform:rotate(45deg) translateX(100%); }
 
-  .hr-pill {
-    transition: background .18s, border-color .18s, transform .18s;
+  /* Headline — prevent overflow on very narrow screens */
+  .hr-headline {
+    font-size: clamp(28px, 8vw, 58px);
+    line-height: 1.1;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: manual;
   }
-  .hr-pill:hover { transform:translateY(-2px); }
+  /* Slightly larger once we have real breathing room */
+  @media (min-width: 400px) { .hr-headline { font-size: clamp(30px, 7vw, 58px); } }
+  @media (min-width: 640px) { .hr-headline { font-size: clamp(34px, 6.5vw, 58px); } }
+
+  /* Primary CTA: full-width on narrow screens, auto width on larger */
+  .hr-cta-primary {
+    width: 100%;
+  }
+  @media (min-width: 480px) { .hr-cta-primary { width: auto; } }
+
+  /* CTA row: stack on narrow, side-by-side on 480px+ */
+  .hr-cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  @media (min-width: 480px) {
+    .hr-cta-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+  }
 
   @keyframes hr-fade-up {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .hr-fade-up { animation: hr-fade-up 0.5s ease both; }
+
+  /* Chat demo: hidden on very small screens to keep hero compact */
+  .hr-chat-demo-wrap {
+    display: none;
+  }
+  @media (min-width: 380px) {
+    .hr-chat-demo-wrap {
+      display: flex;
+    }
+  }
 `;
 
 /* ─── Chat demo messages ──────────────────────────────────────────────── */
@@ -144,41 +180,10 @@ function ChatDemo() {
   );
 }
 
-/* ─── Service chip ────────────────────────────────────────────────────── */
-function Chip({ icon: Icon, label, color, border }) {
-  return (
-    <div className="hr-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-      style={{ background: `${color}12`, border: `1px solid ${border}`, color }}>
-      <Icon size={11} />
-      {label}
-    </div>
-  );
-}
-
-/* ─── Stat block ──────────────────────────────────────────────────────── */
-function Stat({ value, label, primary }) {
-  return (
-    <div className="text-center">
-      <p className="text-lg sm:text-xl font-black leading-none" style={{ color: primary }}>{value}</p>
-      <p className="text-[10px] mt-0.5 opacity-50 font-medium uppercase tracking-wide">{label}</p>
-    </div>
-  );
-}
-
-/* ─── Floating badge ──────────────────────────────────────────────────── */
-function Badge({ children, className = "", bg, border }) {
-  return (
-    <div className={`absolute z-20 flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg text-xs font-bold ${className}`}
-      style={{ background: bg, border: `1px solid ${border}` }}>
-      {children}
-    </div>
-  );
-}
-
 /* ─── Marquee items ───────────────────────────────────────────────────── */
 const TICKER = [
-  "Pax26 × Meta", "·", "Official WhatsApp API", "·", "Online Store Builder", "·",
-  "AI Sales Agent", "·", "WhatsApp Commerce", "·", "Meta Business Partners", "·",
+  "Pax26 × WhatsApp", "·", "WhatsApp Business API", "·", "Online Store Builder", "·",
+  "AI Sales Agent", "·", "WhatsApp Commerce", "·", "CAC Registered RC 9411144", "·",
   "Most Affordable in NG 🇳🇬", "·", "24/7 Auto-Replies", "·",
 ];
 
@@ -192,19 +197,6 @@ export default function Hero() {
   const tp = pax26?.textPrimary;
   const ts = pax26?.textSecondary;
   const bdr = pax26?.border;
-
-  const chips = [
-    { icon: Bot,        label: "Official WhatsApp Business API", color: WA, border: `${WA}40` },
-    { icon: CreditCard, label: "Meta Business Partner",          color: p,  border: `${p}40`  },
-    { icon: Smartphone, label: "Online Store Builder",           color: "#a855f7", border: "#a855f740" },
-  ];
-
-  const stats = [
-    { value: "24/7",  label: "Automated Support" },
-    { value: "< 5m",  label: "API Activation" },
-    { value: "99.9%", label: "Uptime SLA" },
-  ];
-
 
   return (
     <>
@@ -232,46 +224,46 @@ export default function Hero() {
 
         {/* ── Main content ──────────────────────────────────────── */}
         <div className="relative flex-1 max-w-8xl mx-auto w-full px-4 sm:px-6 lg:px-6
-                        flex flex-col justify-center pt-24 pb-4 sm:pt-28">
+                        flex flex-col justify-center pt-20 pb-6 sm:pt-28 sm:pb-4">
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
             {/* ══ LEFT ════════════════════════════════════════════ */}
-            <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="flex flex-col gap-3 sm:gap-5">
 
-              {/* Eyebrow — Consolidated Premium Badge */}
-              <div className="self-start mb-2 hr-fade-up">
+              {/* Eyebrow — Audience indicator */}
+              <div className="self-start hr-fade-up">
                 <div
-                  className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-md border text-[11px] font-medium"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border text-[10px] sm:text-[11px] font-bold tracking-wider uppercase"
                   style={{
                     background: `${WA}08`,
                     borderColor: `${WA}25`,
                     color: WA,
                   }}
                 >
-                  <span className="relative flex h-2 w-2">
+                  <span className="relative flex h-2 w-2 shrink-0">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
-                  <span className="font-bold tracking-wider uppercase">Built for WhatsApp Sellers</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                  <span style={{ color: ts, opacity: 0.8 }}>Registered Nigerian Tech Company</span>
+                  Built for WhatsApp Sellers
                 </div>
               </div>
 
-
               {/* Headline */}
               <div className="hr-fade-up" style={{ animationDelay: "0.08s" }}>
-                <h1 style={{ color: tp, lineHeight: 1.08 }}
-                  className="text-[clamp(30px,6.5vw,58px)] font-black tracking-tight">
-                  Sell More on WhatsApp.<br />
-                  <span className="hr-serif" style={{ color: p }}>Even When You&apos;re Busy.</span>
+                <h1
+                  className="hr-headline font-black tracking-tight"
+                  style={{ color: tp }}
+                >
+                  Sell More on WhatsApp.{" "}
+                  <span className="hr-serif block sm:inline" style={{ color: p }}>
+                    Even When You&apos;re Busy.
+                  </span>
                 </h1>
               </div>
 
-
               {/* Sub-text */}
-              <p className="hr-fade-up text-[13.5px] sm:text-[15px] leading-relaxed"
+              <p className="hr-fade-up text-[13.5px] sm:text-[15px] leading-relaxed max-w-[540px]"
                 style={{ color: ts, opacity: .78, animationDelay: "0.2s" }}>
                 Create your online storefront, showcase your products, and let your{" "}
                 <strong style={{ color: tp }}>Pax26 sales agent</strong> help customers with
@@ -281,15 +273,15 @@ export default function Hero() {
 
               {/* CTA row */}
               <div className="hr-fade-up flex flex-col gap-2" style={{ animationDelay: "0.4s" }}>
-                <div className="flex flex-wrap gap-3">
+                <div className="hr-cta-row">
                   <button
                     onClick={() => openModal("register")}
-                    className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold text-white"
+                    className="hr-cta hr-cta-primary flex items-center justify-center gap-2 px-6 py-4 sm:py-3.5 rounded-2xl text-[14px] sm:text-[13.5px] font-bold text-white"
                     style={{
                       background: `linear-gradient(135deg,${p},${pax26?.btn || p})`,
                       boxShadow: `0 12px 30px ${p}40`,
                     }}>
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M11.999 2.003C6.476 2.003 2 6.479 2 12.003c0 1.843.484 3.57 1.33 5.065L2.004 22l5.074-1.329A9.935 9.935 0 0012 22.003c5.523 0 9.999-4.476 9.999-10s-4.476-9.997-10-9.997z" fillOpacity=".25" /></svg>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M11.999 2.003C6.476 2.003 2 6.479 2 12.003c0 1.843.484 3.57 1.33 5.065L2.004 22l5.074-1.329A9.935 9.935 0 0012 22.003c5.523 0 9.999-4.476 9.999-10s-4.476-9.997-10-9.997z" fillOpacity=".25" /></svg>
                     Start Selling Free
                     <ArrowRight size={15} />
                   </button>
@@ -299,39 +291,27 @@ export default function Hero() {
                     onClick={(e) => {
                       e.preventDefault();
                       const el = document.getElementById("masterclass-video");
-                      if (el) {
-                        el.scrollIntoView({ behavior: "smooth" });
-                      }
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="hr-cta flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[13.5px] font-bold"
+                    className="hr-cta flex items-center justify-center gap-2 px-6 py-4 sm:py-3.5 rounded-2xl text-[14px] sm:text-[13.5px] font-bold"
                     style={{ color: tp, border: `1px solid ${bdr}`, background: "transparent" }}>
                     View Demo
                   </a>
                 </div>
-                {/* Supporting text beneath CTA */}
-                <p className="text-[11px] font-medium" style={{ color: ts, opacity: 0.55 }}>
-                  Start for free. Upgrade as your business grows.
-                </p>
               </div>
 
-              {/* Stats row */}
-              <div className="hr-fade-up flex items-center gap-5 sm:gap-7 pt-1"
-                style={{ color: ts, animationDelay: "0.5s" }}>
-                {stats.map((s, i) => (
-                  <div key={i} className="flex items-center gap-5 sm:gap-7">
-                    {i > 0 && <div className="w-px h-8" style={{ background: bdr }} />}
-                    <Stat {...s} primary={p} />
-                  </div>
-                ))}
-                <div className="ml-auto flex items-center gap-1.5">
-                  <Shield size={12} style={{ color: WA }} aria-hidden="true" />
-                  <span className="text-[10px] font-semibold opacity-50">Secure &amp; Trusted</span>
-                </div>
+              {/* Trust row */}
+              <div className="hr-fade-up flex items-center gap-1.5"
+                style={{ animationDelay: "0.5s" }}>
+                <Shield size={12} style={{ color: WA }} aria-hidden="true" />
+                <span className="text-[11px] font-semibold" style={{ color: ts, opacity: 0.55 }}>
+                  Powered by WhatsApp Business API · CAC Registered RC 9411144
+                </span>
               </div>
             </div>
 
             {/* ══ RIGHT — Chat demo ════════════════════════════════ */}
-            <div className="hr-fade-up flex justify-center lg:justify-end" style={{ animationDelay: "0.15s" }}>
+            <div className="hr-chat-demo-wrap hr-fade-up justify-center lg:justify-end" style={{ animationDelay: "0.15s" }}>
               <div className="relative">
                 <ChatDemo />
               </div>

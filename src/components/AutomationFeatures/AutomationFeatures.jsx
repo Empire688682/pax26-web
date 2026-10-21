@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { useGlobalContext } from "../Context";
 import {
   MessageCircle, Brain, Zap, Users2,
-  ArrowRight, CheckCircle2,
+  CheckCircle2,
 } from "lucide-react";
 
 /* ── Keyframes + font ─────────────────────────────────────────── */
@@ -21,9 +21,6 @@ const CSS = `
     cursor: default;
   }
   .af-card:hover { transform: translateY(-5px); }
-
-  .af-arrow { transition: transform 0.2s ease; }
-  .af-card:hover .af-arrow { transform: translateX(4px); }
 `;
 
 /* ── Feature config ───────────────────────────────────────────── */
@@ -115,9 +112,9 @@ function FeatureCard({ feature, index, pax26, inView }) {
         ))}
       </ul>
 
-      {/* learn more */}
-      <div className="flex items-center gap-1.5 mt-6 text-xs font-bold relative z-10" style={{ color }}>
-        Learn more <ArrowRight size={12} className="af-arrow" />
+      {/* learn more — decorative, no destination yet */}
+      <div className="flex items-center gap-1.5 mt-6 text-xs font-bold relative z-10 select-none" style={{ color, opacity: 0.7 }}>
+        Included in all plans
       </div>
     </motion.div>
   );

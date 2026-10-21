@@ -339,9 +339,9 @@ export default function ChatbotWidget() {
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
+        className="pax26-chat-fab"
         style={{
           position: "fixed",
-          bottom: 24,
           right: 24,
           zIndex: 9998,
           width: 56,

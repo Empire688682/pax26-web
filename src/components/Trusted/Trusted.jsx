@@ -143,7 +143,7 @@ export default function Trusted() {
     },
     {
       icon: Building2, color: primary,
-      countTarget: 2000, suffix: "+",
+      countTarget: 1000, suffix: "+",
       label: "Businesses Onboarded",
       sub: "From solo shops to growing SMEs across Nigeria",
       delay: "0.1s",

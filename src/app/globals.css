@@ -127,3 +127,15 @@ table {
     padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
   }
 }
+
+/* ── Chat FAB positioning ─────────────────────────────
+   On mobile, lift the button above the bottom edge so
+   it doesn't obscure page content or the CTA button.  */
+.pax26-chat-fab {
+  bottom: 80px;
+}
+@media (min-width: 640px) {
+  .pax26-chat-fab {
+    bottom: 24px;
+  }
+}
