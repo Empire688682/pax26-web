@@ -239,6 +239,7 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
   const deliveryZones = store.fulfillmentSettings?.deliveryZones || [];
   const flatDeliveryFee = Number(store.fulfillmentSettings?.flatDeliveryFee) || 0;
   const [fulfillmentMethod, setFulfillmentMethod] = useState(allowPickup && !allowDelivery ? "pickup" : "delivery");
+  const [selectedZoneIndex, setSelectedZoneIndex] = useState(0);
   const currency = store.currency || "NGN";
 
   if (!open) return null;
