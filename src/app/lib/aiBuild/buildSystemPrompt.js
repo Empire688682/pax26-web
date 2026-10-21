@@ -151,7 +151,7 @@ ${paymentStageContext}
 ${(() => {
   const raw = (profile.customInstructions || '').trim();
   if (!raw) return '';
-  return `\nBUSINESS OWNER NOTES:\n${raw.slice(0, 1500)}\n`;
+  return `\nBUSINESS OWNER NOTES:\n${raw.slice(0, 500)}\n`;
 })()}
 `.trim();
 }

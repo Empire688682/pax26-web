@@ -1824,13 +1824,13 @@ export default function AiBusinessDashboard() {
                       <div>
                         <FieldLabel pax26={p}>Custom AI Instructions <span style={{ fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "99px", background: `${p?.primary}15`, color: p?.primary, marginLeft: "6px" }}>Optional</span></FieldLabel>
                         <p style={{ margin: "4px 0 0", fontSize: "12px", color: p?.textPrimary, opacity: 0.5, lineHeight: 1.55 }}>
-                          Add your own policies, greetings, or disclaimers. These are injected after all core rules and <strong>cannot override security or pricing guardrails</strong>. Max 400 words.
+                          Add your own policies, greetings, or disclaimers. These are injected after all core rules and <strong>cannot override security or pricing guardrails</strong>. Max 50 words / 500 characters.
                         </p>
                       </div>
                     </div>
                     <textarea
                       value={form.customInstructions || ""}
-                      onChange={e => setForm(f => ({ ...f, customInstructions: e.target.value.slice(0, 2000) }))}
+                      onChange={e => setForm(f => ({ ...f, customInstructions: e.target.value.slice(0, 500) }))}
                       rows={5}
                       placeholder={isSeller
                         ? 'e.g. Always greet customers with "Welcome to [Store Name] 👑". No refunds after 48 hours. Delivery takes 2–3 working days. Do not accept cash on delivery.'
@@ -1843,7 +1843,7 @@ export default function AiBusinessDashboard() {
                       }}
                     />
                     <p style={{ margin: 0, fontSize: "11px", color: p?.textPrimary, opacity: 0.4 }}>
-                      {(form.customInstructions || "").length}/2000 characters
+                      {(form.customInstructions || "").length}/500 characters · {(form.customInstructions || "").trim().split(/\s+/).filter(Boolean).length}/50 words
                     </p>
                   </div>
                 </div>

@@ -196,7 +196,7 @@ export async function POST(req) {
                     ...(spamThreshold !== undefined && { spamThreshold: parseInt(spamThreshold) || 10 }),
                     ...(promoAnnouncement !== undefined && { promoAnnouncement }),
                     ...(customInstructions !== undefined && {
-                        customInstructions: String(customInstructions).slice(0, 2000), // enforce max 2000 chars server-side
+                        customInstructions: String(customInstructions).slice(0, 500), // enforce max 500 chars server-side
                     }),
                     whatsappNumber,
                     userId,

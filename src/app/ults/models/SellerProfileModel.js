@@ -178,7 +178,7 @@ const SellerProfileSchema = new mongoose.Schema({
         type: String,
         default: '',
         trim: true,
-        maxlength: 2000, // ~400 words — enough for policies, greetings, disclaimers
+        maxlength: 500, // ~50 words — enough for policies, greetings, disclaimers
     },
 
     // Sales Notifications & Tracking
