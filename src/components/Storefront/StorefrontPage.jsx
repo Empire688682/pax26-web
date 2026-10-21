@@ -356,6 +356,9 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         waMsg += `💰 Products Total: ₦${subtotalVal.toLocaleString()}`;
         if (deliveryFeeVal > 0) {
           waMsg += `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}`;
+          if (detectedZone?.timeframe) {
+            waMsg += ` · Est. ${detectedZone.timeframe}`;
+          }
         }
         waMsg += `\n💳 *Grand Total: ₦${totalVal.toLocaleString()}*`;
         if (deliveryLocation) {

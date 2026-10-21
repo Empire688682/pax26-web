@@ -250,6 +250,7 @@ export async function POST(req, { params }) {
       deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress.trim() : "",
       deliveryLocation: fulfillmentMethod === "delivery" ? (deliveryLocation || deliveryAddress).trim() : "",
       selectedZoneName: selectedZoneName || "",
+      deliveryZoneTimeframe: deliveryZoneTimeframe || "",
       fulfillmentMethod,
       pickupDetails: fulfillmentMethod === "pickup" ? (pickupDetails || "") : "",
       status: "awaiting_payment",

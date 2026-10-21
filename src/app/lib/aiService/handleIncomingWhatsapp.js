@@ -758,6 +758,12 @@ export const handleIncomingWhatsApp = async (payload) => {
           const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com";
           const editLink = `${BASE_URL}/store/${sellerProfile.slug}?order=${confirmedOrder.orderCode}`;
           const deliveryStr = (confirmedOrder.deliveryAddress || confirmedOrder.deliveryLocation || "").trim();
+          const timeframeStr = confirmedOrder.deliveryZoneTimeframe || "";
+          const zoneStr = confirmedOrder.selectedZoneName || "";
+
+          const deliveryLine = deliveryFeeVal > 0
+            ? `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}${zoneStr ? ` (${zoneStr})` : ""}${timeframeStr ? ` · Est. ${timeframeStr}` : ""}`
+            : "";
 
           const orderSummaryMsg =
 `🛒 *Order #${confirmedOrder.orderCode} — Review Before Paying*
@@ -766,7 +772,7 @@ export const handleIncomingWhatsApp = async (payload) => {
 🛍️ *Items:*
 ${itemLines}
 
-💰 Products Total: ₦${itemsSubtotal.toLocaleString()}${deliveryFeeVal > 0 ? `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}
+💰 Products Total: ₦${itemsSubtotal.toLocaleString()}${deliveryLine}
 💳 *Grand Total: ₦${totalVal.toLocaleString()}*${deliveryStr ? `\n📍 ${deliveryStr}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━

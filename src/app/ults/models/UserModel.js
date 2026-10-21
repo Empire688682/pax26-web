@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema(
     isPasswordSet: { type: Boolean, default: false },
     transactionPin: { type: String, default: null },
     isTransactionPinSet: { type: Boolean, default: false },
-    number: { type: String, unique: true, sparse: true },
+    number: { type: String, unique: true, required:true, sparse: true },
     profileImage: { type: String, default: "/profile-img.png" },
     authTimestamp: { type: Date, default: Date.now },
 

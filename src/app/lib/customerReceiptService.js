@@ -83,6 +83,8 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             : expectedTotal > 0 ? expectedTotal : totalPaidVal;
 
         const deliveryLocStr = (order.deliveryLocation || order.deliveryAddress || "").trim();
+        const zoneStr = order.selectedZoneName || "";
+        const timeframeStr = order.deliveryZoneTimeframe || "";
 
         const receiptMessage =
 `🧾 *ORDER CONFIRMATION & OFFICIAL RECEIPT*
@@ -99,7 +101,7 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
 🛍️ *Order Breakdown:*
 ${itemsSection}
-${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}` : ""}
+${deliveryFeeVal > 0 ? `\n• Products Subtotal: ₦${subtotalVal.toLocaleString()}\n• Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}${zoneStr ? ` (${zoneStr})` : ""}${timeframeStr ? ` · Est. ${timeframeStr}` : ""}` : ""}
 • Total Amount Paid: ₦${finalTotalPaid.toLocaleString()}
 
 🚚 *DELIVERY INSTRUCTIONS:*

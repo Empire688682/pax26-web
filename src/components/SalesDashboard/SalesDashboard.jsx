@@ -529,6 +529,18 @@ export default function SalesDashboard() {
                                         <span style={{ color: pax26?.textPrimary }}>₦{deliveryFeeVal.toLocaleString()}</span>
                                       </div>
                                     )}
+                                    {order.selectedZoneName && (
+                                      <div className="flex justify-between text-[10px]">
+                                        <span style={{ color: pax26?.textSecondary }}>Zone</span>
+                                        <span style={{ color: pax26?.textPrimary }}>{order.selectedZoneName}</span>
+                                      </div>
+                                    )}
+                                    {order.deliveryZoneTimeframe && (
+                                      <div className="flex justify-between text-[10px]">
+                                        <span style={{ color: pax26?.textSecondary }}>Est. Delivery</span>
+                                        <span style={{ color: "#6366f1", fontWeight: 700 }}>🕐 {order.deliveryZoneTimeframe}</span>
+                                      </div>
+                                    )}
                                     <div className="flex justify-between text-[11px] font-bold">
                                       <span style={{ color: pax26?.textSecondary }}>Total</span>
                                       <span style={{ color: "#22c55e" }}>₦{totalVal.toLocaleString()}</span>
@@ -808,6 +820,7 @@ export default function SalesDashboard() {
                                           { label: "Products Subtotal", value: `₦${subtotalVal.toLocaleString()}` },
                                           deliveryFeeVal > 0 && { label: "Delivery Fee", value: `₦${deliveryFeeVal.toLocaleString()}` },
                                           order.selectedZoneName && { label: "Delivery Zone", value: order.selectedZoneName },
+                                          order.deliveryZoneTimeframe && { label: "Est. Timeframe", value: `🕐 ${order.deliveryZoneTimeframe}` },
                                           { label: "Grand Total", value: `₦${totalVal.toLocaleString()}`, bold: true },
                                           order.deliveryAddress && { label: "Address", value: order.deliveryAddress || order.deliveryLocation },
                                           order.fulfillmentMethod && { label: "Fulfillment", value: order.fulfillmentMethod === "pickup" ? "Store Pick-up" : "Home Delivery" },

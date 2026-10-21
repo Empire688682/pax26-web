@@ -70,7 +70,8 @@ const SellerOrderSchema = new mongoose.Schema({
 
     deliveryLocation: String,
     deliveryAddress: String,
-    selectedZoneName: String,   // name of the auto-detected delivery zone (zones model)
+    selectedZoneName: String,       // name of the auto-detected delivery zone (zones model)
+    deliveryZoneTimeframe: String,  // estimated delivery timeframe e.g. "Same Day", "2-4 days"
 
     fulfillmentMethod: {
         type: String,

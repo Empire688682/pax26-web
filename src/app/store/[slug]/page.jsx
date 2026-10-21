@@ -69,10 +69,28 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
       workingHours: profile.workingHours || null,
       currency: profile.currency || "NGN",
       storeTheme: profile.storeTheme || "classic",
+      deliveryCoverage: profile.deliveryCoverage || null,
       whatsappHref: profile.whatsappNumber
         ? `https://wa.me/${profile.whatsappNumber.replace(/\D/g, "")}`
         : null,
       promoAnnouncement: profile.promoAnnouncement || null,
+      // fulfillmentSettings drives delivery model, zones, flat fee, and pickup in CartDrawer
+      fulfillmentSettings: profile.fulfillmentSettings
+        ? {
+            allowDelivery: profile.fulfillmentSettings.allowDelivery ?? true,
+            allowPickup: profile.fulfillmentSettings.allowPickup ?? false,
+            pickupAddress: profile.fulfillmentSettings.pickupAddress || "",
+            pickupInstructions: profile.fulfillmentSettings.pickupInstructions || "",
+            deliveryModel: profile.fulfillmentSettings.deliveryModel || "flat",
+            flatDeliveryFee: Number(profile.fulfillmentSettings.flatDeliveryFee) || 0,
+            deliveryZones: (profile.fulfillmentSettings.deliveryZones || []).map(z => ({
+              name: z.name || "",
+              areas: z.areas || "",
+              fee: Number(z.fee) || 0,
+              timeframe: z.timeframe || "",
+            })),
+          }
+        : { allowDelivery: true, allowPickup: false, deliveryModel: "flat", flatDeliveryFee: 0, deliveryZones: [] },
     });
 
     const publicProducts = serialize(products.map((p) => ({
