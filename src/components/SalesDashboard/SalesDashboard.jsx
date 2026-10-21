@@ -394,10 +394,10 @@ export default function SalesDashboard() {
           </div>
 
           {/* Recent Orders & Top Selling Products (UNLOCKED FOR FREE USERS) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
             {/* Recent Orders */}
-            <div className="col-span-1 lg:col-span-2 rounded-2xl overflow-hidden shadow-sm" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
+            <div className="col-span-1 xl:col-span-2 rounded-2xl overflow-hidden shadow-sm" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
               <div className="px-4 sm:px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: pax26?.border }}>
                 <div>
                   <h3 className="font-bold text-base sm:text-lg" style={{ color: pax26?.textPrimary }}>Recent Transactions</h3>
@@ -408,8 +408,8 @@ export default function SalesDashboard() {
                 </span>
               </div>
 
-              {/* MOBILE CARDS VIEW (< md) */}
-              <div className="block md:hidden divide-y" style={{ divideColor: pax26?.border }}>
+              {/* MOBILE CARDS VIEW (< lg) */}
+              <div className="block lg:hidden divide-y" style={{ borderColor: pax26?.border }}>
                 {recentOrders.length === 0 ? (
                   <div className="text-center py-10 px-4" style={{ color: pax26?.textSecondary }}>
                     <ShoppingBag className="mx-auto mb-2 opacity-40" size={32} />
@@ -424,204 +424,212 @@ export default function SalesDashboard() {
                     const subtotalVal = deliveryFeeVal > 0 ? totalVal - deliveryFeeVal : totalVal;
 
                     return (
-                      <div key={order._id} className="p-4 space-y-3" style={{ background: pax26?.secondaryBg }}>
-                        {/* Header Row: Customer & Status */}
+                      <div key={order._id} className="p-4 space-y-3" style={{ borderBottom: `1px solid ${pax26?.border}` }}>
+
+                        {/* ── Row 1: Customer info + status badge ── */}
                         <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-sm" style={{ color: pax26?.textPrimary }}>
-                                {order.customerName || "Customer"}
+                          <div className="min-w-0 flex-1">
+                            {/* Name + order code + source */}
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <span className="font-bold text-sm leading-tight" style={{ color: pax26?.textPrimary }}>
+                                {order.customerName || "Storefront Customer"}
                               </span>
                               {order.orderCode && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0">
                                   #{order.orderCode}
                                 </span>
                               )}
                               {order.orderSource === "storefront" && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
                               )}
                             </div>
-                            {/* Clickable phone */}
+
+                            {/* ── Phone → inbox thread ── */}
                             {order.customerPhone ? (
                               <button
                                 onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
-                                className="text-xs font-semibold mt-0.5 block"
-                                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all active:scale-95"
+                                style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}
                               >
-                                💬 {order.customerPhone}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
+                                {order.customerPhone}
+                                <ExternalLink size={10} />
                               </button>
                             ) : (
-                              <p className="text-xs mt-0.5" style={{ color: pax26?.textSecondary }}>No phone yet</p>
+                              <span className="text-xs" style={{ color: pax26?.textSecondary }}>No phone</span>
                             )}
                           </div>
+
+                          {/* Status badge */}
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0"
                             style={{ background: statusBadge.bg, color: statusBadge.color }}>
                             {statusBadge.label}
                           </span>
                         </div>
 
-                        {/* Items preview + expand toggle */}
-                        {order.items?.length > 0 && (
-                          <div>
-                            <button
-                              onClick={() => setSelectedOrder(isMobileExpanded ? null : { ...order, _expandedSummary: true })}
-                              className="w-full text-xs p-2.5 rounded-xl border flex items-center justify-between gap-2"
-                              style={{ background: pax26?.bg, borderColor: pax26?.border, cursor: "pointer" }}
-                            >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <Package size={14} className="shrink-0 text-emerald-400" />
-                                <div className="min-w-0 text-left">
-                                  <p className="font-semibold text-emerald-400 text-[11px]">
-                                    {order.items.length} {order.items.length === 1 ? "item" : "items"}
-                                  </p>
-                                  <p className="text-[10px] truncate" style={{ color: pax26?.textSecondary }}>
-                                    {order.items.map(i => `${i.quantity}x ${i.name}`).join(", ")}
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="text-emerald-400 text-[10px] font-bold shrink-0">{isMobileExpanded ? "▲ Hide" : "▼ Details"}</span>
-                            </button>
-
-                            {/* Expanded order summary */}
-                            {isMobileExpanded && (
-                              <div className="mt-2 rounded-xl overflow-hidden border" style={{ borderColor: "rgba(99,102,241,0.2)" }}>
-                                {/* Inbox warning */}
-                                <div className="flex items-start gap-2 p-3" style={{ background: "rgba(234,179,8,0.08)", borderBottom: "1px solid rgba(234,179,8,0.2)" }}>
-                                  <AlertCircle size={13} style={{ color: "#eab308", flexShrink: 0, marginTop: "1px" }} />
-                                  <p className="text-[10px] leading-relaxed" style={{ color: pax26?.textSecondary }}>
-                                    Always verify with the customer&apos;s original WhatsApp message — it&apos;s the 100% source of truth.{" "}
-                                    {order.customerPhone && (
-                                      <button
-                                        onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
-                                        style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1", fontWeight: 700, fontSize: "10px", padding: 0 }}
-                                      >
-                                        Open inbox →
-                                      </button>
-                                    )}
-                                  </p>
-                                </div>
-
-                                {/* Item breakdown */}
-                                <div className="p-3 space-y-2" style={{ background: "rgba(99,102,241,0.03)" }}>
-                                  {order.items.map((item, idx) => {
-                                    const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
-                                    const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(", ");
-                                    return (
-                                      <div key={idx} className="flex items-start gap-2 text-[11px]">
-                                        {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-8 h-8 rounded object-cover shrink-0" />}
-                                        <div className="flex-1 min-w-0">
-                                          <p className="font-700 truncate" style={{ color: pax26?.textPrimary }}>{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</p>
-                                          {variantStr && <p className="text-[9px]" style={{ color: "#6366f1" }}>{variantStr}</p>}
-                                        </div>
-                                        <span className="font-bold shrink-0" style={{ color: pax26?.textPrimary }}>₦{lineTotal.toLocaleString()}</span>
-                                      </div>
-                                    );
-                                  })}
-
-                                  <div className="pt-2 mt-1 border-t space-y-1" style={{ borderColor: pax26?.border }}>
-                                    <div className="flex justify-between text-[11px]">
-                                      <span style={{ color: pax26?.textSecondary }}>Subtotal</span>
-                                      <span style={{ color: pax26?.textPrimary }}>₦{subtotalVal.toLocaleString()}</span>
-                                    </div>
-                                    {deliveryFeeVal > 0 && (
-                                      <div className="flex justify-between text-[11px]">
-                                        <span style={{ color: pax26?.textSecondary }}>Delivery</span>
-                                        <span style={{ color: pax26?.textPrimary }}>₦{deliveryFeeVal.toLocaleString()}</span>
-                                      </div>
-                                    )}
-                                    {order.selectedZoneName && (
-                                      <div className="flex justify-between text-[10px]">
-                                        <span style={{ color: pax26?.textSecondary }}>Zone</span>
-                                        <span style={{ color: pax26?.textPrimary }}>{order.selectedZoneName}</span>
-                                      </div>
-                                    )}
-                                    {order.deliveryZoneTimeframe && (
-                                      <div className="flex justify-between text-[10px]">
-                                        <span style={{ color: pax26?.textSecondary }}>Est. Delivery</span>
-                                        <span style={{ color: "#6366f1", fontWeight: 700 }}>🕐 {order.deliveryZoneTimeframe}</span>
-                                      </div>
-                                    )}
-                                    <div className="flex justify-between text-[11px] font-bold">
-                                      <span style={{ color: pax26?.textSecondary }}>Total</span>
-                                      <span style={{ color: "#22c55e" }}>₦{totalVal.toLocaleString()}</span>
-                                    </div>
-                                    {order.deliveryAddress && (
-                                      <div className="flex justify-between text-[10px]">
-                                        <span style={{ color: pax26?.textSecondary }}>Address</span>
-                                        <span className="text-right max-w-[55%]" style={{ color: pax26?.textPrimary }}>{order.deliveryAddress}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {/* Price & Receipt Details */}
-                        <div className="flex items-center justify-between gap-3 pt-1">
+                        {/* ── Row 2: Total + Order Details toggle ── */}
+                        <div className="flex items-center justify-between gap-3">
                           <div>
                             <span className="text-[10px] uppercase font-semibold block" style={{ color: pax26?.textSecondary }}>Total Amount</span>
                             <span className="text-lg font-black sd-mono" style={{ color: pax26?.textPrimary }}>
-                              ₦{(order.totalPrice || 0).toLocaleString()}
+                              ₦{totalVal.toLocaleString()}
                             </span>
                           </div>
+
+                          {order.items?.length > 0 && (
+                            <button
+                              onClick={() => setSelectedOrder(isMobileExpanded ? null : { ...order, _expandedSummary: true })}
+                              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                              style={{
+                                background: isMobileExpanded ? `${primary}20` : pax26?.bg,
+                                color: isMobileExpanded ? primary : pax26?.textSecondary,
+                                border: `1px solid ${isMobileExpanded ? primary + "40" : pax26?.border}`,
+                              }}
+                            >
+                              <Package size={13} />
+                              {order.items.length} {order.items.length === 1 ? "item" : "items"}
+                              <span style={{ fontSize: "10px" }}>{isMobileExpanded ? "▲" : "▼"}</span>
+                            </button>
+                          )}
                         </div>
 
-                        {/* Pending Action Buttons */}
+                        {/* ── Row 3: Expanded Order Details ── */}
+                        {isMobileExpanded && (
+                          <div className="rounded-xl overflow-hidden" style={{ border: `1px solid rgba(99,102,241,0.25)` }}>
+
+                            {/* Items list */}
+                            <div className="p-3 space-y-2.5" style={{ background: "rgba(99,102,241,0.04)" }}>
+                              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: pax26?.textSecondary }}>Items Ordered</p>
+                              {order.items.map((item, idx) => {
+                                const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+                                const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(" · ");
+                                return (
+                                  <div key={idx} className="flex items-center gap-2.5">
+                                    {item.imageUrl ? (
+                                      <img src={item.imageUrl} alt={item.name} className="w-10 h-10 rounded-lg object-cover shrink-0" style={{ border: `1px solid ${pax26?.border}` }} />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-base" style={{ background: pax26?.bg }}>📦</div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-bold truncate" style={{ color: pax26?.textPrimary }}>
+                                        {item.quantity > 1 ? <span style={{ color: primary }}>{item.quantity}× </span> : null}{item.name}
+                                      </p>
+                                      {variantStr && <p className="text-[10px]" style={{ color: "#818cf8" }}>{variantStr}</p>}
+                                    </div>
+                                    <span className="text-xs font-bold shrink-0 sd-mono" style={{ color: pax26?.textPrimary }}>₦{lineTotal.toLocaleString()}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Pricing breakdown */}
+                            <div className="px-3 py-2.5 space-y-1.5" style={{ borderTop: `1px solid rgba(99,102,241,0.15)`, background: "rgba(99,102,241,0.02)" }}>
+                              <div className="flex justify-between text-xs">
+                                <span style={{ color: pax26?.textSecondary }}>Subtotal</span>
+                                <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>₦{subtotalVal.toLocaleString()}</span>
+                              </div>
+                              {deliveryFeeVal > 0 && (
+                                <div className="flex justify-between text-xs">
+                                  <span style={{ color: pax26?.textSecondary }}>Delivery fee</span>
+                                  <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>₦{deliveryFeeVal.toLocaleString()}</span>
+                                </div>
+                              )}
+                              {order.selectedZoneName && (
+                                <div className="flex justify-between text-[10px]">
+                                  <span style={{ color: pax26?.textSecondary }}>Zone</span>
+                                  <span style={{ color: pax26?.textPrimary }}>{order.selectedZoneName}</span>
+                                </div>
+                              )}
+                              {order.deliveryZoneTimeframe && (
+                                <div className="flex justify-between text-[10px]">
+                                  <span style={{ color: pax26?.textSecondary }}>Est. delivery</span>
+                                  <span style={{ color: "#818cf8", fontWeight: 700 }}>🕐 {order.deliveryZoneTimeframe}</span>
+                                </div>
+                              )}
+                              {order.fulfillmentMethod && (
+                                <div className="flex justify-between text-[10px]">
+                                  <span style={{ color: pax26?.textSecondary }}>Fulfillment</span>
+                                  <span style={{ color: pax26?.textPrimary }}>{order.fulfillmentMethod === "pickup" ? "🏬 Store Pick-up" : "🚚 Home Delivery"}</span>
+                                </div>
+                              )}
+                              {(order.deliveryAddress || order.deliveryLocation) && (
+                                <div className="flex justify-between text-[10px] gap-4">
+                                  <span className="shrink-0" style={{ color: pax26?.textSecondary }}>Address</span>
+                                  <span className="text-right" style={{ color: pax26?.textPrimary }}>{order.deliveryAddress || order.deliveryLocation}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-xs font-bold pt-1" style={{ borderTop: `1px solid ${pax26?.border}` }}>
+                                <span style={{ color: pax26?.textSecondary }}>Grand Total</span>
+                                <span className="sd-mono" style={{ color: "#22c55e" }}>₦{totalVal.toLocaleString()}</span>
+                              </div>
+                            </div>
+
+                            {/* Open chat CTA */}
+                            {order.customerPhone && (
+                              <button
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-all"
+                                style={{ background: "rgba(99,102,241,0.1)", color: "#818cf8", borderTop: `1px solid rgba(99,102,241,0.2)` }}
+                              >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
+                                Open conversation with {order.customerPhone}
+                                <ExternalLink size={11} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ── Row 4: Action buttons (pending only) ── */}
                         {order.status === "pending" && (
-                          <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: pax26?.border }}>
+                          <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleOrderStatus(order._id, "confirmed")}
                               disabled={processingOrderId === order._id}
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                              style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
                             >
                               {processingOrderId === order._id && processingStatus === "confirmed" ? (
                                 <RefreshCw size={13} className="sd-spin" />
-                              ) : (
-                                <CheckCircle size={13} />
-                              )}
-                              <span>{processingOrderId === order._id && processingStatus === "confirmed" ? "Confirming..." : "Confirm Order"}</span>
+                              ) : <CheckCircle size={13} />}
+                              {processingOrderId === order._id && processingStatus === "confirmed" ? "Confirming…" : "Confirm Order"}
                             </button>
-
                             <button
                               onClick={() => handleOrderStatus(order._id, "cancelled")}
                               disabled={processingOrderId === order._id}
-                              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                              style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}
+                              className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                              style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
                             >
                               {processingOrderId === order._id && processingStatus === "cancelled" ? (
                                 <RefreshCw size={13} className="sd-spin" />
-                              ) : (
-                                <XCircle size={13} />
-                              )}
-                              <span>Cancel</span>
+                              ) : <XCircle size={13} />}
+                              Cancel
                             </button>
                           </div>
                         )}
 
-                        {/* Date & Time Footer */}
-                        <div className="flex items-center gap-1.5 text-[10px] pt-1" style={{ color: pax26?.textSecondary }}>
-                          <Clock size={11} className="opacity-70" />
-                          <span>{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        {/* ── Row 5: Timestamp ── */}
+                        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: pax26?.textSecondary }}>
+                          <Clock size={11} className="opacity-60 shrink-0" />
+                          <span>{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                         </div>
+
                       </div>
                     );
                   })
                 )}
               </div>
 
-              {/* DESKTOP TABLE VIEW (>= md) */}
-              <div className="hidden md:block overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left text-xs border-collapse min-w-[860px]">
+              {/* DESKTOP TABLE VIEW (>= lg) */}
+              <div className="hidden lg:block overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left text-xs border-collapse" style={{ minWidth: "700px" }}>
                   <thead>
                     <tr style={{ background: pax26?.bg, borderBottom: `1px solid ${pax26?.border}` }}>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ minWidth: "220px" }}>Customer</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Total Price</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Receipt</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Status</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Actions</th>
-                      <th className="px-6 py-3.5 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Date & Time</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "28%" }}>Customer</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "14%" }}>Total</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "10%" }}>Receipt</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "12%" }}>Status</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "20%" }}>Actions</th>
+                      <th className="px-4 py-3 font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap" style={{ width: "16%" }}>Date & Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ divideColor: pax26?.border }}>
@@ -642,27 +650,27 @@ export default function SalesDashboard() {
                           className="sd-table-row"
                           style={{ "--sd-row-hover": rowHoverBg }}
                         >
-                          <td className="px-6 py-4" style={{ minWidth: "220px", verticalAlign: "top" }}>
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <p className="font-bold" style={{ color: pax26?.textPrimary }}>{order.customerName || "Customer"}</p>
+                          <td className="px-4 py-3" style={{ verticalAlign: "top", maxWidth: "200px" }}>
+                            <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                              <p className="font-bold text-xs truncate" style={{ color: pax26?.textPrimary, maxWidth: "120px" }}>{order.customerName || "Customer"}</p>
                               {order.orderCode && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0">
                                   #{order.orderCode}
                                 </span>
                               )}
                               {order.orderSource === "storefront" && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒</span>
                               )}
                             </div>
-                            {/* Clickable phone → opens inbox for this customer */}
                             {order.customerPhone ? (
                               <button
                                 onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
-                                className="text-[10px] font-semibold hover:underline text-left"
-                                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all hover:opacity-80"
+                                style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.2)" }}
                                 title="Open WhatsApp conversation"
                               >
-                                💬 {order.customerPhone}
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
+                                {order.customerPhone}
                               </button>
                             ) : (
                               <p className="text-[10px]" style={{ color: pax26?.textSecondary }}>No phone yet</p>
@@ -673,11 +681,11 @@ export default function SalesDashboard() {
                                 className="text-[9px] font-semibold text-emerald-400 mt-0.5 flex items-center gap-1 hover:text-emerald-300 transition-colors"
                                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                               >
-                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} — {isExpanded ? "▲ Hide" : "▼ View order"}
+                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} — {isExpanded ? "▲ Hide" : "▼ View"}
                               </button>
                             )}
                           </td>
-                          <td className="px-6 py-4 font-bold sd-mono whitespace-nowrap" style={{ color: pax26?.textPrimary }}>
+                          <td className="px-4 py-3 font-bold sd-mono whitespace-nowrap text-xs" style={{ color: pax26?.textPrimary }}>
                             ₦{(order.totalPrice || 0).toLocaleString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -712,7 +720,7 @@ export default function SalesDashboard() {
                               <span className="text-[10px]" style={{ color: pax26?.textSecondary }}>No receipt</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase`}
                               style={{
                                 background: order.status === "paid" || order.status === "confirmed" ? "rgba(34,197,94,0.15)" : order.status === "cancelled" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
@@ -721,7 +729,7 @@ export default function SalesDashboard() {
                               {order.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             {order.status === "pending" && (
                               <div className="flex items-center gap-2">
                                 <button
@@ -754,7 +762,7 @@ export default function SalesDashboard() {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap" style={{ color: pax26?.textSecondary }}>
+                          <td className="px-4 py-3 whitespace-nowrap" style={{ color: pax26?.textSecondary }}>
                             <div className="flex flex-col text-xs">
                               <span className="font-semibold">{new Date(order.createdAt).toLocaleDateString()}</span>
                               <span className="text-[10px] opacity-75">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -765,7 +773,7 @@ export default function SalesDashboard() {
                         {/* ── Expandable Order Summary Row ── */}
                         {isExpanded && (
                           <tr style={{ background: pax26?.bg === "#0f172a" ? "rgba(99,102,241,0.04)" : "rgba(99,102,241,0.03)" }}>
-                            <td colSpan="6" className="px-6 pb-5 pt-0">
+                            <td colSpan="6" className="px-4 pb-4 pt-0">
                               <div style={{ border: `1px solid rgba(99,102,241,0.2)`, borderRadius: "14px", padding: "16px", marginTop: "4px" }}>
 
                                 {/* Inbox warning banner */}
@@ -837,9 +845,10 @@ export default function SalesDashboard() {
                                     {order.customerPhone && (
                                       <button
                                         onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
-                                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", borderRadius: "8px", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", color: "#818cf8", fontSize: "11px", fontWeight: 700, cursor: "pointer", border: "none" }}
+                                        style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "8px", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", color: "#818cf8", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
                                       >
-                                        💬 Open WhatsApp conversation →
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
+                                        Open conversation with {order.customerPhone} →
                                       </button>
                                     )}
                                   </div>
