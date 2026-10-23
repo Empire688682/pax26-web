@@ -11,6 +11,7 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { customAlphabet } from "nanoid";
 import { buildFullUserProfile } from "../../helper/buildFullUserProfile";
 import { sendTransactionalEmail } from "@/app/ults/utils/sendpulseMail";
+import { sendUserVerification } from "../services/sendVerificationService";
 
 dotenv.config();
 
