@@ -263,6 +263,8 @@ export const AppProvider = ({ children }) => {
 
   const verifyUserRedirect = async () => {
     if (!userData) return;
+    // Never gate public storefront pages — they must remain accessible to everyone
+    if (pathname.startsWith("/store")) return;
     if (userData && !userData.userVerify && pathname !== "/verify-user") {
       router.push("/verify-user");
     }
