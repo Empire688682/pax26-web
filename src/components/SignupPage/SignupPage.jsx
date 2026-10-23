@@ -1,6 +1,7 @@
 'use client';
 
-import { X, Mail, Lock, User, Phone, Eye, EyeOff, Zap, ArrowRight, ShieldCheck, Globe } from 'lucide-react';
+import { X, Mail, Lock, User, Phone, Eye, EyeOff, Zap, ArrowRight, ShieldCheck, Globe, Ban } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { useGlobalContext } from '../Context';
 import { useEffect, useState } from 'react';
@@ -31,6 +32,17 @@ const CSS = `
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  @keyframes am-ban-in {
+    from { opacity: 0; transform: scale(0.9) translateY(24px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0); }
+  }
+  @keyframes am-ban-icon {
+    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(4deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+  }
+  .am-ban-card { animation: am-ban-in 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+  .am-ban-icon { animation: am-ban-icon 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
 
   .am-backdrop { 
     animation: am-backdrop 0.2s ease both; 
@@ -103,6 +115,8 @@ export default function SignupPage() {
     pax26,
   } = useGlobalContext();
 
+  const router = useRouter();
+
   const [loading, setLoading]         = useState(false);
   const [awayLoading, setAwayLoading] = useState(false);
   const [error, setError]             = useState("");
@@ -110,6 +124,8 @@ export default function SignupPage() {
   const [focused, setFocused]         = useState("");
   const [showPwd, setShowPwd]         = useState(false);
   const [shaking, setShaking]         = useState(false);
+  const [isBanned, setIsBanned]       = useState(false);
+  const [bannedEmail, setBannedEmail] = useState("");
 
   const primary     = pax26?.primary   || "#3b82f6";
   const bg          = pax26?.bg        || "#ffffff";
@@ -155,6 +171,12 @@ export default function SignupPage() {
       setData({ name: "", email: "", number: "", password: "", provider: "credentials" });
       toast.success("Authentication successful");
     } catch (err) {
+      // ── Banned email — show full-screen block overlay ──
+      if (err?.response?.data?.banned === true) {
+        setBannedEmail(data.email || "");
+        setIsBanned(true);
+        return;
+      }
       setError(err?.response?.data?.message || "Something went wrong");
     } finally { setLoading(false); }
   };
@@ -175,6 +197,98 @@ export default function SignupPage() {
   const handleFormSubmission = e => { e.preventDefault(); userAuthHandler(); };
 
   if (!authModalOpen) return null;
+
+  /* ── Banned email full-screen overlay ────────────────────────── */
+  if (isBanned) {
+    return (
+      <>
+        <style>{CSS}</style>
+        <div
+          className="am-backdrop fixed inset-0 z-[9999] flex items-center justify-center px-4"
+          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", paddingTop: 0 }}
+        >
+          <div
+            className="am-ban-card am-root w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
+            style={{ background: bg, border: `1px solid rgba(239,68,68,0.3)` }}
+          >
+            {/* red gradient strip */}
+            <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef444466)" }} />
+
+            <div className="px-8 py-10 flex flex-col items-center text-center">
+              {/* animated ban icon */}
+              <div
+                className="am-ban-icon w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                style={{
+                  background: "rgba(239,68,68,0.1)",
+                  border: "2px solid rgba(239,68,68,0.3)",
+                  boxShadow: "0 0 40px rgba(239,68,68,0.2)",
+                }}
+              >
+                <Ban size={36} color="#ef4444" />
+              </div>
+
+              {/* heading */}
+              <h2 className="text-2xl font-extrabold mb-2" style={{ color: textPrimary }}>
+                Email Permanently Banned
+              </h2>
+
+              {/* banned email chip */}
+              {bannedEmail && (
+                <div
+                  className="am-mono text-xs px-4 py-1.5 rounded-full mb-4"
+                  style={{
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#ef4444",
+                  }}
+                >
+                  {bannedEmail.toLowerCase()}
+                </div>
+              )}
+
+              {/* explanation */}
+              <p className="text-sm leading-relaxed mb-8" style={{ color: textSecondary }}>
+                This email address has been <strong style={{ color: textPrimary }}>permanently banned</strong> from
+                creating a Pax26 account. If you believe this is a mistake, please reach out to our
+                support team and we will review your case.
+              </p>
+
+              {/* Contact Support button */}
+              <button
+                id="ban-contact-support-btn"
+                onClick={() => {
+                  setAuthModalOpen(false);
+                  setIsBanned(false);
+                  router.push("/contact");
+                }}
+                className="am-btn w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white mb-3"
+                style={{
+                  background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                  boxShadow: "0 10px 28px rgba(239,68,68,0.35)",
+                }}
+              >
+                Contact Pax26 Support
+                <ArrowRight size={15} />
+              </button>
+
+              {/* Dismiss button */}
+              <button
+                id="ban-dismiss-btn"
+                onClick={() => {
+                  setIsBanned(false);
+                  setAuthModalOpen(false);
+                }}
+                className="am-link text-xs font-semibold"
+                style={{ color: textSecondary }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   /* ── Copy per auth type ── */
   const COPY = {

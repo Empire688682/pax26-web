@@ -1,4 +1,5 @@
 import UserModel from "@/app/ults/models/UserModel";
+import BannedEmailModel from "@/app/ults/models/BannedEmailModel";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
@@ -75,12 +76,23 @@ const registerUser = async (req) => {
     }
 
     // Normalize: lowercase email, strip leading country code from phone
-    // so "Pastorfanta42@gmail.com" and "pastorfanta42@gmail.com" are treated as the same,
-    // and "2348140202342" / "08140202342" are treated as the same number.
     const normalizedEmail  = email.trim().toLowerCase();
     const normalizedNumber = number
       ? number.trim().replace(/\s+/g, "").replace(/^\+?234/, "0").replace(/^234/, "0")
       : number;
+
+    // ── Banned email check — must run before any other DB query ──
+    const isBanned = await BannedEmailModel.findOne({ email: normalizedEmail }).lean();
+    if (isBanned) {
+      return NextResponse.json(
+        {
+          success: false,
+          banned: true,
+          message: "This email address has been permanently banned from Pax26. Please contact our support team if you believe this is a mistake.",
+        },
+        { status: 403, headers: corsHeaders() }
+      );
+    }
 
     const existingUser = await UserModel.findOne({
       $or: [{ email: normalizedEmail }, { number: normalizedNumber }]
