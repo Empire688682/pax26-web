@@ -95,7 +95,7 @@ export async function POST(req) {
 
     // Also notify secondary admin
     sendTransactionalEmail({
-      toEmail:      "asehindej@gmail.com",
+      toEmail:      "info@pax26.com",
       toName:       "Pax26 Admin",
       subject:      `⚠️ [Delete Account] Request from ${safeName} (${safeEmail})`,
       html:         adminHtml,

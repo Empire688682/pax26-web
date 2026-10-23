@@ -6,6 +6,7 @@ import { buildStorefrontUrl } from "../store/buildStorefrontUrl.js";
 import ServiceProfileModel from "../../ults/models/ServiceProfileModel.js";
 import SellerProfileModel from "../../ults/models/SellerProfileModel.js";
 import SellerProductModel from "../../ults/models/SellerProductModel.js";
+import SellerOrderModel from "../../ults/models/SellerOrderModel.js";
 import { callGroqAI } from "./grok.js";
 import { callGeminiAI } from "./gemini.js";
 import { callMistralAI } from "./mistral.js";
@@ -452,6 +453,38 @@ export const triggerAIResponse = async ({
 
         const { businessProfile, profileType, products, businessUrl, isTrained } = profileData;
 
+        // ── Fetch real customer order history for AI context (seller only) ──
+        // This gives the agent ground-truth data so it NEVER guesses order status.
+        // Scoped to this seller + this customer's phone. Non-blocking on failure.
+        // Phone numbers can be stored in multiple formats (+234..., 0..., 234...) so
+        // we build a regex that matches all variants to ensure orders are always found.
+        let customerOrders = [];
+        if (profileType === "seller" && businessProfile?._id && session?.visitorPhone) {
+            try {
+                const rawPhone = session.visitorPhone;
+                // Build all common Nigerian phone variants from a single number
+                const digits = rawPhone.replace(/\D/g, "");
+                const local  = digits.startsWith("234") ? "0" + digits.slice(3)
+                             : digits.startsWith("0")   ? digits
+                             : "0" + digits;
+                const intl   = digits.startsWith("234") ? "+" + digits
+                             : digits.startsWith("0")   ? "+234" + digits.slice(1)
+                             : "+234" + digits;
+                const intlNoPlus = intl.replace("+", "");
+                const phoneVariants = [...new Set([rawPhone, local, intl, intlNoPlus, digits])];
+
+                customerOrders = await SellerOrderModel.find({
+                    sellerId: businessProfile._id,
+                    customerPhone: { $in: phoneVariants },
+                })
+                    .sort({ createdAt: -1 })
+                    .limit(5)
+                    .lean();
+            } catch (orderErr) {
+                console.warn("⚠️ Order context fetch failed (non-fatal):", orderErr?.message);
+            }
+        }
+
         // ── Hard stop: no profile or not trained ──────────────────
         if (!businessProfile) {
             console.log(`No business profile found for user ${user._id} — skipping AI`);
@@ -545,10 +578,11 @@ export const triggerAIResponse = async ({
         const systemPrompt = await buildSystemPrompt(
             businessProfile,
             businessUrl,
-            profileType,    // "seller" | "general"
-            products,       // [] for general profiles
-            storefrontUrl,  // null for service profiles or sellers without a slug
-            session         // session context for payment tracking
+            profileType,      // "seller" | "general"
+            products,         // [] for general profiles
+            storefrontUrl,    // null for service profiles or sellers without a slug
+            session,          // session context for payment tracking
+            customerOrders    // real order history — never guess order status
         );
 
         if (!systemPrompt) {

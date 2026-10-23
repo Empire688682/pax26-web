@@ -184,3 +184,86 @@ async function _saveReceiptToInbox({ userId, phoneNumberId, customerPhone, recei
         console.warn("[customerReceipt] Could not save receipt to inbox:", err?.message || err);
     }
 }
+
+/**
+ * Sends a delivery notification via WhatsApp when the seller
+ * marks an order as delivered from the Sales Dashboard.
+ */
+export async function sendCustomerDeliveryNotificationWhatsApp(orderId) {
+    try {
+        const order = await SellerOrderModel.findById(orderId)
+            .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
+            .lean();
+
+        if (!order || !order.customerPhone) {
+            return { success: false, message: "Order or customer phone missing" };
+        }
+
+        const sellerProfile = await SellerProfileModel.findById(order.sellerId).lean();
+        if (!sellerProfile) {
+            return { success: false, message: "Seller profile not found" };
+        }
+
+        const user = await UserModel.findById(sellerProfile.userId).select("whatsapp paxAI").lean();
+        if (!user?.whatsapp?.connected || !user?.whatsapp?.phoneNumberId) {
+            return { success: false, message: "WhatsApp not connected for seller" };
+        }
+
+        const orderReceiptsEnabled = user.paxAI?.orderReceiptsEnabled ?? true;
+        if (!orderReceiptsEnabled) {
+            return { success: false, message: "Order receipts not available on this plan" };
+        }
+
+        const businessName = sellerProfile.businessName || "Our Store";
+        const proofCode = order._id.toString().slice(-8).toUpperCase();
+        const customerName = order.customerName || "Customer";
+
+        // Build item summary
+        let itemsSummary = "";
+        if (order.items && order.items.length > 0) {
+            itemsSummary = order.items
+                .map(i => `• ${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}`)
+                .join("\n");
+        } else {
+            itemsSummary = `• ${order.productId?.name || "Your order"}`;
+        }
+
+        const deliveryMessage =
+`🚚 *YOUR ORDER HAS BEEN DELIVERED!*
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+*Store:* ${businessName}
+*Order Ref:* #${proofCode}
+*Status:* DELIVERED ✅
+
+Hi ${customerName}! Your order has been successfully delivered. 🎉
+
+${itemsSummary}
+
+We hope you love your purchase! If you have any issues or questions, simply reply to this message.
+
+Thank you for shopping with *${businessName}*! 💙`;
+
+        const result = await sendWhatsAppAutomationReply({
+            phoneNumberId: user.whatsapp.phoneNumberId,
+            to: order.customerPhone,
+            text: deliveryMessage,
+        });
+
+        // Save to inbox (non-blocking)
+        if (result?.success) {
+            await _saveReceiptToInbox({
+                userId: sellerProfile.userId,
+                phoneNumberId: user.whatsapp.phoneNumberId,
+                customerPhone: order.customerPhone,
+                receiptMessage: deliveryMessage,
+                proofCode,
+                orderId: order._id.toString(),
+            });
+        }
+
+        return result;
+    } catch (error) {
+        console.error("❌ Error in sendCustomerDeliveryNotificationWhatsApp:", error?.message || error);
+        return { success: false, error: error?.message || error };
+    }
+}

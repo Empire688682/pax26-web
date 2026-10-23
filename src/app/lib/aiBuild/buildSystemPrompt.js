@@ -4,7 +4,7 @@
    The storefront handles all order data — address, delivery fee,
    variants, payment. The AI's role is discovery → storefront → receipt.
 ───────────────────────────────────────────────────────────── */
-function buildSellerPrompt({ profile, products, storefrontUrl, sessionContext = null }) {
+function buildSellerPrompt({ profile, products, storefrontUrl, sessionContext = null, customerOrders = [] }) {
   const toneMap = {
     friendly: "You are warm and approachable, building genuine rapport before guiding towards a purchase.",
     professional: "You are polished, clear, and confident, presenting products with authority.",
@@ -63,6 +63,68 @@ ${profile.promoAnnouncement.text}`
   const pickupAddr = fulfillment.pickupAddress || liveLocation || "Contact store";
   const pickupInst = fulfillment.pickupInstructions || "";
 
+  // ── Live order context (ground truth) ────────────────────────────
+  // This section gives the AI real DB data about the customer's orders.
+  // The agent must ONLY use this data when answering order status questions.
+  const orderContextSection = (() => {
+    if (!customerOrders || customerOrders.length === 0) {
+      return `
+━━━━━━━━━━━━━━━━━━━━━━━━
+CUSTOMER ORDER HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━
+No orders found for this customer yet.
+• If asked about order status: say "I don't have any order on record for you yet. If you placed an order, please share your order code and I'll look into it."
+• NEVER invent or guess an order status.`;
+    }
+
+    const statusLabel = (s) => ({
+      awaiting_payment: "Awaiting Payment ⏳",
+      pending:          "Payment Received — Awaiting Seller Verification 💬",
+      confirmed:        "Payment Confirmed ✅",
+      paid:             "Payment Confirmed ✅",
+      delivered:        "Delivered 🚚",
+      cancelled:        "Cancelled ❌",
+    }[s] || s);
+
+    const orderLines = customerOrders.map((o, i) => {
+      const itemsSummary = (o.items && o.items.length > 0)
+        ? o.items.map(it => `${it.quantity > 1 ? `${it.quantity}x ` : ""}${it.name} (${currencySymbol}${Number(it.price * it.quantity).toLocaleString()})`).join(", ")
+        : (o.productId ? `Product ID: ${o.productId}` : "Item details unavailable");
+      const addr = o.deliveryAddress || o.deliveryLocation || "Not specified";
+      const timeframe = o.deliveryZoneTimeframe ? `Est. delivery: ${o.deliveryZoneTimeframe}` : "";
+      const confirmedNote = o.confirmedAt ? `Confirmed at: ${new Date(o.confirmedAt).toLocaleString()}` : "";
+      const proofNote = o.paymentReceiptSubmittedAt ? `Proof submitted: ${new Date(o.paymentReceiptSubmittedAt).toLocaleString()}` : "";
+      return [
+        `Order ${i + 1}: #${o.orderCode || o._id?.toString().slice(-6)} | Status: ${statusLabel(o.status)}`,
+        `  Items: ${itemsSummary}`,
+        `  Total: ${currencySymbol}${Number(o.totalPrice || 0).toLocaleString()}${o.deliveryFee > 0 ? ` (incl. ${currencySymbol}${Number(o.deliveryFee).toLocaleString()} delivery)` : ""}`,
+        `  Delivery address: ${addr}`,
+        timeframe && `  ${timeframe}`,
+        proofNote && `  ${proofNote}`,
+        confirmedNote && `  ${confirmedNote}`,
+        `  Placed: ${new Date(o.createdAt).toLocaleString()}`,
+      ].filter(Boolean).join("\n");
+    }).join("\n\n");
+
+    return `
+━━━━━━━━━━━━━━━━━━━━━━━━
+CUSTOMER ORDER HISTORY (LIVE DB DATA)
+━━━━━━━━━━━━━━━━━━━━━━━━
+This is real-time data from the database. Use ONLY this to answer order questions.
+
+${orderLines}
+
+ORDER STATUS RULES (CRITICAL — NO EXCEPTIONS):
+• ONLY answer order status questions using the data above. NEVER guess, assume, or invent.
+• If the customer's order shows "Awaiting Payment": tell them payment has not been received yet and guide them to pay.
+• If status is "Payment Received — Awaiting Seller Verification": say their proof was received and is being verified. Give realistic timeframe (usually within a few hours during business hours).
+• If status is "Payment Confirmed" or "Paid": confirm payment is verified and the order is being prepared.
+• If status is "Delivered": confirm the order was delivered.
+• If status is "Cancelled": inform them politely and suggest they place a new order if needed.
+• NEVER say "I’m checking now", "system is updating", or stall with vague promises. Respond with the ACTUAL status immediately.
+• If the customer mentions an order code not in the list above, say: "I can’t find order #[code] linked to your number. Please double-check or contact us directly."`;
+  })();
+
   // ── Payment stage — simplified ────────────────────────────
   // The system now sends the order+payment card automatically when the customer
   // returns with their order code. The AI only needs to handle the receipt step.
@@ -104,6 +166,8 @@ ${productsSection}
 ${storefrontSection}
 
 ${promoSection}
+
+${orderContextSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 PRODUCT & IMAGE POLICY
@@ -227,13 +291,13 @@ ENGAGEMENT RULES
    @param storefrontUrl  Full /store/{slug}?session=TOKEN URL (seller only, optional)
    @param sessionContext SessionModel document or { payment: { expectingPayment, paymentProofReceived } }
 ───────────────────────────────────────────────────────────── */
-export const buildSystemPrompt = async (profile, businessUrl, profileType, products = [], storefrontUrl = null, sessionContext = null) => {
+export const buildSystemPrompt = async (profile, businessUrl, profileType, products = [], storefrontUrl = null, sessionContext = null, customerOrders = []) => {
   if (!profile) {
     return "You are a helpful business assistant on WhatsApp. Be concise, friendly, and professional.";
   }
 
   if (profileType === "seller") {
-    return buildSellerPrompt({ profile, products, storefrontUrl, sessionContext });
+    return buildSellerPrompt({ profile, products, storefrontUrl, sessionContext, customerOrders });
   }
 
   return buildGeneralPrompt({ profile });

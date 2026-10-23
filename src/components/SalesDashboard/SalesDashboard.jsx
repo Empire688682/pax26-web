@@ -101,10 +101,12 @@ export default function SalesDashboard() {
       setProcessingStatus(status);
       const res = await axios.patch(`/api/seller/orders/${orderId}`, { status });
       if (res.data.success) {
-        const msg = status === "confirmed"
+        const msg = status === "confirmed" || status === "paid"
           ? (res.data.customerReceiptSent
             ? "Order confirmed! Branded receipt sent to customer via WhatsApp. 📲"
-            : "Order confirmed successfully.")
+            : "Order confirmed & marked as paid.")
+          : status === "delivered"
+          ? "Order marked as delivered! 🚚"
           : "Order updated";
         toast.success(msg);
         fetchAnalytics();
@@ -144,9 +146,13 @@ export default function SalesDashboard() {
     switch (status) {
       case "paid":
       case "confirmed":
-        return { bg: "rgba(34,197,94,0.15)", color: "#22c55e", label: "Confirmed" };
+        return { bg: "rgba(34,197,94,0.15)", color: "#22c55e", label: "Paid ✓" };
+      case "delivered":
+        return { bg: "rgba(99,102,241,0.15)", color: "#818cf8", label: "Delivered 🚚" };
       case "cancelled":
         return { bg: "rgba(239,68,68,0.15)", color: "#ef4444", label: "Cancelled" };
+      case "awaiting_payment":
+        return { bg: "rgba(59,130,246,0.15)", color: "#60a5fa", label: "Awaiting Payment" };
       default:
         return { bg: "rgba(234,179,8,0.15)", color: "#eab308", label: status || "Pending" };
     }
@@ -579,7 +585,7 @@ export default function SalesDashboard() {
                           </div>
                         )}
 
-                        {/* ── Row 4: Action buttons (pending only) ── */}
+                        {/* ── Row 4: Action buttons ── */}
                         {order.status === "pending" && (
                           <div className="flex items-center gap-2">
                             <button
@@ -591,7 +597,7 @@ export default function SalesDashboard() {
                               {processingOrderId === order._id && processingStatus === "confirmed" ? (
                                 <RefreshCw size={13} className="sd-spin" />
                               ) : <CheckCircle size={13} />}
-                              {processingOrderId === order._id && processingStatus === "confirmed" ? "Confirming…" : "Confirm Order"}
+                              {processingOrderId === order._id && processingStatus === "confirmed" ? "Confirming…" : "Confirm Payment"}
                             </button>
                             <button
                               onClick={() => handleOrderStatus(order._id, "cancelled")}
@@ -605,6 +611,21 @@ export default function SalesDashboard() {
                               Cancel
                             </button>
                           </div>
+                        )}
+
+                        {/* ── Mark Delivered CTA (paid/confirmed orders only) ── */}
+                        {(order.status === "paid" || order.status === "confirmed") && (
+                          <button
+                            onClick={() => handleOrderStatus(order._id, "delivered")}
+                            disabled={processingOrderId === order._id}
+                            className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                            style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}
+                          >
+                            {processingOrderId === order._id && processingStatus === "delivered" ? (
+                              <RefreshCw size={13} className="sd-spin" />
+                            ) : <span style={{ fontSize: "13px" }}>🚚</span>}
+                            {processingOrderId === order._id && processingStatus === "delivered" ? "Updating…" : "Mark as Delivered"}
+                          </button>
                         )}
 
                         {/* ── Row 5: Timestamp ── */}
@@ -721,13 +742,15 @@ export default function SalesDashboard() {
                             )}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase`}
-                              style={{
-                                background: order.status === "paid" || order.status === "confirmed" ? "rgba(34,197,94,0.15)" : order.status === "cancelled" ? "rgba(239,68,68,0.15)" : "rgba(234,179,8,0.15)",
-                                color: order.status === "paid" || order.status === "confirmed" ? "#22c55e" : order.status === "cancelled" ? "#ef4444" : "#eab308"
-                              }}>
-                              {order.status}
-                            </span>
+                            {(() => {
+                              const badge = getStatusBadgeStyle(order.status);
+                              return (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold"
+                                  style={{ background: badge.bg, color: badge.color }}>
+                                  {badge.label}
+                                </span>
+                              );
+                            })()}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {order.status === "pending" && (
@@ -737,14 +760,14 @@ export default function SalesDashboard() {
                                   disabled={processingOrderId === order._id}
                                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                   style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}
-                                  title="Confirm order"
+                                  title="Confirm payment & mark as paid"
                                 >
                                   {processingOrderId === order._id && processingStatus === "confirmed" ? (
                                     <RefreshCw size={12} className="sd-spin" />
                                   ) : (
                                     <CheckCircle size={12} />
                                   )}
-                                  {processingOrderId === order._id && processingStatus === "confirmed" ? "Saving..." : "Confirm"}
+                                  {processingOrderId === order._id && processingStatus === "confirmed" ? "Saving..." : "Confirm Payment"}
                                 </button>
                                 <button
                                   onClick={() => handleOrderStatus(order._id, "cancelled")}
@@ -760,6 +783,22 @@ export default function SalesDashboard() {
                                   )}
                                 </button>
                               </div>
+                            )}
+                            {(order.status === "paid" || order.status === "confirmed") && (
+                              <button
+                                onClick={() => handleOrderStatus(order._id, "delivered")}
+                                disabled={processingOrderId === order._id}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}
+                                title="Mark order as delivered"
+                              >
+                                {processingOrderId === order._id && processingStatus === "delivered" ? (
+                                  <RefreshCw size={12} className="sd-spin" />
+                                ) : (
+                                  <span style={{ fontSize: "11px" }}>🚚</span>
+                                )}
+                                {processingOrderId === order._id && processingStatus === "delivered" ? "Updating..." : "Mark Delivered"}
+                              </button>
                             )}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap" style={{ color: pax26?.textSecondary }}>

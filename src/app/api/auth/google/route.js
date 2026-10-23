@@ -119,7 +119,7 @@ export async function POST(req) {
             // Notify admin of new Google signup (fire-and-forget)
             const signupAt = new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" });
             sendTransactionalEmail({
-                toEmail:   "asehindej@gmail.com",
+                toEmail:   "info@pax26.com",
                 toName:    "Pax26 Admin",
                 subject:   `🎉 New Signup (Google) — ${name} (${normalizedEmail})`,
                 html: `<div style="font-family:Arial,sans-serif;padding:24px;max-width:560px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff;"><div style="border-bottom:2px solid #22c55e;padding-bottom:12px;margin-bottom:20px;"><h2 style="color:#16a34a;margin:0;font-size:18px;">🎉 New User Signed Up (Google)</h2><span style="font-size:11px;color:#6b7280;font-family:monospace;">Pax26 Platform · ${signupAt}</span></div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-bottom:16px;"><p style="margin:0 0 6px;font-size:14px;"><strong>Name:</strong> ${name}</p><p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong> <a href="mailto:${normalizedEmail}" style="color:#16a34a;">${normalizedEmail}</a></p><p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> ${normalizedNumber || "—"}</p><p style="margin:0;font-size:14px;"><strong>Country:</strong> ${country || "—"}</p></div><a href="https://pax26-admin.vercel.app/users" style="display:inline-block;background:#16a34a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">View in Admin Panel</a></div>`,

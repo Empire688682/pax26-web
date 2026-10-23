@@ -183,7 +183,7 @@ const registerUser = async (req) => {
     // ── Notify admin of new signup (fire-and-forget) ──────────────
     const signupAt = new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" });
     sendTransactionalEmail({
-      toEmail:   "asehindej@gmail.com",
+      toEmail:   "info@pax26.com",
       toName:    "Pax26 Admin",
       subject:   `🎉 New Signup — ${name} (${normalizedEmail})`,
       html: `

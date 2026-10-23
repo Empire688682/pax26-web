@@ -8,7 +8,7 @@ import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import { sendSalesNotification } from "@/app/lib/salesNotificationService";
-import { sendCustomerOrderReceiptWhatsApp } from "@/app/lib/customerReceiptService";
+import { sendCustomerOrderReceiptWhatsApp, sendCustomerDeliveryNotificationWhatsApp } from "@/app/lib/customerReceiptService";
 
 export async function OPTIONS() {
     return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -43,18 +43,20 @@ export async function PATCH(req, { params }) {
         }
 
         // Allow manual confirmation without a receipt if verified directly by the seller.
-
+        // "confirmed" from the dashboard = payment confirmed → resolve to "paid" for clarity.
+        // This ensures the AI agent always sees a clean, unambiguous status.
         const previousStatus = order.status;
-        order.status = status;
+        const resolvedStatus = status === "confirmed" ? "paid" : status;
+        order.status = resolvedStatus;
 
-        if (["confirmed", "paid", "delivered"].includes(status) && !order.confirmedAt) {
+        if (["paid", "delivered"].includes(resolvedStatus) && !order.confirmedAt) {
             order.confirmedAt = new Date();
             order.confirmedBy = userId;
         }
 
         await order.save();
 
-        if (["confirmed", "paid", "delivered"].includes(status)) {
+        if (["paid", "delivered"].includes(resolvedStatus)) {
             await SessionModel.updateOne(
                 { visitorPhone: order.customerPhone, userId: sellerProfile.userId },
                 {
@@ -84,8 +86,8 @@ export async function PATCH(req, { params }) {
         let customerReceiptResult = null;
 
         if (
-            ["confirmed", "paid", "delivered"].includes(status) &&
-            !["confirmed", "paid", "delivered"].includes(previousStatus)
+            ["paid", "delivered"].includes(resolvedStatus) &&
+            !["paid", "delivered"].includes(previousStatus)
         ) {
             sellerProfile.totalSalesCount = (sellerProfile.totalSalesCount || 0) + 1;
             sellerProfile.totalSalesAmount = (sellerProfile.totalSalesAmount || 0) + (order.totalPrice || 0);
@@ -107,8 +109,20 @@ export async function PATCH(req, { params }) {
                 isConfirmed: true,
             });
 
-            // 2. Send brand receipt confirmation message to customer via WhatsApp
-            customerReceiptResult = await sendCustomerOrderReceiptWhatsApp(order._id);
+            // 2. Send branded receipt/notification to customer via WhatsApp
+            if (resolvedStatus === "paid") {
+                // Payment just confirmed → send full receipt
+                customerReceiptResult = await sendCustomerOrderReceiptWhatsApp(order._id);
+            } else if (resolvedStatus === "delivered") {
+                // Order just delivered → send delivery notification
+                customerReceiptResult = await sendCustomerDeliveryNotificationWhatsApp(order._id);
+            }
+        }
+
+        // 3. If seller manually marks an already-paid order as delivered,
+        //    still send a delivery notification (previous status was paid/confirmed)
+        if (resolvedStatus === "delivered" && ["paid", "confirmed"].includes(previousStatus)) {
+            customerReceiptResult = await sendCustomerDeliveryNotificationWhatsApp(order._id);
         }
 
         return NextResponse.json({

@@ -103,7 +103,7 @@ export async function POST(req) {
 
     // Also notify secondary admin
     sendTransactionalEmail({
-      toEmail: "asehindej@gmail.com",
+      toEmail: "info@pax26.com",
       toName: "Pax26 Support",
       subject: `📩 [Contact Form] Message from ${safeName}`,
       html: adminHtml,
