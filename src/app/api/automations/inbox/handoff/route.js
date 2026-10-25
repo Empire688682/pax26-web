@@ -49,7 +49,7 @@ export async function POST(req) {
         status: "handed_off",
         "handoff.isHandedOff": true,
         "handoff.handedOffAt": new Date(),
-        "handoff.reason": "manual_takeover",
+        "handoff.reason": "manual",
       });
 
       return NextResponse.json(
@@ -61,11 +61,14 @@ export async function POST(req) {
     // ── Hand back — AI resumes ─────────────────────────────
     if (action === "handback") {
       await SessionModel.findByIdAndUpdate(session._id, {
-        status: "active",
-        "handoff.isHandedOff": false,
-        "handoff.handedBackAt": new Date(),
-        "handoff.autoResumeAt": null,
-        "handoff.reason": null,
+        $set: {
+          status: "active",
+          "handoff.isHandedOff": false,
+          "handoff.handedBackAt": new Date(),
+          "handoff.resolvedBy": userId,
+          "handoff.autoResumeAt": null,
+        },
+        $unset: { "handoff.reason": 1 },
       });
 
       return NextResponse.json(

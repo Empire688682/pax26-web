@@ -1,3 +1,4 @@
+import { detectComplaints } from "@/app/lib/complaintDetector.js";
 import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import SessionModel from "@/app/ults/models/SessionModel";
 import UserModel from "@/app/ults/models/UserModel";
@@ -259,17 +260,159 @@ export const handleIncomingWhatsApp = async (payload) => {
     throw err;
   }
 
-  // ── Step 4.5: Early escalation check (fires before any early returns) ──
-  const ESCALATION_RE = /\b(human|agent|person|manager|speak to|call me|real person|not the bot|not a bot|talk to someone|customer service|supervisor|support team|refund|fraud|scam|cheat|angry|nonsense|useless|terrible|horrible|awful|stupid|not working|i am not happy|i'm not happy|cancel my order|this is wrong|help|issue|problem|damaged|wrong item|bad service|fake|stolen|police|court|lawyer|report|owner|boss|seller|rep|contact person)\b/i;
-  if (ESCALATION_RE.test(inboundText || "")) {
-    const contactName = existingContact?.name || visitorPhone;
-    sendMobilePush(user._id, {
-      type:  "escalation",
-      title: "🚨 Customer Needs You",
-      body:  `${contactName}: ${(inboundText || "").slice(0, 80)}`,
-      data:  { phone: visitorPhone },
-    }).catch(err => console.warn("[pushNotif] Escalation push error:", err?.message));
+
+  // ── Step 4.5: Handoff gate — runs before AI, after message is saved ──────
+  //
+  // Two sub-cases:
+  //   A) Session is already in handoff mode → save message (done above), skip AI.
+  //   B) Session is NOT in handoff → check for complaint triggers.
+  //      If triggered → atomically set handoff, send ack, send push, skip AI.
+  //      If not triggered → continue to AI as normal.
+  //
+  // This runs BEFORE the contact-update step (Step 5) because we want to return
+  // early cleanly. The contact update and session counter update still happen
+  // below in Step 5/6 for already-handed-off sessions too — they run in the
+  // same outer try/catch and are non-blocking.
+
+  // ── Sub-case A: Already in handoff mode ───────────────────────────────────
+  if (session.handoff?.isHandedOff === true) {
+    console.log(`[handoff] ✋ Session ${session.sessionId} is in handoff mode — AI skipped. Saving message only.`);
+    // Still update contact counters (Steps 5+6) so inbox stays accurate — fall through.
+    // We return AFTER those updates at the end of the handoff gate block.
+
+    // Only update contact + session; skip everything else
+    try {
+      const res = await UserModel.updateOne(
+        { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+        {
+          $set: { "whatsapp.contacts.list.$.lastMessageAt": new Date(), "whatsapp.contacts.list.$.updatedAt": new Date() },
+          $inc: { "whatsapp.contacts.list.$.messageCount": 1, "whatsapp.contacts.list.$.inboundCount": 1 },
+        }
+      );
+      if (res.matchedCount === 0) {
+        await UserModel.updateOne({ _id: user._id }, {
+          $addToSet: { "whatsapp.contacts.list": { phone: visitorPhone, status: policy === "ask" ? "pending" : "whitelist", leadStage: "new", leadSource: "whatsapp", messageCount: 1, inboundCount: 1, lastMessageAt: new Date(), createdAt: new Date(), updatedAt: new Date() } }
+        });
+      }
+    } catch (cErr) { console.warn("[handoff] Contact update (handed-off session) failed:", cErr.message); }
+
+    await SessionModel.updateOne(
+      { _id: session._id },
+      { $inc: { "context.messageCount": 1, "context.inboundCount": 1 }, $set: { lastMessageAt: new Date(), "followUp.sent": false } }
+    ).catch(() => {});
+
+    return { ok: true };
   }
+
+  // ── Sub-case B: Not in handoff — check for complaint triggers ────────────
+  const complaintResult = detectComplaints(inboundText || "");
+
+  if (complaintResult.triggered) {
+    console.log(`[handoff] 🚨 Complaint detected — group ${complaintResult.group} (${complaintResult.priority}) | phrases: ${complaintResult.matchedPhrases.slice(0, 3).join(", ")}`);
+
+    // Atomic handoff: only set if not already handed off (race condition guard)
+    const handoffResult = await SessionModel.findOneAndUpdate(
+      { _id: session._id, "handoff.isHandedOff": { $ne: true } },
+      {
+        status: "handed_off",
+        "handoff.isHandedOff": true,
+        "handoff.handedOffAt": new Date(),
+        "handoff.reason": "keyword_trigger",
+        "handoff.triggerGroup": complaintResult.group,
+        "handoff.triggerKeywords": complaintResult.matchedPhrases.slice(0, 10),
+        "handoff.ackSent": false,
+        "handoff.autoResumeAt": null,
+      },
+      { new: true }
+    );
+
+    if (!handoffResult) {
+      // Another concurrent webhook already handed off this session — skip duplicates
+      console.log(`[handoff] ⚠️ Race: session ${session.sessionId} already handed off by concurrent webhook — skipping.`);
+      return { ok: true };
+    }
+
+    // ── Send one acknowledgement to the customer ──────────────────────────
+    const ACK_MESSAGE =
+      "I'm sorry you're experiencing this. I've notified the business owner so they can personally review your message and assist you. Please allow them some time to respond. Thank you for your patience.";
+
+    try {
+      const ackResult = await sendWhatsAppAutomationReply({
+        phoneNumberId,
+        to: visitorPhone,
+        text: ACK_MESSAGE,
+      });
+
+      // Mark ackSent so we never repeat it
+      await SessionModel.findByIdAndUpdate(session._id, { "handoff.ackSent": true });
+
+      // Save acknowledgement to inbox so seller can see what was sent
+      await AIMessageModel.create({
+        messageId: `ack_${Date.now()}_${session.sessionId}`,
+        userId: user._id,
+        sessionId: session.sessionId,
+        platform: "whatsapp",
+        phoneNumberId,
+        from: displayPhone,
+        to: visitorPhone,
+        text: ACK_MESSAGE,
+        direction: "outbound",
+        senderType: "system",
+        status: ackResult?.success ? "sent" : "failed",
+        automation: { isAutoReply: false },
+      }).catch(err => console.warn("[handoff] Ack inbox save failed:", err?.message));
+
+      console.log(`[handoff] ✅ Acknowledgement sent to ${visitorPhone} — success=${ackResult?.success}`);
+    } catch (ackErr) {
+      // Ack failure must NOT resume the AI or undo the handoff
+      console.error("[handoff] ❌ Acknowledgement send failed (handoff stays active):", ackErr?.message);
+      // Mark ackSent=false so it's visible in DB, but handoff remains
+    }
+
+    // ── Send mobile push to seller ────────────────────────────────────────
+    const contactName = existingContact?.name || visitorPhone;
+    const priorityEmoji = complaintResult.priority === "CRITICAL" ? "🚨" : "⚠️";
+    sendMobilePush(user._id, {
+      type: "escalation",
+      title: "Customer Needs You",
+      body: "A customer needs your attention. A complaint or request for human assistance was detected.",
+      data: {
+        sessionId: session.sessionId,
+        phone: visitorPhone,
+        triggerGroup: complaintResult.group,
+        priority: complaintResult.priority,
+        type: "complaint_handoff",
+      },
+    }).catch(err => console.warn("[handoff] Push notification failed (handoff stays active):", err?.message));
+
+    console.log(`[handoff] 📱 Push dispatched for seller ${user._id}`);
+
+    // Update contact counters and session before returning early
+    try {
+      const res2 = await UserModel.updateOne(
+        { _id: user._id, "whatsapp.contacts.list.phone": visitorPhone },
+        {
+          $set: { "whatsapp.contacts.list.$.lastMessageAt": new Date(), "whatsapp.contacts.list.$.updatedAt": new Date() },
+          $inc: { "whatsapp.contacts.list.$.messageCount": 1, "whatsapp.contacts.list.$.inboundCount": 1 },
+        }
+      );
+      if (res2.matchedCount === 0) {
+        await UserModel.updateOne({ _id: user._id }, {
+          $addToSet: { "whatsapp.contacts.list": { phone: visitorPhone, status: policy === "ask" ? "pending" : "whitelist", leadStage: "new", leadSource: "whatsapp", messageCount: 1, inboundCount: 1, lastMessageAt: new Date(), createdAt: new Date(), updatedAt: new Date() } }
+        });
+      }
+    } catch (cErr2) { console.warn("[handoff] Contact update (new handoff) failed:", cErr2.message); }
+
+    await SessionModel.updateOne(
+      { _id: session._id },
+      { $inc: { "context.messageCount": 1, "context.inboundCount": 1 }, $set: { lastMessageAt: new Date(), "followUp.sent": false } }
+    ).catch(() => {});
+
+    console.log(`[handoff] ✅ Handoff complete — session ${session.sessionId} — AI paused`);
+    return { ok: true };
+  }
+
+  // No complaint detected — continue to existing AI flow (Step 5 onwards)
 
   // ── Steps 5 & 6 (parallel): Update contact + session ──────
   try {

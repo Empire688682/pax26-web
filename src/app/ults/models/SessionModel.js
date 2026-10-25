@@ -49,8 +49,17 @@ const SessionSchema = new mongoose.Schema({
                 "manual",          // admin jumped in from dashboard
                 "ai_confused",     // ai triggered it itself
                 "user_requested",  // visitor typed "human" or "agent"
-                "keyword_trigger"  // specific word detected
+                "keyword_trigger"  // complaint keyword detected automatically
             ]
+        },
+        // ── Complaint-detection fields ──────────────────────────────
+        triggerGroup: { type: String, default: null },      // "A"–"H" keyword group that triggered handoff
+        triggerKeywords: { type: [String], default: [] },   // matched phrases (stored for seller context)
+        ackSent: { type: Boolean, default: false },         // true once the acknowledgement WA message is sent
+        resolvedBy: {                                       // who pressed "Resume AI"
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null
         },
         autoResumeAt: { type: Date }, // AI auto-resumes after X hours if admin forgets
     },
