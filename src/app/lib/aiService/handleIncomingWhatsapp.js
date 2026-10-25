@@ -1143,9 +1143,25 @@ ${editLink}`;
           status: "handed_off",
           "handoff.isHandedOff": true,
           "handoff.handedOffAt": new Date(),
-          "handoff.reason": "keyword_trigger",
+          "handoff.reason": "ai_confused",   // closest existing enum value for "chat limit hit"
+          "handoff.triggerGroup": "SPAM",
           "handoff.autoResumeAt": autoResumeAt,
         });
+
+        // ── Notify the seller on mobile ───────────────────────────────────
+        sendMobilePush(user._id, {
+          type: "escalation",
+          title: "💬 Chat Threshold Reached",
+          body: `${visitorPhone} sent ${sessionInboundCount} messages with no purchase intent. AI is paused for 24 hours — tap to review or resume manually.`,
+          data: {
+            sessionId: session.sessionId,
+            phone: visitorPhone,
+            triggerGroup: "SPAM",
+            priority: "MEDIUM",
+            type: "spam_handoff",
+            autoResumeAt: autoResumeAt.toISOString(),
+          },
+        }).catch(err => console.warn("[spam_handoff] Push failed (non-fatal):", err?.message));
 
         console.log(`✅ Step 9.8 — ${visitorPhone} handed off until ${autoResumeAt.toISOString()}`);
         return { ok: true };

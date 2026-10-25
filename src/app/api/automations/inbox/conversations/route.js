@@ -73,6 +73,12 @@ export async function GET(req) {
             }
           },
           totalMessages: { $sum: 1 },
+          inboundMessages: {
+            $sum: { $cond: [{ $eq: ["$direction", "inbound"] }, 1, 0] }
+          },
+          outboundMessages: {
+            $sum: { $cond: [{ $eq: ["$direction", "outbound"] }, 1, 0] }
+          },
           sessionId: { $first: "$sessionId" },
           phoneNumberId: { $first: "$phoneNumberId" },
         }
@@ -113,6 +119,8 @@ export async function GET(req) {
           notes: contact?.notes || "",
           tags: contact?.tags || [],
           leadStage: contact?.leadStage || "new",
+          inboundMessages: conv.inboundMessages ?? 0,
+          outboundMessages: conv.outboundMessages ?? 0,
         };
       })
     );
