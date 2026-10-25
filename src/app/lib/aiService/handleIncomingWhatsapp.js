@@ -334,7 +334,7 @@ export const handleIncomingWhatsApp = async (payload) => {
 
     // ── Send one acknowledgement to the customer ──────────────────────────
     const ACK_MESSAGE =
-      "I'm sorry you're experiencing this. I've notified the business owner so they can personally review your message and assist you. Please allow them some time to respond. Thank you for your patience.";
+      "I understand you. No worries, let me get someone to help you with this directly. 🙏";
 
     try {
       const ackResult = await sendWhatsAppAutomationReply({
