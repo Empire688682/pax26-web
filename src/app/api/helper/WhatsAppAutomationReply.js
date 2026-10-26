@@ -54,6 +54,13 @@ export const sendWhatsAppAutomationReply = async ({ phoneNumberId, to, text, ima
 
         const messageId = response.data?.messages?.[0]?.id;
 
+        // ── Increment total message counter (all outbound, all types) ───
+        // Fire-and-forget — never block the send on a counter write failure.
+        UserModel.findOneAndUpdate(
+            { "whatsapp.phoneNumberId": phoneNumberId },
+            { $inc: { "paxAI.messagesUsedThisMonth": 1, "planAnalytics.aiMessagesUsed": 1 } }
+        ).catch(err => console.warn("[msgCounter] Outbound increment failed (non-fatal):", err?.message));
+
         return {
             success: true,
             messageId,

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useGlobalContext } from "@/components/Context";
 import { usePlanLimits } from "@/app/hooks/usePlanLimits";
 import { MessageSquare, AlertTriangle, ArrowUpRight } from "lucide-react";
@@ -9,11 +9,45 @@ import { MessageSquare, AlertTriangle, ArrowUpRight } from "lucide-react";
  * MessageQuotaBar
  *
  * Shows the user's monthly AI message usage vs their plan limit.
- * Displayed on the Dashboard and AI automation pages.
+ * Polls /api/user/plan-usage every 60 seconds while mounted so the
+ * counter stays live without a full page refresh.
  */
 export default function MessageQuotaBar({ compact = false }) {
-  const { pax26, router } = useGlobalContext();
+  const { pax26, router, setUserData } = useGlobalContext();
   const { plan, messagesLimit, messagesUsed, messagesRemaining, messagesPct, isEnterprise } = usePlanLimits();
+  const timerRef = useRef(null);
+
+  // ── Live poll: refresh usage counter from DB every 60s ──────────
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const res = await fetch("/api/user/plan-usage");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data?.success) return;
+        const { messages, broadcast } = data.data || {};
+        // Patch only the counters — leave all other userData intact
+        setUserData(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            paxAI: {
+              ...(prev.paxAI || {}),
+              messagesUsedThisMonth:            messages?.used            ?? prev.paxAI?.messagesUsedThisMonth,
+              maxMonthlyMessages:               messages?.limit           ?? prev.paxAI?.maxMonthlyMessages,
+              broadcastContactsUsedThisMonth:   broadcast?.used           ?? prev.paxAI?.broadcastContactsUsedThisMonth,
+              broadcastContactsLimit:           broadcast?.limit          ?? prev.paxAI?.broadcastContactsLimit,
+            },
+          };
+        });
+      } catch (_) { /* non-fatal — stale data is acceptable fallback */ }
+    };
+
+    // Immediate fetch on mount, then every 60 seconds
+    refresh();
+    timerRef.current = setInterval(refresh, 60_000);
+    return () => clearInterval(timerRef.current);
+  }, [setUserData]);
 
   // Colour reflects urgency
   let barColor = pax26?.primary || "#3b82f6";
@@ -58,7 +92,7 @@ export default function MessageQuotaBar({ compact = false }) {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                Monthly AI Replies
+                Monthly Messages
               </p>
               <h4 className="text-lg font-black flex items-baseline gap-1" style={{ color: pax26?.textPrimary }}>
                 <span className="text-xl font-bold">{messagesUsed.toLocaleString()}</span>
@@ -103,7 +137,7 @@ export default function MessageQuotaBar({ compact = false }) {
         {/* Footer text */}
         <div className="flex justify-between items-center mt-2 text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.55 }}>
           <span>
-            {`${messagesRemaining.toLocaleString()} replies remaining this cycle`}
+            {`${messagesRemaining.toLocaleString()} messages remaining this cycle`}
           </span>
           <span className="uppercase tracking-wide">Plan: {plan}</span>
         </div>

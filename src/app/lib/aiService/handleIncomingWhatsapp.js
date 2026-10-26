@@ -251,6 +251,12 @@ export const handleIncomingWhatsApp = async (payload) => {
       }),
     });
     console.log("✅ Step 4 — Inbound message saved");
+
+    // ── Increment message counter for inbound customer messages ──
+    // Fire-and-forget — never block the webhook on a counter write.
+    UserModel.findByIdAndUpdate(user._id, {
+      $inc: { "paxAI.messagesUsedThisMonth": 1 },
+    }).catch(err => console.warn("[msgCounter] Inbound increment failed (non-fatal):", err?.message));
   } catch (err) {
     console.log("❌ Error saving message:", err);
     if (err.code === 11000) {

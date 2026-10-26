@@ -186,6 +186,12 @@ export async function sendWhatsAppImageReply({
     const messageId = data.messages?.[0]?.id || null;
     console.log("✅ WhatsApp image sent, messageId:", messageId, "| status:", data.messages?.[0]?.message_status);
 
+    // ── Increment total message counter (image outbound) ────────
+    UserModel.findOneAndUpdate(
+      { "whatsapp.phoneNumberId": phoneNumberId },
+      { $inc: { "paxAI.messagesUsedThisMonth": 1, "planAnalytics.aiMessagesUsed": 1 } }
+    ).catch(err => console.warn("[msgCounter] Image outbound increment failed (non-fatal):", err?.message));
+
     return { success: true, messageId };
   } catch (err) {
     console.error("❌ sendWhatsAppImageReply network error:", err.message);

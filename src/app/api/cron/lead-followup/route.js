@@ -173,9 +173,10 @@ async function runFollowUp() {
 
             if (response?.success) {
               totalSent++;
+              // messagesUsedThisMonth is now incremented inside sendWhatsAppAutomationReply
               await UserModel.updateOne(
                 { _id: session.userId },
-                { $inc: { "paxAI.messagesUsedThisMonth": 1, "planAnalytics.aiMessagesUsed": 1, "planAnalytics.metaCost": 5 } }
+                { $inc: { "planAnalytics.metaCost": 5 } }
               );
               console.log(`[lead-followup] ✅ Sent to ${session.visitorPhone} after ${businessProfile.followUpDelayMinutes}min`);
             } else {
