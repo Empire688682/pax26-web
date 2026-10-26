@@ -191,7 +191,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
           )}
 
           {/* ── Virtual account chip ─────────────────────── */}
-          {
+          {/* {
             pathName === "/dashboard" && (
               <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
             style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
@@ -224,7 +224,7 @@ const WalletBalance = ({ setShowMore, showMore }) => {
           </div>
             )
 
-          }
+          } */}
           
 
           {/* ── Show more toggle (mobile only) ──────────── */}
