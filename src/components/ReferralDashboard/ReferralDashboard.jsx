@@ -94,6 +94,7 @@ export default function ReferralDashboard() {
     try {
       const res = await axios.get('/api/referral/stats');
       if (res.data.success) setStats(res.data.data);
+      console.log("STATS: ", res);
     } catch (err) {
       console.error('Referral stats error:', err);
     } finally {
@@ -161,7 +162,8 @@ export default function ReferralDashboard() {
     );
   }
 
-  const isPaidUser = stats?.isPaidUser;
+  const isWhatsAppConnected = stats?.isWhatsAppConnected;
+  console.log("isWhatsAppConnected: ", isWhatsAppConnected)
   const code = stats?.referralCode;
   const referralUrl = code ? `${typeof window !== 'undefined' ? window.location.origin : ''}/ref=${code}` : '';
 
@@ -190,7 +192,7 @@ export default function ReferralDashboard() {
       </div>
 
       {/* ── Upgrade nudge for free users ────────────────────────── */}
-      {!isPaidUser && (
+      {!isWhatsAppConnected && (
         <div
           className="rounded-2xl p-5 flex items-start gap-4"
           style={{ background: `${primary}10`, border: `1px dashed ${primary}40` }}
@@ -219,7 +221,7 @@ export default function ReferralDashboard() {
       )}
 
       {/* ── Referral code card ───────────────────────────────────── */}
-      {isPaidUser && code && (
+      {isWhatsAppConnected && code && (
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{ background: `linear-gradient(135deg, ${primary}18 0%, ${primary}05 100%)`, border: `1px solid ${primary}30` }}
@@ -275,7 +277,7 @@ export default function ReferralDashboard() {
       )}
 
       {/* ── Reward tiers ────────────────────────────────────────── */}
-      {isPaidUser && (
+      {isWhatsAppConnected && (
         <div>
           <p className="text-xs font-bold uppercase tracking-wider mb-3 px-1" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
             Reward Tiers
@@ -463,7 +465,7 @@ export default function ReferralDashboard() {
       )}
 
       {/* ── Empty state ──────────────────────────────────────────── */}
-      {isPaidUser && (stats?.totalReferrals === 0) && (
+      {isWhatsAppConnected && (stats?.totalReferrals === 0) && (
         <div
           className="rounded-2xl p-8 text-center"
           style={{ background: pax26?.card, border: `1px dashed ${pax26?.border}` }}

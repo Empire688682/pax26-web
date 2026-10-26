@@ -964,8 +964,8 @@ export default function Dashboard() {
                 <Label text="Growth & Tools" isDark={isDark} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
-                    { label: "Broadcast Messaging", href: "/dashboard/automations/broadcast",           icon: <Radio size={15} />,   color: C.indigo  },
-                    { label: "Marketing Campaigns", href: "/dashboard/automations/broadcast/campaigns", icon: <Send size={15} />,    color: C.orange  },
+                    // { label: "Broadcast Messaging", href: "/dashboard/automations/broadcast",           icon: <Radio size={15} />,   color: C.indigo  },
+                    // { label: "Marketing Campaigns", href: "/dashboard/automations/broadcast/campaigns", icon: <Send size={15} />,    color: C.orange  },
                     { label: "Prevent Ban Rules",   href: "/dashboard/prevent-ban",                     icon: <Shield size={15} />,  color: C.emerald },
                     { label: "Referral Earnings",   href: "/dashboard/referral",                        icon: <Users size={15} />,   color: C.cyan    },
                     { label: "Billing & Plans",     href: "/dashboard/billing",                         icon: <Crown size={15} />,   color: C.amber   },

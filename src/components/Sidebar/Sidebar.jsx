@@ -249,8 +249,8 @@ export default function Sidebar() {
 
                 {/* ── STAGE 3: MARKETING & GROWTH ── */}
                 <SectionLabel label="Marketing & Growth" pax26={pax26} />
-                <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
-                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} />
+                {/* <NavItem href="/dashboard/automations/broadcast" icon={Radio} label="Send Broadcast" onClick={close} pax26={pax26} />
+                <NavItem href="/dashboard/automations/broadcast/campaigns" icon={Send} label="Broadcast Reports" onClick={close} pax26={pax26} /> */}
                 <NavItem href="/dashboard/automations/sales" icon={BarChart2} label="Sales Analytics" onClick={close} pax26={pax26} badgeCount={unreadNotifCount} />
                 <NavItem href="/dashboard/prevent-ban" icon={ShieldAlert} label="WhatsApp Safety" onClick={close} pax26={pax26} />
 

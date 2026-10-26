@@ -6,7 +6,6 @@ import UserModel from '@/app/ults/models/UserModel';
 import ReferralModel from '@/app/ults/models/ReferralModel';
 import WalletTransactionModel from '@/app/ults/models/WalletTransactionModel';
 import PlanModel from '@/app/ults/models/PlanModel';
-import { isPaidPlan } from '@/app/lib/referralService';
 
 // Module-level cache for plans — avoids hitting MongoDB on every request
 let cachedPlans = null;
@@ -38,7 +37,7 @@ export async function GET(req) {
     const [user, recentTransactions, pendingReferrals] = await Promise.all([
       UserModel.findById(userId).select(
         'referralCode referralWalletBalance pendingReferralBonus releasedReferralBonus ' +
-        'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI'
+        'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI whatsapp.connected'
       ),
       WalletTransactionModel.find({ userId }).sort({ createdAt: -1 }).limit(10).lean(),
       ReferralModel.countDocuments({ referrer: userId, status: 'pending' }),
@@ -50,12 +49,14 @@ export async function GET(req) {
       );
     }
 
-    const isPaidUser = await isPaidPlan(user.paxAI?.plan);
+    const isWhatsAppConnected = user?.whatsapp?.connected;
+
+    console.log("isWhatsAppConnected: ", isWhatsAppConnected)
 
     // Business rule: withdrawal requires ₦10k + verified account
     const withdrawalBalance = user.referralWalletBalance || 0;
     const isEligibleToWithdraw =
-      withdrawalBalance >= 10000 &&
+      withdrawalBalance >= 5000 &&
       user.userVerify === true &&
       user.canWithdraw === true;
 
@@ -80,7 +81,7 @@ export async function GET(req) {
         success: true,
         data: {
           referralCode: user.referralCode || null,
-          isPaidUser,
+          isWhatsAppConnected,
           totalReferrals: user.totalReferrals || 0,
           successfulReferrals: user.successfulReferrals || 0,
           pendingReferrals,

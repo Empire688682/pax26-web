@@ -293,7 +293,7 @@ export default function SignupPage() {
   /* ── Copy per auth type ── */
   const COPY = {
     register:        { title: "Create Account",  sub: "Join thousands of businesses on Pax26" },
-    login:           { title: "Welcome Back",     sub: "Sign in to your Pax26 account" },
+    login:           { title: "Welcome Back",     sub: "" },
     "reset password":{ title: "Reset Password",  sub: "We'll send a link to your email" },
   };
   const { title, sub } = COPY[authType] || { title: "", sub: "" };
