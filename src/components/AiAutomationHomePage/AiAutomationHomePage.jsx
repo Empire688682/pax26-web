@@ -204,14 +204,11 @@ export default function AiAutomationHomePage() {
           const isActive = userData?.paxAI?.enabled ?? false;
           const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
           const currentPlanMeta = aiPlans?.find(p => p.key === plan);
-          const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages || (
-            plan === "starter" ? 2000 :
-              plan === "business" ? 10000 :
-                plan === "enterprise" ? 50000 : 200
-          );
+          // Always trust PlanModel — never hardcode plan quotas
+          const quota = currentPlanMeta?.messagesLimit ?? userData?.paxAI?.maxMonthlyMessages ?? 0;
           const planExpiresAt = userData?.paxAI?.planExpiresAt;
           const lastUpd = userData?.paxAI?.planStartedAt;
-          const usagePct = Math.min((used / (quota || 1)) * 100, 100);
+          const usagePct = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
 
           let remainingDays = null;
           if (plan !== "free" && planExpiresAt) {

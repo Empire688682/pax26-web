@@ -435,9 +435,9 @@ export default function Dashboard() {
   const isAiOn = !!userData?.paxAI?.enabled;
   const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
   const currentPlanMeta = aiPlans?.find(p => p.key === plan);
-  const quota = currentPlanMeta?.messagesLimit || userData?.paxAI?.maxMonthlyMessages ||
-    ({ starter: 2000, business: 10000, enterprise: 50000 }[plan] ?? 200);
-  const pct = Math.min((used / (quota || 1)) * 100, 100);
+  // Always trust PlanModel (via aiPlans) then user's cached limit — never hardcode
+  const quota = currentPlanMeta?.messagesLimit ?? userData?.paxAI?.maxMonthlyMessages ?? 0;
+  const pct = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
   const pctDisplay = pct === 0 ? "0%" : pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
   const planCol = { free: C.blue, starter: C.cyan, business: C.amber, enterprise: C.indigo }[plan] ?? C.blue;
 

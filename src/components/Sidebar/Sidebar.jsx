@@ -290,7 +290,7 @@ export default function Sidebar() {
                   {/* AI messages progress */}
                   <div>
                     <div className="flex justify-between items-center mb-1" style={{ fontSize: '9px', color: pax26?.textSecondary, opacity: 0.7 }}>
-                      <span>AI Replies</span>
+                      <span>Messages</span>
                       <span className="font-mono">
                         {`${limits.messagesUsed.toLocaleString()}/${limits.messagesLimit.toLocaleString()}`}
                       </span>

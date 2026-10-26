@@ -548,7 +548,7 @@ export const handleIncomingWhatsApp = async (payload) => {
   // Fetch latest limits from PlanModel to ensure sync with Admin
   const currentPlan = user.paxAI?.plan || "free";
   const planMeta = await PlanModel.findOne({ key: currentPlan }).lean();
-  const maxMessages = planMeta?.messagesLimit || user.paxAI?.maxMonthlyMessages || 200;
+  const maxMessages = planMeta?.messagesLimit ?? user.paxAI?.maxMonthlyMessages ?? 0;
   let   usedMessages = user.paxAI?.messagesUsedThisMonth ?? 0;
 
   // Reset monthly counters for FREE tier users if 30 days have passed since planStartedAt
