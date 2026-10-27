@@ -22,10 +22,37 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
 
     if (!profile) return null;
 
-    const filter = {
-      sellerId: profile._id,
-      isAvailable: true,
-    };
+    // ── Resolve plan's product allowance ──────────────────────────────────────
+    // Never trust the client — read directly from the user document.
+    // planProductsLimit === 0 means unlimited (enterprise).
+    const user = await UserModel.findById(profile.userId).select("paxAI.productsLimit").lean();
+    const planProductsLimit = user?.paxAI?.productsLimit ?? 20;
+
+    // ── Determine which products are eligible for public display ─────────────
+    // Eligible = the first N products by createdAt ascending (oldest first = stable
+    // deterministic order; the seller's earliest-created products are always shown).
+    // We fetch all available products once and slice to the plan limit before
+    // applying any further filters, so pagination counts are always correct.
+    const baseFilter = { sellerId: profile._id, isAvailable: true };
+
+    // Fetch all eligible products ordered oldest-first, then cap to plan limit.
+    // Using ascending order (oldest first) ensures that when a seller exceeds their
+    // limit the NEWEST products are the ones hidden — which is the least disruptive
+    // behaviour during a downgrade.
+    const allEligible = await SellerProductModel.find(baseFilter)
+      .sort({ createdAt: 1, _id: 1 }) // deterministic: oldest first, _id as tie-breaker
+      .select("_id")
+      .lean();
+
+    // Cap to plan allowance
+    const eligibleSlice = planProductsLimit > 0
+      ? allEligible.slice(0, planProductsLimit)
+      : allEligible;
+
+    const eligibleIds = eligibleSlice.map((p) => p._id);
+
+    // ── Build the filtered query scoped to eligible IDs ───────────────────────
+    const filter = { _id: { $in: eligibleIds } };
 
     if (category && category !== "all") {
       filter.category = category;
@@ -46,12 +73,13 @@ async function getStoreData(slug, { page = 1, limit = 20, category = "all", q = 
 
     const [products, totalProducts, rawCategories] = await Promise.all([
       SellerProductModel.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 }) // newest-first for display within the eligible set
         .skip(skip)
         .limit(limit)
         .lean(),
       SellerProductModel.countDocuments(filter),
-      SellerProductModel.distinct("category", { sellerId: profile._id, isAvailable: true }),
+      // Categories only from the eligible set so no hidden-product category leaks
+      SellerProductModel.distinct("category", { _id: { $in: eligibleIds } }),
     ]);
 
     const categories = rawCategories.filter(Boolean).sort();

@@ -144,8 +144,14 @@ function cleanQueryText(text) {
 
 /* ─────────────────────────────────────────────────────────────
    TIER 1: MongoDB Full-Text Search
+   
+   @param {string|object} sellerId
+   @param {string}        queryText
+   @param {object}        priceFilter        — { min?, max? }
+   @param {number}        limit
+   @param {object[]|null} allowedProductIds  — restrict to these IDs (plan limit)
 ───────────────────────────────────────────────────────────── */
-async function textSearch(sellerId, queryText, priceFilter, limit) {
+async function textSearch(sellerId, queryText, priceFilter, limit, allowedProductIds) {
   if (!queryText || queryText.length < 2) return [];
 
   const filter = {
@@ -154,6 +160,11 @@ async function textSearch(sellerId, queryText, priceFilter, limit) {
     $text: { $search: queryText },
     ...buildPriceFilter(priceFilter),
   };
+
+  // Restrict to plan-eligible products when a list is provided
+  if (allowedProductIds !== null && allowedProductIds !== undefined) {
+    filter._id = { $in: allowedProductIds };
+  }
 
   try {
     return await SellerProductModel.find(filter, { score: { $meta: "textScore" } })
@@ -169,8 +180,14 @@ async function textSearch(sellerId, queryText, priceFilter, limit) {
 
 /* ─────────────────────────────────────────────────────────────
    TIER 2: Regex Fallback
+
+   @param {string|object} sellerId
+   @param {string}        queryText
+   @param {object}        priceFilter        — { min?, max? }
+   @param {number}        limit
+   @param {object[]|null} allowedProductIds  — restrict to these IDs (plan limit)
 ───────────────────────────────────────────────────────────── */
-async function regexSearch(sellerId, queryText, priceFilter, limit) {
+async function regexSearch(sellerId, queryText, priceFilter, limit, allowedProductIds) {
   if (!queryText || queryText.length < 2) return [];
 
   // Split into meaningful tokens (min 3 chars, skip stop words)
@@ -213,6 +230,11 @@ async function regexSearch(sellerId, queryText, priceFilter, limit) {
     ...buildPriceFilter(priceFilter),
   };
 
+  // Restrict to plan-eligible products when a list is provided
+  if (allowedProductIds !== null && allowedProductIds !== undefined) {
+    orFilter._id = { $in: allowedProductIds };
+  }
+
   return SellerProductModel.find(orFilter).limit(limit).lean();
 }
 
@@ -249,21 +271,26 @@ function dedup(products) {
 /* ─────────────────────────────────────────────────────────────
    MAIN EXPORT: searchProducts
    
-   @param {object|string} sellerId  - SellerProfile._id
-   @param {string}        query     - raw customer message text
+   @param {object|string} sellerId         - SellerProfile._id
+   @param {string}        query            - raw customer message text
+   @param {object}        [options]
+   @param {object[]|null} [options.allowedProductIds]
+     When provided, search results are restricted to this set of product IDs.
+     Pass null or omit for unlimited plans (no restriction).
+     Used by the public storefront search API to honour plan product limits.
    @returns {{ results: product[], query: string, priceConstraints: object, tier: string }}
 ───────────────────────────────────────────────────────────── */
-export async function searchProducts(sellerId, query) {
+export async function searchProducts(sellerId, query, { allowedProductIds = null } = {}) {
   const priceConstraints = extractPriceConstraints(query);
   const cleanedQuery = cleanQueryText(query);
 
   // Tier 1: full-text
-  let results = await textSearch(sellerId, cleanedQuery, priceConstraints, MAX_RESULTS);
+  let results = await textSearch(sellerId, cleanedQuery, priceConstraints, MAX_RESULTS, allowedProductIds);
   let tier = "text";
 
   // Tier 2: regex fallback if text search found nothing
   if (!results.length) {
-    results = await regexSearch(sellerId, cleanedQuery, priceConstraints, MAX_RESULTS);
+    results = await regexSearch(sellerId, cleanedQuery, priceConstraints, MAX_RESULTS, allowedProductIds);
     tier = "regex";
   }
 

@@ -547,7 +547,7 @@ function ProductForm({ initial, onSave, onCancel, p, currency, sellerId, saving,
 }
 
 /* ── Product Card (list view) ───────────────────────────── */
-function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSlug }) {
+function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSlug, hiddenByPlan }) {
   const [deleting, setDeleting] = useState(false);
   const displayPrice = product.discountPrice || product.price;
   const imgUrl = product.images?.[0]?.url;
@@ -560,15 +560,20 @@ function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSl
   };
 
   return (
-    <div style={{ background: p?.secondaryBg, borderRadius: "16px", border: `1px solid ${p?.border}`, overflow: "hidden", display: "flex", flexDirection: "column", transition: "box-shadow 0.15s" }}
+    <div style={{ background: p?.secondaryBg, borderRadius: "16px", border: `1px solid ${hiddenByPlan ? "#f59e0b44" : p?.border}`, overflow: "hidden", display: "flex", flexDirection: "column", transition: "box-shadow 0.15s" }}
       onMouseEnter={e => e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.08)"}
       onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
       {/* Image */}
       <div style={{ paddingTop: "70%", position: "relative", background: p?.bg, flexShrink: 0 }}>
-        {imgUrl ? <img src={imgUrl} alt={product.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        {imgUrl ? <img src={imgUrl} alt={product.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: hiddenByPlan ? 0.6 : 1 }} />
           : <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: p?.textPrimary, opacity: 0.2 }}><PackageIcon /></div>}
-        {/* Availability badge */}
-        <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+        {/* Status badge — hidden-by-plan takes priority over availability */}
+        <div style={{ position: "absolute", top: "8px", right: "8px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+          {hiddenByPlan && (
+            <span title="This product is not visible on your storefront because your plan limit has been reached" style={{ padding: "4px 10px", borderRadius: "6px", background: "#f59e0b", color: "#fff", fontSize: "10px", fontWeight: 800, letterSpacing: "0.06em" }}>
+              PLAN LIMIT
+            </span>
+          )}
           <button onClick={() => onToggle(product._id, !product.isAvailable)} title={product.isAvailable ? "Click to hide" : "Click to show"} style={{ padding: "4px 10px", borderRadius: "6px", border: "none", background: product.isAvailable ? "#22c55e" : "#888", color: "#fff", fontSize: "10px", fontWeight: 800, cursor: "pointer", letterSpacing: "0.06em" }}>
             {product.isAvailable ? "LIVE" : "HIDDEN"}
           </button>
@@ -578,6 +583,9 @@ function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSl
       <div style={{ padding: "14px", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
         {product.category && <span style={{ fontSize: "10px", fontWeight: 700, color: p?.textPrimary, opacity: 0.45, textTransform: "uppercase", letterSpacing: "0.08em" }}>{product.category}</span>}
         <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: p?.textPrimary, lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{product.name}</p>
+        {hiddenByPlan && (
+          <p style={{ margin: 0, fontSize: "10px", color: "#f59e0b", fontWeight: 700 }}>Not visible on storefront — plan limit reached</p>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
           <span style={{ fontSize: "16px", fontWeight: 900, color: p?.textPrimary }}>{formatPrice(displayPrice, currency)}</span>
           {product.discountPrice && <span style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.4, textDecoration: "line-through" }}>{formatPrice(product.price, currency)}</span>}
@@ -589,10 +597,15 @@ function ProductCard({ product, currency, onEdit, onDelete, onToggle, p, storeSl
         <button onClick={() => onEdit(product)} style={{ flex: 1, padding: "10px", border: "none", background: "transparent", color: p?.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", fontWeight: 600, opacity: 0.7, transition: "opacity 0.15s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}>
           <EditIcon /> Edit
         </button>
-        {storeSlug && (
+        {storeSlug && !hiddenByPlan && (
           <a href={`/store/${storeSlug}/${product.slug || product._id}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "10px", borderLeft: `1px solid ${p?.border}`, borderRight: `1px solid ${p?.border}`, background: "transparent", color: p?.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", fontWeight: 600, opacity: 0.7, textDecoration: "none", transition: "opacity 0.15s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}>
             <EyeIcon /> Preview
           </a>
+        )}
+        {storeSlug && hiddenByPlan && (
+          <span style={{ flex: 1, padding: "10px", borderLeft: `1px solid ${p?.border}`, borderRight: `1px solid ${p?.border}`, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", fontWeight: 600, color: p?.textPrimary, opacity: 0.35 }} title="Not visible on storefront due to plan limit">
+            <EyeIcon /> Hidden
+          </span>
         )}
         <button onClick={handleDelete} disabled={deleting} style={{ flex: 1, padding: "10px", border: "none", background: "transparent", color: "#ef4444", cursor: deleting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", fontWeight: 600, opacity: 0.7, transition: "opacity 0.15s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.7"}>
           {deleting ? <Spinner color="#ef4444" size={14} /> : <TrashIcon />} Delete
@@ -625,6 +638,16 @@ export default function ProductManager() {
   // Plan limits
   const productsLimit = limits.productsLimit;            // 0 = unlimited
   const atLimit = productsLimit > 0 && products.length >= productsLimit;
+
+  // Derived visibility stats (for downgrade UX)
+  // Products that would be shown on the public storefront
+  const storefrontVisibleCount = productsLimit > 0 ? Math.min(products.length, productsLimit) : products.length;
+  // Products hidden because the plan limit is exceeded
+  const hiddenByPlanCount = productsLimit > 0 ? Math.max(0, products.length - productsLimit) : 0;
+  // How many new products can still be created
+  const availableSlots = productsLimit > 0 ? Math.max(0, productsLimit - products.length) : Infinity;
+  // Is the seller over their limit (downgrade scenario)?
+  const overLimit = productsLimit > 0 && products.length > productsLimit;
 
   // Fetch products + profile data
   const fetchAll = useCallback(async () => {
@@ -673,8 +696,23 @@ export default function ProductManager() {
     try {
       const res = await fetch("/api/seller/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       const json = await res.json();
-      if (json.success) { setProducts(prev => [json.product, ...prev]); setView("list"); }
-      else alert("Save failed: " + (json.message || "Unknown error"));
+      if (json.success) {
+        setProducts(prev => [json.product, ...prev]);
+        setView("list");
+      } else if (json.limitReached) {
+        // Server confirmed the plan limit — show a clear, actionable message
+        const limit = json.productsLimit;
+        const current = json.currentCount;
+        const toDelete = Math.max(0, current - limit + 1);
+        alert(
+          `You've reached your plan's product limit.\n\n` +
+          `Your current plan allows ${limit} product${limit !== 1 ? "s" : ""}, and you currently have ${current} product${current !== 1 ? "s" : ""} in your account.\n\n` +
+          `Your existing products have been preserved — only the first ${limit} are visible on your storefront.\n\n` +
+          `Delete at least ${toDelete} product${toDelete !== 1 ? "s" : ""} to create another, or upgrade your plan.`
+        );
+      } else {
+        alert("Save failed: " + (json.message || "Unknown error"));
+      }
     } catch { alert("Network error. Please try again."); }
     finally { setSaving(false); }
   };
@@ -759,7 +797,7 @@ export default function ProductManager() {
         <div>
           <h1 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 26px)", fontWeight: 900, color: p?.textPrimary, letterSpacing: "-0.03em" }}>Product Manager</h1>
           <p style={{ margin: "4px 0 0", fontSize: "13px", color: p?.textPrimary, opacity: 0.5 }}>
-            {products.length} product{products.length !== 1 ? "s" : ""} · {products.filter(x => x.isAvailable).length} live
+            {products.length} product{products.length !== 1 ? "s" : ""} in your account · {products.filter(x => x.isAvailable).length} live
             {productsLimit > 0 && (
               <span style={{ marginLeft: "8px", color: atLimit ? "#ef4444" : p?.primary, fontWeight: 700 }}>
                 ({products.length}/{productsLimit} plan limit)
@@ -790,28 +828,75 @@ export default function ProductManager() {
 
       {/* Products limit progress bar — shown when a limit applies */}
       {productsLimit > 0 && (
-        <div style={{ padding: "12px 16px", borderRadius: "12px", background: p?.secondaryBg, border: `1px solid ${atLimit ? "#ef444433" : p?.border}` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-            <span style={{ fontSize: "12px", fontWeight: 600, color: p?.textSecondary, opacity: 0.7 }}>Products used</span>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: atLimit ? "#ef4444" : p?.primary }}>
-              {products.length} / {productsLimit}
-              {productsLimit === 0 && " (unlimited)"}
-            </span>
-          </div>
-          <div style={{ width: "100%", height: "6px", borderRadius: "999px", background: p?.border, overflow: "hidden" }}>
-            <div style={{
-              height: "100%",
-              borderRadius: "999px",
-              width: `${Math.min(100, (products.length / productsLimit) * 100)}%`,
-              background: atLimit ? "#ef4444" : products.length / productsLimit >= 0.7 ? "#f59e0b" : p?.primary,
-              transition: "width 0.5s ease",
-            }} />
-          </div>
-          {atLimit && (
-            <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>
-              You've reached your plan limit. <button onClick={() => router.push("/dashboard/billing")} style={{ background: "none", border: "none", color: "#ef4444", fontWeight: 700, cursor: "pointer", padding: 0, textDecoration: "underline", fontSize: "11px" }}>Upgrade your plan</button> to add more products.
-            </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {/* Downgrade banner — shown only when stored products exceed plan allowance */}
+          {overLimit && (
+            <div style={{ padding: "16px", borderRadius: "14px", background: "#fef3c715", border: "1px solid #f59e0b44", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                <span style={{ fontSize: "20px", flexShrink: 0 }}>⚠️</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: "13px", fontWeight: 800, color: p?.textPrimary }}>
+                    Some products are hidden from your storefront
+                  </p>
+                  <p style={{ margin: 0, fontSize: "12px", color: p?.textPrimary, opacity: 0.75, lineHeight: 1.6 }}>
+                    Your plan allows <strong>{productsLimit}</strong> products on your storefront, but you have <strong>{products.length}</strong> products in your account.
+                    The oldest <strong>{storefrontVisibleCount}</strong> products are visible to customers — the newest <strong>{hiddenByPlanCount}</strong> are stored safely but hidden.
+                    Your products have <strong>not been deleted</strong>. To make all your products visible, upgrade your plan or delete at least {Math.max(0, products.length - productsLimit + 1)} product{products.length - productsLimit + 1 !== 1 ? "s" : ""} to create a free slot.
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => router.push("/dashboard/billing")}
+                  style={{ padding: "8px 16px", borderRadius: "8px", background: "#f59e0b", color: "#fff", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "12px" }}
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            </div>
           )}
+
+          {/* Stats row */}
+          {productsLimit > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
+              {[
+                { label: "In your account", value: products.length, color: p?.textPrimary },
+                { label: "Plan's storefront limit", value: productsLimit, color: p?.primary },
+                { label: "Visible on storefront", value: storefrontVisibleCount, color: "#22c55e" },
+                ...(hiddenByPlanCount > 0 ? [{ label: "Hidden by plan", value: hiddenByPlanCount, color: "#f59e0b" }] : []),
+                { label: "Slots available", value: availableSlots === Infinity ? "∞" : availableSlots, color: availableSlots === 0 ? "#ef4444" : "#22c55e" },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ padding: "10px 14px", borderRadius: "10px", background: p?.secondaryBg, border: `1px solid ${p?.border}`, textAlign: "center" }}>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color }}>{value}</div>
+                  <div style={{ fontSize: "10px", fontWeight: 600, color: p?.textPrimary, opacity: 0.55, marginTop: "2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Progress bar */}
+          <div style={{ padding: "12px 16px", borderRadius: "12px", background: p?.secondaryBg, border: `1px solid ${atLimit ? "#ef444433" : p?.border}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: p?.textSecondary, opacity: 0.7 }}>Storefront slots used</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: atLimit ? "#ef4444" : p?.primary }}>
+                {storefrontVisibleCount} / {productsLimit}
+              </span>
+            </div>
+            <div style={{ width: "100%", height: "6px", borderRadius: "999px", background: p?.border, overflow: "hidden" }}>
+              <div style={{
+                height: "100%",
+                borderRadius: "999px",
+                width: `${Math.min(100, (storefrontVisibleCount / productsLimit) * 100)}%`,
+                background: atLimit ? "#ef4444" : storefrontVisibleCount / productsLimit >= 0.7 ? "#f59e0b" : p?.primary,
+                transition: "width 0.5s ease",
+              }} />
+            </div>
+            {atLimit && !overLimit && (
+              <p style={{ margin: "6px 0 0", fontSize: "11px", color: "#ef4444" }}>
+                You've reached your plan limit. <button onClick={() => router.push("/dashboard/billing")} style={{ background: "none", border: "none", color: "#ef4444", fontWeight: 700, cursor: "pointer", padding: 0, textDecoration: "underline", fontSize: "11px" }}>Upgrade your plan</button> to add more products.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -834,13 +919,24 @@ export default function ProductManager() {
       {/* Product Grid */}
       {filtered.length > 0 ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "16px" }}>
-          {filtered.map(prod => (
-            <ProductCard key={prod._id} product={prod} currency={currency} p={p} storeSlug={storeSlug}
-              onEdit={prod => { setEditing(prod); setView("edit"); }}
-              onDelete={handleDelete}
-              onToggle={handleToggle}
-            />
-          ))}
+          {filtered.map((prod, index) => {
+            // Determine whether this product is hidden because of the plan limit.
+            // Products are ordered newest-first in the 'products' array (from the API),
+            // but the storefront shows oldest-first up to the plan limit.
+            // To compute which products are hidden, we work from the full list sorted
+            // oldest-first: anything beyond index (productsLimit - 1) is hidden.
+            // We map each product to its position in the oldest-first ordering.
+            const oldestFirstIndex = products.length - 1 - products.findIndex(x => x._id === prod._id);
+            const hiddenByPlan = productsLimit > 0 && oldestFirstIndex >= productsLimit;
+            return (
+              <ProductCard key={prod._id} product={prod} currency={currency} p={p} storeSlug={storeSlug}
+                hiddenByPlan={hiddenByPlan}
+                onEdit={prod => { setEditing(prod); setView("edit"); }}
+                onDelete={handleDelete}
+                onToggle={handleToggle}
+              />
+            );
+          })}
         </div>
       ) : (
         <div style={{ textAlign: "center", padding: "72px 20px", background: p?.secondaryBg, borderRadius: "24px", border: `2px dashed ${p?.border}` }}>

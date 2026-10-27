@@ -10,6 +10,7 @@ import ProductDetailPage from "@/components/Storefront/ProductDetailPage";
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
 import SellerProductModel from "@/app/ults/models/SellerProductModel";
+import UserModel from "@/app/ults/models/UserModel";
 
 async function getStoreData(slug) {
   try {
@@ -21,11 +22,35 @@ async function getStoreData(slug) {
 
     if (!profile) return null;
 
-    const products = await SellerProductModel.find({
+    // ── Resolve plan's product allowance ──────────────────────────────────────
+    // Read directly from the user document — never trust client input.
+    // planProductsLimit === 0 means unlimited (enterprise).
+    const user = await UserModel.findById(profile.userId).select("paxAI.productsLimit").lean();
+    const planProductsLimit = user?.paxAI?.productsLimit ?? 20;
+
+    // ── Determine eligible product IDs ───────────────────────────────────────
+    // Uses the same deterministic ordering as the storefront listing page
+    // (oldest-first by createdAt, _id as tie-breaker) so the same products are
+    // consistently visible or hidden regardless of which page is accessed.
+    const allAvailable = await SellerProductModel.find({
       sellerId: profile._id,
       isAvailable: true,
     })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1, _id: 1 })
+      .select("_id")
+      .lean();
+
+    const eligibleSlice = planProductsLimit > 0
+      ? allAvailable.slice(0, planProductsLimit)
+      : allAvailable;
+
+    const eligibleIds = eligibleSlice.map((p) => p._id);
+
+    // Fetch only the eligible products for the storefront
+    const products = await SellerProductModel.find({
+      _id: { $in: eligibleIds },
+    })
+      .sort({ createdAt: -1 }) // newest-first for display / related products
       .lean();
 
     // Serialize through JSON to strip all BSON ObjectId / Buffer types

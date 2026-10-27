@@ -16,6 +16,8 @@
 
 import { connectDb } from "@/app/ults/db/ConnectDb";
 import SellerProfileModel from "@/app/ults/models/SellerProfileModel";
+import SellerProductModel from "@/app/ults/models/SellerProductModel";
+import UserModel from "@/app/ults/models/UserModel";
 import { searchProducts } from "@/app/lib/store/searchProducts";
 import { NextResponse } from "next/server";
 
@@ -43,7 +45,7 @@ export async function GET(req, { params }) {
       );
     }
 
-    // Resolve slug → sellerId
+    // Resolve slug → seller profile
     const profile = await SellerProfileModel.findOne({
       slug: slug.toLowerCase().trim(),
       isActive: true,
@@ -56,9 +58,38 @@ export async function GET(req, { params }) {
       );
     }
 
-    const { results, hasResults, tier } = await searchProducts(profile._id, query);
+    // ── Resolve plan's product allowance ─────────────────────────────────────
+    // Read directly from the DB — never trust client-supplied values.
+    // planProductsLimit === 0 means unlimited (enterprise).
+    const user = await UserModel.findById(profile.userId).select("paxAI.productsLimit").lean();
+    const planProductsLimit = user?.paxAI?.productsLimit ?? 20;
 
-    // Strip private fields from each product
+    // ── Build the set of eligible product IDs ────────────────────────────────
+    // Same deterministic ordering used by the storefront listing and product
+    // detail pages (oldest-first, _id tie-breaker) so search results are
+    // consistent with what's visible on the storefront.
+    let allowedProductIds = null; // null = no restriction (unlimited plan)
+
+    if (planProductsLimit > 0) {
+      const allAvailable = await SellerProductModel.find({
+        sellerId: profile._id,
+        isAvailable: true,
+      })
+        .sort({ createdAt: 1, _id: 1 })
+        .select("_id")
+        .lean();
+
+      const eligibleSlice = allAvailable.slice(0, planProductsLimit);
+      allowedProductIds = eligibleSlice.map((p) => p._id);
+    }
+
+    const { results, hasResults, tier } = await searchProducts(
+      profile._id,
+      query,
+      { allowedProductIds }
+    );
+
+    // Strip private fields before responding
     const publicResults = results.map(p => ({
       _id: p._id,
       slug: p.slug || null,
