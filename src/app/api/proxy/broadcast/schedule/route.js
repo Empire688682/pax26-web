@@ -9,41 +9,9 @@ export async function OPTIONS() {
 }
 
 export async function POST(req) {
-  try {
-    const userId = await verifyToken(req);
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: "Not authenticated." },
-        { status: 401, headers: corsHeaders() }
-      );
-    }
-
-    const body = await req.json();
-
-    if (!ADMIN_URL) {
-      return NextResponse.json(
-        { success: false, message: "Admin backend URL not configured." },
-        { status: 500, headers: corsHeaders() }
-      );
-    }
-
-    const res = await fetch(`${ADMIN_URL}/broadcast/schedule`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status, headers: corsHeaders() });
-
-  } catch (error) {
-    console.error("Proxy /broadcast/schedule error:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to schedule broadcast." },
-      { status: 500, headers: corsHeaders() }
-    );
-  }
+  // Broadcast temporarily disabled — coming soon
+  return NextResponse.json(
+    { success: false, message: "Broadcast is coming soon. Stay tuned!" },
+    { status: 503, headers: corsHeaders() }
+  );
 }
