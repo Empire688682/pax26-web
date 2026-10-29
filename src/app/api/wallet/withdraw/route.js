@@ -14,6 +14,7 @@ import { verifyToken } from '../../helper/VerifyToken';
 import { corsHeaders } from '@/app/ults/corsHeaders/corsHeaders';
 import UserModel from '@/app/ults/models/UserModel';
 import WalletTransactionModel from '@/app/ults/models/WalletTransactionModel';
+import { getReferralConfig } from '@/app/ults/models/ReferralConfigModel';
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders() });
@@ -39,6 +40,8 @@ export async function POST(req) {
     }
 
     const balance = user.referralWalletBalance || 0;
+    // Fetch admin-configurable policy (withdrawal minimum + lock days)
+    const config = await getReferralConfig();
 
     /* ── Eligibility checks ─────────────────────────────────────── */
     if (!user.userVerify) {
@@ -48,11 +51,11 @@ export async function POST(req) {
       );
     }
 
-    if (balance < 10000) {
+    if (balance < config.withdrawalMinimum) {
       return NextResponse.json(
         {
           success: false,
-          message: `Minimum withdrawal balance is ₦10,000. Your current balance is ₦${balance.toLocaleString()}.`,
+          message: `Minimum withdrawal balance is ₦${config.withdrawalMinimum.toLocaleString()}. Your current balance is ₦${balance.toLocaleString()}.`,
         },
         { status: 400, headers: corsHeaders() }
       );
@@ -65,7 +68,7 @@ export async function POST(req) {
       return NextResponse.json(
         {
           success: false,
-          message: `Withdrawal is locked for ${daysLeft} more day(s) due to the 14-day holding period.`,
+          message: `Withdrawal is locked for ${daysLeft} more day(s) due to the ${config.withdrawalLockDays}-day holding period.`,
           withdrawalEligibleAt: user.withdrawalEligibleAt,
         },
         { status: 403, headers: corsHeaders() }

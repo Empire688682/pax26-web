@@ -78,6 +78,14 @@ const UserSchema = new mongoose.Schema(
     canWithdraw: { type: Boolean, default: false },
     withdrawalEligibleAt: { type: Date, default: null },   // 14-day lock from last reward
 
+    // Cashout request tracking
+    // true while a bank-payout cashout request is pending admin approval
+    cashoutPending: { type: Boolean, default: false },
+    // Bank details used for cashout requests (separate from VTU bank field)
+    cashoutBankName:      { type: String, default: "" },
+    cashoutAccountNumber: { type: String, default: "" },
+    cashoutAccountName:   { type: String, default: "" },
+
     /* =====================
    WHATSAPP CONFIG WHATSAPP (META)
     ===================== */
@@ -191,7 +199,7 @@ const UserSchema = new mongoose.Schema(
       businessType: { type: String, enum: ["seller", "service"], default: null },
       planStartedAt: { type: Date, default: Date.now },
       planExpiresAt: { type: Date, default: null },  // planStartedAt + 30 days
-      autoRenew:     { type: Boolean, default: false }, // auto-charge wallet on expiry
+      autoRenew:     { type: Boolean, default: true }, // auto-charge wallet on expiry
       lastUpdated: { type: Date, default: Date.now },
 
       // ── Expiry Reminder Tracking ──────────────────────────

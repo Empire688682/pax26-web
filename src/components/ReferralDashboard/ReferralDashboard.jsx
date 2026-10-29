@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 import {
   Copy, Check, Users, TrendingUp, Wallet, Clock,
   Gift, AlertCircle, ChevronRight, Sparkles, Lock,
-  Unlock, ArrowUpRight, RefreshCw, Share2, Star
+  Unlock, ArrowUpRight, RefreshCw, Share2, Star,
+  Banknote, ArrowRightLeft, Hourglass, BadgeCheck
 } from 'lucide-react';
 import { useGlobalContext } from '../Context';
 
@@ -84,6 +85,10 @@ export default function ReferralDashboard() {
   const [copied, setCopied] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  // Cashout (bank payout) form state
+  const [showCashoutForm, setShowCashoutForm] = useState(false);
+  const [cashoutSubmitting, setCashoutSubmitting] = useState(false);
+  const [cashoutBank, setCashoutBank] = useState({ bankName: '', accountNumber: '', accountName: '' });
 
   const primary = pax26?.primary || '#3b82f6';
 
@@ -93,7 +98,13 @@ export default function ReferralDashboard() {
     else setRefreshing(true);
     try {
       const res = await axios.get('/api/referral/stats');
-      if (res.data.success) setStats(res.data.data);
+      if (res.data.success) {
+        setStats(res.data.data);
+        // Pre-fill cashout form with saved bank details
+        if (res.data.data?.savedBank?.bankName) {
+          setCashoutBank(res.data.data.savedBank);
+        }
+      }
       console.log("STATS: ", res);
     } catch (err) {
       console.error('Referral stats error:', err);
@@ -116,10 +127,10 @@ export default function ReferralDashboard() {
     });
   };
 
-  /* ── withdraw ───────────────────────────────────────────────────── */
+  /* ── withdraw to main wallet ────────────────────────────────────── */
   const handleWithdraw = async () => {
     if (!stats?.canWithdraw) return;
-    if (!window.confirm('Transfer your referral wallet balance to your main Pax26 wallet?')) return;
+    if (!window.confirm('Transfer your referral wallet balance to your main Pax26 wallet?\n\nNote: once transferred, it cannot be converted back to cash.')) return;
 
     setWithdrawing(true);
     try {
@@ -134,6 +145,36 @@ export default function ReferralDashboard() {
       toast.error(err.response?.data?.message || 'Something went wrong');
     } finally {
       setWithdrawing(false);
+    }
+  };
+
+  /* ── submit bank cashout request ────────────────────────────────── */
+  const handleCashoutRequest = async () => {
+    const { bankName, accountNumber, accountName } = cashoutBank;
+    if (!bankName.trim() || !accountNumber.trim() || !accountName.trim()) {
+      toast.error('Please fill in all bank details.');
+      return;
+    }
+    if (!window.confirm(`Request a bank payout of ${fmt(stats?.referralWalletBalance)} to ${bankName} — ${accountNumber} (${accountName})?`)) return;
+
+    setCashoutSubmitting(true);
+    try {
+      const res = await axios.post('/api/referral/cashout', {
+        bankName: bankName.trim(),
+        accountNumber: accountNumber.trim(),
+        accountName: accountName.trim(),
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setShowCashoutForm(false);
+        fetchStats(true);
+      } else {
+        toast.error(res.data.message || 'Cashout request failed');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong');
+    } finally {
+      setCashoutSubmitting(false);
     }
   };
 
@@ -362,15 +403,34 @@ export default function ReferralDashboard() {
           </div>
         </div>
 
-        {/* Wallet uses */}
+        {/* ── Cashout pending state ─────────────────────────────── */}
+        {stats?.cashoutPending && (
+          <div
+            className="rounded-xl p-4 mb-5 flex items-start gap-3"
+            style={{ background: '#fef3c715', border: '1px solid #f59e0b44' }}
+          >
+            <Hourglass size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: 1 }} />
+            <div>
+              <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>
+                Cashout request pending
+              </p>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: pax26?.textSecondary }}>
+                Your request for <strong>{fmt(stats.cashoutPendingAmount)}</strong> is being reviewed by our team.
+                You'll receive an email once it's processed — usually within 1–3 business days.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Wallet uses ───────────────────────────────────────── */}
         <div
           className="rounded-xl p-4 mb-5 grid grid-cols-2 gap-2 text-xs"
           style={{ background: pax26?.secondaryBg }}
         >
           <p className="col-span-2 font-bold mb-1" style={{ color: pax26?.textSecondary }}>
-            Your wallet can be used for:
+            Your referral wallet can be used for:
           </p>
-          {['Subscription renewal', 'Extra AI messages', 'Broadcast purchases', 'Future add-ons'].map(use => (
+          {['Subscription renewal', 'Extra AI messages', 'Future add-ons', 'Cash payout to bank'].map(use => (
             <div key={use} className="flex items-center gap-1.5" style={{ color: pax26?.textSecondary }}>
               <Check size={11} className="text-green-400 flex-shrink-0" />
               {use}
@@ -378,13 +438,12 @@ export default function ReferralDashboard() {
           ))}
         </div>
 
-        {/* Withdrawal section */}
-        <div className="space-y-3">
+        {/* ── Withdrawal eligibility checks ─────────────────────── */}
+        <div className="space-y-3 mb-5">
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-            Withdrawal Eligibility
+            Eligibility
           </p>
 
-          {/* checks */}
           {[
             {
               label: 'Account verified',
@@ -392,12 +451,12 @@ export default function ReferralDashboard() {
               note: stats?.isAccountVerified ? 'Verified ✓' : 'Please verify your account',
             },
             {
-              label: 'Minimum balance (₦10,000)',
-              pass: (stats?.referralWalletBalance || 0) >= 10000,
+              label: `Minimum balance (${fmt(stats?.withdrawalMinimum ?? 10000)})`,
+              pass: (stats?.referralWalletBalance || 0) >= (stats?.withdrawalMinimum ?? 10000),
               note: `Current: ${fmt(stats?.referralWalletBalance)}`,
             },
             {
-              label: '14-day holding period',
+              label: `${stats?.withdrawalLockDays ?? 14}-day holding period`,
               pass: stats?.daysUntilWithdrawal === 0 || stats?.daysUntilWithdrawal === null,
               note: stats?.daysUntilWithdrawal > 0
                 ? `${stats.daysUntilWithdrawal} day(s) remaining`
@@ -420,31 +479,152 @@ export default function ReferralDashboard() {
               <span className="text-[11px]" style={{ color: pax26?.textSecondary }}>{note}</span>
             </div>
           ))}
-
-          <button
-            onClick={handleWithdraw}
-            disabled={!stats?.canWithdraw || withdrawing}
-            className="w-full mt-2 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: stats?.canWithdraw ? primary : pax26?.secondaryBg,
-              color: stats?.canWithdraw ? '#fff' : pax26?.textSecondary,
-            }}
-          >
-            {withdrawing ? (
-              <RefreshCw size={15} className="animate-spin" />
-            ) : stats?.canWithdraw ? (
-              <><Unlock size={15} /> Withdraw to Main Wallet</>
-            ) : (
-              <><Lock size={15} /> Withdrawal Locked</>
-            )}
-          </button>
-
-          {stats?.withdrawalEligibleAt && stats.daysUntilWithdrawal > 0 && (
-            <p className="text-center text-[11px]" style={{ color: pax26?.textSecondary }}>
-              Eligible from {fmtDate(stats.withdrawalEligibleAt)}
-            </p>
-          )}
         </div>
+
+        {/* ── Two payout options ────────────────────────────────── */}
+        {!stats?.cashoutPending && (
+          <div className="space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+              Payout Options
+            </p>
+
+            {/* Option 1: Transfer to main VTU wallet */}
+            <div
+              className="rounded-xl p-4"
+              style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${primary}15`, color: primary }}>
+                  <ArrowRightLeft size={16} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>Transfer to Pax26 Wallet</p>
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: pax26?.textSecondary }}>
+                    Instantly move your balance to your Pax26 VTU wallet to pay for subscriptions and services.
+                    <strong> Cannot be withdrawn as cash after transfer.</strong>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleWithdraw}
+                disabled={!stats?.canWithdraw || withdrawing}
+                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: stats?.canWithdraw ? primary : pax26?.border,
+                  color: stats?.canWithdraw ? '#fff' : pax26?.textSecondary,
+                }}
+              >
+                {withdrawing ? (
+                  <RefreshCw size={14} className="animate-spin" />
+                ) : stats?.canWithdraw ? (
+                  <><ArrowRightLeft size={14} /> Transfer to VTU Wallet</>
+                ) : (
+                  <><Lock size={14} /> Not Eligible Yet</>
+                )}
+              </button>
+            </div>
+
+            {/* Option 2: Bank payout (cashout request) */}
+            <div
+              className="rounded-xl p-4"
+              style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: '#22c55e15', color: '#22c55e' }}>
+                  <Banknote size={16} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: pax26?.textPrimary }}>Request Bank Payout</p>
+                  <p className="text-xs mt-0.5 leading-relaxed" style={{ color: pax26?.textSecondary }}>
+                    Request a direct bank transfer. Our team reviews and processes within 1–3 business days.
+                  </p>
+                </div>
+              </div>
+
+              {!showCashoutForm ? (
+                <button
+                  onClick={() => setShowCashoutForm(true)}
+                  disabled={!stats?.canWithdraw}
+                  className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: stats?.canWithdraw ? '#22c55e' : pax26?.border,
+                    color: stats?.canWithdraw ? '#fff' : pax26?.textSecondary,
+                  }}
+                >
+                  {stats?.canWithdraw ? (
+                    <><Banknote size={14} /> Request Bank Payout</>
+                  ) : (
+                    <><Lock size={14} /> Not Eligible Yet</>
+                  )}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  {/* Bank details form */}
+                  {[
+                    { key: 'bankName', label: 'Bank Name', placeholder: 'e.g. GTBank, Kuda, Opay' },
+                    { key: 'accountNumber', label: 'Account Number', placeholder: '10-digit account number' },
+                    { key: 'accountName', label: 'Account Name', placeholder: 'Name on the account' },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key}>
+                      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: pax26?.textSecondary }}>
+                        {label}
+                      </p>
+                      <input
+                        type={key === 'accountNumber' ? 'tel' : 'text'}
+                        value={cashoutBank[key]}
+                        onChange={e => setCashoutBank(prev => ({ ...prev, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                        style={{
+                          background: pax26?.bg,
+                          border: `1px solid ${pax26?.border}`,
+                          color: pax26?.textPrimary,
+                          fontFamily: 'inherit',
+                        }}
+                      />
+                    </div>
+                  ))}
+
+                  <div
+                    className="rounded-lg p-3 text-xs"
+                    style={{ background: '#fef9c3', color: '#854d0e' }}
+                  >
+                    <strong>Amount to be paid:</strong> {fmt(stats?.referralWalletBalance)} · Your balance will be held while the request is pending.
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowCashoutForm(false)}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+                      style={{ background: pax26?.border, color: pax26?.textSecondary }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCashoutRequest}
+                      disabled={cashoutSubmitting}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+                      style={{ background: '#22c55e', color: '#fff' }}
+                    >
+                      {cashoutSubmitting
+                        ? <RefreshCw size={14} className="animate-spin" />
+                        : <><BadgeCheck size={14} /> Submit Request</>
+                      }
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {stats?.withdrawalEligibleAt && stats.daysUntilWithdrawal > 0 && (
+          <p className="text-center text-[11px] mt-3" style={{ color: pax26?.textSecondary }}>
+            Eligible from {fmtDate(stats.withdrawalEligibleAt)}
+          </p>
+        )}
       </div>
 
       {/* ── Recent transactions ──────────────────────────────────── */}

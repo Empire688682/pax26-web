@@ -863,22 +863,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
             placeholder="e.g. Mon–Sat 8am–8pm"
           />
           <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
-          <Toggle label="Follow-Up Messages" hint="AI follows up on unresponded leads" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
-          {form.followUpEnabled && (
-            <ThemedSelect
-              label="Follow-Up Delay"
-              pax26={p}
-              value={String(form.followUpDelayMinutes)}
-              options={[
-                { value: "15", label: "15 minutes" },
-                { value: "30", label: "30 minutes" },
-                { value: "60", label: "1 hour" },
-                { value: "120", label: "2 hours" },
-                { value: "1440", label: "24 hours" },
-              ]}
-              onChange={v => set("followUpDelayMinutes", parseInt(v))}
-            />
-          )}
+          <Toggle label="Follow-Up Messages" hint="AI sends one follow-up after 30 mins of customer silence" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
         </div>
       );
 
@@ -898,7 +883,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
           <ReviewRow label="Tone" value={form.tone.charAt(0).toUpperCase() + form.tone.slice(1)} pax26={p} />
           <ReviewRow label="Hours" value={form.workingHours} pax26={p} />
           <ReviewRow label="Auto-Reply" value={form.autoReplyEnabled ? "Enabled" : "Disabled"} pax26={p} />
-          <ReviewRow label="Follow-Up" value={form.followUpEnabled ? `Enabled · ${form.followUpDelayMinutes}min delay` : "Disabled"} pax26={p} />
+          <ReviewRow label="Follow-Up" value={form.followUpEnabled ? "Enabled · 30 min delay" : "Disabled"} pax26={p} />
           <ReviewRow label="WhatsApp" value={whatsappPhone || form.whatsappNumber} pax26={p} />
           <p style={{ fontSize: "12px", color: p?.textPrimary, opacity: 0.45, marginTop: "16px", lineHeight: 1.6 }}>
             Everything look right? Hit "Launch Agent" to train your AI sales assistant.
@@ -934,7 +919,7 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
               `${form.paymentDetails.length} payment accounts`,
               form.tone,
               form.workingHours || "hours not set",
-              form.followUpEnabled ? `follow-up ${form.followUpDelayMinutes}min` : "no follow-up",
+              form.followUpEnabled ? "follow-up 30min" : "no follow-up",
             ].map((pill, i) => (
               <span key={i} style={{ fontSize: "11px", fontWeight: 700, padding: "5px 13px", borderRadius: "999px", background: `${p?.primary}14`, color: p?.textPrimary }}>{pill}</span>
             ))}
@@ -1047,22 +1032,7 @@ function ServiceStepRenderer({ step, form, setForm, pax26 }) {
             placeholder="e.g. Mon–Fri 9am–5pm"
           />
           <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
-          <Toggle label="Follow-Up Messages" hint="AI follows up on unresponded leads" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
-          {form.followUpEnabled && (
-            <ThemedSelect
-              label="Follow-Up Delay"
-              pax26={p}
-              value={String(form.followUpDelayMinutes)}
-              options={[
-                { value: "15", label: "15 minutes" },
-                { value: "30", label: "30 minutes" },
-                { value: "60", label: "1 hour" },
-                { value: "120", label: "2 hours" },
-                { value: "1440", label: "24 hours" },
-              ]}
-              onChange={v => set("followUpDelayMinutes", parseInt(v))}
-            />
-          )}
+          <Toggle label="Follow-Up Messages" hint="AI sends one follow-up after 30 mins of customer silence" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
         </div>
       );
 

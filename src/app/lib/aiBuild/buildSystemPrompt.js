@@ -33,7 +33,7 @@ function buildSellerPrompt({ profile, products, storefrontUrl, sessionContext = 
 
   // ── Follow-up behaviour ───────────────────────────────────
   const followUpNote = profile.followUpEnabled
-    ? `• Follow-up: Send ONE casual follow-up after ~${profile.followUpDelayMinutes || 30} mins if quiet.`
+    ? `• Follow-up: Send ONE casual follow-up after ~30 mins of customer silence. One follow-up per conversation only — do not send more than one.`
     : "• Do not send unsolicited follow-ups. Only reply when customer messages.";
 
   // ── Storefront link ───────────────────────────────────────

@@ -6,6 +6,8 @@ import UserModel from '@/app/ults/models/UserModel';
 import ReferralModel from '@/app/ults/models/ReferralModel';
 import WalletTransactionModel from '@/app/ults/models/WalletTransactionModel';
 import PlanModel from '@/app/ults/models/PlanModel';
+import CashoutRequestModel from '@/app/ults/models/CashoutRequestModel';
+import { getReferralConfig } from '@/app/ults/models/ReferralConfigModel';
 
 // Module-level cache for plans — avoids hitting MongoDB on every request
 let cachedPlans = null;
@@ -34,13 +36,16 @@ export async function GET(req) {
     const plans = cachedPlans;
 
     // Run all independent DB queries in parallel
-    const [user, recentTransactions, pendingReferrals] = await Promise.all([
+    const [user, recentTransactions, pendingReferrals, config, pendingCashout] = await Promise.all([
       UserModel.findById(userId).select(
         'referralCode referralWalletBalance pendingReferralBonus releasedReferralBonus ' +
-        'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI whatsapp.connected'
+        'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI ' +
+        'whatsapp.connected cashoutPending cashoutBankName cashoutAccountNumber cashoutAccountName'
       ),
       WalletTransactionModel.find({ userId }).sort({ createdAt: -1 }).limit(10).lean(),
       ReferralModel.countDocuments({ referrer: userId, status: 'pending' }),
+      getReferralConfig(),
+      CashoutRequestModel.findOne({ userId, status: 'pending' }).lean(),
     ]);
     if (!user) {
       return NextResponse.json(
@@ -51,12 +56,10 @@ export async function GET(req) {
 
     const isWhatsAppConnected = user?.whatsapp?.connected;
 
-    console.log("isWhatsAppConnected: ", isWhatsAppConnected)
-
     // Business rule: withdrawal requires ₦10k + verified account
     const withdrawalBalance = user.referralWalletBalance || 0;
     const isEligibleToWithdraw =
-      withdrawalBalance >= 5000 &&
+      withdrawalBalance >= config.withdrawalMinimum &&
       user.userVerify === true &&
       user.canWithdraw === true;
 
@@ -95,6 +98,19 @@ export async function GET(req) {
           recentTransactions,
           planRewards,
           maxReward,
+          // Admin-configurable policy — UI reads these instead of hardcoding
+          withdrawalMinimum: config.withdrawalMinimum,
+          withdrawalLockDays: config.withdrawalLockDays,
+          // Cashout request state
+          cashoutPending: !!pendingCashout,
+          cashoutPendingAmount: pendingCashout?.amount || null,
+          cashoutPendingRequestedAt: pendingCashout?.createdAt || null,
+          // Saved bank details for pre-filling cashout form
+          savedBank: {
+            bankName:      user.cashoutBankName      || '',
+            accountNumber: user.cashoutAccountNumber || '',
+            accountName:   user.cashoutAccountName   || '',
+          },
         },
       },
       { status: 200, headers: corsHeaders() }

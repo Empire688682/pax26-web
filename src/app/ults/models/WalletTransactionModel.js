@@ -22,7 +22,9 @@ const walletTxSchema = new mongoose.Schema(
         'subscription_payment', // deducted when user pays for a plan from wallet
         'ai_message_purchase',  // deducted when user buys extra AI messages
         'broadcast_purchase',   // deducted when user buys broadcast slots
-        'withdrawal',           // deducted on approved withdrawal
+        'withdrawal',           // deducted on wallet-to-VTU-wallet transfer
+        'cashout_request',      // deducted when user submits a bank cashout request (pending)
+        'cashout_payment',      // confirmed when admin marks cashout as paid
         'adjustment',           // manual admin adjustment
       ],
       required: true,

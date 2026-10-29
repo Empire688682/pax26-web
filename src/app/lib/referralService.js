@@ -8,8 +8,8 @@
 import UserModel from '@/app/ults/models/UserModel';
 import ReferralModel from '@/app/ults/models/ReferralModel';
 import WalletTransactionModel from '@/app/ults/models/WalletTransactionModel';
-
 import PlanModel from '@/app/ults/models/PlanModel';
+import { getReferralConfig } from '@/app/ults/models/ReferralConfigModel';
 
 /**
  * Determine if a plan key is a paid plan by checking the DB.
@@ -59,7 +59,10 @@ export async function ensureReferralCode(user) {
  */
 export async function processReferralReward(referredUserId, planKey) {
   // Fetch plan from database to get the dynamic reward amount
-  const plan = await PlanModel.findOne({ key: planKey });
+  const [plan, config] = await Promise.all([
+    PlanModel.findOne({ key: planKey }),
+    getReferralConfig(),
+  ]);
   const reward = plan?.referralReward || 0;
   
   if (!reward) {
@@ -96,7 +99,9 @@ export async function processReferralReward(referredUserId, planKey) {
   const balanceAfter  = balanceBefore + reward;
 
   const now = new Date();
-  const withdrawalEligibleAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  // Lock period and withdrawal minimum come from admin-configurable ReferralConfig
+  const lockMs = config.withdrawalLockDays * 24 * 60 * 60 * 1000;
+  const withdrawalEligibleAt = new Date(now.getTime() + lockMs);
 
   /* ── Update referral record ─────────────────────────────── */
   referral.status       = 'rewarded';
@@ -113,7 +118,7 @@ export async function processReferralReward(referredUserId, planKey) {
 
   // Reset / extend 14-day lock
   referrer.withdrawalEligibleAt = withdrawalEligibleAt;
-  referrer.canWithdraw = balanceAfter >= 10000 && referrer.userVerify === true;
+  referrer.canWithdraw = balanceAfter >= config.withdrawalMinimum && referrer.userVerify === true;
 
   await referrer.save();
 

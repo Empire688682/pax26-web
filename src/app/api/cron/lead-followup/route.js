@@ -116,8 +116,10 @@ async function runFollowUp() {
         if (!businessProfile) continue;
         if (businessProfile.followUpEnabled === false) continue;
 
-        // Respect per-seller delay setting
-        const delayMs = (businessProfile.followUpDelayMinutes || 30) * 60 * 1000;
+        // Fixed 30-minute delay — keeps follow-ups inside the customer's free
+        // 24-hour Meta conversation window in the vast majority of cases.
+        // followUpDelayMinutes is no longer configurable per seller.
+        const delayMs = 30 * 60 * 1000;
         const cutoff = new Date(Date.now() - delayMs);
 
         const sessions = await SessionModel.find({
@@ -125,6 +127,10 @@ async function runFollowUp() {
           status: { $in: ["active", "waiting"] },
           lastMessageAt: { $lt: cutoff },
           "followUp.sent": { $ne: true },
+          // One follow-up per conversation window — if totalSent >= 1 for this
+          // session, skip it. This ensures we never send a business-initiated
+          // (paid) message when the free window has already been used.
+          "followUp.totalSent": { $not: { $gte: 1 } },
         }).lean();
 
         totalChecked += sessions.length;
@@ -178,7 +184,7 @@ async function runFollowUp() {
                 { _id: session.userId },
                 { $inc: { "planAnalytics.metaCost": 5 } }
               );
-              console.log(`[lead-followup] ✅ Sent to ${session.visitorPhone} after ${businessProfile.followUpDelayMinutes}min`);
+              console.log(`[lead-followup] ✅ Sent to ${session.visitorPhone} after 30min silence`);
             } else {
               console.warn(`[lead-followup] ⚠️ Delivery failed for ${session.visitorPhone}`);
             }
