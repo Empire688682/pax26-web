@@ -91,11 +91,15 @@ export async function POST(req) {
             const nanoid = customAlphabet(chars, 4);
             const referralCode = "PAX" + prefx + nanoid() + nextUserNumber;
 
-            //Get referral host id
-            let referralHostId = undefined
+            //Get referral host id — scoped correctly, used for both user creation and ReferralModel
+            let referralHostId = undefined;
+            let referredByUserId = undefined;
             if (refHostCode) {
                 const refHost = await UserModel.findOne({ referralCode: refHostCode });
-                referralHostId = refHost ? refHost._id : undefined;
+                if (refHost && refHost._id.toString() !== "placeholder") {
+                    referralHostId   = refHost._id;
+                    referredByUserId = refHost._id;
+                }
             }
             const authTimestamp = Date.now()
             user = await UserModel.create({
@@ -106,6 +110,7 @@ export async function POST(req) {
                 pin: null,
                 authTimestamp,
                 referralHostId: referralHostId,
+                referredBy: referredByUserId || null,
                 provider,
                 isPasswordSet: false,
                 providerId: providerId || null,
@@ -115,6 +120,25 @@ export async function POST(req) {
                 emailVerification: { isVerified: true },
                 country: country || null,
             });
+
+            // Handle referral record for new Google user
+            if (refHostCode && referredByUserId) {
+                const existingReferral = await ReferralModel.findOne({
+                    referrer: referredByUserId,
+                    referredUser: user._id,
+                });
+                if (!existingReferral) {
+                    await ReferralModel.create({
+                        referrer: referredByUserId,
+                        referredUser: user._id,
+                        referralCodeUsed: refHostCode,
+                        status: 'pending',
+                    });
+                    await UserModel.findByIdAndUpdate(referredByUserId, {
+                        $inc: { totalReferrals: 1 },
+                    });
+                }
+            }
 
             // Notify admin of new Google signup (fire-and-forget)
             const signupAt = new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" });
@@ -135,15 +159,8 @@ export async function POST(req) {
             user = await UserModel.findById(user._id);
         }
 
-        // Handle referral if provided
-        if (refHostCode) {
-            if (referralHostId) {
-                await ReferralModel.create({
-                    referrer: referralHostId,
-                    referredUser: user._id,
-                });
-            }
-        }
+        // Referral for new users is now handled inside the if (!user) block above.
+        // Nothing to do here for returning users.
 
         const userObj = user.toObject();
         delete userObj.password;

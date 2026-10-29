@@ -78,6 +78,12 @@ const UserSchema = new mongoose.Schema(
     canWithdraw: { type: Boolean, default: false },
     withdrawalEligibleAt: { type: Date, default: null },   // 14-day lock from last reward
 
+    // Admin bypass — allows influencers/partners to access the referral program
+    // without needing a paid plan or WhatsApp connection.
+    // Set by admin only. Never set by user-facing flows.
+    referralBypassEnabled: { type: Boolean, default: false },
+    referralBypassGrantedAt: { type: Date, default: null },
+
     // Cashout request tracking
     // true while a bank-payout cashout request is pending admin approval
     cashoutPending: { type: Boolean, default: false },

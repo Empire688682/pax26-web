@@ -26,7 +26,7 @@ export async function GET(req) {
     }
 
     const user = await UserModel.findById(userId).select(
-      'referralCode paxAI name'
+      'referralCode paxAI name whatsapp.connected referralBypassEnabled'
     );
 
     if (!user) {
@@ -36,29 +36,31 @@ export async function GET(req) {
       );
     }
 
-    const plan = user.paxAI?.plan;
-    const isPaid = await isPaidPlan(plan);
-    if (!isPaid) {
+    const isWhatsAppConnected = !!user?.whatsapp?.connected;
+    const hasBypass = !!user?.referralBypassEnabled;
+
+    // Gate: must have WhatsApp connected OR admin bypass
+    if (!isWhatsAppConnected && !hasBypass) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Referral codes are available for paid plan subscribers only.',
-          isPaidUser: false,
+          message: 'Referral codes are available for connected subscribers only.',
+          isWhatsAppConnected: false,
         },
         { status: 403, headers: corsHeaders() }
       );
     }
 
     // Assign code if missing (idempotent)
-    if (!user.referralCode) {
-      await ensureReferralCode(user);
-    }
+    // if (!user.referralCode) {
+    //   await ensureReferralCode(user);
+    // }
 
     return NextResponse.json(
       {
         success: true,
         referralCode: user.referralCode,
-        isPaidUser: true,
+        isWhatsAppConnected: true,
       },
       { status: 200, headers: corsHeaders() }
     );

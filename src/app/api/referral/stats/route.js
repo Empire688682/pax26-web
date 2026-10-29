@@ -40,7 +40,8 @@ export async function GET(req) {
       UserModel.findById(userId).select(
         'referralCode referralWalletBalance pendingReferralBonus releasedReferralBonus ' +
         'totalReferrals successfulReferrals canWithdraw withdrawalEligibleAt userVerify paxAI ' +
-        'whatsapp.connected cashoutPending cashoutBankName cashoutAccountNumber cashoutAccountName'
+        'whatsapp.connected cashoutPending cashoutBankName cashoutAccountNumber cashoutAccountName ' +
+        'referralBypassEnabled'
       ),
       WalletTransactionModel.find({ userId }).sort({ createdAt: -1 }).limit(10).lean(),
       ReferralModel.countDocuments({ referrer: userId, status: 'pending' }),
@@ -55,6 +56,8 @@ export async function GET(req) {
     }
 
     const isWhatsAppConnected = user?.whatsapp?.connected;
+    // Bypass: admin can grant referral access without WhatsApp connection or paid plan
+    const hasBypass = !!user?.referralBypassEnabled;
 
     // Business rule: withdrawal requires ₦10k + verified account
     const withdrawalBalance = user.referralWalletBalance || 0;
@@ -85,6 +88,7 @@ export async function GET(req) {
         data: {
           referralCode: user.referralCode || null,
           isWhatsAppConnected,
+          referralBypassEnabled: hasBypass,
           totalReferrals: user.totalReferrals || 0,
           successfulReferrals: user.successfulReferrals || 0,
           pendingReferrals,

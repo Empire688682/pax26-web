@@ -427,6 +427,8 @@ export default function GoogleLoginButton({ loading, setAwayLoading }) {
         providerId:   resultData.uid,
         number:       resultData.phoneNumber,
         profileImage: resultData.photoURL,
+        // URL ?ref= code takes priority; no manual fallback needed for Google
+        // (Google flow has no manual input step — the URL code is the only source)
         refHostCode,
         provider:     resultData.providerData[0]?.providerId,
       };

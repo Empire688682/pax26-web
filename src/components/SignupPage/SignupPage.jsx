@@ -126,6 +126,8 @@ export default function SignupPage() {
   const [shaking, setShaking]         = useState(false);
   const [isBanned, setIsBanned]       = useState(false);
   const [bannedEmail, setBannedEmail] = useState("");
+  // Optional manual referral code — URL ?ref= takes priority over this
+  const [manualRefCode, setManualRefCode] = useState("");
 
   const primary     = pax26?.primary   || "#3b82f6";
   const bg          = pax26?.bg        || "#ffffff";
@@ -160,7 +162,10 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      const res = await axios.post(baseUrl, { ...data, refHostCode });
+      // URL ?ref= code (stored in localStorage/context) is the source of truth.
+      // The manually typed code is used only as a fallback when no URL code is present.
+      const resolvedRefCode = refHostCode || manualRefCode.trim() || undefined;
+      const res = await axios.post(baseUrl, { ...data, refHostCode: resolvedRefCode });
       const { success, message, finalUserData } = res.data;
       if (!success) { setError(message || "Authentication failed"); return; }
       const now = new Date().getTime();
@@ -411,6 +416,46 @@ export default function SignupPage() {
                     <option value="Egypt">🇪🇬 Egypt</option>
                     <option value="Other">🌍 Other</option>
                   </select>
+                </div>
+              )}
+
+              {/* optional referral code — register only, URL code takes priority */}
+              {authType === "register" && !refHostCode && (
+                <div className="relative">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: focused === "manualRefCode" ? primary : textPrimary, opacity: focused === "manualRefCode" ? 0.8 : 0.3 }}>
+                    <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                  </svg>
+                  <input
+                    type="text"
+                    value={manualRefCode}
+                    onChange={e => setManualRefCode(e.target.value.toUpperCase().trim())}
+                    placeholder="Referral code (optional)"
+                    className="am-input w-full pl-9 pr-4 py-3 rounded-xl text-sm"
+                    style={{
+                      background: secondaryBg,
+                      color: textPrimary,
+                      border: `1px solid ${focused === "manualRefCode" ? primary : border}`,
+                      boxShadow: focused === "manualRefCode" ? `0 0 0 3px ${primary}15` : "none",
+                    }}
+                    onFocus={() => setFocused("manualRefCode")}
+                    onBlur={() => setFocused("")}
+                    maxLength={20}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                </div>
+              )}
+              {/* URL referral code is active — show badge, no manual input needed */}
+              {authType === "register" && refHostCode && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+                  style={{ background: `${primary}10`, border: `1px solid ${primary}25`, color: primary }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  Referral code applied: <span className="font-black">{refHostCode}</span>
                 </div>
               )}
 

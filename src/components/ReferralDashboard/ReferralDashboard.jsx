@@ -232,8 +232,8 @@ export default function ReferralDashboard() {
         </button>
       </div>
 
-      {/* ── Upgrade nudge for free users ────────────────────────── */}
-      {!isWhatsAppConnected && (
+      {/* ── Upgrade nudge for users without access ─────────────── */}
+      {!isWhatsAppConnected && !stats?.referralBypassEnabled && (
         <div
           className="rounded-2xl p-5 flex items-start gap-4"
           style={{ background: `${primary}10`, border: `1px dashed ${primary}40` }}
@@ -262,7 +262,7 @@ export default function ReferralDashboard() {
       )}
 
       {/* ── Referral code card ───────────────────────────────────── */}
-      {isWhatsAppConnected && code && (
+      {(isWhatsAppConnected || stats?.referralBypassEnabled) && code && (
         <div
           className="rounded-2xl p-5 relative overflow-hidden"
           style={{ background: `linear-gradient(135deg, ${primary}18 0%, ${primary}05 100%)`, border: `1px solid ${primary}30` }}
@@ -278,6 +278,12 @@ export default function ReferralDashboard() {
             <span className="text-xs font-bold uppercase tracking-wider" style={{ color: primary }}>
               Your Referral Code
             </span>
+            {stats?.referralBypassEnabled && (
+              <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                style={{ background: "#8b5cf620", color: "#8b5cf6", border: "1px solid #8b5cf630" }}>
+                ⚡ Partner Access
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3 mt-3 flex-wrap">
@@ -318,7 +324,7 @@ export default function ReferralDashboard() {
       )}
 
       {/* ── Reward tiers ────────────────────────────────────────── */}
-      {isWhatsAppConnected && (
+      {(isWhatsAppConnected || stats?.referralBypassEnabled) && (
         <div>
           <p className="text-xs font-bold uppercase tracking-wider mb-3 px-1" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
             Reward Tiers
