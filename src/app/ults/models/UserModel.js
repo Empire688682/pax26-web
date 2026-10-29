@@ -174,6 +174,10 @@ const UserSchema = new mongoose.Schema(
       knowledgeBase: [{ type: String }],
       maxMonthlyMessages: { type: Number, default: 200 },
       messagesUsedThisMonth: { type: Number, default: 0 },
+      // Extra messages purchased via top-up packs.
+      // Added to maxMonthlyMessages at purchase time (Option A).
+      // Reset to 0 on plan renewal — top-ups are per-cycle, not persistent.
+      extraMessagesPurchased: { type: Number, default: 0 },
       broadcastContactsLimit: { type: Number, default: 0 },
       broadcastContactsUsedThisMonth: { type: Number, default: 0 },
       scheduledBroadcast: { type: Boolean, default: false },

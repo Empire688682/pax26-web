@@ -149,7 +149,10 @@ export async function PATCH(req) {
       const refundedBalance = (user.referralWalletBalance || 0) + cashout.amount;
       user.referralWalletBalance = refundedBalance;
       user.cashoutPending = false;
-      user.canWithdraw = refundedBalance >= 10000 && user.userVerify === true;
+      // Re-evaluate eligibility against admin-configured minimum
+      const { getReferralConfig } = await import("@/app/ults/models/ReferralConfigModel");
+      const config = await getReferralConfig();
+      user.canWithdraw = refundedBalance >= config.withdrawalMinimum && user.userVerify === true;
       await user.save();
 
       // Reverse the wallet ledger entry

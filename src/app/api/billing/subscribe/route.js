@@ -81,6 +81,7 @@ export async function POST(req) {
     user.paxAI.plan = planKey;
     user.paxAI.maxMonthlyMessages = planMeta.messagesLimit;
     user.paxAI.messagesUsedThisMonth = 0;
+    user.paxAI.extraMessagesPurchased = 0; // top-ups do not carry over to a new plan
     user.paxAI.broadcastContactsLimit = planMeta.broadcastContactsLimit;
     user.paxAI.broadcastContactsUsedThisMonth = 0;
     // Broadcast features

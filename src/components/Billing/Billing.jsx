@@ -216,6 +216,19 @@ export default function Billing() {
   const [paymentMethod, setPaymentMethod] = useState("wallet"); // "wallet" | "card"
   const [displayCurrency, setDisplayCurrency] = useState("NGN");
 
+  // Extra message top-up state
+  const [topUpLoading, setTopUpLoading]   = useState(false);
+  const [topUpSuccess, setTopUpSuccess]   = useState("");
+  const [messagePacks, setMessagePacks]   = useState([]);
+
+  // Fetch admin-configured packs on mount
+  useEffect(() => {
+    fetch("/api/billing/message-packs")
+      .then(r => r.json())
+      .then(d => { if (d.success) setMessagePacks(d.packs); })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     detectUserCurrency().then(c => {
        setDisplayCurrency(c);
@@ -367,6 +380,38 @@ export default function Billing() {
     handler.openIframe();
   }, [selected, selectedMeta, paying, userData, fetchUser, router]);
 
+  /* ── Buy extra message pack ─────────────────────────────────── */
+  const handleBuyMessages = async (packId) => {
+    if (topUpLoading) return;
+    const pack = MESSAGE_PACKS.find(p => p.id === packId);
+    if (!pack) return;
+    if (userWallet < pack.price) {
+      toast.error(`Insufficient balance. You need ₦${pack.price.toLocaleString()} but have ₦${userWallet.toLocaleString()}.`);
+      return;
+    }
+    setTopUpLoading(true);
+    try {
+      const res = await fetch("/api/billing/buy-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message);
+        setTopUpSuccess(packId);
+        setTimeout(() => setTopUpSuccess(""), 3000);
+        await fetchUser();
+      } else {
+        toast.error(data.message || "Purchase failed");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setTopUpLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Paystack Inline SDK */}
@@ -510,6 +555,82 @@ export default function Billing() {
                   </div>
                 ))}
               </div>
+
+              {/* ── Extra Message Top-Up Packs ─────────────────────── */}
+              {currentPlan !== "free" && (
+                <div className="bl-slide rounded-2xl overflow-hidden"
+                  style={{ background: pax26?.bg, border: `1px solid ${pax26?.border}`, animationDelay: "0.25s" }}>
+                  <div style={{ height: "3px", background: "linear-gradient(90deg, #38bdf8, #a78bfa44, transparent)" }} />
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="bl-mono text-[10px] font-bold uppercase tracking-widest" style={{ color: "#38bdf8" }}>
+                        ⚡ Extra AI Messages
+                      </span>
+                    </div>
+                    <p className="text-xs mb-4" style={{ color: pax26?.textSecondary, opacity: 0.65 }}>
+                      Running low? Top up your monthly quota instantly. Extra messages are added directly to
+                      your current cycle — they reset at your next billing renewal.
+                    </p>
+                    {/* Current quota display */}
+                    <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl"
+                      style={{ background: `${pax26?.primary}08`, border: `1px solid ${pax26?.border}` }}>
+                      <div className="flex-1">
+                        <p className="bl-mono text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
+                          Current quota
+                        </p>
+                        <p className="bl-mono text-sm font-bold" style={{ color: pax26?.textPrimary }}>
+                          {(userData?.paxAI?.messagesUsedThisMonth || 0).toLocaleString()}
+                          {" / "}
+                          {(userData?.paxAI?.maxMonthlyMessages || 0).toLocaleString()} used
+                          {(userData?.paxAI?.extraMessagesPurchased || 0) > 0 && (
+                            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full"
+                              style={{ background: "#38bdf820", color: "#38bdf8" }}>
+                              +{(userData?.paxAI?.extraMessagesPurchased || 0).toLocaleString()} extra
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Pack grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {messagePacks.map(pack => {
+                        const canAffordPack = userWallet >= pack.price;
+                        const isDone = topUpSuccess === pack.id;
+                        return (
+                          <button
+                            key={pack.id}
+                            disabled={topUpLoading || !canAffordPack}
+                            onClick={() => handleBuyMessages(pack.id)}
+                            className="bl-btn flex flex-col items-center gap-1.5 p-4 rounded-xl text-center"
+                            style={{
+                              background: isDone ? `${GREEN}15` : `${pack.color}0e`,
+                              border: `1.5px solid ${isDone ? GREEN : canAffordPack ? `${pack.color}35` : `${pax26?.border}`}`,
+                              opacity: canAffordPack ? 1 : 0.45,
+                            }}>
+                            <span className="bl-mono text-base font-black"
+                              style={{ color: isDone ? GREEN : pack.color }}>
+                              {isDone ? "✓ Done!" : `+${pack.messages >= 1000 ? `${pack.messages/1000}K` : pack.messages}`}
+                            </span>
+                            <span className="text-[10px] font-semibold" style={{ color: pax26?.textSecondary }}>
+                              {pack.label}
+                            </span>
+                            <span className="bl-mono text-xs font-bold" style={{ color: isDone ? GREEN : pack.color }}>
+                              {isDone ? "Added!" : `₦${pack.price.toLocaleString()}`}
+                            </span>
+                            {!canAffordPack && (
+                              <span className="text-[9px]" style={{ color: CORAL }}>Low balance</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="bl-mono text-[10px] mt-3 text-center" style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
+                      Deducted from your Pax26 wallet · Resets at next billing cycle
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ── RIGHT — Wallet + checkout panel ───────────────── */}

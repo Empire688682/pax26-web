@@ -127,6 +127,7 @@ const TransactionSchema = new mongoose.Schema(
         // Platform-internal subscriptions
         "ai-automation-subscription",
         "platform-subscription",
+        "ai-message-purchase",   // extra message top-up pack
       ],
       required: true,
       index: true,

@@ -24,10 +24,13 @@ export function usePlanLimits() {
   const isEnterprise = planWeight >= 3;
 
   // ── AI Messages ────────────────────────────────────────────
-  const messagesLimit = paxAI.maxMonthlyMessages ?? 200;
-  const messagesUsed  = paxAI.messagesUsedThisMonth ?? 0;
+  const messagesLimit     = paxAI.maxMonthlyMessages ?? 200;
+  const messagesUsed      = paxAI.messagesUsedThisMonth ?? 0;
+  const extraPurchased    = paxAI.extraMessagesPurchased ?? 0;   // top-up messages added this cycle
+  const basePlanLimit     = messagesLimit - extraPurchased;      // quota from plan alone
   const messagesRemaining = Math.max(0, messagesLimit - messagesUsed);
-  const messagesPct   = messagesLimit > 0 ? Math.min(100, (messagesUsed / messagesLimit) * 100) : 0;
+  const messagesPct       = messagesLimit > 0 ? Math.min(100, (messagesUsed / messagesLimit) * 100) : 0;
+  const canBuyTopUp       = plan !== "free";                     // only paid plans can purchase packs
 
   // ── Broadcast ─────────────────────────────────────────────
   const rawBroadcastLimit = paxAI.broadcastContactsLimit;
@@ -92,6 +95,9 @@ export function usePlanLimits() {
     messagesRemaining,
     messagesPct,
     canSendAIMessage,
+    extraPurchased,
+    basePlanLimit,
+    canBuyTopUp,
 
     // Broadcast
     canBroadcast,
