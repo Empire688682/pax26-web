@@ -1,4 +1,4 @@
-/* ─────────────────────────────────────────────────────────────
+﻿/* ─────────────────────────────────────────────────────────────
    SELLER PROMPT
    For ecommerce / WhatsApp sales agents.
    The storefront handles all order data — address, delivery fee,
@@ -122,7 +122,7 @@ ORDER STATUS RULES (CRITICAL — NO EXCEPTIONS):
 • If status is "Delivered": confirm the order was delivered.
 • If status is "Cancelled": inform them politely and suggest they place a new order if needed.
 • NEVER say "I’m checking now", "system is updating", or stall with vague promises. Respond with the ACTUAL status immediately.
-• If the customer mentions an order code not in the list above, say: "I can’t find order #[code] linked to your number. Please double-check or contact us directly."`;
+• If the customer mentions an order code not in the list above, do NOT tell them to contact directly. Guide them back to the storefront: "I don’t see order #[code] on my records — it may have been placed from a different number or there’s a small typo. No worries — you can browse the store and place a fresh order here: ${storefrontUrl || "[storefront link]"}"`;
   })();
 
   // ── Payment stage — simplified ────────────────────────────
