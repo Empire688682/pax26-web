@@ -155,6 +155,8 @@ const CSS = `
   }
   @media (max-width: 920px) {
     .px-mobile-sidebar { display: flex; flex-direction: column; gap: 14px; }
+    /* Hide the entire right aside on mobile — px-mobile-sidebar renders it instead */
+    .px-right-aside { display: none !important; }
   }
 
   /* ── Service grid — 5 col → 3 col on mobile ── */
@@ -892,8 +894,8 @@ export default function Dashboard() {
 
             </div>
 
-            {/* ═══ RIGHT SIDEBAR (desktop) ═══ */}
-            <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* ═══ RIGHT SIDEBAR (desktop only) ═══ */}
+            <aside className="px-right-aside" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
               {/* ── AI PLAN CARD ── */}
               <div className={`px-s3 ${isDark ? "px-glass" : "px-glass-light"}`}
