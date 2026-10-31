@@ -6,7 +6,8 @@ import {
   MessageSquare, Users, Layers, Crown, Sparkles,
   MessageCircle, Brain, Repeat,
   Activity, ChevronRight, BarChart2, Shield,
-  Radio, Send, Store, Package
+  Radio, Send, Store, Package,
+  RefreshCw, ShoppingBag, AlertCircle,
 } from "lucide-react";
 
 import { useGlobalContext } from "../Context";
@@ -34,10 +35,6 @@ const CSS = `
     0%   { background-position: 200% center; }
     100% { background-position: -200% center; }
   }
-  @keyframes px-orbit {
-    from { transform: rotate(0deg) translateX(90px) rotate(0deg); }
-    to   { transform: rotate(360deg) translateX(90px) rotate(-360deg); }
-  }
   @keyframes px-breathe {
     0%, 100% { opacity: 0.55; transform: scale(1);    }
     50%       { opacity: 0.85; transform: scale(1.06); }
@@ -62,6 +59,10 @@ const CSS = `
     0%, 100% { box-shadow: 0 0 30px rgba(52,211,153,0.15), 0 0 60px rgba(59,130,246,0.08); }
     50%       { box-shadow: 0 0 50px rgba(52,211,153,0.28), 0 0 90px rgba(59,130,246,0.15); }
   }
+  @keyframes px-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
 
   .px-s1 { animation: px-rise 0.6s cubic-bezier(0.16,1,0.3,1) 0.00s both; }
   .px-s2 { animation: px-rise 0.6s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
@@ -73,6 +74,7 @@ const CSS = `
   .px-breathe { animation: px-breathe 4s ease-in-out infinite; }
   .px-pulse   { animation: px-pulse-ring 2.5s ease-out infinite; }
   .px-glow    { animation: px-glow-pulse 3s ease-in-out infinite; }
+  .px-spin    { animation: px-spin 1s linear infinite; }
 
   /* ── Cards ── */
   .px-glass {
@@ -128,34 +130,12 @@ const CSS = `
   .px-svc:hover::before { opacity: 1; }
   .px-svc:active { transform: translateY(-1px); }
 
-  /* ── Tx row ── */
-  .px-tx {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 14px; padding: 13px 18px; border-radius: 14px; cursor: pointer;
-    transition: background 0.18s ease, transform 0.18s ease;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
-  .px-tx:last-child { border-bottom: none; }
-  .px-tx:hover { background: rgba(255,255,255,0.04); transform: translateX(2px); }
-
-  .px-tx-light {
-    border-bottom-color: rgba(0,0,0,0.05);
-  }
-  .px-tx-light:hover { background: rgba(0,0,0,0.03); }
-
   /* ── Shimmer bar ── */
   .px-shimmer {
     background: linear-gradient(90deg, #34d399 0%, #22d3ee 40%, #818cf8 70%, #34d399 100%);
     background-size: 200% 100%;
     animation: px-shimmer 3s linear infinite, px-bar-grow 1s cubic-bezier(0.16,1,0.3,1) both;
   }
-
-  /* ── Ticker ── */
-  .px-ticker-wrap {
-    overflow: hidden; white-space: nowrap;
-    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-  }
-  .px-ticker-inner { display: inline-flex; animation: px-ticker 28s linear infinite; }
 
   /* ── Layout ── */
   .px-grid {
@@ -179,14 +159,14 @@ const CSS = `
     .px-svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
-  /* ── Stat strip — scrollable on very small screens ── */
-  .px-stat-strip {
+  /* ── Metrics row — 3 col → scrollable on mobile ── */
+  .px-metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    gap: 12px;
   }
-  @media (max-width: 380px) {
-    .px-stat-strip {
+  @media (max-width: 400px) {
+    .px-metrics-row {
       display: flex;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -194,46 +174,16 @@ const CSS = `
       gap: 10px;
       padding-bottom: 4px;
     }
-    .px-stat-strip > * {
+    .px-metrics-row > * {
       scroll-snap-align: start;
       flex-shrink: 0;
-      min-width: 130px;
+      min-width: 120px;
     }
-  }
-
-  /* ── Hero card inner padding responsive ── */
-  .px-hero-inner {
-    padding: clamp(20px, 5vw, 36px) clamp(18px, 5vw, 36px) clamp(24px, 5vw, 36px);
-  }
-
-  /* ── CTA button row — wraps on mobile ── */
-  .px-cta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  @media (max-width: 400px) {
-    .px-cta-row { flex-direction: column; }
-    .px-cta-row button { width: 100%; justify-content: center; }
-  }
-
-  /* ── Header — prevent icon buttons from wrapping ── */
-  .px-header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .px-header-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-    margin-top: 4px;
   }
 
   /* ── Progress bar ── */
   .px-progress-track {
-    height: 8px; border-radius: 999px; overflow: hidden;
+    height: 6px; border-radius: 999px; overflow: hidden;
     position: relative;
   }
   .px-progress-fill {
@@ -247,6 +197,56 @@ const CSS = `
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35));
     border-radius: 999px;
   }
+
+  /* ── Hero card ── */
+  .px-hero-card {
+    border-radius: 24px;
+    overflow: hidden;
+    border-width: 1.5px;
+    border-style: solid;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+  }
+  .px-hero-card:hover {
+    box-shadow: 0 32px 80px rgba(52,211,153,0.15);
+  }
+
+  /* ── Stat strip in hero ── */
+  .px-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* ── Tx row ── */
+  .px-tx {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; padding: 13px 18px; border-radius: 14px; cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .px-tx:last-child { border-bottom: none; }
+  .px-tx:hover { background: rgba(255,255,255,0.04); transform: translateX(2px); }
+  .px-tx-light { border-bottom-color: rgba(0,0,0,0.05); }
+  .px-tx-light:hover { background: rgba(0,0,0,0.03); }
+
+  /* ── WA Card hover ── */
+  .px-wa-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px; border-radius: 18px; cursor: pointer;
+    border-width: 1px; border-style: solid;
+    transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s ease;
+  }
+  .px-wa-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+
+  /* ── Top product row ── */
+  .px-top-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px;
+    transition: background 0.18s ease;
+    border-bottom-width: 1px; border-bottom-style: solid;
+  }
+  .px-top-row:last-child { border-bottom: none; }
+  .px-top-row:hover { background: rgba(255,255,255,0.03); }
 
   /* ── Stat count animation ── */
   .px-count { animation: px-count 0.5s cubic-bezier(0.16,1,0.3,1) both; }
@@ -278,6 +278,21 @@ function badge(label, color) {
   );
 }
 
+/* ── Section label ── */
+function Label({ text, isDark }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+      <div style={{ height: 2, width: 18, borderRadius: 999, background: C.emerald, opacity: 0.7 }} />
+      <span className="px-mono" style={{
+        fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
+        color: isDark ? "rgba(148,163,184,0.5)" : "rgba(100,116,139,0.6)",
+      }}>
+        {text}
+      </span>
+    </div>
+  );
+}
+
 /* ── Service card ── */
 function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
   return (
@@ -286,7 +301,6 @@ function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
         background: isDark ? `rgba(255,255,255,0.04)` : `rgba(0,0,0,0.04)`,
         border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)"}`,
       }}>
-      {/* Icon with optional pulsing badge */}
       <div style={{ position: "relative", display: "inline-flex" }}>
         <div style={{
           width: 46, height: 46, borderRadius: 14,
@@ -300,8 +314,7 @@ function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
           <span style={{
             position: "absolute", top: -6, right: -8,
             minWidth: 18, height: 18, borderRadius: 999,
-            background: "#ef4444",
-            color: "#fff",
+            background: "#ef4444", color: "#fff",
             fontSize: 9.5, fontWeight: 800,
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: "0 5px",
@@ -325,60 +338,27 @@ function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
   );
 }
 
-/* ── Transaction row ── */
-function TxRow({ tx, onClick, isDark }) {
-  const s = tx.status;
-  const col = s === "success" ? C.emerald : s === "pending" ? C.amber : C.coral;
+/* ── Metric card (Today's Sales) ── */
+function MetricCard({ label, value, color, isDark, cardBg, cardBdr }) {
   return (
-    <div className={`px-tx ${isDark ? "" : "px-tx-light"}`} onClick={onClick} role="button" tabIndex={0}
-      onKeyDown={e => { if (e.key === "Enter") onClick(); }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: `${col}15`, color: col,
-        }}>
-          <TrendingUp size={15} strokeWidth={2.25} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <p style={{
-            fontSize: 13, fontWeight: 600, margin: "0 0 2px",
-            color: isDark ? "rgba(226,232,240,0.9)" : "rgba(15,23,42,0.9)",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>
-            {tx.description}
-          </p>
-          <p className="px-mono" style={{ fontSize: 10, margin: 0, color: isDark ? "rgba(148,163,184,0.6)" : "rgba(100,116,139,0.7)" }}>
-            {new Date(tx.createdAt).toLocaleString()}
-          </p>
-        </div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flexShrink: 0, gap: 3 }}>
-        <p className="px-mono" style={{ fontSize: 13, fontWeight: 700, color: col, margin: 0 }}>
-          ₦{tx.amount?.toLocaleString()}
-        </p>
-        <span style={{
-          fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "capitalize",
-          color: isDark ? "rgba(148,163,184,0.5)" : "rgba(100,116,139,0.6)",
-        }}>
-          {tx.type}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* ── Section label ── */
-function Label({ text, isDark }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-      <div style={{ height: 2, width: 18, borderRadius: 999, background: C.emerald, opacity: 0.7 }} />
-      <span className="px-mono" style={{
-        fontSize: 9, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
-        color: isDark ? "rgba(148,163,184,0.5)" : "rgba(100,116,139,0.6)",
-      }}>
-        {text}
-      </span>
+    <div style={{
+      borderRadius: 16, borderWidth: 1, borderStyle: "solid",
+      padding: "14px 12px",
+      display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+      background: cardBg, borderColor: cardBdr,
+      transition: "transform 0.22s ease",
+    }}>
+      <p className="px-display px-count" style={{
+        fontSize: "clamp(1.2rem,2.5vw,1.5rem)", fontWeight: 900,
+        color, margin: 0, lineHeight: 1,
+        fontVariantNumeric: "tabular-nums",
+      }}>{value}</p>
+      <p className="px-mono" style={{
+        fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        color: isDark ? "rgba(148,163,184,0.55)" : "rgba(100,116,139,0.65)",
+        margin: 0, textAlign: "center",
+      }}>{label}</p>
     </div>
   );
 }
@@ -391,6 +371,9 @@ export default function Dashboard() {
   const [showWallet, setShowWallet] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsError, setAnalyticsError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchUnreadCount = () => {
     fetch("/api/seller/notifications", { credentials: "include" })
@@ -403,10 +386,32 @@ export default function Dashboard() {
       .catch(() => {});
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch("/api/seller/analytics", { credentials: "include" });
+      const data = await res.json();
+      if (data?.success) {
+        setAnalytics(data);
+        setAnalyticsError(false);
+      } else {
+        setAnalyticsError(true);
+      }
+    } catch (_) {
+      setAnalyticsError(true);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchUser(), fetchAnalytics(), fetchUnreadCount()]);
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     getUserRealTimeData();
     fetchUser();
     fetchUnreadCount();
+    fetchAnalytics();
 
     const interval = setInterval(fetchUnreadCount, 8000);
     window.addEventListener("focus", fetchUnreadCount);
@@ -417,6 +422,9 @@ export default function Dashboard() {
   }, []);
 
   const firstName = userData?.name?.split(" ")[0] || "User";
+  const businessName = userData?.businessProfile?.businessName || userData?.name || "Your Store";
+  const profileImage = userData?.profileImage ?? null;
+  const initials = (userData?.name ?? "U").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
   const getGreeting = () => {
     const h = new Date().getHours();
     if (h < 12) return "Good morning";
@@ -433,14 +441,32 @@ export default function Dashboard() {
   /* ── AI plan data ── */
   const plan = userData?.paxAI?.plan || "free";
   const isAiOn = !!userData?.paxAI?.enabled;
-  const used = userData?.paxAI?.messagesUsedThisMonth ?? 0;
-  const currentPlanMeta = aiPlans?.find(p => p.key === plan);
-  // Always trust PlanModel (via aiPlans) then user's cached limit — never hardcode
-  const quota = currentPlanMeta?.messagesLimit ?? userData?.paxAI?.maxMonthlyMessages ?? 0;
-  const pct = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
-  const pctDisplay = pct === 0 ? "0%" : pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
-  const planCol = { free: C.blue, starter: C.cyan, business: C.amber, enterprise: C.indigo }[plan] ?? C.blue;
 
+  // ── MSGS HANDLED: same source as AI Messages ──────────────────────
+  // Both the stat strip and the AI quota bar use paxAI.messagesUsedThisMonth
+  const messagesUsed   = userData?.paxAI?.messagesUsedThisMonth ?? 0;
+
+  const currentPlanMeta = aiPlans?.find(p => p.key === plan);
+  const quota = currentPlanMeta?.messagesLimit ?? userData?.paxAI?.maxMonthlyMessages ?? 0;
+  const pct = quota > 0 ? Math.min((messagesUsed / quota) * 100, 100) : 0;
+  const pctDisplay = pct === 0 ? "0%" : pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
+
+  const planColors = { free: C.blue, starter: C.cyan, business: C.amber, enterprise: C.indigo };
+  const planCol = planColors[plan] ?? C.blue;
+  const quotaColor = pct >= 90 ? C.coral : pct >= 70 ? C.orange : C.emerald;
+
+  const contactCount = userData?.contacts ?? 0;
+  const workflowCount = userData?.workflows ?? 0;
+
+  // WhatsApp connection
+  const waConnected = !!(
+    userData?.whatsapp?.connected ||
+    userData?.whatsapp?.phoneNumberId ||
+    userData?.whatsappBusinessNo
+  );
+  const waPhone = userData?.whatsapp?.displayPhone ?? userData?.whatsappBusinessNo ?? "";
+
+  // Plan expiry
   const planExpiresAt = userData?.paxAI?.planExpiresAt;
   const lastUpd = userData?.paxAI?.planStartedAt;
   let remainingDays = null;
@@ -451,6 +477,8 @@ export default function Dashboard() {
     const diff = (Date.now() - new Date(lastUpd).getTime()) / (1000 * 60 * 60 * 24);
     remainingDays = Math.max(0, 30 - Math.floor(diff));
   }
+  const daysLabel = remainingDays === null ? "" : remainingDays === 0 ? "Resets today" : remainingDays === 1 ? "1d left" : `${remainingDays}d left`;
+  const daysUrgent = remainingDays !== null && remainingDays <= 3;
 
   /* ── Computed style helpers ── */
   const cardBg = isDark ? "rgba(12,20,40,0.72)" : "rgba(255,255,255,0.92)";
@@ -462,7 +490,12 @@ export default function Dashboard() {
   const subBdr = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)";
   const pageBg = isDark ? "#060d1e" : "#f0f4f9";
 
-  const ticker = ["AI Active • PaxAI", "WhatsApp Automation • Live", "Africa-ready Platform", "Official Meta API • Secure", "24/7 Auto-replies • Enabled"];
+  const heroBorderColor = isDark ? "rgba(52,211,153,0.25)" : "rgba(52,211,153,0.35)";
+  const heroTextPrimary = isDark ? "#f1f5f9" : "#1e293b";
+  const heroTextSecondary = isDark ? "rgba(241,245,249,0.6)" : "rgba(30,41,59,0.55)";
+  const heroBg = isDark
+    ? "linear-gradient(135deg, rgba(10,20,40,0.95) 0%, rgba(10,24,48,0.92) 100%)"
+    : "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(240,249,255,0.97) 100%)";
 
   return (
     <>
@@ -494,30 +527,11 @@ export default function Dashboard() {
           display: "flex", flexDirection: "column", gap: 20,
         }}>
 
-          {/* ── TICKER BAR (Desktop Only) ── */}
-          <div className="px-s1 px-desktop-only" style={{
-            borderRadius: 999, overflow: "hidden",
-            background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)"}`,
-            padding: "8px 0",
+          {/* ── HEADER row ── */}
+          <header className="px-s1" style={{
+            display: "flex", alignItems: "flex-start",
+            justifyContent: "space-between", gap: 12,
           }}>
-            <div className="px-ticker-wrap">
-              <div className="px-ticker-inner">
-                {[...ticker, ...ticker].map((t, i) => (
-                  <span key={i} className="px-mono" style={{
-                    fontSize: 10, fontWeight: 500, letterSpacing: "0.1em",
-                    color: isDark ? "rgba(52,211,153,0.7)" : "rgba(5,150,105,0.75)",
-                    padding: "0 28px",
-                  }}>
-                    ◆ {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ── HEADER ── */}
-          <header className="px-s1 px-header-row">
             <div style={{ minWidth: 0, flex: 1 }}>
               <p className="px-mono" style={{
                 fontSize: 10, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase",
@@ -532,7 +546,7 @@ export default function Dashboard() {
               }}>
                 {firstName} <span style={{ opacity: 0.85 }}>👋</span>
               </h1>
-              <p className="px-desktop-only" style={{
+              <p style={{
                 fontSize: 13.5, color: textSec, margin: "8px 0 0",
                 fontWeight: 400, maxWidth: 360, lineHeight: 1.6,
               }}>
@@ -540,40 +554,25 @@ export default function Dashboard() {
               </p>
             </div>
 
+            {/* Refresh button */}
+            <button
+              type="button"
+              className="px-btn"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "9px 14px", borderRadius: 12, marginTop: 4,
+                background: subBg, border: `1px solid ${subBdr}`,
+                color: textSec, fontSize: 12, fontWeight: 600,
+                fontFamily: "'Outfit', sans-serif",
+                opacity: refreshing ? 0.6 : 1,
+              }}
+            >
+              <RefreshCw size={14} className={refreshing ? "px-spin" : ""} />
+              <span className="px-desktop-only">Refresh</span>
+            </button>
           </header>
-
-          {/* ── STAT STRIP ── */}
-          <div className="px-s2 px-stat-strip">
-            {[
-              { label: "Automations", val: userData?.workflows || 0, icon: <Layers size={16} />, color: C.emerald },
-              { label: "Msgs Handled", val: userData?.messagesHandled || 0, icon: <MessageSquare size={16} />, color: C.cyan },
-              { label: "Contacts", val: userData?.contacts || 0, icon: <Users size={16} />, color: C.indigo },
-            ].map(({ label, val, icon, color }) => (
-              <div key={label} className={isDark ? "px-glass" : "px-glass-light"}
-                style={{ padding: "clamp(14px,3vw,18px) clamp(12px,3vw,20px)" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 11,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: `${color}18`, color,
-                  }}>
-                    {icon}
-                  </div>
-                  <Activity size={13} color={color} style={{ opacity: 0.5 }} />
-                </div>
-                <p className="px-display px-count" style={{
-                  fontSize: "clamp(1.4rem,3vw,1.9rem)", fontWeight: 900,
-                  color: textPri, margin: "0 0 4px", lineHeight: 1,
-                  fontVariantNumeric: "tabular-nums",
-                }}>
-                  {typeof val === "number" ? val.toLocaleString() : val}
-                </p>
-                <p className="px-mono" style={{ fontSize: 10, color: textMuted, margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  {label}
-                </p>
-              </div>
-            ))}
-          </div>
 
           {/* ── MAIN GRID ── */}
           <div className="px-grid">
@@ -581,241 +580,282 @@ export default function Dashboard() {
             {/* ═══ LEFT COLUMN ═══ */}
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
-              {/* ── LIVE AI & STORE PERFORMANCE COMMAND CENTER ── */}
-              <div className={`px-s3 ${isDark ? "px-glass" : "px-glass-light"}`} style={{
-                borderRadius: 24, overflow: "hidden", position: "relative",
-                background: isDark
-                  ? "linear-gradient(135deg, rgba(12,20,40,0.85) 0%, rgba(10,24,48,0.85) 100%)"
-                  : "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,244,249,0.95) 100%)",
-                border: `1px solid ${isDark ? "rgba(52,211,153,0.25)" : "rgba(52,211,153,0.3)"}`,
-              }}>
+              {/* ── HERO CARD (mirrors mobile home.tsx exactly) ── */}
+              <div
+                className="px-s2 px-hero-card px-glow"
+                style={{
+                  background: heroBg,
+                  borderColor: heroBorderColor,
+                }}
+              >
+                {/* Top accent shimmer line */}
+                <div style={{
+                  height: 2,
+                  background: "linear-gradient(90deg, transparent, rgba(52,211,153,0.8) 30%, rgba(34,211,238,0.7) 70%, transparent)",
+                }} />
 
-                {/* Geometric mesh background */}
+                {/* Geometric mesh overlay */}
                 <div style={{
                   position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-                  backgroundImage: `radial-gradient(${isDark ? "rgba(52,211,153,0.06)" : "rgba(52,211,153,0.1)"} 1px, transparent 1px)`,
-                  backgroundSize: "32px 32px",
-                  maskImage: "linear-gradient(to bottom right, black 30%, transparent 80%)",
+                  backgroundImage: `radial-gradient(${isDark ? "rgba(52,211,153,0.05)" : "rgba(52,211,153,0.09)"} 1px, transparent 1px)`,
+                  backgroundSize: "28px 28px",
+                  maskImage: "linear-gradient(to bottom right, black 20%, transparent 75%)",
                 }} />
 
-                {/* Glow orb */}
+                {/* Glow orb top-right */}
                 <div style={{
-                  position: "absolute", top: -60, right: -60, width: 280, height: 280,
+                  position: "absolute", top: -50, right: -50, width: 260, height: 260,
                   borderRadius: "50%", pointerEvents: "none", zIndex: 0,
                   background: isDark
-                    ? "radial-gradient(circle, rgba(52,211,153,0.14) 0%, transparent 65%)"
-                    : "radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 65%)",
-                }} />
-                <div style={{
-                  position: "absolute", bottom: -40, left: 40, width: 220, height: 220,
-                  borderRadius: "50%", pointerEvents: "none", zIndex: 0,
-                  background: isDark
-                    ? "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 65%)"
-                    : "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 65%)",
+                    ? "radial-gradient(circle, rgba(52,211,153,0.12) 0%, transparent 65%)"
+                    : "radial-gradient(circle, rgba(52,211,153,0.16) 0%, transparent 65%)",
                 }} />
 
-                {/* Top accent line */}
                 <div style={{
-                  height: 2, width: "100%",
-                  background: "linear-gradient(90deg, transparent, rgba(52,211,153,0.8) 30%, rgba(34,211,238,0.7) 70%, transparent)",
+                  padding: "clamp(18px,4vw,28px)",
                   position: "relative", zIndex: 1,
-                }} />
+                  display: "flex", flexDirection: "column", gap: 18,
+                }}>
 
-                <div className="px-hero-inner" style={{ position: "relative", zIndex: 1 }}>
-
-                  {/* Header Row: Title + Live Status Pill */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 12,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: "rgba(52,211,153,0.15)", color: C.emerald,
-                        boxShadow: "0 0 20px rgba(52,211,153,0.2)",
-                      }}>
-                        <Zap size={18} strokeWidth={2.25} />
-                      </div>
-                      <div>
-                        <span className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: C.emerald }}>
-                          Live Command Center
-                        </span>
-                        <h2 className="px-display" style={{ fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", fontWeight: 800, color: textPri, margin: "2px 0 0", letterSpacing: "-0.02em" }}>
-                          AI Engine & Store Health
-                        </h2>
-                      </div>
+                  {/* Row 1: Avatar + Greeting + Plan badge */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    {/* Avatar */}
+                    <div style={{
+                      width: 52, height: 52, borderRadius: 26, flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      overflow: "hidden",
+                      background: "rgba(52,211,153,0.15)",
+                      border: "1.5px solid rgba(52,211,153,0.35)",
+                    }}>
+                      {profileImage
+                        ? <img src={profileImage} alt="avatar" style={{ width: 52, height: 52, borderRadius: 26, objectFit: "cover" }} />
+                        : <span className="px-display" style={{ fontSize: 18, fontWeight: 900, color: C.emerald }}>{initials}</span>
+                      }
                     </div>
 
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 11, color: heroTextSecondary, margin: "0 0 2px", fontWeight: 500 }}>
+                        Welcome back
+                      </p>
+                      <p className="px-display" style={{
+                        fontSize: "clamp(1.2rem,3vw,1.55rem)", fontWeight: 900,
+                        color: heroTextPrimary, margin: 0, letterSpacing: "-0.03em",
+                        lineHeight: 1.15,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {firstName}
+                      </p>
+                    </div>
+
+                    {/* Plan badge */}
                     <div style={{
-                      display: "inline-flex", alignItems: "center", gap: 8,
-                      padding: "6px 14px", borderRadius: 999,
-                      background: isAiOn ? "rgba(52,211,153,0.12)" : "rgba(245,158,11,0.12)",
-                      border: `1px solid ${isAiOn ? "rgba(52,211,153,0.3)" : "rgba(245,158,11,0.3)"}`,
+                      padding: "5px 12px", borderRadius: 999,
+                      background: `${planCol}20`, border: `1px solid ${planCol}50`,
+                      flexShrink: 0,
                     }}>
-                      <div className={isAiOn ? "px-pulse" : ""} style={{
-                        width: 8, height: 8, borderRadius: "50%",
-                        background: isAiOn ? C.emerald : C.amber,
-                      }} />
-                      <span className="px-mono" style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: isAiOn ? C.emerald : C.amber }}>
-                        {isAiOn ? "AI Automation Live" : "AI Inactive"}
+                      <span className="px-mono" style={{
+                        fontSize: 9, fontWeight: 800, letterSpacing: "0.12em",
+                        color: planCol, textTransform: "uppercase",
+                      }}>
+                        {plan}
                       </span>
                     </div>
                   </div>
 
-                  {/* System Status Indicators Grid */}
-                  <div style={{
-                    display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-                    gap: 10, marginBottom: 20,
-                  }}>
-                    {/* Status 1: WhatsApp Bot */}
-                    <div style={{
-                      padding: "10px 14px", borderRadius: 14,
-                      background: subBg, border: `1px solid ${subBdr}`,
-                      backdropFilter: "blur(12px)", display: "flex", alignItems: "center", gap: 10
+                  {/* Row 2: Business name */}
+                  <div>
+                    <p className="px-display" style={{
+                      fontSize: "clamp(1.4rem,3.5vw,2rem)", fontWeight: 900,
+                      color: heroTextPrimary, margin: 0, letterSpacing: "-0.04em",
+                      lineHeight: 1.15,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: userData?.whatsapp?.connected ? "rgba(52,211,153,0.15)" : "rgba(251,113,133,0.15)",
-                        color: userData?.whatsapp?.connected ? C.emerald : C.coral,
-                      }}>
-                        <Wifi size={15} strokeWidth={2.2} />
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: 11.5, fontWeight: 700, color: textPri, margin: "0 0 1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          WhatsApp Bot
-                        </p>
-                        <p className="px-mono" style={{ fontSize: 9.5, color: userData?.whatsapp?.connected ? C.emerald : textMuted, margin: 0 }}>
-                          {userData?.whatsapp?.connected ? "Connected" : "Disconnected"}
-                        </p>
-                      </div>
-                    </div>
+                      {businessName}
+                    </p>
+                  </div>
 
-                    {/* Status 2: AI Knowledge Agent */}
-                    <div style={{
-                      padding: "10px 14px", borderRadius: 14,
-                      background: subBg, border: `1px solid ${subBdr}`,
-                      backdropFilter: "blur(12px)", display: "flex", alignItems: "center", gap: 10
-                    }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: "rgba(34,211,238,0.15)", color: C.cyan,
-                      }}>
-                        <Brain size={15} strokeWidth={2.2} />
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: 11.5, fontWeight: 700, color: textPri, margin: "0 0 1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          Agent Training
-                        </p>
-                        <p className="px-mono" style={{ fontSize: 9.5, color: C.cyan, margin: 0 }}>
-                          {userData?.paxAI?.trained || userData?.paxAI?.businessDescription ? "Ready & Trained" : "Needs Training"}
-                        </p>
-                      </div>
-                    </div>
+                  {/* Divider */}
+                  <div style={{ height: 1, background: heroBorderColor, marginLeft: -28, marginRight: -28 }} />
 
-                    {/* Status 3: Average Latency */}
-                    <div style={{
-                      padding: "10px 14px", borderRadius: 14,
-                      background: subBg, border: `1px solid ${subBdr}`,
-                      backdropFilter: "blur(12px)", display: "flex", alignItems: "center", gap: 10
-                    }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: "rgba(129,140,248,0.15)", color: C.indigo,
+                  {/* Row 3: 3 key stats */}
+                  <div className="px-stat-strip">
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "4px 0" }}>
+                      <p className="px-display px-count" style={{
+                        fontSize: "clamp(1.3rem,2.5vw,1.6rem)", fontWeight: 900,
+                        color: heroTextPrimary, margin: "0 0 3px", lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
                       }}>
-                        <Activity size={15} strokeWidth={2.2} />
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: 11.5, fontWeight: 700, color: textPri, margin: "0 0 1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          Response Latency
-                        </p>
-                        <p className="px-mono" style={{ fontSize: 9.5, color: C.indigo, margin: 0 }}>
-                          ~1.8s (Instant)
-                        </p>
-                      </div>
+                        {messagesUsed.toLocaleString()}
+                      </p>
+                      <p className="px-mono" style={{ fontSize: 9, color: heroTextSecondary, margin: 0, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "center" }}>
+                        Msg Handled
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "4px 0", borderLeft: `1px solid ${heroBorderColor}`, borderRight: `1px solid ${heroBorderColor}` }}>
+                      <p className="px-display px-count" style={{
+                        fontSize: "clamp(1.3rem,2.5vw,1.6rem)", fontWeight: 900,
+                        color: heroTextPrimary, margin: "0 0 3px", lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
+                      }}>
+                        {contactCount.toLocaleString()}
+                      </p>
+                      <p className="px-mono" style={{ fontSize: 9, color: heroTextSecondary, margin: 0, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "center" }}>
+                        Contacts
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "4px 0" }}>
+                      <p className="px-display px-count" style={{
+                        fontSize: "clamp(1.3rem,2.5vw,1.6rem)", fontWeight: 900,
+                        color: heroTextPrimary, margin: "0 0 3px", lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
+                      }}>
+                        {workflowCount}
+                      </p>
+                      <p className="px-mono" style={{ fontSize: 9, color: heroTextSecondary, margin: 0, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "center" }}>
+                        Automations
+                      </p>
                     </div>
                   </div>
 
-                  {/* Live Activity & Performance Summary Bar */}
-                  <div style={{
-                    padding: "16px 20px", borderRadius: 18,
-                    background: isDark ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.03)", border: `1px solid ${subBdr}`,
-                    marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                      <div style={{
-                        width: 38, height: 38, borderRadius: 12,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: "rgba(52,211,153,0.15)", color: C.emerald,
-                      }}>
-                        <Sparkles size={18} />
-                      </div>
-                      <div>
-                        <span className="px-mono" style={{ fontSize: 9, color: textMuted, textTransform: "uppercase", letterSpacing: "0.1em" }}>Automated Conversations</span>
-                        <p className="px-display" style={{ fontSize: 15, fontWeight: 800, color: textPri, margin: "2px 0 0" }}>
-                          {userData?.messagesHandled ? `${userData.messagesHandled.toLocaleString()} Messages Handled` : "Auto-Reply Engine Active"}
-                        </p>
+                  {/* Row 4: Monthly AI quota bar */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: heroTextSecondary, fontWeight: 500 }}>
+                        Monthly AI replies
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: heroTextPrimary }}>
+                          {messagesUsed.toLocaleString()} / {quota.toLocaleString()}
+                        </span>
+                        {!!daysLabel && (
+                          <span style={{
+                            padding: "2px 8px", borderRadius: 999, fontSize: 9.5, fontWeight: 700,
+                            background: daysUrgent ? "rgba(239,68,68,0.18)" : "rgba(52,211,153,0.14)",
+                            color: daysUrgent ? C.coral : C.emerald,
+                            fontFamily: "'DM Mono', monospace",
+                          }}>
+                            {daysLabel}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <button type="button" className="px-btn"
-                        onClick={() => router.push("/dashboard/automations/whatsapp-inbox")}
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: 6,
-                          padding: "8px 14px", borderRadius: 11,
-                          background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.25)",
-                          color: C.emerald, fontSize: 12, fontWeight: 700,
-                          fontFamily: "'Outfit', sans-serif",
-                        }}>
-                        <MessageCircle size={14} /> Live Inbox
-                      </button>
-                      <button type="button" className="px-btn"
-                        onClick={() => router.push("/dashboard/automations/ai-business-dashboard")}
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: 6,
-                          padding: "8px 14px", borderRadius: 11,
-                          background: subBg, border: `1px solid ${subBdr}`,
-                          color: textPri, fontSize: 12, fontWeight: 600,
-                          fontFamily: "'Outfit', sans-serif",
-                        }}>
-                        <Bot size={14} /> Agent Setup
-                      </button>
+                    <div className="px-progress-track" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }}>
+                      <div
+                        className="px-progress-fill px-shimmer"
+                        style={{ width: `${pct}%`, minWidth: messagesUsed > 0 ? 4 : 0, background: quotaColor }}
+                      />
                     </div>
-                  </div>
-
-                  {/* CTA Buttons */}
-                  <div className="px-cta-row">
-                    <button type="button" className="px-btn"
-                      onClick={() => router.push("/dashboard/automations/market-place")}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 10,
-                        padding: "13px 24px", borderRadius: 14,
-                        background: `linear-gradient(135deg, ${C.emerald} 0%, #059669 100%)`,
-                        color: "#fff", fontWeight: 700, fontSize: 13.5,
-                        letterSpacing: "-0.01em",
-                        boxShadow: `0 16px 40px rgba(52,211,153,0.35), inset 0 1px 0 rgba(255,255,255,0.2)`,
-                        fontFamily: "'Outfit', sans-serif",
-                      }}>
-                      <Sparkles size={16} strokeWidth={2.25} />
-                      Open AI Marketplace
-                      <ArrowRight size={15} strokeWidth={2.25} />
-                    </button>
                   </div>
                 </div>
               </div>
+
+              {/* ── ANALYTICS ERROR ── */}
+              {analyticsError && (
+                <div className="px-s3" style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "12px 16px", borderRadius: 14,
+                  background: `${C.amber}14`, border: `1px solid ${C.amber}35`,
+                }}>
+                  <AlertCircle size={16} color={C.amber} />
+                  <p style={{ fontSize: 13, fontWeight: 500, color: C.amber, margin: 0 }}>
+                    Couldn't load dashboard data. Pull down to retry.
+                  </p>
+                </div>
+              )}
+
+              {/* ── WHATSAPP STATUS ── */}
+              <button
+                type="button"
+                className={`px-s3 px-wa-card px-btn`}
+                onClick={() => router.push("/dashboard/automations/whatsapp#connect")}
+                style={{
+                  width: "100%",
+                  background: waConnected
+                    ? (isDark ? "rgba(52,211,153,0.07)" : "rgba(52,211,153,0.06)")
+                    : (isDark ? "rgba(251,191,36,0.07)" : "rgba(251,191,36,0.06)"),
+                  borderColor: waConnected
+                    ? "rgba(52,211,153,0.3)"
+                    : "rgba(251,191,36,0.3)",
+                }}
+              >
+                {/* Pulse dot */}
+                <div className={waConnected ? "px-pulse" : ""} style={{
+                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                  background: waConnected ? C.emerald : C.amber,
+                }} />
+                <div style={{ flex: 1, textAlign: "left" }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: textPri, margin: "0 0 2px" }}>
+                    WhatsApp {waConnected ? "Connected" : "Not Connected"}
+                  </p>
+                  <p className="px-mono" style={{ fontSize: 10, color: textMuted, margin: 0 }}>
+                    {waConnected ? (waPhone || "Business number active") : "Tap to connect your number"}
+                  </p>
+                </div>
+                <ChevronRight size={16} color={textMuted} />
+              </button>
+
+              {/* ── TODAY'S SALES ── */}
+              {analytics?.metrics && (
+                <div className="px-s4">
+                  <Label text="Today's Sales" isDark={isDark} />
+                  <div className="px-metrics-row">
+                    <MetricCard
+                      label="Revenue"
+                      value={`₦${(analytics.metrics.todaySales ?? 0).toLocaleString()}`}
+                      color={C.emerald}
+                      isDark={isDark}
+                      cardBg={cardBg}
+                      cardBdr={cardBdr}
+                    />
+                    <MetricCard
+                      label="Orders"
+                      value={analytics.metrics.totalOrders ?? 0}
+                      color={C.blue}
+                      isDark={isDark}
+                      cardBg={cardBg}
+                      cardBdr={cardBdr}
+                    />
+                    <MetricCard
+                      label="Pending"
+                      value={analytics.metrics.pendingOrdersCount ?? 0}
+                      color={C.amber}
+                      isDark={isDark}
+                      cardBg={cardBg}
+                      cardBdr={cardBdr}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* ── QUICK ACTIONS ── */}
-              <div className={`px-s4 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "24px" }}>
+              <div className={`px-s5 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "24px" }}>
                 <Label text="Quick Actions" isDark={isDark} />
-
                 <div className="px-svc-grid">
-                  <SvcCard title="My Store" link="/dashboard/my-store" icon={<Store size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
-                  <SvcCard title="Products" link="/dashboard/automations/products" icon={<Package size={19} strokeWidth={2.2} />} color={C.cyan} isDark={isDark} router={router} />
-                  <SvcCard title="Smart Agent" link="/dashboard/automations/ai-business-dashboard" icon={<Bot size={19} strokeWidth={2.2} />} color={C.indigo} isDark={isDark} router={router} />
-                  <SvcCard title="Inbox" link="/dashboard/automations/whatsapp-inbox" icon={<MessageSquare size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
-                  <SvcCard title="Analytics" link="/dashboard/automations/sales" icon={<BarChart2 size={19} strokeWidth={2.2} />} color={C.coral} isDark={isDark} router={router} badgeCount={unreadNotifCount} />
+                  <SvcCard title="My Store"    link="/dashboard/my-store"                             icon={<Store       size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
+                  <SvcCard title="Products"    link="/dashboard/automations/products"                 icon={<Package     size={19} strokeWidth={2.2} />} color={C.cyan}    isDark={isDark} router={router} />
+                  <SvcCard title="Smart Agent" link="/dashboard/automations/ai-business-dashboard"   icon={<Bot         size={19} strokeWidth={2.2} />} color={C.indigo}  isDark={isDark} router={router} />
+                  <SvcCard title="Inbox"       link="/dashboard/automations/whatsapp-inbox"          icon={<MessageSquare size={19} strokeWidth={2.2} />} color={C.amber} isDark={isDark} router={router} />
+                  <SvcCard title="Analytics"   link="/dashboard/automations/sales"                   icon={<BarChart2   size={19} strokeWidth={2.2} />} color={C.coral}   isDark={isDark} router={router} badgeCount={unreadNotifCount} />
                 </div>
               </div>
+
+              {/* ── TOP PRODUCTS (if available) ── */}
+              {(analytics?.topProducts ?? []).length > 0 && (
+                <div className="px-s6">
+                  <Label text="Top Products" isDark={isDark} />
+                  <div className={isDark ? "px-glass" : "px-glass-light"} style={{ overflow: "hidden" }}>
+                    {(analytics.topProducts).slice(0, 4).map((p, i, arr) => (
+                      <div key={i} className="px-top-row"
+                        style={{ borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}>
+                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 900, color: textMuted, width: 24 }}>#{i + 1}</span>
+                        <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: textPri, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                        <span className="px-mono" style={{ fontSize: 13, fontWeight: 800, color: C.emerald, flexShrink: 0 }}>₦{(p.revenue ?? 0).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
 
             {/* ═══ RIGHT SIDEBAR ═══ */}
@@ -862,12 +902,12 @@ export default function Dashboard() {
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                       <span style={{ fontSize: 11, fontWeight: 500, color: textMuted }}>Messages used</span>
                       <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: textPri }}>
-                        {used.toLocaleString()}/{quota.toLocaleString()}
+                        {messagesUsed.toLocaleString()}/{quota.toLocaleString()}
                       </span>
                     </div>
                     <div className="px-progress-track" style={{ background: subBg, border: `1px solid ${subBdr}` }}>
                       <div className="px-progress-fill px-shimmer"
-                        style={{ width: `${pct}%`, minWidth: used > 0 ? 4 : 0 }} />
+                        style={{ width: `${pct}%`, minWidth: messagesUsed > 0 ? 4 : 0 }} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 5 }}>
                       <span className="px-mono" style={{ fontSize: 9, color: pct >= 90 ? C.coral : textMuted }}>
@@ -893,7 +933,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* ── WALLET CARD ── */}
+              {/* ── WALLET CARD (untouched) ── */}
               <div className={`px-s4 ${isDark ? "px-glass" : "px-glass-light"}`}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px", gap: 12 }}>
                   <div>
@@ -939,17 +979,17 @@ export default function Dashboard() {
                     <div style={{
                       width: 42, height: 42, borderRadius: 13,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      background: userData?.whatsapp?.connected ? `${C.emerald}18` : `${C.amber}12`,
-                      color: userData?.whatsapp?.connected ? C.emerald : C.amber,
+                      background: waConnected ? `${C.emerald}18` : `${C.amber}12`,
+                      color: waConnected ? C.emerald : C.amber,
                     }}>
                       <Wifi size={18} strokeWidth={2} />
                     </div>
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: textPri, margin: "0 0 3px" }}>
-                        {userData?.whatsapp?.connected ? "WhatsApp Connected" : "Not Connected"}
+                        {waConnected ? "WhatsApp Connected" : "Not Connected"}
                       </p>
                       <p className="px-mono" style={{ fontSize: 10, color: textMuted, margin: 0 }}>
-                        {userData?.whatsapp?.connected
+                        {waConnected
                           ? userData?.whatsappBusinessNo || "Business number active"
                           : "Tap to configure channel"}
                       </p>
@@ -964,11 +1004,9 @@ export default function Dashboard() {
                 <Label text="Growth & Tools" isDark={isDark} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
-                    // { label: "Broadcast Messaging", href: "/dashboard/automations/broadcast",           icon: <Radio size={15} />,   color: C.indigo  },
-                    // { label: "Marketing Campaigns", href: "/dashboard/automations/broadcast/campaigns", icon: <Send size={15} />,    color: C.orange  },
-                    { label: "Prevent Ban Rules",   href: "/dashboard/prevent-ban",                     icon: <Shield size={15} />,  color: C.emerald },
-                    { label: "Referral Earnings",   href: "/dashboard/referral",                        icon: <Users size={15} />,   color: C.cyan    },
-                    { label: "Billing & Plans",     href: "/dashboard/billing",                         icon: <Crown size={15} />,   color: C.amber   },
+                    { label: "Prevent Ban Rules",   href: "/dashboard/prevent-ban",  icon: <Shield size={15} />, color: C.emerald },
+                    { label: "Referral Earnings",   href: "/dashboard/referral",      icon: <Users  size={15} />, color: C.cyan    },
+                    { label: "Billing & Plans",     href: "/dashboard/billing",       icon: <Crown  size={15} />, color: C.amber   },
                   ].map(({ label, href, icon, color }) => (
                     <button key={label} type="button" className="px-btn"
                       onClick={() => router.push(href)}
