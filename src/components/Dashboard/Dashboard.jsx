@@ -18,6 +18,9 @@ const CSS = `
 
   *, *::before, *::after { box-sizing: border-box; }
 
+  /* Prevent horizontal overflow site-wide */
+  html, body { overflow-x: hidden; max-width: 100%; }
+
   .px-root {
     font-family: 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -159,27 +162,17 @@ const CSS = `
     .px-svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   }
 
-  /* ── Metrics row — 3 equal cols → scrollable on narrow mobile ── */
+  /* ── Metrics row — 3 equal cols, compact on mobile ── */
   .px-metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 10px;
   }
-  @media (max-width: 500px) {
-    .px-metrics-row {
-      display: flex;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      gap: 10px;
-      padding-bottom: 6px;
-    }
-    .px-metrics-row > * {
-      scroll-snap-align: start;
-      flex-shrink: 0;
-      min-width: 110px;
-      flex: 1 0 110px;
-    }
+  @media (max-width: 480px) {
+    .px-metrics-row { gap: 6px; }
+    .px-metric-card { padding: 10px 6px !important; }
+    .px-metric-value { font-size: 1rem !important; }
+    .px-metric-label { font-size: 8px !important; }
   }
 
   /* ── Quota bar text — wrap gracefully on small screens ── */
@@ -367,20 +360,23 @@ function SvcCard({ title, link, icon, color, isDark, router, badgeCount }) {
 /* ── Metric card (Today's Sales) ── */
 function MetricCard({ label, value, color, isDark, cardBg, cardBdr }) {
   return (
-    <div style={{
-      borderRadius: 16, borderWidth: 1, borderStyle: "solid",
-      padding: "14px 12px",
+    <div className="px-metric-card" style={{
+      borderRadius: 14, borderWidth: 1, borderStyle: "solid",
+      padding: "12px 8px",
       display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
       background: cardBg, borderColor: cardBdr,
       transition: "transform 0.22s ease",
+      minWidth: 0, overflow: "hidden",
     }}>
-      <p className="px-display px-count" style={{
-        fontSize: "clamp(1.2rem,2.5vw,1.5rem)", fontWeight: 900,
+      <p className="px-display px-count px-metric-value" style={{
+        fontSize: "clamp(0.85rem,3.5vw,1.25rem)", fontWeight: 900,
         color, margin: 0, lineHeight: 1,
         fontVariantNumeric: "tabular-nums",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        maxWidth: "100%",
       }}>{value}</p>
-      <p className="px-mono" style={{
-        fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em",
+      <p className="px-mono px-metric-label" style={{
+        fontSize: 8.5, fontWeight: 700, letterSpacing: "0.08em",
         textTransform: "uppercase",
         color: isDark ? "rgba(148,163,184,0.55)" : "rgba(100,116,139,0.65)",
         margin: 0, textAlign: "center",
@@ -528,7 +524,7 @@ export default function Dashboard() {
       <style>{CSS}</style>
 
       {/* ── Page bg ── */}
-      <div style={{ minHeight: "100vh", background: pageBg, position: "relative", overflow: "hidden" }}>
+      <div style={{ minHeight: "100vh", background: pageBg, position: "relative", overflow: "hidden", overflowX: "hidden", maxWidth: "100vw" }}>
 
         {/* ── Ambient orbs ── */}
         {isDark && (
@@ -551,6 +547,7 @@ export default function Dashboard() {
           padding: "clamp(16px,4vw,28px) clamp(12px,4vw,20px) 100px",
           position: "relative", zIndex: 1,
           display: "flex", flexDirection: "column", gap: 20,
+          overflowX: "hidden",
         }}>
 
           {/* ── HEADER row ── */}
