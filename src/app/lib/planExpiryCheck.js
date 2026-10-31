@@ -165,6 +165,7 @@ export async function processPlanExpirationOrRenewal(userId) {
       // 3. Re-apply plan limits from PlanModel
       user.paxAI.maxMonthlyMessages = planMeta.messagesLimit;
       user.paxAI.messagesUsedThisMonth = 0;
+      user.paxAI.quotaWarningSentAt = null; // Reset so warning fires again next cycle
       user.paxAI.extraMessagesPurchased = 0; // top-up packs do not roll over
       user.paxAI.broadcastContactsLimit = planMeta.broadcastContactsLimit;
       user.paxAI.broadcastContactsUsedThisMonth = 0;
@@ -242,6 +243,8 @@ export async function processPlanExpirationOrRenewal(userId) {
     user.paxAI.plan = "free";
     user.paxAI.productsLimit = 20;
     user.paxAI.maxMonthlyMessages = 200;
+    user.paxAI.messagesUsedThisMonth = 0; // reset for free plan
+    user.paxAI.quotaWarningSentAt = null;  // Reset so warning fires again next cycle
     user.paxAI.extraMessagesPurchased = 0; // top-ups expire with the plan
     user.paxAI.broadcastContactsLimit = 0;
     user.paxAI.scheduledBroadcast = false;

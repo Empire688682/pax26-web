@@ -109,6 +109,7 @@ export async function POST(req) {
     user.paxAI.planExpiresAt = expiresAt;
     user.paxAI.reminderWindowSent = []; // Reset sent reminder windows for the new cycle
     user.paxAI.reminderSentAt = null;
+    user.paxAI.quotaWarningSentAt = null; // Reset so low-quota warning fires fresh next cycle
     if (planKey !== "free") {
       user.paxAI.hadPaidPlan = true;
     }

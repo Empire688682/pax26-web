@@ -560,6 +560,7 @@ export const handleIncomingWhatsApp = async (payload) => {
           "paxAI.messagesUsedThisMonth": 0,
           "paxAI.broadcastContactsUsedThisMonth": 0,
           "paxAI.planStartedAt": now,
+          "paxAI.quotaWarningSentAt": null, // Reset so warning fires again in the new cycle
         },
       }
     );

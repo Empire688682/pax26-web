@@ -430,3 +430,121 @@ export async function sendWhatsAppDisconnectedNotification(userOrId, { displayPh
     console.warn("[whatsappDisconnected] Non-fatal email error:", err.message);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   6. QUOTA WARNING EMAIL (< 20 messages remaining)
+   ═══════════════════════════════════════════════════════════════ */
+function buildQuotaWarningHtml({ userName, plan, messagesUsed, messagesLimit, remaining, isFree }) {
+  const pct         = messagesLimit > 0 ? Math.min(100, Math.round((messagesUsed / messagesLimit) * 100)) : 100;
+  const urgentColor = remaining <= 5 ? "#ef4444" : "#f97316";
+  const urgentBg    = remaining <= 5 ? "rgba(239,68,68,0.08)" : "rgba(249,115,22,0.08)";
+  const urgentBdr   = remaining <= 5 ? "rgba(239,68,68,0.25)" : "rgba(249,115,22,0.25)";
+
+  const barFilled = Math.max(4, pct);
+
+  const progressBar = `
+    <div style="margin:16px 0;">
+      <div style="background:#e8e8e6;border-radius:999px;height:10px;overflow:hidden;">
+        <div style="height:100%;width:${barFilled}%;background:${urgentColor};border-radius:999px;"></div>
+      </div>
+      <p style="font-size:11px;color:#888;margin:5px 0 0;text-align:right;">${messagesUsed.toLocaleString()} / ${messagesLimit.toLocaleString()} used (${pct}%)</p>
+    </div>`;
+
+  const upgradeSection = isFree
+    ? `
+    <div style="background:#f0f0ff;border:1px solid #d0d0ff;border-radius:14px;padding:18px 20px;margin:20px 0;">
+      <p style="color:#4f46e5;font-size:13px;font-weight:700;margin:0 0 8px;">🚀 Upgrade to a Paid Plan</p>
+      <p style="color:#555;font-size:13px;margin:0;line-height:1.6;">
+        You're on the <strong>Free Plan</strong> with a limit of ${messagesLimit.toLocaleString()} AI replies/month.
+        Upgrade to a paid plan to keep your AI agent running without interruption and unlock more features.
+      </p>
+      <ul style="color:#555;font-size:13px;margin:12px 0 0;padding-left:18px;line-height:1.8;">
+        <li><strong>Starter</strong> — ₦15,000/mo · Up to 1,000 AI replies</li>
+        <li><strong>Business</strong> — ₦45,000/mo · Up to 5,000 AI replies</li>
+        <li><strong>Enterprise</strong> — ₦120,000/mo · Unlimited replies</li>
+      </ul>
+    </div>
+    ${ctaButton(BILLING_URL, "Upgrade My Plan Now →", "#6366f1")}
+    ${ctaButton(DASHBOARD, "Go to Dashboard", "#111")}`
+    : `
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:18px 20px;margin:20px 0;">
+      <p style="color:#c2410c;font-size:13px;font-weight:700;margin:0 0 8px;">⚡ Buy Extra Messages or Upgrade</p>
+      <p style="color:#555;font-size:13px;margin:0;line-height:1.6;">
+        You have only <strong style="color:${urgentColor};">${remaining} replies left</strong> on your <strong>${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan</strong> this month.
+        You can buy a message top-up pack to keep your AI agent running, or upgrade to a higher plan for a bigger monthly allowance.
+      </p>
+    </div>
+    ${ctaButton(BILLING_URL, "Buy Extra Messages →", urgentColor)}
+    ${ctaButton(BILLING_URL, "Upgrade My Plan →", "#6366f1")}
+    ${ctaButton(DASHBOARD, "Go to Dashboard", "#111")}`;
+
+  const body = `
+    <p style="color:#555;font-size:14px;margin:0 0 16px;line-height:1.6;">
+      Hi <strong>${userName || "there"}</strong>, your AI agent's monthly message quota is almost exhausted.
+      Once the limit is reached, your AI agent will <strong>stop replying</strong> to customer messages until
+      you upgrade or the quota resets next month.
+    </p>
+    <div style="background:${urgentBg};border:1px solid ${urgentBdr};border-radius:14px;padding:16px 20px;margin-bottom:4px;">
+      <p style="color:${urgentColor};font-size:14px;font-weight:800;margin:0;">
+        ⚠️ Only <strong>${remaining}</strong> AI repl${remaining === 1 ? "y" : "ies"} remaining this month
+      </p>
+    </div>
+    ${progressBar}
+    ${upgradeSection}
+    <p style="color:#aaa;font-size:12px;margin:16px 0 0;text-align:center;line-height:1.6;">
+      Questions? <a href="mailto:info@pax26.com" style="color:#6366f1;">info@pax26.com</a>
+    </p>`;
+
+  return shell({
+    headerGradient: remaining <= 5
+      ? "linear-gradient(135deg, #ef4444, #dc2626)"
+      : "linear-gradient(135deg, #f97316, #ea580c)",
+    headerIcon:  remaining <= 5 ? "🚨" : "⚠️",
+    headerTitle: "Your AI Agent Is Running Low!",
+    headerSub:   `Only ${remaining} message${remaining === 1 ? "" : "s"} left this month`,
+    body,
+    footerNote: "You are receiving this because your Pax26 AI agent is approaching its monthly message limit.",
+  });
+}
+
+/**
+ * sendQuotaWarningEmail
+ *
+ * Sends a "running low on AI messages" alert email to the seller.
+ *
+ * @param {{ _id, email, name }} user      - User object (must have email)
+ * @param {{
+ *   plan: string,
+ *   messagesUsed: number,
+ *   messagesLimit: number,
+ *   remaining: number,
+ * }} opts
+ */
+export async function sendQuotaWarningEmail(user, { plan, messagesUsed, messagesLimit, remaining } = {}) {
+  try {
+    if (!user?.email) return;
+
+    const isFree = !plan || plan === "free";
+    const html   = buildQuotaWarningHtml({
+      userName: user.name,
+      plan,
+      messagesUsed,
+      messagesLimit,
+      remaining,
+      isFree,
+    });
+
+    const subject = remaining <= 5
+      ? `🚨 URGENT: Only ${remaining} AI repl${remaining === 1 ? "y" : "ies"} left — Your Pax26 agent may go silent`
+      : `⚠️ Your Pax26 AI agent is running low — ${remaining} messages remaining`;
+
+    await new Promise((resolve) => {
+      sendpulse.smtpSendMail((result) => {
+        console.log(`[quotaWarning] 📧 Sent to ${user.email} | remaining=${remaining} | result:`, result?.result);
+        resolve();
+      }, { subject, from: FROM_EMAIL, to: [{ email: user.email }], html });
+    });
+  } catch (err) {
+    console.warn("[quotaWarning] Non-fatal email error:", err.message);
+  }
+}

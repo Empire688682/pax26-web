@@ -217,6 +217,12 @@ const UserSchema = new mongoose.Schema(
       // in the CURRENT billing cycle. Reset to [] on every renewal.
       reminderWindowSent: { type: [String], default: [] },
 
+      // ── Quota Warning Tracking ────────────────────────────
+      // Set when a "running low on messages" warning email/push is sent.
+      // Reset to null whenever messagesUsedThisMonth resets (plan renewal / free-tier monthly reset).
+      // Prevents sending duplicate low-quota alerts within the same billing cycle.
+      quotaWarningSentAt: { type: Date, default: null },
+
       // ── Free-Trial & Paid-Plan History ────────────────────
       // Set to true the first time the user's free trial month ends
       // (whether they renew or get downgraded). Used for future paid-only
