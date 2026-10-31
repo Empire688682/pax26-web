@@ -149,16 +149,6 @@ const CSS = `
     .px-desktop-only { display: none !important; }
   }
 
-  /* ── Mobile sidebar — show AI Plan & Wallet below main on small screens ── */
-  .px-mobile-sidebar {
-    display: none;
-  }
-  @media (max-width: 920px) {
-    .px-mobile-sidebar { display: flex; flex-direction: column; gap: 14px; }
-    /* Hide the entire right aside on mobile — px-mobile-sidebar renders it instead */
-    .px-right-aside { display: none !important; }
-  }
-
   /* ── Service grid — 5 col → 3 col on mobile ── */
   .px-svc-grid {
     display: grid;
@@ -894,8 +884,8 @@ export default function Dashboard() {
 
             </div>
 
-            {/* ═══ RIGHT SIDEBAR (desktop only) ═══ */}
-            <aside className="px-right-aside" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* ═══ RIGHT SIDEBAR (stacks below on mobile) ═══ */}
+            <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
               {/* ── AI PLAN CARD ── */}
               <div className={`px-s3 ${isDark ? "px-glass" : "px-glass-light"}`}
@@ -1070,97 +1060,6 @@ export default function Dashboard() {
               </div>
 
             </aside>
-          </div>
-
-          {/* ═══ MOBILE-ONLY: AI Plan + Wallet shown below main content ═══ */}
-          <div className="px-mobile-sidebar">
-
-            {/* AI Plan card */}
-            <div className={`${isDark ? "px-glass" : "px-glass-light"}`} style={{ overflow: "hidden" }}>
-              <div style={{ height: 3, background: `linear-gradient(90deg, transparent, ${planCol}, transparent)` }} />
-              <div className="px-card-pad">
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: 13,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      background: `${planCol}18`, color: planCol,
-                      border: `1px solid ${planCol}28`,
-                    }}>
-                      <Crown size={17} strokeWidth={2} />
-                    </div>
-                    <div>
-                      <p className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, margin: "0 0 3px" }}>AI Plan</p>
-                      <p className="px-display" style={{ fontSize: 15, fontWeight: 800, color: textPri, margin: 0, textTransform: "capitalize", letterSpacing: "-0.02em" }}>{plan}</p>
-                      {remainingDays !== null && (
-                        <p style={{ fontSize: 10, fontWeight: 600, color: remainingDays <= 5 ? C.coral : textMuted, margin: "2px 0 0" }}>{remainingDays}d remaining</p>
-                      )}
-                    </div>
-                  </div>
-                  {badge(isAiOn ? "Active" : "Inactive", isAiOn ? C.emerald : C.coral)}
-                </div>
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7, gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 11, fontWeight: 500, color: textMuted }}>Messages used</span>
-                    <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: textPri, whiteSpace: "nowrap" }}>
-                      {messagesUsed.toLocaleString()}/{quota.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="px-progress-track" style={{ background: subBg, border: `1px solid ${subBdr}` }}>
-                    <div className="px-progress-fill px-shimmer" style={{ width: `${pct}%`, minWidth: messagesUsed > 0 ? 4 : 0 }} />
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                    <span className="px-mono" style={{ fontSize: 9, color: pct >= 90 ? C.coral : textMuted }}>{pctDisplay} used</span>
-                  </div>
-                </div>
-                <button type="button" className="px-btn"
-                  onClick={() => router.push(isAiOn ? "/dashboard/billing" : "/dashboard/automations/ai-business-dashboard")}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                    width: "100%", padding: "11px 0", borderRadius: 13,
-                    fontSize: 13, fontWeight: 700,
-                    background: `${planCol}14`, color: planCol,
-                    border: `1px solid ${planCol}28`,
-                    fontFamily: "'Outfit', sans-serif",
-                  }}>
-                  <Crown size={13} />
-                  {isAiOn ? "Manage Plan" : "Activate AI"}
-                </button>
-              </div>
-            </div>
-
-            {/* Wallet card */}
-            <div className={`${isDark ? "px-glass" : "px-glass-light"}`}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "clamp(14px,4vw,20px)", gap: 12 }}>
-                <div>
-                  <p className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, margin: "0 0 4px" }}>Wallet</p>
-                  <p className="px-display" style={{ fontSize: 15, fontWeight: 800, color: textPri, margin: 0, letterSpacing: "-0.02em" }}>Wallet Balance</p>
-                </div>
-                <button type="button" className="px-btn"
-                  onClick={() => setShowWallet(!showWallet)}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 7,
-                    padding: "9px 14px", borderRadius: 12, fontSize: 12, fontWeight: 600,
-                    background: showWallet ? `${C.emerald}14` : subBg,
-                    color: showWallet ? C.emerald : textSec,
-                    border: `1px solid ${showWallet ? `${C.emerald}28` : subBdr}`,
-                    cursor: "pointer", fontFamily: "'Outfit', sans-serif",
-                  }}>
-                  {showWallet ? <EyeOff size={14} /> : <Eye size={14} />}
-                  {showWallet ? "Hide" : "View"}
-                </button>
-              </div>
-              {showWallet && (
-                <div style={{
-                  padding: "0 clamp(14px,4vw,20px) clamp(14px,4vw,20px)",
-                  borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                  paddingTop: 16,
-                }}>
-                  <WalletBalance showMore={showMore} setShowMore={setShowMore} />
-                </div>
-              )}
-            </div>
-
           </div>
 
         </div>
