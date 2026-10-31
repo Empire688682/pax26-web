@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import Script from "next/script";
+import React, { useState, useEffect } from "react";
+
 import { useGlobalContext } from "../Context";
 import WalletBalance from "../WalletBalance/WalletBalance";
 import { toast } from "react-toastify";
@@ -213,7 +213,7 @@ export default function Billing() {
   const [selected, setSelected] = useState(null);
   const [paying, setPaying] = useState(false);
   const [showMore, setShowMore] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("wallet"); // "wallet" | "card"
+  // Payment is always via wallet — card option has been removed
   const [displayCurrency, setDisplayCurrency] = useState("NGN");
 
   // Extra message top-up state
@@ -316,79 +316,28 @@ export default function Billing() {
     }
   };
 
-  /* ── Subscribe via Paystack card ────────────────────────────── */
-  const handlePaystackCard = useCallback(() => {
-    if (!selected || !selectedMeta || paying) return;
-    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
-    if (!paystackKey) {
-      toast.error("Card payments are not configured yet. Please use wallet.");
-      return;
-    }
-    if (typeof window === "undefined" || !window.PaystackPop) {
-      toast.error("Payment gateway not loaded. Please refresh and try again.");
-      return;
-    }
-
-    const reference = `PAX-CARD-${selected.toUpperCase()}-${Date.now()}`;
-
-    const handler = window.PaystackPop.setup({
-      key: paystackKey,
-      email: userData?.email || "",
-      amount: selectedMeta.price * 100, // Paystack uses kobo
-      currency: "NGN",
-      ref: reference,
-      metadata: {
-        custom_fields: [
-          { display_name: "Plan", variable_name: "plan", value: selectedMeta.label },
-          { display_name: "User", variable_name: "user", value: userData?._id || "" },
-        ],
-      },
-      callback: async (response) => {
-        // response.reference is the verified reference
-        setPaying(true);
-        try {
-          const res = await fetch("/api/billing/subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              plan: selected,
-              paymentType: "paystack",
-              reference: response.reference,
-            }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            toast.success(data.message);
-            await fetchUser();
-            setSelected(null);
-            router.push("/dashboard/automations");
-          } else {
-            toast.error(data.message || "Subscription failed");
-          }
-        } catch (err) {
-          console.error(err);
-          toast.error("Could not activate plan. Contact support with ref: " + response.reference);
-        } finally {
-          setPaying(false);
-        }
-      },
-      onClose: () => {
-        toast("Payment cancelled.", { icon: "💳" });
-      },
-    });
-
-    handler.openIframe();
-  }, [selected, selectedMeta, paying, userData, fetchUser, router]);
+  /* Card payment removed — wallet only */
 
   /* ── Buy extra message pack ─────────────────────────────────── */
   const handleBuyMessages = async (packId) => {
     if (topUpLoading) return;
-    const pack = MESSAGE_PACKS.find(p => p.id === packId);
-    if (!pack) return;
-    if (userWallet < pack.price) {
-      toast.error(`Insufficient balance. You need ₦${pack.price.toLocaleString()} but have ₦${userWallet.toLocaleString()}.`);
+
+    // Use the messagePacks state (fetched from /api/billing/message-packs on mount)
+    // NOT a stale local constant — admin controls pack prices/sizes from the DB
+    const pack = messagePacks.find(p => p.id === packId);
+    if (!pack) {
+      toast.error("Pack not found. Please refresh the page and try again.");
       return;
     }
+
+    // Pre-flight wallet check with the correct pack price
+    if (userWallet < pack.price) {
+      toast.error(
+        `Insufficient wallet balance. You need ₦${pack.price.toLocaleString()} but have ₦${userWallet.toLocaleString()}. Fund your wallet first.`
+      );
+      return;
+    }
+
     setTopUpLoading(true);
     try {
       const res = await fetch("/api/billing/buy-messages", {
@@ -403,10 +352,11 @@ export default function Billing() {
         setTimeout(() => setTopUpSuccess(""), 3000);
         await fetchUser();
       } else {
-        toast.error(data.message || "Purchase failed");
+        // Surface the exact server message (e.g. "free plan", "insufficient balance")
+        toast.error(data.message || "Purchase failed. Please try again.");
       }
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Network error. Please check your connection and try again.");
     } finally {
       setTopUpLoading(false);
     }
@@ -414,8 +364,6 @@ export default function Billing() {
 
   return (
     <>
-      {/* Paystack Inline SDK */}
-      <Script src="https://js.paystack.co/v1/inline.js" strategy="lazyOnload" />
       <style>{CSS}</style>
       <div className="bl-root max-w-6xl mx-auto px-5 py-10 pb-24">
 
@@ -718,31 +666,8 @@ export default function Billing() {
                         </div>
                       </div>
 
-                      {/* ── Payment method toggle ─────────────────── */}
-                      <div className="flex gap-2 rounded-xl p-1" style={{ background: `${pax26?.border}60` }}>
-                        {[
-                          { id: "wallet", label: "Wallet", icon: <IconWallet size={13} /> },
-                          { id: "card",   label: "Card",   icon: <IconCard size={13} /> },
-                        ].map(({ id, label, icon }) => {
-                          const active = paymentMethod === id;
-                          return (
-                            <button
-                              key={id}
-                              id={`billing-pm-${id}`}
-                              className={`bl-pm-tab flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold${active ? " active" : ""}`}
-                              onClick={() => setPaymentMethod(id)}
-                              style={active
-                                ? { background: selectedMeta?.accentHex || pax26?.primary, color: "#fff", boxShadow: `0 2px 10px ${selectedMeta?.accentHex || pax26?.primary}40` }
-                                : { color: pax26?.textSecondary }}
-                            >
-                              {icon} {label}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* ── Wallet panel ──────────────────────────── */}
-                      {paymentMethod === "wallet" && (
+                      {/* ── Wallet panel (only payment method) ─── */}
+                      {true && (
                         <div className="bl-scale-in flex flex-col gap-3">
                           {/* Wallet balance row */}
                           <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
@@ -763,7 +688,7 @@ export default function Billing() {
                               style={{ background: `${CORAL}0D`, border: `1px solid ${CORAL}25`, color: CORAL }}>
                               ⚠️ You need{" "}
                               <span className="bl-mono font-bold">{formatPrice(displayShortfall, displayCurrency)}</span>{" "}
-                              more. Fund your wallet first, or switch to Card payment.
+                              more to activate this plan. Fund your wallet to continue.
                               <button
                                 className="bl-btn block mt-2 w-full py-2 rounded-xl text-xs font-bold text-white"
                                 style={{ background: pax26?.primary, boxShadow: `0 4px 14px ${pax26?.primary}40` }}
@@ -800,47 +725,7 @@ export default function Billing() {
                         </div>
                       )}
 
-                      {/* ── Card / Paystack panel ────────────────── */}
-                      {paymentMethod === "card" && (
-                        <div className="bl-scale-in flex flex-col gap-3">
-                          {/* Card info */}
-                          <div className="rounded-xl px-4 py-3"
-                            style={{ background: `${pax26?.border}40`, border: `1px solid ${pax26?.border}` }}>
-                            <p className="text-xs font-semibold mb-1" style={{ color: pax26?.textPrimary }}>Pay with Debit / Credit Card</p>
-                            <p className="text-[10px] leading-relaxed" style={{ color: pax26?.textSecondary, opacity: 0.6 }}>
-                              Securely powered by Paystack. Visa, Mastercard & Verve accepted.
-                            </p>
-                          </div>
-
-                          {/* Card pay CTA */}
-                          <button
-                            id="billing-pay-card-btn"
-                            className="bl-btn w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white"
-                            disabled={paying}
-                            onClick={handlePaystackCard}
-                            style={{
-                              background: `linear-gradient(135deg, #00C3A0, #009B7E)`,
-                              boxShadow: `0 8px 24px #00C3A040`,
-                            }}
-                          >
-                            {paying ? (
-                              <><Spinner color="#fff" /> Processing…</>
-                            ) : (
-                              <>
-                                <IconCard size={15} />
-                                Pay {formatPrice(displaySelectedPrice, displayCurrency)} via Card
-                                <IconArrow size={14} />
-                              </>
-                            )}
-                          </button>
-
-                          {/* Security badge */}
-                          <div className="flex items-center justify-center gap-1.5 text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.45 }}>
-                            <IconShield size={10} />
-                            256-bit SSL encrypted · Powered by Paystack
-                          </div>
-                        </div>
-                      )}
+                      {/* Card payment removed — wallet only */}
 
                       <p className="text-center text-[10px]" style={{ color: pax26?.textSecondary, opacity: 0.4 }}>
                         Billed monthly · Cancel anytime
