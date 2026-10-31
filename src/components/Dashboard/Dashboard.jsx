@@ -149,36 +149,70 @@ const CSS = `
     .px-desktop-only { display: none !important; }
   }
 
+  /* ── Mobile sidebar — show AI Plan & Wallet below main on small screens ── */
+  .px-mobile-sidebar {
+    display: none;
+  }
+  @media (max-width: 920px) {
+    .px-mobile-sidebar { display: flex; flex-direction: column; gap: 14px; }
+  }
+
   /* ── Service grid — 5 col → 3 col on mobile ── */
   .px-svc-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 10px;
   }
-  @media (max-width: 500px) {
-    .px-svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 640px) {
+    .px-svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   }
 
-  /* ── Metrics row — 3 col → scrollable on mobile ── */
+  /* ── Metrics row — 3 equal cols → scrollable on narrow mobile ── */
   .px-metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
-  @media (max-width: 400px) {
+  @media (max-width: 500px) {
     .px-metrics-row {
       display: flex;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
       gap: 10px;
-      padding-bottom: 4px;
+      padding-bottom: 6px;
     }
     .px-metrics-row > * {
       scroll-snap-align: start;
       flex-shrink: 0;
-      min-width: 120px;
+      min-width: 110px;
+      flex: 1 0 110px;
     }
+  }
+
+  /* ── Quota bar text — wrap gracefully on small screens ── */
+  .px-quota-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .px-quota-values {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Hero card inner padding — responsive ── */
+  .px-hero-inner {
+    padding: clamp(14px, 4vw, 28px);
+  }
+
+  /* ── Card padding — responsive ── */
+  .px-card-pad {
+    padding: clamp(16px, 4vw, 22px);
   }
 
   /* ── Progress bar ── */
@@ -611,10 +645,9 @@ export default function Dashboard() {
                     : "radial-gradient(circle, rgba(52,211,153,0.16) 0%, transparent 65%)",
                 }} />
 
-                <div style={{
-                  padding: "clamp(18px,4vw,28px)",
+                <div className="px-hero-inner" style={{
                   position: "relative", zIndex: 1,
-                  display: "flex", flexDirection: "column", gap: 18,
+                  display: "flex", flexDirection: "column", gap: 16,
                 }}>
 
                   {/* Row 1: Avatar + Greeting + Plan badge */}
@@ -675,7 +708,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Divider */}
-                  <div style={{ height: 1, background: heroBorderColor, marginLeft: -28, marginRight: -28 }} />
+                  <div style={{ height: 1, background: heroBorderColor, marginLeft: "calc(-1 * clamp(14px, 4vw, 28px))", marginRight: "calc(-1 * clamp(14px, 4vw, 28px))" }} />
 
                   {/* Row 3: 3 key stats */}
                   <div className="px-stat-strip">
@@ -719,12 +752,12 @@ export default function Dashboard() {
 
                   {/* Row 4: Monthly AI quota bar */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 11, color: heroTextSecondary, fontWeight: 500 }}>
+                    <div className="px-quota-row">
+                      <span style={{ fontSize: 11, color: heroTextSecondary, fontWeight: 500, whiteSpace: "nowrap" }}>
                         Monthly AI replies
                       </span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: heroTextPrimary }}>
+                      <div className="px-quota-values">
+                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: heroTextPrimary, whiteSpace: "nowrap" }}>
                           {messagesUsed.toLocaleString()} / {quota.toLocaleString()}
                         </span>
                         {!!daysLabel && (
@@ -733,6 +766,7 @@ export default function Dashboard() {
                             background: daysUrgent ? "rgba(239,68,68,0.18)" : "rgba(52,211,153,0.14)",
                             color: daysUrgent ? C.coral : C.emerald,
                             fontFamily: "'DM Mono', monospace",
+                            whiteSpace: "nowrap",
                           }}>
                             {daysLabel}
                           </span>
@@ -828,7 +862,7 @@ export default function Dashboard() {
               )}
 
               {/* ── QUICK ACTIONS ── */}
-              <div className={`px-s5 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "24px" }}>
+              <div className={`px-s5 ${isDark ? "px-glass" : "px-glass-light"}`} style={{ padding: "clamp(16px,4vw,24px)" }}>
                 <Label text="Quick Actions" isDark={isDark} />
                 <div className="px-svc-grid">
                   <SvcCard title="My Store"    link="/dashboard/my-store"                             icon={<Store       size={19} strokeWidth={2.2} />} color={C.emerald} isDark={isDark} router={router} />
@@ -858,7 +892,7 @@ export default function Dashboard() {
 
             </div>
 
-            {/* ═══ RIGHT SIDEBAR ═══ */}
+            {/* ═══ RIGHT SIDEBAR (desktop) ═══ */}
             <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
               {/* ── AI PLAN CARD ── */}
@@ -868,7 +902,7 @@ export default function Dashboard() {
                   height: 3,
                   background: `linear-gradient(90deg, transparent, ${planCol}, transparent)`,
                 }} />
-                <div style={{ padding: "22px" }}>
+                <div className="px-card-pad">
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, gap: 12 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{
@@ -899,9 +933,9 @@ export default function Dashboard() {
 
                   {/* Usage bar */}
                   <div style={{ marginBottom: 18 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, gap: 8, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 11, fontWeight: 500, color: textMuted }}>Messages used</span>
-                      <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: textPri }}>
+                      <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: textPri, whiteSpace: "nowrap" }}>
                         {messagesUsed.toLocaleString()}/{quota.toLocaleString()}
                       </span>
                     </div>
@@ -933,9 +967,9 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* ── WALLET CARD (untouched) ── */}
+              {/* ── WALLET CARD ── */}
               <div className={`px-s4 ${isDark ? "px-glass" : "px-glass-light"}`}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "clamp(14px,4vw,22px)", gap: 12 }}>
                   <div>
                     <p className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, margin: "0 0 5px" }}>
                       Wallet
@@ -960,7 +994,7 @@ export default function Dashboard() {
                 </div>
                 {showWallet && (
                   <div style={{
-                    padding: "0 22px 22px",
+                    padding: "0 clamp(14px,4vw,22px) clamp(14px,4vw,22px)",
                     borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                     paddingTop: 18,
                   }}>
@@ -1035,6 +1069,98 @@ export default function Dashboard() {
 
             </aside>
           </div>
+
+          {/* ═══ MOBILE-ONLY: AI Plan + Wallet shown below main content ═══ */}
+          <div className="px-mobile-sidebar">
+
+            {/* AI Plan card */}
+            <div className={`${isDark ? "px-glass" : "px-glass-light"}`} style={{ overflow: "hidden" }}>
+              <div style={{ height: 3, background: `linear-gradient(90deg, transparent, ${planCol}, transparent)` }} />
+              <div className="px-card-pad">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 13,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: `${planCol}18`, color: planCol,
+                      border: `1px solid ${planCol}28`,
+                    }}>
+                      <Crown size={17} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, margin: "0 0 3px" }}>AI Plan</p>
+                      <p className="px-display" style={{ fontSize: 15, fontWeight: 800, color: textPri, margin: 0, textTransform: "capitalize", letterSpacing: "-0.02em" }}>{plan}</p>
+                      {remainingDays !== null && (
+                        <p style={{ fontSize: 10, fontWeight: 600, color: remainingDays <= 5 ? C.coral : textMuted, margin: "2px 0 0" }}>{remainingDays}d remaining</p>
+                      )}
+                    </div>
+                  </div>
+                  {badge(isAiOn ? "Active" : "Inactive", isAiOn ? C.emerald : C.coral)}
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7, gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: textMuted }}>Messages used</span>
+                    <span className="px-mono" style={{ fontSize: 11, fontWeight: 700, color: textPri, whiteSpace: "nowrap" }}>
+                      {messagesUsed.toLocaleString()}/{quota.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="px-progress-track" style={{ background: subBg, border: `1px solid ${subBdr}` }}>
+                    <div className="px-progress-fill px-shimmer" style={{ width: `${pct}%`, minWidth: messagesUsed > 0 ? 4 : 0 }} />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                    <span className="px-mono" style={{ fontSize: 9, color: pct >= 90 ? C.coral : textMuted }}>{pctDisplay} used</span>
+                  </div>
+                </div>
+                <button type="button" className="px-btn"
+                  onClick={() => router.push(isAiOn ? "/dashboard/billing" : "/dashboard/automations/ai-business-dashboard")}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    width: "100%", padding: "11px 0", borderRadius: 13,
+                    fontSize: 13, fontWeight: 700,
+                    background: `${planCol}14`, color: planCol,
+                    border: `1px solid ${planCol}28`,
+                    fontFamily: "'Outfit', sans-serif",
+                  }}>
+                  <Crown size={13} />
+                  {isAiOn ? "Manage Plan" : "Activate AI"}
+                </button>
+              </div>
+            </div>
+
+            {/* Wallet card */}
+            <div className={`${isDark ? "px-glass" : "px-glass-light"}`}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "clamp(14px,4vw,20px)", gap: 12 }}>
+                <div>
+                  <p className="px-mono" style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: textMuted, margin: "0 0 4px" }}>Wallet</p>
+                  <p className="px-display" style={{ fontSize: 15, fontWeight: 800, color: textPri, margin: 0, letterSpacing: "-0.02em" }}>Wallet Balance</p>
+                </div>
+                <button type="button" className="px-btn"
+                  onClick={() => setShowWallet(!showWallet)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 7,
+                    padding: "9px 14px", borderRadius: 12, fontSize: 12, fontWeight: 600,
+                    background: showWallet ? `${C.emerald}14` : subBg,
+                    color: showWallet ? C.emerald : textSec,
+                    border: `1px solid ${showWallet ? `${C.emerald}28` : subBdr}`,
+                    cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+                  }}>
+                  {showWallet ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showWallet ? "Hide" : "View"}
+                </button>
+              </div>
+              {showWallet && (
+                <div style={{
+                  padding: "0 clamp(14px,4vw,20px) clamp(14px,4vw,20px)",
+                  borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+                  paddingTop: 16,
+                }}>
+                  <WalletBalance showMore={showMore} setShowMore={setShowMore} />
+                </div>
+              )}
+            </div>
+
+          </div>
+
         </div>
       </div>
     </>
