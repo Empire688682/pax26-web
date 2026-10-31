@@ -500,11 +500,10 @@ function TypePicker({ onSelect, selecting, selectedTarget, pax26 }) {
         </p>
       </div>
 
-      {/* Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", width: "100%", maxWidth: "760px" }}>
+      {/* Cards — Service Provider option hidden; only Seller is shown */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", width: "100%", maxWidth: "480px" }}>
         {[
           { type: "seller", emoji: "🛒", title: "Seller", subtitle: "I sell products", accent: p?.primary, features: SELLER_FEATURES },
-          { type: "service", emoji: "🤝", title: "Service Provider", subtitle: "I offer services", accent: "#8b5cf6", features: SERVICE_FEATURES },
         ].map(({ type, emoji, title, subtitle, accent, features }) => (
           <button
             key={type}
