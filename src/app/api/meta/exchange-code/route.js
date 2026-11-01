@@ -6,6 +6,11 @@ import { corsHeaders } from "@/app/ults/corsHeaders/corsHeaders";
 import { verifyToken } from "../../helper/VerifyToken";
 import crypto from "crypto";
 
+// Tell Vercel this route can run for up to 60 seconds (requires Pro plan).
+// On Hobby the hard limit is 10s — this annotation is a no-op there but
+// is picked up automatically when the project is on a paid plan.
+export const maxDuration = 60;
+
 // ── Helpers ───────────────────────────────────────────────────
 
 /**
@@ -232,10 +237,12 @@ export async function POST(req) {
       // ✅ PATH A — session info from postMessage
       console.log("📨 [Meta API exchange-code] PATH A — using session info from postMessage:", { hintWabaId, hintPhoneId });
 
-      const phoneRes = await fetch(
-        `https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status&access_token=${accessToken}`
-      );
-      const phoneData = await phoneRes.json();
+      // Fetch phone details and WABA name in parallel to save ~1s
+      const [phoneRes, wabaRes] = await Promise.all([
+        fetch(`https://graph.facebook.com/v22.0/${hintPhoneId}?fields=id,display_phone_number,verified_name,quality_rating,code_verification_status&access_token=${accessToken}`),
+        fetch(`https://graph.facebook.com/v22.0/${hintWabaId}?fields=id,name&access_token=${accessToken}`),
+      ]);
+      const [phoneData, wabaData] = await Promise.all([phoneRes.json(), wabaRes.json()]);
 
       if (phoneData.error) {
         console.error("❌ [Meta API exchange-code] Phone fetch error (PATH A):", JSON.stringify(phoneData.error));
@@ -246,13 +253,6 @@ export async function POST(req) {
       }
 
       console.log("📞 [Meta API exchange-code] Phone details fetched (PATH A):", phoneData);
-
-      // Get WABA name for display
-      const wabaRes = await fetch(
-        `https://graph.facebook.com/v22.0/${hintWabaId}?fields=id,name&access_token=${accessToken}`
-      );
-      const wabaData = await wabaRes.json();
-
       console.log("📦 [Meta API exchange-code] WABA details fetched (PATH A):", wabaData);
 
       phones.push({
@@ -391,13 +391,16 @@ export async function POST(req) {
     }
 
     // ── Step 5: Subscribe to WABA webhooks + register each phone ─
+    // Run subscribe + credit line sharing in parallel per unique WABA,
+    // then register phones — this cuts ~2-3s off sequential execution.
     const subscribedWabas = new Set();
     for (const phone of phones) {
       if (!subscribedWabas.has(phone.wabaId)) {
-        console.log(`⚡ [Meta API exchange-code] Subscribing WABA ${phone.wabaId}...`);
-        await subscribeToWaba(phone.wabaId, accessToken);
-        console.log(`⚡ [Meta API exchange-code] Sharing credit line to WABA ${phone.wabaId}...`);
-        await shareCreditLine(phone.wabaId, accessToken);
+        console.log(`⚡ [Meta API exchange-code] Subscribing WABA ${phone.wabaId} + sharing credit line in parallel...`);
+        await Promise.all([
+          subscribeToWaba(phone.wabaId, accessToken),
+          shareCreditLine(phone.wabaId, accessToken),
+        ]);
         subscribedWabas.add(phone.wabaId);
       }
 
