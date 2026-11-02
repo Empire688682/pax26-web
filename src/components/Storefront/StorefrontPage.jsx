@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -133,7 +133,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Messenger</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Personal WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>â€º</div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
         </a>
 
         {/* WhatsApp Business */}
@@ -159,7 +159,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Business</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Business WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>â€º</div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
         </a>
 
         <button
@@ -466,7 +466,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             )}
 
             {product.stock === 0 && <div style={{ position: "absolute", top: "8px", left: "8px", background: "rgba(15, 15, 19, 0.88)", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", backdropFilter: "blur(4px)" }}>SOLD OUT</div>}
-            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>ðŸ¤– AI Pick</div>}
+            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>🤖 AI Pick</div>}
             {hasDiscount && !highlighted && product.stock > 0 && cartQuantity === 0 && (
               <div style={{ position: "absolute", top: "8px", left: "8px", background: "#ef4444", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, boxShadow: "0 2px 8px rgba(239,68,68,0.3)" }}>
                 -{discountPercent}% OFF
@@ -804,8 +804,8 @@ export default function StorefrontPage({
                   </p>
                 )}
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "11px", color: t.textSecondary }}>
-                  {store.liveLocation && <span>ðŸ“ {store.liveLocation}</span>}
-                  <span>ðŸ“¦ {totalProducts} Products</span>
+                  {store.liveLocation && <span><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{display:"inline",marginRight:"3px",verticalAlign:"middle"}}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>{store.liveLocation}</span>}
+                  <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{display:"inline",marginRight:"3px",verticalAlign:"middle"}}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>{totalProducts} Products</span>
                 </div>
               </div>
             </div>
@@ -988,7 +988,7 @@ export default function StorefrontPage({
             </>
           ) : (
             <div style={{ textAlign: "center", padding: "64px 20px", background: t.card, borderRadius: "18px", border: `1px dashed ${t.border}` }}>
-              <div style={{ fontSize: "44px", marginBottom: "14px" }}>ðŸ“¦</div>
+              <div style={{ fontSize: "44px", marginBottom: "14px" }}><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
               <h3 style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary, margin: "0 0 8px" }}>{search ? "No products match your search" : "No products yet"}</h3>
               <p style={{ fontSize: "13px", color: t.textSecondary, margin: "0 0 24px" }}>{search ? "Try searching for a different item or select another category." : "This store hasn't published any products yet."}</p>
               {search && <button onClick={() => { handleSearchChange(""); handleCategoryChange("all"); }} style={{ padding: "10px 24px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 800, border: "none", cursor: "pointer", fontSize: "13px" }}>Clear search</button>}
@@ -1020,7 +1020,7 @@ export default function StorefrontPage({
 
           {/* Store Tab */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", color: t.accent, cursor: "pointer", fontSize: "10px", fontWeight: 800 }}>
-            <span style={{ fontSize: "18px", lineHeight: 1 }}>ðŸª</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span>Store</span>
           </button>
 
@@ -1110,3 +1110,5 @@ export default function StorefrontPage({
     </>
   );
 }
+
+
