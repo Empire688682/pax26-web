@@ -165,14 +165,16 @@ const CSS = `
   /* ── Metrics row — 3 equal cols, compact on mobile ── */
   .px-metrics-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
+    width: 100%;
+    overflow: hidden;
   }
   @media (max-width: 480px) {
     .px-metrics-row { gap: 6px; }
     .px-metric-card { padding: 10px 6px !important; }
-    .px-metric-value { font-size: 1rem !important; }
-    .px-metric-label { font-size: 8px !important; }
+    .px-metric-value { font-size: 0.78rem !important; }
+    .px-metric-label { font-size: 7.5px !important; letter-spacing: 0.04em !important; }
   }
 
   /* ── Quota bar text — wrap gracefully on small screens ── */
@@ -366,20 +368,25 @@ function MetricCard({ label, value, color, isDark, cardBg, cardBdr }) {
       display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
       background: cardBg, borderColor: cardBdr,
       transition: "transform 0.22s ease",
-      minWidth: 0, overflow: "hidden",
+      minWidth: 0, overflow: "hidden", width: "100%",
     }}>
       <p className="px-display px-count px-metric-value" style={{
-        fontSize: "clamp(0.85rem,3.5vw,1.25rem)", fontWeight: 900,
-        color, margin: 0, lineHeight: 1,
+        fontSize: "clamp(0.78rem,3vw,1.2rem)", fontWeight: 900,
+        color, margin: 0, lineHeight: 1.2,
         fontVariantNumeric: "tabular-nums",
-        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        overflow: "hidden", textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
         maxWidth: "100%",
+        width: "100%",
+        textAlign: "center",
+        display: "block",
       }}>{value}</p>
       <p className="px-mono px-metric-label" style={{
-        fontSize: 8.5, fontWeight: 700, letterSpacing: "0.08em",
+        fontSize: 8, fontWeight: 700, letterSpacing: "0.06em",
         textTransform: "uppercase",
         color: isDark ? "rgba(148,163,184,0.55)" : "rgba(100,116,139,0.65)",
         margin: 0, textAlign: "center",
+        whiteSpace: "nowrap",
       }}>{label}</p>
     </div>
   );
