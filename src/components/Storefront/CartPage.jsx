@@ -295,7 +295,6 @@ export default function CartPage({ store, topProducts, slug, sessionToken }) {
 
   // ── Stage: Cart Review ─────────────────────────────────────────
   const canCheckout = cart.length > 0;
-  const grandTotal  = totalPrice + estimatedFee;
   const showCallBtn = store.callNumberEnabled && store.callNumber;
 
   return (
