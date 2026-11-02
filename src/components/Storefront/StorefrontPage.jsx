@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿﻿-"use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -50,7 +50,7 @@ function Pax26Footer() {
               Powered by <span style={{ color: "#818cf8" }}>Pax26</span>
             </p>
             <p style={{ margin: 0, fontSize: "11px", color: "#828799" }}>
-              AI WhatsApp Storefront â€” automated orders 24/7
+              AI WhatsApp Storefront - automated orders 24/7
             </p>
           </div>
         </div>
@@ -60,7 +60,7 @@ function Pax26Footer() {
           rel="noopener noreferrer"
           style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", fontWeight: 800, fontSize: "12px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(99, 102, 241, 0.35)" }}
         >
-          Create free store â†’
+          Create free store -
         </a>
       </div>
     </div>
@@ -106,7 +106,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
           Open in WhatsApp
         </p>
         <p style={{ margin: '0 0 20px', fontSize: '12px', color: t.textSecondary, textAlign: 'center' }}>
-          You have multiple WhatsApp apps installed â€” choose one
+          You have multiple WhatsApp apps installed - choose one
         </p>
 
         {/* WhatsApp Messenger */}
@@ -133,7 +133,9 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Messenger</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Personal WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+          <div style={{ marginLeft: 'auto', color: t.textSecondary }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
         </a>
 
         {/* WhatsApp Business */}
@@ -159,7 +161,9 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Business</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Business WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+          <div style={{ marginLeft: 'auto', color: t.textSecondary }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
         </a>
 
         <button
@@ -248,7 +252,7 @@ function SideMenu({ open, onClose, store, categories, activeCategory, onCategory
         <div style={{ padding: "14px 16px", borderBottom: `1px solid ${t.border}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", background: t.pageBg, borderRadius: "10px", padding: "9px 12px", border: `1px solid ${t.border}` }}>
             <span style={{ color: t.textSecondary, flexShrink: 0 }}><SearchIcon /></span>
-            <input value={search} onChange={e => onSearchChange(e.target.value)} placeholder="Search productsΓÇª" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
+            <input value={search} onChange={e => onSearchChange(e.target.value)} placeholder="Search products..." style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
           </div>
         </div>
 
@@ -466,7 +470,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             )}
 
             {product.stock === 0 && <div style={{ position: "absolute", top: "8px", left: "8px", background: "rgba(15, 15, 19, 0.88)", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", backdropFilter: "blur(4px)" }}>SOLD OUT</div>}
-            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>🤖 AI Pick</div>}
+            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>- AI Pick</div>}
             {hasDiscount && !highlighted && product.stock > 0 && cartQuantity === 0 && (
               <div style={{ position: "absolute", top: "8px", left: "8px", background: "#ef4444", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, boxShadow: "0 2px 8px rgba(239,68,68,0.3)" }}>
                 -{discountPercent}% OFF
@@ -486,7 +490,11 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "2px" }}>
               {product.variants.map(v => (
                 <span key={v.label} style={{ fontSize: "9px", fontWeight: 700, color: t.textSecondary, background: t.pageBg, border: `1px solid ${t.border}`, borderRadius: "4px", padding: "2px 5px" }}>
-                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ? "â€¦" : ""}
+                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ?  
+            $m = $args[0]
+            if ($m.Value -match '^\{') { return '{"..."}' }
+            return '"..."'
+         : ""}
                 </span>
               ))}
             </div>
@@ -538,7 +546,7 @@ export default function StorefrontPage({
   sessionToken,
   referredProductId,
   initialSearch = "",
-  initialOrderCode = "",   // ?order=CODE â€” pre-fills cart from an existing DB order for editing
+  initialOrderCode = "",   // ?order=CODE - pre-fills cart from an existing DB order for editing
 }) {
   const theme = getTheme(store.storeTheme);
   const t = theme;
@@ -565,7 +573,7 @@ export default function StorefrontPage({
   const [menuOpen, setMenuOpen] = useState(false);
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [loadingPage, setLoadingPage] = useState(false);
-  // Skip the initial-mount guard when a search query was pre-seeded from the URL â€”
+  // Skip the initial-mount guard when a search query was pre-seeded from the URL -
   // we need the useEffect to fire on first render to fetch the filtered products.
   const [isInitialMount, setIsInitialMount] = useState(!initialSearch);
   const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
@@ -636,7 +644,7 @@ export default function StorefrontPage({
   useEffect(() => {
     const hasActiveFilter = search.trim() !== "" || activeCategory !== "all" || currentPage !== 1;
 
-    // If no filter is active and we already have server-rendered products, skip â€”
+    // If no filter is active and we already have server-rendered products, skip -
     // avoids a redundant network call on page load.
     if (!hasActiveFilter && initialProducts.length > 0 && !initialSearch) {
       return;
@@ -796,7 +804,7 @@ export default function StorefrontPage({
                   <h1 style={{ margin: 0, fontSize: "17px", fontWeight: 900, color: t.textPrimary, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {store.businessName}
                   </h1>
-                  <span style={{ background: "#22c55e18", color: "#16a34a", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, whiteSpace: "nowrap" }}>âœ“ Verified</span>
+                  <span style={{ background: "#22c55e18", color: "#16a34a", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, whiteSpace: "nowrap" }}>&#10003; Verified</span>
                 </div>
                 {store.businessDescription && (
                   <p style={{ margin: "2px 0 4px", fontSize: "12px", color: t.textSecondary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -810,7 +818,7 @@ export default function StorefrontPage({
               </div>
             </div>
 
-            {/* Desktop Hero CTA â€” removed direct WhatsApp order button, cart is the order path */}
+            {/* Desktop Hero CTA - removed direct WhatsApp order button, cart is the order path */}
           </div>
 
           {/* Search bar + category selector */}
@@ -820,8 +828,8 @@ export default function StorefrontPage({
               <span style={{ color: t.textSecondary, flexShrink: 0 }}>
                 {loadingPage ? <div style={{ width: "14px", height: "14px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} /> : <SearchIcon />}
               </span>
-              <input id="sf-search-input" value={search} onChange={e => handleSearchChange(e.target.value)} placeholder="Search store productsâ€¦" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
-              {search && <button onClick={() => handleSearchChange("")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "16px", lineHeight: 1, padding: 0 }}>Ã—</button>}
+              <input id="sf-search-input" value={search} onChange={e => handleSearchChange(e.target.value)} placeholder="Search store products..." style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
+              {search && <button onClick={() => handleSearchChange("")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "16px", lineHeight: 1, padding: 0 }}>&#215;</button>}
             </div>
 
             {/* Mobile Category Dropdown Select (< 640px) */}
@@ -877,7 +885,7 @@ export default function StorefrontPage({
           {loadingPage && productsList.length > 0 && (
             <div style={{ padding: "12px 0", textAlign: "center", fontSize: "13px", color: t.textSecondary, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <div style={{ width: "16px", height: "16px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
-              Updating productsâ€¦
+              Updating products...
             </div>
           )}
 
@@ -885,7 +893,7 @@ export default function StorefrontPage({
           {loadingPage && productsList.length === 0 ? (
             <div style={{ padding: "64px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", background: t.card, borderRadius: "18px", border: `1px solid ${t.border}` }}>
               <div style={{ width: "32px", height: "32px", border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
-              <span style={{ fontSize: "14px", color: t.textSecondary, fontWeight: 700 }}>Loading store productsâ€¦</span>
+              <span style={{ fontSize: "14px", color: t.textSecondary, fontWeight: 700 }}>Loading store products-</span>
             </div>
           ) : productsList.length > 0 ? (
             <>
@@ -921,7 +929,7 @@ export default function StorefrontPage({
               {totalPages > 1 && (
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px", marginTop: "32px", paddingTop: "20px", borderTop: `1px solid ${t.border}` }}>
                   <p style={{ margin: 0, fontSize: "13px", color: t.textSecondary }}>
-                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * 20 + 1}</strong>â€“<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * 20, totalProducts)}</strong> of <strong style={{ color: t.textPrimary }}>{totalProducts}</strong> products
+                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * 20 + 1}</strong>-<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * 20, totalProducts)}</strong> of <strong style={{ color: t.textPrimary }}>{totalProducts}</strong> products
                   </p>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1110,5 +1118,6 @@ export default function StorefrontPage({
     </>
   );
 }
+
 
 
