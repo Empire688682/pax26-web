@@ -490,11 +490,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "2px" }}>
               {product.variants.map(v => (
                 <span key={v.label} style={{ fontSize: "9px", fontWeight: 700, color: t.textSecondary, background: t.pageBg, border: `1px solid ${t.border}`, borderRadius: "4px", padding: "2px 5px" }}>
-                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ?  
-            $m = $args[0]
-            if ($m.Value -match '^\{') { return '{"..."}' }
-            return '"..."'
-         : ""}
+                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ? "..." : ""}
                 </span>
               ))}
             </div>
