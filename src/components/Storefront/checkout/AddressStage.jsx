@@ -22,7 +22,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { loadSavedAddresses, saveAddress } from "@/app/lib/store/savedAddressUtils";
+import { loadSavedAddresses, saveAddress, loadCustomerProfile, saveCustomerProfile } from "@/app/lib/store/savedAddressUtils";
 
 /* ── Icons ────────────────────────────────────────────────────── */
 const BackIcon = () => (
@@ -126,10 +126,14 @@ function SavedAddressCard({ entry, selected, t, onSelect }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: "0 0 2px", fontSize: "14px", fontWeight: 700, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {entry.label || entry.address}
+          {entry.label || [entry.firstName, entry.lastName].filter(Boolean).join(" ") || entry.address}
         </p>
-        {entry.label && (
-          <p style={{ margin: "0 0 4px", fontSize: "12px", color: t.textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.address}</p>
+        {/* Show address below if label or name is the title */}
+        {(entry.label || entry.firstName) && (
+          <p style={{ margin: "0 0 3px", fontSize: "12px", color: t.textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{entry.address}</p>
+        )}
+        {entry.phone1 && (
+          <p style={{ margin: "0 0 4px", fontSize: "11px", color: t.textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>📱 {entry.phone1}</p>
         )}
         <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
           {entry.zoneName && (
@@ -183,8 +187,17 @@ export default function AddressStage({
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState("");
 
-  // ── Load saved addresses on mount ────────────────────────────
+  // ── Load saved addresses + customer profile on mount ─────────
   useEffect(() => {
+    // Always try to load customer profile for name + phone autofill
+    const profile = loadCustomerProfile(slug);
+    if (profile) {
+      if (profile.firstName) setFirstName(profile.firstName);
+      if (profile.lastName)  setLastName(profile.lastName);
+      if (profile.phone1)    setPhone1(profile.phone1);
+      if (profile.phone2)    setPhone2(profile.phone2);
+    }
+
     if (isDelivery) {
       const saved = loadSavedAddresses(slug);
       setSavedAddresses(saved);
@@ -194,7 +207,7 @@ export default function AddressStage({
   // ── When a saved address is selected, autofill the form ──────
   const applySavedAddress = (idx) => {
     if (selectedSaved === idx) {
-      // Deselect — clear address fields
+      // Deselect — clear address fields only, keep name/phone (customer typed those)
       setSelectedSaved(null);
       setAddress("");
       setCity("");
@@ -205,9 +218,15 @@ export default function AddressStage({
     const entry = savedAddresses[idx];
     if (!entry) return;
     setSelectedSaved(idx);
+    // Restore address fields
     setAddress(entry.address || "");
     setState(entry.state || "");
     setCity(entry.city || "");
+    // Restore name + phones if present in the entry
+    if (entry.firstName) setFirstName(entry.firstName);
+    if (entry.lastName)  setLastName(entry.lastName);
+    if (entry.phone1)    setPhone1(entry.phone1);
+    if (entry.phone2)    setPhone2(entry.phone2 || "");
     // Try to auto-select zone if still valid
     if (deliveryModel === "zones" && entry.zoneName) {
       const stillValid = deliveryZones.some(z => z.name === entry.zoneName);
@@ -341,7 +360,7 @@ export default function AddressStage({
         return;
       }
 
-      // ── Save address to localStorage ──────────────────────────
+      // ── Save address + customer info to localStorage ─────────
       if (isDelivery && fullAddress) {
         saveAddress(slug, {
           address: address.trim(),
@@ -350,8 +369,19 @@ export default function AddressStage({
           zoneName: detectedZone?.name || null,
           deliveryFee: effectiveFee,
           label: setAsDefault ? "Default" : null,
+          firstName: firstName.trim() || null,
+          lastName:  lastName.trim()  || null,
+          phone1:    phone1.trim()    || null,
+          phone2:    phone2.trim()    || null,
         });
       }
+      // Always save customer profile (name + phones) for future autofill
+      saveCustomerProfile(slug, {
+        firstName: firstName.trim(),
+        lastName:  lastName.trim(),
+        phone1:    phone1.trim(),
+        phone2:    phone2.trim(),
+      });
 
       // ── Build WhatsApp message ────────────────────────────────
       const baseWaHref = store.whatsappHref?.split("?")[0] || "";
