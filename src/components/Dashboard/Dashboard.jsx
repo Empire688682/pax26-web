@@ -166,15 +166,15 @@ const CSS = `
   .px-metrics-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
     width: 100%;
     overflow: hidden;
   }
   @media (max-width: 480px) {
-    .px-metrics-row { gap: 6px; }
-    .px-metric-card { padding: 10px 6px !important; }
-    .px-metric-value { font-size: 0.78rem !important; }
-    .px-metric-label { font-size: 7.5px !important; letter-spacing: 0.04em !important; }
+    .px-metrics-row { gap: 5px; }
+    .px-metric-card { padding: 8px 4px !important; }
+    .px-metric-value { font-size: 0.68rem !important; line-height: 1.3 !important; word-break: break-all !important; white-space: normal !important; }
+    .px-metric-label { font-size: 7px !important; letter-spacing: 0.03em !important; }
   }
 
   /* ── Quota bar text — wrap gracefully on small screens ── */
@@ -364,29 +364,29 @@ function MetricCard({ label, value, color, isDark, cardBg, cardBdr }) {
   return (
     <div className="px-metric-card" style={{
       borderRadius: 14, borderWidth: 1, borderStyle: "solid",
-      padding: "12px 8px",
-      display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+      padding: "10px 6px",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
       background: cardBg, borderColor: cardBdr,
       transition: "transform 0.22s ease",
-      minWidth: 0, overflow: "hidden", width: "100%",
+      minWidth: 0, overflow: "hidden", width: "100%", boxSizing: "border-box",
     }}>
       <p className="px-display px-count px-metric-value" style={{
-        fontSize: "clamp(0.78rem,3vw,1.2rem)", fontWeight: 900,
+        fontSize: "clamp(0.68rem, 2.8vw, 1.1rem)", fontWeight: 900,
         color, margin: 0, lineHeight: 1.2,
         fontVariantNumeric: "tabular-nums",
-        overflow: "hidden", textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
+        wordBreak: "break-all",
+        overflowWrap: "break-word",
+        whiteSpace: "normal",
         maxWidth: "100%",
         width: "100%",
         textAlign: "center",
         display: "block",
       }}>{value}</p>
       <p className="px-mono px-metric-label" style={{
-        fontSize: 8, fontWeight: 700, letterSpacing: "0.06em",
+        fontSize: 7.5, fontWeight: 700, letterSpacing: "0.05em",
         textTransform: "uppercase",
         color: isDark ? "rgba(148,163,184,0.55)" : "rgba(100,116,139,0.65)",
-        margin: 0, textAlign: "center",
-        whiteSpace: "nowrap",
+        margin: 0, textAlign: "center", whiteSpace: "nowrap",
       }}>{label}</p>
     </div>
   );
