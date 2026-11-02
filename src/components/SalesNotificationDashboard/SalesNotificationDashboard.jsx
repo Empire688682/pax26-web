@@ -218,7 +218,7 @@ export default function SalesNotificationDashboard() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-1">
                               <p className="font-bold text-sm truncate" style={{ color: pax26?.textPrimary }}>
-                                {order.customerName || order.customerPhone}
+                                {order.customerName || "Customer"}
                               </p>
                               <span className="text-sm font-bold sn-mono flex-shrink-0" style={{ color: "#22c55e" }}>
                                 ₦{(order.totalPrice || 0).toLocaleString()}

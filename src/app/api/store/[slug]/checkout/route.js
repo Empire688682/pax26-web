@@ -103,47 +103,41 @@ export async function POST(req, { params }) {
       additionalInfo = "",
     } = body;
 
-    // Resolve the primary phone: prefer new customerPhone1 field, fall back to legacy customerPhone
-    const primaryPhone = customerPhone1 || customerPhone || "";
+    // Resolve the primary phone: customerPhone1 is the delivery form phone ONLY.
+    // Session token / DB session phone is the WhatsApp identity — stored separately as whatsappPhone.
+    const primaryPhone = customerPhone1 || customerPhone || ""; // delivery form phone
 
-    console.log(`[checkout] 📦 New checkout request | store=${slug} | items=${items?.length ?? 0} | fulfillment=${fulfillmentMethod} | deliveryFee=${deliveryFee} | sessionToken=${sessionToken ? "present" : "none"}`);
-
-    // ── Resolve customer phone from session token ─────────────────────────────
-    let resolvedPhone = primaryPhone;
-    if (!resolvedPhone && sessionToken) {
+    // ── Resolve WhatsApp identity phone from session token ────────────────────
+    // This is separate from the delivery phone. It goes to order.whatsappPhone, never order.customerPhone.
+    let sessionWaPhone = "";
+    if (sessionToken) {
       try {
         const sessionPayload = verifySessionToken(sessionToken);
         if (sessionPayload?.customerPhone) {
-          resolvedPhone = sessionPayload.customerPhone;
-          console.log(`[checkout] ✅ Phone resolved from session token: ${resolvedPhone}`);
-        } else {
-          console.log(`[checkout] ⚠️ Session token verified but no customerPhone in payload`);
+          sessionWaPhone = sessionPayload.customerPhone;
+          console.log(`[checkout] ✅ WhatsApp phone resolved from session token: ${sessionWaPhone}`);
         }
       } catch (tokenErr) {
         console.warn(`[checkout] ⚠️ Session token verification failed: ${tokenErr.message}`);
       }
     }
 
-    if (!resolvedPhone && sessionToken) {
+    if (!sessionWaPhone && sessionToken) {
       try {
         const dbSession = await StorefrontSessionModel.findOne({
           token: sessionToken,
           storeSlug: slug.toLowerCase().trim(),
         }).lean();
         if (dbSession?.customerPhone) {
-          resolvedPhone = dbSession.customerPhone;
-          console.log(`[checkout] ✅ Phone resolved from DB session: ${resolvedPhone}`);
-        } else {
-          console.log(`[checkout] ⚠️ DB session found but no customerPhone stored`);
+          sessionWaPhone = dbSession.customerPhone;
+          console.log(`[checkout] ✅ WhatsApp phone resolved from DB session: ${sessionWaPhone}`);
         }
       } catch (dbErr) {
         console.warn(`[checkout] ⚠️ DB session lookup failed: ${dbErr.message}`);
       }
     }
 
-    if (!resolvedPhone) {
-      console.log(`[checkout] ℹ️ No phone resolved — order will be linked when WhatsApp message arrives`);
-    }
+    console.log(`[checkout] 📦 New checkout request | store=${slug} | items=${items?.length ?? 0} | fulfillment=${fulfillmentMethod} | deliveryFee=${deliveryFee} | sessionToken=${sessionToken ? "present" : "none"}`);
 
     // ── Basic validation ──────────────────────────────────────────────────────
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -162,6 +156,49 @@ export async function POST(req, { params }) {
       return NextResponse.json({ success: false, message: "Store not found" }, { status: 404, headers: publicHeaders() });
     }
     console.log(`[checkout] ✅ Store loaded: ${profile.businessName} (${profile._id})`);
+
+    // ── Server-side delivery coverage validation ──────────────────────────────
+    // This mirrors the client-side check in AddressStage — but here it's the authoritative gate.
+    // A customer cannot bypass it via devtools or direct API call.
+    if (fulfillmentMethod === "delivery" && deliveryAddress?.trim()) {
+      const fs = profile.fulfillmentSettings || {};
+      const deliveryModel = fs.deliveryModel || "flat";
+      const deliveryZones = fs.deliveryZones || [];
+
+      if (deliveryModel === "zones" && selectedZoneName) {
+        const zone = deliveryZones.find(z => z.name === selectedZoneName);
+        if (zone?.areas?.trim()) {
+          const areaList = zone.areas.toLowerCase().split(",").map(a => a.trim()).filter(Boolean);
+          const enteredText = deliveryAddress.toLowerCase();
+          const covered = areaList.some(area => enteredText.includes(area));
+          if (!covered) {
+            console.warn(`[checkout] ❌ Address "${deliveryAddress}" not in zone "${selectedZoneName}" areas: ${zone.areas}`);
+            return NextResponse.json({
+              success: false,
+              message: `Your address doesn't appear to be within the "${zone.name}" zone (covers: ${zone.areas}). Please check your address.`,
+            }, { status: 400, headers: publicHeaders() });
+          }
+        }
+      } else if (deliveryModel === "flat" && profile.deliveryCoverage?.trim()) {
+        const coverage = profile.deliveryCoverage.toLowerCase();
+        const isNationwide = /nationwide|all\s*state|everywhere|any.*where/i.test(coverage);
+        if (!isNationwide) {
+          const coveredAreas = coverage.split(/[,;\/\n]/).map(a => a.trim()).filter(a => a.length > 2);
+          if (coveredAreas.length > 0) {
+            const enteredText = deliveryAddress.toLowerCase();
+            const covered = coveredAreas.some(area => enteredText.includes(area));
+            if (!covered) {
+              console.warn(`[checkout] ❌ Address "${deliveryAddress}" outside coverage: ${profile.deliveryCoverage}`);
+              return NextResponse.json({
+                success: false,
+                message: `Sorry, we don't currently deliver to your location. We cover: ${profile.deliveryCoverage}. Contact us on WhatsApp for assistance.`,
+              }, { status: 400, headers: publicHeaders() });
+            }
+          }
+        }
+      }
+      // quote model: no server gate — seller quotes manually on WhatsApp
+    }
 
     // ── Validate & enrich each cart item against the live product catalogue ───
     const productIds = items.map(i => i.productId).filter(Boolean);
@@ -217,13 +254,19 @@ export async function POST(req, { params }) {
 
     console.log(`[checkout] 💰 Totals | subtotal=₦${itemsSubtotal.toLocaleString()} | deliveryFee=₦${deliveryFeeNum.toLocaleString()} | total=₦${totalPrice.toLocaleString()} | zone="${selectedZoneName || "none"}"`);
 
-    // ── Normalise phone ───────────────────────────────────────────────────────
-    const normPhone = resolvedPhone ? resolvedPhone.replace(/\D/g, "") : "";
+    // ── Normalise delivery form phone ────────────────────────────────────────
+    const normPhone = primaryPhone ? primaryPhone.replace(/\D/g, "") : "";
     const formattedPhone = normPhone
       ? (normPhone.startsWith("+") ? normPhone : `+${normPhone}`)
       : "";
 
-    console.log(`[checkout] 📱 Customer phone: "${formattedPhone || "(not resolved yet)"}" | address="${deliveryAddress || "(pickup)"}"`);
+    // ── Normalise WhatsApp identity phone (from session token) ───────────────
+    const normWaPhone = sessionWaPhone ? sessionWaPhone.replace(/\D/g, "") : "";
+    const formattedWaPhone = normWaPhone
+      ? (normWaPhone.startsWith("+") ? normWaPhone : `+${normWaPhone}`)
+      : "";
+
+    console.log(`[checkout] 📱 Delivery phone: "${formattedPhone || "(not provided)"}" | WhatsApp phone: "${formattedWaPhone || "(not yet known)"}" | address="${deliveryAddress || "(pickup)"}"`);
 
     // ── Generate order code ───────────────────────────────────────────────────
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -231,12 +274,9 @@ export async function POST(req, { params }) {
     for (let i = 0; i < 8; i++) orderCode += chars.charAt(Math.floor(Math.random() * chars.length));
 
     // ── Cancel any existing awaiting_payment orders for this customer ────────
-    // Match by customerPhone (delivery form phone) OR whatsappPhone (Meta identity)
-    // to catch all variations — customer using same or different phones across orders.
     const cancelConditions = [];
     if (formattedPhone) cancelConditions.push({ customerPhone: formattedPhone });
-    // sessionToken can also carry the WhatsApp phone — we don't have it at this point
-    // so just matching by delivery phone is sufficient here; the TTL handles orphans.
+    if (formattedWaPhone) cancelConditions.push({ whatsappPhone: formattedWaPhone });
     if (cancelConditions.length > 0) {
       const cancelResult = await SellerOrderModel.updateMany(
         { sellerId: profile._id, $or: cancelConditions, status: "awaiting_payment" },
@@ -255,8 +295,9 @@ export async function POST(req, { params }) {
     const order = await SellerOrderModel.create({
       sellerId: profile._id,
       productId: validatedItems[0]?.productId || null,
-      customerPhone: formattedPhone,
+      customerPhone: formattedPhone,           // delivery form phone — seller logistics only
       customerPhone2: customerPhone2 ? `+${(customerPhone2).replace(/\D/g, "")}` : "",
+      whatsappPhone: formattedWaPhone || "",   // Meta inbound identity — set from session token if available
       customerName: customerName || "Storefront Customer",
       quantity: validatedItems.reduce((sum, i) => sum + i.quantity, 0),
       items: validatedItems,

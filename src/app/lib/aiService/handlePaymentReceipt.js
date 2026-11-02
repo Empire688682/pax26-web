@@ -432,9 +432,13 @@ export async function handlePaymentReceipt({
     }
 
     // ── Priority 2: Legacy path — existing pending order or WhatsApp-chat order ─
+    // Match by whatsappPhone (primary identity) OR customerPhone (delivery phone / legacy)
     const pendingOrder = await SellerOrderModel.findOne({
         sellerId,
-        customerPhone: normalizedPhone,
+        $or: [
+            { whatsappPhone: normalizedPhone },
+            { customerPhone: normalizedPhone },
+        ],
         status: "pending",
     }).sort({ createdAt: -1 });
 
@@ -857,7 +861,10 @@ export async function createPendingOrderFromText({
 
     const existing = await SellerOrderModel.findOne({
         sellerId,
-        customerPhone: normalizedPhone,
+        $or: [
+            { whatsappPhone: normalizedPhone },
+            { customerPhone: normalizedPhone },
+        ],
         status: "pending",
     });
 

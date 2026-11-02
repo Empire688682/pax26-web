@@ -475,11 +475,25 @@ export const triggerAIResponse = async ({
 
                 customerOrders = await SellerOrderModel.find({
                     sellerId: businessProfile._id,
-                    customerPhone: { $in: phoneVariants },
+                    $or: [
+                        // Match by whatsappPhone (Meta inbound identity — set after first WA message)
+                        { whatsappPhone: { $in: phoneVariants } },
+                        // Match by customerPhone (delivery form phone — legacy or same-phone customers)
+                        { customerPhone: { $in: phoneVariants } },
+                    ],
                 })
                     .sort({ createdAt: -1 })
-                    .limit(5)
+                    .limit(10) // fetch more to allow dedup
                     .lean();
+
+                // Deduplicate by _id — $or can match the same order twice if both fields match the phone
+                const seen = new Set();
+                customerOrders = customerOrders.filter(o => {
+                    const id = o._id.toString();
+                    if (seen.has(id)) return false;
+                    seen.add(id);
+                    return true;
+                }).slice(0, 5); // cap at 5 for AI context
             } catch (orderErr) {
                 console.warn("⚠️ Order context fetch failed (non-fatal):", orderErr?.message);
             }

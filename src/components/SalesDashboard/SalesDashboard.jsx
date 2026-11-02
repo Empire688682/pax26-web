@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -103,10 +103,10 @@ export default function SalesDashboard() {
       if (res.data.success) {
         const msg = status === "confirmed" || status === "paid"
           ? (res.data.customerReceiptSent
-            ? "Order confirmed! Branded receipt sent to customer via WhatsApp. 📲"
+            ? "Order confirmed! Branded receipt sent to customer via WhatsApp. ðŸ“²"
             : "Order confirmed & marked as paid.")
           : status === "delivered"
-          ? "Order marked as delivered! 🚚"
+          ? "Order marked as delivered! ðŸšš"
           : "Order updated";
         toast.success(msg);
         fetchAnalytics();
@@ -139,16 +139,16 @@ export default function SalesDashboard() {
   const topProducts = data?.topProducts || [];
   const salesTrend = data?.salesTrend || [];
 
-  // Row hover color — subtle in both modes
+  // Row hover color â€” subtle in both modes
   const rowHoverBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.035)";
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {
       case "paid":
       case "confirmed":
-        return { bg: "rgba(34,197,94,0.15)", color: "#22c55e", label: "Paid ✓" };
+        return { bg: "rgba(34,197,94,0.15)", color: "#22c55e", label: "Paid âœ“" };
       case "delivered":
-        return { bg: "rgba(99,102,241,0.15)", color: "#818cf8", label: "Delivered 🚚" };
+        return { bg: "rgba(99,102,241,0.15)", color: "#818cf8", label: "Delivered ðŸšš" };
       case "cancelled":
         return { bg: "rgba(239,68,68,0.15)", color: "#ef4444", label: "Cancelled" };
       case "awaiting_payment":
@@ -242,9 +242,9 @@ export default function SalesDashboard() {
                 </div>
 
                 <div className="flex items-center justify-center gap-2 flex-wrap text-[11px] text-indigo-300 font-semibold py-1">
-                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">💰 Revenue Breakdown</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">📈 Conversion Rate</span>
-                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">📊 Trend Charts</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">ðŸ’° Revenue Breakdown</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">ðŸ“ˆ Conversion Rate</span>
+                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">ðŸ“Š Trend Charts</span>
                 </div>
 
                 <button
@@ -261,7 +261,7 @@ export default function SalesDashboard() {
                 </button>
 
                 <p className="text-[11px] text-emerald-400 font-medium">
-                  ✓ Recent Transactions & Payment Receipt verification below are 100% free!
+                  âœ“ Recent Transactions & Payment Receipt verification below are 100% free!
                 </p>
               </div>
             )}
@@ -273,8 +273,8 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Today's Sales</span>
                   <DollarSign size={16} className="shrink-0 ml-1" style={{ color: "#22c55e" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`₦${(metrics.todaySales || 0).toLocaleString()}`}>
-                  ₦{isFree ? "•••,•••" : (metrics.todaySales || 0).toLocaleString()}
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`â‚¦${(metrics.todaySales || 0).toLocaleString()}`}>
+                  â‚¦{isFree ? "â€¢â€¢â€¢,â€¢â€¢â€¢" : (metrics.todaySales || 0).toLocaleString()}
                 </p>
               </div>
 
@@ -283,8 +283,8 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Weekly Sales</span>
                   <TrendingUp size={16} className="shrink-0 ml-1" style={{ color: primary }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`₦${(metrics.weeklySales || 0).toLocaleString()}`}>
-                  ₦{isFree ? "•••,•••" : (metrics.weeklySales || 0).toLocaleString()}
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`â‚¦${(metrics.weeklySales || 0).toLocaleString()}`}>
+                  â‚¦{isFree ? "â€¢â€¢â€¢,â€¢â€¢â€¢" : (metrics.weeklySales || 0).toLocaleString()}
                 </p>
               </div>
 
@@ -293,8 +293,8 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Monthly Sales</span>
                   <ShoppingBag size={16} className="shrink-0 ml-1" style={{ color: "#eab308" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`₦${(metrics.monthlySales || 0).toLocaleString()}`}>
-                  ₦{isFree ? "•••,•••" : (metrics.monthlySales || 0).toLocaleString()}
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`â‚¦${(metrics.monthlySales || 0).toLocaleString()}`}>
+                  â‚¦{isFree ? "â€¢â€¢â€¢,â€¢â€¢â€¢" : (metrics.monthlySales || 0).toLocaleString()}
                 </p>
               </div>
 
@@ -303,8 +303,8 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Total Revenue</span>
                   <BarChart2 size={16} className="shrink-0 ml-1" style={{ color: "#38bdf8" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`₦${(metrics.totalSales || 0).toLocaleString()}`}>
-                  ₦{isFree ? "•••,•••" : (metrics.totalSales || 0).toLocaleString()}
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }} title={`â‚¦${(metrics.totalSales || 0).toLocaleString()}`}>
+                  â‚¦{isFree ? "â€¢â€¢â€¢,â€¢â€¢â€¢" : (metrics.totalSales || 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -324,7 +324,7 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Total Orders</span>
                   <ShoppingBag size={16} className="shrink-0 ml-1" style={{ color: primary }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "••" : (metrics.totalOrders || 0)}</p>
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "â€¢â€¢" : (metrics.totalOrders || 0)}</p>
               </div>
 
               <div className="sd-card rounded-2xl p-3.5 sm:p-5 overflow-hidden min-w-0 flex flex-col justify-between" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
@@ -332,7 +332,7 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Conversion Rate</span>
                   <Percent size={16} className="shrink-0 ml-1" style={{ color: "#a78bfa" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "••%" : `${metrics.conversionRate || 0}%`}</p>
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "â€¢â€¢%" : `${metrics.conversionRate || 0}%`}</p>
               </div>
 
               <div className="sd-card rounded-2xl p-3.5 sm:p-5 overflow-hidden min-w-0 flex flex-col justify-between" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
@@ -341,7 +341,7 @@ export default function SalesDashboard() {
                   <Receipt size={16} className="shrink-0 ml-1" style={{ color: "#fb7185" }} />
                 </div>
                 <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>
-                  ₦{isFree ? "•••" : Number(metrics.averageOrderValue || 0).toLocaleString()}
+                  â‚¦{isFree ? "â€¢â€¢â€¢" : Number(metrics.averageOrderValue || 0).toLocaleString()}
                 </p>
               </div>
 
@@ -350,7 +350,7 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Repeat Buyers</span>
                   <Users size={16} className="shrink-0 ml-1" style={{ color: "#22c55e" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "••" : (metrics.repeatCustomers || 0)}</p>
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "â€¢â€¢" : (metrics.repeatCustomers || 0)}</p>
               </div>
 
               <div className="sd-card rounded-2xl p-3.5 sm:p-5 overflow-hidden min-w-0 flex flex-col justify-between col-span-2 sm:col-span-1" style={{ background: pax26?.secondaryBg, border: `1px solid ${pax26?.border}` }}>
@@ -358,7 +358,7 @@ export default function SalesDashboard() {
                   <span className="text-[11px] sm:text-xs font-semibold truncate" style={{ color: pax26?.textSecondary }}>Paid Orders</span>
                   <ArrowUpRight size={16} className="shrink-0 ml-1" style={{ color: "#22c55e" }} />
                 </div>
-                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "••" : (metrics.successfulOrdersCount || 0)}</p>
+                <p className="text-base sm:text-xl md:text-2xl font-black tracking-tight truncate" style={{ color: pax26?.textPrimary }}>{isFree ? "â€¢â€¢" : (metrics.successfulOrdersCount || 0)}</p>
               </div>
             </div>
 
@@ -432,7 +432,7 @@ export default function SalesDashboard() {
                     return (
                       <div key={order._id} className="p-4 space-y-3" style={{ borderBottom: `1px solid ${pax26?.border}` }}>
 
-                        {/* ── Row 1: Customer info + status badge ── */}
+                        {/* â”€â”€ Row 1: Customer info + status badge â”€â”€ */}
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             {/* Name + order code + source */}
@@ -446,19 +446,19 @@ export default function SalesDashboard() {
                                 </span>
                               )}
                               {order.orderSource === "storefront" && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒 Store</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>ðŸ›’ Store</span>
                               )}
                             </div>
 
-                            {/* ── Phone → inbox thread ── */}
-                            {order.customerPhone ? (
+                            {/* â”€â”€ Phone â†’ inbox thread â”€â”€ */}
+                            {(order.whatsappPhone || order.customerPhone) ? (
                               <button
-                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.whatsappPhone || order.customerPhone)}`)}
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all active:scale-95"
                                 style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}
                               >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
-                                {order.customerPhone}
+                                {order.whatsappPhone || order.customerPhone}
                                 <ExternalLink size={10} />
                               </button>
                             ) : (
@@ -473,12 +473,12 @@ export default function SalesDashboard() {
                           </span>
                         </div>
 
-                        {/* ── Row 2: Total + Order Details toggle ── */}
+                        {/* â”€â”€ Row 2: Total + Order Details toggle â”€â”€ */}
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <span className="text-[10px] uppercase font-semibold block" style={{ color: pax26?.textSecondary }}>Total Amount</span>
                             <span className="text-lg font-black sd-mono" style={{ color: pax26?.textPrimary }}>
-                              ₦{totalVal.toLocaleString()}
+                              â‚¦{totalVal.toLocaleString()}
                             </span>
                           </div>
 
@@ -494,12 +494,12 @@ export default function SalesDashboard() {
                             >
                               <Package size={13} />
                               {order.items.length} {order.items.length === 1 ? "item" : "items"}
-                              <span style={{ fontSize: "10px" }}>{isMobileExpanded ? "▲" : "▼"}</span>
+                              <span style={{ fontSize: "10px" }}>{isMobileExpanded ? "â–²" : "â–¼"}</span>
                             </button>
                           )}
                         </div>
 
-                        {/* ── Row 3: Expanded Order Details ── */}
+                        {/* â”€â”€ Row 3: Expanded Order Details â”€â”€ */}
                         {isMobileExpanded && (
                           <div className="rounded-xl overflow-hidden" style={{ border: `1px solid rgba(99,102,241,0.25)` }}>
 
@@ -508,21 +508,21 @@ export default function SalesDashboard() {
                               <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: pax26?.textSecondary }}>Items Ordered</p>
                               {order.items.map((item, idx) => {
                                 const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
-                                const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(" · ");
+                                const variantStr = (item.selectedVariants || []).map(v => `${v.label}: ${v.value}`).join(" Â· ");
                                 return (
                                   <div key={idx} className="flex items-center gap-2.5">
                                     {item.imageUrl ? (
                                       <img src={item.imageUrl} alt={item.name} className="w-10 h-10 rounded-lg object-cover shrink-0" style={{ border: `1px solid ${pax26?.border}` }} />
                                     ) : (
-                                      <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-base" style={{ background: pax26?.bg }}>📦</div>
+                                      <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-base" style={{ background: pax26?.bg }}>ðŸ“¦</div>
                                     )}
                                     <div className="flex-1 min-w-0">
                                       <p className="text-xs font-bold truncate" style={{ color: pax26?.textPrimary }}>
-                                        {item.quantity > 1 ? <span style={{ color: primary }}>{item.quantity}× </span> : null}{item.name}
+                                        {item.quantity > 1 ? <span style={{ color: primary }}>{item.quantity}Ã— </span> : null}{item.name}
                                       </p>
                                       {variantStr && <p className="text-[10px]" style={{ color: "#818cf8" }}>{variantStr}</p>}
                                     </div>
-                                    <span className="text-xs font-bold shrink-0 sd-mono" style={{ color: pax26?.textPrimary }}>₦{lineTotal.toLocaleString()}</span>
+                                    <span className="text-xs font-bold shrink-0 sd-mono" style={{ color: pax26?.textPrimary }}>â‚¦{lineTotal.toLocaleString()}</span>
                                   </div>
                                 );
                               })}
@@ -532,12 +532,12 @@ export default function SalesDashboard() {
                             <div className="px-3 py-2.5 space-y-1.5" style={{ borderTop: `1px solid rgba(99,102,241,0.15)`, background: "rgba(99,102,241,0.02)" }}>
                               <div className="flex justify-between text-xs">
                                 <span style={{ color: pax26?.textSecondary }}>Subtotal</span>
-                                <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>₦{subtotalVal.toLocaleString()}</span>
+                                <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>â‚¦{subtotalVal.toLocaleString()}</span>
                               </div>
                               {deliveryFeeVal > 0 && (
                                 <div className="flex justify-between text-xs">
                                   <span style={{ color: pax26?.textSecondary }}>Delivery fee</span>
-                                  <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>₦{deliveryFeeVal.toLocaleString()}</span>
+                                  <span className="font-semibold sd-mono" style={{ color: pax26?.textPrimary }}>â‚¦{deliveryFeeVal.toLocaleString()}</span>
                                 </div>
                               )}
                               {order.selectedZoneName && (
@@ -549,13 +549,13 @@ export default function SalesDashboard() {
                               {order.deliveryZoneTimeframe && (
                                 <div className="flex justify-between text-[10px]">
                                   <span style={{ color: pax26?.textSecondary }}>Est. delivery</span>
-                                  <span style={{ color: "#818cf8", fontWeight: 700 }}>🕐 {order.deliveryZoneTimeframe}</span>
+                                  <span style={{ color: "#818cf8", fontWeight: 700 }}>ðŸ• {order.deliveryZoneTimeframe}</span>
                                 </div>
                               )}
                               {order.fulfillmentMethod && (
                                 <div className="flex justify-between text-[10px]">
                                   <span style={{ color: pax26?.textSecondary }}>Fulfillment</span>
-                                  <span style={{ color: pax26?.textPrimary }}>{order.fulfillmentMethod === "pickup" ? "🏬 Store Pick-up" : "🚚 Home Delivery"}</span>
+                                  <span style={{ color: pax26?.textPrimary }}>{order.fulfillmentMethod === "pickup" ? "ðŸ¬ Store Pick-up" : "ðŸšš Home Delivery"}</span>
                                 </div>
                               )}
                               {(order.deliveryAddress || order.deliveryLocation) && (
@@ -566,26 +566,26 @@ export default function SalesDashboard() {
                               )}
                               <div className="flex justify-between text-xs font-bold pt-1" style={{ borderTop: `1px solid ${pax26?.border}` }}>
                                 <span style={{ color: pax26?.textSecondary }}>Grand Total</span>
-                                <span className="sd-mono" style={{ color: "#22c55e" }}>₦{totalVal.toLocaleString()}</span>
+                                <span className="sd-mono" style={{ color: "#22c55e" }}>â‚¦{totalVal.toLocaleString()}</span>
                               </div>
                             </div>
 
                             {/* Open chat CTA */}
-                            {order.customerPhone && (
+                            {(order.whatsappPhone || order.customerPhone) && (
                               <button
-                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.whatsappPhone || order.customerPhone)}`)}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-all"
                                 style={{ background: "rgba(99,102,241,0.1)", color: "#818cf8", borderTop: `1px solid rgba(99,102,241,0.2)` }}
                               >
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
-                                Open conversation with {order.customerPhone}
+                                Open conversation with {order.whatsappPhone || order.customerPhone}
                                 <ExternalLink size={11} />
                               </button>
                             )}
                           </div>
                         )}
 
-                        {/* ── Row 4: Action buttons ── */}
+                        {/* â”€â”€ Row 4: Action buttons â”€â”€ */}
                         {order.status === "pending" && (
                           <div className="flex items-center gap-2">
                             <button
@@ -597,7 +597,7 @@ export default function SalesDashboard() {
                               {processingOrderId === order._id && processingStatus === "confirmed" ? (
                                 <RefreshCw size={13} className="sd-spin" />
                               ) : <CheckCircle size={13} />}
-                              {processingOrderId === order._id && processingStatus === "confirmed" ? "Confirming…" : "Confirm Payment"}
+                              {processingOrderId === order._id && processingStatus === "confirmed" ? "Confirmingâ€¦" : "Confirm Payment"}
                             </button>
                             <button
                               onClick={() => handleOrderStatus(order._id, "cancelled")}
@@ -613,7 +613,7 @@ export default function SalesDashboard() {
                           </div>
                         )}
 
-                        {/* ── Mark Delivered CTA (paid/confirmed orders only) ── */}
+                        {/* â”€â”€ Mark Delivered CTA (paid/confirmed orders only) â”€â”€ */}
                         {(order.status === "paid" || order.status === "confirmed") && (
                           <button
                             onClick={() => handleOrderStatus(order._id, "delivered")}
@@ -623,12 +623,12 @@ export default function SalesDashboard() {
                           >
                             {processingOrderId === order._id && processingStatus === "delivered" ? (
                               <RefreshCw size={13} className="sd-spin" />
-                            ) : <span style={{ fontSize: "13px" }}>🚚</span>}
-                            {processingOrderId === order._id && processingStatus === "delivered" ? "Updating…" : "Mark as Delivered"}
+                            ) : <span style={{ fontSize: "13px" }}>ðŸšš</span>}
+                            {processingOrderId === order._id && processingStatus === "delivered" ? "Updatingâ€¦" : "Mark as Delivered"}
                           </button>
                         )}
 
-                        {/* ── Row 5: Timestamp ── */}
+                        {/* â”€â”€ Row 5: Timestamp â”€â”€ */}
                         <div className="flex items-center gap-1.5 text-[10px]" style={{ color: pax26?.textSecondary }}>
                           <Clock size={11} className="opacity-60 shrink-0" />
                           <span>{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
@@ -680,12 +680,12 @@ export default function SalesDashboard() {
                                 </span>
                               )}
                               {order.orderSource === "storefront" && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>🛒</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e" }}>ðŸ›’</span>
                               )}
                             </div>
-                            {order.customerPhone ? (
+                            {(order.whatsappPhone || order.customerPhone) ? (
                               <button
-                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.whatsappPhone || order.customerPhone)}`)}
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all hover:opacity-80"
                                 style={{ background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.2)" }}
                                 title="Open WhatsApp conversation"
@@ -702,12 +702,12 @@ export default function SalesDashboard() {
                                 className="text-[9px] font-semibold text-emerald-400 mt-0.5 flex items-center gap-1 hover:text-emerald-300 transition-colors"
                                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                               >
-                                📦 {order.items.length} {order.items.length === 1 ? "item" : "items"} — {isExpanded ? "▲ Hide" : "▼ View"}
+                                ðŸ“¦ {order.items.length} {order.items.length === 1 ? "item" : "items"} â€” {isExpanded ? "â–² Hide" : "â–¼ View"}
                               </button>
                             )}
                           </td>
                           <td className="px-4 py-3 font-bold sd-mono whitespace-nowrap text-xs" style={{ color: pax26?.textPrimary }}>
-                            ₦{(order.totalPrice || 0).toLocaleString()}
+                            â‚¦{(order.totalPrice || 0).toLocaleString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {order.paymentReceiptUrl ? (
@@ -733,7 +733,7 @@ export default function SalesDashboard() {
                                     <ExternalLink size={10} /> Link
                                   </a>
                                   <span className="text-[9px] font-semibold opacity-75" style={{ color: pax26?.textSecondary }}>
-                                    🕒 {new Date(order.paymentReceiptSubmittedAt || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    ðŸ•’ {new Date(order.paymentReceiptSubmittedAt || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                   </span>
                                 </div>
                               </div>
@@ -795,7 +795,7 @@ export default function SalesDashboard() {
                                 {processingOrderId === order._id && processingStatus === "delivered" ? (
                                   <RefreshCw size={12} className="sd-spin" />
                                 ) : (
-                                  <span style={{ fontSize: "11px" }}>🚚</span>
+                                  <span style={{ fontSize: "11px" }}>ðŸšš</span>
                                 )}
                                 {processingOrderId === order._id && processingStatus === "delivered" ? "Updating..." : "Mark Delivered"}
                               </button>
@@ -809,7 +809,7 @@ export default function SalesDashboard() {
                           </td>
                         </tr>
 
-                        {/* ── Expandable Order Summary Row ── */}
+                        {/* â”€â”€ Expandable Order Summary Row â”€â”€ */}
                         {isExpanded && (
                           <tr style={{ background: pax26?.bg === "#0f172a" ? "rgba(99,102,241,0.04)" : "rgba(99,102,241,0.03)" }}>
                             <td colSpan="6" className="px-4 pb-4 pt-0">
@@ -821,13 +821,13 @@ export default function SalesDashboard() {
                                   <div>
                                     <p style={{ margin: 0, fontSize: "11px", fontWeight: 800, color: "#eab308" }}>Always verify in WhatsApp Inbox</p>
                                     <p style={{ margin: "2px 0 0", fontSize: "10px", color: pax26?.textSecondary, lineHeight: 1.5 }}>
-                                      The order summary below comes from the storefront database. While highly accurate, always cross-check with the customer&apos;s original message in the WhatsApp Inbox — it is the 100% source of truth.{" "}
-                                      {order.customerPhone && (
+                                      The order summary below comes from the storefront database. While highly accurate, always cross-check with the customer&apos;s original message in the WhatsApp Inbox â€” it is the 100% source of truth.{" "}
+                                      {(order.whatsappPhone || order.customerPhone) && (
                                         <button
-                                          onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                          onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.whatsappPhone || order.customerPhone)}`)}
                                           style={{ background: "none", border: "none", cursor: "pointer", color: "#6366f1", fontWeight: 700, fontSize: "10px", padding: 0, textDecoration: "underline" }}
                                         >
-                                          Open inbox for {order.customerPhone} →
+                                          Open inbox for {order.whatsappPhone || order.customerPhone} â†’
                                         </button>
                                       )}
                                     </p>
@@ -851,7 +851,7 @@ export default function SalesDashboard() {
                                               <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: pax26?.textPrimary }}>{item.quantity > 1 ? `${item.quantity}x ` : ""}{item.name}</p>
                                               {variantStr && <p style={{ margin: "1px 0 0", fontSize: "9px", color: "#6366f1", fontWeight: 600 }}>{variantStr}</p>}
                                             </div>
-                                            <span style={{ fontSize: "11px", fontWeight: 700, color: pax26?.textPrimary, whiteSpace: "nowrap" }}>₦{lineTotal.toLocaleString()}</span>
+                                            <span style={{ fontSize: "11px", fontWeight: 700, color: pax26?.textPrimary, whiteSpace: "nowrap" }}>â‚¦{lineTotal.toLocaleString()}</span>
                                           </div>
                                         );
                                       })}
@@ -864,14 +864,14 @@ export default function SalesDashboard() {
                                       <p style={{ margin: "0 0 8px", fontSize: "10px", fontWeight: 800, color: pax26?.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>Order Details</p>
                                       <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                                         {[
-                                          { label: "Products Subtotal", value: `₦${subtotalVal.toLocaleString()}` },
-                                          deliveryFeeVal > 0 && { label: "Delivery Fee", value: `₦${deliveryFeeVal.toLocaleString()}` },
+                                          { label: "Products Subtotal", value: `â‚¦${subtotalVal.toLocaleString()}` },
+                                          deliveryFeeVal > 0 && { label: "Delivery Fee", value: `â‚¦${deliveryFeeVal.toLocaleString()}` },
                                           order.selectedZoneName && { label: "Delivery Zone", value: order.selectedZoneName },
-                                          order.deliveryZoneTimeframe && { label: "Est. Timeframe", value: `🕐 ${order.deliveryZoneTimeframe}` },
-                                          { label: "Grand Total", value: `₦${totalVal.toLocaleString()}`, bold: true },
+                                          order.deliveryZoneTimeframe && { label: "Est. Timeframe", value: `ðŸ• ${order.deliveryZoneTimeframe}` },
+                                          { label: "Grand Total", value: `â‚¦${totalVal.toLocaleString()}`, bold: true },
                                           order.deliveryAddress && { label: "Address", value: order.deliveryAddress || order.deliveryLocation },
                                           order.fulfillmentMethod && { label: "Fulfillment", value: order.fulfillmentMethod === "pickup" ? "Store Pick-up" : "Home Delivery" },
-                                          order.orderSource && { label: "Order Source", value: order.orderSource === "storefront" ? "🛒 Storefront" : "💬 WhatsApp Chat" },
+                                          order.orderSource && { label: "Order Source", value: order.orderSource === "storefront" ? "ðŸ›’ Storefront" : "ðŸ’¬ WhatsApp Chat" },
                                         ].filter(Boolean).map((row, i) => (
                                           <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "3px 0", borderBottom: `1px solid rgba(255,255,255,0.05)` }}>
                                             <span style={{ color: pax26?.textSecondary }}>{row.label}</span>
@@ -881,13 +881,13 @@ export default function SalesDashboard() {
                                       </div>
                                     </div>
 
-                                    {order.customerPhone && (
+                                    {(order.whatsappPhone || order.customerPhone) && (
                                       <button
-                                        onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.customerPhone)}`)}
+                                        onClick={() => router.push(`/dashboard/automations/whatsapp-inbox?phone=${encodeURIComponent(order.whatsappPhone || order.customerPhone)}`)}
                                         style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "8px", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)", color: "#818cf8", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
                                       >
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.07-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" opacity=".3"/></svg>
-                                        Open conversation with {order.customerPhone} →
+                                        Open conversation with {order.whatsappPhone || order.customerPhone} â†’
                                       </button>
                                     )}
                                   </div>
@@ -922,7 +922,7 @@ export default function SalesDashboard() {
                         <p className="text-[10px] sd-mono" style={{ color: pax26?.textSecondary }}>{p.count} units sold</p>
                       </div>
                       <p className="text-xs sm:text-sm font-bold sd-mono shrink-0" style={{ color: "#22c55e" }}>
-                        ₦{(p.revenue || 0).toLocaleString()}
+                        â‚¦{(p.revenue || 0).toLocaleString()}
                       </p>
                     </div>
                   ))
@@ -953,16 +953,16 @@ export default function SalesDashboard() {
                 {selectedOrder && (
                   <div className="mt-1 flex flex-col gap-1">
                     <p className="text-xs leading-normal" style={{ color: pax26?.textSecondary || "#94a3b8" }}>
-                      Order <strong>#{selectedOrder.orderCode || selectedOrder._id?.toString()?.slice(-6)}</strong> for <strong>{selectedOrder.customerName || "Customer"}</strong> ({selectedOrder.customerPhone}) - <span className="font-bold text-emerald-400">₦{selectedOrder.totalPrice?.toLocaleString()}</span>
+                      Order <strong>#{selectedOrder.orderCode || selectedOrder._id?.toString()?.slice(-6)}</strong> for <strong>{selectedOrder.customerName || "Customer"}</strong> ({selectedOrder.customerPhone}) - <span className="font-bold text-emerald-400">â‚¦{selectedOrder.totalPrice?.toLocaleString()}</span>
                     </p>
                     {selectedOrder.items?.length > 0 && (
                       <div className="text-[11px] p-2 rounded-lg bg-black/30 border border-slate-700/50 mt-1 max-h-24 overflow-y-auto">
-                        <p className="font-bold text-slate-300 mb-0.5">📦 Ordered Products:</p>
+                        <p className="font-bold text-slate-300 mb-0.5">ðŸ“¦ Ordered Products:</p>
                         <ul className="space-y-0.5 text-slate-400">
                           {selectedOrder.items.map((item, idx) => (
                             <li key={idx} className="flex items-center justify-between text-[10px]">
-                              <span>• {item.quantity}x {item.name}</span>
-                              <span className="font-mono text-emerald-400 font-bold">₦{(item.price * item.quantity).toLocaleString()}</span>
+                              <span>â€¢ {item.quantity}x {item.name}</span>
+                              <span className="font-mono text-emerald-400 font-bold">â‚¦{(item.price * item.quantity).toLocaleString()}</span>
                             </li>
                           ))}
                         </ul>
@@ -970,12 +970,12 @@ export default function SalesDashboard() {
                     )}
                     {selectedOrder.deliveryLocation && (
                       <p className="text-[11px] font-semibold text-sky-400 flex items-center gap-1 mt-0.5">
-                        <span>📍 Delivery Address:</span>
+                        <span>ðŸ“ Delivery Address:</span>
                         <span className="truncate">{selectedOrder.deliveryLocation}</span>
                       </p>
                     )}
                     <p className="text-[10px] font-medium text-amber-400 flex items-center gap-1 mt-0.5">
-                      <span>🕒 Receipt Received:</span>
+                      <span>ðŸ•’ Receipt Received:</span>
                       <span className="font-bold">
                         {selectedOrder.paymentReceiptSubmittedAt
                           ? new Date(selectedOrder.paymentReceiptSubmittedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
