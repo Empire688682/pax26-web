@@ -59,10 +59,13 @@ export async function POST(req) {
                 sendSalesNotification(sellerProfile.userId, {
                     orderId: order._id.toString(),
                     customerName: order.customerName || order.customerPhone,
+                    customerPhone: order.customerPhone || "",
+                    customerPhone2: order.customerPhone2 || "",
                     productName: prodSummary,
                     amountPaid: order.totalPrice,
                     deliveryFee: order.deliveryFee,
                     deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
+                    additionalInfo: order.additionalInfo || "",
                     isConfirmed: false,
                 }).catch(err => console.warn("Receipt push notification error:", err?.message));
             }

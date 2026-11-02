@@ -333,10 +333,13 @@ export async function handlePaymentReceipt({
             await sendSalesNotification(sellerUserId, {
                 orderId: awaitingOrder._id.toString(),
                 customerName: awaitingOrder.customerName || awaitingOrder.customerPhone,
+                customerPhone: awaitingOrder.customerPhone || "",
+                customerPhone2: awaitingOrder.customerPhone2 || "",
                 productName: productSummary,
                 amountPaid: awaitingOrder.totalPrice,
                 deliveryFee: awaitingOrder.deliveryFee,
                 deliveryLocation: awaitingOrder.deliveryAddress || awaitingOrder.deliveryLocation || "",
+                additionalInfo: awaitingOrder.additionalInfo || "",
                 isConfirmed: false,
             });
         } catch (err) {
@@ -659,10 +662,13 @@ export async function handlePaymentReceipt({
             await sendSalesNotification(sellerUserId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
+                customerPhone: order.customerPhone || "",
+                customerPhone2: order.customerPhone2 || "",
                 productName: productSummaryName,
                 amountPaid: order.totalPrice,
                 deliveryFee: order.deliveryFee,
                 deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
+                additionalInfo: order.additionalInfo || "",
                 isConfirmed: false,
             });
             console.log("🔔 Sales alert sent for payment proof upload (Order:", order._id, "| Product:", productSummaryName, ")");

@@ -89,6 +89,8 @@ export async function POST(req, { params }) {
     const {
       customerPhone,
       customerName,
+      customerPhone1,
+      customerPhone2,
       items,
       deliveryAddress,
       deliveryLocation,
@@ -98,12 +100,16 @@ export async function POST(req, { params }) {
       selectedZoneName = "",
       deliveryZoneTimeframe = "",
       sessionToken,
+      additionalInfo = "",
     } = body;
+
+    // Resolve the primary phone: prefer new customerPhone1 field, fall back to legacy customerPhone
+    const primaryPhone = customerPhone1 || customerPhone || "";
 
     console.log(`[checkout] 📦 New checkout request | store=${slug} | items=${items?.length ?? 0} | fulfillment=${fulfillmentMethod} | deliveryFee=${deliveryFee} | sessionToken=${sessionToken ? "present" : "none"}`);
 
     // ── Resolve customer phone from session token ─────────────────────────────
-    let resolvedPhone = customerPhone || "";
+    let resolvedPhone = primaryPhone;
     if (!resolvedPhone && sessionToken) {
       try {
         const sessionPayload = verifySessionToken(sessionToken);
@@ -242,6 +248,7 @@ export async function POST(req, { params }) {
       sellerId: profile._id,
       productId: validatedItems[0]?.productId || null,
       customerPhone: formattedPhone,
+      customerPhone2: customerPhone2 ? `+${(customerPhone2).replace(/\D/g, "")}` : "",
       customerName: customerName || "Storefront Customer",
       quantity: validatedItems.reduce((sum, i) => sum + i.quantity, 0),
       items: validatedItems,
@@ -253,6 +260,7 @@ export async function POST(req, { params }) {
       deliveryZoneTimeframe: deliveryZoneTimeframe || "",
       fulfillmentMethod,
       pickupDetails: fulfillmentMethod === "pickup" ? (pickupDetails || "") : "",
+      additionalInfo: additionalInfo || "",
       status: "awaiting_payment",
       orderCode,
       orderSource: "storefront",

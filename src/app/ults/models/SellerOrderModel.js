@@ -19,6 +19,12 @@ const SellerOrderSchema = new mongoose.Schema({
         default: "",
     },
 
+    // Second phone number — optional, provided by customer during checkout
+    customerPhone2: {
+        type: String,
+        default: "",
+    },
+
     customerName: String,
 
     quantity: {
@@ -80,6 +86,12 @@ const SellerOrderSchema = new mongoose.Schema({
     },
 
     pickupDetails: String,
+
+    // Extra notes from the customer at checkout (gate colour, landmark, etc.)
+    additionalInfo: {
+        type: String,
+        default: "",
+    },
 
     paymentReceiptUrl: String,
     paymentReceiptPublicId: String,

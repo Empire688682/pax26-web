@@ -102,10 +102,13 @@ export async function PATCH(req, { params }) {
             await sendSalesNotification(userId, {
                 orderId: order._id.toString(),
                 customerName: order.customerName || order.customerPhone,
+                customerPhone: order.customerPhone || "",
+                customerPhone2: order.customerPhone2 || "",
                 productName: productSummary,
                 amountPaid: order.totalPrice,
                 deliveryFee: order.deliveryFee,
                 deliveryLocation: order.deliveryLocation || order.deliveryAddress || "",
+                additionalInfo: order.additionalInfo || "",
                 isConfirmed: true,
             });
 

@@ -100,11 +100,17 @@ No orders found for this customer yet.
       const timeframe = o.deliveryZoneTimeframe ? `Est. delivery: ${o.deliveryZoneTimeframe}` : "";
       const confirmedNote = o.confirmedAt ? `Confirmed at: ${new Date(o.confirmedAt).toLocaleString()}` : "";
       const proofNote = o.paymentReceiptSubmittedAt ? `Proof submitted: ${new Date(o.paymentReceiptSubmittedAt).toLocaleString()}` : "";
+      const customerNameNote = o.customerName && o.customerName !== "Storefront Customer" ? `Customer: ${o.customerName}` : "";
+      const phone2Note = o.customerPhone2 ? `Alt Phone: ${o.customerPhone2}` : "";
+      const addInfoNote = o.additionalInfo ? `Note: ${o.additionalInfo}` : "";
       return [
         `Order ${i + 1}: #${o.orderCode || o._id?.toString().slice(-6)} | Status: ${statusLabel(o.status)}`,
         `  Items: ${itemsSummary}`,
         `  Total: ${currencySymbol}${Number(o.totalPrice || 0).toLocaleString()}${o.deliveryFee > 0 ? ` (incl. ${currencySymbol}${Number(o.deliveryFee).toLocaleString()} delivery)` : ""}`,
         `  Delivery address: ${addr}`,
+        customerNameNote && `  ${customerNameNote}`,
+        phone2Note && `  ${phone2Note}`,
+        addInfoNote && `  ${addInfoNote}`,
         timeframe && `  ${timeframe}`,
         proofNote && `  ${proofNote}`,
         confirmedNote && `  ${confirmedNote}`,

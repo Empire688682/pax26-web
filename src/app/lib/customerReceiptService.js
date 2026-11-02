@@ -96,8 +96,9 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 
 👤 *Customer Details:*
 • Name: ${customerName}
-• Phone: ${order.customerPhone}
+• Phone: ${order.customerPhone}${order.customerPhone2 ? `\n• Alt Phone: ${order.customerPhone2}` : ""}
 • Delivery Address: ${deliveryLocStr || "Not specified"}
+${order.additionalInfo ? `• Note: ${order.additionalInfo}` : ""}
 
 🛍️ *Order Breakdown:*
 ${itemsSection}

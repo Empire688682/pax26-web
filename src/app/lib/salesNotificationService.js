@@ -123,11 +123,14 @@ export const sendSalesNotification = async (userId, orderData) => {
         if (shouldEmail) {
             try {
                 await sendSalesAlertEmail(userId, {
-                    customerPhone: orderData.customerName,
+                    customerPhone: orderData.customerPhone || orderData.customerName || "Customer",
+                    customerName: orderData.customerName || null,
+                    customerPhone2: orderData.customerPhone2 || null,
                     productName: orderData.productName,
                     amountPaid: orderData.amountPaid,
                     deliveryFee: orderData.deliveryFee,
                     deliveryLocation: orderData.deliveryLocation || orderData.deliveryAddress || "",
+                    additionalInfo: orderData.additionalInfo || null,
                     orderId: orderData.orderId,
                     isConfirmed: orderData.isConfirmed ?? false,
                 });

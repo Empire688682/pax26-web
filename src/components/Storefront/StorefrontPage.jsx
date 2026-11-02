@@ -1,20 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/app/lib/currency/currencyHelper";
 import { getTheme } from "@/app/lib/store/storeThemes";
 import { useCart } from "@/app/lib/store/useCart";
-import { buildMultiProductWhatsAppMessage } from "@/app/lib/store/buildMultiProductWhatsAppMessage";
-import { validateDeliveryLocation } from "@/app/lib/store/validateDeliveryLocation";
-import {
-  loadSavedAddresses,
-  saveAddress,
-  removeSavedAddress,
-  formatAddressTime,
-} from "@/app/lib/store/savedAddressUtils";
 
-/* ── Icons ──────────────────────────────────────────────── */
+/* â”€â”€ Icons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const SearchIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>);
 const WhatsAppIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>);
 const MenuIcon = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>);
@@ -29,7 +21,7 @@ const TrashIcon = () => (<svg width="15" height="15" viewBox="0 0 24 24" fill="n
 const PlusIcon = () => (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>);
 const MinusIcon = () => (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>);
 
-/* ── Owner preview banner ───────────────────────────────── */
+/* â”€â”€ Owner preview banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function OwnerBanner({ slug }) {
   return (
     <div style={{ position: "sticky", top: 0, zIndex: 100, background: "#111115", color: "#fff", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", fontSize: "12px", fontWeight: 600, borderBottom: "1px solid #2a2a35" }}>
@@ -44,7 +36,7 @@ function OwnerBanner({ slug }) {
   );
 }
 
-/* ── Pax26 powered footer ───────────────────── */
+/* â”€â”€ Pax26 powered footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function Pax26Footer() {
   return (
     <div style={{ background: "linear-gradient(135deg, #09090d 0%, #151522 100%)", borderTop: "1px solid #232332", padding: "24px 20px 88px" }}>
@@ -58,7 +50,7 @@ function Pax26Footer() {
               Powered by <span style={{ color: "#818cf8" }}>Pax26</span>
             </p>
             <p style={{ margin: 0, fontSize: "11px", color: "#828799" }}>
-              AI WhatsApp Storefront — automated orders 24/7
+              AI WhatsApp Storefront â€” automated orders 24/7
             </p>
           </div>
         </div>
@@ -68,14 +60,14 @@ function Pax26Footer() {
           rel="noopener noreferrer"
           style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", fontWeight: 800, fontSize: "12px", textDecoration: "none", whiteSpace: "nowrap", boxShadow: "0 4px 16px rgba(99, 102, 241, 0.35)" }}
         >
-          Create free store →
+          Create free store â†’
         </a>
       </div>
     </div>
   );
 }
 
-/* ── WhatsApp app chooser (Android multi-app support) ───────── */
+/* â”€â”€ WhatsApp app chooser (Android multi-app support) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 // Android allows both WhatsApp Messenger (com.whatsapp) and
 // WhatsApp Business (com.whatsapp.w4b) to be installed at the same time.
 // Using intent:// links targets each package directly.
@@ -114,7 +106,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
           Open in WhatsApp
         </p>
         <p style={{ margin: '0 0 20px', fontSize: '12px', color: t.textSecondary, textAlign: 'center' }}>
-          You have multiple WhatsApp apps installed — choose one
+          You have multiple WhatsApp apps installed â€” choose one
         </p>
 
         {/* WhatsApp Messenger */}
@@ -141,7 +133,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Messenger</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Personal WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>â€º</div>
         </a>
 
         {/* WhatsApp Business */}
@@ -167,7 +159,7 @@ export function WhatsAppChooserModal({ visible, onClose, messengerUrl, businessU
             <p style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: t.textPrimary }}>WhatsApp Business</p>
             <p style={{ margin: 0, fontSize: '11px', color: t.textSecondary }}>Business WhatsApp account</p>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>›</div>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', color: t.textSecondary }}>â€º</div>
         </a>
 
         <button
@@ -232,594 +224,7 @@ export function handleWhatsAppRedirect(e, href, onShowChooser) {
   }
 }
 
-/* ── Cart Drawer Component ───────────────────────────────── */
-function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQty, onRemoveItem, onClearCart, store, slug, sessionToken, theme, onWhatsAppRedirect }) {
-  const t = theme;
-  const [deliveryLocation, setDeliveryLocation] = useState("");
-  const [checkoutState, setCheckoutState] = useState("idle"); // idle | loading | success | error
-  const [checkoutError, setCheckoutError] = useState("");
-  const [detectedZone, setDetectedZone] = useState(null); // { fee, zoneName, timeframe, confidence }
-
-  // ── Saved addresses ───────────────────────────────────────
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
-  const addressInputRef = useRef(null);
-
-  // Load saved addresses when cart opens
-  useEffect(() => {
-    if (open && slug) {
-      setSavedAddresses(loadSavedAddresses(slug));
-    }
-  }, [open, slug]);
-  const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
-  const allowPickup = store.fulfillmentSettings?.allowPickup === true;
-  const deliveryModel = store.fulfillmentSettings?.deliveryModel || "flat";
-  const deliveryZones = store.fulfillmentSettings?.deliveryZones || [];
-  const flatDeliveryFee = Number(store.fulfillmentSettings?.flatDeliveryFee) || 0;
-  const [fulfillmentMethod, setFulfillmentMethod] = useState(allowPickup && !allowDelivery ? "pickup" : "delivery");
-  const [selectedZoneIndex, setSelectedZoneIndex] = useState(0);
-  const currency = store.currency || "NGN";
-
-  if (!open) return null;
-
-  // ── Auto-detect zone from address as customer types ──────────────────────
-  // Uses debounced matching against store delivery zones
-  const handleAddressChange = (val) => {
-    setDeliveryLocation(val);
-    if (deliveryModel === "zones" && val.trim().length >= 5) {
-      // Inline detection — import is a module so call inline
-      const normVal = val.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
-      let best = null;
-      let bestScore = 0;
-      for (const zone of deliveryZones) {
-        const combined = `${zone.name || ""}, ${zone.areas || ""}`;
-        const keywords = combined.split(",").map(k => k.trim().toLowerCase().replace(/[^a-z0-9\s]/g, " ").trim()).filter(k => k.length >= 3);
-        let score = 0;
-        for (const kw of keywords) { if (normVal.includes(kw)) score += kw.length; }
-        if (score > bestScore) { bestScore = score; best = zone; }
-      }
-      if (best && bestScore > 0) {
-        setDetectedZone({ fee: Number(best.fee) || 0, zoneName: best.name || "", timeframe: best.timeframe || "", confidence: "matched" });
-      } else if (deliveryZones.length > 0) {
-        const fb = deliveryZones[deliveryZones.length - 1];
-        setDetectedZone({ fee: Number(fb.fee) || 0, zoneName: fb.name || "", timeframe: fb.timeframe || "", confidence: "fallback" });
-      } else {
-        setDetectedZone(null);
-      }
-    } else if (deliveryModel !== "zones") {
-      setDetectedZone(null);
-    } else {
-      setDetectedZone(null);
-    }
-  };
-
-  // ── Compute the active delivery fee ──────────────────────────────────────
-  const maxProductFee = cart.length > 0 ? Math.max(0, ...cart.map(i => Number(i.deliveryFee) || 0)) : 0;
-
-  const activeDeliveryFee = fulfillmentMethod === "pickup"
-    ? 0
-    : deliveryModel === "quote"
-      ? 0
-      : deliveryModel === "zones"
-        ? Math.max(detectedZone?.fee || 0, maxProductFee)
-        : Math.max(flatDeliveryFee, maxProductFee); // flat model
-
-  const grandTotal = (totalPrice || 0) + activeDeliveryFee;
-
-  const locationValidation = fulfillmentMethod === "delivery"
-    ? validateDeliveryLocation(cart, deliveryLocation, store.deliveryCoverage || "Nationwide")
-    : { valid: true };
-
-  const canCheckout = locationValidation.valid && checkoutState !== "loading";
-
-  const handleConfirmOrder = async (e) => {
-    e.preventDefault();
-    if (!cart.length || !canCheckout) return;
-
-    setCheckoutState("loading");
-    setCheckoutError("");
-
-    try {
-      const res = await fetch(`/api/store/${slug}/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          // customerPhone intentionally omitted — resolved from session token
-          sessionToken: sessionToken || null,  // used to look up customer phone
-          items: cart.map(item => ({
-            productId: item.productId,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            imageUrl: item.imageUrl,
-            selectedVariants: item.selectedVariants || [],
-          })),
-          deliveryAddress: fulfillmentMethod === "delivery" ? deliveryLocation.trim() : "",
-          deliveryLocation: fulfillmentMethod === "delivery" ? deliveryLocation.trim() : "",
-          fulfillmentMethod,
-          pickupDetails: fulfillmentMethod === "pickup" ? (store.fulfillmentSettings?.pickupAddress || store.liveLocation || "") : "",
-          deliveryFee: activeDeliveryFee,
-          selectedZoneName: detectedZone?.zoneName || "",
-          deliveryZoneTimeframe: detectedZone?.timeframe || "",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        setCheckoutState("error");
-        setCheckoutError(data.message || "Something went wrong. Please try again.");
-        return;
-      }
-
-      // Build the WhatsApp redirect message — full order summary so it's visible
-      // in the customer's thread and the system can parse it correctly
-      const baseWaHref = store.whatsappHref?.split("?")[0] || "";
-      if (baseWaHref) {
-        const deliveryFeeVal = Number(data.deliveryFee) || 0;
-        const subtotalVal = Number(data.itemsSubtotal) || (Number(data.totalPrice) - deliveryFeeVal);
-        const totalVal = Number(data.totalPrice) || 0;
-
-        // Build item lines from cart (already validated by server)
-        const itemLines = cart.map(item => {
-          const lineTotal = item.price * item.quantity;
-          const variantStr = (item.selectedVariants || []).length > 0
-            ? ` [${item.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
-            : "";
-          return `• ${item.quantity > 1 ? `${item.quantity}x ` : ""}${item.name}${variantStr} — ₦${lineTotal.toLocaleString()}`;
-        }).join("\n");
-
-        let waMsg = `Hi! I've confirmed my order #${data.orderCode} on ${data.businessName || "your store"}.\n\n`;
-        waMsg += `🛒 *Order #${data.orderCode}*\n`;
-        waMsg += `${itemLines}\n\n`;
-        waMsg += `💰 Products Total: ₦${subtotalVal.toLocaleString()}`;
-        if (deliveryFeeVal > 0) {
-          waMsg += `\n🚚 Delivery Fee: ₦${deliveryFeeVal.toLocaleString()}`;
-          if (detectedZone?.timeframe) {
-            waMsg += ` · Est. ${detectedZone.timeframe}`;
-          }
-        }
-        waMsg += `\n💳 *Grand Total: ₦${totalVal.toLocaleString()}*`;
-        if (deliveryLocation) {
-          waMsg += `\n📍 ${deliveryLocation.trim()}`;
-        }
-
-        const fullWaUrl = `${baseWaHref}?text=${encodeURIComponent(waMsg)}`;
-
-        // ── Save address to localStorage for autofill next time ───────────
-        if (fulfillmentMethod === "delivery" && deliveryLocation.trim()) {
-          saveAddress(slug, {
-            address: deliveryLocation.trim(),
-            zoneName: detectedZone?.zoneName || null,
-            deliveryFee: activeDeliveryFee,
-          });
-        }
-
-        onClearCart();
-        setCheckoutState("idle");
-        onClose();
-
-        if (onWhatsAppRedirect) {
-          onWhatsAppRedirect(e, fullWaUrl);
-        } else {
-          handleWhatsAppRedirect(e, fullWaUrl);
-        }
-      } else {
-        // No WhatsApp link configured — still success, just close
-        onClearCart();
-        setCheckoutState("success");
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setCheckoutState("error");
-      setCheckoutError("Network error. Please check your connection and try again.");
-    }
-  };
-
-  return (
-    <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 300, backdropFilter: "blur(4px)", animation: "sf-fade-in 0.2s" }} />
-      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "400px", maxWidth: "92vw", background: t.navBg, zIndex: 301, display: "flex", flexDirection: "column", boxShadow: "-8px 0 48px rgba(0,0,0,0.28)", borderLeft: `1px solid ${t.border}` }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 20px 16px", borderBottom: `1px solid ${t.border}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: t.accent, color: t.accentText, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }}>
-              <ShoppingBagIcon />
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: "16px", fontWeight: 900, color: t.textPrimary }}>Your Cart</p>
-              <p style={{ margin: 0, fontSize: "11px", color: t.textSecondary }}>{totalQuantity} {totalQuantity === 1 ? "item selected" : "items selected"}</p>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ width: "32px", height: "32px", borderRadius: "8px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><XIcon /></button>
-        </div>
-
-        {/* Cart Items */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          {cart.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "56px 16px", color: t.textSecondary }}>
-              <div style={{ fontSize: "40px", marginBottom: "12px" }}>🛒</div>
-              <p style={{ margin: "0 0 6px", fontSize: "15px", fontWeight: 800, color: t.textPrimary }}>Your cart is empty</p>
-              <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5 }}>Select products from the storefront to add them to your order.</p>
-            </div>
-          ) : (
-            cart.map((item) => (
-              <div key={item.cartItemKey || item.productId} style={{ display: "flex", alignItems: "flex-start", gap: "12px", background: t.card, padding: "12px", borderRadius: "14px", border: `1px solid ${t.border}` }}>
-                {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} style={{ width: "48px", height: "48px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }} />
-                ) : (
-                  <div style={{ width: "48px", height: "48px", borderRadius: "10px", background: t.pageBg, display: "flex", alignItems: "center", justifyContent: "center", color: t.textSecondary, flexShrink: 0 }}><PackageIcon /></div>
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 800, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</p>
-                  {/* Show selected variants */}
-                  {item.selectedVariants && item.selectedVariants.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "4px" }}>
-                      {item.selectedVariants.map(v => (
-                        <span key={v.label} style={{ fontSize: "10px", fontWeight: 700, color: t.accent, background: `${t.accent}14`, borderRadius: "4px", padding: "1px 6px" }}>
-                          {v.label}: {v.value}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <p style={{ margin: 0, fontSize: "13px", fontWeight: 900, color: t.accent }}>{formatPrice(item.price * item.quantity, currency)}</p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "4px", background: t.pageBg, borderRadius: "8px", padding: "4px 6px", border: `1px solid ${t.border}`, flexShrink: 0 }}>
-                  <button onClick={() => onUpdateQty(item.cartItemKey || item.productId, item.quantity - 1)} style={{ background: "none", border: "none", color: t.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px" }}><MinusIcon /></button>
-                  <span style={{ fontSize: "12px", fontWeight: 900, color: t.textPrimary, minWidth: "16px", textAlign: "center" }}>{item.quantity}</span>
-                  <button onClick={() => onUpdateQty(item.cartItemKey || item.productId, item.quantity + 1)} style={{ background: "none", border: "none", color: t.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px" }}><PlusIcon /></button>
-                </div>
-                <button onClick={() => onRemoveItem(item.cartItemKey || item.productId)} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "4px", flexShrink: 0 }} title="Remove item"><TrashIcon /></button>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Footer Checkout Section */}
-        {cart.length > 0 && (
-          <div style={{ padding: "16px 20px 20px", borderTop: `1px solid ${t.border}`, background: t.navBg, display: "flex", flexDirection: "column", gap: "12px" }}>
-            {/* Fulfillment Choice Segment Toggle */}
-            {allowPickup && (
-              <div style={{ display: "flex", background: t.pageBg, borderRadius: "12px", padding: "3px", border: `1px solid ${t.border}` }}>
-                {allowDelivery && (
-                  <button
-                    onClick={() => setFulfillmentMethod("delivery")}
-                    style={{
-                      flex: 1,
-                      padding: "8px 10px",
-                      borderRadius: "99px",
-                      border: "none",
-                      background: fulfillmentMethod === "delivery" ? t.card : "transparent",
-                      color: fulfillmentMethod === "delivery" ? t.textPrimary : t.textSecondary,
-                      fontWeight: 800,
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      boxShadow: fulfillmentMethod === "delivery" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    🚚 Delivery
-                  </button>
-                )}
-                <button
-                  onClick={() => setFulfillmentMethod("pickup")}
-                  style={{
-                    flex: 1,
-                    padding: "8px 10px",
-                    borderRadius: "99px",
-                    border: "none",
-                    background: fulfillmentMethod === "pickup" ? t.card : "transparent",
-                    color: fulfillmentMethod === "pickup" ? t.textPrimary : t.textSecondary,
-                    fontWeight: 800,
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    boxShadow: fulfillmentMethod === "pickup" ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
-                    transition: "all 0.15s"
-                  }}
-                >
-                  🏬 Store Pick-up
-                </button>
-              </div>
-            )}
-
-            {fulfillmentMethod === "delivery" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {/* Location Zone Dropdown */}
-                {deliveryModel === "zones" && deliveryZones.length > 0 && (
-                  <div>
-                    <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Select Delivery Zone / Area</label>
-                    <select
-                      value={selectedZoneIndex}
-                      onChange={(e) => setSelectedZoneIndex(Number(e.target.value))}
-                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit", fontWeight: 700, cursor: "pointer" }}
-                    >
-                      {deliveryZones.map((zone, i) => (
-                        <option key={i} value={i}>
-                          📍 {zone.name}{zone.areas ? ` (${zone.areas})` : ""} — {formatPrice(zone.fee, currency)} {zone.timeframe ? `· ${zone.timeframe}` : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {deliveryModel === "quote" && (
-                  <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary }}>
-                    ℹ️ <strong>Dispatch Quote:</strong> Delivery fee will be calculated upon order placement based on rider rates.
-                  </div>
-                )}
-
-                <div>
-                  <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Full Delivery Address *</label>
-                  
-                  {/* ── Saved address dropdown ──────────────────────────── */}
-                  <div style={{ position: "relative" }}>
-                    <input
-                      ref={addressInputRef}
-                      type="text"
-                      placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
-                      value={deliveryLocation}
-                      onChange={(e) => { handleAddressChange(e.target.value); setShowAddressDropdown(true); }}
-                      onFocus={() => { if (savedAddresses.length > 0) setShowAddressDropdown(true); }}
-                      onBlur={() => setTimeout(() => setShowAddressDropdown(false), 180)}
-                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
-                    />
-
-                    {/* Dropdown */}
-                    {showAddressDropdown && savedAddresses.length > 0 && (
-                      <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: t.navBg, border: `1px solid ${t.border}`, borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.14)", zIndex: 10, overflow: "hidden", maxHeight: "220px", overflowY: "auto" }}>
-                        <p style={{ padding: "8px 12px 4px", margin: 0, fontSize: "9px", fontWeight: 800, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em", borderBottom: `1px solid ${t.border}` }}>
-                          Recent addresses
-                        </p>
-                        {savedAddresses.map((entry, i) => {
-                          // Check if this entry's zone still exists on the current store
-                          const zoneStillValid = !entry.zoneName || deliveryZones.some(z =>
-                            (z.name || "").toLowerCase().trim() === (entry.zoneName || "").toLowerCase().trim()
-                          );
-                          return (
-                            <div
-                              key={i}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                // Apply address
-                                handleAddressChange(entry.address);
-                                // Pre-select zone if delivery model is zones and zone still valid
-                                if (deliveryModel === "zones" && entry.zoneName && zoneStillValid) {
-                                  const zoneIdx = deliveryZones.findIndex(z =>
-                                    (z.name || "").toLowerCase().trim() === (entry.zoneName || "").toLowerCase().trim()
-                                  );
-                                  if (zoneIdx !== -1) setSelectedZoneIndex(zoneIdx);
-                                }
-                                setShowAddressDropdown(false);
-                              }}
-                              style={{ padding: "10px 12px", cursor: "pointer", borderBottom: i < savedAddresses.length - 1 ? `1px solid ${t.border}` : "none", transition: "background 0.1s" }}
-                              onMouseEnter={e => e.currentTarget.style.background = `${t.accent}10`}
-                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                            >
-                              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {entry.label ? `🏷️ ${entry.label}` : "📍"} {entry.address}
-                                  </p>
-                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", flexWrap: "wrap" }}>
-                                    {entry.zoneName && (
-                                      <span style={{ fontSize: "10px", fontWeight: 700, color: zoneStillValid ? t.accent : "#f59e0b", background: zoneStillValid ? `${t.accent}14` : "#fef3c7", borderRadius: "4px", padding: "1px 6px" }}>
-                                        {zoneStillValid ? entry.zoneName : `⚠️ ${entry.zoneName} (zone changed)`}
-                                      </span>
-                                    )}
-                                    <span style={{ fontSize: "10px", color: t.textSecondary }}>{formatAddressTime(entry.usedAt)}</span>
-                                  </div>
-                                </div>
-                                {/* Remove button */}
-                                <button
-                                  onMouseDown={(e) => {
-                                    e.stopPropagation();
-                                    removeSavedAddress(slug, entry.address);
-                                    setSavedAddresses(prev => prev.filter((_, j) => j !== i));
-                                  }}
-                                  style={{ background: "none", border: "none", color: t.textSecondary, cursor: "pointer", fontSize: "14px", padding: "0 2px", flexShrink: 0, opacity: 0.5, lineHeight: 1 }}
-                                  title="Remove this address"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  {/* Auto-detected zone chip */}
-                  {deliveryModel === "zones" && deliveryLocation.trim().length >= 5 && (
-                    <div style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "8px", background: detectedZone?.confidence === "matched" ? `${t.accent}12` : "#fef3c7", border: `1px solid ${detectedZone?.confidence === "matched" ? `${t.accent}33` : "#fde68a"}` }}>
-                      <span style={{ fontSize: "14px" }}>{detectedZone?.confidence === "matched" ? "📍" : "⚠️"}</span>
-                      <div style={{ flex: 1 }}>
-                        {detectedZone?.confidence === "matched" ? (
-                          <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: t.textPrimary }}>
-                            Zone: <strong>{detectedZone.zoneName}</strong> — {formatPrice(activeDeliveryFee, currency)}
-                            {detectedZone.timeframe ? ` · ${detectedZone.timeframe}` : ""}
-                          </p>
-                        ) : (
-                          <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#92400e" }}>
-                            Area not matched — using: <strong>{detectedZone?.zoneName || "Default Zone"}</strong> ({formatPrice(activeDeliveryFee, currency)})
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {deliveryModel === "flat" && activeDeliveryFee > 0 && deliveryLocation.trim().length > 0 && (
-                    <p style={{ margin: "6px 0 0", fontSize: "11px", color: t.textSecondary, fontWeight: 600 }}>
-                      🚚 Flat delivery fee: {formatPrice(activeDeliveryFee, currency)}
-                    </p>
-                  )}
-                </div>
-
-                {!locationValidation.valid && (
-                  <div style={{
-                    padding: "10px 12px",
-                    borderRadius: "10px",
-                    background: locationValidation.reason === "empty_address" ? "#fef3c7" : "#fef2f2",
-                    border: `1px solid ${locationValidation.reason === "empty_address" ? "#fde68a" : "#fecaca"}`,
-                    fontSize: "12px",
-                    color: locationValidation.reason === "empty_address" ? "#92400e" : "#ef4444",
-                    fontWeight: 700,
-                    lineHeight: 1.4,
-                  }}>
-                    {locationValidation.message}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ padding: "10px 12px", borderRadius: "10px", background: `${t.accent}12`, border: `1px solid ${t.accent}33`, fontSize: "12px", color: t.textPrimary, display: "flex", flexDirection: "column", gap: "4px" }}>
-                <p style={{ margin: 0, fontWeight: 800, color: t.accent }}>🏬 Store Pick-up Selected</p>
-                <p style={{ margin: 0, opacity: 0.85 }}>
-                  <strong>Address:</strong> {store.fulfillmentSettings?.pickupAddress || store.liveLocation || "Contact seller for address"}
-                </p>
-                {store.fulfillmentSettings?.pickupInstructions && (
-                  <p style={{ margin: "2px 0 0", opacity: 0.65, fontSize: "11px" }}>
-                    ℹ️ {store.fulfillmentSettings.pickupInstructions}
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "2px" }}>
-              <div>
-                <span style={{ fontSize: "13px", fontWeight: 700, color: t.textSecondary }}>
-                  {fulfillmentMethod === "pickup" ? "Total (Pick-up FREE)" : "Total Order Amount"}
-                </span>
-                {fulfillmentMethod === "delivery" && activeDeliveryFee > 0 && (
-                  <p style={{ margin: 0, fontSize: "11px", color: t.accent, fontWeight: 700 }}>
-                    Products: {formatPrice(totalPrice, currency)} + Delivery: {formatPrice(activeDeliveryFee, currency)}
-                  </p>
-                )}
-                {fulfillmentMethod === "delivery" && deliveryModel === "quote" && (
-                  <p style={{ margin: 0, fontSize: "11px", color: t.textSecondary, fontWeight: 600 }}>
-                    + Delivery fee to be confirmed
-                  </p>
-                )}
-              </div>
-              <span style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary }}>{formatPrice(grandTotal, currency)}</span>
-            </div>
-
-            {checkoutError && (
-              <div style={{ padding: "10px 12px", borderRadius: "10px", background: "#fef2f2", border: "1px solid #fecaca", fontSize: "12px", color: "#ef4444", fontWeight: 700 }}>
-                {checkoutError}
-              </div>
-            )}
-
-            <button
-              onClick={handleConfirmOrder}
-              disabled={!canCheckout}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                padding: "14px",
-                borderRadius: "12px",
-                background: canCheckout ? "#25d366" : t.border,
-                color: canCheckout ? "#fff" : t.textSecondary,
-                fontWeight: 900,
-                fontSize: "15px",
-                border: "none",
-                cursor: canCheckout ? "pointer" : "not-allowed",
-                opacity: canCheckout ? 1 : 0.6,
-                boxShadow: canCheckout ? "0 6px 20px rgba(37, 211, 102, 0.35)" : "none",
-              }}
-            >
-              {checkoutState === "loading"
-                ? <><div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} /> Confirming order…</>
-                : <><WhatsAppIcon /> Confirm Order ({totalQuantity})</>
-              }
-            </button>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-/* ── Side menu drawer ───────────────────────────────────── */
-function SideMenu({ open, onClose, store, categories, activeCategory, onCategoryChange, theme, search, onSearchChange, slug, onWhatsAppRedirect }) {
-  const t = theme;
-  if (!open) return null;
-  return (
-    <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(4px)", animation: "sf-fade-in 0.2s" }} />
-      <div style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: "290px", maxWidth: "88vw", background: t.navBg, zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "8px 0 48px rgba(0,0,0,0.25)", overflowY: "auto", borderRight: `1px solid ${t.border}` }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 18px 16px", borderBottom: `1px solid ${t.border}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {store.logoUrl ? (
-              <img src={store.logoUrl} alt={store.businessName} style={{ width: "34px", height: "34px", borderRadius: "8px", objectFit: "cover" }} />
-            ) : (
-              <div style={{ width: "34px", height: "34px", borderRadius: "8px", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center", color: t.accentText, fontWeight: 900, fontSize: "16px", flexShrink: 0 }}>
-                {store.businessName?.charAt(0)?.toUpperCase()}
-              </div>
-            )}
-            <p style={{ margin: 0, fontSize: "15px", fontWeight: 900, color: t.textPrimary }}>{store.businessName}</p>
-          </div>
-          <button onClick={onClose} style={{ width: "30px", height: "30px", borderRadius: "8px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><XIcon /></button>
-        </div>
-
-        <div style={{ padding: "14px 16px", borderBottom: `1px solid ${t.border}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: t.pageBg, borderRadius: "10px", padding: "9px 12px", border: `1px solid ${t.border}` }}>
-            <span style={{ color: t.textSecondary, flexShrink: 0 }}><SearchIcon /></span>
-            <input value={search} onChange={e => onSearchChange(e.target.value)} placeholder="Search products…" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
-          </div>
-        </div>
-
-        {categories.length > 0 && (
-          <div style={{ padding: "16px", borderBottom: `1px solid ${t.border}` }}>
-            <p style={{ margin: "0 0 10px", fontSize: "10px", fontWeight: 900, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em" }}>Categories</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-              {["all", ...categories].map(cat => {
-                const isActive = activeCategory === cat;
-                return (
-                  <button key={cat} onClick={() => { onCategoryChange(cat); onClose(); }}
-                    style={{ padding: "9px 12px", borderRadius: "8px", border: "none", background: isActive ? t.accent : "transparent", color: isActive ? t.accentText : t.textPrimary, fontSize: "13px", fontWeight: isActive ? 800 : 600, cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}>
-                    {cat === "all" ? "All Products" : cat}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
-          {store.workingHours && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textSecondary }}>
-              <ClockIcon />{store.workingHours}
-            </div>
-          )}
-          {store.liveLocation && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textSecondary }}>
-              <MapPinIcon />{store.liveLocation}
-            </div>
-          )}
-        </div>
-
-        {store.whatsappHref && (
-          <div style={{ padding: "0 16px 20px", marginTop: "auto" }}>
-            <a href={store.whatsappHref} onClick={(e) => onWhatsAppRedirect ? onWhatsAppRedirect(e, store.whatsappHref) : handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 16px rgba(37,211,102,0.3)" }}>
-              <WhatsAppIcon /> Chat on WhatsApp
-            </a>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-/* ── Product Card Component ─────────────────────────────── */
+/* â”€â”€ Product Card Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function ProductCard({ product, store, slug, sessionToken, theme, highlighted, index = 0, cartQuantity = 0, onUpdateQty, onAddToCart }) {
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -992,7 +397,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             )}
 
             {product.stock === 0 && <div style={{ position: "absolute", top: "8px", left: "8px", background: "rgba(15, 15, 19, 0.88)", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, letterSpacing: "0.06em", backdropFilter: "blur(4px)" }}>SOLD OUT</div>}
-            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>🤖 AI Pick</div>}
+            {highlighted && <div style={{ position: "absolute", top: "8px", left: "8px", background: t.accent, color: t.accentText, padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900 }}>ðŸ¤– AI Pick</div>}
             {hasDiscount && !highlighted && product.stock > 0 && cartQuantity === 0 && (
               <div style={{ position: "absolute", top: "8px", left: "8px", background: "#ef4444", color: "#fff", padding: "3px 8px", borderRadius: "6px", fontSize: "9px", fontWeight: 900, boxShadow: "0 2px 8px rgba(239,68,68,0.3)" }}>
                 -{discountPercent}% OFF
@@ -1012,7 +417,7 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
             <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "2px" }}>
               {product.variants.map(v => (
                 <span key={v.label} style={{ fontSize: "9px", fontWeight: 700, color: t.textSecondary, background: t.pageBg, border: `1px solid ${t.border}`, borderRadius: "4px", padding: "2px 5px" }}>
-                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ? "…" : ""}
+                  {v.label}: {v.options.slice(0, 3).map(o => o.value).join(", ")}{v.options.length > 3 ? "â€¦" : ""}
                 </span>
               ))}
             </div>
@@ -1050,9 +455,9 @@ function ProductCard({ product, store, slug, sessionToken, theme, highlighted, i
   );
 }
 
-/* ══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN: StorefrontPage
-══════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 export default function StorefrontPage({
   store,
   initialProducts = [],
@@ -1064,7 +469,7 @@ export default function StorefrontPage({
   sessionToken,
   referredProductId,
   initialSearch = "",
-  initialOrderCode = "",   // ?order=CODE — pre-fills cart from an existing DB order for editing
+  initialOrderCode = "",   // ?order=CODE â€” pre-fills cart from an existing DB order for editing
 }) {
   const theme = getTheme(store.storeTheme);
   const t = theme;
@@ -1089,10 +494,9 @@ export default function StorefrontPage({
   const [activeCategory, setActiveCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [highlightedProductId, setHighlightedProductId] = useState(referredProductId || null);
   const [loadingPage, setLoadingPage] = useState(false);
-  // Skip the initial-mount guard when a search query was pre-seeded from the URL —
+  // Skip the initial-mount guard when a search query was pre-seeded from the URL â€”
   // we need the useEffect to fire on first render to fetch the filtered products.
   const [isInitialMount, setIsInitialMount] = useState(!initialSearch);
   const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
@@ -1136,8 +540,11 @@ export default function StorefrontPage({
               item.selectedVariants || []
             );
           });
-          // Open cart drawer after a short delay so the customer sees the pre-filled cart
-          setTimeout(() => setCartDrawerOpen(true), 400);
+          // Redirect to cart page after pre-fill so the customer sees the dedicated checkout flow
+          setTimeout(() => {
+            const cartUrl = `/store/${slug}/cart${sessionToken ? `?session=${encodeURIComponent(sessionToken)}` : ""}`;
+            window.location.href = cartUrl;
+          }, 400);
         }
       })
       .catch(() => { });
@@ -1160,7 +567,7 @@ export default function StorefrontPage({
   useEffect(() => {
     const hasActiveFilter = search.trim() !== "" || activeCategory !== "all" || currentPage !== 1;
 
-    // If no filter is active and we already have server-rendered products, skip —
+    // If no filter is active and we already have server-rendered products, skip â€”
     // avoids a redundant network call on page load.
     if (!hasActiveFilter && initialProducts.length > 0 && !initialSearch) {
       return;
@@ -1208,7 +615,7 @@ export default function StorefrontPage({
       {isPreview && <OwnerBanner slug={slug} />}
       <div style={{ minHeight: "100vh", background: t.pageBg, fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
 
-        {/* ── DESKTOP & MOBILE HEADER BAR ────────────────────── */}
+        {/* â”€â”€ DESKTOP & MOBILE HEADER BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <nav className="sf-top-navbar" style={{
           background: `${t.navBg}f5`,
           backdropFilter: "blur(12px)",
@@ -1228,8 +635,8 @@ export default function StorefrontPage({
 
             {/* Right: Cart Button & Desktop WhatsApp Link */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <button
-                onClick={() => setCartDrawerOpen(true)}
+              <a
+                href={`/store/${slug}/cart${sessionToken ? `?session=${encodeURIComponent(sessionToken)}` : ""}`}
                 style={{
                   position: "relative",
                   display: "flex",
@@ -1242,7 +649,8 @@ export default function StorefrontPage({
                   color: cartState.totalQuantity > 0 ? t.accentText : t.textPrimary,
                   cursor: "pointer",
                   fontSize: "12px",
-                  fontWeight: 800
+                  fontWeight: 800,
+                  textDecoration: "none",
                 }}
               >
                 <ShoppingBagIcon />
@@ -1252,12 +660,12 @@ export default function StorefrontPage({
                     {cartState.totalQuantity}
                   </span>
                 )}
-              </button>
+              </a>
             </div>
           </div>
         </nav>
 
-        {/* ── PROMO ANNOUNCEMENT BANNER ────────────────
+        {/* â”€â”€ PROMO ANNOUNCEMENT BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         {store.promoAnnouncement?.enabled && store.promoAnnouncement?.text && (
           <div style={{
             background: "linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
@@ -1287,30 +695,13 @@ export default function StorefrontPage({
           </div>
         )} */}
 
-        {/* ── SIDE MENU ────────────────────────────────── */}
+        {/* â”€â”€ SIDE MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} store={store} categories={categoriesList} activeCategory={activeCategory} onCategoryChange={handleCategoryChange} theme={t} search={search} onSearchChange={handleSearchChange} slug={slug} onWhatsAppRedirect={openWhatsApp} />
 
-        {/* ── CART DRAWER ──────────────────────────────── */}
-        <CartDrawer
-          open={cartDrawerOpen}
-          onClose={() => setCartDrawerOpen(false)}
-          cart={cartState.cart}
-          totalQuantity={cartState.totalQuantity}
-          totalPrice={cartState.totalPrice}
-          onUpdateQty={(id, q) => cartState.setItemQuantity(id, q)}
-          onRemoveItem={(id) => cartState.removeItem(id)}
-          onClearCart={() => cartState.clear()}
-          store={store}
-          slug={slug}
-          sessionToken={sessionToken}
-          theme={t}
-          onWhatsAppRedirect={openWhatsApp}
-        />
-
-        {/* ── MAIN CONTENT ─────────────────────────────── */}
+        {/* â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <main style={{ maxWidth: "1140px", margin: "0 auto", padding: "16px 16px 88px", position: "relative" }}>
 
-          {/* ── COMPACT STORE HERO BANNER ──────────────── */}
+          {/* â”€â”€ COMPACT STORE HERO BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div style={{
             background: t.card,
             borderRadius: "18px",
@@ -1336,7 +727,7 @@ export default function StorefrontPage({
                   <h1 style={{ margin: 0, fontSize: "17px", fontWeight: 900, color: t.textPrimary, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {store.businessName}
                   </h1>
-                  <span style={{ background: "#22c55e18", color: "#16a34a", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, whiteSpace: "nowrap" }}>✓ Verified</span>
+                  <span style={{ background: "#22c55e18", color: "#16a34a", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, whiteSpace: "nowrap" }}>âœ“ Verified</span>
                 </div>
                 {store.businessDescription && (
                   <p style={{ margin: "2px 0 4px", fontSize: "12px", color: t.textSecondary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -1344,13 +735,13 @@ export default function StorefrontPage({
                   </p>
                 )}
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "11px", color: t.textSecondary }}>
-                  {store.liveLocation && <span>📍 {store.liveLocation}</span>}
-                  <span>📦 {totalProducts} Products</span>
+                  {store.liveLocation && <span>ðŸ“ {store.liveLocation}</span>}
+                  <span>ðŸ“¦ {totalProducts} Products</span>
                 </div>
               </div>
             </div>
 
-            {/* Desktop Hero CTA — removed direct WhatsApp order button, cart is the order path */}
+            {/* Desktop Hero CTA â€” removed direct WhatsApp order button, cart is the order path */}
           </div>
 
           {/* Search bar + category selector */}
@@ -1360,8 +751,8 @@ export default function StorefrontPage({
               <span style={{ color: t.textSecondary, flexShrink: 0 }}>
                 {loadingPage ? <div style={{ width: "14px", height: "14px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} /> : <SearchIcon />}
               </span>
-              <input id="sf-search-input" value={search} onChange={e => handleSearchChange(e.target.value)} placeholder="Search store products…" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
-              {search && <button onClick={() => handleSearchChange("")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "16px", lineHeight: 1, padding: 0 }}>×</button>}
+              <input id="sf-search-input" value={search} onChange={e => handleSearchChange(e.target.value)} placeholder="Search store productsâ€¦" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
+              {search && <button onClick={() => handleSearchChange("")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textSecondary, fontSize: "16px", lineHeight: 1, padding: 0 }}>Ã—</button>}
             </div>
 
             {/* Mobile Category Dropdown Select (< 640px) */}
@@ -1417,7 +808,7 @@ export default function StorefrontPage({
           {loadingPage && productsList.length > 0 && (
             <div style={{ padding: "12px 0", textAlign: "center", fontSize: "13px", color: t.textSecondary, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               <div style={{ width: "16px", height: "16px", border: `2px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
-              Updating products…
+              Updating productsâ€¦
             </div>
           )}
 
@@ -1425,7 +816,7 @@ export default function StorefrontPage({
           {loadingPage && productsList.length === 0 ? (
             <div style={{ padding: "64px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", background: t.card, borderRadius: "18px", border: `1px solid ${t.border}` }}>
               <div style={{ width: "32px", height: "32px", border: `3px solid ${t.border}`, borderTopColor: t.accent, borderRadius: "50%", animation: "sf-spin 0.7s linear infinite" }} />
-              <span style={{ fontSize: "14px", color: t.textSecondary, fontWeight: 700 }}>Loading store products…</span>
+              <span style={{ fontSize: "14px", color: t.textSecondary, fontWeight: 700 }}>Loading store productsâ€¦</span>
             </div>
           ) : productsList.length > 0 ? (
             <>
@@ -1457,11 +848,11 @@ export default function StorefrontPage({
                 ))}
               </div>
 
-              {/* ── PAGINATION CONTROLS ──────────────────────── */}
+              {/* â”€â”€ PAGINATION CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
               {totalPages > 1 && (
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "14px", marginTop: "32px", paddingTop: "20px", borderTop: `1px solid ${t.border}` }}>
                   <p style={{ margin: 0, fontSize: "13px", color: t.textSecondary }}>
-                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * 20 + 1}</strong>–<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * 20, totalProducts)}</strong> of <strong style={{ color: t.textPrimary }}>{totalProducts}</strong> products
+                    Showing <strong style={{ color: t.textPrimary }}>{(currentPage - 1) * 20 + 1}</strong>â€“<strong style={{ color: t.textPrimary }}>{Math.min(currentPage * 20, totalProducts)}</strong> of <strong style={{ color: t.textPrimary }}>{totalProducts}</strong> products
                   </p>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1528,7 +919,7 @@ export default function StorefrontPage({
             </>
           ) : (
             <div style={{ textAlign: "center", padding: "64px 20px", background: t.card, borderRadius: "18px", border: `1px dashed ${t.border}` }}>
-              <div style={{ fontSize: "44px", marginBottom: "14px" }}>📦</div>
+              <div style={{ fontSize: "44px", marginBottom: "14px" }}>ðŸ“¦</div>
               <h3 style={{ fontSize: "18px", fontWeight: 900, color: t.textPrimary, margin: "0 0 8px" }}>{search ? "No products match your search" : "No products yet"}</h3>
               <p style={{ fontSize: "13px", color: t.textSecondary, margin: "0 0 24px" }}>{search ? "Try searching for a different item or select another category." : "This store hasn't published any products yet."}</p>
               {search && <button onClick={() => { handleSearchChange(""); handleCategoryChange("all"); }} style={{ padding: "10px 24px", borderRadius: "10px", background: t.accent, color: t.accentText, fontWeight: 800, border: "none", cursor: "pointer", fontSize: "13px" }}>Clear search</button>}
@@ -1536,7 +927,7 @@ export default function StorefrontPage({
           )}
         </main>
 
-        {/* ── MOBILE STICKY BOTTOM APP NAVIGATION BAR ────────── */}
+        {/* â”€â”€ MOBILE STICKY BOTTOM APP NAVIGATION BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="sf-mobile-bottom-bar" style={{
           position: "fixed",
           bottom: 0,
@@ -1560,7 +951,7 @@ export default function StorefrontPage({
 
           {/* Store Tab */}
           <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", color: t.accent, cursor: "pointer", fontSize: "10px", fontWeight: 800 }}>
-            <span style={{ fontSize: "18px", lineHeight: 1 }}>🏪</span>
+            <span style={{ fontSize: "18px", lineHeight: 1 }}>ðŸª</span>
             <span>Store</span>
           </button>
 
@@ -1571,7 +962,7 @@ export default function StorefrontPage({
           </button>
 
           {/* Cart Tab */}
-          <button onClick={() => setCartDrawerOpen(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", color: t.textSecondary, cursor: "pointer", fontSize: "10px", fontWeight: 700, position: "relative" }}>
+          <a href={`/store/${slug}/cart${sessionToken ? `?session=${encodeURIComponent(sessionToken)}` : ""}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", color: t.textSecondary, textDecoration: "none", fontSize: "10px", fontWeight: 700, position: "relative" }}>
             <ShoppingBagIcon />
             <span>Cart</span>
             {cartState.totalQuantity > 0 && (
@@ -1579,7 +970,7 @@ export default function StorefrontPage({
                 {cartState.totalQuantity}
               </span>
             )}
-          </button>
+          </a>
 
           {/* WhatsApp Chat Tab */}
           {store.whatsappHref && (
@@ -1590,7 +981,7 @@ export default function StorefrontPage({
           )}
         </div>
 
-        {/* ── PAX26 AD FOOTER ──────────────────────────── */}
+        {/* â”€â”€ PAX26 AD FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Pax26Footer />
 
         <WhatsAppChooserModal

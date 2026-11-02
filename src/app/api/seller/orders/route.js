@@ -79,10 +79,13 @@ export async function POST(req) {
             await sendSalesNotification(userId, {
                 orderId: newOrder._id.toString(),
                 customerName: newOrder.customerName || newOrder.customerPhone,
+                customerPhone: newOrder.customerPhone || "",
+                customerPhone2: newOrder.customerPhone2 || "",
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 deliveryFee: newOrder.deliveryFee,
                 deliveryLocation: newOrder.deliveryLocation || newOrder.deliveryAddress || "",
+                additionalInfo: newOrder.additionalInfo || "",
                 isConfirmed: true,
             });
         } else {
@@ -90,10 +93,13 @@ export async function POST(req) {
             await sendSalesNotification(userId, {
                 orderId: newOrder._id.toString(),
                 customerName: newOrder.customerName || newOrder.customerPhone,
+                customerPhone: newOrder.customerPhone || "",
+                customerPhone2: newOrder.customerPhone2 || "",
                 productName: productSummary,
                 amountPaid: newOrder.totalPrice,
                 deliveryFee: newOrder.deliveryFee,
                 deliveryLocation: newOrder.deliveryLocation || newOrder.deliveryAddress || "",
+                additionalInfo: newOrder.additionalInfo || "",
                 isConfirmed: false,
             });
         }

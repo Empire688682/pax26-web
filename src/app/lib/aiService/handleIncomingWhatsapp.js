@@ -881,6 +881,24 @@ export const handleIncomingWhatsApp = async (payload) => {
     const orderCode = orderConfirmMatch?.[1] || orderConfirmMatch?.[2] || orderConfirmMatch?.[3];
 
     if (orderCode) {
+      // ── Auto-handback: storefront orders bypass any handoff ───────────────
+      // A customer placing a real order is a confirmed buyer — never block them.
+      // Lift the handoff silently before processing the order.
+      if (session.handoff?.isHandedOff) {
+        console.log(`[storefront_order] 🔄 Auto-resuming handoff for ${visitorPhone} — storefront order detected (#${orderCode})`);
+        await SessionModel.findByIdAndUpdate(session._id, {
+          $set: {
+            status: "active",
+            "handoff.isHandedOff": false,
+            "handoff.reason": null,
+            "handoff.resumedAt": new Date(),
+            "handoff.resumedBy": "storefront_order",
+            "handoff.autoResumeAt": null,
+          },
+        });
+        session.handoff = { ...session.handoff, isHandedOff: false };
+      }
+
       try {
         const { connectDb } = await import("@/app/ults/db/ConnectDb.js");
         const SellerOrderModel = (await import("@/app/ults/models/SellerOrderModel.js")).default;
@@ -1133,11 +1151,19 @@ ${editLink}`;
     !session.handoff?.isHandedOff
   ) {
     const threshold = sellerProfile.spamThreshold || 10;
-    const sessionInboundCount = session.context?.inboundCount || 0;
+
+    // ── Re-read the CURRENT inbound count from DB (not the stale in-memory value).
+    // The session object was loaded at the start of the request BEFORE the $inc
+    // ran at Steps 5/6, so session.context.inboundCount is always one behind.
+    // Reading fresh from DB ensures the threshold is evaluated correctly.
+    const freshSession = await SessionModel.findById(session._id).select("context.inboundCount").lean();
+    const sessionInboundCount = freshSession?.context?.inboundCount || session.context?.inboundCount || 0;
+
+    console.log(`[spam_check] inboundCount=${sessionInboundCount} threshold=${threshold} session=${session.sessionId}`);
 
     if (sessionInboundCount >= threshold) {
-      // Check if any message in this session shows buying intent
-      const BUYING_INTENT = /buy|order|price|cost|how much|delivery|pay|purchase|want|interested|available|stock|send me|i need|i want/i;
+      // Tightened buying intent — requires explicit purchase signals, not casual conversation words
+      const BUYING_INTENT = /\b(buy|order|place.?order|i want to buy|i want to order|how much|price|cost|delivery fee|pay|payment|purchase|add to cart|checkout|confirm.?order|i need this|send.?me|i.?ll take)\b/i;
 
       const recentForSpam = await AIMessageModel.find({
         sessionId: session.sessionId,
@@ -1185,10 +1211,11 @@ ${editLink}`;
         });
 
         // ── Notify the seller on mobile ───────────────────────────────────
+        const spamContactName = existingContact?.name || visitorPhone;
         sendMobilePush(user._id, {
           type: "escalation",
-          title: "💬 Chat Threshold Reached",
-          body: `${visitorPhone} sent ${sessionInboundCount} messages with no purchase intent. AI is paused for 24 hours — tap to review or resume manually.`,
+          title: "💬 Chat Limit Reached — AI Paused",
+          body: `${spamContactName} sent ${sessionInboundCount} messages with no purchase intent. AI paused 24h. Open inbox to resume if needed.`,
           data: {
             sessionId: session.sessionId,
             phone: visitorPhone,
