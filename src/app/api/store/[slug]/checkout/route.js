@@ -230,19 +230,27 @@ export async function POST(req, { params }) {
     let orderCode = "";
     for (let i = 0; i < 8; i++) orderCode += chars.charAt(Math.floor(Math.random() * chars.length));
 
-    // ── Cancel any existing awaiting_payment order for this phone+seller ─────
-    if (formattedPhone) {
+    // ── Cancel any existing awaiting_payment orders for this customer ────────
+    // Match by customerPhone (delivery form phone) OR whatsappPhone (Meta identity)
+    // to catch all variations — customer using same or different phones across orders.
+    const cancelConditions = [];
+    if (formattedPhone) cancelConditions.push({ customerPhone: formattedPhone });
+    // sessionToken can also carry the WhatsApp phone — we don't have it at this point
+    // so just matching by delivery phone is sufficient here; the TTL handles orphans.
+    if (cancelConditions.length > 0) {
       const cancelResult = await SellerOrderModel.updateMany(
-        { sellerId: profile._id, customerPhone: formattedPhone, status: "awaiting_payment" },
-        { $set: { status: "cancelled" } }
+        { sellerId: profile._id, $or: cancelConditions, status: "awaiting_payment" },
+        { $set: { status: "cancelled", awaitingPaymentExpiresAt: null } }
       );
       if (cancelResult.modifiedCount > 0) {
-        console.log(`[checkout] 🗑️ Cancelled ${cancelResult.modifiedCount} existing awaiting_payment order(s) for ${formattedPhone}`);
+        console.log(`[checkout] 🗑️ Cancelled ${cancelResult.modifiedCount} existing awaiting_payment order(s)`);
       }
     }
 
     // ── Create the order ──────────────────────────────────────────────────────
     console.log(`[checkout] 💾 Creating order #${orderCode} in DB...`);
+
+    const AWAITING_PAYMENT_TTL_HOURS = 48;
 
     const order = await SellerOrderModel.create({
       sellerId: profile._id,
@@ -262,6 +270,8 @@ export async function POST(req, { params }) {
       pickupDetails: fulfillmentMethod === "pickup" ? (pickupDetails || "") : "",
       additionalInfo: additionalInfo || "",
       status: "awaiting_payment",
+      // TTL: auto-delete this order if it stays awaiting_payment for 48 hours
+      awaitingPaymentExpiresAt: new Date(Date.now() + AWAITING_PAYMENT_TTL_HOURS * 60 * 60 * 1000),
       orderCode,
       orderSource: "storefront",
     });

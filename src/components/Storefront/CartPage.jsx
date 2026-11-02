@@ -179,8 +179,7 @@ function ProductCard({ product, t, slug, currency }) {
 }
 
 /* ── Order Summary sidebar (desktop only) ───────────────────────── */
-function OrderSummary({ cart, totalPrice, activeDeliveryFee, deliveryModel, t, currency }) {
-  const grandTotal = totalPrice + activeDeliveryFee;
+function OrderSummary({ cart, totalPrice, t, currency }) {
   return (
     <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: "20px", padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
       <p style={{ margin: 0, fontSize: "15px", fontWeight: 800, color: t.textPrimary }}>Order Summary</p>
@@ -194,18 +193,16 @@ function OrderSummary({ cart, totalPrice, activeDeliveryFee, deliveryModel, t, c
       </div>
       <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-          <span style={{ color: t.textSecondary }}>Subtotal</span>
+          <span style={{ color: t.textSecondary }}>Products Total</span>
           <span style={{ color: t.textPrimary, fontWeight: 600 }}>{fmtN(totalPrice, currency)}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
-          <span style={{ color: t.textSecondary }}>Delivery</span>
-          <span style={{ color: t.textPrimary, fontWeight: 600 }}>
-            {deliveryModel === "quote" ? "Quoted on WhatsApp" : activeDeliveryFee > 0 ? fmtN(activeDeliveryFee, currency) : "Free"}
-          </span>
+          <span style={{ color: t.textSecondary }}>Delivery fee</span>
+          <span style={{ color: t.textSecondary, fontStyle: "italic", fontSize: "12px" }}>Calculated at next step</span>
         </div>
         <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: "10px", display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: 800 }}>
-          <span style={{ color: t.textPrimary }}>Total</span>
-          <span style={{ color: t.accent }}>{fmtN(grandTotal, currency)}</span>
+          <span style={{ color: t.textPrimary }}>Products Total</span>
+          <span style={{ color: t.accent }}>{fmtN(totalPrice, currency)}</span>
         </div>
       </div>
     </div>
@@ -231,9 +228,9 @@ export default function CartPage({ store, topProducts, slug, sessionToken }) {
   const deliveryZones = store.fulfillmentSettings?.deliveryZones || [];
   const flatDeliveryFee = Number(store.fulfillmentSettings?.flatDeliveryFee) || 0;
 
-  // Simple delivery fee estimate for summary (actual fee confirmed in address stage)
-  const maxProductFee = cart.length > 0 ? Math.max(0, ...cart.map(i => Number(i.deliveryFee) || 0)) : 0;
-  const estimatedFee = deliveryModel === "quote" ? 0 : deliveryModel === "zones" ? 0 : Math.max(flatDeliveryFee, maxProductFee);
+  // Cart stage: never show a delivery fee estimate — customer hasn't selected their location yet.
+  // Delivery fee is confirmed only in the Address stage after zone/location is chosen.
+  const grandTotal = totalPrice; // products subtotal only at cart stage
 
   const handleCheckout = () => {
     if (!cart.length) return;
@@ -332,7 +329,7 @@ export default function CartPage({ store, topProducts, slug, sessionToken }) {
           <div className="cp-layout">
 
             {/* ── LEFT / MAIN: cart items ──────────────────────── */}
-            <div style={{ padding: "0 0 120px" }}>
+            <div style={{ padding: "0 0 80px" }}>
 
               {cart.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "80px 24px", color: t.textSecondary }}>
@@ -416,6 +413,45 @@ export default function CartPage({ store, topProducts, slug, sessionToken }) {
                     </div>
                   </div>
 
+                  {/* ── Inline checkout summary (right after cart items) ── */}
+                  <div style={{ padding: "0 16px 16px" }}>
+                    <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {/* Subtotal row */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "13px", color: t.textSecondary }}>Subtotal ({cart.reduce((s, i) => s + i.quantity, 0)} items)</span>
+                        <span style={{ fontSize: "15px", fontWeight: 800, color: t.textPrimary }}>{fmtN(totalPrice, currency)}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "13px", color: t.textSecondary }}>Delivery fee</span>
+                        <span style={{ fontSize: "12px", fontWeight: 600, color: t.textSecondary, fontStyle: "italic" }}>Calculated at next step</span>
+                      </div>
+                      <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 800, color: t.textPrimary }}>Products Total</span>
+                        <span style={{ fontSize: "18px", fontWeight: 900, color: t.accent }}>{fmtN(grandTotal, currency)}</span>
+                      </div>
+                      {/* Checkout + Call row */}
+                      <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
+                        {showCallBtn && (
+                          <a
+                            href={`tel:${store.callNumber}`}
+                            style={{ width: "52px", height: "52px", flexShrink: 0, borderRadius: "14px", background: `${t.accent}14`, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: t.accent, textDecoration: "none" }}
+                            title={`Call ${store.businessName}`}
+                          >
+                            <PhoneIcon />
+                          </a>
+                        )}
+                        <button
+                          onClick={handleCheckout}
+                          disabled={!canCheckout}
+                          className="cp-btn"
+                          style={{ flex: 1, height: "52px", borderRadius: "14px", border: "none", background: canCheckout ? "#25d366" : t.border, color: canCheckout ? "#fff" : t.textSecondary, fontWeight: 800, fontSize: "15px", cursor: canCheckout ? "pointer" : "not-allowed", boxShadow: canCheckout ? "0 6px 20px rgba(37,211,102,0.35)" : "none" }}
+                        >
+                          Checkout
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Top products section */}
                   {topProducts?.length > 0 && (
                     <div style={{ padding: "24px 16px 16px" }}>
@@ -438,8 +474,6 @@ export default function CartPage({ store, topProducts, slug, sessionToken }) {
               <OrderSummary
                 cart={cart}
                 totalPrice={totalPrice}
-                activeDeliveryFee={estimatedFee}
-                deliveryModel={deliveryModel}
                 t={t}
                 currency={currency}
               />

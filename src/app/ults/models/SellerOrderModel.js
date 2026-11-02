@@ -25,6 +25,15 @@ const SellerOrderSchema = new mongoose.Schema({
         default: "",
     },
 
+    // WhatsApp inbound phone — the Meta/WhatsApp number the customer used to contact the store.
+    // This is the account identity key for lookups, push, and leadStage updates.
+    // It is SEPARATE from customerPhone (the delivery/contact number from the storefront form).
+    whatsappPhone: {
+        type: String,
+        default: "",
+        index: true,
+    },
+
     customerName: String,
 
     quantity: {
@@ -91,6 +100,17 @@ const SellerOrderSchema = new mongoose.Schema({
     additionalInfo: {
         type: String,
         default: "",
+    },
+
+    // ── TTL for abandoned awaiting_payment orders ─────────────
+    // Set to 48 hours after creation for awaiting_payment orders only.
+    // MongoDB TTL index auto-deletes the document when this date is reached.
+    // For ALL other statuses (pending, confirmed, paid, delivered, cancelled)
+    // this field is null — TTL index ignores null, so they are never auto-deleted.
+    awaitingPaymentExpiresAt: {
+        type: Date,
+        default: null,
+        index: { expireAfterSeconds: 0 }, // MongoDB TTL — deletes doc when this date passes
     },
 
     paymentReceiptUrl: String,

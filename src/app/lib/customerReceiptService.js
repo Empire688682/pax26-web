@@ -6,6 +6,19 @@ import AIMessageModel from "@/app/ults/models/AIMessageModel";
 import { sendWhatsAppAutomationReply } from "@/app/api/helper/WhatsAppAutomationReply";
 
 /**
+ * Resolve the correct WhatsApp number to send a message to.
+ *
+ * RULE:
+ *   - whatsappPhone = Meta inbound number (the customer's actual WhatsApp) → ALWAYS use this for messaging
+ *   - customerPhone  = storefront delivery form phone → shown to the SELLER only (for delivery logistics)
+ *
+ * We fall back to customerPhone ONLY if whatsappPhone was never set (very old legacy orders).
+ */
+function resolveWaPhone(order) {
+    return (order.whatsappPhone || "").trim() || (order.customerPhone || "").trim() || "";
+}
+
+/**
  * Sends a branded WhatsApp payment receipt to the customer when an order is confirmed.
  */
 export async function sendCustomerOrderReceiptWhatsApp(orderId) {
@@ -14,9 +27,10 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
             .lean();
 
-        if (!order || !order.customerPhone) {
-            console.warn(`[customerReceipt] Order ${orderId} not found or missing customer phone.`);
-            return { success: false, message: "Order or customer phone missing" };
+        const waPhone = resolveWaPhone(order);
+        if (!order || !waPhone) {
+            console.warn(`[customerReceipt] Order ${orderId} not found or no WhatsApp phone available.`);
+            return { success: false, message: "Order or customer WhatsApp phone missing" };
         }
 
         const sellerProfile = await SellerProfileModel.findById(order.sellerId).lean();
@@ -30,11 +44,9 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             return { success: false, message: "WhatsApp not connected for seller" };
         }
 
-        // ── Plan gate: orderReceiptsEnabled ──────────────────────
-        // Default true so legacy users continue to receive receipts.
         const orderReceiptsEnabled = user.paxAI?.orderReceiptsEnabled ?? true;
         if (!orderReceiptsEnabled) {
-            console.log(`[customerReceipt] Order receipts disabled on plan '${user.paxAI?.plan}' for seller ${sellerProfile.userId}`);
+            console.log(`[customerReceipt] Order receipts disabled on plan '${user.paxAI?.plan}'`);
             return { success: false, message: "Order receipts not available on this plan" };
         }
 
@@ -44,26 +56,24 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
         const deliveryFeeVal = Number(order.deliveryFee) || 0;
         const customerName = order.customerName || "Customer";
         const dateStr = new Date().toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
+            year: "numeric", month: "short", day: "numeric",
         });
 
-        // ── Format items section for multi-product or single-product ────────
+        // ── Format items ─────────────────────────────────────────────────────
         let itemsSection = "";
         let calculatedSubtotal = 0;
 
         if (order.items && order.items.length > 0) {
-            calculatedSubtotal = order.items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
-            itemsSection = order.items
-                .map((i) => {
-                    const linePrice = (Number(i.price) || 0) * (Number(i.quantity) || 1);
-                    const variantStr = (i.selectedVariants || []).length > 0
-                        ? ` [${i.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
-                        : "";
-                    return `• Item: ${i.name}${variantStr} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
-                })
-                .join("\n");
+            calculatedSubtotal = order.items.reduce(
+                (sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0
+            );
+            itemsSection = order.items.map(i => {
+                const linePrice = (Number(i.price) || 0) * (Number(i.quantity) || 1);
+                const variantStr = (i.selectedVariants || []).length > 0
+                    ? ` [${i.selectedVariants.map(v => `${v.label}: ${v.value}`).join(", ")}]`
+                    : "";
+                return `• Item: ${i.name}${variantStr} (x${i.quantity || 1})${linePrice > 0 ? ` — ₦${linePrice.toLocaleString()}` : ""}`;
+            }).join("\n");
         } else {
             const productName = order.productId?.name || "Ordered Item";
             const quantity = order.quantity || 1;
@@ -76,7 +86,6 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
             ? calculatedSubtotal
             : Math.max(0, totalPaidVal - deliveryFeeVal);
 
-        // 🛡️ Sanity Check: Guarantee Total Amount Paid strictly equals Subtotal + Delivery Fee
         const expectedTotal = subtotalVal + deliveryFeeVal;
         const finalTotalPaid = (totalPaidVal > 0 && Math.abs(totalPaidVal - expectedTotal) <= 100)
             ? totalPaidVal
@@ -86,6 +95,9 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
         const zoneStr = order.selectedZoneName || "";
         const timeframeStr = order.deliveryZoneTimeframe || "";
 
+        // ── Receipt message ───────────────────────────────────────────────────
+        // NOTE: customerPhone (form phone) is intentionally NOT shown here.
+        // It is only for the seller's delivery logistics and is visible in the admin/sales page.
         const receiptMessage =
 `🧾 *ORDER CONFIRMATION & OFFICIAL RECEIPT*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -94,11 +106,9 @@ export async function sendCustomerOrderReceiptWhatsApp(orderId) {
 *Order Proof ID:* #${proofCode}
 *Date:* ${dateStr}
 
-👤 *Customer Details:*
-• Name: ${customerName}
-• Phone: ${order.customerPhone}${order.customerPhone2 ? `\n• Alt Phone: ${order.customerPhone2}` : ""}
-• Delivery Address: ${deliveryLocStr || "Not specified"}
-${order.additionalInfo ? `• Note: ${order.additionalInfo}` : ""}
+👤 *Customer:* ${customerName}
+📍 *Delivery Address:* ${deliveryLocStr || "Not specified"}
+${order.additionalInfo?.trim() ? `📝 *Note:* ${order.additionalInfo.trim()}` : ""}
 
 🛍️ *Order Breakdown:*
 ${itemsSection}
@@ -110,39 +120,36 @@ Please present this receipt / Order Proof ID (*#${proofCode}*) to our delivery t
 
 Thank you for shopping with *${businessName}*! 🎉`;
 
+        // ── Send to customer's WhatsApp (Meta inbound number) ─────────────────
         let result;
-        // Attempt sending image receipt with brand logo as caption if logoUrl exists
         if (sellerProfile.logoUrl) {
             result = await sendWhatsAppAutomationReply({
                 phoneNumberId: user.whatsapp.phoneNumberId,
-                to: order.customerPhone,
+                to: waPhone,
                 imageUrl: sellerProfile.logoUrl,
                 caption: receiptMessage,
             });
-
-            // Fallback to text message if image delivery failed
             if (!result?.success) {
-                console.warn("[customerReceipt] Image receipt failed, falling back to text receipt.");
+                console.warn("[customerReceipt] Image receipt failed, falling back to text.");
                 result = await sendWhatsAppAutomationReply({
                     phoneNumberId: user.whatsapp.phoneNumberId,
-                    to: order.customerPhone,
+                    to: waPhone,
                     text: receiptMessage,
                 });
             }
         } else {
             result = await sendWhatsAppAutomationReply({
                 phoneNumberId: user.whatsapp.phoneNumberId,
-                to: order.customerPhone,
+                to: waPhone,
                 text: receiptMessage,
             });
         }
 
-        // Save to inbox for seller visibility (non-blocking)
         if (result?.success) {
             await _saveReceiptToInbox({
                 userId: sellerProfile.userId,
                 phoneNumberId: user.whatsapp.phoneNumberId,
-                customerPhone: order.customerPhone,
+                waPhone,
                 receiptMessage,
                 proofCode,
                 orderId: order._id.toString(),
@@ -159,17 +166,17 @@ Thank you for shopping with *${businessName}*! 🎉`;
 /**
  * Saves the sent receipt as an AIMessageModel record so it
  * appears in the WhatsApp Inbox for easy tracking.
+ * Uses waPhone (Meta inbound number) as the conversation key.
  */
-async function _saveReceiptToInbox({ userId, phoneNumberId, customerPhone, receiptMessage, proofCode, orderId }) {
+async function _saveReceiptToInbox({ userId, phoneNumberId, waPhone, receiptMessage, proofCode, orderId }) {
     try {
-        const messageId = `receipt_${orderId}_${Date.now()}`;
         await AIMessageModel.create({
-            messageId,
+            messageId: `receipt_${orderId}_${Date.now()}`,
             userId,
             platform: "whatsapp",
             phoneNumberId,
             from: phoneNumberId,
-            to: customerPhone,
+            to: waPhone,
             text: receiptMessage,
             direction: "outbound",
             senderType: "system",
@@ -181,14 +188,12 @@ async function _saveReceiptToInbox({ userId, phoneNumberId, customerPhone, recei
             },
         });
     } catch (err) {
-        // Non-critical — don't crash the receipt flow
         console.warn("[customerReceipt] Could not save receipt to inbox:", err?.message || err);
     }
 }
 
 /**
- * Sends a delivery notification via WhatsApp when the seller
- * marks an order as delivered from the Sales Dashboard.
+ * Sends a delivery notification via WhatsApp when the seller marks an order delivered.
  */
 export async function sendCustomerDeliveryNotificationWhatsApp(orderId) {
     try {
@@ -196,14 +201,13 @@ export async function sendCustomerDeliveryNotificationWhatsApp(orderId) {
             .populate({ path: "productId", model: SellerProductModel, select: "name price", strictPopulate: false })
             .lean();
 
-        if (!order || !order.customerPhone) {
-            return { success: false, message: "Order or customer phone missing" };
+        const waPhone = resolveWaPhone(order);
+        if (!order || !waPhone) {
+            return { success: false, message: "Order or customer WhatsApp phone missing" };
         }
 
         const sellerProfile = await SellerProfileModel.findById(order.sellerId).lean();
-        if (!sellerProfile) {
-            return { success: false, message: "Seller profile not found" };
-        }
+        if (!sellerProfile) return { success: false, message: "Seller profile not found" };
 
         const user = await UserModel.findById(sellerProfile.userId).select("whatsapp paxAI").lean();
         if (!user?.whatsapp?.connected || !user?.whatsapp?.phoneNumberId) {
@@ -219,12 +223,9 @@ export async function sendCustomerDeliveryNotificationWhatsApp(orderId) {
         const proofCode = order._id.toString().slice(-8).toUpperCase();
         const customerName = order.customerName || "Customer";
 
-        // Build item summary
         let itemsSummary = "";
         if (order.items && order.items.length > 0) {
-            itemsSummary = order.items
-                .map(i => `• ${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}`)
-                .join("\n");
+            itemsSummary = order.items.map(i => `• ${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}`).join("\n");
         } else {
             itemsSummary = `• ${order.productId?.name || "Your order"}`;
         }
@@ -246,16 +247,15 @@ Thank you for shopping with *${businessName}*! 💙`;
 
         const result = await sendWhatsAppAutomationReply({
             phoneNumberId: user.whatsapp.phoneNumberId,
-            to: order.customerPhone,
+            to: waPhone,
             text: deliveryMessage,
         });
 
-        // Save to inbox (non-blocking)
         if (result?.success) {
             await _saveReceiptToInbox({
                 userId: sellerProfile.userId,
                 phoneNumberId: user.whatsapp.phoneNumberId,
-                customerPhone: order.customerPhone,
+                waPhone,
                 receiptMessage: deliveryMessage,
                 proofCode,
                 orderId: order._id.toString(),

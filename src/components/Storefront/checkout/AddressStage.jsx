@@ -168,6 +168,7 @@ export default function AddressStage({
   const [lastName,    setLastName]    = useState("");
   const [phone1,      setPhone1]      = useState("");
   const [phone2,      setPhone2]      = useState("");
+  const [state,       setState]       = useState("");
   const [address,     setAddress]     = useState("");
   const [city,        setCity]        = useState("");
   const [addInfo,     setAddInfo]     = useState("");
@@ -197,6 +198,7 @@ export default function AddressStage({
       setSelectedSaved(null);
       setAddress("");
       setCity("");
+      setState("");
       setSelectedZone("");
       return;
     }
@@ -204,7 +206,9 @@ export default function AddressStage({
     if (!entry) return;
     setSelectedSaved(idx);
     setAddress(entry.address || "");
-    // Try to auto-select zone
+    setState(entry.state || "");
+    setCity(entry.city || "");
+    // Try to auto-select zone if still valid
     if (deliveryModel === "zones" && entry.zoneName) {
       const stillValid = deliveryZones.some(z => z.name === entry.zoneName);
       setSelectedZone(stillValid ? entry.zoneName : "");
@@ -233,6 +237,8 @@ export default function AddressStage({
     if (!firstName.trim()) return false;
     if (!phone1.trim())    return false;
     if (isDelivery) {
+      if (!state.trim())   return false;
+      if (!city.trim())    return false;
       if (!address.trim()) return false;
       if (deliveryModel === "zones" && !selectedZone) return false;
     }
@@ -247,13 +253,54 @@ export default function AddressStage({
     setSubmitting(true);
     setError("");
 
+    // ── Delivery coverage gate ────────────────────────────────
+    // Run before API call so customer gets instant feedback.
+    if (isDelivery) {
+      if (deliveryModel === "zones" && selectedZone) {
+        // Validate that the entered city/address actually falls within the selected zone's areas
+        const zone = deliveryZones.find(z => z.name === selectedZone);
+        if (zone?.areas?.trim()) {
+          const areaList = zone.areas.toLowerCase().split(",").map(a => a.trim()).filter(Boolean);
+          const enteredText = [city.trim(), address.trim(), state.trim()].join(" ").toLowerCase();
+          const covered = areaList.some(area => enteredText.includes(area));
+          if (!covered) {
+            setError(
+              `Your address doesn't appear to be within the "${zone.name}" zone. ` +
+              `This zone covers: ${zone.areas}. Please select the correct zone or check your address.`
+            );
+            setSubmitting(false);
+            return;
+          }
+        }
+      } else if (deliveryModel === "flat" && store.deliveryCoverage?.trim()) {
+        // Validate against seller's free-text coverage description
+        const coverage = store.deliveryCoverage.toLowerCase();
+        const coveredAreas = coverage.split(/[,;\/\n]/).map(a => a.trim()).filter(a => a.length > 2);
+        // Only block if seller explicitly configured coverage areas (not just "Nationwide" / "All")
+        const isNationwide = /nationwide|all\s*state|everywhere|any.*where/i.test(coverage);
+        if (!isNationwide && coveredAreas.length > 0) {
+          const enteredText = [city.trim(), state.trim(), address.trim()].join(" ").toLowerCase();
+          const covered = coveredAreas.some(area => enteredText.includes(area));
+          if (!covered) {
+            setError(
+              `Sorry, we don't currently deliver to your location. ` +
+              `We cover: ${store.deliveryCoverage}. Please contact us on WhatsApp if you need assistance.`
+            );
+            setSubmitting(false);
+            return;
+          }
+        }
+      }
+      // quote model: no gate — seller will handle on WhatsApp
+    }
+
     try {
       const pickupDetails = !isDelivery
         ? (fs.pickupAddress || store.liveLocation || "")
         : "";
 
       const fullAddress = isDelivery
-        ? [address.trim(), city.trim()].filter(Boolean).join(", ")
+        ? [address.trim(), city.trim(), state.trim()].filter(Boolean).join(", ")
         : "";
 
       const customerName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ");
@@ -297,7 +344,9 @@ export default function AddressStage({
       // ── Save address to localStorage ──────────────────────────
       if (isDelivery && fullAddress) {
         saveAddress(slug, {
-          address: fullAddress,
+          address: address.trim(),
+          state: state.trim(),
+          city: city.trim(),
           zoneName: detectedZone?.name || null,
           deliveryFee: effectiveFee,
           label: setAsDefault ? "Default" : null,
@@ -543,14 +592,31 @@ export default function AddressStage({
               <>
                 <div>
                   <label className="as-label" style={labelStyle}>
+                    State <span style={{ color: "#ef4444" }}>*</span>
+                  </label>
+                  <input
+                    className="as-input"
+                    type="text"
+                    placeholder="e.g. Lagos, Abuja, Rivers"
+                    value={state}
+                    onChange={e => setState(e.target.value)}
+                    required
+                    style={inputStyle(!state.trim())}
+                    autoComplete="address-level1"
+                  />
+                </div>
+
+                <div>
+                  <label className="as-label" style={labelStyle}>
                     City / Area <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input
                     className="as-input"
                     type="text"
-                    placeholder="e.g. Ikeja, Surulere"
+                    placeholder="e.g. Ikeja, Surulere, Ikorodu"
                     value={city}
                     onChange={e => setCity(e.target.value)}
+                    required
                     style={inputStyle(!city.trim())}
                     autoComplete="address-level2"
                   />

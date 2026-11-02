@@ -86,6 +86,8 @@ async function getCartPageData(slug) {
           : null,
         callNumber: profile.callNumber || null,
         callNumberEnabled: profile.callNumberEnabled || false,
+        deliveryCoverage: profile.deliveryCoverage || "",
+        liveLocation: profile.liveLocation || "",
         fulfillmentSettings: profile.fulfillmentSettings
           ? {
               allowDelivery: profile.fulfillmentSettings.allowDelivery ?? true,

@@ -70,7 +70,7 @@ function saveSavedAddresses(storeSlug, entries) {
  * - If the address already exists (case-insensitive), update its usedAt and zoneName
  * - Otherwise prepend and cap at MAX_ENTRIES (drop oldest)
  */
-export function saveAddress(storeSlug, { address, zoneName = null, deliveryFee = 0, label = null }) {
+export function saveAddress(storeSlug, { address, state = null, city = null, zoneName = null, deliveryFee = 0, label = null }) {
   if (typeof window === "undefined") return;
   if (!address?.trim()) return;
 
@@ -84,6 +84,8 @@ export function saveAddress(storeSlug, { address, zoneName = null, deliveryFee =
     entries[existingIdx] = {
       ...entries[existingIdx],
       address: address.trim(),
+      state: state || entries[existingIdx].state || null,
+      city: city || entries[existingIdx].city || null,
       zoneName: zoneName || entries[existingIdx].zoneName || null,
       deliveryFee,
       usedAt: new Date().toISOString(),
@@ -92,6 +94,8 @@ export function saveAddress(storeSlug, { address, zoneName = null, deliveryFee =
     // Prepend new entry
     entries.unshift({
       address: address.trim(),
+      state: state || null,
+      city: city || null,
       zoneName: zoneName || null,
       deliveryFee,
       label: label || null,

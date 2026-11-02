@@ -294,15 +294,90 @@ export async function handlePaymentReceipt({
     // ── Priority 1: Find a storefront-confirmed "awaiting_payment" order ──────
     // This is the clean path — order was created on the storefront with full
     // structured data (items, variants, delivery address). No parsing needed.
-    // Match by phone OR by empty phone (order not yet linked — phone set in handleIncomingWhatsapp)
-    const awaitingOrder = await SellerOrderModel.findOne({
-        sellerId,
-        customerPhone: normalizedPhone,
-        status: "awaiting_payment",
-    }).sort({ createdAt: -1 });
+    //
+    // Match strategy (in order):
+    //   A. By orderCode extracted from the WhatsApp message — most reliable when
+    //      the customer's WhatsApp number differs from the phone they entered on the form
+    //   B. By WhatsApp phone number — fast path when phones match
+    //   C. By empty phone — order not yet linked (session-less storefront order)
+
+    // Extract order code from caption or recent messages
+    const orderCodeFromMsg = (() => {
+        const allText = [caption, ...recentMessages.map(m => m.content || m.text || "")].join(" ");
+        const match = allText.match(/(?:order\s*#?|#)([A-Z0-9]{6,10})\b/i);
+        return match ? match[1].toUpperCase() : null;
+    })();
+
+    let awaitingOrder = null;
+
+    // A. Match by order code (covers cross-phone scenario — customer's WhatsApp number
+    //    may differ from the delivery phone they entered on the storefront form)
+    //
+    //    OWNERSHIP GUARD: If the order already has a whatsappPhone set, only the
+    //    original claimant can match it. This prevents a copied order message from
+    //    a friend / screenshot from hijacking someone else's order.
+    if (orderCodeFromMsg) {
+        const candidate = await SellerOrderModel.findOne({
+            sellerId,
+            orderCode: orderCodeFromMsg,
+            status: "awaiting_payment",
+        }).lean();
+
+        if (candidate) {
+            const alreadyClaimed = candidate.whatsappPhone && candidate.whatsappPhone !== normalizedPhone;
+            if (alreadyClaimed) {
+                // Order exists but belongs to a different WhatsApp sender — do NOT claim it
+                console.warn(`⚠️ Order #${orderCodeFromMsg} already claimed by ${candidate.whatsappPhone}. Rejecting claim from ${normalizedPhone}.`);
+            } else {
+                awaitingOrder = candidate;
+                console.log(`✅ Found storefront awaiting_payment order by orderCode=${orderCodeFromMsg} | _id=${awaitingOrder._id}`);
+                // Claim the order — store the Meta WhatsApp phone as identity key
+                if (!awaitingOrder.whatsappPhone) {
+                    await SellerOrderModel.updateOne(
+                        { _id: awaitingOrder._id },
+                        { $set: { whatsappPhone: normalizedPhone } }
+                    );
+                    awaitingOrder.whatsappPhone = normalizedPhone;
+                }
+            }
+        }
+    }
+
+    // B. Match by WhatsApp phone stored on order (Meta identity key only)
+    if (!awaitingOrder) {
+        awaitingOrder = await SellerOrderModel.findOne({
+            sellerId,
+            whatsappPhone: normalizedPhone,
+            status: "awaiting_payment",
+        }).sort({ createdAt: -1 }).lean();
+        if (awaitingOrder) {
+            console.log(`✅ Found storefront awaiting_payment order by whatsappPhone=${normalizedPhone} | _id=${awaitingOrder._id}`);
+        }
+    }
+
+    // C. Match by most-recent unlinked storefront order (no phone yet)
+    if (!awaitingOrder) {
+        awaitingOrder = await SellerOrderModel.findOne({
+            sellerId,
+            whatsappPhone: "",
+            status: "awaiting_payment",
+            orderSource: "storefront",
+        }).sort({ createdAt: -1 }).lean();
+        if (awaitingOrder) {
+            console.log(`✅ Found unlinked storefront order | _id=${awaitingOrder._id} — linking WhatsApp phone`);
+            await SellerOrderModel.updateOne(
+                { _id: awaitingOrder._id },
+                { $set: { whatsappPhone: normalizedPhone } }
+            );
+            awaitingOrder.whatsappPhone = normalizedPhone;
+        }
+    }
 
     if (awaitingOrder) {
-        console.log(`✅ Found storefront awaiting_payment order ${awaitingOrder._id} — attaching receipt directly.`);
+        // Re-fetch as mutable document for save()
+        const awaitingDoc = await SellerOrderModel.findById(awaitingOrder._id);
+
+        console.log(`✅ Attaching payment receipt to order ${awaitingDoc._id} — storefront order.`);
 
         let url = imageUrl;
         let publicId = imagePublicId;
@@ -319,27 +394,28 @@ export async function handlePaymentReceipt({
             }
         }
 
-        awaitingOrder.paymentReceiptUrl = url || "";
-        awaitingOrder.paymentReceiptPublicId = publicId || "";
-        awaitingOrder.paymentReceiptSubmittedAt = new Date();
-        awaitingOrder.status = "pending";
-        await awaitingOrder.save();
+        awaitingDoc.paymentReceiptUrl = url || "";
+        awaitingDoc.paymentReceiptPublicId = publicId || "";
+        awaitingDoc.paymentReceiptSubmittedAt = new Date();
+        awaitingDoc.status = "pending";
+        awaitingDoc.awaitingPaymentExpiresAt = null; // Clear TTL — order is now active, never auto-delete
+        await awaitingDoc.save();
 
-        const productSummary = (awaitingOrder.items || [])
+        const productSummary = (awaitingDoc.items || [])
             .map(i => `${i.quantity > 1 ? `${i.quantity}x ` : ""}${i.name}${i.selectedVariants?.length ? ` (${i.selectedVariants.map(v => v.value).join(", ")})` : ""}`)
             .join(", ") || "Order Item";
 
         try {
             await sendSalesNotification(sellerUserId, {
-                orderId: awaitingOrder._id.toString(),
-                customerName: awaitingOrder.customerName || awaitingOrder.customerPhone,
-                customerPhone: awaitingOrder.customerPhone || "",
-                customerPhone2: awaitingOrder.customerPhone2 || "",
+                orderId: awaitingDoc._id.toString(),
+                customerName: awaitingDoc.customerName || awaitingDoc.customerPhone,
+                customerPhone: awaitingDoc.customerPhone || "",
+                customerPhone2: awaitingDoc.customerPhone2 || "",
                 productName: productSummary,
-                amountPaid: awaitingOrder.totalPrice,
-                deliveryFee: awaitingOrder.deliveryFee,
-                deliveryLocation: awaitingOrder.deliveryAddress || awaitingOrder.deliveryLocation || "",
-                additionalInfo: awaitingOrder.additionalInfo || "",
+                amountPaid: awaitingDoc.totalPrice,
+                deliveryFee: awaitingDoc.deliveryFee,
+                deliveryLocation: awaitingDoc.deliveryAddress || awaitingDoc.deliveryLocation || "",
+                additionalInfo: awaitingDoc.additionalInfo || "",
                 isConfirmed: false,
             });
         } catch (err) {
@@ -352,7 +428,7 @@ export async function handlePaymentReceipt({
             { $set: { "whatsapp.contacts.list.$.leadStage": "converted" } }
         ).catch(() => {});
 
-        return { handled: true, order: awaitingOrder, isNewProof: true };
+        return { handled: true, order: awaitingDoc, isNewProof: true };
     }
 
     // ── Priority 2: Legacy path — existing pending order or WhatsApp-chat order ─
@@ -488,21 +564,18 @@ export async function handlePaymentReceipt({
             ? recentCustomerMsgs.find(m => (m.content || m.text || "") === storefrontTemplateText)
             : lastUserMessage;
 
-        calculatedDeliveryFee = extractDeliveryFeeFromConversation(
-            templateMsgObj ? [templateMsgObj] : [],
-            [],
-            sourceText
-        );
+        // Delivery fee from storefront template text is never trusted — DB is the only source
+        calculatedDeliveryFee = 0;
         orderTotalPrice =
             extractOrderTotalFromConversation(templateMsgObj ? [templateMsgObj] : []) ||
-            (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
+            orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
     } else if (session?.payment?.pendingItems && session.payment.pendingItems.length > 0) {
         // High Priority #3: Session pendingItems fallback
         console.log("📋 Consuming session pendingItems for order receipt.");
         orderItems = isCorrectionInbound
             ? session.payment.pendingItems.map(i => ({ ...i, quantity: 1 }))
             : session.payment.pendingItems;
-        calculatedDeliveryFee = Number(session.payment.deliveryFee) || extractDeliveryFeeFromConversation(recentMessages);
+        calculatedDeliveryFee = Number(session.payment.deliveryFee) || 0;
         orderTotalPrice = Number(session.payment.pendingAmount) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
     } else {
         // Scoped fallback: Filter recentMessages to ONLY messages since the last completed receipt/order message
@@ -555,15 +628,14 @@ export async function handlePaymentReceipt({
                 }));
             }
         }
-        calculatedDeliveryFee = extractDeliveryFeeFromConversation(currentOrderWindowMsgs);
-        orderTotalPrice = extractOrderTotalFromConversation(currentOrderWindowMsgs) || (orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0) + calculatedDeliveryFee);
+        calculatedDeliveryFee = 0; // Delivery fee is DB-only — never inferred from chat
+        orderTotalPrice = extractOrderTotalFromConversation(currentOrderWindowMsgs) || orderItems.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
     }
 
+    // Delivery fee is always 0 for WhatsApp-chat orders — it is never inferred from conversation text.
+    // The single source of truth is the storefront DB order. WhatsApp-chat orders have no reliable fee.
+
     const itemsSubtotal = orderItems.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-    const extractedFeeFromText = extractDeliveryFeeFromConversation(recentMessages);
-    if (extractedFeeFromText > 0 && calculatedDeliveryFee === 0) {
-        calculatedDeliveryFee = extractedFeeFromText;
-    }
 
     if (itemsSubtotal > 0 && (!orderTotalPrice || orderTotalPrice <= 0)) {
         orderTotalPrice = itemsSubtotal + calculatedDeliveryFee;
@@ -702,45 +774,6 @@ function generateOrderCode() {
     return code;
 }
 
-function extractDeliveryFeeFromConversation(recentMessages = [], matchedProducts = [], inboundText = "") {
-    const reversedAssistantMsgs = [...recentMessages]
-        .reverse()
-        .filter((m) => m.role === "assistant" || m.direction === "outbound" || m.senderType === "ai")
-        .map((m) => m.content || m.text || "");
-
-    const deliveryPatterns = [
-        /(?:delivery\s+will\s+be|delivery\s+is|delivery\s+fee\s+is|delivery\s+cost\s+is|shipping\s+fee\s+is|delivery|shipping)[\s:]*(?:₦|N|NGN)?\s*([\d,]+)/i,
-        /\+\s*(?:₦|N|NGN)?\s*([\d,]+)\s*\((?:delivery|shipping)\)/i,
-        /\((?:delivery|shipping):\s*(?:₦|N|NGN)?\s*([\d,]+)\)/i,
-    ];
-
-    for (const text of reversedAssistantMsgs) {
-        for (const pattern of deliveryPatterns) {
-            const match = text.match(pattern);
-            if (match && match[1]) {
-                const fee = parseInt(match[1].replace(/,/g, ""), 10);
-                if (!isNaN(fee) && fee >= 0) return fee;
-            }
-        }
-    }
-
-    const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
-    for (const pattern of deliveryPatterns) {
-        const match = combinedText.match(pattern);
-        if (match && match[1]) {
-            const fee = parseInt(match[1].replace(/,/g, ""), 10);
-            if (!isNaN(fee) && fee >= 0) return fee;
-        }
-    }
-
-    if (matchedProducts && matchedProducts.length > 0) {
-        const fees = matchedProducts.map(p => Number(p.deliveryFee) || 0);
-        return Math.max(0, ...fees);
-    }
-
-    return 0;
-}
-
 export function parseMultiProductOrderFromText(inboundText = "", recentMessages = []) {
     const combinedText = inboundText + "\n" + recentMessages.map((m) => m.content || m.text || "").join("\n");
 
@@ -845,7 +878,7 @@ export async function createPendingOrderFromText({
     const orderTotalPrice = parsedTotal || matchedProduct.price || 0;
     const orderCode = generateOrderCode();
     const multiOrderData = parseMultiProductOrderFromText(inboundText, recentMessages);
-    const extractedDeliveryFee = extractDeliveryFeeFromConversation(recentMessages, matchedProduct ? [matchedProduct] : [], inboundText);
+    const extractedDeliveryFee = 0; // Delivery fee is DB/storefront only — never inferred from chat
     const resolvedLoc = session?.payment?.deliveryLocation || session?.payment?.stagedOrder?.deliveryLocation || multiOrderData.deliveryLocation || "";
 
     const order = await SellerOrderModel.create({

@@ -911,13 +911,41 @@ export const handleIncomingWhatsApp = async (payload) => {
         }).lean();
 
         if (confirmedOrder) {
-          // Link the customer's WhatsApp phone to this order if not already set
-          // (phone was unknown when the order was created on the storefront)
-          if (!confirmedOrder.customerPhone || confirmedOrder.customerPhone === "") {
-            await SellerOrderModel.findByIdAndUpdate(confirmedOrder._id, {
-              $set: { customerPhone: visitorPhone }
+          // ── Ownership guard: prevent order hijacking ──────────────────────
+          // If a whatsappPhone is already set and belongs to a different sender,
+          // this is a copied/forwarded message — do NOT process it as their order.
+          const alreadyClaimed = confirmedOrder.whatsappPhone && confirmedOrder.whatsappPhone !== visitorPhone;
+          if (alreadyClaimed) {
+            console.warn(`[storefront_order] ⚠️ Order #${orderCode} already claimed by ${confirmedOrder.whatsappPhone}. Ignoring claim from ${visitorPhone}.`);
+
+            // Send a clear, friendly rejection — never expose the original customer's details
+            const storeUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pax26.com"}/store/${sellerProfile.slug}`;
+            const rejectionMsg = `Hi! Order *#${orderCode}* has already been registered to another customer.\n\nIf you'd like to place your own order, visit our store here:\n${storeUrl}\n\nAdd items to your cart and tap *Confirm Order* to get your own order code. 😊`;
+
+            try {
+              await sendWhatsAppAutomationReply({
+                phoneNumberId: user.whatsapp.phoneNumberId,
+                to: visitorPhone,
+                text: rejectionMsg,
+              });
+            } catch (err) {
+              console.warn("[storefront_order] ⚠️ Could not send rejection message:", err?.message);
+            }
+
+            await SessionModel.findByIdAndUpdate(session._id, {
+              $set: { lastMessageAt: new Date(), isProcessingAI: false },
+              $inc: { "context.messageCount": 1, "context.outboundCount": 1 },
             });
-            confirmedOrder.customerPhone = visitorPhone;
+            return { ok: true };
+          } else {
+          // ── Link WhatsApp identity to order (first-time claim) ─────────────
+          // Store the Meta inbound phone as whatsappPhone (identity key).
+          // customerPhone from the storefront form is NEVER overwritten here.
+          if (!confirmedOrder.whatsappPhone) {
+            await SellerOrderModel.findByIdAndUpdate(confirmedOrder._id, {
+              $set: { whatsappPhone: visitorPhone }
+            });
+            confirmedOrder.whatsappPhone = visitorPhone;
           }
 
           // Mark session as expecting payment so the receipt image is handled correctly
@@ -1014,6 +1042,7 @@ ${editLink}`;
             $inc: { "context.messageCount": 1, "context.outboundCount": 1 },
           });
           return { ok: true };
+          } // end ownership guard else block
         }
       } catch (orderLookupErr) {
         console.warn("[handleIncoming] Order lookup failed (non-fatal):", orderLookupErr.message);
