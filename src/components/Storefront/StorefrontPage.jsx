@@ -223,7 +223,76 @@ export function handleWhatsAppRedirect(e, href, onShowChooser) {
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   }
 }
+/* ΓöÇΓöÇ Side menu drawer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+function SideMenu({ open, onClose, store, categories, activeCategory, onCategoryChange, theme, search, onSearchChange, slug, onWhatsAppRedirect }) {
+  const t = theme;
+  if (!open) return null;
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 200, backdropFilter: "blur(4px)", animation: "sf-fade-in 0.2s" }} />
+      <div style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: "290px", maxWidth: "88vw", background: t.navBg, zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "8px 0 48px rgba(0,0,0,0.25)", overflowY: "auto", borderRight: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 18px 16px", borderBottom: `1px solid ${t.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {store.logoUrl ? (
+              <img src={store.logoUrl} alt={store.businessName} style={{ width: "34px", height: "34px", borderRadius: "8px", objectFit: "cover" }} />
+            ) : (
+              <div style={{ width: "34px", height: "34px", borderRadius: "8px", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center", color: t.accentText, fontWeight: 900, fontSize: "16px", flexShrink: 0 }}>
+                {store.businessName?.charAt(0)?.toUpperCase()}
+              </div>
+            )}
+            <p style={{ margin: 0, fontSize: "15px", fontWeight: 900, color: t.textPrimary }}>{store.businessName}</p>
+          </div>
+          <button onClick={onClose} style={{ width: "30px", height: "30px", borderRadius: "8px", background: t.pageBg, border: `1px solid ${t.border}`, color: t.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><XIcon /></button>
+        </div>
 
+        <div style={{ padding: "14px 16px", borderBottom: `1px solid ${t.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: t.pageBg, borderRadius: "10px", padding: "9px 12px", border: `1px solid ${t.border}` }}>
+            <span style={{ color: t.textSecondary, flexShrink: 0 }}><SearchIcon /></span>
+            <input value={search} onChange={e => onSearchChange(e.target.value)} placeholder="Search productsΓÇª" style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: "13px", color: t.textPrimary, fontFamily: "inherit" }} />
+          </div>
+        </div>
+
+        {categories.length > 0 && (
+          <div style={{ padding: "16px", borderBottom: `1px solid ${t.border}` }}>
+            <p style={{ margin: "0 0 10px", fontSize: "10px", fontWeight: 900, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em" }}>Categories</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+              {["all", ...categories].map(cat => {
+                const isActive = activeCategory === cat;
+                return (
+                  <button key={cat} onClick={() => { onCategoryChange(cat); onClose(); }}
+                    style={{ padding: "9px 12px", borderRadius: "8px", border: "none", background: isActive ? t.accent : "transparent", color: isActive ? t.accentText : t.textPrimary, fontSize: "13px", fontWeight: isActive ? 800 : 600, cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}>
+                    {cat === "all" ? "All Products" : cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+          {store.workingHours && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textSecondary }}>
+              <ClockIcon />{store.workingHours}
+            </div>
+          )}
+          {store.liveLocation && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: t.textSecondary }}>
+              <MapPinIcon />{store.liveLocation}
+            </div>
+          )}
+        </div>
+
+        {store.whatsappHref && (
+          <div style={{ padding: "0 16px 20px", marginTop: "auto" }}>
+            <a href={store.whatsappHref} onClick={(e) => onWhatsAppRedirect ? onWhatsAppRedirect(e, store.whatsappHref) : handleWhatsAppRedirect(e, store.whatsappHref)} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", borderRadius: "12px", background: "#25d366", color: "#fff", fontWeight: 900, fontSize: "14px", textDecoration: "none", boxShadow: "0 4px 16px rgba(37,211,102,0.3)" }}>
+              <WhatsAppIcon /> Chat on WhatsApp
+            </a>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
 /* â”€â”€ Product Card Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function ProductCard({ product, store, slug, sessionToken, theme, highlighted, index = 0, cartQuantity = 0, onUpdateQty, onAddToCart }) {
   const [imgError, setImgError] = useState(false);
