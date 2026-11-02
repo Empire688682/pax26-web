@@ -940,6 +940,9 @@ export default function AiBusinessDashboard() {
     autoReplyEnabled: true,
     followUpEnabled: true,
     followUpDelayMinutes: 30,
+    callNumberEnabled: false,
+    callNumber: "",
+    followUpDelayMinutes: 30,
     currency: "NGN",
     workingHours: "",
     onlineStoreUrl: "",
@@ -991,6 +994,9 @@ export default function AiBusinessDashboard() {
           tone: profile.tone || "friendly",
           autoReplyEnabled: profile.autoReplyEnabled ?? true,
           followUpEnabled: profile.followUpEnabled ?? true,
+          followUpDelayMinutes: profile.followUpDelayMinutes || 30,
+          callNumberEnabled: profile.callNumberEnabled ?? false,
+          callNumber: profile.callNumber || "",
           followUpDelayMinutes: profile.followUpDelayMinutes || 30,
           currency: profile.currency || "NGN",
           whatsappNumber: profile.whatsappNumber || userData?.whatsapp?.displayPhone || "",
@@ -1130,6 +1136,8 @@ export default function AiBusinessDashboard() {
             storeTheme: data.profile.storeTheme ?? f.storeTheme,
             promoAnnouncement: data.profile.promoAnnouncement ?? f.promoAnnouncement,
             emailSalesAlerts: data.profile.emailSalesAlerts !== false,
+            callNumberEnabled: data.profile.callNumberEnabled ?? f.callNumberEnabled,
+            callNumber: data.profile.callNumber ?? f.callNumber,
             products: data.profile.products || f.products,
             services: data.profile.services || f.services,
             faqs: data.profile.faqs || f.faqs,
@@ -1796,7 +1804,38 @@ export default function AiBusinessDashboard() {
                     {isSeller && (
                       <Toggle label="Spam Auto-Handoff" hint="Auto-pause AI for 24h if a contact sends too many messages with no intent to buy" value={form.spamAutoHandoff !== false} onChange={v => setForm(f => ({ ...f, spamAutoHandoff: v }))} pax26={p} />
                     )}
+                    {isSeller && (
+                      <Toggle
+                        label="Direct Call Feature"
+                        hint="AI shares your contact number when a customer asks to speak to you directly (Starter+ required)"
+                        value={!!form.callNumberEnabled}
+                        onChange={v => setForm(f => ({ ...f, callNumberEnabled: v }))}
+                        pax26={p}
+                      />
+                    )}
                   </div>
+                  {/* Direct call number input — only shown when toggle is on and user is Starter+ */}
+                  {isSeller && form.callNumberEnabled && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <label style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: p?.textPrimary, opacity: 0.65 }}>
+                        📞 Your Call / WhatsApp Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={form.callNumber || ""}
+                        onChange={e => setForm(f => ({ ...f, callNumber: e.target.value }))}
+                        placeholder="+234 XXX XXX XXXX"
+                        style={{
+                          width: "100%", backgroundColor: p?.secondaryBg, color: p?.textPrimary,
+                          border: `1px solid ${p?.border}`, borderRadius: "10px", padding: "10px 14px",
+                          fontSize: "14px", fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+                        }}
+                      />
+                      <p style={{ fontSize: "11px", color: p?.textPrimary, opacity: 0.45, margin: 0 }}>
+                        This number is shared when a customer asks to speak to you directly. Do <strong>NOT</strong> use your WhatsApp API number — use a personal or support number you monitor.
+                      </p>
+                    </div>
+                  )}
                   {isSeller && form.spamAutoHandoff !== false && (
                     <div style={{ paddingTop: "4px" }}>
                       <ThemedSelect

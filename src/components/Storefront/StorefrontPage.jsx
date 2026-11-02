@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/app/lib/currency/currencyHelper";
 import { getTheme } from "@/app/lib/store/storeThemes";
 import { useCart } from "@/app/lib/store/useCart";
 import { buildMultiProductWhatsAppMessage } from "@/app/lib/store/buildMultiProductWhatsAppMessage";
 import { validateDeliveryLocation } from "@/app/lib/store/validateDeliveryLocation";
+import {
+  loadSavedAddresses,
+  saveAddress,
+  removeSavedAddress,
+  formatAddressTime,
+} from "@/app/lib/store/savedAddressUtils";
 
 /* ── Icons ──────────────────────────────────────────────── */
 const SearchIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>);
@@ -233,6 +239,18 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
   const [checkoutState, setCheckoutState] = useState("idle"); // idle | loading | success | error
   const [checkoutError, setCheckoutError] = useState("");
   const [detectedZone, setDetectedZone] = useState(null); // { fee, zoneName, timeframe, confidence }
+
+  // ── Saved addresses ───────────────────────────────────────
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+  const addressInputRef = useRef(null);
+
+  // Load saved addresses when cart opens
+  useEffect(() => {
+    if (open && slug) {
+      setSavedAddresses(loadSavedAddresses(slug));
+    }
+  }, [open, slug]);
   const allowDelivery = store.fulfillmentSettings?.allowDelivery !== false;
   const allowPickup = store.fulfillmentSettings?.allowPickup === true;
   const deliveryModel = store.fulfillmentSettings?.deliveryModel || "flat";
@@ -367,6 +385,15 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
         }
 
         const fullWaUrl = `${baseWaHref}?text=${encodeURIComponent(waMsg)}`;
+
+        // ── Save address to localStorage for autofill next time ───────────
+        if (fulfillmentMethod === "delivery" && deliveryLocation.trim()) {
+          saveAddress(slug, {
+            address: deliveryLocation.trim(),
+            zoneName: detectedZone?.zoneName || null,
+            deliveryFee: activeDeliveryFee,
+          });
+        }
 
         onClearCart();
         setCheckoutState("idle");
@@ -531,13 +558,84 @@ function CartDrawer({ open, onClose, cart, totalQuantity, totalPrice, onUpdateQt
 
                 <div>
                   <label style={{ display: "block", fontSize: "10px", fontWeight: 800, color: t.textSecondary, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Full Delivery Address *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
-                    value={deliveryLocation}
-                    onChange={(e) => handleAddressChange(e.target.value)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit" }}
-                  />
+                  
+                  {/* ── Saved address dropdown ──────────────────────────── */}
+                  <div style={{ position: "relative" }}>
+                    <input
+                      ref={addressInputRef}
+                      type="text"
+                      placeholder="e.g. Lagos, Ikeja, No 11 Allen Avenue"
+                      value={deliveryLocation}
+                      onChange={(e) => { handleAddressChange(e.target.value); setShowAddressDropdown(true); }}
+                      onFocus={() => { if (savedAddresses.length > 0) setShowAddressDropdown(true); }}
+                      onBlur={() => setTimeout(() => setShowAddressDropdown(false), 180)}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${t.border}`, background: t.pageBg, color: t.textPrimary, fontSize: "13px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                    />
+
+                    {/* Dropdown */}
+                    {showAddressDropdown && savedAddresses.length > 0 && (
+                      <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: t.navBg, border: `1px solid ${t.border}`, borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.14)", zIndex: 10, overflow: "hidden", maxHeight: "220px", overflowY: "auto" }}>
+                        <p style={{ padding: "8px 12px 4px", margin: 0, fontSize: "9px", fontWeight: 800, color: t.textSecondary, textTransform: "uppercase", letterSpacing: "0.1em", borderBottom: `1px solid ${t.border}` }}>
+                          Recent addresses
+                        </p>
+                        {savedAddresses.map((entry, i) => {
+                          // Check if this entry's zone still exists on the current store
+                          const zoneStillValid = !entry.zoneName || deliveryZones.some(z =>
+                            (z.name || "").toLowerCase().trim() === (entry.zoneName || "").toLowerCase().trim()
+                          );
+                          return (
+                            <div
+                              key={i}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                // Apply address
+                                handleAddressChange(entry.address);
+                                // Pre-select zone if delivery model is zones and zone still valid
+                                if (deliveryModel === "zones" && entry.zoneName && zoneStillValid) {
+                                  const zoneIdx = deliveryZones.findIndex(z =>
+                                    (z.name || "").toLowerCase().trim() === (entry.zoneName || "").toLowerCase().trim()
+                                  );
+                                  if (zoneIdx !== -1) setSelectedZoneIndex(zoneIdx);
+                                }
+                                setShowAddressDropdown(false);
+                              }}
+                              style={{ padding: "10px 12px", cursor: "pointer", borderBottom: i < savedAddresses.length - 1 ? `1px solid ${t.border}` : "none", transition: "background 0.1s" }}
+                              onMouseEnter={e => e.currentTarget.style.background = `${t.accent}10`}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {entry.label ? `🏷️ ${entry.label}` : "📍"} {entry.address}
+                                  </p>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", flexWrap: "wrap" }}>
+                                    {entry.zoneName && (
+                                      <span style={{ fontSize: "10px", fontWeight: 700, color: zoneStillValid ? t.accent : "#f59e0b", background: zoneStillValid ? `${t.accent}14` : "#fef3c7", borderRadius: "4px", padding: "1px 6px" }}>
+                                        {zoneStillValid ? entry.zoneName : `⚠️ ${entry.zoneName} (zone changed)`}
+                                      </span>
+                                    )}
+                                    <span style={{ fontSize: "10px", color: t.textSecondary }}>{formatAddressTime(entry.usedAt)}</span>
+                                  </div>
+                                </div>
+                                {/* Remove button */}
+                                <button
+                                  onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                    removeSavedAddress(slug, entry.address);
+                                    setSavedAddresses(prev => prev.filter((_, j) => j !== i));
+                                  }}
+                                  style={{ background: "none", border: "none", color: t.textSecondary, cursor: "pointer", fontSize: "14px", padding: "0 2px", flexShrink: 0, opacity: 0.5, lineHeight: 1 }}
+                                  title="Remove this address"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                   {/* Auto-detected zone chip */}
                   {deliveryModel === "zones" && deliveryLocation.trim().length >= 5 && (
                     <div style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "8px", background: detectedZone?.confidence === "matched" ? `${t.accent}12` : "#fef3c7", border: `1px solid ${detectedZone?.confidence === "matched" ? `${t.accent}33` : "#fde68a"}` }}>

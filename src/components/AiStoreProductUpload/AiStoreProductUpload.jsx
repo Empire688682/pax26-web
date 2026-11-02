@@ -864,6 +864,35 @@ function StepRenderer({ step, form, setForm, pax26, sellerId, whatsappConnected,
           />
           <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
           <Toggle label="Follow-Up Messages" hint="AI sends one follow-up after 30 mins of customer silence" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
+          {/* Direct Call — Starter+ only */}
+          <Toggle
+            label="Direct Call Feature"
+            hint="AI shares your contact number when a customer asks to speak to you directly (Starter+ required)"
+            value={!!form.callNumberEnabled}
+            onChange={v => set("callNumberEnabled", v)}
+            pax26={p}
+          />
+          {form.callNumberEnabled && (
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: p?.textPrimary, opacity: 0.65, marginBottom: "5px" }}>
+                Call / WhatsApp Number
+              </label>
+              <input
+                type="tel"
+                value={form.callNumber || ""}
+                onChange={e => set("callNumber", e.target.value)}
+                placeholder="+234 XXX XXX XXXX"
+                style={{
+                  width: "100%", backgroundColor: p?.secondaryBg, color: p?.textPrimary,
+                  border: `1px solid ${p?.border}`, borderRadius: "10px", padding: "10px 14px",
+                  fontSize: "14px", fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+                }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.45 }}>
+                This number is shared with customers who ask to speak to you directly. Do NOT use your WhatsApp API number.
+              </p>
+            </div>
+          )}
         </div>
       );
 
@@ -1033,6 +1062,35 @@ function ServiceStepRenderer({ step, form, setForm, pax26 }) {
           />
           <Toggle label="Auto-Reply" hint="AI responds instantly to new messages" value={form.autoReplyEnabled} onChange={v => set("autoReplyEnabled", v)} pax26={p} />
           <Toggle label="Follow-Up Messages" hint="AI sends one follow-up after 30 mins of customer silence" value={form.followUpEnabled} onChange={v => set("followUpEnabled", v)} pax26={p} />
+          {/* Direct Call — Starter+ only */}
+          <Toggle
+            label="Direct Call Feature"
+            hint="AI shares your contact number when a customer asks to speak to you directly (Starter+ required)"
+            value={!!form.callNumberEnabled}
+            onChange={v => set("callNumberEnabled", v)}
+            pax26={p}
+          />
+          {form.callNumberEnabled && (
+            <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: p?.textPrimary, opacity: 0.65, marginBottom: "5px" }}>
+                Call / WhatsApp Number
+              </label>
+              <input
+                type="tel"
+                value={form.callNumber || ""}
+                onChange={e => set("callNumber", e.target.value)}
+                placeholder="+234 XXX XXX XXXX"
+                style={{
+                  width: "100%", backgroundColor: p?.secondaryBg, color: p?.textPrimary,
+                  border: `1px solid ${p?.border}`, borderRadius: "10px", padding: "10px 14px",
+                  fontSize: "14px", fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+                }}
+              />
+              <p style={{ margin: "4px 0 0", fontSize: "11px", color: p?.textPrimary, opacity: 0.45 }}>
+                This number is shared with customers who ask to speak to you directly. Do NOT use your WhatsApp API number.
+              </p>
+            </div>
+          )}
         </div>
       );
 
@@ -1139,6 +1197,8 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
     autoReplyEnabled: true,
     followUpEnabled: true,
     followUpDelayMinutes: 30,
+    callNumberEnabled: false,
+    callNumber: "",
     currency: "NGN",
     workingHours: "",
     paymentDetails: [],
@@ -1185,6 +1245,8 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
           autoReplyEnabled: p.autoReplyEnabled ?? true,
           followUpEnabled: p.followUpEnabled ?? true,
           followUpDelayMinutes: p.followUpDelayMinutes || 30,
+          callNumberEnabled: p.callNumberEnabled ?? false,
+          callNumber: p.callNumber || "",
           currency: p.currency || "NGN",
           workingHours: p.workingHours || "",
           paymentDetails: p.paymentDetails || [],
@@ -1217,6 +1279,8 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
         autoReplyEnabled: form.autoReplyEnabled,
         followUpEnabled: form.followUpEnabled,
         followUpDelayMinutes: form.followUpDelayMinutes,
+        callNumberEnabled: form.callNumberEnabled,
+        callNumber: form.callNumber,
         paymentDetails: form.paymentDetails,
         services: form.services,
         faqs: form.faqs,
@@ -1288,6 +1352,8 @@ const AiTrainingPage = forwardRef(function AiTrainingPage(props, ref) {
           autoReplyEnabled: form.autoReplyEnabled,
           followUpEnabled: form.followUpEnabled,
           followUpDelayMinutes: form.followUpDelayMinutes,
+          callNumberEnabled: form.callNumberEnabled,
+          callNumber: form.callNumber,
           currency: form.currency,
           workingHours: form.workingHours,
           paymentDetails: form.paymentDetails,

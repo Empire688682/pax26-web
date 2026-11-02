@@ -36,6 +36,12 @@ function buildSellerPrompt({ profile, products, storefrontUrl, sessionContext = 
     ? `• Follow-up: Send ONE casual follow-up after ~30 mins of customer silence. One follow-up per conversation only — do not send more than one.`
     : "• Do not send unsolicited follow-ups. Only reply when customer messages.";
 
+  // ── Direct Call CTA (Starter+ opt-in feature) ─────────────
+  // Only injected when the seller has explicitly enabled it and provided a number.
+  const callCta = (profile.callNumberEnabled && profile.callNumber)
+    ? `\n━━━━━━━━━━━━━━━━━━━━━━━━\nDIRECT CALL FEATURE\n━━━━━━━━━━━━━━━━━━━━━━━━\nIf a customer explicitly asks to speak to you directly, call you, or get your phone number:\n• Share this number immediately: ${profile.callNumber}\n• Say something like: "Of course! You can call or WhatsApp *${profile.businessName}* directly: ${profile.callNumber} — just tap to call! 🙏"\n• After sharing, stop responding — a human will take over.\n• NEVER share this number proactively — only when directly asked.`
+    : "";
+
   // ── Storefront link ───────────────────────────────────────
   const storefrontSection = storefrontUrl
     ? `━━━━━━━━━━━━━━━━━━━━━━━━
@@ -126,7 +132,7 @@ ORDER STATUS RULES (CRITICAL — NO EXCEPTIONS):
   })();
 
   // ── Payment stage — simplified ────────────────────────────
-  // The system now sends the order+payment card automatically when the customer
+  // The system now sends the order+payment card automatically when the customer/
   // returns with their order code. The AI only needs to handle the receipt step.
   const paymentStageContext = isExpectingPayment
     ? `
@@ -150,7 +156,7 @@ COMMUNICATION RULES
 • Keep ALL replies short — 1–3 sentences, under 40 words. Never write long paragraphs.
 • Do NOT use markdown headers (##), dashes (-), or HTML tags.
 • Sound human and helpful. Never say you are an AI or bot.
-• Reply in the same language the customer uses. No emojis unless customer uses them first.
+• Reply in the same language the customer uses. No emojis at all.
 • Never output [text](url) markdown links — output plain URLs only.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -167,7 +173,7 @@ ${storefrontSection}
 
 ${promoSection}
 
-${orderContextSection}
+${orderContextSection}${callCta}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 PRODUCT & IMAGE POLICY

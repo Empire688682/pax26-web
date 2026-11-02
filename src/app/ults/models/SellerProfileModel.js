@@ -51,6 +51,15 @@ const SellerProfileSchema = new mongoose.Schema({
     // Sends the seller an email whenever the AI sends payment details to a customer
     emailSalesAlerts: { type: Boolean, default: true },
 
+    // ── Direct Call Feature (Starter+ only) ─────────────────
+    // Sellers opt in by providing a phone number and enabling the toggle.
+    // The AI will share this number when a customer explicitly asks to speak
+    // to the owner, then trigger a handoff (AI goes silent).
+    // NOTE: This should NOT be auto-populated from the WhatsApp connected number
+    // — sellers must explicitly enter their preferred contact number.
+    callNumber:        { type: String, default: '', trim: true },
+    callNumberEnabled: { type: Boolean, default: false },
+
     // ── Spam auto-handoff ─────────────────────────────────────
     // When a contact sends too many messages with no buying intent,
     // the AI hands them off automatically for 24 hours.

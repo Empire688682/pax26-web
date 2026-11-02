@@ -16,6 +16,7 @@ import { searchProducts, shouldSearch } from "@/app/lib/store/searchProducts.js"
 import { buildSearchMatchContext } from "@/app/lib/store/buildSearchContext.js";
 import { buildStorefrontUrl } from "@/app/lib/store/buildStorefrontUrl.js";
 import { sendMobilePush } from "@/app/lib/pushNotificationService.js";
+import SellerNotificationModel from "@/app/ults/models/SellerNotificationModel.js";
 
 /**
  * buildImageReceivedContext
@@ -339,8 +340,19 @@ export const handleIncomingWhatsApp = async (payload) => {
     }
 
     // ── Send one acknowledgement to the customer ──────────────────────────
-    const ACK_MESSAGE =
-      "I understand you. No worries, let me get someone to help you with this directly. 🙏";
+    // If the seller has enabled the Direct Call feature and the trigger group is A
+    // (Human/Seller Request), include the call number CTA and a plan check.
+    const isCallRequest = complaintResult.group === "A";
+    const callEnabled = sellerProfile?.callNumberEnabled === true;
+    const callNumber  = sellerProfile?.callNumber?.trim() || "";
+    const isStarterPlus = ["starter", "business", "enterprise"].includes(user?.paxAI?.plan);
+    const canShareCall = isCallRequest && callEnabled && callNumber && isStarterPlus;
+
+    const businessName = sellerProfile?.businessName || "us";
+
+    const ACK_MESSAGE = canShareCall
+      ? `Of course! You can call or WhatsApp *${businessName}* directly:\n\n📞 ${callNumber}\n\nJust tap the number above to call or start a WhatsApp chat. I'll let the team know you're reaching out. 🙏`
+      : "I understand you. No worries, let me get someone to help you with this directly. 🙏";
 
     try {
       const ackResult = await sendWhatsAppAutomationReply({
@@ -380,8 +392,10 @@ export const handleIncomingWhatsApp = async (payload) => {
     const priorityEmoji = complaintResult.priority === "CRITICAL" ? "🚨" : "⚠️";
     sendMobilePush(user._id, {
       type: "escalation",
-      title: "Customer Needs You",
-      body: "A customer needs your attention. A complaint or request for human assistance was detected.",
+      title: canShareCall ? "📞 Customer Wants to Call" : "Customer Needs You",
+      body: canShareCall
+        ? `${contactName} asked to speak directly. Your call number was shared with them.`
+        : "A customer needs your attention. A complaint or request for human assistance was detected.",
       data: {
         sessionId: session.sessionId,
         phone: visitorPhone,
@@ -392,6 +406,21 @@ export const handleIncomingWhatsApp = async (payload) => {
     }).catch(err => console.warn("[handoff] Push notification failed (handoff stays active):", err?.message));
 
     console.log(`[handoff] 📱 Push dispatched for seller ${user._id}`);
+
+    // ── In-app notification for web sellers ──────────────────────────────
+    // Saved to SellerNotificationModel so it shows in the web notification bell
+    // and increments the unread count in the sidebar.
+    SellerNotificationModel.create({
+      userId: user._id,
+      orderId: "",
+      customerName: existingContact?.name || visitorPhone,
+      productName: canShareCall
+        ? `📞 Customer wants to call — ${visitorPhone}`
+        : `⚠️ Customer needs assistance — ${visitorPhone}`,
+      amountPaid: 0,
+      channel: "in-app",
+      status: "sent",
+    }).catch(err => console.warn("[handoff] In-app notification save failed (non-fatal):", err?.message));
 
     // Update contact counters and session before returning early
     try {
