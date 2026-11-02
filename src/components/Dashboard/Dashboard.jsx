@@ -143,12 +143,14 @@ const CSS = `
   /* ── Layout ── */
   .px-grid {
     display: grid;
-    grid-template-columns: 1fr 330px;
+    grid-template-columns: minmax(0, 1fr) 330px;
     gap: 20px;
     align-items: start;
+    overflow: hidden;
+    width: 100%;
   }
   @media (max-width: 920px) {
-    .px-grid { grid-template-columns: 1fr; }
+    .px-grid { grid-template-columns: minmax(0, 1fr); }
     .px-desktop-only { display: none !important; }
   }
 
@@ -172,9 +174,9 @@ const CSS = `
   }
   @media (max-width: 480px) {
     .px-metrics-row { gap: 5px; }
-    .px-metric-card { padding: 8px 4px !important; }
-    .px-metric-value { font-size: 0.68rem !important; line-height: 1.3 !important; word-break: break-all !important; white-space: normal !important; }
-    .px-metric-label { font-size: 7px !important; letter-spacing: 0.03em !important; }
+    .px-metric-card { padding: 10px 4px !important; }
+    .px-metric-value { font-size: 0.72rem !important; }
+    .px-metric-label { font-size: 7px !important; }
   }
 
   /* ── Quota bar text — wrap gracefully on small screens ── */
@@ -263,6 +265,7 @@ const CSS = `
   .px-top-row {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 18px;
+    overflow: hidden;
     transition: background 0.18s ease;
     border-bottom-width: 1px; border-bottom-style: solid;
   }
@@ -364,29 +367,23 @@ function MetricCard({ label, value, color, isDark, cardBg, cardBdr }) {
   return (
     <div className="px-metric-card" style={{
       borderRadius: 14, borderWidth: 1, borderStyle: "solid",
-      padding: "10px 6px",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+      padding: "12px 6px",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
       background: cardBg, borderColor: cardBdr,
-      transition: "transform 0.22s ease",
       minWidth: 0, overflow: "hidden", width: "100%", boxSizing: "border-box",
     }}>
       <p className="px-display px-count px-metric-value" style={{
-        fontSize: "clamp(0.68rem, 2.8vw, 1.1rem)", fontWeight: 900,
-        color, margin: 0, lineHeight: 1.2,
+        fontSize: "clamp(0.72rem, 2.6vw, 1.1rem)", fontWeight: 900,
+        color, margin: 0, lineHeight: 1.15,
         fontVariantNumeric: "tabular-nums",
-        wordBreak: "break-all",
-        overflowWrap: "break-word",
-        whiteSpace: "normal",
-        maxWidth: "100%",
-        width: "100%",
-        textAlign: "center",
-        display: "block",
+        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        maxWidth: "100%", width: "100%", textAlign: "center", display: "block",
       }}>{value}</p>
       <p className="px-mono px-metric-label" style={{
-        fontSize: 7.5, fontWeight: 700, letterSpacing: "0.05em",
-        textTransform: "uppercase",
+        fontSize: 7.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
         color: isDark ? "rgba(148,163,184,0.55)" : "rgba(100,116,139,0.65)",
         margin: 0, textAlign: "center", whiteSpace: "nowrap",
+        overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
       }}>{label}</p>
     </div>
   );
@@ -531,7 +528,7 @@ export default function Dashboard() {
       <style>{CSS}</style>
 
       {/* ── Page bg ── */}
-      <div style={{ minHeight: "100vh", background: pageBg, position: "relative", overflow: "hidden", overflowX: "hidden", maxWidth: "100vw" }}>
+      <div style={{ minHeight: "100vh", background: pageBg, position: "relative", overflow: "hidden", width: "100%", maxWidth: "100vw", boxSizing: "border-box" }}>
 
         {/* ── Ambient orbs ── */}
         {isDark && (
@@ -554,7 +551,7 @@ export default function Dashboard() {
           padding: "clamp(16px,4vw,28px) clamp(12px,4vw,20px) 100px",
           position: "relative", zIndex: 1,
           display: "flex", flexDirection: "column", gap: 20,
-          overflowX: "hidden",
+          overflow: "hidden", width: "100%", boxSizing: "border-box",
         }}>
 
           {/* ── HEADER row ── */}
@@ -608,7 +605,7 @@ export default function Dashboard() {
           <div className="px-grid">
 
             {/* ═══ LEFT COLUMN ═══ */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 0, overflow: "hidden", width: "100%" }}>
 
               {/* ── HERO CARD (mirrors mobile home.tsx exactly) ── */}
               <div
@@ -876,10 +873,10 @@ export default function Dashboard() {
                   <div className={isDark ? "px-glass" : "px-glass-light"} style={{ overflow: "hidden" }}>
                     {(analytics.topProducts).slice(0, 4).map((p, i, arr) => (
                       <div key={i} className="px-top-row"
-                        style={{ borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}>
-                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 900, color: textMuted, width: 24 }}>#{i + 1}</span>
-                        <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: textPri, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
-                        <span className="px-mono" style={{ fontSize: 13, fontWeight: 800, color: C.emerald, flexShrink: 0 }}>₦{(p.revenue ?? 0).toLocaleString()}</span>
+                        style={{ borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+                        <span className="px-mono" style={{ fontSize: 11, fontWeight: 900, color: textMuted, width: 20, flexShrink: 0 }}>#{i + 1}</span>
+                        <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: textPri, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{p.name}</span>
+                        <span className="px-mono" style={{ fontSize: 12, fontWeight: 800, color: C.emerald, flexShrink: 0, maxWidth: "38%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>₦{(p.revenue ?? 0).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
