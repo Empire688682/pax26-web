@@ -23,6 +23,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { loadSavedAddresses, saveAddress, loadCustomerProfile, saveCustomerProfile } from "@/app/lib/store/savedAddressUtils";
+import { handleWhatsAppRedirect, WhatsAppChooserModal } from "@/components/Storefront/StorefrontPage";
 
 /* ── Icons ────────────────────────────────────────────────────── */
 const BackIcon = () => (
@@ -186,6 +187,7 @@ export default function AddressStage({
   // ── Submission state ─────────────────────────────────────────
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState("");
+  const [waChooserModal, setWaChooserModal] = useState({ visible: false, messengerUrl: "", businessUrl: "" });
 
   // ── Load saved addresses + customer profile on mount ─────────
   useEffect(() => {
@@ -428,7 +430,9 @@ export default function AddressStage({
         // Clear cart and call onSuccess before redirect
         onSuccess();
 
-        window.location.href = `${baseWaHref}?text=${encodeURIComponent(waMsg)}`;
+        handleWhatsAppRedirect(null, `${baseWaHref}?text=${encodeURIComponent(waMsg)}`, (messengerUrl, businessUrl) => {
+          setWaChooserModal({ visible: true, messengerUrl, businessUrl });
+        });
       } else {
         // No WhatsApp configured — just clear cart and show done
         onSuccess();
@@ -765,6 +769,14 @@ export default function AddressStage({
         </div>
 
       </div>
+
+      <WhatsAppChooserModal
+        visible={waChooserModal.visible}
+        onClose={() => setWaChooserModal({ visible: false, messengerUrl: "", businessUrl: "" })}
+        messengerUrl={waChooserModal.messengerUrl}
+        businessUrl={waChooserModal.businessUrl}
+        theme={t}
+      />
     </>
   );
 }

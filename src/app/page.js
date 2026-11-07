@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import Hero from '@/components/Hero/Hero';
 import QueryHandler from '@/components/Landing/QueryHandler';
+import FloatingAppBadge from '@/components/FloatingAppBadge/FloatingAppBadge';
 
 // Dynamic imports for below-the-fold components to reduce initial JS bundle size on mobile
 const Trusted = dynamic(() => import('@/components/Trusted/Trusted'));
@@ -12,6 +13,7 @@ const MasterclassVideo = dynamic(() => import('@/components/MasterclassVideo/Mas
 const HowItWorks = dynamic(() => import('@/components/HowItWorks/HowItWorks'));
 const WhyChooseUs = dynamic(() => import('@/components/WhyChooseUs/WhyChooseUs'));
 const Testimonials = dynamic(() => import('@/components/Testimonials/Testimonials'));
+const DownloadOurApp = dynamic(() => import('@/components/DownloadOurApp/DownloadOurApp'));
 const Pricing = dynamic(() => import('@/components/Pricing/Pricing'));
 const CTA = dynamic(() => import('@/components/CTA/CTA'));
 
@@ -19,6 +21,9 @@ export default function Page() {
   return (
     <main id="main-content" role="main" aria-label="Pax26 WhatsApp Commerce Platform" className="overflow-hidden">
       <QueryHandler />
+
+      {/* Floating Play Store badge — visible after scroll */}
+      <FloatingAppBadge />
 
       {/* Hero Section */}
       <Hero />
@@ -51,6 +56,9 @@ export default function Page() {
 
       {/* Testimonials */}
       <Testimonials />
+
+      {/* Download the App */}
+      <DownloadOurApp />
 
       {/* Pricing */}
       <Pricing />

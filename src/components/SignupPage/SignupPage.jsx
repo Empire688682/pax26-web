@@ -166,8 +166,15 @@ export default function SignupPage() {
       // The manually typed code is used only as a fallback when no URL code is present.
       const resolvedRefCode = refHostCode || manualRefCode.trim() || undefined;
       const res = await axios.post(baseUrl, { ...data, refHostCode: resolvedRefCode });
-      const { success, message, finalUserData } = res.data;
-      if (!success) { setError(message || "Authentication failed"); return; }
+      const { success, message, finalUserData, googleAccount } = res.data;
+      if (!success) {
+        if (googleAccount) {
+          setError("This account uses Google Sign-In. Please use \"Continue with Google\" below, or set a password first.");
+        } else {
+          setError(message || "Authentication failed");
+        }
+        return;
+      }
       const now = new Date().getTime();
       const userDataWithTimestamp = { ...finalUserData, authTimestamp: now };
       localStorage.setItem("userData", JSON.stringify(userDataWithTimestamp));
@@ -180,6 +187,11 @@ export default function SignupPage() {
       if (err?.response?.data?.banned === true) {
         setBannedEmail(data.email || "");
         setIsBanned(true);
+        return;
+      }
+      // ── Google/social account — no password set ──────────
+      if (err?.response?.data?.googleAccount) {
+        setError('This account was created with Google. Use "Continue with Google" below to sign in, or set a password from your account settings.');
         return;
       }
       setError(err?.response?.data?.message || "Something went wrong");

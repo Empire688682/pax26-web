@@ -44,6 +44,21 @@ export async function POST(req) {
       );
     }
 
+    // ── Google / social account — no password set ──────────────────────────
+    // If the user signed up via Google and has never set a password,
+    // give them a clear, actionable message instead of a generic error.
+    if (!existUser.isPasswordSet || !existUser.password) {
+      return NextResponse.json(
+        {
+          success: false,
+          googleAccount: true,
+          provider: existUser.provider || "google",
+          message: "This account was created with Google Sign-In. Please use \"Continue with Google\" to sign in, or set a password first from your account settings.",
+        },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
    const passwordMatch = await bcrypt.compare(password, existUser.password);
         if (!passwordMatch) {
           return NextResponse.json(

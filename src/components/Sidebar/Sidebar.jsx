@@ -330,8 +330,59 @@ export default function Sidebar() {
           </div>
 
           {/* ── Footer — pinned at bottom (clickable -> /profile) ── */}
-          <div className="shrink-0 px-4 py-3.5 flex items-center justify-between"
+          <div className="shrink-0 flex flex-col"
             style={{ borderTop: `1px solid ${pax26?.border}`, background: pax26?.card }}>
+
+            {/* ── App Store badges ── */}
+            <div className="px-4 py-2.5 flex items-center gap-2"
+              style={{ borderBottom: `1px solid ${pax26?.border}` }}>
+              <span style={{ fontSize: '9.5px', fontWeight: 700, color: pax26?.textSecondary, opacity: 0.55, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+                GET THE APP
+              </span>
+              {/* Google Play — active */}
+              <a
+                href="https://play.google.com/store/apps/details?id=com.jayempire.pax26mobile"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={close}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200"
+                style={{
+                  background: pax26?.secondaryBg,
+                  border: `1px solid ${pax26?.border}`,
+                  textDecoration: 'none',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = (pax26?.primary || '#3b82f6')}
+                onMouseLeave={e => e.currentTarget.style.borderColor = pax26?.border}
+              >
+                {/* Google Play icon */}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#34a853', flexShrink: 0 }}>
+                  <path d="M3.18 23.76c.28.16.6.22.94.18L15.84 12 12 8.16 3.18 23.76zM20.5 10.19l-2.96-1.7-3.78 3.51 3.78 3.5 2.98-1.71c.85-.49.85-1.62-.02-2.1zM2.02.58C1.88.78 1.8 1.04 1.8 1.35v21.3c0 .3.08.57.22.76L14.18 12 2.02.58zM3.18.24L12 15.84l3.84-3.84L4.12.06C3.78.02 3.46.08 3.18.24z"/>
+                </svg>
+                <span style={{ fontSize: '9.5px', fontWeight: 700, color: pax26?.textPrimary, lineHeight: 1 }}>Play</span>
+              </a>
+              {/* App Store — coming soon, not clickable */}
+              <div
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg"
+                style={{
+                  background: pax26?.secondaryBg,
+                  border: `1px solid ${pax26?.border}`,
+                  opacity: 0.4,
+                  cursor: 'not-allowed',
+                  flexShrink: 0,
+                }}
+                title="iOS app coming soon"
+              >
+                {/* Apple icon */}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{ color: pax26?.textSecondary, flexShrink: 0 }}>
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                <span style={{ fontSize: '9.5px', fontWeight: 700, color: pax26?.textSecondary, lineHeight: 1 }}>iOS</span>
+              </div>
+              <span style={{ fontSize: '8.5px', color: pax26?.textSecondary, opacity: 0.4, whiteSpace: 'nowrap' }}>soon</span>
+            </div>
+
+            <div className="px-4 py-3.5 flex items-center justify-between">
             {userData ? (
               <Link
                 href="/profile"
@@ -363,6 +414,8 @@ export default function Sidebar() {
             )}
             <ThemeToggle />
           </div>
+
+          </div>  {/* end footer wrapper */}
 
         </div>
 
