@@ -635,19 +635,18 @@ export default function ProductManager() {
 
   const isSellerUser = !userData?.paxAI?.businessType || userData?.paxAI?.businessType === "seller";
 
-  // Plan limits
-  const productsLimit = limits.productsLimit;            // 0 = unlimited
-  const atLimit = productsLimit > 0 && products.length >= productsLimit;
+  // Plan limits — only compute after userData is confirmed loaded
+  // productsLimit === null means userData hasn't loaded yet (mobile handoff / fresh session)
+  // productsLimit === 0 means unlimited
+  const productsLimit = limits.productsLimit;
+  const limitsLoaded  = productsLimit !== null;
+  const atLimit = limitsLoaded && productsLimit > 0 && products.length >= productsLimit;
 
-  // Derived visibility stats (for downgrade UX)
-  // Products that would be shown on the public storefront
-  const storefrontVisibleCount = productsLimit > 0 ? Math.min(products.length, productsLimit) : products.length;
-  // Products hidden because the plan limit is exceeded
-  const hiddenByPlanCount = productsLimit > 0 ? Math.max(0, products.length - productsLimit) : 0;
-  // How many new products can still be created
-  const availableSlots = productsLimit > 0 ? Math.max(0, productsLimit - products.length) : Infinity;
-  // Is the seller over their limit (downgrade scenario)?
-  const overLimit = productsLimit > 0 && products.length > productsLimit;
+  // Derived visibility stats — only valid once limits are loaded
+  const storefrontVisibleCount = limitsLoaded && productsLimit > 0 ? Math.min(products.length, productsLimit) : products.length;
+  const hiddenByPlanCount      = limitsLoaded && productsLimit > 0 ? Math.max(0, products.length - productsLimit) : 0;
+  const availableSlots         = !limitsLoaded ? null : productsLimit > 0 ? Math.max(0, productsLimit - products.length) : Infinity;
+  const overLimit              = limitsLoaded && productsLimit > 0 && products.length > productsLimit;
 
   // Fetch products + profile data
   const fetchAll = useCallback(async () => {
@@ -674,7 +673,10 @@ export default function ProductManager() {
   }, []);
 
   useEffect(() => {
-    if (userData === undefined) return;
+    // Wait until userData is fully loaded from the server before fetching products.
+    // userData === null means not yet loaded (e.g. fresh mobile handoff session).
+    // userData === undefined means still initialising. Both should wait.
+    if (!userData) return;
     if (isSellerUser) fetchAll();
     else setLoading(false);
   }, [userData, isSellerUser, fetchAll]);
@@ -798,7 +800,7 @@ export default function ProductManager() {
           <h1 style={{ margin: 0, fontSize: "clamp(20px, 4vw, 26px)", fontWeight: 900, color: p?.textPrimary, letterSpacing: "-0.03em" }}>Product Manager</h1>
           <p style={{ margin: "4px 0 0", fontSize: "13px", color: p?.textPrimary, opacity: 0.5 }}>
             {products.length} product{products.length !== 1 ? "s" : ""} in your account · {products.filter(x => x.isAvailable).length} live
-            {productsLimit > 0 && (
+            {limitsLoaded && productsLimit > 0 && (
               <span style={{ marginLeft: "8px", color: atLimit ? "#ef4444" : p?.primary, fontWeight: 700 }}>
                 ({products.length}/{productsLimit} plan limit)
               </span>
@@ -827,9 +829,8 @@ export default function ProductManager() {
       </div>
 
       {/* Products limit progress bar — shown when a limit applies */}
-      {productsLimit > 0 && (
+      {limitsLoaded && productsLimit > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {/* Downgrade banner — shown only when stored products exceed plan allowance */}
           {overLimit && (
             <div style={{ padding: "16px", borderRadius: "14px", background: "#fef3c715", border: "1px solid #f59e0b44", display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
@@ -857,7 +858,7 @@ export default function ProductManager() {
           )}
 
           {/* Stats row */}
-          {productsLimit > 0 && (
+          {limitsLoaded && productsLimit > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
               {[
                 { label: "In your account", value: products.length, color: p?.textPrimary },
@@ -927,7 +928,7 @@ export default function ProductManager() {
             // oldest-first: anything beyond index (productsLimit - 1) is hidden.
             // We map each product to its position in the oldest-first ordering.
             const oldestFirstIndex = products.length - 1 - products.findIndex(x => x._id === prod._id);
-            const hiddenByPlan = productsLimit > 0 && oldestFirstIndex >= productsLimit;
+            const hiddenByPlan = limitsLoaded && productsLimit > 0 && oldestFirstIndex >= productsLimit;
             return (
               <ProductCard key={prod._id} product={prod} currency={currency} p={p} storeSlug={storeSlug}
                 hiddenByPlan={hiddenByPlan}

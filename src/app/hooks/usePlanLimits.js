@@ -53,7 +53,10 @@ export function usePlanLimits() {
 
   // ── Storefront & Commerce ──────────────────────────────────
   const storefrontEnabled      = paxAI.storefrontEnabled      ?? true;
-  const productsLimit          = paxAI.productsLimit          ?? (isEnterprise ? 0 : isBusiness ? 500 : isStarter ? 100 : 20);   // 0 = unlimited
+  // productsLimit comes ONLY from the stored plan value on the user record.
+  // Never guess from plan tier — if it's undefined the user data hasn't loaded yet.
+  // 0 = unlimited, null/undefined = not yet loaded (UI should show loading state).
+  const productsLimit          = paxAI.productsLimit          ?? null;
   const orderReceiptsEnabled   = paxAI.orderReceiptsEnabled   ?? true;
   const salesAlertsEnabled     = paxAI.salesAlertsEnabled     ?? true;
   const salesAnalyticsEnabled  = paxAI.salesAnalyticsEnabled  ?? (plan !== "free");
@@ -76,7 +79,7 @@ export function usePlanLimits() {
   // ── Named Helper Methods ───────────────────────────────────
   const canUseAnalytics = salesAnalyticsEnabled;
   const canSendAIMessage = messagesLimit === 0 || messagesRemaining > 0;
-  const canCreateProduct = (currentCount = 0) => productsLimit === 0 || currentCount < productsLimit;
+  const canCreateProduct = (currentCount = 0) => productsLimit === null ? false : (productsLimit === 0 || currentCount < productsLimit);
   const canInviteStaff   = (currentCount = 0) => multiStaff > 0 && currentCount < multiStaff;
 
   return {

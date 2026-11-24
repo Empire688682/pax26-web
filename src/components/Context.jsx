@@ -143,6 +143,12 @@ export const AppProvider = ({ children }) => {
         } else {
           setUserData(parsedData);
         }
+      } else {
+        // No localStorage — user may have arrived via mobile handoff which sets
+        // an httpOnly cookie but has no localStorage. Try fetching the profile
+        // from the server; if the cookie is valid it will succeed and populate
+        // userData correctly with the real plan limits.
+        fetchUser();
       }
     }
   };
