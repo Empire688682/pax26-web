@@ -232,7 +232,7 @@ export default function Sidebar() {
                 <SectionLabel label="Core & Storefront" pax26={pax26} />
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/tutorial" icon={Youtube} label="Video Masterclass" onClick={close} pax26={pax26} isNew />
-                {userData?.paxAI?.businessType === 'seller' && (
+                {(!userData?.paxAI?.businessType || userData?.paxAI?.businessType === 'seller') && (
                   <NavItem href="/dashboard/my-store" icon={Store} label="My Storefront" onClick={close} pax26={pax26} isNew />
                 )}
                 <NavItem href="/dashboard/automations/whatsapp#connect" icon={Wifi} label="Connect WhatsApp" onClick={close} pax26={pax26} />
@@ -242,7 +242,7 @@ export default function Sidebar() {
                 <NavItem href="/dashboard/automations/whatsapp-inbox" icon={MessageSquare} label="WhatsApp Inbox" onClick={close} pax26={pax26} badgeCount={unreadInboxCount} />
                 <NavItem href="/dashboard/automations/market-place" icon={Layers} label="AI Marketplace" onClick={close} pax26={pax26} />
                 <NavItem href="/dashboard/automations/ai-business-dashboard" icon={Bot} label="Agent Setup" onClick={close} pax26={pax26} />
-                {userData?.paxAI?.businessType === 'seller' && (
+                {(!userData?.paxAI?.businessType || userData?.paxAI?.businessType === 'seller') && (
                   <NavItem href="/dashboard/automations/products" icon={Package} label="Product Manager" onClick={close} pax26={pax26} />
                 )}
                 <NavItem href="/dashboard/automations/staff" icon={Users} label="Team & Staff Inboxes" onClick={close} pax26={pax26} />

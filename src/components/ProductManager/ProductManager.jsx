@@ -633,7 +633,7 @@ export default function ProductManager() {
   const [currency, setCurrency] = useState("NGN");
   const [fulfillmentSettings, setFulfillmentSettings] = useState(null);
 
-  const isSellerUser = userData?.paxAI?.businessType === "seller";
+  const isSellerUser = !userData?.paxAI?.businessType || userData?.paxAI?.businessType === "seller";
 
   // Plan limits
   const productsLimit = limits.productsLimit;            // 0 = unlimited
